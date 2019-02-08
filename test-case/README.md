@@ -2,6 +2,8 @@
 
 This document describes an end-to-end test of the Modern Data Analytics Stack running on multiple docker containers. 
 
+**Important:** Make sure that you have added the alias `analyticsplatform` to the `/etc/hosts` file and that it references the IP-address of the Docker Host. 
+
 ## Register Avro Schema against Confluent Schema Registry
 
 Navigate to the 
