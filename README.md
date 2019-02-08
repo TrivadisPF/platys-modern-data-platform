@@ -95,7 +95,9 @@ db2033adfd2a        trivadisbds/kafka-manager                        "./km.sh"  
 676e4f734b09        confluentinc/cp-zookeeper:5.0.0-beta1-1          "/etc/confluent/dock…"   7 hours ago         Up 7 hours                       2888/tcp, 0.0.0.0:2181->2181/tcp, 3888/tcp     stream-processing_zookeeper_1
 ```
 
-## Port to Service Mapping
+## Reserved Port to Service Mapping
+
+This table reserves the external ports for the various services. Not all services have to be used in the platform at a given time. But by reserving, we can asure that there are no conflicts if a service is added at a later time.
 
 Container Port(s) | Internal Port(s)           | Service (alternatives) |
 --------------------|------------------|-----------------------|
