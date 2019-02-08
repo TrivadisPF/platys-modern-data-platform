@@ -171,6 +171,13 @@ services:
       - $PWD/kafka-connect:/etc/kafka-connect/custom-plugins
     restart: always
 
+  streamsets:
+    image: trivadisbds/streamsets-kafka-nosql
+    hostname: streamsets
+    ports:
+      - "18630:18630"
+    restart: always
+
   namenode:
     image: bde2020/hadoop-namenode:1.2.1-hadoop2.8-java8
     container_name: namenode
@@ -264,6 +271,8 @@ services:
   hive-metastore:
     image: bde2020/hive:2.3.2-postgresql-metastore
     container_name: hive-metastore
+    ports:
+      - "9083:9083"
     env_file:
       - ./conf/hadoop-hive.env
     command: /opt/hive/bin/hive --service metastore
@@ -349,3 +358,13 @@ services:
       ZK_HOSTS: 'zookeeper-1:2181'
       APPLICATION_SECRET: 'letmein'
     restart: always
+
+  kafdrop:
+    image: thomsch98/kafdrop:latest
+    ports:
+      - "29020:9020" 
+    environment:
+      ZK_HOSTS: zookeeper-1:2181
+      LISTEN: 9020
+    restart: always
+
