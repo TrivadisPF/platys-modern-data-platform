@@ -2,10 +2,6 @@
 
 The environment is completly based on docker containers. 
 
-Either use the Virtual Machine image made available in the course, containing a docker installation or provisiong your own Docker environemnt including Docker Compose. Find the information for installing [Docker](https://docs.docker.com/install/#supported-platforms) and [Docker Compose](https://docs.docker.com/compose/install/).
- 
-[Here](../00-setup/README.md) you can find the installation of an Virtual Machine in Azure. 
-
 In order to simplify the provisioning, a single docker-compose configuration is used. All the necessary software will be provisioned using Docker. 
 
 ## What is the Analytics Platform?
@@ -16,11 +12,12 @@ The following services are provisioned as part of the Analytics Platform:
  * Kafka Broker 1 -3
  * Confluent Schema Registry
  * Kafka Connect 1-2 
- * Hadoop Namenode
- * Hadoop Datanode
+ * Hadoop Namenode 
+ * Hadoop Datanode 1
  * Spark Master
  * Spark Worker 1-2
- * Hive Metastore
+ * Hive Service
+ * Hive Metastore on PostgreSQL
  * Apache Zeppelin
  * Streamsets Data Collector
  * Schema registry UI
