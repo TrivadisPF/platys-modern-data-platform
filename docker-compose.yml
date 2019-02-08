@@ -88,12 +88,13 @@ services:
       
   schema-registry:
     image: confluentinc/cp-schema-registry:5.1.0
+    hostname: schema-registry
     container_name: schema-registry
     depends_on:
       - zookeeper-1
       - broker-1
     ports:
-      - "8085:8081"
+      - "8089:8081"
     environment:
       SCHEMA_REGISTRY_HOST_NAME: schema-registry
       SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL: 'zookeeper-1:2181'
@@ -243,7 +244,7 @@ services:
       - "SPARK_MASTER=spark://spark-master:7077"
       - CORE_CONF_fs_defaultFS=hdfs://namenode:8020
     volumes:
-      - ./conf/hive-site.xml:/opt/hive/conf/hive-site.xml
+      - ./conf/hive-site.xml:/spark/conf/hive-site.xml
     restart: always
    
   spark-worker-2:
@@ -258,8 +259,8 @@ services:
     environment:
       - "SPARK_MASTER=spark://spark-master:7077"
       - CORE_CONF_fs_defaultFS=hdfs://namenode:8020
-#    volumes:
-#      - ./conf/hive-site.xml:/opt/hive/conf/hive-site.xml
+    volumes:
+      - ./conf/hive-site.xml:/spark/conf/hive-site.xml
     restart: always
 
   hive-server:
@@ -303,6 +304,8 @@ services:
       SPARK_MASTER: "spark://spark-master:7077"
       MASTER: "spark://spark-master:7077"
 #      SPARK_SUBMIT_OPTIONS: "--jars /opt/sansa-examples/jars/sansa-examples-spark.jar --conf spark.serializer=org.apache.spark.serializer.KryoSerializer --conf spark.kryo.registrator=net.sansa_stack.owl.spark.dataset.UnmodifiableCollectionKryoRegistrator"
+    volumes:
+      - ./conf/hive-site.xml:/spark/conf/hive-site.xml
     depends_on:
       namenode:
         condition: service_healthy
@@ -339,7 +342,7 @@ services:
     ports:
       - "28002:8000"
     environment:
-      SCHEMAREGISTRY_URL: 'http://${PUBLIC_IP}:8085'
+      SCHEMAREGISTRY_URL: 'http://${PUBLIC_IP}:8089'
     restart: always
 
   kafka-connect-ui:
