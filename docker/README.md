@@ -141,5 +141,6 @@ Management | Kafka Connect UI | <http://analyticsplatform:28001>
 Management | Kafka Manager  | <http://analyticsplatform:29000>
 Management | Kafdrop  | <http://analyticsplatform:29020>
 Management | Zoonavigator  | <http://analyticsplatform:28010>
+Management | Spark UI  | <http://analyticsplatform:8080>
 Management | Hue  | <http://analyticsplatform:8888>
 
