@@ -1,0 +1,351 @@
+version: "2.1"
+
+services:
+  zookeeper-1:
+    image: confluentinc/cp-zookeeper:5.1.0
+    container_name: zookeeper-1
+    ports:
+      - "2181:2181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    restart: always
+
+  broker-1:
+    image: confluentinc/cp-enterprise-kafka:5.1.0
+    container_name: broker-1
+    depends_on:
+      - zookeeper-1
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_BROKER_RACK: 'r1'
+      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper-1:2181'
+      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://${DOCKER_HOST_IP}:9092'
+      KAFKA_METRIC_REPORTERS: io.confluent.metrics.reporter.ConfluentMetricsReporter
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_DELETE_TOPIC_ENABLE: 'true'
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'false'
+      KAFKA_JMX_PORT: 9994
+      CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: broker-1:9092
+      CONFLUENT_METRICS_REPORTER_ZOOKEEPER_CONNECT: zookeeper-1:2181
+      CONFLUENT_METRICS_REPORTER_TOPIC_REPLICAS: 1
+      CONFLUENT_METRICS_ENABLE: 'true'
+      CONFLUENT_SUPPORT_CUSTOMER_ID: 'anonymous'
+    restart: always
+
+  broker-2:
+    image: confluentinc/cp-enterprise-kafka:5.1.0
+    container_name: broker-2
+    depends_on:
+      - zookeeper-1
+    ports:
+      - "9093:9093"
+    environment:
+      KAFKA_BROKER_ID: 2
+      KAFKA_BROKER_RACK: 'r1'
+      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper-1:2181'
+      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://${DOCKER_HOST_IP}:9093'
+      KAFKA_METRIC_REPORTERS: io.confluent.metrics.reporter.ConfluentMetricsReporter
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_DELETE_TOPIC_ENABLE: 'true'
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'false'
+      KAFKA_JMX_PORT: 9993
+      CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: broker-2:9093
+      CONFLUENT_METRICS_REPORTER_ZOOKEEPER_CONNECT: zookeeper-1:2181
+      CONFLUENT_METRICS_REPORTER_TOPIC_REPLICAS: 1
+      CONFLUENT_METRICS_ENABLE: 'true'
+      CONFLUENT_SUPPORT_CUSTOMER_ID: 'anonymous'
+    restart: always
+
+  broker-3:
+    image: confluentinc/cp-enterprise-kafka:5.1.0
+    container_name: broker-3
+    depends_on:
+      - zookeeper-1
+    ports:
+      - "9094:9094"
+    environment:
+      KAFKA_BROKER_ID: 3
+      KAFKA_BROKER_RACK: 'r1'
+      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper-1:2181'
+      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://${DOCKER_HOST_IP}:9094'
+      KAFKA_METRIC_REPORTERS: io.confluent.metrics.reporter.ConfluentMetricsReporter
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_DELETE_TOPIC_ENABLE: 'true'
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'false'
+      KAFKA_JMX_PORT: 9992
+      CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: broker-3:9094
+      CONFLUENT_METRICS_REPORTER_ZOOKEEPER_CONNECT: zookeeper-1:2181
+      CONFLUENT_METRICS_REPORTER_TOPIC_REPLICAS: 1
+      CONFLUENT_METRICS_ENABLE: 'true'
+      CONFLUENT_SUPPORT_CUSTOMER_ID: 'anonymous'
+    restart: always
+      
+  schema-registry:
+    image: confluentinc/cp-schema-registry:5.1.0
+    container_name: schema-registry
+    depends_on:
+      - zookeeper-1
+      - broker-1
+    ports:
+      - "8081:8081"
+    environment:
+      SCHEMA_REGISTRY_HOST_NAME: schema-registry
+      SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL: 'zookeeper-1:2181'
+      SCHEMA_REGISTRY_ACCESS_CONTROL_ALLOW_ORIGIN: '*'
+      SCHEMA_REGISTRY_ACCESS_CONTROL_ALLOW_METHODS: 'GET,POST,PUT,OPTIONS'
+    restart: always
+      
+  connect-1:
+    image: confluentinc/cp-kafka-connect:5.1.0
+    container_name: connect-1
+    depends_on:
+      - zookeeper-1
+      - broker-1
+      - schema-registry
+    ports:
+      - "8083:8083"
+    environment:
+      CONNECT_BOOTSTRAP_SERVERS: 'broker-1:9092'
+      CONNECT_REST_ADVERTISED_HOST_NAME: connect-1
+      CONNECT_REST_PORT: 8083
+      CONNECT_GROUP_ID: compose-connect-group
+      CONNECT_CONFIG_STORAGE_TOPIC: docker-connect-configs
+      CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: 3
+      CONNECT_OFFSET_FLUSH_INTERVAL_MS: 10000
+      CONNECT_OFFSET_STORAGE_TOPIC: docker-connect-offsets
+      CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: 3
+      CONNECT_STATUS_STORAGE_TOPIC: docker-connect-status
+      CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 3
+      CONNECT_KEY_CONVERTER: io.confluent.connect.avro.AvroConverter
+      CONNECT_KEY_CONVERTER_SCHEMA_REGISTRY_URL: 'http://schema-registry:8081'
+      CONNECT_VALUE_CONVERTER: io.confluent.connect.avro.AvroConverter
+      CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL: 'http://schema-registry:8081'
+      CONNECT_INTERNAL_KEY_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+      CONNECT_INTERNAL_VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+      CONNECT_ZOOKEEPER_CONNECT: 'zookeeper-1:2181'
+      CONNECT_PLUGIN_PATH: "/usr/share/java,/etc/kafka-connect/custom-plugins"
+      CONNECT_LOG4J_ROOT_LOGLEVEL: INFO
+      CLASSPATH: /usr/share/java/monitoring-interceptors/monitoring-interceptors-4.0.0.jar
+    volumes:
+      - $PWD/kafka-connect:/etc/kafka-connect/custom-plugins
+    restart: always
+
+  connect-2:
+    image: confluentinc/cp-kafka-connect:5.1.0
+    container_name: connect-2
+    depends_on:
+      - zookeeper-1
+      - broker-1
+      - schema-registry
+    ports:
+      - "8084:8084"
+    environment:
+      CONNECT_BOOTSTRAP_SERVERS: 'broker-1:9092'
+      CONNECT_REST_ADVERTISED_HOST_NAME: connect-2
+      CONNECT_REST_PORT: 8084
+      CONNECT_GROUP_ID: compose-connect-group
+      CONNECT_CONFIG_STORAGE_TOPIC: docker-connect-configs
+      CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: 3
+      CONNECT_OFFSET_FLUSH_INTERVAL_MS: 10000
+      CONNECT_OFFSET_STORAGE_TOPIC: docker-connect-offsets
+      CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: 3
+      CONNECT_STATUS_STORAGE_TOPIC: docker-connect-status
+      CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 3
+      CONNECT_KEY_CONVERTER: io.confluent.connect.avro.AvroConverter
+      CONNECT_KEY_CONVERTER_SCHEMA_REGISTRY_URL: 'http://schema-registry:8081'
+      CONNECT_VALUE_CONVERTER: io.confluent.connect.avro.AvroConverter
+      CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL: 'http://schema-registry:8081'
+      CONNECT_INTERNAL_KEY_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+      CONNECT_INTERNAL_VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+      CONNECT_ZOOKEEPER_CONNECT: 'zookeeper-1:2181'
+      CONNECT_PLUGIN_PATH: "/usr/share/java,/etc/kafka-connect/custom-plugins"
+      CONNECT_LOG4J_ROOT_LOGLEVEL: INFO
+      CLASSPATH: /usr/share/java/monitoring-interceptors/monitoring-interceptors-4.0.0.jar
+    volumes:
+      - $PWD/kafka-connect:/etc/kafka-connect/custom-plugins
+    restart: always
+
+  namenode:
+    image: bde2020/hadoop-namenode:1.2.1-hadoop2.8-java8
+    container_name: namenode
+    volumes:
+      - ./container-volume/namenode:/hadoop/dfs/name
+    ports:
+      - "50070:50070"
+    environment:
+      - CLUSTER_NAME=test
+      - CORE_CONF_fs_defaultFS=hdfs://namenode:8020
+      - CORE_CONF_hadoop_http_staticuser_user=root
+      - CORE_CONF_hadoop_proxyuser_hue_hosts=*
+      - CORE_CONF_hadoop_proxyuser_hue_groups=*
+      - HDFS_CONF_dfs_webhdfs_enabled=true
+      - HDFS_CONF_dfs_permissions_enabled=false
+    healthcheck:
+      interval: 5s
+      retries: 100 
+
+  datanode-1:
+    image: bde2020/hadoop-datanode:1.2.1-hadoop2.8-java8
+    container_name: datanode-1
+    volumes:
+      - ./container-volume/datanode:/hadoop/dfs/data
+    ports:
+      - "50075:50075"
+    environment:
+      - CORE_CONF_fs_defaultFS=hdfs://namenode:8020
+    depends_on:
+      namenode:
+        condition: service_healthy
+    healthcheck:
+      interval: 5s
+      retries: 100 
+
+  spark-master:
+    image: bde2020/spark-master:2.3.2-hadoop2.8 
+    container_name: spark-master
+    ports:
+      - "8080:8080"
+      - "7077:7077"
+    env_file:
+      - ./conf/hadoop-hive.env  
+    environment:
+#      - INIT_DAEMON_STEP=setup_spark
+      - CORE_CONF_fs_defaultFS=hdfs://namenode:8020
+    volumes:
+      - ./conf/hive-site.xml:/spark/conf/hive-site.xml  
+
+  spark-worker-1:
+    image: bde2020/spark-worker:2.3.2-hadoop2.8
+    container_name: spark-worker-1
+    depends_on:
+      - spark-master
+    ports:
+      - "8081:8081"
+    env_file:
+      - ./conf/hadoop-hive.env      
+    environment:
+      - "SPARK_MASTER=spark://spark-master:7077"
+      - CORE_CONF_fs_defaultFS=hdfs://namenode:8020
+    volumes:
+      - ./conf/hive-site.xml:/spark/conf/hive-site.xml  
+   
+  spark-worker-2:
+    image: bde2020/spark-worker:2.3.2-hadoop2.8
+    container_name: spark-worker-2
+    depends_on:
+      - spark-master
+    ports:
+      - "8082:8082"
+    env_file:
+      - ./conf/hadoop-hive.env      
+    environment:
+      - "SPARK_MASTER=spark://spark-master:7077"
+      - CORE_CONF_fs_defaultFS=hdfs://namenode:8020
+    volumes:
+      - ./conf/hive-site.xml:/spark/conf/hive-site.xml  
+
+  hive-server:
+    image: bde2020/hive:2.3.2-postgresql-metastore
+    container_name: hive-server
+    ports:
+      - "10000:10000"
+    env_file:
+      - ./conf/hadoop-hive.env
+    environment:
+      - "HIVE_CORE_CONF_javax_jdo_option_ConnectionURL=jdbc:postgresql://hive-metastore/metastore"
+      - "SERVICE_PRECONDITION=hive-metastore:9083"
+
+  hive-metastore:
+    image: bde2020/hive:2.3.2-postgresql-metastore
+    container_name: hive-metastore
+    env_file:
+      - ./conf/hadoop-hive.env
+    command: /opt/hive/bin/hive --service metastore
+    environment:
+      - "SERVICE_PRECONDITION=namenode:50070 datanode-1:50075 hive-metastore-postgresql:5432"
+  
+  hive-metastore-postgresql:
+    container_name: hive-metastore-postgresql
+    image: bde2020/hive-metastore-postgresql:2.3.0
+         
+  zeppelin:
+    image: trivadisbds/apache-zeppelin:0.8.0-hadoop-2.8.0-spark-2.3.2
+    container_name: zeppelin 
+    ports:
+      - 38081:8080
+#    volumes:
+#      - ./notebook:/opt/zeppelin/notebook
+    environment:
+      CORE_CONF_fs_defaultFS: "hdfs://namenode:8020"
+      SPARK_MASTER: "spark://spark-master:7077"
+      MASTER: "spark://spark-master:7077"
+#      SPARK_SUBMIT_OPTIONS: "--jars /opt/sansa-examples/jars/sansa-examples-spark.jar --conf spark.serializer=org.apache.spark.serializer.KryoSerializer --conf spark.kryo.registrator=net.sansa_stack.owl.spark.dataset.UnmodifiableCollectionKryoRegistrator"
+    depends_on:
+      namenode:
+        condition: service_healthy
+
+  filebrowser:
+    image: bde2020/hdfs-filebrowser:3.11
+    ports:
+      - 8088:8088
+    environment:
+      - NAMENODE_HOST=namenode
+      - SPARK_MASTER=spark://spark-master:7077
+    depends_on:
+      namenode:
+        condition: service_healthy
+
+  hue:
+    image: gethue/hue:latest
+    container_name: hue
+    dns: 8.8.8.8
+    ports:
+      - "8888:8888"
+    command: ./build/env/bin/hue runserver_plus 0.0.0.0:8888
+    volumes:
+      - ./conf/hue.ini:/hue/desktop/conf/hue.ini
+
+  schema-registry-ui:
+    image: landoop/schema-registry-ui
+    container_name: schema-registry-ui
+    depends_on:
+      - broker-1
+      - schema-registry
+    ports:
+      - "28002:8000"
+    environment:
+      SCHEMAREGISTRY_URL: 'http://${PUBLIC_IP}:8081'
+    restart: always
+
+  kafka-connect-ui:
+    image: landoop/kafka-connect-ui:0.9.5
+    container_name: kafka-connect-ui
+    ports:
+      - "28001:8000"
+    environment:
+      CONNECT_URL: "http://${PUBLIC_IP}:8083/,http://${PUBLIC_IP}:8084/"
+      PROXY: "true"
+    depends_on:
+      - connect-1
+    restart: always
+
+  kafka-manager:
+    image: trivadisbds/kafka-manager
+    container_name: kafka-manager
+    depends_on:
+      - zookeeper-1
+      - broker-1
+      - broker-2
+      - broker-3
+    ports:
+      - "29000:9000"
+    environment:
+      ZK_HOSTS: 'zookeeper-1:2181'
+      APPLICATION_SECRET: 'letmein'
+    restart: always
