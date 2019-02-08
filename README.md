@@ -41,7 +41,7 @@ cd analyticsplatform
 Download the code of the [docker-compose.yml](docker-compose.yml) file from GitHub using wget or curl, i.e. 
 
 ```
-wget xxxxx
+wget https://raw.githubusercontent.com/TrivadisBDS/modern-data-analytics-stack/master/docker-compose.yml
 ```
 
 ## Prepare the environment
@@ -106,11 +106,13 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 9093 |	9093 | kafka-2     |
 9094 |	9094 | kafka-3     |
 8086 | 8086 | rest-proxy |
-8081 |	8081 | schema-registry     |
+8085 |	8081 | schema-registry     |
 8088 | 8088 | ksql-server |
 8083 | 8083 | connect-1 |
 8084 | 8084 | connect-2 |
 8085 | 8085 | connect-3 |
+8081 | 8081 | spark-worker-1 |
+8082 | 8082 | spark-worker-2 |
 18630 |	186330 | streamsets     |
 38080 |	8080 | nifi     |
 38081 |	8080 | zeppelin, zeppelin-spark     |
