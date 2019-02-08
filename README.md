@@ -108,7 +108,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 9093 |	9093 | kafka-2     |
 9094 |	9094 | kafka-3     |
 8086 | 8086 | rest-proxy |
-8085 |	8081 | schema-registry     |
+8089 |	8081 | schema-registry     |
 8088 | 8088 | ksql-server |
 8083 | 8083 | connect-1 |
 8084 | 8084 | connect-2 |
@@ -124,4 +124,22 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 29020 |	9020 | kafdrop     |
 28010 |	8010 | zoonavigator-web     |
 29010 |	9010 | zoonavigator-api     |
+
+## Services accessible on Analytics Platform
+The following service are available as part of the Analytics platform. 
+
+Please make sure that you add a entry to your `/etc/hosts` file with the alias `analyticsplatform` and pointing to the IP address of the docker host.
+
+Type | Service | Url
+------|------- | -------------
+Development | StreamSets Data Collector | <http://analyticsplatform:18630>
+Development | Apache NiFi | <http://analyticsplatform:38080/nifi>
+Development | Zeppelin  | <http://analyticsplatform:38081>
+Governance | Schema Registry Rest API  | <http://analyticsplatform:8089>
+Governance | Schema Registry UI  | <http://analyticsplatform:28002>
+Management | Kafka Connect UI | <http://analyticsplatform:28001>
+Management | Kafka Manager  | <http://analyticsplatform:29000>
+Management | Kafdrop  | <http://analyticsplatform:29020>
+Management | Zoonavigator  | <http://analyticsplatform:28010>
+Management | Hue  | <http://analyticsplatform:8888>
 
