@@ -47,14 +47,14 @@ Before we can start the environment, we have to set the environment variable `DO
 
 You can find the IP-Address of the Docker host using the `ifconfig` or `ip addr` command from the shell window. 
 
-In a terminal window, execute the follwoing two commands, setting the two addresses with the values you got in the previous steps:
+In a terminal window, execute the following two commands, setting the two addresses with the values you got in the previous steps:
 
 ```
-export PUBLIC_IP=40.91.195.92
-export DOCKER_HOST_IP=10.0.1.4
+export PUBLIC_IP=nnn.nnn.nnn.nnn
+export DOCKER_HOST_IP=nnn.nnn.nnn
 ```
 
-If you are not on azure, you can set the `PUBLIC_IP` environment variable to the same value as the `DOCKER_HOST_IP`.
+If you are not using a cloud based environment, you can set the `PUBLIC_IP` environment variable to the same value as the `DOCKER_HOST_IP`.
 
 You have to repeat that, whever you open a new terminal window and want to perform some commands in the docker-compose environment. 
 
