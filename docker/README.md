@@ -38,7 +38,7 @@ cd analyticsplatform
 Download the code of the [docker-compose.yml](docker-compose.yml) file from GitHub using wget or curl, i.e. 
 
 ```
-wget https://raw.githubusercontent.com/TrivadisBDS/modern-data-analytics-stack/master/docker-compose.yml
+wget https://raw.githubusercontent.com/TrivadisBDS/modern-data-analytics-stack/master/docker/docker-compose.yml
 ```
 
 ## Prepare the environment
