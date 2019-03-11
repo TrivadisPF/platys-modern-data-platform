@@ -1,17 +1,19 @@
-# Modern Data Analytics Stack on Docker
+# Modern Data (Analytics) Platform (MDP) on Docker
 
 The environment is completly based on docker containers. 
 
 In order to simplify the provisioning, a single docker-compose configuration is used. All the necessary software will be provisioned using Docker. 
 
-## What is the Analytics Platform?
+## What is the Modern Data (Analytics) Platform?
 
-The following services are provisioned as part of the Analytics Platform: 
+The following services are provisioned as part of the Modern Data Platform: 
 
  * Apache Zookeeper
  * Kafka Broker 1 -3
  * Confluent Schema Registry
- * Kafka Connect 1-2 
+ * Kafka Connect 1-2
+ * Confluent Rest Proxy 1 
+ * KSQL Server 1
  * Hadoop Namenode 
  * Hadoop Datanode 1
  * Spark Master
@@ -20,9 +22,14 @@ The following services are provisioned as part of the Analytics Platform:
  * Hive Metastore on PostgreSQL
  * Apache Zeppelin
  * Streamsets Data Collector
- * Schema registry UI
+ * Schema Registry UI
  * Kafka Connect UI
  * Kafka Manager
+ * Apache ActiveMQ
+ * Mosquitto 1 -2 (as extra)
+ * Kafka MQTT Proxy 1 (as extra)
+ * Oracle RDMBS (as extra)
+ * Oracle REST Database Service (as extra)
 
 In this project, there is an example folder with a few different docker compose configuration for various Confluent Platform configurations. 
 
@@ -39,6 +46,19 @@ Download the code of the [docker-compose.yml](docker-compose.yml) file from GitH
 
 ```
 wget https://raw.githubusercontent.com/TrivadisBDS/modern-data-analytics-stack/master/docker-compose.yml
+```
+
+Now create a `conf` folder and download the configuration files needed in the `docker-compose.yml` file:
+
+```
+#!/bin/bash
+mkdir conf
+cd conf
+base="https://raw.githubusercontent.com/TrivadisBDS/modern-data-analytics-stack/master/docker/conf/"
+for file in hadoop-hive.env hadoop.env hive-site.xml hue.ini
+do
+    wget "$base$file"
+done
 ```
 
 ## Prepare the environment
@@ -101,26 +121,46 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 2181 |	2181 | zookeeper-1     |
 2182 |	2181 | zookeeper-2     |
 2183 |	2181 | zookeeper-3     |
-9092 |	9092 | kafka-1     |
-9093 |	9093 | kafka-2     |
-9094 |	9094 | kafka-3     |
-8086 | 8086 | rest-proxy |
+1521 | 1521 | oracle-db |
+1882 | 1882 | kafka-mqtt-1 |
+1883 | 1883 | mosquitto-1 |
+1884 | 1883 | mosquitto-2 |
+5500 | 5500 | oracle-db |
+9001 | 9001 | mosquitto-1 |
+9003 | 9001 | mosquitto-2 |
+9092 |	9092 | broker-1     |
+9093 |	9093 | broker-2     |
+9094 |	9094 | broker-3     |
+8086 | 8086 | kafka-rest-1 |
 8089 |	8081 | schema-registry     |
-8088 | 8088 | ksql-server |
+8088 | 8088 | ksql-server-1 |
 8083 | 8083 | connect-1 |
 8084 | 8084 | connect-2 |
 8085 | 8085 | connect-3 |
+8086 | 8086 | rest-proxy-1 |
 8081 | 8081 | spark-worker-1 |
 8082 | 8082 | spark-worker-2 |
-18630 |	186330 | streamsets     |
-38080 |	8080 | nifi     |
-38081 |	8080 | zeppelin, zeppelin-spark     |
-28001 |	8000 | kafka-connect-ui     |
-28002 |	8000 | schema-registry-ui     |
-29000 |	9000 | kafka-manager     |
-29020 |	9020 | kafdrop     |
-28010 |	8010 | zoonavigator-web     |
-29010 |	9010 | zoonavigator-api     |
+8888 | 8888 | oracle-rest-1 |
+18630 | 186330 | streamsets     |
+23000 | 3000 | burrow-ui |
+23001 | 80 | burrow-dashboard |
+23002 | 8000 | burrow     |
+28001 | 8000 | kafka-connect-ui     |
+28002 | 8000 | schema-registry-ui     |
+28080 | 8080 | kadmin     |
+28081 | 8080 | adminer     |
+29000 | 9000 | kafka-manager     |
+29020 | 9020 | kafdrop     |
+28010 | 8010 | zoonavigator-web     |
+29010 | 9010 | zoonavigator-api     |
+38080 | 8080 | nifi     |
+38081 | 8080 | zeppelin, zeppelin-spark     |
+1883 |	1883 | activemq (mqtt)    |
+5672 |	5672 | activemq (amqp)    |
+8161 |	8161 | activemq (ui)    |
+61613 | 61613 | activemq (stomp)    |
+61614 | 61614 | activemq (ws)    |
+61616 | 61616 | activemq (jms)    |
 
 ## Services accessible on Analytics Platform
 The following service are available as part of the Analytics platform. 
@@ -132,12 +172,17 @@ Type | Service | Url
 Development | StreamSets Data Collector | <http://analyticsplatform:18630>
 Development | Apache NiFi | <http://analyticsplatform:38080/nifi>
 Development | Zeppelin  | <http://analyticsplatform:38081>
+Runtime | Rest Proxy API  | <http://analyticsplatform:8086>
+Runtime | Oracle REST Database Service | <http://analyticsplatform:8888/ords>
 Governance | Schema Registry Rest API  | <http://analyticsplatform:8089>
 Governance | Schema Registry UI  | <http://analyticsplatform:28002>
 Management | Kafka Connect UI | <http://analyticsplatform:28001>
 Management | Kafka Manager  | <http://analyticsplatform:29000>
 Management | Kafdrop  | <http://analyticsplatform:29020>
+Management | Kadmin  | <http://analyticsplatform:28080>
 Management | Zoonavigator  | <http://analyticsplatform:28010>
 Management | Spark UI  | <http://analyticsplatform:8080>
 Management | Hue  | <http://analyticsplatform:8888>
+Management | ActiveMQ  | <http://analyticsplatform:8161>
+Management | Adminer (RDBMS)  | <http://analyticsplatform:28081>
 

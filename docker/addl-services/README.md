@@ -173,3 +173,44 @@ Or add it as a service to a docker-compose configuration
       ORDS_PWD: manager
     restart: always
 ```
+
+## Mosquitto MQTT Broker(1 - 2)
+
+``` 
+  mosquitto-1:
+    image: eclipse-mosquitto:latest
+    hostname: mosquitto-1
+    ports: 
+      - "1883:1883"
+      - "9001:9001"
+    volumes:
+      - ./mosquitto-1.conf:/mosquitto/config/mosquitto.conf
+    restart: always
+```
+
+``` 
+  mosquitto-2:
+    image: eclipse-mosquitto:latest
+    hostname: mosquitto-2
+    ports: 
+      - "1884:1883"
+      - "9002:9001"
+    volumes:
+      - ./mosquitto-.conf:/mosquitto/config/mosquitto.conf
+    restart: always
+```
+
+## Kafka MQTT Broker
+
+``` 
+  kafka-mqtt-1:
+    image: confluentinc/cp-kafka-mqtt:5.1.2
+    hostname: kafka-mqtt-1
+    ports:
+      - "1882:1882"
+    environment:
+      KAFKA_MQTT_TOPIC_REGEX_LIST: 'truck_position:.*position,truck_engine:.*engine'
+      KAFKA_MQTT_LISTENERS: 0.0.0.0:1882
+      KAFKA_MQTT_BOOTSTRAP_SERVERS: PLAINTEXT://broker-1:9092,broker-2:9093
+      KAFKA_MQTT_CONFLUENT_TOPIC_REPLICATIN_FACTOR: 1
+```

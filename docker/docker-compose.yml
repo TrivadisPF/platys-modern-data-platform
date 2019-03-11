@@ -182,7 +182,7 @@ services:
       KSQL_KSQL_SERVER_UI_ENABLED: "true"
     restart: always
 
-  rest-proxy-1:
+  kafka-rest-1:
     image: confluentinc/cp-kafka-rest:5.1.2
     container_name: rest-proxy-1
     depends_on:
@@ -196,6 +196,17 @@ services:
       KAFKA_REST_SCHEMA_REGISTRY_URL: 'http://schema-registry:8081'
       KAFKA_REST_HOST_NAME: 'rest-proxy'
     restart: always
+ 
+  kafka-mqtt-1:
+    image: confluentinc/cp-kafka-mqtt:5.1.2
+    hostname: mqtt-proxy
+    ports:
+      - "1882:1882"
+    environment:
+      KAFKA_MQTT_TOPIC_REGEX_LIST: 'truck_position:.*position,truck_engine:.*engine'
+      KAFKA_MQTT_LISTENERS: 0.0.0.0:1882
+      KAFKA_MQTT_BOOTSTRAP_SERVERS: PLAINTEXT://broker-1:9092,broker-2:9093
+      KAFKA_MQTT_CONFLUENT_TOPIC_REPLICATIN_FACTOR: 1
 
   streamsets:
     image: trivadisbds/streamsets-kafka-hadoop-aws:3.7.2
@@ -465,7 +476,7 @@ services:
       - ./conf/burrow:/etc/burrow/
       - ./tmp:/var/tmp/burrow
     ports:
-      - 28000:8000
+      - 23002:8000
     depends_on:
       - zookeeper-1
       - broker-1
