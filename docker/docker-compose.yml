@@ -434,13 +434,28 @@ services:
       #KEY_STORE_LOCATION: ssl/server.keystore.jks
       #KEY_STORE_PASSWORD: password
       #KEY_PASSWORD: password
+    restart: always
       
   adminer:
     image: adminer
     container_name: adminer
     ports:
       - 38080:8080
-
+    restart: always
+      
+  mysql:
+    image: mysql:8
+    container_name: mysql
+    ports:
+      - 3306:3306
+    environment:
+      - MYSQL_DATABASE=sample
+      - MYSQL_USER=sample
+      - MYSQL_PASSWORD=sample
+      - MYSQL_ROOT_PASSWORD=manager
+      - MYSQL_LOG_CONSOLE=true
+    restart: always
+      
   postgresql:
     image: mujz/pagila
     container_name: postgresql
@@ -448,7 +463,37 @@ services:
       - POSTGRES_PASSWORD=sample
       - POSTGRES_USER=sample
       - POSTGRES_DB=sample
-      
+    restart: always
+
+  mongodb:
+    image: mongo:4
+    container_name: mongodb
+    ports: 
+      - 27017:27017
+    environment:
+      - MONGO_INITDB_DATABASE=sample   
+      - MONGO_INITDB_USERNAME=admin
+      - MONGO_INITDB_PASSWORD=admin 
+    volumes:
+      # seeding scripts
+      - ./conf/mongo-entrypoint:/docker-entrypoint-initdb.d 
+    restart: always
+     
+  axon-server:
+    image: axoniq/axonserver:4.1 
+    container_name: axon-server  
+    hostname: axon-server
+    ports:
+      - 8024:8024
+      - 8124:8124
+    environment:
+      - AXONSERVER_HOSTNAME=axon-server
+      - AXONSERVER_EVENTSTORE=/eventstore
+      - AXONSERVER_CONTROLDB=/controldb
+      - AXONSERVER_HTTP_PORT=8024
+      - AXONSERVER_GRPC_PORT=8124
+    restart: always
+     
   activemq:
     image: rmohr/activemq
     container_name: activemq

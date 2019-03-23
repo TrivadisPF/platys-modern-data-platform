@@ -27,6 +27,10 @@ The following services are provisioned as part of the Modern Data Platform:
  * Kafka Manager
  * Apache ActiveMQ
  * Mosquitto 1 -2 (as extra)
+ * PostreSQL
+ * Mongo DB
+ * DataStax Enterprise
+ * Axon Server
  * Kafka MQTT Proxy 1 (as extra)
  * Oracle RDMBS (as extra)
  * Oracle REST Database Service (as extra)
@@ -125,12 +129,14 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 1882 | 1882 | kafka-mqtt-1 |
 1883 | 1883 | mosquitto-1 |
 1884 | 1883 | mosquitto-2 |
+3306 | 3306 | mysql |
 5500 | 5500 | oracle-db |
 9001 | 9001 | mosquitto-1 |
 9003 | 9001 | mosquitto-2 |
 9092 |	9092 | broker-1     |
 9093 |	9093 | broker-2     |
 9094 |	9094 | broker-3     |
+8024 | 8024 | axon-server |
 8086 | 8086 | kafka-rest-1 |
 8089 |	8081 | schema-registry     |
 8088 | 8088 | ksql-server-1 |
@@ -140,6 +146,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 8086 | 8086 | rest-proxy-1 |
 8081 | 8081 | spark-worker-1 |
 8082 | 8082 | spark-worker-2 |
+8124 | 8124 | axon-server |
 8888 | 8888 | oracle-rest-1 |
 18630 | 186330 | streamsets     |
 23000 | 3000 | burrow-ui |
@@ -158,6 +165,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 1883 |	1883 | activemq (mqtt)    |
 5672 |	5672 | activemq (amqp)    |
 8161 |	8161 | activemq (ui)    |
+27017 | 27017 | mongodb |
 61613 | 61613 | activemq (stomp)    |
 61614 | 61614 | activemq (ws)    |
 61616 | 61616 | activemq (jms)    |
@@ -185,4 +193,4 @@ Management | Spark UI  | <http://analyticsplatform:8080>
 Management | Hue  | <http://analyticsplatform:8888>
 Management | ActiveMQ  | <http://analyticsplatform:8161>
 Management | Adminer (RDBMS)  | <http://analyticsplatform:28081>
-
+Management | Axon Server Dashboard | <http://anayticsplatform:8024>

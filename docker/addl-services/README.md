@@ -136,10 +136,16 @@ Or add it as a service to a docker-compose configuration
 
 Support available here: <https://github.com/oracle/docker-images/tree/master/OracleRestDataServices>
 
-Build the Oracle REST Data Service docker image 
+First you have to build the `OracleJava` docker image. Download the latest server-jre-8uNNN-linux-x64.tar.gz and build it
 
 ```
-./buildDockerImage.sh -v 18.3.0 -e -i
+./build.sh
+```
+
+Then in the `OracleRestDatabaseService` folder build the Oracle REST Data Service docker image 
+
+```
+./buildDockerImage.sh -i
 ```
 
 Run a standalone instance using the following command
@@ -200,7 +206,7 @@ Or add it as a service to a docker-compose configuration
     restart: always
 ```
 
-## Kafka MQTT Broker
+## Kafka MQTT Proxy
 
 ``` 
   kafka-mqtt-1:
@@ -213,4 +219,24 @@ Or add it as a service to a docker-compose configuration
       KAFKA_MQTT_LISTENERS: 0.0.0.0:1882
       KAFKA_MQTT_BOOTSTRAP_SERVERS: PLAINTEXT://broker-1:9092,broker-2:9093
       KAFKA_MQTT_CONFLUENT_TOPIC_REPLICATIN_FACTOR: 1
+    restart: always
+```
+
+## Axon Server
+
+``` 
+  axon-server:
+    image: axoniq/axonserver:4.1 
+    container_name: axon-server  
+    hostname: axon-server
+    ports:
+      - 8024:8024
+      - 8124:8124
+    environment:
+      - AXONSERVER_HOSTNAME=axon-server
+      - AXONSERVER_EVENTSTORE=/eventstore
+      - AXONSERVER_CONTROLDB=/controldb
+      - AXONSERVER_HTTP_PORT=8024
+      - AXONSERVER_GRPC_PORT=8124
+    restart: always
 ```
