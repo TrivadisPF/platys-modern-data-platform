@@ -29,11 +29,14 @@ The following services are provisioned as part of the Modern Data Platform:
  * Mosquitto 1 -2 (as extra)
  * PostreSQL
  * Mongo DB
+ * Elasticsearch
+ * Kibana
  * DataStax Enterprise
  * Axon Server
  * Kafka MQTT Proxy 1 (as extra)
  * Oracle RDMBS (as extra)
  * Oracle REST Database Service (as extra)
+ * KafkaHQ
 
 In this project, there is an example folder with a few different docker compose configuration for various Confluent Platform configurations. 
 
@@ -122,20 +125,20 @@ This table reserves the external ports for the various services. Not all service
 
 Container Port(s) | Internal Port(s)           | Service (alternatives) |
 --------------------|------------------|-----------------------|
-2181 |	2181 | zookeeper-1     |
-2182 |	2181 | zookeeper-2     |
-2183 |	2181 | zookeeper-3     |
+1234 | 1234 | admin-mongo |
+1358 | 1358 | dejavu |
 1521 | 1521 | oracle-db |
 1882 | 1882 | kafka-mqtt-1 |
 1883 | 1883 | mosquitto-1 |
 1884 | 1883 | mosquitto-2 |
+2181 |	2181 | zookeeper-1     |
+2182 |	2181 | zookeeper-2     |
+2183 |	2181 | zookeeper-3     |
 3306 | 3306 | mysql |
 5500 | 5500 | oracle-db |
-9001 | 9001 | mosquitto-1 |
-9003 | 9001 | mosquitto-2 |
-9092 |	9092 | broker-1     |
-9093 |	9093 | broker-2     |
-9094 |	9094 | broker-3     |
+5601 | 5601 | kibana |
+6379 | 6379 | redis |
+7199 | 7199 | cassandra-1 |
 8024 | 8024 | axon-server |
 8086 | 8086 | kafka-rest-1 |
 8089 |	8081 | schema-registry     |
@@ -148,20 +151,37 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 8082 | 8082 | spark-worker-2 |
 8124 | 8124 | axon-server |
 8888 | 8888 | oracle-rest-1 |
+9000 | 9000 | minio |
+9001 | 9001 | mosquitto-1 |
+9003 | 9001 | mosquitto-2 |
+9042 | 9042 | cassandra-1 |
+9092 |	9092 | broker-1     |
+9093 |	9093 | broker-2     |
+9094 |	9094 | broker-3     |
+9160 | 9160 | cassandra-1 |
+9200 | 9200 | elasticsearch |
+9300 | 9300 | elasticsearch |
 18630 | 186330 | streamsets     |
+19000 | 9000 | portainer |
+21000 | 21000 | atlas |
 23000 | 3000 | burrow-ui |
 23001 | 80 | burrow-dashboard |
 23002 | 8000 | burrow     |
+27017 | 27017 | mongodb |
 28001 | 8000 | kafka-connect-ui     |
 28002 | 8000 | schema-registry-ui     |
 28080 | 8080 | kadmin     |
 28081 | 8080 | adminer     |
+28082 | 8080 | kafkahq     |
 29000 | 9000 | kafka-manager     |
 29020 | 9020 | kafdrop     |
 28010 | 8010 | zoonavigator-web     |
 29010 | 9010 | zoonavigator-api     |
 38080 | 8080 | nifi     |
 38081 | 8080 | zeppelin, zeppelin-spark     |
+38082 | 8081 | mongo-express |
+38083 | 8081 | redis-commander |
+39000 | 9000 | cerebro |
 1883 |	1883 | activemq (mqtt)    |
 5672 |	5672 | activemq (amqp)    |
 8161 |	8161 | activemq (ui)    |
@@ -180,17 +200,26 @@ Type | Service | Url
 Development | StreamSets Data Collector | <http://analyticsplatform:18630>
 Development | Apache NiFi | <http://analyticsplatform:38080/nifi>
 Development | Zeppelin  | <http://analyticsplatform:38081>
+Development | Dejavu (Elasticsearch) | <http://analyticsplatform:1358>
+Development | Kibana | <http://analyticsplatform:5601>
+Development | Redis Commander | <http://analyticsplaform:38083>
 Runtime | Rest Proxy API  | <http://analyticsplatform:8086>
 Runtime | Oracle REST Database Service | <http://analyticsplatform:8888/ords>
 Governance | Schema Registry Rest API  | <http://analyticsplatform:8089>
 Governance | Schema Registry UI  | <http://analyticsplatform:28002>
+Governance | Atlas | <http://analyticsplatform:21000>
 Management | Kafka Connect UI | <http://analyticsplatform:28001>
 Management | Kafka Manager  | <http://analyticsplatform:29000>
 Management | Kafdrop  | <http://analyticsplatform:29020>
 Management | Kadmin  | <http://analyticsplatform:28080>
+Management | KafkaHQ  | <http://analyticsplatform:28082>
 Management | Zoonavigator  | <http://analyticsplatform:28010>
 Management | Spark UI  | <http://analyticsplatform:8080>
 Management | Hue  | <http://analyticsplatform:8888>
 Management | ActiveMQ  | <http://analyticsplatform:8161>
 Management | Adminer (RDBMS)  | <http://analyticsplatform:28081>
 Management | Axon Server Dashboard | <http://anayticsplatform:8024>
+Management | Admin Mongo | <http://analyticsplatform:1234>
+Management | Minio UI | <http://analyticsplaform:9000>
+Management | Portainer | <http://analyticsplatform:19000>
+

@@ -2,7 +2,7 @@ version: "2.1"
 
 services:
   zookeeper-1:
-    image: confluentinc/cp-zookeeper:5.1.2
+    image: confluentinc/cp-zookeeper:5.2.1
     container_name: zookeeper-1
     ports:
       - "2181:2181"
@@ -12,7 +12,7 @@ services:
     restart: always
 
   broker-1:
-    image: confluentinc/cp-kafka:5.1.2
+    image: confluentinc/cp-kafka:5.2.1
     container_name: broker-1
     depends_on:
       - zookeeper-1
@@ -32,7 +32,7 @@ services:
     restart: always
 
   broker-2:
-    image: confluentinc/cp-kafka:5.1.2
+    image: confluentinc/cp-kafka:5.2.1
     container_name: broker-2
     depends_on:
       - zookeeper-1
@@ -52,7 +52,7 @@ services:
     restart: always
 
   broker-3:
-    image: confluentinc/cp-enterprise-kafka:5.1.2
+    image: confluentinc/cp-enterprise-kafka:5.2.1
     container_name: broker-3
     depends_on:
       - zookeeper-1
@@ -73,7 +73,7 @@ services:
     restart: always
       
   schema-registry:
-    image: confluentinc/cp-schema-registry:5.1.2
+    image: confluentinc/cp-schema-registry:5.2.1
     hostname: schema-registry
     container_name: schema-registry
     depends_on:
@@ -89,7 +89,7 @@ services:
     restart: always
       
   connect-1:
-    image: confluentinc/cp-kafka-connect:5.1.2
+    image: confluentinc/cp-kafka-connect:5.2.1
     container_name: connect-1
     depends_on:
       - zookeeper-1
@@ -124,7 +124,7 @@ services:
     restart: always
 
   connect-2:
-    image: confluentinc/cp-kafka-connect:5.1.2
+    image: confluentinc/cp-kafka-connect:5.2.1
     container_name: connect-2
     depends_on:
       - zookeeper-1
@@ -159,7 +159,7 @@ services:
     restart: always
 
   ksql-server-1:
-    image: confluentinc/cp-ksql-server:5.1.2
+    image: confluentinc/cp-ksql-server:5.2.1
     container_name: ksql-server-1
     ports:
       - '8088:8088'
@@ -183,7 +183,7 @@ services:
     restart: always
 
   kafka-rest-1:
-    image: confluentinc/cp-kafka-rest:5.1.2
+    image: confluentinc/cp-kafka-rest:5.2.1
     container_name: rest-proxy-1
     depends_on:
       - broker-1
@@ -198,7 +198,7 @@ services:
     restart: always
  
   kafka-mqtt-1:
-    image: confluentinc/cp-kafka-mqtt:5.1.2
+    image: confluentinc/cp-kafka-mqtt:5.2.1
     hostname: mqtt-proxy
     ports:
       - "1882:1882"
@@ -209,7 +209,7 @@ services:
       KAFKA_MQTT_CONFLUENT_TOPIC_REPLICATIN_FACTOR: 1
 
   streamsets:
-    image: trivadisbds/streamsets-kafka-hadoop-aws:3.7.2
+    image: trivadis/streamsets-kafka-hadoop-aws:3.8.1
     container_name: streamsets
     ports:
       - "18630:18630"
@@ -342,7 +342,7 @@ services:
     restart: always
          
   zeppelin:
-    image: trivadisbds/apache-zeppelin:0.8.0-hadoop-2.7.0-spark-2.3.2
+    image: trivadis/apache-zeppelin:0.8.1-hadoop-2.7.0-spark-2.3.2
     container_name: zeppelin 
     ports:
       - 38081:8080
@@ -361,18 +361,25 @@ services:
     restart: always
 
   hue:
-    image: gethue/hue:latest
+    image: gethue/hue:4.4.0
     container_name: hue
     dns: 8.8.8.8
     ports:
       - "8888:8888"
-    command: ./build/env/bin/hue runserver_plus 0.0.0.0:8888
+#    command: ./build/env/bin/hue runserver_plus 0.0.0.0:8888
     volumes:
       - ./conf/hue.ini:/hue/desktop/conf/hue.ini
     restart: always
 
+  solr:
+    image: solr
+    container_name: solr
+    ports:
+      - "8983:8983"
+    restart: always
+
   schema-registry-ui:
-    image: landoop/schema-registry-ui
+    image: landoop/schema-registry-ui   
     container_name: schema-registry-ui
     depends_on:
       - broker-1
@@ -384,7 +391,7 @@ services:
     restart: always
 
   kafka-connect-ui:
-    image: landoop/kafka-connect-ui:0.9.5
+    image: landoop/kafka-connect-ui:0.9.7
     container_name: kafka-connect-ui
     ports:
       - "28001:8000"
@@ -396,7 +403,7 @@ services:
     restart: always
 
   kafka-manager:
-    image: trivadisbds/kafka-manager
+    image: trivadis/kafka-manager
     container_name: kafka-manager
     depends_on:
       - zookeeper-1
@@ -478,7 +485,61 @@ services:
       # seeding scripts
       - ./conf/mongo-entrypoint:/docker-entrypoint-initdb.d 
     restart: always
-     
+
+  mongo-express:
+    image: mongo-express  
+    container_name: mongo-express
+    ports: 
+      - 38082:8081
+    environment:
+      - ME_CONFIG_MONGODB_SERVER=mongodb   
+    restart: always
+
+  admin-mongo:
+    image: adicom/admin-mongo  
+    container_name: admin-mongo
+    ports: 
+      - 1234:1234
+    restart: always
+         
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:6.7.0
+    hostname: elasticsearch
+    container_name: elasticsearch
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    environment:
+      xpack.security.enabled: "false"
+      XPACK_SECURITY_ENABLED: "false"
+      xpack.monitoring.enabled: "false"
+    restart: always
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:6.7.0
+    hostname: kibana
+    container_name: kibana
+    depends_on:
+      - elasticsearch
+    ports:
+      - "5601:5601"
+    environment:
+      xpack.security.enabled: "false"
+      XPACK_SECURITY_ENABLED: "false"
+      xpack.monitoring.enabled: "false"
+      discovery.type: "single-node"
+      elasticsearch.url: http://elasticsearch:9200
+      server.host: "0.0.0.0"
+      SERVER_HOST: "0.0.0.0"
+      server.name: "kibana"
+      SERVER_NAME: "kibana"
+      XPACK_GRAPH_ENABLED: "false"
+      XPACK_MONITORING_ENABLED: "false"
+      XPACK_REPORTING_ENABLED: "false"
+      XPACK_SECURITY_ENABLED: "false"
+    command: [ "/bin/bash", "-c", "/usr/share/kibana/bin/kibana-plugin remove x-pack; /usr/local/bin/kibana-docker" ]
+    restart: always
+       
   axon-server:
     image: axoniq/axonserver:4.1 
     container_name: axon-server  
@@ -551,3 +612,72 @@ services:
       - broker-1
     restart: always
     
+  kafkahq:
+    image: tchiotludo/kafkahq
+    container_name: kafkahq
+    ports:
+      - 28082:8080
+    environment:
+      KAFKAHQ_CONFIGURATION: |
+        kafkahq:
+          connections:
+            docker-kafka-server:
+              properties:
+                bootstrap.servers: "broker-1:9092"
+              schema-registry: "http://schema-registry:8085"
+    depends_on:
+      - broker-1
+    restart: always
+
+  redis:
+    container_name: redis
+    hostname: redis
+    image: redis
+    ports:
+      - 6379:6379
+    restart: always
+
+  redis-commander:
+    container_name: redis-commander
+    hostname: redis-commander
+    image: rediscommander/redis-commander:latest
+    environment:
+      - REDIS_HOSTS=local:redis:6379
+    ports:
+      - "38083:8081"
+    restart: always
+        
+  atlas:
+    image: trivads/apache-atlas
+    container_name: atlas
+    ports:
+      - 21000:21000
+    restart: always
+
+  minio:
+    hostname: minio
+    image: minio/minio
+    container_name: minio
+    ports:
+      - '9000:9000'
+#    volumes:
+#      - './minio/data/:/data'
+#      - './minio/config:/root/.minio'
+    environment:
+      MINIO_ACCESS_KEY: V42FCGRVMK24JJ8DHUYG
+      MINIO_SECRET_KEY: bKhWxVF3kQoLY9kFmt91l+tDrEoZjqnWXzY9Eza
+    command: server /data
+    restart: always
+    
+  portainer:
+    image: portainer/portainer
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+#      - data_portainer:/data
+#    environment:
+#      - VIRTUAL_HOST=monitor.bioatlas.se
+#      - VIRTUAL_PORT=9000
+    ports:
+      - 19000:9000   
+    restart: always
+        

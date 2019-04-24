@@ -240,3 +240,33 @@ Or add it as a service to a docker-compose configuration
       - AXONSERVER_GRPC_PORT=8124
     restart: always
 ```
+
+## Pre-Provisiong Kafka Topics
+``` 
+  kafka-setup:
+    image: confluentinc/cp-kafka:5.1.2
+    hostname: kafka-setup
+    container_name: kafka-setup
+    depends_on:
+      - broker
+      - schema-registry
+    volumes:
+      - $PWD/connectors:/tmp/connectors
+      - $PWD/dashboard:/tmp/dashboard
+    command: "bash -c 'echo Waiting for Kafka to be ready... && \
+                       cub kafka-ready -b broker:9092 1 20 && \
+                       kafka-topics --create --if-not-exists --zookeeper zookeeper:2181 --partitions 1 --replication-factor 1 --topic orders && \
+                       kafka-topics --create --if-not-exists --zookeeper zookeeper:2181 --partitions 1 --replication-factor 1 --topic order-validations && \
+                       echo Waiting 60 seconds for Connect to be ready... && \
+                       sleep 60 && \
+                       curl -i -X POST -H Accept:application/json -H Content-Type:application/json http://connect:8083/connectors/ -d @/tmp/connectors/connector_elasticsearch_docker.config && \
+                       curl -i -X POST -H Accept:application/json -H Content-Type:application/json http://connect:8083/connectors/ -d @/tmp/connectors/connector_jdbc_customers_docker.config && \
+                       echo Waiting 90 seconds for Elasticsearch and Kibana to be ready... && \
+                       sleep 90 && \
+                       /tmp/dashboard/docker-combined.sh'"
+    environment:
+      # The following settings are listed here only to satisfy the image's requirements.
+      # We override the image's `command` anyways, hence this container will not start a broker.
+      KAFKA_BROKER_ID: ignored
+      KAFKA_ZOOKEEPER_CONNECT: ignored
+``` 
