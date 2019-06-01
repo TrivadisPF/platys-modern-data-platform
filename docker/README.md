@@ -37,6 +37,7 @@ The following services are provisioned as part of the Modern Data Platform:
  * Oracle RDMBS (as extra)
  * Oracle REST Database Service (as extra)
  * KafkaHQ
+ * MqttUI (HiveMQWebClient)
 
 In this project, there is an example folder with a few different docker compose configuration for various Confluent Platform configurations. 
 
@@ -125,43 +126,60 @@ This table reserves the external ports for the various services. Not all service
 
 Container Port(s) | Internal Port(s)           | Service (alternatives) |
 --------------------|------------------|-----------------------|
-1234 | 1234 | admin-mongo |
 1358 | 1358 | dejavu |
 1521 | 1521 | oracle-db |
 1882 | 1882 | kafka-mqtt-1 |
 1883 | 1883 | mosquitto-1 |
+1883 | 1883 | activemq (mqtt)    |
 1884 | 1883 | mosquitto-2 |
-2181 |	2181 | zookeeper-1     |
-2182 |	2181 | zookeeper-2     |
-2183 |	2181 | zookeeper-3     |
+2181 | 2181 | zookeeper-1     |
+2182 | 2181 | zookeeper-2     |
+2183 | 2181 | zookeeper-3     |
 3306 | 3306 | mysql |
+5432 | 5432 | postgresql, hive-metastore-postgresql |
 5500 | 5500 | oracle-db |
 5601 | 5601 | kibana |
+5672 | 5672 | activemq (amqp)    |
 6379 | 6379 | redis |
+7077 | 7077 | spark-master |
 7199 | 7199 | cassandra-1 |
+7474 | 7474 | neo4j |
+7687 | 7687 | neo4j |
 8024 | 8024 | axon-server |
+8042 | 8042 | nodemanager |
 8086 | 8086 | kafka-rest-1 |
-8089 |	8081 | schema-registry     |
-8088 | 8088 | ksql-server-1 |
 8083 | 8083 | connect-1 |
 8084 | 8084 | connect-2 |
 8085 | 8085 | connect-3 |
 8086 | 8086 | rest-proxy-1 |
+8080 | 8080 | spark-master |
 8081 | 8081 | spark-worker-1 |
-8082 | 8082 | spark-worker-2 |
+8082 | 8081 | spark-worker-2 |
+8083 | 8081 | spark-worker-3 |
+8088 | 8088 | resourcemanager |
+8089 | 8080 | presto |
 8124 | 8124 | axon-server |
+8161 | 8161 | activemq (ui)    |
+8188 | 8188 | historyserver |
 8888 | 8888 | oracle-rest-1 |
+8983 | 8983 | solr |
+8998 | 8998 | livy |
 9000 | 9000 | minio |
 9001 | 9001 | mosquitto-1 |
 9003 | 9001 | mosquitto-2 |
 9042 | 9042 | cassandra-1 |
-9092 |	9092 | broker-1     |
-9093 |	9093 | broker-2     |
-9094 |	9094 | broker-3     |
+9083 | 9083 | hive-metastore |
+9092 | 9092 | broker-1     |
+9093 | 9093 | broker-2     |
+9094 | 9094 | broker-3     |
 9160 | 9160 | cassandra-1 |
-9200 | 9200 | elasticsearch |
-9300 | 9300 | elasticsearch |
-18630 | 186330 | streamsets     |
+9200 | 9200 | elasticsearch-1 |
+9300 | 9300 | elasticsearch-1 |
+10000 | 10000 | hive-server |
+10002 | 10002 | hive-server |
+18630 | 18630 | streamsets     |
+18081 | 8081 | schema-registry     |
+18088 | 8088 | ksql-server-1 |
 19000 | 9000 | portainer |
 21000 | 21000 | atlas |
 23000 | 3000 | burrow-ui |
@@ -173,19 +191,29 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28080 | 8080 | kadmin     |
 28081 | 8080 | adminer     |
 28082 | 8080 | kafkahq     |
+28083 | 8080 | tsujun (ksqlui) | 
+28888 | 8888 | hue |
 29000 | 9000 | kafka-manager     |
 29020 | 9020 | kafdrop     |
+29021 | 9021 | control-center |
 28010 | 8010 | zoonavigator-web     |
 29010 | 9010 | zoonavigator-api     |
+29080 | 80 | mqtt-ui |
+31234 | 1234 | admin-mongo |
+35000 | 5000 | elastichq |
+33000 | 3000 | cassandra-web |
 38080 | 8080 | nifi     |
 38081 | 8080 | zeppelin, zeppelin-spark     |
 38082 | 8081 | mongo-express |
 38083 | 8081 | redis-commander |
+38888 | 8888 | jupyter |
 39000 | 9000 | cerebro |
-1883 |	1883 | activemq (mqtt)    |
-5672 |	5672 | activemq (amqp)    |
-8161 |	8161 | activemq (ui)    |
-27017 | 27017 | mongodb |
+39091 | 9091 | dse-studio |
+48888 | 8888 | opscenter |
+50070 | 50070 | namenode |
+50075 | 50075 | datanode-1 |
+50076 | 50075 | datanode-2 |
+50077 | 50075 | datanode-3 |
 61613 | 61613 | activemq (stomp)    |
 61614 | 61614 | activemq (ws)    |
 61616 | 61616 | activemq (jms)    |
@@ -200,9 +228,14 @@ Type | Service | Url
 Development | StreamSets Data Collector | <http://analyticsplatform:18630>
 Development | Apache NiFi | <http://analyticsplatform:38080/nifi>
 Development | Zeppelin  | <http://analyticsplatform:38081>
+Development | Jupyter  | <http://analyticsplatform:38888>
+Development | Datastax Studio  | <http://analyticsplatform:39091>
 Development | Dejavu (Elasticsearch) | <http://analyticsplatform:1358>
 Development | Kibana | <http://analyticsplatform:5601>
 Development | Redis Commander | <http://analyticsplaform:38083>
+Development | Neo4j | <http://analyticsplatform:7474>
+Development | tsujun (KSQL UI) |  <http://analyticsplatform:28083>
+Development | cassandra-web |  <http://analyticsplatform:33000>
 Runtime | Rest Proxy API  | <http://analyticsplatform:8086>
 Runtime | Oracle REST Database Service | <http://analyticsplatform:8888/ords>
 Governance | Schema Registry Rest API  | <http://analyticsplatform:8089>
@@ -215,11 +248,72 @@ Management | Kadmin  | <http://analyticsplatform:28080>
 Management | KafkaHQ  | <http://analyticsplatform:28082>
 Management | Zoonavigator  | <http://analyticsplatform:28010>
 Management | Spark UI  | <http://analyticsplatform:8080>
-Management | Hue  | <http://analyticsplatform:8888>
+Management | Hue  | <http://analyticsplatform:28888>
 Management | ActiveMQ  | <http://analyticsplatform:8161>
 Management | Adminer (RDBMS)  | <http://analyticsplatform:28081>
 Management | Axon Server Dashboard | <http://anayticsplatform:8024>
-Management | Admin Mongo | <http://analyticsplatform:1234>
+Management | Admin Mongo | <http://analyticsplatform:31234>
+Management | Mongo Express | <http://analyticsplatform:38082>
+Management | ElasticHQ | <http://analyticsplatform:35000>
+Management | Solr UI | <http://analyticsplatform:8983>
 Management | Minio UI | <http://analyticsplaform:9000>
 Management | Portainer | <http://analyticsplatform:19000>
+Management | MQTT UI | <http://analyticsplatform:29080>
+Management | Hive Web UI | <http://analyticsplatform:10002>
+Management | Namenode UI | <http://analyticsplatform:10002>
+Management | Resourcemanager UI | <http://analyticsplatform:8088>
+Management | Namemanger UI | <http://analyticsplatform:8042>
+Management | Presto UI | <http://analyticsplatform:8089>
 
+## Troubleshooting
+
+Want to see the configurations for Hive
+
+`docker-compose logs -f hive-server`
+
+```
+hive-server                  | Configuring core
+hive-server                  |  - Setting hadoop.proxyuser.hue.hosts=*
+hive-server                  |  - Setting fs.defaultFS=hdfs://namenode:8020
+hive-server                  |  - Setting hadoop.proxyuser.hue.groups=*
+hive-server                  |  - Setting hadoop.http.staticuser.user=root
+hive-server                  | Configuring hdfs
+hive-server                  |  - Setting dfs.permissions.enabled=false
+hive-server                  |  - Setting dfs.webhdfs.enabled=true
+hive-server                  | Configuring yarn
+hive-server                  |  - Setting yarn.resourcemanager.fs.state-store.uri=/rmstate
+hive-server                  |  - Setting yarn.timeline-service.generic-application-history.enabled=true
+hive-server                  |  - Setting yarn.resourcemanager.recovery.enabled=true
+hive-server                  |  - Setting yarn.timeline-service.enabled=true
+hive-server                  |  - Setting yarn.log-aggregation-enable=true
+hive-server                  |  - Setting yarn.resourcemanager.store.class=org.apache.hadoop.yarn.server.resourcemanager.recovery.FileSystemRMStateStore
+hive-server                  |  - Setting yarn.resourcemanager.system-metrics-publisher.enabled=true
+hive-server                  |  - Setting yarn.nodemanager.remote-app-log-dir=/app-logs
+hive-server                  |  - Setting yarn.resourcemanager.resource.tracker.address=resourcemanager:8031
+hive-server                  |  - Setting yarn.resourcemanager.hostname=resourcemanager
+hive-server                  |  - Setting yarn.timeline-service.hostname=historyserver
+hive-server                  |  - Setting yarn.log.server.url=http://historyserver:8188/applicationhistory/logs/
+hive-server                  |  - Setting yarn.resourcemanager.scheduler.address=resourcemanager:8030
+hive-server                  |  - Setting yarn.resourcemanager.address=resourcemanager:8032
+hive-server                  | Configuring httpfs
+hive-server                  | Configuring kms
+hive-server                  | Configuring mapred
+hive-server                  | Configuring hive
+hive-server                  |  - Setting hive.metastore.uris=thrift://hive-metastore:9083
+hive-server                  |  - Setting datanucleus.autoCreateSchema=false
+hive-server                  |  - Setting javax.jdo.option.ConnectionURL=jdbc:postgresql://hive-metastore-postgresql/metastore
+hive-server                  |  - Setting javax.jdo.option.ConnectionDriverName=org.postgresql.Driver
+hive-server                  |  - Setting javax.jdo.option.ConnectionPassword=hive
+hive-server                  |  - Setting javax.jdo.option.ConnectionUserName=hive
+hive-server                  | Configuring for multihomed network
+hive-server                  | [1/100] check for hive-metastore:9083...
+hive-server                  | [1/100] hive-metastore:9083 is not available yet
+hive-server                  | [1/100] try in 5s once again ...
+hive-server                  | [2/100] check for hive-metastore:9083...
+hive-server                  | [2/100] hive-metastore:9083 is not available yet
+hive-server                  | [2/100] try in 5s once again ...
+hive-server                  | [3/100] hive-metastore:9083 is available.
+hive-server                  | mkdir: `/tmp': File exists
+hive-server                  | 2019-05-10 15:45:28: Starting HiveServer2
+hive-server                  | SLF4J: Class path contains multiple SLF4J bindings.
+```
