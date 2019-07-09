@@ -1,6 +1,9 @@
 version: "2.1"
 
 services:
+
+  # Zookeeper & Kafka ===============================================
+
   zookeeper-1:
     image: confluentinc/cp-zookeeper:5.2.2
     container_name: zookeeper-1
@@ -44,7 +47,7 @@ services:
       KAFKA_BROKER_ID: 2
       KAFKA_BROKER_RACK: 'r1'
       KAFKA_ZOOKEEPER_CONNECT: 'zookeeper-1:2181'
-      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://${DOCKER_HOST_IP}:9093'
+      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://${PUBLIC_HOST_IP}:9093'
 #      KAFKA_METRIC_REPORTERS: io.confluent.metrics.reporter.ConfluentMetricsReporter
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
@@ -245,187 +248,6 @@ services:
       KAFKA_MQTT_BOOTSTRAP_SERVERS: PLAINTEXT://broker-1:9092,broker-2:9093
       KAFKA_MQTT_CONFLUENT_TOPIC_REPLICATIN_FACTOR: 1
 
-  streamsets:
-    image: trivadis/streamsets-kafka-hadoop-aws
-    container_name: streamsets
-    hostname: streamsets
-    ports:
-      - "18630:18630"
-    restart: always
-
-  nifi:
-    image: apache/nifi
-    container_name: nifi
-    hostname: nifi
-    ports:
-      - "38080:8080"
-    restart: always
-
-  namenode:
-    image: bde2020/hadoop-namenode:1.2.0-hadoop2.7.4-java8
-    container_name: namenode
-    volumes:
-      - ./container-volume/namenode:/hadoop/dfs/name
-    ports:
-      - "50070:50070"
-    environment:
-      - CLUSTER_NAME=test
-      - CORE_CONF_fs_defaultFS=hdfs://namenode:8020
-      - CORE_CONF_hadoop_http_staticuser_user=root
-      - CORE_CONF_hadoop_proxyuser_hue_hosts=*
-      - CORE_CONF_hadoop_proxyuser_hue_groups=*
-      - HDFS_CONF_dfs_webhdfs_enabled=true
-      - HDFS_CONF_dfs_permissions_enabled=false
-    healthcheck:
-      interval: 5s
-      retries: 100 
-    restart: always
-
-  datanode-1:
-    image: bde2020/hadoop-datanode:1.2.0-hadoop2.7.4-java8
-    container_name: datanode-1
-    volumes:
-      - ./container-volume/datanode:/hadoop/dfs/data
-    ports:
-      - "50075:50075"
-    environment:
-      - CORE_CONF_fs_defaultFS=hdfs://namenode:8020
-    depends_on:
-      namenode:
-        condition: service_healthy
-    healthcheck:
-      interval: 5s
-      retries: 100 
-    restart: always
-
-  spark-master:
-    image: bde2020/spark-master:2.3.1-hadoop2.7 
-    container_name: spark-master
-    ports:
-      - "8080:8080"
-      - "7077:7077"
-    env_file:
-      - ./conf/hadoop-hive.env  
-    environment:
-      - INIT_DAEMON_STEP=setup_spark
-      - CORE_CONF_fs_defaultFS=hdfs://namenode:8020
-    volumes:
-      - ./conf/hive-site.xml:/spark/conf/hive-site.xml
-    restart: always
-
-  spark-worker-1:
-    image: bde2020/spark-worker:2.3.2-hadoop2.7
-    container_name: spark-worker-1
-    depends_on:
-      - spark-master
-    ports:
-      - "8081:8081"
-    env_file:
-      - ./conf/hadoop-hive.env      
-    environment:
-      - "SPARK_MASTER=spark://spark-master:7077"
-      - SPARK_LOCAL_IP=${PUBLIC_IP}
-      - CORE_CONF_fs_defaultFS=hdfs://namenode:8020
-    volumes:
-      - ./conf/hive-site.xml:/spark/conf/hive-site.xml
-    restart: always
-   
-  spark-worker-2:
-    image: bde2020/spark-worker:2.3.2-hadoop2.7
-    container_name: spark-worker-2
-    depends_on:
-      - spark-master
-    ports:
-      - "8082:8081"
-    env_file:
-      - ./conf/hadoop-hive.env      
-    environment:
-      - "SPARK_MASTER=spark://spark-master:7077"
-      - SPARK_LOCAL_IP=${PUBLIC_IP}
-      - CORE_CONF_fs_defaultFS=hdfs://namenode:8020
-    volumes:
-      - ./conf/hive-site.xml:/spark/conf/hive-site.xml
-    restart: always
-
-  spark-thrift-server:
-    image: bde2020/spark-master:2.3.1-hadoop2.7 
-    container_name: spark-thrift-server
-    ports:
-      - "10001:10000"
-    env_file:
-      - ./conf/hadoop-hive.env  
-    environment:
-      - CORE_CONF_fs_defaultFS=hdfs://namenode:8020
-    volumes:
-      - ./conf/hive-site.xml:/spark/conf/hive-site.xml
-    command: bash -c "sleep 2m && /spark/sbin/start-thriftserver.sh && tail -f /spark/logs/spark--org.apache.spark.sql.hive.thriftserver.HiveThriftServer2-*.out"
-
-  hive-server:
-    image: bde2020/hive:2.3.2-postgresql-metastore
-    container_name: hive-server
-    ports:
-      - "10000:10000"
-    env_file:
-      - ./conf/hadoop-hive.env
-    environment:
-      - "HIVE_CORE_CONF_javax_jdo_option_ConnectionURL=jdbc:postgresql://hive-metastore/metastore"
-      - "SERVICE_PRECONDITION=hive-metastore:9083"
-    restart: always
-
-  hive-metastore:
-    image: bde2020/hive:2.3.2-postgresql-metastore
-    container_name: hive-metastore
-    ports:
-      - "9083:9083"
-    env_file:
-      - ./conf/hadoop-hive.env
-    command: /opt/hive/bin/hive --service metastore
-    environment:
-      - "SERVICE_PRECONDITION=namenode:50070 datanode-1:50075 hive-metastore-postgresql:5432"
-    restart: always
-  
-  hive-metastore-postgresql:
-    container_name: hive-metastore-postgresql
-    image: bde2020/hive-metastore-postgresql:2.3.0
-    restart: always
-         
-  zeppelin:
-    image: trivadis/apache-zeppelin:0.8.1-hadoop-2.7.0-spark-2.3.2
-    container_name: zeppelin 
-    ports:
-      - 38081:8080
-#    volumes:
-#      - ./notebook:/opt/zeppelin/notebook
-    environment:
-      CORE_CONF_fs_defaultFS: "hdfs://namenode:8020"
-      SPARK_MASTER: "spark://spark-master:7077"
-      MASTER: "spark://spark-master:7077"
-#      SPARK_SUBMIT_OPTIONS: "--jars /opt/sansa-examples/jars/sansa-examples-spark.jar --conf spark.serializer=org.apache.spark.serializer.KryoSerializer --conf spark.kryo.registrator=net.sansa_stack.owl.spark.dataset.UnmodifiableCollectionKryoRegistrator"
-    volumes:
-      - ./conf/hive-site.xml:/spark/conf/hive-site.xml
-    depends_on:
-      namenode:
-        condition: service_healthy
-    restart: always
-
-  hue:
-    image: gethue/hue:4.4.0
-    container_name: hue
-    dns: 8.8.8.8
-    ports:
-      - "8888:8888"
-#    command: ./build/env/bin/hue runserver_plus 0.0.0.0:8888
-    volumes:
-      - ./conf/hue.ini:/usr/share/hue/desktop/conf/hue.ini
-    restart: always
-
-  solr:
-    image: solr
-    container_name: solr
-    ports:
-      - "8983:8983"
-    restart: always
-
   schema-registry-ui:
     image: landoop/schema-registry-ui   
     container_name: schema-registry-ui
@@ -435,7 +257,7 @@ services:
     ports:
       - "28002:8000"
     environment:
-      SCHEMAREGISTRY_URL: 'http://${PUBLIC_IP}:8089'
+      SCHEMAREGISTRY_URL: 'http://${PUBLIC_IP}:18081'
     restart: always
 
   kafka-connect-ui:
@@ -451,7 +273,7 @@ services:
     restart: always
 
   kafka-manager:
-    image: trivadisbds/kafka-manager
+    image: trivadis/kafka-manager
     container_name: kafka-manager
     hostname: kafka-manager
     depends_on:
@@ -485,50 +307,352 @@ services:
       ZOOKEEPER_HOST: zookeeper-1:2181
       KAFKA_HOST: broker-1:9092
       #SECURITY_PROTOCOL: SSL
-      #TRUST_STORE_LOCATION: ssl/client.truststore.jks
-      #TRUST_STORE_PASSWORD: password
-      #KEY_STORE_LOCATION: ssl/server.keystore.jks
-      #KEY_STORE_PASSWORD: password
-      #KEY_PASSWORD: password
+      TRUST_STORE_LOCATION: ssl/client.truststore.jks
+      TRUST_STORE_PASSWORD: password
+      KEY_STORE_LOCATION: ssl/server.keystore.jks
+      KEY_STORE_PASSWORD: password
+      KEY_PASSWORD: password
     restart: always
     
-  ksqlui:
-    image: matsumana/tsujun
-    hostname: ksqlui
-    container_name: ksqlui
-    ports: 
-      - "28083:8080"
-    environment:
-      - KSQL_SERVER=http://ksql-server-1
-            
-  adminer:
-    image: adminer
-    container_name: adminer
+  kafkahq:
+    image: tchiotludo/kafkahq
+    container_name: kafkahq
     ports:
-      - 38080:8080
+      - 28082:8080
+    environment:
+      KAFKAHQ_CONFIGURATION: |
+        kafkahq:
+          connections:
+            docker-kafka-server:
+              properties:
+                bootstrap.servers: "broker-1:9092,broker-2:9093"
+              schema-registry:
+                url: "http://schema-registry:8081"
+              connect:
+                url: "http://connect-1:8083"
+    depends_on:
+      - broker-1
     restart: always
-      
-  mysql:
-    image: mysql:8
-    container_name: mysql
+    
+  burrow:
+    image: gschmutz/linkedin-burrow:1.2.0
+    container_name: burrow
+    volumes:
+      - ./conf/burrow:/etc/burrow/
+      - ./tmp:/var/tmp/burrow
     ports:
-      - 3306:3306
-    environment:
-      - MYSQL_DATABASE=sample
-      - MYSQL_USER=sample
-      - MYSQL_PASSWORD=sample
-      - MYSQL_ROOT_PASSWORD=manager
-      - MYSQL_LOG_CONSOLE=true
+      - 23002:8000
+    depends_on:
+      - zookeeper-1
+      - broker-1
     restart: always
-      
-  postgresql:
-    image: mujz/pagila
-    container_name: postgresql
+    
+  burrow-ui:
+    image: generalmills/burrowui
+    container_name: burrow-ui
+    ports:
+      - 23000:3000
     environment:
-      - POSTGRES_PASSWORD=sample
-      - POSTGRES_USER=sample
-      - POSTGRES_DB=sample
+      - BURROW_HOME="http://${PUBLIC_IP}:28000/v3/kafka"
+    depends_on:
+      - zookeeper-1
+      - broker-1
     restart: always
+
+  burrow-dashboard:
+    image: joway/burrow-dashboard
+    container_name: burrow-dashboard
+    ports:
+      - 23001:80
+    environment:
+      - BURROW_BACKEND="http://${PUBLIC_IP}:28000"
+    depends_on:
+      - zookeeper-1
+      - broker-1
+    restart: always
+    
+  # Hadoop ===============================================
+
+  namenode:
+    image: trivadis/apache-hadoop-namenode:2.0.0-hadoop3.1.1-java8
+    container_name: namenode
+    hostname: namenode
+    volumes:
+      - ./container-volume/namenode:/hadoop/dfs/name
+      - ./data-transfer:/tmp/data-transfer
+    ports:
+      - "9870:9870"
+    environment:
+      - CLUSTER_NAME=test
+    env_file:
+      - ./conf/hadoop.env
+    restart: always
+
+  datanode-1:
+    image: trivadis/apache-hadoop-datanode:2.0.0-hadoop3.1.1-java8
+    container_name: datanode-1
+    volumes:
+      - ./container-volume/datanode-1:/hadoop/dfs/data
+    ports:
+      - "9864:9864"
+    environment:
+      SERVICE_PRECONDITION: "namenode:9870"
+    env_file:
+      - ./conf/hadoop.env
+    restart: always
+
+  datanode-2:
+    image: trivadis/apache-hadoop-datanode:2.0.0-hadoop3.1.1-java8
+    container_name: datanode-2
+    volumes:
+      - ./container-volume/datanode-2:/hadoop/dfs/data
+    ports:
+      - "9865:9864"
+    environment:
+      SERVICE_PRECONDITION: "namenode:9870"
+    env_file:
+      - ./conf/hadoop.env
+    restart: always
+
+  resourcemanager:
+    image: trivadis/apache-hadoop-resourcemanager:2.0.0-hadoop3.1.1-java8
+    container_name: resourcemanager
+    hostname: resourcemanager
+    ports:
+      - "8088:8088"
+    depends_on:
+      - namenode
+      - datanode-1
+    env_file:
+      - ./conf/hadoop.env
+    restart: always
+  
+  nodemanager:
+    image: trivadis/apache-hadoop-nodemanager:2.0.0-hadoop3.1.1-java8
+    container_name: nodemanager
+    hostname: nodemanager
+    ports:
+      - "8042:8042"
+    depends_on:
+      - namenode
+      - datanode-1
+      - datanode-2
+    env_file:
+      - ./conf/hadoop.env
+    restart: always
+
+  hadoop-client:
+    image: trivadis/apache-hadoop-client:2.0.0-hadoop3.1.1-java8
+    container_name: hadoop-client
+    hostname: hadoop-client
+    env_file:
+      - ./conf/hadoop.env
+    command: tail -f /dev/null
+    restart: always
+
+  # Spark ===============================================
+
+  spark-master:
+    image: trivadis/apache-spark-master:2.4.3-hadoop3.1 
+    container_name: spark-master
+    hostname: spark-master
+    ports:
+      - 6066:6066
+      - 7077:7077
+      - 8080:8080
+    env_file:
+      - ./conf/hadoop.env  
+    environment:
+      - SPARK_PUBLIC_DNS=${PUBLIC_IP}
+      - INIT_DAEMON_STEP=setup_spark
+#      - CORE_CONF_fs_defaultFS=hdfs://namenode:8020
+    volumes:
+      - ./conf/spark-defaults.conf:/spark/conf/spark-defaults.conf
+    restart: always
+
+  spark-worker-1:
+    image: trivadis/apache-spark-worker:2.4.3-hadoop3.1
+    container_name: spark-worker-1
+    hostname: spark-worker-1
+    depends_on:
+      - spark-master
+    ports:
+      - "8081:8081"
+    env_file:
+      - ./conf/hadoop.env  
+    environment:
+      SPARK_MASTER: "spark://spark-master:7077"
+#      SPARK_WORKER_CORES: 2
+#      SPARK_WORKER_MEMORY: 1g
+      SPARK_WORKER_WEBUI_PORT: "8081"
+      SPARK_PUBLIC_DNS: ${PUBLIC_IP}
+    volumes:
+      - ./conf/spark-defaults.conf:/spark/conf/spark-defaults.conf
+    restart: always
+
+  spark-worker-2:
+    image: trivadis/apache-spark-worker:2.4.3-hadoop3.1
+    container_name: spark-worker-2
+    hostname: spark-worker-2
+    depends_on:
+      - spark-master
+    ports:
+      - "8082:8082"
+    env_file:
+      - ./conf/hadoop.env  
+    environment:
+      SPARK_MASTER: "spark://spark-master:7077"
+#      SPARK_WORKER_CORES: 2
+#      SPARK_WORKER_MEMORY: 1g
+      SPARK_WORKER_WEBUI_PORT: "8082"
+      SPARK_PUBLIC_DNS: ${PUBLIC_IP}
+    volumes:
+      - ./conf/spark-defaults.conf:/spark/conf/spark-defaults.conf
+    restart: always
+
+  spark-history:
+    image: trivadis/apache-spark-worker:2.4.3-hadoop3.1
+    command: /spark/bin/spark-class org.apache.spark.deploy.history.HistoryServer
+    container_name: spark-history
+    hostname: spark-history
+    expose:
+      - 18080
+    ports:
+      - 18080:18080
+    volumes:
+      - ./conf/spark-defaults.conf:/spark/conf/spark-defaults.conf
+    restart: always
+
+  spark-thrift-server:
+    image: trivadis/spark-master:2.4.3-hadoop3.1
+    container_name: spark-thrift-server
+    ports:
+      - "10001:10000"
+    env_file:
+      - ./conf/hadoop.env  
+    volumes:
+      - ./conf/hive-site.xml:/spark/conf/hive-site.xml
+      - ./conf/spark-defaults.conf:/spark/conf/spark-defaults.conf
+    command: bash -c "sleep 2m && /spark/sbin/start-thriftserver.sh && tail -f /spark/logs/spark--org.apache.spark.sql.hive.thriftserver.HiveThriftServer2-*.out"
+
+  livy:
+    image: registry.gitlab.com/rychly-edu/docker/docker-livy
+    container_name: livy
+    hostname: livy
+    environment:
+      - LIVY_PORT=8998
+      - MASTER=spark://spark-master:7077
+      - DEPLOY_MODE=cluster
+    ports:
+      - "8998:8998"
+    restart: always
+
+  # Hive ===============================================
+    
+  hive-server:
+    image: johannestang/hive:2.3.4-postgresql-metastore-s3
+    container_name: hive-server
+    hostname: hive-server
+    ports:
+      - "10000:10000"
+      - "10002:10002"
+    env_file:
+      - ./conf/hadoop.env
+    environment:
+      HIVE_CORE_CONF_javax_jdo_option_ConnectionURL: "jdbc:postgresql://hive-metastore/metastore"
+      SERVICE_PRECONDITION: "hive-metastore:9083"
+#      HDFS_CONF_fs_s3a_access_key: ${MINIO_ACCESS_KEY}
+#      HDFS_CONF_fs_s3a_secret_key: ${MINIO_SECRET_KEY}
+    restart: always
+
+  hive-metastore:
+    image: johannestang/hive:2.3.4-postgresql-metastore-s3
+    container_name: hive-metastore
+    hostname: hive-metastore
+    ports:
+      - "9083:9083"
+    env_file:
+      - ./conf/hadoop.env
+    command: /opt/hive/bin/hive --service metastore
+    environment:
+      - "SERVICE_PRECONDITION=namenode:9870 datanode-1:9864 hive-metastore-postgresql:5432"
+    restart: always
+  
+  hive-metastore-postgresql:
+    container_name: hive-metastore-postgresql
+    hostname: hive-metastore-postgresql
+    image: bde2020/hive-metastore-postgresql:2.3.0
+    restart: always
+
+    
+  # Governance ===============================================
+
+  atlas:
+    image: trivads/apache-atlas
+    container_name: atlas
+    ports:
+      - 21000:21000
+    restart: always
+
+  # Data Science Tools ===============================================
+
+  hue:
+    image: gethue/hue:4.4.0
+    container_name: hue
+    hostname: hue
+    dns: 8.8.8.8
+    ports:
+      - "28888:8888"
+    volumes:
+      - ./conf/hue.ini:/usr/share/hue/desktop/conf/hue.ini
+    depends_on:
+      - hue-postgres
+    restart: always
+
+  hue-postgres:
+    image: postgres:10
+    container_name: hue-postgres
+    hostname: hue-postgres
+    environment:
+      POSTGRES_DB: hue
+      POSTGRES_PASSWORD: hue
+      POSTGRES_USER: hue
+    restart: always
+
+  zeppelin:
+    image: trivadis/apache-zeppelin:0.8.1-hadoop-3.1.1-spark-2.4.3
+    container_name: zeppelin
+    hostname: zeppelin
+    ports:
+      - "38081:8080"    
+      - "4040:4040"
+      - "42331:42331"    
+    env_file:
+      - ./conf/hadoop.env
+    environment:
+      SPARK_MASTER: "spark://spark-master:7077"
+      # set spark-master for Zeppelin interpreter
+      MASTER: "spark://spark-master:7077"
+      SPARK_DRIVER_HOST: zeppelin
+      SPARK_DRIVER_BINDADDRESS: "0.0.0.0"
+      PYSPARK_PYTHON: "python3"
+      SPARK_SUBMIT_OPTIONS: "--packages org.apache.commons:commons-lang3:3.5"
+    volumes:
+      - ./conf/hive-site.xml:/spark/conf/hive-site.xml
+      - ./conf/spark-defaults.conf:/spark/conf/spark-defaults.conf
+      - ./zeppelin/interpreter-setting.json:/opt/zeppelin/interpreter/spark/interpreter-setting.json
+      - './conf/s3cfg:/root/.s3cfg'
+    restart: always
+
+  # NoSQL ===============================================
+
+  solr:
+    image: solr
+    container_name: solr
+    ports:
+      - "8983:8983"
+    restart: always
+
 
   mongodb:
     image: mongo:4
@@ -597,95 +721,6 @@ services:
       XPACK_SECURITY_ENABLED: "false"
     command: [ "/bin/bash", "-c", "/usr/share/kibana/bin/kibana-plugin remove x-pack; /usr/local/bin/kibana-docker" ]
     restart: always
-       
-  axon-server:
-    image: axoniq/axonserver:4.1 
-    container_name: axon-server  
-    hostname: axon-server
-    ports:
-      - 8024:8024
-      - 8124:8124
-    environment:
-      - AXONSERVER_HOSTNAME=axon-server
-      - AXONSERVER_EVENTSTORE=/eventstore
-      - AXONSERVER_CONTROLDB=/controldb
-      - AXONSERVER_HTTP_PORT=8024
-      - AXONSERVER_GRPC_PORT=8124
-    restart: always
-     
-  activemq:
-    image: rmohr/activemq
-    container_name: activemq
-    ports:
-      # mqtt
-      - "1883:1883"
-      # amqp
-      - "5672:5672"
-      # ui
-      - "8161:8161"
-      # stomp
-      - "61613:61613"
-      # ws
-      - "61614:61614"
-      # jms
-      - "61616:61616"
-    volumes:
-      - ./container-volume/activemq/data:/opt/activemq/data
-    restart: always
-    
-  burrow:
-    image: gschmutz/linkedin-burrow:1.2.0
-    container_name: burrow
-    volumes:
-      - ./conf/burrow:/etc/burrow/
-      - ./tmp:/var/tmp/burrow
-    ports:
-      - 23002:8000
-    depends_on:
-      - zookeeper-1
-      - broker-1
-    restart: always
-    
-  burrow-ui:
-    image: generalmills/burrowui
-    container_name: burrow-ui
-    ports:
-      - 23000:3000
-    environment:
-      - BURROW_HOME="http://${PUBLIC_IP}:28000/v3/kafka"
-    depends_on:
-      - zookeeper-1
-      - broker-1
-    restart: always
-
-  burrow-dashboard:
-    image: joway/burrow-dashboard
-    container_name: burrow-dashboard
-    ports:
-      - 23001:80
-    environment:
-      - BURROW_BACKEND="http://${PUBLIC_IP}:28000"
-    depends_on:
-      - zookeeper-1
-      - broker-1
-    restart: always
-    
-  kafkahq:
-    image: tchiotludo/kafkahq
-    container_name: kafkahq
-    ports:
-      - 28082:8080
-    environment:
-      KAFKAHQ_CONFIGURATION: |
-        kafkahq:
-          connections:
-            docker-kafka-server:
-              properties:
-                bootstrap.servers: "broker-1:9092"
-              schema-registry: "http://schema-registry:8085"
-    depends_on:
-      - broker-1
-    restart: always
 
   redis:
     container_name: redis
@@ -712,12 +747,96 @@ services:
       - "9851:9851"
     restart: always        
   
-  atlas:
-    image: trivads/apache-atlas
-    container_name: atlas
+
+  # RDBMS ===============================================
+   
+  adminer:
+    image: adminer
+    container_name: adminer
     ports:
-      - 21000:21000
+      - 38080:8080
     restart: always
+      
+  mysql:
+    image: mysql:8
+    container_name: mysql
+    ports:
+      - 3306:3306
+    environment:
+      - MYSQL_DATABASE=sample
+      - MYSQL_USER=sample
+      - MYSQL_PASSWORD=sample
+      - MYSQL_ROOT_PASSWORD=manager
+      - MYSQL_LOG_CONSOLE=true
+    restart: always
+      
+  postgresql:
+    image: mujz/pagila
+    container_name: postgresql
+    environment:
+      - POSTGRES_PASSWORD=sample
+      - POSTGRES_USER=sample
+      - POSTGRES_DB=sample
+    restart: always
+
+  # Event Store ===============================================
+       
+  axon-server:
+    image: axoniq/axonserver:4.1 
+    container_name: axon-server  
+    hostname: axon-server
+    ports:
+      - 8024:8024
+      - 8124:8124
+    environment:
+      - AXONSERVER_HOSTNAME=axon-server
+      - AXONSERVER_EVENTSTORE=/eventstore
+      - AXONSERVER_CONTROLDB=/controldb
+      - AXONSERVER_HTTP_PORT=8024
+      - AXONSERVER_GRPC_PORT=8124
+    restart: always
+     
+    
+  #  Data Integration ===============================================
+
+  streamsets:
+    image: trivadis/streamsets-kafka-hadoop-aws
+    container_name: streamsets
+    hostname: streamsets
+    ports:
+      - "18630:18630"
+    restart: always
+
+  nifi:
+    image: apache/nifi
+    container_name: nifi
+    hostname: nifi
+    ports:
+      - "38080:8080"
+    restart: always
+
+  activemq:
+    image: rmohr/activemq
+    container_name: activemq
+    ports:
+      # mqtt
+      - "1883:1883"
+      # amqp
+      - "5672:5672"
+      # ui
+      - "8161:8161"
+      # stomp
+      - "61613:61613"
+      # ws
+      - "61614:61614"
+      # jms
+      - "61616:61616"
+    volumes:
+      - ./container-volume/activemq/data:/opt/activemq/data
+    restart: always
+
+
+  #  Object Store (S3) ===============================================
 
   minio:
     hostname: minio
@@ -733,6 +852,8 @@ services:
       MINIO_SECRET_KEY: bKhWxVF3kQoLY9kFmt91l+tDrEoZjqnWXzY9Eza
     command: server /data
     restart: always
+
+  #  Container UI ===============================================
     
   portainer:
     image: portainer/portainer
