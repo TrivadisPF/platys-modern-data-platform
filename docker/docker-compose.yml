@@ -643,6 +643,22 @@ services:
       - './conf/s3cfg:/root/.s3cfg'
     restart: always
 
+  # make sure to get Spark to fit with the version of spark master 
+  # - 2.4.0 tag 59b402ce701d
+  # - 2.4.3 tag abdb27a6dfbb
+  jupyter:
+    image: jupyter/all-spark-notebook:abdb27a6dfbb
+    container_name: jupyter
+    hostname: jupyter
+    ports: 
+      - "38888:8888"
+    environment:
+      JUPYTER_ENABLE_LAB: "true"
+      JUPYTER_TOKEN: "abc123"
+      GRANT_SUDO: "true"
+      TINI_SUBREAPER: "true"
+    restart: always
+
   # NoSQL ===============================================
 
   solr:
@@ -834,7 +850,37 @@ services:
       - ./container-volume/activemq/data:/opt/activemq/data
     restart: always
 
+  
+  ftp:
+    image: stilliard/pure-ftpd
+    container_name: ftp
+    hostname: ftp
+    environment:
+#      - PUBLICHOST="192.168.73.86"
+      - PUBLICHOST=${DOCKER_HOST_IP}
+      - FTP_USER_NAME=orderproc
+      - FTP_USER_PASS=orderproc
+      - FTP_USER_HOME=/home/ftp-data
+      - FTP_MAX_CLIENTS=9
+    ports:
+      - "21:21"
+      - "30000-30009:30000-30009"
+    restart: always
 
+  filezilla:
+    image: jlesage/filezilla
+    container_name: filezilla
+    volumes: 
+      - ./data-transfer:/data-transfer
+    ports:
+      - "5800:5800"
+      - "5900:5900"
+#    volumes:
+#      - "/docker/appdata/filezilla:/config:rw"
+#      - "/files:/storage:rw"
+    environment:
+      - VNC_PASSWORD=admin123  
+      
   #  Object Store (S3) ===============================================
 
   minio:
@@ -851,6 +897,21 @@ services:
       MINIO_SECRET_KEY: bKhWxVF3kQoLY9kFmt91l+tDrEoZjqnWXzY9Eza
     command: server /data
     restart: always
+
+  awscli:
+    image: xueshanf/awscli
+    container_name: awscli
+    hostname: awscli
+    volumes:
+      - './conf/s3cfg:/root/.s3cfg'
+      - './data-transfer:/tmp/data-transfer'
+#      - './minio/config:/root/.minio'
+    environment:
+      AWS_ACCESS_KEY_ID: V42FCGRVMK24JJ8DHUYG
+      AWS_SECRET_ACCESS_KEY: bKhWxVF3kQoLY9kFmt91l+tDrEoZjqnWXzY9Eza
+    command: tail -f /dev/null
+    restart: always
+  
 
   #  Container UI ===============================================
     
