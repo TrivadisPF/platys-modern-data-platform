@@ -1,6 +1,6 @@
 # Modern Data (Analytics) Platform (MDP) on Docker
 
-The environment is completly based on docker containers. 
+The environment is completley based on docker containers. 
 
 In order to simplify the provisioning, a single docker-compose configuration is used. All the necessary software will be provisioned using Docker. 
 
@@ -130,8 +130,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 1521 | 1521 | oracle-db |
 1882 | 1882 | kafka-mqtt-1 |
 1883 | 1883 | mosquitto-1 |
-1883 | 1883 | activemq (mqtt)    |
 1884 | 1883 | mosquitto-2 |
+1885 | 1883 | activemq (mqtt)    |
 2181 | 2181 | zookeeper-1     |
 2182 | 2181 | zookeeper-2     |
 2183 | 2181 | zookeeper-3     |
@@ -140,6 +140,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 5500 | 5500 | oracle-db |
 5601 | 5601 | kibana |
 5672 | 5672 | activemq (amqp)    |
+5800 | 5800 | filezilla (ftp browser based UI)  |
+5900 | 5900 | filezilla (ftp browser based UI)  |
 6379 | 6379 | redis |
 7077 | 7077 | spark-master |
 7199 | 7199 | cassandra-1 |
@@ -147,6 +149,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 7687 | 7687 | neo4j |
 8024 | 8024 | axon-server |
 8042 | 8042 | nodemanager |
+8047 | 8047 | drill |
 8086 | 8086 | kafka-rest-1 |
 8083 | 8083 | connect-1 |
 8084 | 8084 | connect-2 |
@@ -168,6 +171,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 9001 | 9001 | mosquitto-1 |
 9003 | 9001 | mosquitto-2 |
 9042 | 9042 | cassandra-1 |
+9047 | 9047 | dremio |
 9083 | 9083 | hive-metastore |
 9092 | 9092 | broker-1     |
 9093 | 9093 | broker-2     |
@@ -175,11 +179,13 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 9160 | 9160 | cassandra-1 |
 9200 | 9200 | elasticsearch-1 |
 9300 | 9300 | elasticsearch-1 |
+9851 | 9851 | tile38 |
 10000 | 10000 | hive-server |
 10002 | 10002 | hive-server |
 18630 | 18630 | streamsets     |
 18081 | 8081 | schema-registry     |
 18088 | 8088 | ksql-server-1 |
+18089 | 8089 | ksql-server-2 |
 19000 | 9000 | portainer |
 21000 | 21000 | atlas |
 23000 | 3000 | burrow-ui |
@@ -199,6 +205,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28010 | 8010 | zoonavigator-web     |
 29010 | 9010 | zoonavigator-api     |
 29080 | 80 | mqtt-ui |
+31010 | 31010 | dremio | 
 31234 | 1234 | admin-mongo |
 35000 | 5000 | elastichq |
 33000 | 3000 | cassandra-web |
@@ -206,9 +213,12 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 38081 | 8080 | zeppelin, zeppelin-spark     |
 38082 | 8081 | mongo-express |
 38083 | 8081 | redis-commander |
+38084 | 8080 | webspoon (penthao) | 
+38085 | 8080 | hawtio |
 38888 | 8888 | jupyter |
 39000 | 9000 | cerebro |
 39091 | 9091 | dse-studio |
+45678 | 45678 | dremio |
 48888 | 8888 | opscenter |
 50070 | 50070 | namenode |
 50075 | 50075 | datanode-1 |
@@ -221,7 +231,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 ## Services accessible on Analytics Platform
 The following service are available as part of the Analytics platform. 
 
-Please make sure that you add a entry to your `/etc/hosts` file with the alias `analyticsplatform` and pointing to the IP address of the docker host.
+Please make sure that you add an entry to your `/etc/hosts` file with the alias `analyticsplatform` and pointing to the IP address of the docker host.
 
 Type | Service | Url
 ------|------- | -------------

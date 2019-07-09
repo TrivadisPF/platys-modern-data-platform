@@ -180,8 +180,9 @@ Or add it as a service to a docker-compose configuration
     restart: always
 ```
 
-## Mosquitto MQTT Broker(1 - 2)
+## MQTT Broker
 
+### Mosquitto
 ``` 
   mosquitto-1:
     image: eclipse-mosquitto:latest
@@ -193,17 +194,28 @@ Or add it as a service to a docker-compose configuration
       - ./mosquitto-1.conf:/mosquitto/config/mosquitto.conf
     restart: always
 ```
+### HiveMQ
 
-``` 
-  mosquitto-2:
-    image: eclipse-mosquitto:latest
-    hostname: mosquitto-2
+```
+  mqtt-2:
+    image: hivemq/hivemq3
+    hostname: mqtt-2
+    container_name: mqtt-2
     ports: 
-      - "1884:1883"
-      - "9002:9001"
-    volumes:
-      - ./mosquitto-.conf:/mosquitto/config/mosquitto.conf
+      - "1882:1883"
+      - "48080:8080"
     restart: always
+```
+### HiveMQ Web Client
+ 
+```
+  mqtt-ui:
+    image: vergissberlin/hivemq-mqtt-web-client
+    hostname: mqtt-ui
+    container_name: mqtt-ui
+    restart: always
+    ports:
+      - "20080:80"
 ```
 
 ## Kafka MQTT Proxy
@@ -240,6 +252,87 @@ Or add it as a service to a docker-compose configuration
       - AXONSERVER_GRPC_PORT=8124
     restart: always
 ```
+
+## Confluent Control Center
+
+``` 
+  control-center:
+    image: confluentinc/cp-enterprise-control-center:5.2.1
+    hostname: control-center
+    container_name: control-center
+    depends_on:
+      - zookeeper-1
+      - broker-1
+      - schema-registry
+      - connect-1
+    ports:
+      - "29021:9021"
+    environment:
+      CONTROL_CENTER_BOOTSTRAP_SERVERS: 'broker-1:9092,broker-2:9093'
+      CONTROL_CENTER_ZOOKEEPER_CONNECT: 'zookeeper-1:2181'
+      CONTROL_CENTER_CONNECT_CLUSTER: 'connect-1:8083'
+      CONTROL_CENTER_KSQL_URL: "http://ksql-server-1:8088"
+      CONTROL_CENTER_KSQL_ADVERTISED_URL: "http://ksql-server-1:8088"
+      CONTROL_CENTER_SCHEMA_REGISTRY_URL: "http://schema-registry:8081"
+      CONTROL_CENTER_REPLICATION_FACTOR: 1
+      CONTROL_CENTER_INTERNAL_TOPICS_PARTITIONS: 1
+      CONTROL_CENTER_MONITORING_INTERCEPTOR_TOPIC_PARTITIONS: 1
+      CONFLUENT_METRICS_TOPIC_REPLICATION: 1
+      PORT: 9021
+    restart: always
+``` 
+
+## Apache Ranger
+```     
+  ranger-admin:
+    image: wbaa/rokku-dev-apache-ranger:0.0.17
+    container_name: ranger-admin
+    stdin_open: true
+    tty: true
+    depends_on:
+      - "postgres-server"
+      - "ceph"
+    ports:
+      - "6080:6080"
+
+  ceph:
+    image: ceph/daemon:v3.0.5-stable-3.0-luminous-centos-7
+    container_name: ceph
+    environment:
+      - CEPH_DEMO_UID=ceph-admin
+      - CEPH_DEMO_ACCESS_KEY=accesskey
+      - CEPH_DEMO_SECRET_KEY=secretkey
+      - CEPH_DEMO_BUCKET=demobucket
+      - RGW_NAME=localhost
+      - RGW_CIVETWEB_PORT=8010
+      - NETWORK_AUTO_DETECT=4
+      - RESTAPI_LOG_LEVEL=debug
+    ports:
+      - 8010:8010
+      - 35000:5000
+    command: demo
+
+  postgres-server:
+    image: wbaa/rokku-dev-apache-ranger-postgres:0.0.17
+    container_name: postgres-server
+``` 
+
+## Solr
+
+Source: <https://github.com/docker-solr/docker-solr-examples/blob/master/docker-compose/docker-compose.yml>
+
+``` 
+  solr:
+    image: solr:8.0.0
+    container_name: solr
+    environment:
+      - ZK_HOST=zookeeper-1:2181
+#    volumes:
+#      - data:/opt/solr/server/solr/mycores
+    ports:
+      - "8983:8983"
+    restart: always
+``` 
 
 ## Pre-Provisiong Kafka Topics
 ``` 
