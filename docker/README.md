@@ -197,7 +197,6 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28080 | 8080 | kadmin     |
 28081 | 8080 | adminer     |
 28082 | 8080 | kafkahq     |
-28083 | 8080 | tsujun (ksqlui) | 
 28888 | 8888 | hue |
 29000 | 9000 | kafka-manager     |
 29020 | 9020 | kafdrop     |
