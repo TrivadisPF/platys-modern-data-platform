@@ -655,43 +655,6 @@ services:
 
   # NoSQL ===============================================
 
-  solr:
-    image: solr
-    container_name: solr
-    ports:
-      - "8983:8983"
-    restart: always
-
-
-  mongodb:
-    image: mongo:4
-    container_name: mongodb
-    ports: 
-      - 27017:27017
-    environment:
-      - MONGO_INITDB_DATABASE=sample   
-      - MONGO_INITDB_USERNAME=admin
-      - MONGO_INITDB_PASSWORD=admin 
-    volumes:
-      # seeding scripts
-      - ./conf/mongo-entrypoint:/docker-entrypoint-initdb.d 
-    restart: always
-
-  mongo-express:
-    image: mongo-express  
-    container_name: mongo-express
-    ports: 
-      - 38082:8081
-    environment:
-      - ME_CONFIG_MONGODB_SERVER=mongodb   
-    restart: always
-
-  mongo-admin:
-    image: adicom/mongo-admin  
-    container_name: mongo-admin
-    ports: 
-      - 1234:1234
-    restart: always
          
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:6.7.0
@@ -730,83 +693,8 @@ services:
       XPACK_SECURITY_ENABLED: "false"
     command: [ "/bin/bash", "-c", "/usr/share/kibana/bin/kibana-plugin remove x-pack; /usr/local/bin/kibana-docker" ]
     restart: always
-
-  redis:
-    container_name: redis
-    hostname: redis
-    image: redis
-    ports:
-      - 6379:6379
-    restart: always
-
-  redis-commander:
-    container_name: redis-commander
-    hostname: redis-commander
-    image: rediscommander/redis-commander:latest
-    environment:
-      - REDIS_HOSTS=local:redis:6379
-    ports:
-      - "38083:8081"
-    restart: always
-    
-  tile38:
-    image: tile38/tile38
-    container_name: tile38
-    ports:
-      - "9851:9851"
-    restart: always        
-  
-
-  # RDBMS ===============================================
-   
-  mysql:
-    image: mysql:8
-    container_name: mysql
-    ports:
-      - 3306:3306
-    environment:
-      - MYSQL_DATABASE=sample
-      - MYSQL_USER=sample
-      - MYSQL_PASSWORD=sample
-      - MYSQL_ROOT_PASSWORD=manager
-      - MYSQL_LOG_CONSOLE=true
-    restart: always
       
-  postgresql:
-    image: mujz/pagila
-    container_name: postgresql
-    environment:
-      - POSTGRES_PASSWORD=sample
-      - POSTGRES_USER=sample
-      - POSTGRES_DB=sample
-    restart: always
-
-  adminer:
-    image: adminer
-    container_name: adminer
-    ports:
-      - 28081:8080
-    restart: always
       
-
-  # Event Store ===============================================
-       
-  axon-server:
-    image: axoniq/axonserver:4.1 
-    container_name: axon-server  
-    hostname: axon-server
-    ports:
-      - 8024:8024
-      - 8124:8124
-    environment:
-      - AXONSERVER_HOSTNAME=axon-server
-      - AXONSERVER_EVENTSTORE=/eventstore
-      - AXONSERVER_CONTROLDB=/controldb
-      - AXONSERVER_HTTP_PORT=8024
-      - AXONSERVER_GRPC_PORT=8124
-    restart: always
-     
-    
   #  Data Integration ===============================================
 
   streamsets:
@@ -816,82 +704,8 @@ services:
     ports:
       - "18630:18630"
     restart: always
-
-  nifi:
-    image: apache/nifi
-    container_name: nifi
-    hostname: nifi
-    ports:
-      - "38080:8080"
-    restart: always
-
-  activemq:
-    image: rmohr/activemq
-    container_name: activemq
-    ports:
-      # mqtt
-      - "1883:1883"
-      # amqp
-      - "5672:5672"
-      # ui
-      - "8161:8161"
-      # stomp
-      - "61613:61613"
-      # ws
-      - "61614:61614"
-      # jms
-      - "61616:61616"
-    volumes:
-      - ./container-volume/activemq/data:/opt/activemq/data
-    restart: always
-
-  
-  ftp:
-    image: stilliard/pure-ftpd
-    container_name: ftp
-    hostname: ftp
-    environment:
-#      - PUBLICHOST="192.168.73.86"
-      - PUBLICHOST=${DOCKER_HOST_IP}
-      - FTP_USER_NAME=orderproc
-      - FTP_USER_PASS=orderproc
-      - FTP_USER_HOME=/home/ftp-data
-      - FTP_MAX_CLIENTS=9
-    ports:
-      - "21:21"
-      - "30000-30009:30000-30009"
-    restart: always
-
-  filezilla:
-    image: jlesage/filezilla
-    container_name: filezilla
-    volumes: 
-      - ./data-transfer:/data-transfer
-    ports:
-      - "5800:5800"
-      - "5900:5900"
-#    volumes:
-#      - "/docker/appdata/filezilla:/config:rw"
-#      - "/files:/storage:rw"
-    environment:
-      - VNC_PASSWORD=admin123  
       
   #  Object Store (S3) ===============================================
-
-  minio:
-    hostname: minio
-    image: minio/minio
-    container_name: minio
-    ports:
-      - '9000:9000'
-#    volumes:
-#      - './minio/data/:/data'
-#      - './minio/config:/root/.minio'
-    environment:
-      MINIO_ACCESS_KEY: V42FCGRVMK24JJ8DHUYG
-      MINIO_SECRET_KEY: bKhWxVF3kQoLY9kFmt91l+tDrEoZjqnWXzY9Eza
-    command: server /data
-    restart: always
 
   awscli:
     image: xueshanf/awscli
@@ -907,18 +721,3 @@ services:
     command: tail -f /dev/null
     restart: always
   
-
-  #  Container UI ===============================================
-    
-  portainer:
-    image: portainer/portainer
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-#      - data_portainer:/data
-#    environment:
-#      - VIRTUAL_HOST=monitor.bioatlas.se
-#      - VIRTUAL_PORT=9000
-    ports:
-      - 19000:9000   
-    restart: always
-        
