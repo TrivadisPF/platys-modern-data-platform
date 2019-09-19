@@ -507,7 +507,18 @@ services:
       - ./conf/hive-site.xml:/spark/conf/hive-site.xml
       - ./conf/spark-defaults.conf:/spark/conf/spark-defaults.conf
     command: bash -c "sleep 2m && /spark/sbin/start-thriftserver.sh && tail -f /spark/logs/spark--org.apache.spark.sql.hive.thriftserver.HiveThriftServer2-*.out"
-
+    restart: always 
+    
+  livy:
+    image: trivadis/apache-livy
+    container_name: livy
+    hostname: livy
+    env_file:
+      - ./conf/hadoop.env 
+    environment:
+      SPARK_MASTER: "spark://spark-master:7077"
+    restart: always    
+    
   # Hive ===============================================
     
   hive-server:
