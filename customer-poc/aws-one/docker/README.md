@@ -1,3 +1,5 @@
+# Modern Data Platform Stack für DEVK Development
+
 ## Start on Lightsail
 
 The following script can be used to start the stack on Lightsail
@@ -30,15 +32,33 @@ cd modern-data-analytics-stack/customer-poc/aws-one/docker
 sudo -E docker-compose up -d
 ```
 
+## Spark History Server
 
+Für den Spark History Server muss der Folder zurzeit noch manuell erstellt werden:
 
-## Services
+```
+docker exec -ti hadoop-client hadoop fs -mkdir -p /spark/logs
+```
 
+## Verfügbare Services
+
+Die wichtigsten Services:
+
+* Zeppelin: <http://analyticsplatform:38081>
+* Minio Browser: <http://analyticsplatform:9000>
 * Hue: <http://analyticsplatform:28888>
-
+* StreamSets: <http://analyticsplatform:18630>
+* Spark UI: <http://analyticsplatform:8080>
+* Spark History Server: <http://analyticsplatform:18080>
+* Hadoop Namenode: <http://analyticsplatform:9870>
+* Yarn Ressource Manager: <http://analyticsplatform:8088>
+* Kafka Manager: <http://analyticsplatform:29000>
+* Kafka HQ: <http://analyticsplatform:28082>
 
 
 ## Spark
+
+Testen von Spark über das CLI
 
 ```
 docker exec -ti spark-master spark-shell spark.version
@@ -64,3 +84,8 @@ And if you want to use S3, the following 7 additional dependencies have to be ad
  * `joda-time:joda-time:2.9.9`
  * `org.apache.hadoop:hadoop-aws:3.1.1`	
 
+## ToDo
+
+ * Livy richtig konfigurieren
+ * Konfiguration auf externes S3 einrichten
+ *  
