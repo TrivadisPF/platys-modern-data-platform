@@ -441,6 +441,21 @@ services:
       - ./conf/hadoop.env
     restart: always
 
+  historyserver:
+    image: trivadis/apache-hadoop-historyserver:2.0.0-hadoop3.1.1-java8
+    container_name: historyserver
+    hostname: historyserver
+    ports:
+      - "8188:8188"
+    depends_on:
+      - namenode
+      - datanode-1
+    env_file:
+      - ./conf/hadoop.env
+    environment:
+      SERVICE_PRECONDITION: "namenode:9870 datanode-1:9864 datanode-2:9864 resourcemanager:8088"      
+    restart: always
+
   hadoop-client:
     image: trivadis/apache-hadoop-client:2.0.0-hadoop3.1.1-java8
     container_name: hadoop-client
@@ -575,7 +590,7 @@ services:
       - ./conf/hadoop.env
     command: /opt/hive/bin/hive --service metastore
     environment:
-      - "SERVICE_PRECONDITION=namenode:9870 datanode-1:9864 hive-metastore-postgresql:5432"
+      - "SERVICE_PRECONDITION=namenode:9870 datanode-1:9864 hive-metastore-db:5432"
     restart: always
   
   hive-metastore-db:
