@@ -1,4 +1,6 @@
-# Modern Data Platform Stack für DEVK Development
+# Modern Data Platform Stack für Development beim AWS-ONE Projekt
+
+Im folgenden ist beschrieben, wie der Stack gestartet werden kann und auf was es zu achten gilt. 
 
 ## Start on Lightsail
 
