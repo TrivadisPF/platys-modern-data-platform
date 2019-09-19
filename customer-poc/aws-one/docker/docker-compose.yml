@@ -236,17 +236,6 @@ services:
       KAFKA_REST_SCHEMA_REGISTRY_URL: 'http://schema-registry:8081'
       KAFKA_REST_HOST_NAME: 'rest-proxy'
     restart: always
- 
-  kafka-mqtt-1:
-    image: confluentinc/cp-kafka-mqtt:5.3.0
-    hostname: mqtt-proxy
-    ports:
-      - "1882:1882"
-    environment:
-      KAFKA_MQTT_TOPIC_REGEX_LIST: 'truck_position:.*position,truck_engine:.*engine'
-      KAFKA_MQTT_LISTENERS: 0.0.0.0:1882
-      KAFKA_MQTT_BOOTSTRAP_SERVERS: PLAINTEXT://broker-1:9092,broker-2:9093
-      KAFKA_MQTT_CONFLUENT_TOPIC_REPLICATIN_FACTOR: 1
 
   schema-registry-ui:
     image: landoop/schema-registry-ui   
@@ -297,22 +286,6 @@ services:
       ZK_HOSTS: zookeeper-1:2181
       LISTEN: 9020
     restart: always
-
-  kadmin:
-    image: hasnat/kadmin
-    container_name: kadmin
-    ports:
-      - "28080:8080"
-    environment:
-      ZOOKEEPER_HOST: zookeeper-1:2181
-      KAFKA_HOST: broker-1:9092
-      #SECURITY_PROTOCOL: SSL
-      TRUST_STORE_LOCATION: ssl/client.truststore.jks
-      TRUST_STORE_PASSWORD: password
-      KEY_STORE_LOCATION: ssl/server.keystore.jks
-      KEY_STORE_PASSWORD: password
-      KEY_PASSWORD: password
-    restart: always
     
   kafkahq:
     image: tchiotludo/kafkahq
@@ -331,43 +304,6 @@ services:
               connect:
                 url: "http://connect-1:8083"
     depends_on:
-      - broker-1
-    restart: always
-    
-  burrow:
-    image: gschmutz/linkedin-burrow:1.2.0
-    container_name: burrow
-    volumes:
-      - ./conf/burrow:/etc/burrow/
-      - ./tmp:/var/tmp/burrow
-    ports:
-      - 23002:8000
-    depends_on:
-      - zookeeper-1
-      - broker-1
-    restart: always
-    
-  burrow-ui:
-    image: generalmills/burrowui
-    container_name: burrow-ui
-    ports:
-      - 23000:3000
-    environment:
-      - BURROW_HOME="http://${PUBLIC_IP}:28000/v3/kafka"
-    depends_on:
-      - zookeeper-1
-      - broker-1
-    restart: always
-
-  burrow-dashboard:
-    image: joway/burrow-dashboard
-    container_name: burrow-dashboard
-    ports:
-      - 23001:80
-    environment:
-      - BURROW_BACKEND="http://${PUBLIC_IP}:28000"
-    depends_on:
-      - zookeeper-1
       - broker-1
     restart: always
     
@@ -441,6 +377,21 @@ services:
       - ./conf/hadoop.env
     restart: always
 
+  historyserver:
+    image: trivadis/apache-hadoop-historyserver:2.0.0-hadoop3.1.1-java8
+    container_name: historyserver
+    hostname: historyserver
+    ports:
+      - "8188:8188"
+    depends_on:
+      - namenode
+      - datanode-1
+    env_file:
+      - ./conf/hadoop.env
+    environment:
+      SERVICE_PRECONDITION: "namenode:9870 datanode-1:9864 datanode-2:9864 resourcemanager:8088"      
+    restart: always
+
   hadoop-client:
     image: trivadis/apache-hadoop-client:2.0.0-hadoop3.1.1-java8
     container_name: hadoop-client
@@ -449,6 +400,28 @@ services:
       - ./conf/hadoop.env
     command: tail -f /dev/null
     restart: always
+
+  hadoop-setup:
+    image: trivadis/apache-hadoop-client:2.0.0-hadoop3.1.1-java8
+    hostname: hadoop-setup
+    container_name: hadoop-setup
+    env_file:
+      - ./conf/hadoop.env
+    depends_on:
+      - namenode
+    command:
+      - bash 
+      - -c 
+      - |
+        echo "Waiting for Hadoop Namenode to start listening on connect..."
+        while [ $$(curl -s -o /dev/null -w %{http_code} http://namenode:9870) -ne 200 ] ; do 
+          echo -e $$(date) " Hadoop Namenode state: " $$(curl -s -o /dev/null -w %{http_code} http://namenode:9870) " (waiting for 200)"
+          sleep 5 
+        done
+        nc -vz namenode 9870
+        echo -e "\n--\n+> Creating Hadoop Folders"
+        hadoop fs -mkdir -p /spark/logs
+        sleep infinity
 
   # Spark ===============================================
 
@@ -535,18 +508,6 @@ services:
       - ./conf/spark-defaults.conf:/spark/conf/spark-defaults.conf
     command: bash -c "sleep 2m && /spark/sbin/start-thriftserver.sh && tail -f /spark/logs/spark--org.apache.spark.sql.hive.thriftserver.HiveThriftServer2-*.out"
 
-  livy:
-    image: registry.gitlab.com/rychly-edu/docker/docker-livy
-    container_name: livy
-    hostname: livy
-    environment:
-      - LIVY_PORT=8998
-      - MASTER=spark://spark-master:7077
-      - DEPLOY_MODE=cluster
-    ports:
-      - "8998:8998"
-    restart: always
-
   # Hive ===============================================
     
   hive-server:
@@ -575,7 +536,7 @@ services:
       - ./conf/hadoop.env
     command: /opt/hive/bin/hive --service metastore
     environment:
-      - "SERVICE_PRECONDITION=namenode:9870 datanode-1:9864 hive-metastore-postgresql:5432"
+      - "SERVICE_PRECONDITION=namenode:9870 datanode-1:9864 hive-metastore-db:5432"
     restart: always
   
   hive-metastore-db:
@@ -655,6 +616,13 @@ services:
 
   # NoSQL ===============================================
 
+  # Needed for Hue
+  solr:
+    image: solr
+    container_name: solr
+    ports:
+      - "8983:8983"
+    restart: always
          
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:6.7.0
@@ -707,6 +675,21 @@ services:
       
   #  Object Store (S3) ===============================================
 
+  minio:
+    hostname: minio
+    image: minio/minio
+    container_name: minio
+    ports:
+      - '9000:9000'
+#    volumes:
+#      - './minio/data/:/data'
+#      - './minio/config:/root/.minio'
+    environment:
+      MINIO_ACCESS_KEY: ${OBJECT_STORAGE_ACCESS_KEY}
+      MINIO_SECRET_KEY: ${OBJECT_STORAGE_SECRET_KEY}
+    command: server /data
+    restart: always
+    
   awscli:
     image: xueshanf/awscli
     container_name: awscli
@@ -716,8 +699,24 @@ services:
       - './data-transfer:/tmp/data-transfer'
 #      - './minio/config:/root/.minio'
     environment:
-      AWS_ACCESS_KEY_ID: V42FCGRVMK24JJ8DHUYG
-      AWS_SECRET_ACCESS_KEY: bKhWxVF3kQoLY9kFmt91l+tDrEoZjqnWXzY9Eza
+      AWS_ACCESS_KEY_ID: ${OBJECT_STORAGE_ACCESS_KEY}
+      AWS_SECRET_ACCESS_KEY: ${OBJECT_STORAGE_SECRET_KEY}
     command: tail -f /dev/null
     restart: always
   
+  object-storage-setup:
+    image: xueshanf/awscli
+    container_name: object-storage-setup
+    hostname: object-storage-setup
+    volumes:
+      - './conf/s3cfg:/root/.s3cfg'
+    environment:
+      AWS_ACCESS_KEY_ID: ${OBJECT_STORAGE_ACCESS_KEY}
+      AWS_SECRET_ACCESS_KEY: ${OBJECT_STORAGE_SECRET_KEY}
+    command:
+      - bash 
+      - -c 
+      - |
+        echo -e "\n--\n+> Creating Object Storage Folder"
+        s3cmd mb s3://spark-logs
+        sleep infinity
