@@ -334,7 +334,7 @@ Source: <https://github.com/docker-solr/docker-solr-examples/blob/master/docker-
     restart: always
 ``` 
 
-## Pre-Provisiong Kafka Topics
+## Pre-Provisioning Kafka Topics
 ``` 
   kafka-setup:
     image: confluentinc/cp-kafka:5.1.2
@@ -363,3 +363,114 @@ Source: <https://github.com/docker-solr/docker-solr-examples/blob/master/docker-
       KAFKA_BROKER_ID: ignored
       KAFKA_ZOOKEEPER_CONNECT: ignored
 ``` 
+
+
+## Pre-Provisioning Streamsets Pipelines
+
+``` 
+  streamsets-setup:
+    image: tutum/curl
+    hostname: streamsets-setup
+    container_name: streamsets-setup
+    depends_on:
+      - streamsets
+    volumes:
+      - ./streamsets-pipelines:/import
+    command:
+      - bash 
+      - -c 
+      - |
+        echo "Waiting for Streamsets to start listening on connect..."
+        while [ $$(curl -s -o /dev/null -w %{http_code} http://streamsets:18630/rest/v1/pipelines/status) -ne 200 ] ; do 
+          echo -e $$(date) " Streamsets state: " $$(curl -s -o /dev/null -w %{http_code} http://streamsets:18630/rest/v1/pipelines/status) " (waiting for 200)"
+          sleep 5 
+        done
+        nc -vz streamsets 18630
+        echo -e "\n--\n+> Creating Streamsets Pipelines"
+        curl -XPOST -u admin:admin -v -H 'Content-Type: multipart/form-data' -H 'X-Requested-By: My Import Process' -F file=@/import/pipelines-V1.0.zip http://streamsets:18630/rest/v1/pipelines/import
+        sleep infinity
+        
+``` 
+## Pre-Provisioning Kafka Connect
+
+```
+  connect:
+    image: confluentinc/cp-kafka-connect:5.3.0
+    hostname: connect
+    container_name: connect
+    depends_on:
+      - zookeeper
+      - broker
+      - schema-registry
+    ports:
+      - "8083:8083"
+    volumes:
+      - ./kafka-connect-jdbc-sink-hafen-vm.json:/opt/kafka-connect-jdbc-sink-hafen-vm.json:Z
+    environment:
+      CONNECT_BOOTSTRAP_SERVERS: 'broker:29092'
+      CONNECT_REST_ADVERTISED_HOST_NAME: connect
+      CONNECT_REST_PORT: 8083
+      CONNECT_GROUP_ID: compose-connect-group
+      CONNECT_CONFIG_STORAGE_TOPIC: docker-connect-configs
+      CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_OFFSET_FLUSH_INTERVAL_MS: 10000
+      CONNECT_OFFSET_STORAGE_TOPIC: docker-connect-offsets
+      CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_STATUS_STORAGE_TOPIC: docker-connect-status
+      CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_KEY_CONVERTER: org.apache.kafka.connect.storage.StringConverter
+      CONNECT_VALUE_CONVERTER: io.confluent.connect.avro.AvroConverter
+      CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL: http://schema-registry:8081
+      CONNECT_INTERNAL_KEY_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+      CONNECT_INTERNAL_VALUE_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+      CONNECT_ZOOKEEPER_CONNECT: 'zookeeper:2181'
+      # Assumes image is based on confluentinc/kafka-connect-datagen:latest which is pulling 5.1.1 Connect image
+      CLASSPATH: /usr/share/java/monitoring-interceptors/monitoring-interceptors-5.3.0.jar
+      CONNECT_PRODUCER_INTERCEPTOR_CLASSES: "io.confluent.monitoring.clients.interceptor.MonitoringProducerInterceptor"
+      CONNECT_CONSUMER_INTERCEPTOR_CLASSES: "io.confluent.monitoring.clients.interceptor.MonitoringConsumerInterceptor"
+      CONNECT_PLUGIN_PATH: "/usr/share/java,/usr/share/confluent-hub-components"
+      CONNECT_LOG4J_ROOT_LOGLEVEL: WARN
+      CONNECT_LOG4J_LOGGERS: org.apache.zookeeper=ERROR,org.I0Itec.zkclient=ERROR,org.reflections=ERROR
+    command:
+      - bash 
+      - -c 
+      - |
+        /etc/confluent/docker/run & 
+        echo "Waiting for Kafka Connect to start listening on connect..."
+        while [ $$(curl -s -o /dev/null -w %{http_code} http://connect:8083/connectors) -ne 200 ] ; do 
+          echo -e $$(date) " Kafka Connect listener HTTP state: " $$(curl -s -o /dev/null -w %{http_code} http://connect:8083/connectors) " (waiting for 200)"
+          sleep 5 
+        done
+        nc -vz connect 8083
+        echo -e "\n--\n+> Creating Kafka Connect TimescaleDB sink"
+        curl -X POST -H "Content-Type: application/json" -d @/opt/kafka-connect-jdbc-sink-hafen-vm.json http://connect:8083/connectors
+        sleep infinity
+```
+
+
+## Pre-Provisioning Schema-Registry
+
+```
+  schema-registry-setup:
+    image: blacktop/httpie
+    hostname: schema-registry-setup
+    container_name: schema-registry-setup
+    volumes:
+      - ./avro-schemas:/import:Z
+    entrypoint: /bin/sh
+    command:
+      - -c 
+      - |
+        echo "Waiting for Schema-Registry to start listening on connect..."
+        while [ $$(curl -s -o /dev/null -w %{http_code} http://schema-registry:8081/subjects) -ne 200 ] ; do 
+          echo -e $$(date) " Schema-Registry state: " $$(curl -s -o /dev/null -w %{http_code} http://schema-registry:8081/subjects) " (waiting for 200)"
+          sleep 5 
+        done
+        nc -vz schema-registry 8081
+        echo -e "\n--\n+> Registering Avro Schemas"
+        
+        http -v --ignore-stdin POST http://schema-registry:8081/subjects/Barge/versions Accept:application/vnd.schemaregistry.v1+json schema=@/import/Barge-v1.avsc        
+
+        sleep infinity
+    restart: always
+```
