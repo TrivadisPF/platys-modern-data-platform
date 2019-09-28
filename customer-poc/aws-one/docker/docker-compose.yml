@@ -361,6 +361,11 @@ services:
       - datanode-1
     env_file:
       - ./conf/hadoop.env
+    environment:
+      - YARN_CONF_yarn_resourcemanager_webapp_address=${PUBLIC_IP}:8088
+      - YARN_CONF_yarn_nodemanager_webapp_address=${PUBLIC_IP}:8042
+      - YARN_CONF_yarn_timeline___service_webapp_address=${PUBLIC_IP}:8188
+      - YARN_CONF_yarn_log_server_url=${PUBLIC_IP}:8188
     restart: always
   
   nodemanager:
@@ -375,6 +380,11 @@ services:
       - datanode-2
     env_file:
       - ./conf/hadoop.env
+    environment:
+      - YARN_CONF_yarn_resourcemanager_webapp_address=${PUBLIC_IP}:8088
+      - YARN_CONF_yarn_nodemanager_webapp_address=${PUBLIC_IP}:8042
+      - YARN_CONF_yarn_timeline___service_webapp_address=${PUBLIC_IP}:8188
+      - YARN_CONF_yarn_log_server_url=${PUBLIC_IP}:8188
     restart: always
 
   historyserver:
@@ -390,7 +400,7 @@ services:
       - ./conf/hadoop.env
     environment:
       SERVICE_PRECONDITION: "namenode:9870 datanode-1:9864 datanode-2:9864 resourcemanager:8088"      
-    restart: always
+    restart: always 
 
   hadoop-client:
     image: trivadis/apache-hadoop-client:2.0.0-hadoop3.1.1-java8
@@ -515,15 +525,14 @@ services:
     hostname: livy
     env_file:
       - ./conf/hadoop.env 
+    volumes:
+      - ./conf/spark-defaults.conf:/spark/conf/spark-defaults.conf
     ports:
       - "8998:8998"
     environment:
-      SPARK_MASTER: "spark://spark-master:7077"
-      SPARK_HOME: "/spark"
-      SPARK_MASTER_ENDPOINT: "spark-master"
-      SPARK_MASTER_PORT: "7077"
-      DEPLOY_MODE: "cluster"
-    restart: always    
+      - SPARK_MASTER=yarn
+      - DEPLOY_MODE=cluster
+    restart: always      
     
   # Hive ===============================================
     
