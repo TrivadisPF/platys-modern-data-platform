@@ -35,3 +35,9 @@ mkdir kafka-connect
 # Startup Environment
 docker-compose up
 ```
+
+You can check the log of the script by connecting to the lightsail instance console and executing
+
+```
+tail -f /var/log/cloud-init-output.log --lines 1000
+```
