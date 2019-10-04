@@ -614,9 +614,26 @@ services:
     depends_on:
       - zookeeper-1
       - broker-1
-      - kafka-setup
+      - atlas-kafka-setup
       - cassandra-atlas
     restart: always
+
+  atlas-kafka-setup:
+    image: confluentinc/cp-kafka:5.3.0
+    hostname: atlas-kafka-setup
+    container_name: atlas-kafka-setup
+    depends_on:
+      - broker-1
+      - zookeeper-1
+    command: "bash -c 'echo Waiting for Kafka to be ready... && \
+                       cub kafka-ready -b broker-1:9092 1 120 && \
+                       kafka-topics --create --if-not-exists --zookeeper zookeeper-1:2181 --partitions 1 --replication-factor 1 --topic ATLAS_HOOK && \
+                       kafka-topics --create --if-not-exists --zookeeper zookeeper-1:2181 --partitions 1 --replication-factor 1 --topic ATLAS_ENTITIES'"
+    environment:
+      # The following settings are listed here only to satisfy the image's requirements.
+      # We override the image's `command` anyways, hence this container will not start a broker.
+      KAFKA_BROKER_ID: ignored
+      KAFKA_ZOOKEEPER_CONNECT: ignored
 
   cassandra-atlas:
     image: cassandra:3
