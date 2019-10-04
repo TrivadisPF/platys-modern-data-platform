@@ -38,6 +38,7 @@ The following services are provisioned as part of the Modern Data Platform:
  * Oracle REST Database Service (as extra)
  * KafkaHQ
  * MqttUI (HiveMQWebClient)
+ * Atlas
 
 In this project, there is an example folder with a few different docker compose configuration for various Confluent Platform configurations. 
 
@@ -136,6 +137,9 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 2182 | 2181 | zookeeper-2     |
 2183 | 2181 | zookeeper-3     |
 3306 | 3306 | mysql |
+5000 | 5000 | amundsenfrontend
+5001 | 5000 | amundsensearch
+5002 | 5000 | amundsenmetadata
 5432 | 5432 | postgresql, hive-metastore-postgresql |
 5500 | 5500 | oracle-db |
 5601 | 5601 | kibana |
@@ -216,7 +220,10 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 38085 | 8080 | hawtio |
 38888 | 8888 | jupyter |
 39000 | 9000 | cerebro |
+39042 | 9042 | cassandra-atlas |
 39091 | 9091 | dse-studio |
+39160 | 9160 | cassandra-atlas |
+39200 | 9200 | elasticsearch-atlas |
 45678 | 45678 | dremio |
 48888 | 8888 | opscenter |
 50070 | 50070 | namenode |
