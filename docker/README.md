@@ -1,6 +1,6 @@
 # Modern Data (Analytics) Platform (MDP) on Docker
 
-The environment is completley based on docker containers. 
+The environment is completely based on docker containers. 
 
 In order to simplify the provisioning, a single docker-compose configuration is used. All the necessary software will be provisioned using Docker. 
 
