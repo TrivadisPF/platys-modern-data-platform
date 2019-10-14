@@ -285,13 +285,13 @@ Management | Mongo Express | <http://analyticsplatform:28056>
 Management | ElasticHQ | <http://analyticsplatform:28052>
 Management | Solr UI | <http://analyticsplatform:28081>
 Management | Minio UI | <http://analyticsplaform:28083>
-Management | MQTT UI | <http://analyticsplatform: 28082>
+Management | MQTT UI | <http://analyticsplatform:28082>
 Management | Hive Web UI | <http://analyticsplatform:28028>
 Management | Namenode UI | <http://analyticsplatform:28084>
 Management | Resourcemanager UI | <http://analyticsplatform:8088>
 Management | Nodemanager UI | <http://analyticsplatform:8042>
-Management | Presto UI | <http://analyticsplatform: 28017>
-Management | Dremio UI | <http://analyticsplatform: 28025>
+Management | Presto UI | <http://analyticsplatform:28017>
+Management | Dremio UI | <http://analyticsplatform:28025>
 Management | Portainer | <http://analyticsplatform:28071>
 Management | Filezilla | <http://analyticsplatform:28008>
 
