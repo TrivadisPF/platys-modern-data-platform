@@ -143,6 +143,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 7199 | 7199 | cassandra-1 |
 7474 | 7474 | neo4j |
 7687 | 7687 | neo4j |
+8088 | 8088 | resourcemanager |
 8983 | 8983 | solr |
 9000 | 9000 | minio |
 9042 | 9042 | cassandra-1 |
@@ -237,7 +238,6 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28071 | 9000 | portainer |
 28072 | 18080 | spark-history |
 28073 | 10000 | spark-thrift-server |
-28074 | 8088 | resourcemanager |
 28075 | 8042 | nodemanager |
 28076 | 8080 | spark-master |
 28077 | 8081 | spark-worker-1 |
