@@ -41,3 +41,8 @@ You can check the log of the script by connecting to the lightsail instance cons
 ```
 tail -f /var/log/cloud-init-output.log --lines 1000
 ```
+
+## Browser Bookmarks für Chrome
+
+In the folder `browser-bookmarks` you can find a file which can be imported into Google Chrome to get bookmarks for all the applications which are part of the stack. In order for them to work you have to add the alias `analyticsplatform` to the `/etc/hosts` file.
+
