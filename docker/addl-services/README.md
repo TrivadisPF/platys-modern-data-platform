@@ -215,7 +215,7 @@ Or add it as a service to a docker-compose configuration
     container_name: mqtt-ui
     restart: always
     ports:
-      - "20080:80"
+      - '28082:80'
 ```
 
 ## Kafka MQTT Proxy
