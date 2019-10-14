@@ -141,11 +141,9 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 6066 | 6066 | spark-master |
 7077 | 7077 | spark-master |
 7199 | 7199 | cassandra-1 |
-7474 | 7474 | neo4j |
 7687 | 7687 | neo4j |
 8088 | 8088 | resourcemanager |
-8983 | 8983 | solr |
-9000 | 9000 | minio |
+8042 | 8042 | nodemanager |
 9042 | 9042 | cassandra-1 |
 9092 | 9092 | broker-1     |
 9093 | 9093 | broker-2     |
@@ -155,10 +153,6 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 9200 | 9200 | elasticsearch-1 |
 9300 | 9300 | elasticsearch-1 |
 9851 | 9851 | tile38 |
-50070 | 50070 | namenode |
-50075 | 50075 | datanode-1 |
-50076 | 50075 | datanode-2 |
-50077 | 50075 | datanode-3 |
 
 ### External Ports
 
@@ -211,7 +205,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28044 | 9000 | kafka-manager     |
 28045 | 9020 | kafdrop     |
 28046 | 9021 | control-center |
-28057 | 8010 | zoonavigator-web     |
+28047 | 8010 | zoonavigator-web     |
 28048 | 9010 | zoonavigator-api     |
 28049 | 80 | mqtt-ui |
 28050 | 31010 | dremio | 
@@ -238,11 +232,18 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28071 | 9000 | portainer |
 28072 | 18080 | spark-history |
 28073 | 10000 | spark-thrift-server |
-28075 | 8042 | nodemanager |
 28076 | 8080 | spark-master |
 28077 | 8081 | spark-worker-1 |
 28078 | 8081 | spark-worker-2 |
 28079 | 8081 | spark-worker-3 |
+28080 | 7474 | neo4j |
+28081 | 8983 | solr |
+28082 | 80 | mqtt-ui |
+28083 | 9000 | minio |
+28084 | 9870 | namenode |
+28085 | 9864 | datanode-1 |
+28086 | 9864 | datanode-2 |
+28087 | 9864 | datanode-3 |
 
 
 ## Services accessible on Analytics Platform
@@ -252,45 +253,47 @@ Please make sure that you add an entry to your `/etc/hosts` file with the alias 
 
 Type | Service | Url
 ------|------- | -------------
-Development | StreamSets Data Collector | <http://analyticsplatform:18630>
-Development | Apache NiFi | <http://analyticsplatform:38080/nifi>
-Development | Zeppelin  | <http://analyticsplatform:38081>
-Development | Jupyter  | <http://analyticsplatform:38888>
-Development | Datastax Studio  | <http://analyticsplatform:39091>
-Development | Dejavu (Elasticsearch) | <http://analyticsplatform:1358>
-Development | Kibana | <http://analyticsplatform:5601>
-Development | Redis Commander | <http://analyticsplaform:38083>
-Development | Neo4j | <http://analyticsplatform:7474>
-Development | tsujun (KSQL UI) |  <http://analyticsplatform:28083>
-Development | cassandra-web |  <http://analyticsplatform:33000>
-Runtime | Rest Proxy API  | <http://analyticsplatform:8086>
-Runtime | Oracle REST Database Service | <http://analyticsplatform:8888/ords>
-Governance | Schema Registry Rest API  | <http://analyticsplatform:8089>
-Governance | Schema Registry UI  | <http://analyticsplatform:28002>
-Governance | Atlas | <http://analyticsplatform:21000>
-Management | Kafka Connect UI | <http://analyticsplatform:28001>
-Management | Kafka Manager  | <http://analyticsplatform:29000>
-Management | Kafdrop  | <http://analyticsplatform:29020>
-Management | Kadmin  | <http://analyticsplatform:28080>
-Management | KafkaHQ  | <http://analyticsplatform:28082>
-Management | Zoonavigator  | <http://analyticsplatform:28010>
-Management | Spark UI  | <http://analyticsplatform:8080>
-Management | Hue  | <http://analyticsplatform:28888>
-Management | ActiveMQ  | <http://analyticsplatform:8161>
-Management | Adminer (RDBMS)  | <http://analyticsplatform:28081>
-Management | Axon Server Dashboard | <http://anayticsplatform:8024>
-Management | Admin Mongo | <http://analyticsplatform:31234>
-Management | Mongo Express | <http://analyticsplatform:38082>
-Management | ElasticHQ | <http://analyticsplatform:35000>
-Management | Solr UI | <http://analyticsplatform:8983>
-Management | Minio UI | <http://analyticsplaform:9000>
-Management | Portainer | <http://analyticsplatform:19000>
-Management | MQTT UI | <http://analyticsplatform:29080>
-Management | Hive Web UI | <http://analyticsplatform:10002>
-Management | Namenode UI | <http://analyticsplatform:10002>
+Development | StreamSets Data Collector | <http://analyticsplatform:28029>
+Development | Apache NiFi | <http://analyticsplatform:28054/nifi>
+Development | Zeppelin  | <http://analyticsplatform:28055>
+Development | Jupyter  | <http://analyticsplatform:28060>
+Development | Datastax Studio  | <http://analyticsplatform:28063>
+Development | Dejavu (Elasticsearch) | <http://analyticsplatform:28000>
+Development | Kibana | <http://analyticsplatform:28006>
+Development | Redis Commander | <http://analyticsplaform:28057>
+Development | Neo4j | <http://analyticsplatform:28080>
+Development | Cassandra Web |  <http://analyticsplatform:28053>
+Runtime | Rest Proxy API  | <http://analyticsplatform:28022>
+Runtime | Oracle REST Database Service | <http://analyticsplatform:28022/ords>
+Runtime | Livy | <http://analyticsplatform:28021>
+Governance | Schema Registry Rest API  | <http://analyticsplatform:28030>
+Governance | Schema Registry UI  | <http://analyticsplatform:28039>
+Governance | Atlas | <http://analyticsplatform:28034>
+Management | Kafka Connect UI | <http://analyticsplatform:28038>
+Management | Kafka Manager  | <http://analyticsplatform:28044>
+Management | Kafdrop  | <http://analyticsplatform:28045>
+Management | Kadmin  | <http://analyticsplatform:28040>
+Management | KafkaHQ  | <http://analyticsplatform:28042>
+Management | Zoonavigator  | <http://analyticsplatform:28047>
+Management | Spark UI  | <http://analyticsplatform:28076>
+Management | Hue  | <http://analyticsplatform:28043>
+Management | ActiveMQ  | <http://analyticsplatform:28019>
+Management | Adminer (RDBMS)  | <http://analyticsplatform:28041>
+Management | Axon Server Dashboard | <http://anayticsplatform:28018>
+Management | Admin Mongo | <http://analyticsplatform:28051>
+Management | Mongo Express | <http://analyticsplatform:28056>
+Management | ElasticHQ | <http://analyticsplatform:28052>
+Management | Solr UI | <http://analyticsplatform:28081>
+Management | Minio UI | <http://analyticsplaform:28083>
+Management | MQTT UI | <http://analyticsplatform: 28082>
+Management | Hive Web UI | <http://analyticsplatform:28028>
+Management | Namenode UI | <http://analyticsplatform:28084>
 Management | Resourcemanager UI | <http://analyticsplatform:8088>
-Management | Namemanger UI | <http://analyticsplatform:8042>
-Management | Presto UI | <http://analyticsplatform:8089>
+Management | Nodemanager UI | <http://analyticsplatform:8042>
+Management | Presto UI | <http://analyticsplatform: 28017>
+Management | Dremio UI | <http://analyticsplatform: 28025>
+Management | Portainer | <http://analyticsplatform:28071>
+Management | Filezilla | <http://analyticsplatform:28008>
 
 ## Troubleshooting
 
