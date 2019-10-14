@@ -123,116 +123,127 @@ db2033adfd2a        trivadisbds/kafka-manager                        "./km.sh"  
 
 ## Reserved Port to Service Mapping
 
-This table reserves the external ports for the various services. Not all services have to be used in the platform at a given time. But by reserving, we can asure that there are no conflicts if a service is added at a later time.
+This table reserves the external ports for the various services. Not all services have to be used in the platform at a given time. But by reserving, we can assure that there are no conflicts if a service is added at a later time.
+
+### Internal Port
 
 Container Port(s) | Internal Port(s)           | Service (alternatives) |
 --------------------|------------------|-----------------------|
-1358 | 1358 | dejavu |
+21 | 21 | ftp |
+1433 | 1433 | sqlserver |
 1521 | 1521 | oracle-db |
-1882 | 1882 | kafka-mqtt-1 |
 1883 | 1883 | mosquitto-1 |
 1884 | 1883 | mosquitto-2 |
-1885 | 1883 | activemq (mqtt)    |
-2181 | 2181 | zookeeper-1     |
-2182 | 2181 | zookeeper-2     |
-2183 | 2181 | zookeeper-3     |
 3306 | 3306 | mysql |
-5000 | 5000 | amundsenfrontend
-5001 | 5000 | amundsensearch
-5002 | 5000 | amundsenmetadata
-5432 | 5432 | postgresql, hive-metastore-postgresql |
 5500 | 5500 | oracle-db |
-5601 | 5601 | kibana |
-5672 | 5672 | activemq (amqp)    |
-5800 | 5800 | filezilla (ftp browser based UI)  |
-5900 | 5900 | filezilla (ftp browser based UI)  |
+5432 | 5432 | postgresql, hive-metastore-postgresql |
 6379 | 6379 | redis |
+6066 | 6066 | spark-master |
 7077 | 7077 | spark-master |
 7199 | 7199 | cassandra-1 |
 7474 | 7474 | neo4j |
 7687 | 7687 | neo4j |
-8024 | 8024 | axon-server |
-8042 | 8042 | nodemanager |
-8047 | 8047 | drill |
-8086 | 8086 | kafka-rest-1 |
-8083 | 8083 | connect-1 |
-8084 | 8084 | connect-2 |
-8085 | 8085 | connect-3 |
-8086 | 8086 | rest-proxy-1 |
-8080 | 8080 | spark-master |
-8081 | 8081 | spark-worker-1 |
-8082 | 8081 | spark-worker-2 |
-8083 | 8081 | spark-worker-3 |
-8088 | 8088 | resourcemanager |
-8089 | 8080 | presto |
-8124 | 8124 | axon-server |
-8161 | 8161 | activemq (ui)    |
-8188 | 8188 | historyserver |
-8888 | 8888 | oracle-rest-1 |
 8983 | 8983 | solr |
-8998 | 8998 | livy |
 9000 | 9000 | minio |
-9001 | 9001 | mosquitto-1 |
-9003 | 9001 | mosquitto-2 |
 9042 | 9042 | cassandra-1 |
-9047 | 9047 | dremio |
-9083 | 9083 | hive-metastore |
 9092 | 9092 | broker-1     |
 9093 | 9093 | broker-2     |
 9094 | 9094 | broker-3     |
 9160 | 9160 | cassandra-1 |
+27017 | 27017 | mongodb |
 9200 | 9200 | elasticsearch-1 |
 9300 | 9300 | elasticsearch-1 |
 9851 | 9851 | tile38 |
-10000 | 10000 | hive-server |
-10002 | 10002 | hive-server |
-18630 | 18630 | streamsets     |
-18081 | 8081 | schema-registry     |
-18088 | 8088 | ksql-server-1 |
-18089 | 8089 | ksql-server-2 |
-19000 | 9000 | portainer |
-21000 | 21000 | atlas |
-23000 | 3000 | burrow-ui |
-23001 | 80 | burrow-dashboard |
-23002 | 8000 | burrow     |
-27017 | 27017 | mongodb |
-28001 | 8000 | kafka-connect-ui     |
-28002 | 8000 | schema-registry-ui     |
-28080 | 8080 | kadmin     |
-28081 | 8080 | adminer     |
-28082 | 8080 | kafkahq     |
-28888 | 8888 | hue |
-29000 | 9000 | kafka-manager     |
-29020 | 9020 | kafdrop     |
-29021 | 9021 | control-center |
-28010 | 8010 | zoonavigator-web     |
-29010 | 9010 | zoonavigator-api     |
-29080 | 80 | mqtt-ui |
-31010 | 31010 | dremio | 
-31234 | 1234 | admin-mongo |
-35000 | 5000 | elastichq |
-33000 | 3000 | cassandra-web |
-38080 | 8080 | nifi     |
-38081 | 8080 | zeppelin, zeppelin-spark     |
-38082 | 8081 | mongo-express |
-38083 | 8081 | redis-commander |
-38084 | 8080 | webspoon (penthao) | 
-38085 | 8080 | hawtio |
-38888 | 8888 | jupyter |
-39000 | 9000 | cerebro |
-39042 | 9042 | cassandra-atlas |
-39091 | 9091 | dse-studio |
-39160 | 9160 | cassandra-atlas |
-39200 | 9200 | elasticsearch-atlas |
-45678 | 45678 | dremio |
-48888 | 8888 | opscenter |
 50070 | 50070 | namenode |
 50075 | 50075 | datanode-1 |
 50076 | 50075 | datanode-2 |
 50077 | 50075 | datanode-3 |
-61613 | 61613 | activemq (stomp)    |
-61614 | 61614 | activemq (ws)    |
-61616 | 61616 | activemq (jms)    |
+
+### External Ports
+
+Container Port(s) | Internal Port(s)           | Service (alternatives) |
+--------------------|------------------|-----------------------|
+28000 | 1358 | dejavu |
+28001 | 1882 | kafka-mqtt-1 |
+28002 | 1882 | kafka-mqtt-2 |
+28003 | 5000 | amundsenfrontend
+28004 | 5000 | amundsensearch
+28005 | 5000 | amundsenmetadata
+28006 | 5601 | kibana |
+28007 | 5672 | activemq (amqp)    |
+28008 | 5800 | filezilla (ftp browser based UI)  |
+28009 | 5900 | filezilla (ftp browser based UI)  |
+28010 | 8024 | axon-server |
+28011 | 8047 | drill |
+28012 | 8086 | kafka-rest-1 |
+28013 | 8083 | connect-1 |
+28014 | 8084 | connect-2 |
+28015 | 8085 | connect-3 |
+28016 | 8086 | rest-proxy-1 |
+28017 | 8080 | presto |
+28018 | 8124 | axon-server |
+28019 | 8161 | activemq (ui)    |
+28020 | 8188 | historyserver |
+28021 | 8998 | livy |
+28022 | 8888 | oracle-rest-1 |
+28023 | 9001 | mosquitto-1 |
+28024 | 9001 | mosquitto-2 |
+28025 | 9047 | dremio |
+28026 | 9083 | hive-metastore |
+28027 | 10000 | hive-server |
+28028 | 10002 | hive-server |
+28029 | 18630 | streamsets     |
+28030 | 8081 | schema-registry     |
+28031 | 8088 | ksql-server-1 |
+28032 | 8089 | ksql-server-2 |
+28033 | 9000 | portainer |
+28034 | 21000 | atlas |
+28035 | 3000 | burrow-ui |
+28036 | 80 | burrow-dashboard |
+28037 | 8000 | burrow     |
+28038 | 8000 | kafka-connect-ui     |
+28039 | 8000 | schema-registry-ui     |
+28040 | 8080 | kadmin     |
+28041 | 8080 | adminer     |
+28042 | 8080 | kafkahq     |
+28043 | 8888 | hue |
+28044 | 9000 | kafka-manager     |
+28045 | 9020 | kafdrop     |
+28046 | 9021 | control-center |
+28057 | 8010 | zoonavigator-web     |
+28048 | 9010 | zoonavigator-api     |
+28049 | 80 | mqtt-ui |
+28050 | 31010 | dremio | 
+28051 | 1234 | admin-mongo |
+28052 | 5000 | elastichq |
+28053 | 3000 | cassandra-web |
+28054 | 8080 | nifi     |
+28055 | 8080 | zeppelin, zeppelin-spark     |
+28056 | 8081 | mongo-express |
+28057 | 8081 | redis-commander |
+28058 | 8080 | webspoon (penthao) | 
+28059 | 8080 | hawtio |
+28060 | 8888 | jupyter |
+28061 | 9000 | cerebro |
+28062 | 9042 | cassandra-atlas |
+28063 | 9091 | dse-studio |
+28064 | 9160 | cassandra-atlas |
+28065 | 9200 | elasticsearch-atlas |
+28066 | 45678 | dremio |
+28067 | 8888 | opscenter |
+28068 | 61613 | activemq (stomp)    |
+28069 | 61614 | activemq (ws)    |
+28070 | 61616 | activemq (jms)    |
+28071 | 9000 | portainer |
+28072 | 18080 | spark-history |
+28073 | 10000 | spark-thrift-server |
+28074 | 8088 | resourcemanager |
+28075 | 8042 | nodemanager |
+28076 | 8080 | spark-master |
+28077 | 8081 | spark-worker-1 |
+28078 | 8081 | spark-worker-2 |
+28079 | 8081 | spark-worker-3 |
+
 
 ## Services accessible on Analytics Platform
 The following service are available as part of the Analytics platform. 

@@ -88,7 +88,7 @@ services:
       - zookeeper-1
       - broker-1
     ports:
-      - "18081:8081"
+      - "28030:8081"
     environment:
       SCHEMA_REGISTRY_HOST_NAME: schema-registry
       SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL: 'zookeeper-1:2181'
@@ -104,7 +104,7 @@ services:
       - broker-1
       - schema-registry
     ports:
-      - "8083:8083"
+      - "28013:8083"
     environment:
       CONNECT_BOOTSTRAP_SERVERS: 'broker-1:9092'
       CONNECT_REST_ADVERTISED_HOST_NAME: connect-1
@@ -141,7 +141,7 @@ services:
       - broker-1
       - schema-registry
     ports:
-      - "8084:8084"
+      - "28014:8084"
     environment:
       CONNECT_BOOTSTRAP_SERVERS: 'broker-1:9092'
       CONNECT_REST_ADVERTISED_HOST_NAME: connect-2
@@ -174,7 +174,7 @@ services:
     image: confluentinc/cp-ksql-server:5.3.0
     container_name: ksql-server-1
     ports:
-      - '18088:8088'
+      - '28031:8088'
     depends_on:
       - broker-1
       - schema-registry
@@ -200,7 +200,7 @@ services:
     image: confluentinc/cp-ksql-server:5.3.0
     container_name: ksql-server-2
     ports:
-      - '18089:8088'
+      - '28032:8088'
     depends_on:
       - broker-1
       - schema-registry
@@ -229,7 +229,7 @@ services:
       - broker-1
       - schema-registry
     ports:
-      - "8086:8086"
+      - "28012:8086"
     environment:
       KAFKA_REST_ZOOKEEPER_CONNECT: '${DOCKER_HOST_IP}:2181'
       KAFKA_REST_LISTENERS: 'http://0.0.0.0:8086'
@@ -241,7 +241,7 @@ services:
     image: confluentinc/cp-kafka-mqtt:5.3.0
     hostname: mqtt-proxy
     ports:
-      - "1882:1882"
+      - "28001:1882"
     environment:
       KAFKA_MQTT_TOPIC_REGEX_LIST: 'truck_position:.*position,truck_engine:.*engine'
       KAFKA_MQTT_LISTENERS: 0.0.0.0:1882
@@ -255,21 +255,22 @@ services:
       - broker-1
       - schema-registry
     ports:
-      - "28002:8000"
+      - "28039:8000"
     environment:
-      SCHEMAREGISTRY_URL: 'http://${PUBLIC_IP}:18081'
+      SCHEMAREGISTRY_URL: 'http://${PUBLIC_IP}:28030'
     restart: always
 
   kafka-connect-ui:
     image: landoop/kafka-connect-ui:0.9.7
     container_name: kafka-connect-ui
     ports:
-      - "28001:8000"
+      - "28038:8000"
     environment:
-      CONNECT_URL: "http://${PUBLIC_IP}:8083/,http://${PUBLIC_IP}:8084/"
+      CONNECT_URL: "http://${PUBLIC_IP}:28013/,http://${PUBLIC_IP}:28014/"
       PROXY: "true"
     depends_on:
       - connect-1
+      - connect-2
     restart: always
 
   kafka-manager:
@@ -282,17 +283,17 @@ services:
       - broker-2
       - broker-3
     ports:
-      - "29000:9000"
+      - "28044:9000"
     environment:
       ZK_HOSTS: 'zookeeper-1:2181'
-      APPLICATION_SECRET: 'letmein'
+      APPLICATION_SECRET: 'abc123!'
     restart: always
     
   kafdrop:
     image: thomsch98/kafdrop:latest
     container_name: kafdrop
     ports:
-      - "29020:9020" 
+      - "28045:9020" 
     environment:
       ZK_HOSTS: zookeeper-1:2181
       LISTEN: 9020
@@ -302,7 +303,7 @@ services:
     image: hasnat/kadmin
     container_name: kadmin
     ports:
-      - "28080:8080"
+      - "28040:8080"
     environment:
       ZOOKEEPER_HOST: zookeeper-1:2181
       KAFKA_HOST: broker-1:9092
@@ -318,7 +319,7 @@ services:
     image: tchiotludo/kafkahq
     container_name: kafkahq
     ports:
-      - 28082:8080
+      - 28042:8080
     environment:
       KAFKAHQ_CONFIGURATION: |
         kafkahq:
@@ -341,7 +342,7 @@ services:
       - ./conf/burrow:/etc/burrow/
       - ./tmp:/var/tmp/burrow
     ports:
-      - 23002:8000
+      - 28037:8000
     depends_on:
       - zookeeper-1
       - broker-1
@@ -363,9 +364,9 @@ services:
     image: joway/burrow-dashboard
     container_name: burrow-dashboard
     ports:
-      - 23001:80
+      - 28036:80
     environment:
-      - BURROW_BACKEND="http://${PUBLIC_IP}:28000"
+      - BURROW_BACKEND="http://${PUBLIC_IP}:28037"
     depends_on:
       - zookeeper-1
       - broker-1
@@ -419,12 +420,17 @@ services:
     container_name: resourcemanager
     hostname: resourcemanager
     ports:
-      - "8088:8088"
+      - "28074:8088"
     depends_on:
       - namenode
       - datanode-1
     env_file:
       - ./conf/hadoop.env
+    environment:
+      - YARN_CONF_yarn_resourcemanager_webapp_address=${PUBLIC_IP}:28074
+      - YARN_CONF_yarn_nodemanager_webapp_address=${PUBLIC_IP}:28075
+      - YARN_CONF_yarn_timeline___service_webapp_address=${PUBLIC_IP}:28020
+      - YARN_CONF_yarn_log_server_url=${PUBLIC_IP}:28020
     restart: always
   
   nodemanager:
@@ -432,13 +438,18 @@ services:
     container_name: nodemanager
     hostname: nodemanager
     ports:
-      - "8042:8042"
+      - "28074:8042"
     depends_on:
       - namenode
       - datanode-1
       - datanode-2
     env_file:
       - ./conf/hadoop.env
+    environment:
+      - YARN_CONF_yarn_resourcemanager_webapp_address=${PUBLIC_IP}:28074
+      - YARN_CONF_yarn_nodemanager_webapp_address=${PUBLIC_IP}:28075
+      - YARN_CONF_yarn_timeline___service_webapp_address=${PUBLIC_IP}:28020
+      - YARN_CONF_yarn_log_server_url=${PUBLIC_IP}:28020
     restart: always
 
   historyserver:
@@ -446,7 +457,7 @@ services:
     container_name: historyserver
     hostname: historyserver
     ports:
-      - "8188:8188"
+      - "28020:8188"
     depends_on:
       - namenode
       - datanode-1
@@ -474,7 +485,7 @@ services:
     ports:
       - 6066:6066
       - 7077:7077
-      - 8080:8080
+      - 28076:8080
     env_file:
       - ./conf/hadoop.env  
     environment:
@@ -492,14 +503,14 @@ services:
     depends_on:
       - spark-master
     ports:
-      - "8081:8081"
+      - "28077:28077"
     env_file:
       - ./conf/hadoop.env  
     environment:
       SPARK_MASTER: "spark://spark-master:7077"
 #      SPARK_WORKER_CORES: 2
 #      SPARK_WORKER_MEMORY: 1g
-      SPARK_WORKER_WEBUI_PORT: "8081"
+      SPARK_WORKER_WEBUI_PORT: "28077"
       SPARK_PUBLIC_DNS: ${PUBLIC_IP}
     volumes:
       - ./conf/spark-defaults.conf:/spark/conf/spark-defaults.conf
@@ -512,14 +523,34 @@ services:
     depends_on:
       - spark-master
     ports:
-      - "8082:8082"
+      - "28078:28078"
     env_file:
       - ./conf/hadoop.env  
     environment:
       SPARK_MASTER: "spark://spark-master:7077"
 #      SPARK_WORKER_CORES: 2
 #      SPARK_WORKER_MEMORY: 1g
-      SPARK_WORKER_WEBUI_PORT: "8082"
+      SPARK_WORKER_WEBUI_PORT: "28078"
+      SPARK_PUBLIC_DNS: ${PUBLIC_IP}
+    volumes:
+      - ./conf/spark-defaults.conf:/spark/conf/spark-defaults.conf
+    restart: always
+
+  spark-worker-3:
+    image: trivadis/apache-spark-worker:2.4.3-hadoop3.1
+    container_name: spark-worker-3
+    hostname: spark-worker-3
+    depends_on:
+      - spark-master
+    ports:
+      - "28079:28079"
+    env_file:
+      - ./conf/hadoop.env  
+    environment:
+      SPARK_MASTER: "spark://spark-master:7077"
+#      SPARK_WORKER_CORES: 2
+#      SPARK_WORKER_MEMORY: 1g
+      SPARK_WORKER_WEBUI_PORT: "28079"
       SPARK_PUBLIC_DNS: ${PUBLIC_IP}
     volumes:
       - ./conf/spark-defaults.conf:/spark/conf/spark-defaults.conf
@@ -533,7 +564,7 @@ services:
     expose:
       - 18080
     ports:
-      - 18080:18080
+      - 28072:18080
     volumes:
       - ./conf/spark-defaults.conf:/spark/conf/spark-defaults.conf
     restart: always
@@ -542,7 +573,7 @@ services:
     image: trivadis/apache-spark-master:2.4.3-hadoop3.1 
     container_name: spark-thrift-server
     ports:
-      - "10001:10000"
+      - "28073:10000"
     env_file:
       - ./conf/hadoop.env  
     volumes:
@@ -559,7 +590,7 @@ services:
       - MASTER=spark://spark-master:7077
       - DEPLOY_MODE=cluster
     ports:
-      - "8998:8998"
+      - "28021:8998"
     restart: always
 
   # Hive ===============================================
@@ -569,8 +600,8 @@ services:
     container_name: hive-server
     hostname: hive-server
     ports:
-      - "10000:10000"
-      - "10002:10002"
+      - "28027:10000"
+      - "28028:10002"
     env_file:
       - ./conf/hadoop.env
     environment:
@@ -585,7 +616,7 @@ services:
     container_name: hive-metastore
     hostname: hive-metastore
     ports:
-      - "9083:9083"
+      - "28026:9083"
     env_file:
       - ./conf/hadoop.env
     command: /opt/hive/bin/hive --service metastore
@@ -606,7 +637,7 @@ services:
     container_name: atlas
     hostname: atlas    
     ports:
-      - 21000:21000
+      - 28034:21000
     environment:
       - ATLAS_PROVISION_EXAMPLES=true
     volumes:
@@ -642,8 +673,8 @@ services:
     container_name: cassandra-atlas
     hostname: cassandra-atlas
     ports:
-      - "39042:9042"
-      - "39160:9160"
+      - "28062:9042"
+      - "28064:9160"
     environment:
       - CASSANDRA_START_RPC=true
     restart: always
@@ -661,7 +692,7 @@ services:
       - "xpack.security.enabled=false"
       - "discovery.zen.minimum_master_nodes=1"
     ports:
-      - "39200:9200"
+      - "28065:9200"
     restart: always
 
   amundsenfrontend:
@@ -671,7 +702,7 @@ services:
       - amundsenmetadata
       - amundsensearch
     ports:
-      - 5000:5000
+      - 28003:5000
     environment:
       - METADATASERVICE_BASE=http://amundsenmetadata:5000
       - SEARCHSERVICE_BASE=http://amundsensearch:5000
@@ -681,7 +712,7 @@ services:
     image: amundsendev/amundsen-search:1.1.1
     container_name: amundsensearch
     ports:
-      - 5001:5000
+      - 28004:5000
     depends_on:
       - elasticsearch
     environment:
@@ -697,7 +728,7 @@ services:
     depends_on:
       - atlas
     ports:
-      - 5002:5000
+      - 28005:5000
     environment:
       - CREDENTIALS_PROXY_USER=admin
       - CREDENTIALS_PROXY_PASSWORD=abc123!
@@ -714,7 +745,7 @@ services:
     hostname: hue
     dns: 8.8.8.8
     ports:
-      - "28888:8888"
+      - "28043:8888"
     volumes:
       - ./conf/hue.ini:/usr/share/hue/desktop/conf/hue.ini
     depends_on:
@@ -736,9 +767,9 @@ services:
     container_name: zeppelin
     hostname: zeppelin
     ports:
-      - "38081:8080"    
-      - "4040:4040"
-      - "42331:42331"    
+      - "28055:8080"    
+#      - "4040:4040"
+#      - "42331:42331"    
     env_file:
       - ./conf/hadoop.env
     environment:
@@ -765,7 +796,7 @@ services:
     container_name: jupyter
     hostname: jupyter
     ports: 
-      - "38888:8888"
+      - "28060:8888"
     environment:
       JUPYTER_ENABLE_LAB: "true"
       JUPYTER_TOKEN: "abc123!"
@@ -773,6 +804,7 @@ services:
       TINI_SUBREAPER: "true"
     restart: always
 
+    
   # NoSQL ===============================================
 
   solr:
@@ -800,7 +832,7 @@ services:
     image: mongo-express  
     container_name: mongo-express
     ports: 
-      - 38082:8081
+      - 28056:8081
     environment:
       - ME_CONFIG_MONGODB_SERVER=mongodb   
     restart: always
@@ -825,7 +857,7 @@ services:
     depends_on:
       - elasticsearch
     ports:
-      - "5601:5601"
+      - "28006:5601"
     environment:
       xpack.security.enabled: "false"
       XPACK_SECURITY_ENABLED: "false"
@@ -858,7 +890,7 @@ services:
     environment:
       - REDIS_HOSTS=local:redis:6379
     ports:
-      - "38083:8081"
+      - "28057:8081"
     restart: always
     
   tile38:
@@ -892,7 +924,7 @@ services:
       - "1433:1433"
     environment:
       ACCEPT_EULA: "Y"
-      SA_PASSWORD: "sqlserveradmin"
+      SA_PASSWORD: "SqlServerAdmin123!"
       MSSQL_PID: "Express"     
     restart: always
       
@@ -909,7 +941,7 @@ services:
     image: adminer
     container_name: adminer
     ports:
-      - 28081:8080
+      - 28041:8080
     restart: always
       
 
@@ -920,8 +952,8 @@ services:
     container_name: axon-server  
     hostname: axon-server
     ports:
-      - 8024:8024
-      - 8124:8124
+      - 28010:8024
+      - 28018:8124
     environment:
       - AXONSERVER_HOSTNAME=axon-server
       - AXONSERVER_EVENTSTORE=/eventstore
@@ -938,7 +970,7 @@ services:
     container_name: streamsets
     hostname: streamsets
     ports:
-      - "18630:18630"
+      - "28029:18630"
     restart: always
 
   nifi:
@@ -946,7 +978,7 @@ services:
     container_name: nifi
     hostname: nifi
     ports:
-      - "38080:8080"
+      - "28054:8080"
     restart: always
 
   activemq:
@@ -956,19 +988,18 @@ services:
       # mqtt
       - "1883:1883"
       # amqp
-      - "5672:5672"
+      - "28007:5672"
       # ui
-      - "8161:8161"
+      - "28019:8161"
       # stomp
-      - "61613:61613"
+      - "28068:61613"
       # ws
-      - "61614:61614"
+      - "28069:61614"
       # jms
-      - "61616:61616"
+      - "28070:61616"
     volumes:
       - ./container-volume/activemq/data:/opt/activemq/data
     restart: always
-
   
   ftp:
     image: stilliard/pure-ftpd
@@ -992,8 +1023,8 @@ services:
     volumes: 
       - ./data-transfer:/data-transfer
     ports:
-      - "5800:5800"
-      - "5900:5900"
+      - "28008:5800"
+      - "28009:5900"
 #    volumes:
 #      - "/docker/appdata/filezilla:/config:rw"
 #      - "/files:/storage:rw"
@@ -1043,6 +1074,6 @@ services:
 #      - VIRTUAL_HOST=monitor.bioatlas.se
 #      - VIRTUAL_PORT=9000
     ports:
-      - 19000:9000   
+      - 28071:9000   
     restart: always
         
