@@ -631,6 +631,7 @@ services:
       - ./conf/hue.ini:/usr/share/hue/desktop/conf/hue.ini
     depends_on:
       - hue-db
+      - solr
     restart: always
 
   hue-db:
@@ -815,8 +816,39 @@ services:
         s3cmd mb s3://spark-logs
         sleep infinity
         
+#  FTP ===============================================
         
-  #  Container UI ===============================================
+  ftp:
+    image: stilliard/pure-ftpd
+    container_name: ftp
+    hostname: ftp
+    environment:
+#      - PUBLICHOST="192.168.73.86"
+      - PUBLICHOST=${DOCKER_HOST_IP}
+      - FTP_USER_NAME=orderproc
+      - FTP_USER_PASS=orderproc
+      - FTP_USER_HOME=/home/ftp-data
+      - FTP_MAX_CLIENTS=9
+    ports:
+      - "21:21"
+      - "30000-30009:30000-30009"
+    restart: always
+
+  filezilla:
+    image: jlesage/filezilla
+    container_name: filezilla
+    volumes: 
+      - ./data-transfer:/data-transfer
+    ports:
+      - "28008:5800"
+      - "28009:5900"
+#    volumes:
+#      - "/docker/appdata/filezilla:/config:rw"
+#      - "/files:/storage:rw"
+    environment:
+      - VNC_PASSWORD=admin123 
+
+#  Container UI ===============================================
 
   portainer:
     image: portainer/portainer
