@@ -1,4 +1,4 @@
-version: "3.1"
+version: "3.7"
 
 services:
 
@@ -428,7 +428,7 @@ services:
     restart: always 
 
   hadoop-client:
-    image: trivadis/apache-hadoop-client:2.0.0-hadoop3.1.1-java8
+    image: trivadis/apache-hadoop-client:2.0.0-hadoop3.1.3-java8
     container_name: hadoop-client
     hostname: hadoop-client
     env_file:
@@ -437,26 +437,17 @@ services:
     restart: always
 
   hadoop-setup:
-    image: trivadis/apache-hadoop-client:2.0.0-hadoop3.1.1-java8
+    image: trivadis/apache-hadoop-client:2.0.0-hadoop3.1.3-java8
     hostname: hadoop-setup
     container_name: hadoop-setup
     env_file:
       - ./conf/hadoop.env
     depends_on:
       - namenode
-    command:
-      - bash 
-      - -c 
-      - |
-        echo "Waiting for Hadoop Namenode to start listening on connect..."
-        while [ $$(curl -s -o /dev/null -w %{http_code} http://namenode:9870) -ne 200 ] ; do 
-          echo -e $$(date) " Hadoop Namenode state: " $$(curl -s -o /dev/null -w %{http_code} http://namenode:9870) " (waiting for 200)"
-          sleep 5 
-        done
-        nc -vz namenode 9870
-        echo -e "\n--\n+> Creating Hadoop Folders"
-        hadoop fs -mkdir -p /spark/logs
-        sleep infinity
+    entrypoint: "bash -c 'echo Waiting for Kafka to be ready... && \
+                       dockerize -wait tcp://broker-1:9092 && \
+                       hadoop fs -mkdir -p /spark/logs &&
+                       sleep infinity'"
 
   # Spark ===============================================
 
