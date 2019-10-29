@@ -24,7 +24,7 @@ Replace the IP address by the public IP address of the Docker host.
 
 ### Browser Bookmarks für Chrome
 
-In the folder `browser-bookmarks` you can find a file which can be imported into Google Chrome to get bookmarks for all the applications which are part of the stack. In order for them to work you have to add the alias `analyticsplatform` to the `/etc/hosts` file (as shown before)
+In the folder `browser-bookmarks` you can find a file which can be imported into Google Chrome to get bookmarks for all the Web-based GUIs which are part of the stack. In order for them to work you have to add the alias `analyticsplatform` to the `/etc/hosts` file (as shown before)
 
 ## Services accessible on Analytics Platform
 The following service are available as part of the Analytics platform. 
