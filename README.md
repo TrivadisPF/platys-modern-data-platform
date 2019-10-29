@@ -1,4 +1,4 @@
-# Modern Data Analytics Platform Stack
+# Modern Analytical Data Platform Stack
 
 This project sets up the infrastructure for testing a modern data analytics stack with services such as
 
