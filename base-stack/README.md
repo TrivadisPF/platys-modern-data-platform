@@ -8,71 +8,71 @@ In order to simplify the provisioning, a single docker-compose configuration is 
 
 The following services are provisioned as part of the Modern Data Platform: 
 
-* Zookeeper
- * Apache Zookeeper
- * Zoonavigator (Mgmt UI)
-* Kafka (Confluent Platform)
- * Kafka Broker 1 -3
- * Confluent Schema Registry
- * Kafka Connect 1-2
- * Confluent Rest Proxy 1 
- * KSQL Server 1-2
- * Kafka REST Proxy
- * Confluent MQTT Proxy
- * Schema Registry UI
- * Kafka Connect UI
- * Kafka Manager (Mgmt UI)
- * Kafka Drop (Mgmt UI)
- * Kafka Admin (Mgmt UI)
- * Kafka HQ (Mgmt UI)
- * Burrow (Offset Monitoring)
-* Hadoop / YARN
- * Hadoop Namenode 
- * Hadoop Datanode 1-2
- * YARN Resourcemanager
- * YARN Nodemanager
- * YARN Historyserver
- * Hadoop Client
-* Spark
- * Spark Master
- * Spark Worker 1-3
- * Spark History Server
- * Spark Thrift Server
- * Livy
-* Hive
- * Hive Service
- * Hive Metastore on PostgreSQL
-* Governance
- * Atlas
- * Amundsen
-* Data Engineering Tools
- * Hue
- * Streamsets Data Collector
- * Apache NiFi
-* Data Science Tools 
- * Apache Zeppelin
- * Jupyter (with Spark)
-* NoSQL
- * Solr
- * MongoDB
- * MongoExpress (UI)
- * Elasticsearch
- * Kibana (UI)
- * Redis
- * Redis Commander (UI)
- * Tile38
- * Neo4J
-* RDBMS
- * MySQL
- * SQLServer
- * PostreSQL
- * Adminer (UI) 
-* Event Store
- * Axon Server
-* Integration 
- * Apache ActiveMQ
- * FTP
- * Filezilla (FTP UI)
+ * Zookeeper
+   * Apache Zookeeper
+   * Zoonavigator (Mgmt UI)
+ * Kafka (Confluent Platform)
+   * Kafka Broker 1 -3
+   * Confluent Schema Registry
+   * Kafka Connect 1-2
+   * Confluent Rest Proxy 1 
+   * KSQL Server 1-2
+   * Kafka REST Proxy
+   * Confluent MQTT Proxy
+   * Schema Registry UI
+   * Kafka Connect UI
+   * Kafka Manager (Mgmt UI)
+   * Kafka Drop (Mgmt UI)
+   * Kafka Admin (Mgmt UI)
+   * Kafka HQ (Mgmt UI)
+   * Burrow (Offset Monitoring)
+ * Hadoop / YARN
+   * Hadoop Namenode 
+   * Hadoop Datanode 1-2
+   * YARN Resourcemanager
+   * YARN Nodemanager
+   * YARN Historyserver
+   * Hadoop Client
+ * Spark
+   * Spark Master
+   * Spark Worker 1-3
+   * Spark History Server
+   * Spark Thrift Server
+   * Livy
+ * Hive
+   * Hive Service
+   * Hive Metastore on PostgreSQL
+ * Governance
+   * Atlas
+   * Amundsen
+ * Data Engineering Tools
+   * Hue
+   * Streamsets Data Collector
+   * Apache NiFi
+ * Data Science Tools 
+   * Apache Zeppelin
+   * Jupyter (with Spark)
+ * NoSQL
+   * Solr
+   * MongoDB
+   * MongoExpress (UI)
+   * Elasticsearch
+   * Kibana (UI)
+   * Redis
+   * Redis Commander (UI)
+   * Tile38
+   * Neo4J
+ * RDBMS
+   * MySQL
+   * SQLServer
+   * PostreSQL
+   * Adminer (UI) 
+ * Event Store
+   * Axon Server
+ * Integration 
+   * Apache ActiveMQ
+   * FTP
+   * Filezilla (FTP UI)
 
 For new services to be added, please either create an [GitHub issue](https://github.com/TrivadisPF/modern-data-analytics-stack/issues/new) or create a Pull Request.
 
