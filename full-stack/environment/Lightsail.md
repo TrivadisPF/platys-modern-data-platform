@@ -69,7 +69,15 @@ Click on the instance to navigate to the image details page. On the right you ca
 
 ![Alt Image Text](./images/lightsail-image-details.png "Lightsail Homepage")
 
-Click **Connect using SSH** to open the console and enter the following command to watch the log file of the init script.
+Next we have to configure the Firewall to allow traffic into the Lightsail instance. 
+
+Click on the **Networking** tab/link to navigate to the network settings and under **Firewall** click on **+ Add another**.
+We allow TCP traffic on ports 28000 - 28200 by selecting **Custom**, entering **28000 - 28200** into the **Port range** field and then click **Save**. 
+
+![Alt Image Text](./images/lightsail-image-networking-add-firewall-rule.png "Lightsail Homepage")
+
+Now let's see how the provisioning of the lightsail instance is doing. 
+Navigate to the **Connect** tab and click **Connect using SSH** to open the console and enter the following command to watch the log file of the init script.
 
 ```
 tail -f /var/log/cloud-init-output.log --lines 1000
@@ -84,15 +92,6 @@ Optionally you can also SSH into the Lightsail instance using the **SSH key pair
 ```
 ssh -i LightsailDefaultKey-eu-central-1.pem ubuntu@18.196.124.212 
 ```
-
-So with all services running, there is one last step to do. We have to configure the Firewall to allow traffic into the Lightsail instance. 
-
-![Alt Image Text](./images/lightsail-image-networking.png "Lightsail Homepage")
-
-Click on the **Networking** tab/link to navigate to the network settings and under **Firewall** click on ** **Add another**.
-For simplicity reasons, we allow all TCP traffic by selecting **All TCP** on port range **0 - 65535** and then click **Save**. 
-
-![Alt Image Text](./images/lightsail-image-networking-add-firewall-rule.png "Lightsail Homepage")
 
 Your instance is now ready to use. Complete the post installation steps documented the [here](README.md).
 
