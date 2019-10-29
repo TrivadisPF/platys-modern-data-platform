@@ -52,16 +52,24 @@ The following services are provisioned as part of the Modern Data Platform:
  * Data Science Tools 
    * Apache Zeppelin
    * Jupyter (with Spark)
+ * Data Visualization
+   * Grafana 
  * NoSQL
-   * Solr
-   * MongoDB
-   * MongoExpress (UI)
-   * Elasticsearch
-   * Kibana (UI)
    * Redis
    * Redis Commander (UI)
-   * Tile38
+   * Cassandra
+   * Cassandra Web (UI)
+   * MongoDB
+   * MongoExpress (UI)
+   * Admin Mongo (UI)
+   * Solr
+   * Elasticsearch
+   * Dejavu (Elasticsearch UI)
+   * Cerebro (Elasticsearch UI) 
+   * ElasticHQ (Elasticsearch UI)
+   * Kibana (UI)
    * Neo4J
+   * Tile38
  * RDBMS
    * MySQL
    * SQLServer
@@ -95,15 +103,12 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 6379 | 6379 | redis |
 6066 | 6066 | spark-master |
 7077 | 7077 | spark-master |
-7199 | 7199 | cassandra-1 |
 7687 | 7687 | neo4j |
 8088 | 8088 | resourcemanager |
 8042 | 8042 | nodemanager |
-9042 | 9042 | cassandra-1 |
 9092 | 9092 | broker-1     |
 9093 | 9093 | broker-2     |
 9094 | 9094 | broker-3     |
-9160 | 9160 | cassandra-1 |
 27017 | 27017 | mongodb |
 9200 | 9200 | elasticsearch-1 |
 9300 | 9300 | elasticsearch-1 |
@@ -199,5 +204,15 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28085 | 9864 | datanode-1 |
 28086 | 9864 | datanode-2 |
 28087 | 9864 | datanode-3 |
+28090 | 9042 | cassandra-1 |
+28091 | 7199 | cassandra-1 |
+28092 | 9160 | cassandra-1 |
+28093 | 9042 | cassandra-2 |
+28094 | 7199 | cassandra-2 |
+28095 | 9160 | cassandra-2 |
+28096 | 9042 | cassandra-3 |
+28097 | 7199 | cassandra-3 |
+28098 | 9160 | cassandra-3 |
+28099 | 3000 | grafana |
 
 

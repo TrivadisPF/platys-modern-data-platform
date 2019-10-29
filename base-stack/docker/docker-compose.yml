@@ -845,18 +845,66 @@ services:
       GRANT_SUDO: "true"
       TINI_SUBREAPER: "true"
     restart: always
-  
+
+  # Data Visualization ===============================================
+
+  grafana:
+    image: grafana/grafana
+    hostname: grafana
+    container_name: grafana
+    ports:
+      - "28099:3000"
+    restart: always
+
   # NoSQL ===============================================
 
-  solr:
-    image: solr
-    container_name: solr
+  redis:
+    container_name: redis
+    hostname: redis
+    image: redis
     ports:
-      - "28081:8983"
+      - 6379:6379
+    restart: always
+
+  redis-commander:
+    container_name: redis-commander
+    hostname: redis-commander
+    image: rediscommander/redis-commander:latest
+    environment:
+      - REDIS_HOSTS=local:redis:6379
+    ports:
+      - "28057:8081"
+    restart: always
+
+  cassandra-1:
+    image: cassandra
+    container_name: cassandra-1
+    
+    ports: 
+      - 28090:9042
+      - 7199:7199
+      - 9160:9160      
+    environment:
+      - CASSANDRA_SEEDS=cassandra-1
+      - CASSANDRA_CLUSTER_NAME="Test Cluster"
+      - CASSANDRA_DC=se1
+      - CASSANDRA_ENDPOINT_SNITCH=GossipingPropertyFileSnitch    
+    restart: always
+
+  cassandra-web:
+    image: trivadis/cassandra-web
+    container_name: cassandra-web
+    ports:
+      - "28053:3000"
+    environment:
+      - CASSANDRA_HOSTNAME=cassandra-1
+      - CASSANDRA_PORT=9042
+      - CASSANDRA_USERNAME=cassandra
+      - CASSANDRA_PASSWORD=cassandra
     restart: always
 
   mongodb:
-    image: mongo:4
+    image: mongo
     container_name: mongodb
     ports: 
       - 27017:27017
@@ -876,8 +924,22 @@ services:
       - 28056:8081
     environment:
       - ME_CONFIG_MONGODB_SERVER=mongodb   
+    restart: always     
+
+  admin-mongo:
+    image: adicom/admin-mongo  
+    container_name: admin-mongo
+    ports: 
+      - 28051:1234
     restart: always
-         
+        
+  solr:
+    image: solr
+    container_name: solr
+    ports:
+      - "28081:8983"
+    restart: always
+
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:6.7.0
     hostname: elasticsearch
@@ -890,7 +952,30 @@ services:
       XPACK_SECURITY_ENABLED: "false"
       xpack.monitoring.enabled: "false"
     restart: always
+ 
+  dejavu:
+    image: appbaseio/dejavu
+    hostname: dejuvu
+    container_name: dejavu
+    ports:
+      - "28000:1358"
+    restart: always
 
+  cerebro:
+    image: lmenezes/cerebro
+    hostname: cerebro
+    container_name: cerebro
+    ports:
+      - "28061:9000"    
+    restart: always
+  
+  elastichq:
+    image: elastichq/elasticsearch-hq
+    hostname: elatichq
+    container_name: elastichq
+    ports:
+      - "28052:5000"
+          
   kibana:
     image: docker.elastic.co/kibana/kibana:6.7.0
     hostname: kibana
@@ -916,24 +1001,19 @@ services:
     command: [ "/bin/bash", "-c", "/usr/share/kibana/bin/kibana-plugin remove x-pack; /usr/local/bin/kibana-docker" ]
     restart: always
 
-  redis:
-    container_name: redis
-    hostname: redis
-    image: redis
+  neo4j:
+    image: neo4j:latest
+    hostname: neo4j
+    container_name: neo4j
     ports:
-      - 6379:6379
-    restart: always
-
-  redis-commander:
-    container_name: redis-commander
-    hostname: redis-commander
-    image: rediscommander/redis-commander:latest
+      - "28080:7474"
+      - "7687:7687"
     environment:
-      - REDIS_HOSTS=local:redis:6379
-    ports:
-      - "28057:8081"
+      - NEO4J_dbms_security_procedures_unrestricted=apoc.*
+      - NEO4J_apoc_import_file_enabled=true
+      - NEO4J_dbms_shell_enabled=true
     restart: always
-    
+        
   tile38:
     image: tile38/tile38
     container_name: tile38
@@ -1005,8 +1085,7 @@ services:
      
     
   #  Data Integration ===============================================
-
-
+  
   activemq:
     image: rmohr/activemq
     container_name: activemq
