@@ -78,9 +78,12 @@ The following services are provisioned as part of the Modern Data Platform:
  * Event Store
    * Axon Server
  * Integration 
+   * Mosquitto MQTT Broker
+   * HiveMQ MQTT Broker
+   * MQTT UI
    * Apache ActiveMQ
    * FTP
-   * Filezilla (FTP UI)
+   * Filezilla (FTP UI)  
 
 For new services to be added, please either create an [GitHub issue](https://github.com/TrivadisPF/modern-data-analytics-stack/issues/new) or create a Pull Request.
 
@@ -95,8 +98,6 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 21 | 21 | ftp |
 1433 | 1433 | sqlserver |
 1521 | 1521 | oracle-db |
-1883 | 1883 | mosquitto-1 |
-1884 | 1883 | mosquitto-2 |
 3306 | 3306 | mysql |
 5500 | 5500 | oracle-db |
 5432 | 5432 | postgresql, hive-metastore-postgresql |
@@ -142,7 +143,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28021 | 8998 | livy |
 28022 | 8888 | oracle-rest-1 |
 28023 | 9001 | mosquitto-1 |
-28024 | 9001 | mosquitto-2 |
+28024 | 8080 | mqtt-1 |
 28025 | 9047 | dremio |
 28026 | 9083 | hive-metastore |
 28027 | 10000 | hive-server |
@@ -214,5 +215,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28097 | 7199 | cassandra-3 |
 28098 | 9160 | cassandra-3 |
 28099 | 3000 | grafana |
+28100 | 1883 | mosquitto-1 |
+28101 | 1883 | mqtt-1 |
 
-
+An overview of the URL for the various web-based UIs can be found [here](./environment/README.md).
