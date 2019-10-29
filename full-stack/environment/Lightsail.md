@@ -43,7 +43,7 @@ apt-get install -y kafkacat
 export PUBLIC_IP=$(curl ipinfo.io/ip)
 export DOCKER_HOST_IP=$(ip addr show eth0 | grep "inet\b" | awk '{print $2}' | cut -d/ -f1)
 git clone https://github.com/TrivadisBDS/modern-data-analytics-stack.git
-cd modern-data-analytics-stack/base-stack/docker
+cd modern-data-analytics-stack/full-stack/docker
 mkdir kafka-connect
 
 # Startup Environment
