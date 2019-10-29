@@ -8,118 +8,73 @@ In order to simplify the provisioning, a single docker-compose configuration is 
 
 The following services are provisioned as part of the Modern Data Platform: 
 
+* Zookeeper
  * Apache Zookeeper
+ * Zoonavigator (Mgmt UI)
+* Kafka (Confluent Platform)
  * Kafka Broker 1 -3
  * Confluent Schema Registry
  * Kafka Connect 1-2
  * Confluent Rest Proxy 1 
- * KSQL Server 1
- * Hadoop Namenode 
- * Hadoop Datanode 1
- * Spark Master
- * Spark Worker 1-2
- * Hive Service
- * Hive Metastore on PostgreSQL
- * Apache Zeppelin
- * Streamsets Data Collector
+ * KSQL Server 1-2
+ * Kafka REST Proxy
+ * Confluent MQTT Proxy
  * Schema Registry UI
  * Kafka Connect UI
- * Kafka Manager
- * Apache ActiveMQ
- * Mosquitto 1 -2 (as extra)
- * PostreSQL
- * Mongo DB
- * Elasticsearch
- * Kibana
- * DataStax Enterprise
- * Axon Server
- * Kafka MQTT Proxy 1 (as extra)
- * Oracle RDMBS (as extra)
- * Oracle REST Database Service (as extra)
- * KafkaHQ
- * MqttUI (HiveMQWebClient)
+ * Kafka Manager (Mgmt UI)
+ * Kafka Drop (Mgmt UI)
+ * Kafka Admin (Mgmt UI)
+ * Kafka HQ (Mgmt UI)
+ * Burrow (Offset Monitoring)
+* Hadoop / YARN
+ * Hadoop Namenode 
+ * Hadoop Datanode 1-2
+ * YARN Resourcemanager
+ * YARN Nodemanager
+ * YARN Historyserver
+ * Hadoop Client
+* Spark
+ * Spark Master
+ * Spark Worker 1-3
+ * Spark History Server
+ * Spark Thrift Server
+ * Livy
+* Hive
+ * Hive Service
+ * Hive Metastore on PostgreSQL
+* Governance
  * Atlas
+ * Amundsen
+* Data Engineering Tools
+ * Hue
+ * Streamsets Data Collector
+ * Apache NiFi
+* Data Science Tools 
+ * Apache Zeppelin
+ * Jupyter (with Spark)
+* NoSQL
+ * Solr
+ * MongoDB
+ * MongoExpress (UI)
+ * Elasticsearch
+ * Kibana (UI)
+ * Redis
+ * Redis Commander (UI)
+ * Tile38
+ * Neo4J
+* RDBMS
+ * MySQL
+ * SQLServer
+ * PostreSQL
+ * Adminer (UI) 
+* Event Store
+ * Axon Server
+* Integration 
+ * Apache ActiveMQ
+ * FTP
+ * Filezilla (FTP UI)
 
-In this project, there is an example folder with a few different docker compose configuration for various Confluent Platform configurations. 
-
-## Prepare the Docker Compose configuration
-
-On your Docker Machine, create a folder `analyticsplatform`. 
-
-```
-mkdir analyticsplatform
-cd analyticsplatform
-```
-
-Download the code of the [docker-compose.yml](docker-compose.yml) file from GitHub using wget or curl, i.e. 
-
-```
-wget https://raw.githubusercontent.com/TrivadisBDS/modern-data-analytics-stack/master/docker/docker-compose.yml
-```
-
-Now create a `conf` folder and download the configuration files needed in the `docker-compose.yml` file:
-
-```
-#!/bin/bash
-mkdir conf
-cd conf
-base="https://raw.githubusercontent.com/TrivadisBDS/modern-data-analytics-stack/master/docker/conf/"
-for file in hadoop-hive.env hadoop.env hive-site.xml hue.ini
-do
-    wget "$base$file"
-done
-```
-
-## Prepare the environment
-
-Before we can start the environment, we have to set the environment variable `DOCKER_HOST_IP` to contain the IP-address of the Docker Host and another environment variable `PUBLIC_IP` to the public IP address (not the same if you are using a cloud-based environment). 
-
-You can find the IP-Address of the Docker host using the `ifconfig` or `ip addr` command from the shell window. 
-
-In a terminal window, execute the following two commands, setting the two addresses with the values you got in the previous steps:
-
-```
-export PUBLIC_IP=nnn.nnn.nnn.nnn
-export DOCKER_HOST_IP=nnn.nnn.nnn
-```
-
-If you are not using a cloud based environment, you can set the `PUBLIC_IP` environment variable to the same value as the `DOCKER_HOST_IP`.
-
-You have to repeat that, whever you open a new terminal window and want to perform some commands in the docker-compose environment. 
-
-## Start the environment
-
-Now let's run all the container specified by the Docker Compose configuration. In the terminal window, where you have exported the two environment variables, perform the following command:
-
-```
-docker-compose up -d
-```
-
-The first time it will take a while, as it has to download many Docker images.
-
-After it has started, you can get the log output of all services by executing
- 
-```
-docker-compose logs -f
-```
-
-if you want to see the services running for our environment, perform the following command:
-
-```
-docker ps
-
-CONTAINER ID        IMAGE                                            COMMAND                  CREATED             STATUS                           PORTS                                          NAMES
-d01fb522accd        apache/nifi:1.6.0                                "/bin/sh -c ${NIFI_B…"   6 hours ago         Up 6 hours                       8443/tcp, 10000/tcp, 0.0.0.0:38080->8080/tcp   stream-processing_nifi_1
-9ecf9a3ab42c        trivadisbds/streamsets-kafka-nosql               "/docker-entrypoint.…"   6 hours ago         Up 6 hours                       0.0.0.0:18630->18630/tcp                       stream-processing_streamsets_1
-5e96deeff9cc        confluentinc/ksql-cli:5.0.0-beta1                "perl -e 'while(1){ …"   7 hours ago         Up 7 hours                                                                      stream-processing_ksql-cli_1
-cf4893312d40        confluentinc/cp-kafka-rest:5.0.0-beta1-1         "/etc/confluent/dock…"   7 hours ago         Up 7 hours                       8082/tcp, 0.0.0.0:8084->8084/tcp               stream-processing_rest-proxy_1
-a36ed06fa71f        landoop/schema-registry-ui                       "/run.sh"                7 hours ago         Up 7 hours                       0.0.0.0:8002->8000/tcp                         stream-processing_schema-registry-ui_1
-382358f81cf8        confluentinc/cp-enterprise-kafka:5.0.0-beta1-1   "/etc/confluent/dock…"   7 hours ago         Up 7 hours                       9092/tcp, 0.0.0.0:9093->9093/tcp               stream-processing_broker-2_1
-e813de06f7cd        confluentinc/cp-enterprise-kafka:5.0.0-beta1-1   "/etc/confluent/dock…"   7 hours ago         Up 7 hours                       0.0.0.0:9092->9092/tcp                         stream-processing_broker-1_1
-c2210b42db6e        confluentinc/cp-enterprise-kafka:5.0.0-beta1-1   "/etc/confluent/dock…"   7 hours ago         Up 7 hours                       9092/tcp, 0.0.0.0:9094->9094/tcp               stream-processing_broker-3_1
-db2033adfd2a        trivadisbds/kafka-manager                        "./km.sh"                7 hours ago         Restarting (255) 7 seconds ago                                                  stream-processing_kafka-manager_1
-676e4f734b09        confluentinc/cp-zookeeper:5.0.0-beta1-1          "/etc/confluent/dock…"   7 hours ago         Up 7 hours                       2888/tcp, 0.0.0.0:2181->2181/tcp, 3888/tcp     stream-processing_zookeeper_1
-```
+For new services to be added, please either create an [GitHub issue](https://github.com/TrivadisPF/modern-data-analytics-stack/issues/new) or create a Pull Request.
 
 ## Reserved Port to Service Mapping
 
@@ -246,104 +201,3 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28087 | 9864 | datanode-3 |
 
 
-## Services accessible on Analytics Platform
-The following service are available as part of the Analytics platform. 
-
-Please make sure that you add an entry to your `/etc/hosts` file with the alias `analyticsplatform` and pointing to the IP address of the docker host.
-
-Type | Service | Url
-------|------- | -------------
-Development | StreamSets Data Collector | <http://analyticsplatform:28029>
-Development | Apache NiFi | <http://analyticsplatform:28054/nifi>
-Development | Zeppelin  | <http://analyticsplatform:28055>
-Development | Jupyter  | <http://analyticsplatform:28060>
-Development | Datastax Studio  | <http://analyticsplatform:28063>
-Development | Dejavu (Elasticsearch) | <http://analyticsplatform:28000>
-Development | Kibana | <http://analyticsplatform:28006>
-Development | Redis Commander | <http://analyticsplaform:28057>
-Development | Neo4j | <http://analyticsplatform:28080>
-Development | Cassandra Web |  <http://analyticsplatform:28053>
-Runtime | Rest Proxy API  | <http://analyticsplatform:28022>
-Runtime | Oracle REST Database Service | <http://analyticsplatform:28022/ords>
-Runtime | Livy | <http://analyticsplatform:28021>
-Governance | Schema Registry Rest API  | <http://analyticsplatform:28030>
-Governance | Schema Registry UI  | <http://analyticsplatform:28039>
-Governance | Atlas | <http://analyticsplatform:28034>
-Management | Kafka Connect UI | <http://analyticsplatform:28038>
-Management | Kafka Manager  | <http://analyticsplatform:28044>
-Management | Kafdrop  | <http://analyticsplatform:28045>
-Management | Kadmin  | <http://analyticsplatform:28040>
-Management | KafkaHQ  | <http://analyticsplatform:28042>
-Management | Zoonavigator  | <http://analyticsplatform:28047>
-Management | Spark UI  | <http://analyticsplatform:28076>
-Management | Hue  | <http://analyticsplatform:28043>
-Management | ActiveMQ  | <http://analyticsplatform:28019>
-Management | Adminer (RDBMS)  | <http://analyticsplatform:28041>
-Management | Axon Server Dashboard | <http://anayticsplatform:28018>
-Management | Admin Mongo | <http://analyticsplatform:28051>
-Management | Mongo Express | <http://analyticsplatform:28056>
-Management | ElasticHQ | <http://analyticsplatform:28052>
-Management | Solr UI | <http://analyticsplatform:28081>
-Management | Minio UI | <http://analyticsplaform:28083>
-Management | MQTT UI | <http://analyticsplatform:28082>
-Management | Hive Web UI | <http://analyticsplatform:28028>
-Management | Namenode UI | <http://analyticsplatform:28084>
-Management | Resourcemanager UI | <http://analyticsplatform:8088>
-Management | Nodemanager UI | <http://analyticsplatform:8042>
-Management | Presto UI | <http://analyticsplatform:28017>
-Management | Dremio UI | <http://analyticsplatform:28025>
-Management | Portainer | <http://analyticsplatform:28071>
-Management | Filezilla | <http://analyticsplatform:28008>
-
-## Troubleshooting
-
-Want to see the configurations for Hive
-
-`docker-compose logs -f hive-server`
-
-```
-hive-server                  | Configuring core
-hive-server                  |  - Setting hadoop.proxyuser.hue.hosts=*
-hive-server                  |  - Setting fs.defaultFS=hdfs://namenode:8020
-hive-server                  |  - Setting hadoop.proxyuser.hue.groups=*
-hive-server                  |  - Setting hadoop.http.staticuser.user=root
-hive-server                  | Configuring hdfs
-hive-server                  |  - Setting dfs.permissions.enabled=false
-hive-server                  |  - Setting dfs.webhdfs.enabled=true
-hive-server                  | Configuring yarn
-hive-server                  |  - Setting yarn.resourcemanager.fs.state-store.uri=/rmstate
-hive-server                  |  - Setting yarn.timeline-service.generic-application-history.enabled=true
-hive-server                  |  - Setting yarn.resourcemanager.recovery.enabled=true
-hive-server                  |  - Setting yarn.timeline-service.enabled=true
-hive-server                  |  - Setting yarn.log-aggregation-enable=true
-hive-server                  |  - Setting yarn.resourcemanager.store.class=org.apache.hadoop.yarn.server.resourcemanager.recovery.FileSystemRMStateStore
-hive-server                  |  - Setting yarn.resourcemanager.system-metrics-publisher.enabled=true
-hive-server                  |  - Setting yarn.nodemanager.remote-app-log-dir=/app-logs
-hive-server                  |  - Setting yarn.resourcemanager.resource.tracker.address=resourcemanager:8031
-hive-server                  |  - Setting yarn.resourcemanager.hostname=resourcemanager
-hive-server                  |  - Setting yarn.timeline-service.hostname=historyserver
-hive-server                  |  - Setting yarn.log.server.url=http://historyserver:8188/applicationhistory/logs/
-hive-server                  |  - Setting yarn.resourcemanager.scheduler.address=resourcemanager:8030
-hive-server                  |  - Setting yarn.resourcemanager.address=resourcemanager:8032
-hive-server                  | Configuring httpfs
-hive-server                  | Configuring kms
-hive-server                  | Configuring mapred
-hive-server                  | Configuring hive
-hive-server                  |  - Setting hive.metastore.uris=thrift://hive-metastore:9083
-hive-server                  |  - Setting datanucleus.autoCreateSchema=false
-hive-server                  |  - Setting javax.jdo.option.ConnectionURL=jdbc:postgresql://hive-metastore-postgresql/metastore
-hive-server                  |  - Setting javax.jdo.option.ConnectionDriverName=org.postgresql.Driver
-hive-server                  |  - Setting javax.jdo.option.ConnectionPassword=hive
-hive-server                  |  - Setting javax.jdo.option.ConnectionUserName=hive
-hive-server                  | Configuring for multihomed network
-hive-server                  | [1/100] check for hive-metastore:9083...
-hive-server                  | [1/100] hive-metastore:9083 is not available yet
-hive-server                  | [1/100] try in 5s once again ...
-hive-server                  | [2/100] check for hive-metastore:9083...
-hive-server                  | [2/100] hive-metastore:9083 is not available yet
-hive-server                  | [2/100] try in 5s once again ...
-hive-server                  | [3/100] hive-metastore:9083 is available.
-hive-server                  | mkdir: `/tmp': File exists
-hive-server                  | 2019-05-10 15:45:28: Starting HiveServer2
-hive-server                  | SLF4J: Class path contains multiple SLF4J bindings.
-```
