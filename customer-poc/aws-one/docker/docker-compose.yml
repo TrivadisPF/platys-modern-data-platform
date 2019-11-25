@@ -5,7 +5,7 @@ services:
   # Zookeeper & Kafka ===============================================
 
   zookeeper-1:
-    image: confluentinc/cp-zookeeper:5.3.0
+    image: confluentinc/cp-zookeeper:5.3.1
     container_name: zookeeper-1
     ports:
       - "2181:2181"
@@ -15,7 +15,7 @@ services:
     restart: always
 
   broker-1:
-    image: confluentinc/cp-kafka:5.3.0
+    image: confluentinc/cp-kafka:5.3.1
     container_name: broker-1
     depends_on:
       - zookeeper-1
@@ -37,7 +37,7 @@ services:
     restart: always
 
   broker-2:
-    image: confluentinc/cp-kafka:5.3.0
+    image: confluentinc/cp-kafka:5.3.1
     container_name: broker-2
     depends_on:
       - zookeeper-1
@@ -59,7 +59,7 @@ services:
     restart: always
 
   broker-3:
-    image: confluentinc/cp-kafka:5.3.0
+    image: confluentinc/cp-kafka:5.3.1
     container_name: broker-3
     depends_on:
       - zookeeper-1
@@ -81,7 +81,7 @@ services:
     restart: always
       
   schema-registry:
-    image: confluentinc/cp-schema-registry:5.3.0
+    image: confluentinc/cp-schema-registry:5.3.1
     hostname: schema-registry
     container_name: schema-registry
     depends_on:
@@ -97,7 +97,7 @@ services:
     restart: always
       
   connect-1:
-    image: confluentinc/cp-kafka-connect:5.3.0
+    image: confluentinc/cp-kafka-connect:5.3.1
     container_name: connect-1
     depends_on:
       - zookeeper-1
@@ -134,7 +134,7 @@ services:
     restart: always
 
   connect-2:
-    image: confluentinc/cp-kafka-connect:5.3.0
+    image: confluentinc/cp-kafka-connect:5.3.1
     container_name: connect-2
     depends_on:
       - zookeeper-1
@@ -170,11 +170,12 @@ services:
       - $PWD/kafka-connect:/etc/kafka-connect/custom-plugins
     restart: always
 
-  ksql-server-1:
-    image: confluentinc/cp-ksql-server:5.3.0
-    container_name: ksql-server-1
+  ksqldb-server-1:
+    image: confluentinc/ksqldb-server:0.6.0
+    hostname: ksqldb-server-1
+    container_name: ksqldb-server-1
     ports:
-      - '28031:8088'
+      - "28031:8088"
     depends_on:
       - broker-1
       - schema-registry
@@ -182,25 +183,22 @@ services:
       KSQL_CONFIG_DIR: "/etc/ksql"
       KSQL_LOG4J_OPTS: "-Dlog4j.configuration=file:/etc/ksql/log4j-rolling.properties"
       KSQL_BOOTSTRAP_SERVERS: "broker-1:9092,broker-2:9093"
-      KSQL_HOST_NAME: ksql-server-1
+      KSQL_HOST_NAME: ksqldb-server-1
       KSQL_APPLICATION_ID: "kafka-demo"
-      KSQL_LISTENERS: "http://0.0.0.0:8088"
-      KSQL_CACHE_MAX_BYTES_BUFFERING: 0
-      # Schema Registry using HTTPS
-      KSQL_KSQL_SCHEMA_REGISTRY_URL: "http://schema-registry:8081"
+      KSQL_LISTENERS: http://0.0.0.0:8088
+      KSQL_KSQL_LOGGING_PROCESSING_STREAM_AUTO_CREATE: "true"
+      KSQL_KSQL_LOGGING_PROCESSING_TOPIC_AUTO_CREATE: "true"
       KSQL_KSQL_SERVICE_ID: "kafka-demo"
-      KSQL_PRODUCER_INTERCEPTOR_CLASSES: io.confluent.monitoring.clients.interceptor.MonitoringProducerInterceptor
-      KSQL_CONSUMER_INTERCEPTOR_CLASSES: io.confluent.monitoring.clients.interceptor.MonitoringConsumerInterceptor
-      KSQL_KSQL_SERVER_UI_ENABLED: "false"
     volumes:
       - $PWD/ksql:/etc/ksql/ext      
     restart: always
 
-  ksql-server-2:
-    image: confluentinc/cp-ksql-server:5.3.0
-    container_name: ksql-server-2
+  ksqldb-server-2:
+    image: confluentinc/ksqldb-server:0.6.0
+    hostname: ksqldb-server-2
+    container_name: ksqldb-server-2
     ports:
-      - '28032:8088'
+      - "28032:8088"
     depends_on:
       - broker-1
       - schema-registry
@@ -208,22 +206,27 @@ services:
       KSQL_CONFIG_DIR: "/etc/ksql"
       KSQL_LOG4J_OPTS: "-Dlog4j.configuration=file:/etc/ksql/log4j-rolling.properties"
       KSQL_BOOTSTRAP_SERVERS: "broker-1:9092,broker-2:9093"
-      KSQL_HOST_NAME: ksql-server-2
+      KSQL_HOST_NAME: ksqldb-server-2
       KSQL_APPLICATION_ID: "kafka-demo"
-      KSQL_LISTENERS: "http://0.0.0.0:8088"
-      KSQL_CACHE_MAX_BYTES_BUFFERING: 0
-      # Schema Registry using HTTPS
-      KSQL_KSQL_SCHEMA_REGISTRY_URL: "http://schema-registry:8081"
+      KSQL_LISTENERS: http://0.0.0.0:8088
+      KSQL_KSQL_LOGGING_PROCESSING_STREAM_AUTO_CREATE: "true"
+      KSQL_KSQL_LOGGING_PROCESSING_TOPIC_AUTO_CREATE: "true"
       KSQL_KSQL_SERVICE_ID: "kafka-demo"
-      KSQL_PRODUCER_INTERCEPTOR_CLASSES: io.confluent.monitoring.clients.interceptor.MonitoringProducerInterceptor
-      KSQL_CONSUMER_INTERCEPTOR_CLASSES: io.confluent.monitoring.clients.interceptor.MonitoringConsumerInterceptor
-      KSQL_KSQL_SERVER_UI_ENABLED: "false"
     volumes:
       - $PWD/ksql:/etc/ksql/ext      
     restart: always
+
+  ksqldb-cli:
+    image: confluentinc/ksqldb-cli:0.6.0
+    container_name: ksqldb-cli
+    depends_on:
+      - ksqldb-server-1
+      - ksqldb-server-2
+    entrypoint: /bin/sh
+    tty: true
 
   kafka-rest-1:
-    image: confluentinc/cp-kafka-rest:5.3.0
+    image: confluentinc/cp-kafka-rest:5.3.1
     container_name: rest-proxy-1
     depends_on:
       - broker-1
@@ -277,16 +280,7 @@ services:
       ZK_HOSTS: 'zookeeper-1:2181'
       APPLICATION_SECRET: 'abc123!'
     restart: always
-    
-  kafdrop:
-    image: thomsch98/kafdrop:latest
-    container_name: kafdrop
-    ports:
-      - "28045:9020" 
-    environment:
-      ZK_HOSTS: zookeeper-1:2181
-      LISTEN: 9020
-    restart: always
+
     
   kafkahq:
     image: tchiotludo/kafkahq
@@ -308,39 +302,15 @@ services:
       - broker-1
     restart: always
 
-  zoonavigator:
-    image: elkozmon/zoonavigator-web:0.5.1
-    container_name: zoonavigator
-    hostname: zoonavigator
-    ports:
-      - "28047:8010"
-    environment:
-      WEB_HTTP_PORT: 8010
-      API_HOST: "zoonavigator-api"
-      API_PORT: 9010
-    depends_on:
-     - zoonavigator-api
-    restart: always
-    
-  zoonavigator-api:
-    image: elkozmon/zoonavigator-api:0.5.1
-    container_name: zoonavigator-api
-    hostname: zoonavigator-api
-    ports:
-      - "28048:9010"
-    environment:
-      API_HTTP_PORT: 9010
-    restart: always
-
   # Hadoop ===============================================
 
   namenode:
-    image: trivadis/apache-hadoop-namenode:2.0.0-hadoop3.1.1-java8
+    image: trivadis/apache-hadoop-namenode:2.0.0-hadoop3.1.3-java8
     container_name: namenode
     hostname: namenode
     volumes:
       - ./container-volume/namenode:/hadoop/dfs/name
-      - ./data-transfer:/tmp/data-transfer
+      - ./data-transfer:/data-transfer
     ports:
       - "28084:9870"
     environment:
@@ -350,7 +320,7 @@ services:
     restart: always
 
   datanode-1:
-    image: trivadis/apache-hadoop-datanode:2.0.0-hadoop3.1.1-java8
+    image: trivadis/apache-hadoop-datanode:2.0.0-hadoop3.1.3-java8
     container_name: datanode-1
     volumes:
       - ./container-volume/datanode-1:/hadoop/dfs/data
@@ -363,7 +333,7 @@ services:
     restart: always
 
   datanode-2:
-    image: trivadis/apache-hadoop-datanode:2.0.0-hadoop3.1.1-java8
+    image: trivadis/apache-hadoop-datanode:2.0.0-hadoop3.1.3-java8
     container_name: datanode-2
     volumes:
       - ./container-volume/datanode-2:/hadoop/dfs/data
@@ -376,7 +346,7 @@ services:
     restart: always
 
   resourcemanager:
-    image: trivadis/apache-hadoop-resourcemanager:2.0.0-hadoop3.1.1-java8
+    image: trivadis/apache-hadoop-resourcemanager:2.0.0-hadoop3.1.3-java8
     container_name: resourcemanager
     hostname: resourcemanager
     ports:
@@ -394,7 +364,7 @@ services:
     restart: always
   
   nodemanager:
-    image: trivadis/apache-hadoop-nodemanager:2.0.0-hadoop3.1.1-java8
+    image: trivadis/apache-hadoop-nodemanager:2.0.0-hadoop3.1.3-java8
     container_name: nodemanager
     hostname: nodemanager
     ports:
@@ -413,7 +383,7 @@ services:
     restart: always
 
   historyserver:
-    image: trivadis/apache-hadoop-historyserver:2.0.0-hadoop3.1.1-java8
+    image: trivadis/apache-hadoop-historyserver:2.0.0-hadoop3.1.3-java8
     container_name: historyserver
     hostname: historyserver
     ports:
@@ -433,6 +403,9 @@ services:
     hostname: hadoop-client
     env_file:
       - ./conf/hadoop.env
+    volumes:
+      - ./credentials/s3.jceks:/credentials/s3.jceks
+      - ./data-transfer:/data-transfer
     command: tail -f /dev/null
     restart: always
 
@@ -446,13 +419,14 @@ services:
       - namenode
     entrypoint: "bash -c 'echo Waiting for Hadoop to be ready... && \
                        dockerize -wait tcp://namenode:9870 -timeout 120s && \
-                       hadoop fs -mkdir -p /spark/logs &&
+                       hadoop fs -mkdir -p /var/log/spark/logs &&
                        sleep infinity'"
+
 
   # Spark ===============================================
 
   spark-master:
-    image: trivadis/apache-spark-master:2.4.3-hadoop3.1 
+    image: trivadis/apache-spark-master:2.4.4-hadoop2.7 
     container_name: spark-master
     hostname: spark-master
     ports:
@@ -462,15 +436,18 @@ services:
     env_file:
       - ./conf/hadoop.env  
     environment:
-      - SPARK_PUBLIC_DNS=${PUBLIC_IP}
-      - INIT_DAEMON_STEP=setup_spark
-#      - CORE_CONF_fs_defaultFS=hdfs://namenode:8020
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      SPARK_PUBLIC_DNS: ${PUBLIC_IP}
+      INIT_DAEMON_STEP: setup_spark
+#      CORE_CONF_fs_defaultFS: hdfs://namenode:8020
     volumes:
-      - ./conf/spark-defaults.conf:/spark/conf/spark-defaults.conf
+      - ./conf/spark/spark-defaults.conf:/spark/conf/spark-defaults.conf
+      - ./credentials/s3.jceks:/credentials/s3.jceks
     restart: always
 
   spark-worker-1:
-    image: trivadis/apache-spark-worker:2.4.3-hadoop3.1
+    image: trivadis/apache-spark-worker:2.4.4-hadoop2.7
     container_name: spark-worker-1
     hostname: spark-worker-1
     depends_on:
@@ -481,16 +458,18 @@ services:
       - ./conf/hadoop.env  
     environment:
       SPARK_MASTER: "spark://spark-master:7077"
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
 #      SPARK_WORKER_CORES: 2
 #      SPARK_WORKER_MEMORY: 1g
       SPARK_WORKER_WEBUI_PORT: "28077"
       SPARK_PUBLIC_DNS: ${PUBLIC_IP}
     volumes:
-      - ./conf/spark-defaults.conf:/spark/conf/spark-defaults.conf
+      - ./conf/spark/spark-defaults.conf:/spark/conf/spark-defaults.conf
     restart: always
 
   spark-worker-2:
-    image: trivadis/apache-spark-worker:2.4.3-hadoop3.1
+    image: trivadis/apache-spark-worker:2.4.4-hadoop2.7
     container_name: spark-worker-2
     hostname: spark-worker-2
     depends_on:
@@ -501,16 +480,18 @@ services:
       - ./conf/hadoop.env  
     environment:
       SPARK_MASTER: "spark://spark-master:7077"
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
 #      SPARK_WORKER_CORES: 2
 #      SPARK_WORKER_MEMORY: 1g
       SPARK_WORKER_WEBUI_PORT: "28078"
       SPARK_PUBLIC_DNS: ${PUBLIC_IP}
     volumes:
-      - ./conf/spark-defaults.conf:/spark/conf/spark-defaults.conf
+      - ./conf/spark/spark-defaults.conf:/spark/conf/spark-defaults.conf
     restart: always
 
   spark-worker-3:
-    image: trivadis/apache-spark-worker:2.4.3-hadoop3.1
+    image: trivadis/apache-spark-worker:2.4.4-hadoop2.7
     container_name: spark-worker-3
     hostname: spark-worker-3
     depends_on:
@@ -521,16 +502,18 @@ services:
       - ./conf/hadoop.env  
     environment:
       SPARK_MASTER: "spark://spark-master:7077"
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
 #      SPARK_WORKER_CORES: 2
 #      SPARK_WORKER_MEMORY: 1g
       SPARK_WORKER_WEBUI_PORT: "28079"
       SPARK_PUBLIC_DNS: ${PUBLIC_IP}
     volumes:
-      - ./conf/spark-defaults.conf:/spark/conf/spark-defaults.conf
+      - ./conf/spark/spark-defaults.conf:/spark/conf/spark-defaults.conf
     restart: always
 
   spark-history:
-    image: trivadis/apache-spark-worker:2.4.3-hadoop3.1
+    image: trivadis/apache-spark-worker:2.4.4-hadoop2.7
     command: /spark/bin/spark-class org.apache.spark.deploy.history.HistoryServer
     container_name: spark-history
     hostname: spark-history
@@ -539,19 +522,18 @@ services:
     ports:
       - 28072:18080
     volumes:
-      - ./conf/spark-defaults.conf:/spark/conf/spark-defaults.conf
+      - ./conf/spark/spark-defaults.conf:/spark/conf/spark-defaults.conf
     restart: always
 
   spark-thrift-server:
-    image: trivadis/apache-spark-master:2.4.3-hadoop3.1 
+    image: trivadis/apache-spark-master:2.4.4-hadoop2.7
     container_name: spark-thrift-server
     ports:
       - "28073:10000"
     env_file:
       - ./conf/hadoop.env  
     volumes:
-      - ./conf/hive-site.xml:/spark/conf/hive-site.xml
-      - ./conf/spark-defaults.conf:/spark/conf/spark-defaults.conf
+      - ./conf/spark/spark-defaults.conf:/spark/conf/spark-defaults.conf
     command: bash -c "sleep 2m && /spark/sbin/start-thriftserver.sh && tail -f /spark/logs/spark--org.apache.spark.sql.hive.thriftserver.HiveThriftServer2-*.out"
     restart: always 
     
@@ -562,7 +544,7 @@ services:
     env_file:
       - ./conf/hadoop.env 
     volumes:
-      - ./conf/spark-defaults.conf:/spark/conf/spark-defaults.conf
+      - ./conf/spark/spark-defaults.conf:/spark/conf/spark-defaults.conf
     ports:
       - "28021:8998"
     environment:
@@ -586,6 +568,8 @@ services:
       SERVICE_PRECONDITION: "hive-metastore:9083"
 #      HDFS_CONF_fs_s3a_access_key: ${MINIO_ACCESS_KEY}
 #      HDFS_CONF_fs_s3a_secret_key: ${MINIO_SECRET_KEY}
+    volumes: 
+      - ./data-transfer:/data-transfer
     restart: always
 
   hive-metastore:
@@ -612,14 +596,14 @@ services:
   # Data Science Tools ===============================================
 
   hue:
-    image: gethue/hue:4.4.0
+    image: gethue/hue
     container_name: hue
     hostname: hue
     dns: 8.8.8.8
     ports:
       - "28043:8888"
     volumes:
-      - ./conf/hue.ini:/usr/share/hue/desktop/conf/hue.ini
+      - ./conf/hue/hue.ini:/usr/share/hue/desktop/conf/hue.ini
     depends_on:
       - hue-db
       - solr
@@ -637,7 +621,7 @@ services:
 
   # .s3cfg is needed in order to use the s3cmd from a sh directive
   zeppelin:
-    image: trivadis/apache-zeppelin:0.8.2-hadoop-3.1.1-spark-2.4.3
+    image: trivadis/apache-zeppelin:0.8.2-hadoop2.7-spark2.4.4
     container_name: zeppelin
     hostname: zeppelin
     ports:
@@ -647,41 +631,31 @@ services:
     env_file:
       - ./conf/hadoop.env
     environment:
+      # AWS Credentials
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+
       ZEPPELIN_ADDR: "0.0.0.0"
       ZEPPELIN_PORT: "8080"
+      ZEPPELIN_INTERPRETER_CONNECT_TIMEOUT: 120000
       SPARK_MASTER: "spark://spark-master:7077"
+
       # set spark-master for Zeppelin interpreter
       MASTER: "spark://spark-master:7077"
       SPARK_DRIVER_HOST: zeppelin
       SPARK_DRIVER_BINDADDRESS: "0.0.0.0"
       PYSPARK_PYTHON: "python3"
 # no longer necessary with 0.8.2 of Zepplin      
-#      SPARK_SUBMIT_OPTIONS: "--packages org.apache.commons:commons-lang3:3.5"
+#      - SPARK_SUBMIT_OPTIONS="--packages org.apache.commons:commons-lang3:3.5"
+      # enableV4 to make it work with AWS Frankfurt region
+      SPARK_SUBMIT_OPTIONS: "--conf spark.driver.extraJavaOptions=-Dcom.amazonaws.services.s3.enableV4 --conf spark.executor.extraJavaOptions=-Dcom.amazonaws.services.s3.enableV4"
     volumes:
-      - ./conf/hive-site.xml:/spark/conf/hive-site.xml
-      - ./conf/spark-defaults.conf:/spark/conf/spark-defaults.conf
+      - ./conf/spark/spark-defaults.conf:/spark/conf/spark-defaults.conf
       - ./conf/zeppelin/shiro.ini:/opt/zeppelin/conf/shiro.ini
       - ./conf/zeppelin/interpreter-setting.json:/opt/zeppelin/interpreter/spark/interpreter-setting.json
-      - ./conf/s3cfg:/root/.s3cfg
+      - ./data-transfer:/data-transfer
     restart: always
 
-
-  # make sure to get Spark to fit with the version of spark master 
-  # - 2.4.0 tag 59b402ce701d
-  # - 2.4.3 tag abdb27a6dfbb
-  jupyter:
-    image: jupyter/all-spark-notebook:abdb27a6dfbb
-    container_name: jupyter
-    hostname: jupyter
-    ports: 
-      - "28060:8888"
-    environment:
-      JUPYTER_ENABLE_LAB: "true"
-      JUPYTER_TOKEN: "abc123!"
-      GRANT_SUDO: "true"
-      TINI_SUBREAPER: "true"
-    restart: always
-  
   # NoSQL ===============================================
 
   # Needed for Hue
@@ -690,44 +664,6 @@ services:
     container_name: solr
     ports:
       - "28081:8983"
-    restart: always
-         
-  elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:6.7.0
-    hostname: elasticsearch
-    container_name: elasticsearch
-    ports:
-      - "9200:9200"
-      - "9300:9300"
-    environment:
-      xpack.security.enabled: "false"
-      XPACK_SECURITY_ENABLED: "false"
-      xpack.monitoring.enabled: "false"
-    restart: always
-
-  kibana:
-    image: docker.elastic.co/kibana/kibana:6.7.0
-    hostname: kibana
-    container_name: kibana
-    depends_on:
-      - elasticsearch
-    ports:
-      - "28006:5601"
-    environment:
-      xpack.security.enabled: "false"
-      XPACK_SECURITY_ENABLED: "false"
-      xpack.monitoring.enabled: "false"
-      discovery.type: "single-node"
-      elasticsearch.url: http://elasticsearch:9200
-      server.host: "0.0.0.0"
-      SERVER_HOST: "0.0.0.0"
-      server.name: "kibana"
-      SERVER_NAME: "kibana"
-      XPACK_GRAPH_ENABLED: "false"
-      XPACK_MONITORING_ENABLED: "false"
-      XPACK_REPORTING_ENABLED: "false"
-      XPACK_SECURITY_ENABLED: "false"
-    command: [ "/bin/bash", "-c", "/usr/share/kibana/bin/kibana-plugin remove x-pack; /usr/local/bin/kibana-docker" ]
     restart: always
       
 
@@ -790,11 +726,11 @@ services:
     hostname: awscli
     volumes:
       - './conf/s3cfg:/root/.s3cfg'
-      - './data-transfer:/tmp/data-transfer'
+      - './data-transfer:/data-transfer'
 #      - './minio/config:/root/.minio'
     environment:
-      AWS_ACCESS_KEY_ID: ${OBJECT_STORAGE_ACCESS_KEY}
-      AWS_SECRET_ACCESS_KEY: ${OBJECT_STORAGE_SECRET_KEY}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
     command: tail -f /dev/null
     restart: always
   
@@ -805,14 +741,14 @@ services:
     volumes:
       - './conf/s3cfg:/root/.s3cfg'
     environment:
-      AWS_ACCESS_KEY_ID: ${OBJECT_STORAGE_ACCESS_KEY}
-      AWS_SECRET_ACCESS_KEY: ${OBJECT_STORAGE_SECRET_KEY}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
     command:
       - bash 
       - -c 
       - |
         echo -e "\n--\n+> Creating Object Storage Folder"
-        s3cmd mb s3://spark-logs
+        s3cmd mb s3://spark-logs/
         sleep infinity
         
 #  FTP ===============================================
