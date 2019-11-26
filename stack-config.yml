@@ -7,41 +7,68 @@ vars:
   admin_password: abc123!
   restart: always
   docker_compose_version: 3.0
+  confluent_platform_version: 5.3.0
+  zoonavigator_version: 0.5.1
+  ksql_db_version: 0.6.0
+  schema_registry_ui_version: 0.9.5
+  kafka_connect_ui_version: 0.9.7
+  kafka_manager_version: LATEST
+  kafka_kafdrop_version: LATEST
+  kafka_kadmin_version: LATEST
+  kafka_kafkahq_version: LATEST
+  kafka_burrow_version: 1.2.0
+  kafka_burrow_ui_version: 1.1.0
+  kafka_burrow_dashboard_version: 1.0.4
+
 
 templates:
   - src: templates/docker-compose.yml.j2
     dest: stacks/{{ stack_name }}/docker-compose.yml
     vars:
-      with_zookeeper: true
-      ZOOKEEPER_NODES: 1
-      CONFLUENT_PLATFORM_VERSION: 5.3.0
+      #zookeeper
+      ZOOKEEPER_enabled: true
+      ZOOKEEPER_nodes: 1
 
-      with_kafka_broker: true
-      volume_map_data: true
-      KAFKA_BROKER_NODES: 3
-      KAFKA_DELETE_TOPIC_ENABLE: false
-      KAFKA_AUTO_CREATE_TOPICS_ENABLE: true
 
-      with_schema_registry: true
-      with_kafka_connect: true
-      KAFKA_CONNECT_NODES: 2
-      with_ksqldb: false
-      with_kafka_restproxy: false
-      with_kafka_mqttproxy: false
-      with_schema_registry_ui: false
-      with_kafka_connect_ui: false
-      with_kafka_manager: false
-      with_kafkahq: false
-      with_burrow: false
-      
-      with_hadoop: true
+      #kafka
+
+      KAFKA_enabled: true
+      KAFKA_volume_map_data: true
+      KAFKA_broker_nodes: 3
+      KAFKA_delete_topic_enable: false
+      KAFKA_auto_create_topics_enable: true
+
+      #kafka schema registry
+
+      KAFKA_schema_registry_enabled: true
+
+      #kafka connect
+
+      KAFKA_connect_enabled: true
+      KAFKA_connect.nodes: 2
+
+      #misc kafka 'addons'
+
+      KAFKA_ksqldb_enabled: true
+      KAFKA_restproxy_enabled: true
+      KAFKA_mqttproxy_enabled: true
+      KAFKA_schema_registry_ui_enabled: true
+      KAFKA_connect_ui_enabled: true
+      KAFKA_manager_enabled: true
+      KAFKA_kafdrop_enabled: true
+      KAFKA_kadmin_enabled: true
+      KAFKA_kafkahq_enabled: true
+      KAFKA_burrow_enabled: true
+
+      #hadoop
+      with_hadoop: false
       HADOOP_DATANODES: 2
 
-      with_spark: true
+      with_spark: false
       SPARK_WORKERS: 2
-      with_hive: true
-      with_zeppelin: true
-      with_jupyter: true
+      with_hive: false
+      with_zeppelin: false
+      with_jupyter: false
 
 
       # Visualization

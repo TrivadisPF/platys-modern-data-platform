@@ -1,24 +1,108 @@
 version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
 
+{% set __confluent_platform_version = confluent_platform_version | default('latest') -%}
+{% set __zoonavigator_version = zoonavigator_version | default('latest') -%}
+{% set __zoonavigator_api_version = zoonavigator_api_version | default('latest') -%}
+{% set __ksql_db_version = ksql_db_version | default('latest') -%}
+{% set __schema_registry_ui_version = schema_registry_ui_version | default('latest') -%}
+
+{% set __kafka_connect_ui_version = kafka_connect_ui_version | default('latest') -%}
+{% set __kafka_manager_version = kafka_manager_version | default('latest') -%}
+{% set __kafka_kafdrop_version = kafka_kafdrop_version | default('latest') -%}
+{% set __kafka_kadmin_version = kafka_kadmin_version | default('latest') -%}
+{% set __kafka_kafkahq_version = kafka_kafkahq_version | default('latest') -%}
+{% set __kafka_burrow_version = kafka_burrow_version | default('latest') -%}
+{% set __kafka_burrow_ui_version = kafka_burrow_ui_version | default('latest') -%}
+{% set __kafka_burrow_dashboard_version = kafka_burrow_dashboard_version | default('latest') -%}
+
+{% set __tvd_hadoop_version = tvd_hadoop_version | default('latest') -%}
+
+{% set __tvd_spark_version = tvd_spark_version | default('latest') -%}
+
+{% set __hive_version = hive_version | default('latest') -%}
+
+{% set __tvd_atlas_verion = tvd_atlas_verion | default('latest') -%}
+
+{% set __cassandra_version = cassandra_version | default('latest') -%}
+
+{% set __elasticsearch_version = elasticsearch_version | default('latest') -%}
+{% set __dejavu_version = dejavu_version | default('latest') -%}
+{% set __cerebro_version = cerebro_version | default('latest') -%}
+{% set __elasticsearchhq_version = elasticsearchhq_version | default('latest') -%}
+
+
+{% set __amundsen_frontend_version = amundsen_frontend_version | default('latest') -%}
+{% set __amundsen_search_version = amundsen_search_version | default('latest') -%}
+{% set __amundsen_metadata_version = amundsen_metadata_version | default('latest') -%}
+
+{% set __hue_version = hue_version | default('latest') -%}
+{% set __hue_postgres_version = hue_postgres_version | default('latest') -%}
+
+{% set __tvd_streamsets_version = tvd_streamsets_version | default('latest') -%}
+
+{% set __nifi_version = nifi_version | default('latest') -%}
+
+{% set __tvd_zeppelin_version = tvd_zeppelin_version | default('latest') -%}
+
+{% set __jupyter_version = jupyter_version | default('latest') -%}
+
+{% set __graphana_version = graphana_version | default('latest') -%}
+
+{% set __kibana_version = kibana_version | default('latest') -%}
+
+
+{% set __redis_version = redis_version | default('latest') -%}
+{% set __redis_commander_version = redis_commander_version | default('latest') -%}
+
+{% set __mongodb_version = mongodb_version | default('latest') -%}
+{% set __mongo_express_version = mongo_express_version | default('latest') -%}
+{% set __mongo_admin_version = mongo_admin_version | default('latest') -%}
+
+{% set __solr_version = solr_version | default('latest') -%}
+
+{% set __neo4j_version = neo4j_version | default('latest') -%}
+
+{% set __tile38_version = tile38_version | default('latest') -%}
+
+{% set __mysql_version = mysql_version | default('latest') -%}
+{% set __postgres_version = postgres_version | default('latest') -%}
+{% set __sqlserver_version = sqlserver_version | default('latest') -%}
+{% set __adminer_version = adminer_version | default('latest') -%}
+
+{% set __axon_version = axon_version | default('latest') -%}
+
+{% set __mosquitto_version = mosquitto_version | default('latest') -%}
+{% set __hivemq3_version = hivemq3_version | default('latest') -%}
+{% set __hivemq_mqtt_web_client_version = hivemq_mqtt_web_client_version | default('latest') -%}
+{% set __activemq_version = activemq_version | default('latest') -%}
+
+{% set __ftp_pureftpd_version = ftp_pureftpd_version | default('latest') -%}
+{% set __ftp_filezilla_version = ftp_filezilla_version | default('latest') -%}
+
+{% set __minio_version = minio_version | default('latest') -%}
+{% set __awscli_version = awscli_version | default('latest') -%}
+{% set __portainer_version = portainer_version | default('latest') %}
+
+
 services:
 
-{% if with_zookeeper | default(false) %}
+{% if ZOOKEEPER_enabled | default(false) %}
   # Zookeeper ===============================================
 
-  {% for num in range(ZOOKEEPER_NODES | default('1') ) %}
+  {% for num in range(ZOOKEEPER_nodes | default('1') ) %}
   zookeeper-{{loop.index}}:
-    image: confluentinc/cp-zookeeper:{{ CONFLUENT_PLATFORM_VERSION |default('LATEST') }}
-    container_name: zookeeper-1
+    image: confluentinc/cp-zookeeper:{{__confluent_platform_version}}
+    container_name: zookeeper-{{loop.index}}
     ports:
       - "2181:2181"
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
-    restart: always
+    restart: {{container_restart_policy}}
   {% endfor %}
 
   zoonavigator:
-    image: elkozmon/zoonavigator-web:0.5.1
+    image: elkozmon/zoonavigator-web:{{__zoonavigator_version}}
     container_name: zoonavigator
     ports:
      - "28047:8010"
@@ -28,26 +112,26 @@ services:
       API_PORT: 9010
     depends_on:
      - zoonavigator-api
-    restart: always
+    restart: {{container_restart_policy}}
 
   zoonavigator-api:
-    image: elkozmon/zoonavigator-api:0.5.1
+    image: elkozmon/zoonavigator-api:{{__zoonavigator_api_version}}
     container_name: zoonavigator-api
     ports:
      - "28048:9010"
     environment:
       API_HTTP_PORT: 9010
 
-{% endif %}   {# with_zookeeper #}
+{% endif %}   {# zookeeper_enabled #}
 
-{% if with_kafka_broker | default(false) %}
 
-  # Kafka ===============================================
 
-  {% for num in range(KAFKA_BROKER_NODES | default(1) ) %}
-    {% set port = 9091 + loop.index %}
+{% if KAFKA_enabled | default(false) %}
+# Kafka ===============================================
+  {% for num in range(KAFKA_broker_nodes | default(1) ) %}
+  {% set port = 9091 + loop.index %}
   broker-{{loop.index}}:
-    image: confluentinc/cp-kafka:5.3.0
+    image: confluentinc/cp-kafka:{{__confluent_platform_version}}
     container_name: broker-{{loop.index}}
     depends_on:
       - zookeeper-1
@@ -63,20 +147,20 @@ services:
 #      KAFKA_METRIC_REPORTERS: io.confluent.metrics.reporter.ConfluentMetricsReporter
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
-      KAFKA_DELETE_TOPIC_ENABLE: '{{ KAFKA_DELETE_TOPIC_ENABLE | default(omit) }}'
-      KAFKA_AUTO_CREATE_TOPICS_ENABLE: '{{ KAFKA_AUTO_CREATE_TOPICS_ENABLE | default(omit) }}'
+      KAFKA_DELETE_TOPIC_ENABLE: '{{ KAFKA_delete_topic_enable | default(omit) }}'
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: '{{ KAFKA_auto_create_topics_enable | default(omit) }}'
       KAFKA_JMX_PORT: {{9093 + loop.index}}
       KAFKA_JMX_OPTS: '-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.rmi.port={{9093 + loop.index}}'
       KAFKA_JMX_HOSTNAME: 'broker-{{loop.index}}'
-    restart: always
+    restart: {{container_restart_policy}}
 
   {% endfor %}
 
-{% endif %}
+{% endif %} {# KAFKA_enabled #}
 
-{% if ( with_kafka_broker and with_schema_registry) | default(false) %}
+{% if ( KAFKA_enabled and KAFKA_schema_registry_enabled ) | default(false) %}
   schema-registry:
-    image: confluentinc/cp-schema-registry:5.3.0
+    image: confluentinc/cp-schema-registry:{{__confluent_platform_version}}
     hostname: schema-registry
     container_name: schema-registry
     depends_on:
@@ -89,15 +173,15 @@ services:
       SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL: 'zookeeper-1:2181'
       SCHEMA_REGISTRY_ACCESS_CONTROL_ALLOW_ORIGIN: '*'
       SCHEMA_REGISTRY_ACCESS_CONTROL_ALLOW_METHODS: 'GET,POST,PUT,OPTIONS'
-    restart: always
-{% endif %}   {# with_kafka_broker #}
+    restart: {{container_restart_policy}}
+{% endif %}   {# KAFKA_enabled and KAFKA_schema_registry_enabled #}
 
-{% if ( with_kafka_broker and with_kafka_connect) | default(false) %}
-  {% for num in range(KAFKA_CONNECT_NODES | default(1) ) %}
+{% if ( KAFKA_enabled and KAFKA_connect_enabled ) | default(false) %}
+  {% for num in range(KAFKA_connect_nodes | default(1) ) %}
     {% set external_port = 28013 + loop.index - 1 %}
     {% set port = 8083 + loop.index - 1 %}
-  connect-{{loop.index}}:
-    image: confluentinc/cp-kafka-connect:5.3.0
+  connect-{{loop.index}} :
+    image: confluentinc/cp-kafka-connect:{{__confluent_platform_version}}
     container_name: connect-{{loop.index}}
     depends_on:
       - zookeeper-1
@@ -121,8 +205,8 @@ services:
       CONNECT_KEY_CONVERTER_SCHEMA_REGISTRY_URL: 'http://schema-registry:8081'
       CONNECT_VALUE_CONVERTER: io.confluent.connect.avro.AvroConverter
       CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL: 'http://schema-registry:8081'
-      CONNECT_INTERNAL_KEY_CONVERTER: org.apache.kafka.connect.json.JsonConverter
-      CONNECT_INTERNAL_VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+      CONNECT_INTERNAL_KEY_CONVERTER: org.apache.kafka_connect.json.JsonConverter
+      CONNECT_INTERNAL_VALUE_CONVERTER: org.apache.kafka_connect.json.JsonConverter
       CONNECT_ZOOKEEPER_CONNECT: 'zookeeper-1:2181'
       CONNECT_PLUGIN_PATH: "/usr/share/java,/etc/kafka-connect/custom-plugins"
       CONNECT_LOG4J_ROOT_LOGLEVEL: INFO
@@ -131,14 +215,14 @@ services:
       AWS_SECRET_ACCESS_KEY: bKhWxVF3kQoLY9kFmt91l+tDrEoZjqnWXzY9Eza
     volumes:
       - $PWD/kafka-connect:/etc/kafka-connect/custom-plugins
-    restart: always
+    restart: {{container_restart_policy}}
 
   {% endfor %}
-{% endif %}   {# with_kafka_broker and with_kafka_connect #}
+{% endif %}   {# KAFKA_enabled and KAFKA_connect_enabled  #}
 
-{% if with_kafka_broker and with_ksqldb | default(false) %}
+{% if (KAFKA_enabled and KAFKA_ksqldb_enabled )| default(false) %}
   ksqldb-server-1:
-    image: confluentinc/ksqldb-server:0.6.0
+    image: confluentinc/ksqldb-server:{{__ksql_db_version}}
     hostname: ksqldb-server-1
     container_name: ksqldb-server-1
     ports:
@@ -158,10 +242,10 @@ services:
       KSQL_KSQL_SERVICE_ID: "kafka-demo"
     volumes:
       - $PWD/ksql:/etc/ksql/ext
-    restart: always
+    restart: {{container_restart_policy}}
 
   ksqldb-server-2:
-    image: confluentinc/ksqldb-server:0.6.0
+    image: confluentinc/ksqldb-server:{{__ksql_db_version}}
     hostname: ksqldb-server-2
     container_name: ksqldb-server-2
     ports:
@@ -181,21 +265,22 @@ services:
       KSQL_KSQL_SERVICE_ID: "kafka-demo"
     volumes:
       - $PWD/ksql:/etc/ksql/ext
-    restart: always
+    restart: {{container_restart_policy}}
 
   ksqldb-cli:
-    image: confluentinc/ksqldb-cli:0.6.0
+    image: confluentinc/ksqldb-cli:{{__ksql_db_version}}
     container_name: ksqldb-cli
     depends_on:
       - ksqldb-server-1
       - ksqldb-server-2
     entrypoint: /bin/sh
     tty: true
-{% endif %}   {# with_ksqldb #}
+{% endif %}   {# KAFKA_broker_enabled and KAFKA_ksqldb_enabled #}
 
-{% if with_kafka_restproxy | default(false) %}
+
+{% if (KAFKA_enabled and KAFKA_restproxy_enabled) | default(false) %}
   kafka-rest-1:
-    image: confluentinc/cp-kafka-rest:5.3.0
+    image: confluentinc/cp-kafka-rest:{{__confluent_platform_version}}
     container_name: rest-proxy-1
     depends_on:
       - broker-1
@@ -207,12 +292,14 @@ services:
       KAFKA_REST_LISTENERS: 'http://0.0.0.0:8086'
       KAFKA_REST_SCHEMA_REGISTRY_URL: 'http://schema-registry:8081'
       KAFKA_REST_HOST_NAME: 'rest-proxy'
-    restart: always
-{% endif %}   {# with_kafka_restproxy #}
+    restart: {{container_restart_policy}}
+{% endif %}   {# KAFKA_enabled and KAFKA_ksqldb_enabled #}
 
-{% if with_kafka_mqttproxy | default(false) %}
+
+
+{% if (KAFKA_enabled and KAFKA_mqttproxy_enabled) | default(false) %}
   kafka-mqtt-1:
-    image: confluentinc/cp-kafka-mqtt:5.3.0
+    image: confluentinc/cp-kafka-mqtt:{{__confluent_platform_version}}
     hostname: mqtt-proxy
     ports:
       - "28001:1882"
@@ -221,25 +308,25 @@ services:
       KAFKA_MQTT_LISTENERS: 0.0.0.0:1882
       KAFKA_MQTT_BOOTSTRAP_SERVERS: PLAINTEXT://broker-1:9092,broker-2:9093
       KAFKA_MQTT_CONFLUENT_TOPIC_REPLICATIN_FACTOR: 1
-{% endif %}   {# with_kafka_mqttproxy #}
+{% endif %}   {# KAFKA_enabled and KAFKA_mqttproxy_enabled #}
 
-{% if with_schema_registry_ui | default(false) %}
+{% if (KAFKA_enabled and KAFKA_schema_registry_ui_enabled) | default(false) %}
   schema-registry-ui:
-    image: landoop/schema-registry-ui
-    container_name: schema-registry-ui
-    depends_on:
-      - broker-1
-      - schema-registry
-    ports:
-      - "28039:8000"
-    environment:
-      SCHEMAREGISTRY_URL: 'http://${PUBLIC_IP}:28030'
-    restart: always
-{% endif %}   {# with_schema_registry_ui #}
+      image: landoop/schema-registry-ui:{{__schema_registry_ui_version}}
+      container_name: schema-registry-ui
+      depends_on:
+        - broker-1
+        - schema-registry
+      ports:
+        - "28039:8000"
+      environment:
+        SCHEMAREGISTRY_URL: 'http://${PUBLIC_IP}:28030'
+      restart: {{container_restart_policy}}
+{% endif %}   {# KAFKA_enabled and KAFKA_schema_registry_ui_enabled #}
 
-{% if with_kafka_connect_ui | default(false) %}
+{% if (KAFKA_enabled and KAFKA_connect_ui_enabled) | default(false) %}
   kafka-connect-ui:
-    image: landoop/kafka-connect-ui:0.9.7
+    image: landoop/kafka-connect-ui:{{__kafka_connect_ui_version}}
     container_name: kafka-connect-ui
     ports:
       - "28038:8000"
@@ -249,12 +336,16 @@ services:
     depends_on:
       - connect-1
       - connect-2
-    restart: always
-{% endif %}   {# with_schema_registry_ui #}
+    restart: {{container_restart_policy}}
+{% endif %}   {# KAFKA_enabled and KAFKA_connect_ui_enabled #}
 
-{% if with_kafka_manager | default(false) %}
+
+
+
+
+{% if (KAFKA_enabled and KAFKA_manager_enabled) | default(false) %}
   kafka-manager:
-    image: trivadis/kafka-manager
+    image: trivadis/kafka-manager:{{__kafka_manager_version}}
     container_name: kafka-manager
     hostname: kafka-manager
     depends_on:
@@ -267,24 +358,25 @@ services:
     environment:
       ZK_HOSTS: 'zookeeper-1:2181'
       APPLICATION_SECRET: 'abc123!'
-    restart: always
-{% endif %}   {# with_kafka_manager #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  KAFKA_enabled and KAFKA_manager_enabled #}
 
-{% if with_kafkadrop | default(false) %}
+
+{% if (KAFKA_enabled and KAFKA_kafdrop_enabled) | default(false) %}
   kafdrop:
-    image: thomsch98/kafdrop:latest
+    image: thomsch98/kafdrop:{{__kafka_kafdrop_version}}
     container_name: kafdrop
     ports:
       - "28045:9020"
     environment:
       ZK_HOSTS: zookeeper-1:2181
       LISTEN: 9020
-    restart: always
-{% endif %}   {# with_kafkadrop #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  KAFKA_enabled and KAFKA_kafdrop_enabled #}
 
-{% if with_kadmin | default(false) %}
+{% if (KAFKA_enabled and KAFKA_kadmin_enabled) | default(false) %}
   kadmin:
-    image: hasnat/kadmin
+    image: hasnat/kadmin:{{__kafka_kadmin_version}}
     container_name: kadmin
     ports:
       - "28040:8080"
@@ -297,12 +389,13 @@ services:
       KEY_STORE_LOCATION: ssl/server.keystore.jks
       KEY_STORE_PASSWORD: password
       KEY_PASSWORD: password
-    restart: always
-{% endif %}   {# with_kadmin #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  KAFKA_enabled and KAFKA_kadmin_enabled #}
 
-{% if with_kafkahq | default(false) %}
+
+{% if (KAFKA_enabled and KAFKA_kafkahq_enabled) | default(false) %}
   kafkahq:
-    image: tchiotludo/kafkahq
+    image: tchiotludo/kafkahq:{{kafka_kafkahq_version}}
     container_name: kafkahq
     ports:
       - 28042:8080
@@ -319,12 +412,14 @@ services:
                 url: "http://connect-1:8083"
     depends_on:
       - broker-1
-    restart: always
-{% endif %}   {# with_kafkahq #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  KAFKA_enabled and KAFKA_kafkahq_enabled #}
 
-{% if with_burrow | default(false) %}
+
+
+{% if (KAFKA_enabled and KAFKA_burrow_enabled) | default(false) %}
   burrow:
-    image: gschmutz/linkedin-burrow:1.2.0
+    image: gschmutz/linkedin-burrow:{{__kafka_burrow_version}}
     container_name: burrow
     volumes:
       - ./conf/burrow:/etc/burrow/
@@ -334,10 +429,10 @@ services:
     depends_on:
       - zookeeper-1
       - broker-1
-    restart: always
+    restart: {{container_restart_policy}}
 
   burrow-ui:
-    image: generalmills/burrowui
+    image: generalmills/burrowui:{{__kafka_burrow_ui_version}}
     container_name: burrow-ui
     ports:
       - 23000:3000
@@ -346,10 +441,9 @@ services:
     depends_on:
       - zookeeper-1
       - broker-1
-    restart: always
-
+    restart: {{container_restart_policy}}
   burrow-dashboard:
-    image: joway/burrow-dashboard
+    image: joway/burrow-dashboard:{{__kafka_burrow_dashboard_version}}
     container_name: burrow-dashboard
     ports:
       - 28036:80
@@ -358,15 +452,16 @@ services:
     depends_on:
       - zookeeper-1
       - broker-1
-    restart: always
-{% endif %}   {# with_burrow #}
+    restart: {{container_restart_policy}}
+{% endif %}   {# KAFKA_enabled and KAFKA_burrow_enabled #}
 
-  # Hadoop ===============================================
 
-{% if with_hadoop | default(false) %}
 
+{% if HADOOP_enabled | default(false) %}
+
+# Hadoop ===============================================
   namenode:
-    image: trivadis/apache-hadoop-namenode:2.0.0-hadoop3.1.1-java8
+    image: trivadis/apache-hadoop-namenode:{{__tvd_hadoop_version}}
     container_name: namenode
     hostname: namenode
     volumes:
@@ -378,13 +473,13 @@ services:
       - CLUSTER_NAME=test
     env_file:
       - ./conf/hadoop.env
-    restart: always
+    restart: {{container_restart_policy}}
 
-  {% for num in range(HADOOP_DATANODES| default(1) ) %}
+  {% for num in range(HADOOP_datanodes| default(1) ) %}
     {% set external_port = 28085 + loop.index - 1 %}
 
   datanode-{{loop.index}}:
-    image: trivadis/apache-hadoop-datanode:2.0.0-hadoop3.1.1-java8
+    image: trivadis/apache-hadoop-datanode:{{__tvd_hadoop_version}}
     container_name: datanode-{{loop.index}}
     volumes:
       - ./container-volume/datanode-{{loop.index}}:/hadoop/dfs/data
@@ -394,11 +489,11 @@ services:
       SERVICE_PRECONDITION: "namenode:9870"
     env_file:
       - ./conf/hadoop.env
-    restart: always
+    restart: {{container_restart_policy}}
   {% endfor %}
 
   resourcemanager:
-    image: trivadis/apache-hadoop-resourcemanager:2.0.0-hadoop3.1.1-java8
+    image: trivadis/apache-hadoop-resourcemanager:{{__tvd_hadoop_version}}
     container_name: resourcemanager
     hostname: resourcemanager
     ports:
@@ -413,10 +508,10 @@ services:
       - YARN_CONF_yarn_nodemanager_webapp_address=${PUBLIC_IP}:8042
       - YARN_CONF_yarn_timeline___service_webapp_address=${PUBLIC_IP}:28020
       - YARN_CONF_yarn_log_server_url=${PUBLIC_IP}:28020
-    restart: always
+    restart: {{container_restart_policy}}
 
   nodemanager:
-    image: trivadis/apache-hadoop-nodemanager:2.0.0-hadoop3.1.1-java8
+    image: trivadis/apache-hadoop-nodemanager:{{__tvd_hadoop_version}}
     container_name: nodemanager
     hostname: nodemanager
     ports:
@@ -432,10 +527,10 @@ services:
       - YARN_CONF_yarn_nodemanager_webapp_address=${PUBLIC_IP}:8042
       - YARN_CONF_yarn_timeline___service_webapp_address=${PUBLIC_IP}:28020
       - YARN_CONF_yarn_log_server_url=${PUBLIC_IP}:28020
-    restart: always
+    restart: {{container_restart_policy}}
 
   historyserver:
-    image: trivadis/apache-hadoop-historyserver:2.0.0-hadoop3.1.1-java8
+    image: trivadis/apache-hadoop-historyserver:{{__tvd_hadoop_version}}
     container_name: historyserver
     hostname: historyserver
     ports:
@@ -447,24 +542,24 @@ services:
       - ./conf/hadoop.env
     environment:
       SERVICE_PRECONDITION: "namenode:9870 datanode-1:9864 datanode-2:9864 resourcemanager:8088"
-    restart: always
+    restart: {{container_restart_policy}}
 
   hadoop-client:
-    image: trivadis/apache-hadoop-client:2.0.0-hadoop3.1.1-java8
+    image: trivadis/apache-hadoop-client:{{__tvd_hadoop_version}}
     container_name: hadoop-client
     hostname: hadoop-client
     env_file:
       - ./conf/hadoop.env
     command: tail -f /dev/null
-    restart: always
+    restart: {{container_restart_policy}}
 
-{% endif %}   {# with_hadoop #}
+{% endif %}   {#  HADOOP_enabled #}
 
-  # Spark ===============================================
-{% if with_spark | default(false) %}
 
+{% if SPARK_enabled | default(false) %}
+# Spark ===============================================
   spark-master:
-    image: trivadis/apache-spark-master:2.4.3-hadoop3.1
+    image: trivadis/apache-spark-master:{{__tvd_spark_version}}
     container_name: spark-master
     hostname: spark-master
     ports:
@@ -479,70 +574,38 @@ services:
 #      - CORE_CONF_fs_defaultFS=hdfs://namenode:8020
     volumes:
       - ./conf/spark/spark-defaults.conf:/spark/conf/spark/spark-defaults.conf
-    restart: always
+    restart: {{container_restart_policy}}
 
-  spark-worker-1:
-    image: trivadis/apache-spark-worker:2.4.3-hadoop3.1
-    container_name: spark-worker-1
-    hostname: spark-worker-1
+
+    {% for num in range(SPARK_workers | default(1) ) %}
+      {% set external_port = 28077 + loop.index - 1 %}
+      {% set webui_port = 28077 + loop.index - 1 %}
+
+
+  spark-worker-{{loop.index}}:
+    image: trivadis/apache-spark-worker:{{__tvd_spark_version}}
+    container_name: spark-worker-{{loop.index}}
+    hostname: spark-worker-{{loop.index}}
     depends_on:
       - spark-master
     ports:
-      - "28077:28077"
+      - "{{external_port}}:{{external_port}}"
     env_file:
       - ./conf/hadoop.env
     environment:
       SPARK_MASTER: "spark://spark-master:7077"
 #      SPARK_WORKER_CORES: 2
 #      SPARK_WORKER_MEMORY: 1g
-      SPARK_WORKER_WEBUI_PORT: "28077"
+      SPARK_WORKER_WEBUI_PORT: "{{webui_port}}"
       SPARK_PUBLIC_DNS: ${PUBLIC_IP}
     volumes:
       - ./conf/spark/spark-defaults.conf:/spark/conf/spark/spark-defaults.conf
-    restart: always
+    restart: {{container_restart_policy}}
 
-  spark-worker-2:
-    image: trivadis/apache-spark-worker:2.4.3-hadoop3.1
-    container_name: spark-worker-2
-    hostname: spark-worker-2
-    depends_on:
-      - spark-master
-    ports:
-      - "28078:28078"
-    env_file:
-      - ./conf/hadoop.env
-    environment:
-      SPARK_MASTER: "spark://spark-master:7077"
-#      SPARK_WORKER_CORES: 2
-#      SPARK_WORKER_MEMORY: 1g
-      SPARK_WORKER_WEBUI_PORT: "28078"
-      SPARK_PUBLIC_DNS: ${PUBLIC_IP}
-    volumes:
-      - ./conf/spark/spark-defaults.conf:/spark/conf/spark/spark-defaults.conf
-    restart: always
-
-  spark-worker-3:
-    image: trivadis/apache-spark-worker:2.4.3-hadoop3.1
-    container_name: spark-worker-3
-    hostname: spark-worker-3
-    depends_on:
-      - spark-master
-    ports:
-      - "28079:28079"
-    env_file:
-      - ./conf/hadoop.env
-    environment:
-      SPARK_MASTER: "spark://spark-master:7077"
-#      SPARK_WORKER_CORES: 2
-#      SPARK_WORKER_MEMORY: 1g
-      SPARK_WORKER_WEBUI_PORT: "28079"
-      SPARK_PUBLIC_DNS: ${PUBLIC_IP}
-    volumes:
-      - ./conf/spark/spark-defaults.conf:/spark/conf/spark/spark-defaults.conf
-    restart: always
+ {% endfor %}
 
   spark-history:
-    image: trivadis/apache-spark-worker:2.4.3-hadoop3.1
+    image: trivadis/apache-spark-worker:{{__tvd_spark_version}}
     command: /spark/bin/spark-class org.apache.spark.deploy.history.HistoryServer
     container_name: spark-history
     hostname: spark-history
@@ -552,10 +615,10 @@ services:
       - 28072:18080
     volumes:
       - ./conf/spark/spark-defaults.conf:/spark/conf/spark/spark-defaults.conf
-    restart: always
+    restart: {{container_restart_policy}}
 
   spark-thrift-server:
-    image: trivadis/apache-spark-master:2.4.3-hadoop3.1
+    image: trivadis/apache-spark-master:{{__tvd_spark_version}}
     container_name: spark-thrift-server
     ports:
       - "28073:10000"
@@ -576,13 +639,14 @@ services:
       - DEPLOY_MODE=cluster
     ports:
       - "28021:8998"
-    restart: always
-{% endif %}   {# with_spark #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  SPARK_enabled #}
 
-  # Hive ===============================================
-{% if with_hive | default(false) %}
+
+{% if HIVE_enabled | default(false) %}
+# Hive ===============================================
   hive-server:
-    image: johannestang/hive:2.3.4-postgresql-metastore-s3
+    image: johannestang/hive:{{__hive_version}}
     container_name: hive-server
     hostname: hive-server
     ports:
@@ -595,10 +659,10 @@ services:
       SERVICE_PRECONDITION: "hive-metastore:9083"
 #      HDFS_CONF_fs_s3a_access_key: ${MINIO_ACCESS_KEY}
 #      HDFS_CONF_fs_s3a_secret_key: ${MINIO_SECRET_KEY}
-    restart: always
+    restart: {{container_restart_policy}}
 
   hive-metastore:
-    image: johannestang/hive:2.3.4-postgresql-metastore-s3
+    image: johannestang/hive:{{__hive_version}}
     container_name: hive-metastore
     hostname: hive-metastore
     ports:
@@ -608,19 +672,20 @@ services:
     command: /opt/hive/bin/hive --service metastore
     environment:
       - "SERVICE_PRECONDITION=namenode:9870 datanode-1:9864 hive-metastore-db:5432"
-    restart: always
+    restart: {{container_restart_policy}}
 
   hive-metastore-db:
     container_name: hive-metastore-db
     hostname: hive-metastore-db
     image: bde2020/hive-metastore-postgresql:2.3.0
-    restart: always
-{% endif %}   {# with_spark #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  HIVE_enabled #}
 
-  # Governance ===============================================
-{% if with_atlas | default(false) %}
+
+{% if ATLAS_enabled  | default(false) %}
+# Governance ===============================================
   atlas:
-    image: trivadis/apache-atlas:2.0.0
+    image: trivadis/apache-atlas:{{__tvd_atlas_verion}}
     container_name: atlas
     hostname: atlas
     ports:
@@ -636,10 +701,11 @@ services:
       - broker-1
       - atlas-kafka-setup
       - cassandra-atlas
-    restart: always
+    restart: {{container_restart_policy}}
 
+  {% if KAFKA_enabled  | default(false) %}
   atlas-kafka-setup:
-    image: confluentinc/cp-kafka:5.3.0
+    image: confluentinc/cp-kafka:{{__confluent_platform_version}}
     hostname: atlas-kafka-setup
     container_name: atlas-kafka-setup
     depends_on:
@@ -654,9 +720,10 @@ services:
       # We override the image's `command` anyways, hence this container will not start a broker.
       KAFKA_BROKER_ID: ignored
       KAFKA_ZOOKEEPER_CONNECT: ignored
+  {% endif %} {#  KAFKA_enabled #}
 
   cassandra-atlas:
-    image: cassandra:3
+    image: cassandra:{{__cassandra_version}}
     container_name: cassandra-atlas
     hostname: cassandra-atlas
     ports:
@@ -664,10 +731,10 @@ services:
       - "28064:9160"
     environment:
       - CASSANDRA_START_RPC=true
-    restart: always
+    restart: {{container_restart_policy}}
 
   elasticsearch-atlas:
-    image: docker.elastic.co/elasticsearch/elasticsearch:6.6.0
+    image: docker.elastic.co/elasticsearch/elasticsearch:{{elasticsearch_version}}
     container_name: elasticsearch-atlas
     hostname: elasticsearch-atlas
     environment:
@@ -680,11 +747,11 @@ services:
       - "discovery.zen.minimum_master_nodes=1"
     ports:
       - "28065:9200"
-    restart: always
-{% endif %}   {# with_atlas #}
+    restart: {{container_restart_policy}}
 
+ {% if AMUNDSEN_enabled  | default(false) %}
   amundsenfrontend:
-    image: amundsendev/amundsen-frontend:1.0.7
+    image: amundsendev/amundsen-frontend:{{__amundsen_frontend_version}}
     container_name: amundsenfrontend
     depends_on:
       - amundsenmetadata
@@ -694,10 +761,10 @@ services:
     environment:
       - METADATASERVICE_BASE=http://amundsenmetadata:5000
       - SEARCHSERVICE_BASE=http://amundsensearch:5000
-    restart: always
+    restart: {{container_restart_policy}}
 
   amundsensearch:
-    image: amundsendev/amundsen-search:1.1.1
+    image: amundsendev/amundsen-search:{{__amundsen_search_version}}
     container_name: amundsensearch
     ports:
       - 28004:5000
@@ -708,10 +775,10 @@ services:
       - CREDENTIALS_PROXY_PASSWORD=abc123!
       - PROXY_ENDPOINT=atlas:21000
       - PROXY_CLIENT=ATLAS
-    restart: always
+    restart: {{container_restart_policy}}
 
   amundsenmetadata:
-    image: amundsendev/amundsen-metadata:1.0.12
+    image: amundsendev/amundsen-metadata:{{__amundsen_metadata_version}}
     container_name: amundsenmetadata
     depends_on:
       - atlas
@@ -723,12 +790,15 @@ services:
       - PROXY_HOST=atlas
       - PROXY_PORT=21000
       - PROXY_CLIENT=ATLAS
-    restart: always
+    restart: {{container_restart_policy}}
+  {% endif %}   {#  AMUNDSEN_enabled #}
+{% endif %}   {#  ATLAS_enabled #}
 
+{% if (HUE_enabled and SOLR_enabled)  | default(false) %}
   # Data Engineering Tools ===============================================
 
   hue:
-    image: gethue/hue:4.4.0
+    image: gethue/hue:{{__hue_version}}
     container_name: hue
     hostname: hue
     dns: 8.8.8.8
@@ -739,38 +809,48 @@ services:
     depends_on:
       - hue-db
       - solr
-    restart: always
+    restart: {{container_restart_policy}}
 
   hue-db:
-    image: postgres:10
+    image: postgres:{{__hue_postgres_version}}
     container_name: hue-db
     hostname: hue-db
     environment:
       POSTGRES_DB: hue
       POSTGRES_PASSWORD: hue
       POSTGRES_USER: hue
-    restart: always
+    restart: {{container_restart_policy}}
 
+{% endif %}   {#  HUE_enabled and SOLR_enabled #}
+
+{%if STREAMSETS_enabled | default(false) %}
   streamsets:
-    image: trivadis/streamsets-kafka-hadoop-aws
+    image: trivadis/streamsets-kafka-hadoop-aws:{{__tvd_streamsets_version}}
     container_name: streamsets
     hostname: streamsets
     ports:
       - "28029:18630"
-    restart: always
+    restart: {{container_restart_policy}}
+{% endif %}   {#  STREAMSETS_enabled  #}
+
+{%if STREAMSETS_enabled | default(false) %}
 
   nifi:
-    image: apache/nifi
+    image: apache/nifi:{{__nifi_version}}
     container_name: nifi
     hostname: nifi
     ports:
       - "28054:8080"
-    restart: always
+    restart: {{container_restart_policy}}
 
-  # Data Science Tools ===============================================
+{% endif %}   {#  STREAMSETS_enabled  #}
 
+
+
+{%if ZEPPELIN_enabled | default(false) %}
+# Data Science Tools ===============================================
   zeppelin:
-    image: trivadis/apache-zeppelin:0.8.1-hadoop-3.1.1-spark-2.4.3
+    image: trivadis/apache-zeppelin:{{__tvd_zeppelin_version}}
     container_name: zeppelin
     hostname: zeppelin
     ports:
@@ -793,14 +873,16 @@ services:
       - ./conf/zeppelin/shiro.ini:/opt/zeppelin/conf/shiro.ini
       - ./conf/zeppelin/interpreter-setting.json:/opt/zeppelin/interpreter/spark/interpreter-setting.json
       - './conf/s3cfg:/root/.s3cfg'
-    restart: always
+    restart: {{container_restart_policy}}
+{% endif %}   {#  ZEPPELIN_enabled  #}
 
-
+{%if JUPYTER_enabled | default(false) %}
+# Data Science Tools ===============================================
   # make sure to get Spark to fit with the version of spark master
   # - 2.4.0 tag 59b402ce701d
   # - 2.4.3 tag abdb27a6dfbb
   jupyter:
-    image: jupyter/all-spark-notebook:abdb27a6dfbb
+    image: jupyter/all-spark-notebook:{{__jupyter_version}}
     container_name: jupyter
     hostname: jupyter
     ports:
@@ -810,45 +892,51 @@ services:
       JUPYTER_TOKEN: "abc123!"
       GRANT_SUDO: "true"
       TINI_SUBREAPER: "true"
-    restart: always
+    restart: {{container_restart_policy}}
 
-  # Data Visualization ===============================================
+{% endif %}   {#  JUPYTER_enabled  #}
 
-{% if with_grafana | default(false) %}
+
+
+{% if GRAFANA_enabled | default(false) %}
+# Data Visualization ===============================================
   grafana:
-    image: grafana/grafana
+    image: grafana/grafana:{{__graphana_version}}
     hostname: grafana
     container_name: grafana
     ports:
       - "28099:3000"
-    restart: always
-{% endif %}   {# with_grafana #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  GRAFANA_enabled #}
 
-  # NoSQL ===============================================
 
-{% if with_redis | default(false) %}
+
+
+{% if REDIS_enabled | default(false) %}
+# NoSQL ===============================================
   redis:
     container_name: redis
-    hostname: redis
+    hostname: redis:{{__redis_version}}
     image: redis
     ports:
       - 6379:6379
-    restart: always
+    restart: {{container_restart_policy}}
 
   redis-commander:
     container_name: redis-commander
     hostname: redis-commander
-    image: rediscommander/redis-commander:latest
+    image: rediscommander/redis-commander:{{__redis_commander_version}}
     environment:
       - REDIS_HOSTS=local:redis:6379
     ports:
       - "28057:8081"
-    restart: always
-{% endif %}   {# with_redis #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  REDIS_enabled #}
 
-{% if with_cassandra | default(false) %}
+{% if CASSANDRA_enabled | default(false) %}
+# NoSQL ===============================================
   cassandra-1:
-    image: cassandra
+    image: cassandra:{{__cassandra_version}}
     container_name: cassandra-1
 
     ports:
@@ -860,7 +948,7 @@ services:
       - CASSANDRA_CLUSTER_NAME="Test Cluster"
       - CASSANDRA_DC=se1
       - CASSANDRA_ENDPOINT_SNITCH=GossipingPropertyFileSnitch
-    restart: always
+    restart: {{container_restart_policy}}
 
   cassandra-web:
     image: trivadis/cassandra-web
@@ -872,12 +960,13 @@ services:
       - CASSANDRA_PORT=9042
       - CASSANDRA_USERNAME=cassandra
       - CASSANDRA_PASSWORD=cassandra
-    restart: always
-{% endif %}   {# with_cassandra #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  CASSANDRA_enabled #}
 
-{% if with_mongo | default(false) %}
+{% if MONGODB_enabled | default(false) %}
+# NoSQL ===============================================
   mongodb:
-    image: mongo
+    image: mongo:{{__mongodb_version}}
     container_name: mongodb
     ports:
       - 27017:27017
@@ -888,37 +977,39 @@ services:
     volumes:
       # seeding scripts
       - ./conf/mongo-entrypoint:/docker-entrypoint-initdb.d
-    restart: always
+    restart: {{container_restart_policy}}
 
   mongo-express:
-    image: mongo-express
+    image: mongo-express:{{__mongo_express_version}}
     container_name: mongo-express
     ports:
       - 28056:8081
     environment:
       - ME_CONFIG_MONGODB_SERVER=mongodb
-    restart: always
+    restart: {{container_restart_policy}}
 
   admin-mongo:
-    image: adicom/admin-mongo
+    image: adicom/admin-mongo:{{__mongo_admin_version}}
     container_name: admin-mongo
     ports:
       - 28051:1234
-    restart: always
-{% endif %}   {# with_mongo #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  MONGODB_enabled #}
 
-{% if with_solr | default(false) %}
+{% if SOLR_enabled | default(false) %}
+# NoSQL ===============================================
   solr:
-    image: solr
+    image: solr:{{__solr_version}}
     container_name: solr
     ports:
       - "28081:8983"
-    restart: always
-{% endif %}   {# with_solr #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  SOLR_enabled #}
 
-{% if with_elasticsearch | default(false) %}
+{% if ELASTICSEARCH_enabled | default(false) %}
+# NoSQL ===============================================
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:6.7.0
+    image: docker.elastic.co/elasticsearch/elasticsearch:{{__elasticsearch_version}}
     hostname: elasticsearch
     container_name: elasticsearch
     ports:
@@ -927,34 +1018,34 @@ services:
     environment:
       XPACK_SECURITY_ENABLED: "false"
       xpack.monitoring.enabled: "false"
-    restart: always
+    restart: {{container_restart_policy}}
 
   dejavu:
-    image: appbaseio/dejavu
+    image: appbaseio/dejavu:{{__dejavu_version}}
     hostname: dejuvu
     container_name: dejavu
     ports:
       - "28000:1358"
-    restart: always
+    restart: {{container_restart_policy}}
 
   cerebro:
-    image: lmenezes/cerebro
+    image: lmenezes/cerebro:{{__cerebro_version}}
     hostname: cerebro
     container_name: cerebro
     ports:
       - "28061:9000"
-    restart: always
+    restart: {{container_restart_policy}}
 
   elastichq:
-    image: elastichq/elasticsearch-hq
+    image: elastichq/elasticsearch-hq:{{__elasticsearchhq_version}}
     hostname: elatichq
     container_name: elastichq
     ports:
       - "28052:5000"
 
-  {% if with_kibana | default(false) %}
+  {% if KIBANA_enabled | default(false) %}
   kibana:
-    image: docker.elastic.co/kibana/kibana:6.7.0
+    image: docker.elastic.co/kibana/kibana:{{__kibana_version}}
     hostname: kibana
     container_name: kibana
     depends_on:
@@ -974,13 +1065,14 @@ services:
       XPACK_REPORTING_ENABLED: "false"
       XPACK_SECURITY_ENABLED: "false"
     command: [ "/bin/bash", "-c", "/usr/share/kibana/bin/kibana-plugin remove x-pack; /usr/local/bin/kibana-docker" ]
-    restart: always
-  {% endif %}   {# with_kibana #}
-{% endif %}   {# with_elasticsearch #}
+    restart: {{container_restart_policy}}
+  {% endif %}   {#  KIBANA_enabled #}
+{% endif %}   {#  ELASTICSEARCH_enabled #}
 
-{% if with_neo4j | default(false) %}
+{% if NEO4J_enabled | default(false) %}
+# NoSQL ===============================================
   neo4j:
-    image: neo4j:latest
+    image: neo4j:{{__neo4j_version}}
     hostname: neo4j
     container_name: neo4j
     ports:
@@ -990,25 +1082,26 @@ services:
       - NEO4J_dbms_security_procedures_unrestricted=apoc.*
       - NEO4J_apoc_import_file_enabled=true
       - NEO4J_dbms_shell_enabled=true
-    restart: always
-{% endif %}   {# with_neo4j #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  NEO4J_enabled #}
 
-{% if with_tile38 | default(false) %}
+{% if TILE38_enabled | default(false) %}
+# NoSQL ===============================================
   tile38:
-    image: tile38/tile38
+    image: tile38/tile38:{{__tile38_version}}
     container_name: tile38
     ports:
       - "9851:9851"
-    restart: always
-{% endif %}   {# with_tile38 #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  TILE38_enabled #}
 
 
-  # RDBMS ===============================================
 
-{% if with_mysql | default(false) %}
 
+{% if MYSQL_enabled | default(false) %}
+# RDBMS ===============================================
   mysql:
-    image: mysql:8
+    image: mysql:{{__mysql_version}}
     container_name: mysql
     ports:
       - 3306:3306
@@ -1018,12 +1111,13 @@ services:
       - MYSQL_PASSWORD=sample
       - MYSQL_ROOT_PASSWORD=manager
       - MYSQL_LOG_CONSOLE=true
-    restart: always
-{% endif %}   {# with_mysql #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  MYSQL_enabled #}
 
-{% if with_sqlserver | default(false) %}
+{% if SQLSERVER_enabled | default(false) %}
+# RDBMS ===============================================
   sqlserver:
-    image: mcr.microsoft.com/mssql/server:2017-latest-ubuntu
+    image: mcr.microsoft.com/mssql/server:{{__sqlserver_version}}
     hostname: sqlserver
     container_name: sqlserver
     ports:
@@ -1032,34 +1126,35 @@ services:
       ACCEPT_EULA: "Y"
       SA_PASSWORD: "SqlServerAdmin123!"
       MSSQL_PID: "Express"
-    restart: always
-{% endif %}   {# with_sqlserver #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  SQLSERVER_enabled #}
 
-{% if with_postgresql | default(false) %}
+{% if POSTGRESQL_enabled | default(false) %}
+# RDBMS ===============================================
   postgresql:
-    image: mujz/pagila
+    image: mujz/pagila:{{__postgres_version}}
     container_name: postgresql
     environment:
       - POSTGRES_PASSWORD=sample
       - POSTGRES_USER=sample
       - POSTGRES_DB=sample
-    restart: always
-{% endif %}   {# with_postgresql #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  POSTGRESQL_enabled #}
 
-{% if with_adminer | default(false) %}
+{% if ADMINER_enabled | default(false) %}
   adminer:
-    image: adminer
+    image: adminer:{{__adminer_version}}
     container_name: adminer
     ports:
       - 28041:8080
-    restart: always
-{% endif %}   {# with_adminer #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  ADMINER_enabled #}
 
-{% if with_axon | default(false) %}
+{% if AXON_enabled | default(false) %}
   # Event Store ===============================================
 
   axon-server:
-    image: axoniq/axonserver
+    image: axoniq/axonserver:{{__axon_version}}
     container_name: axon-server
     hostname: axon-server
     ports:
@@ -1071,50 +1166,53 @@ services:
       - AXONSERVER_CONTROLDB=/controldb
       - AXONSERVER_HTTP_PORT=8024
       - AXONSERVER_GRPC_PORT=8124
-    restart: always
-{% endif %}   {# with_axon #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  AXON_enabled #}
 
 
-  #  Data Integration ===============================================
 
-{% if with_mqtt | default(false) %}
 
-  {% if use_mosquitto | default(false) %}
+{% if MQTT_enabled | default(false) %}
+#  Data Integration ===============================================
+
+  {% if MOSQUITTO_enabled | default(false) %}
   mosquitto-1:
-    image: eclipse-mosquitto:latest
+    image: eclipse-mosquitto:{{__mosquitto_version}}
     hostname: mosquitto-1
     ports:
       - "28100:1883"
       - "28023:9001"
     volumes:
       - ./conf/mosquitto/mosquitto-1.conf:/mosquitto/config/mosquitto.conf
-    restart: always
-  {% endif %}   {# use_mosquitto #}
+    restart: {{container_restart_policy}}
+  {% endif %}   {#  MOSQUITTO_enabled #}
 
-  {% if use_hivemq | default(false) %}
+  {% if HIVEMQ_enabled | default(false) %}
   mqtt-1:
-    image: hivemq/hivemq3
+    image: hivemq/hivemq3:{{__hivemq3_version}}
     hostname: mqtt-1
     container_name: mqtt-1
     ports:
       - "28101:1883"
       - "28024:8080"
-    restart: always
-  {% endif %}   {# use_hivemq #}
+    restart: {{container_restart_policy}}
+  {% endif %}   {#  HIVEMQ_enabled #}
 
-  {% if with_mqtt_ui | default(false) %}
+  {% if MQTT_UI_enabled | default(false) %}
   mqtt-ui:
-    image: vergissberlin/hivemq-mqtt-web-client
+    image: vergissberlin/hivemq-mqtt-web-client:{{__hivemq_mqtt_web_client_version}}
+
     hostname: mqtt-ui
     container_name: mqtt-ui
-    restart: always
+    restart: {{container_restart_policy}}
     ports:
       - '28082:80'
-  {% endif %}   {# with_mqtt_ui #}
-{% endif %}   {# with_mqtt #}
+  {% endif %}   {#  MQTT_UI_enabled #}
+{% endif %}   {#  MQTT_enabled #}
 
+{% if ACTIVEMQ_enabled | default(false) %}
   activemq:
-    image: rmohr/activemq
+    image: rmohr/activemq:{{__activemq_version}}
     container_name: activemq
     ports:
       # mqtt
@@ -1131,11 +1229,12 @@ services:
       - "28070:61616"
     volumes:
       - ./container-volume/activemq/data:/opt/activemq/data
-    restart: always
+    restart: {{container_restart_policy}}
+{% endif %}   {#  ACTIVEMQ_enabled #}
 
-{% if with_ftp | default(false) %}
+{% if FTP_enabled | default(false) %}
   ftp:
-    image: stilliard/pure-ftpd
+    image: stilliard/pure-ftpd:{{__ftp_pureftpd_version}}
     container_name: ftp
     hostname: ftp
     environment:
@@ -1148,10 +1247,10 @@ services:
     ports:
       - "21:21"
       - "30000-30009:30000-30009"
-    restart: always
+    restart: {{container_restart_policy}}
 
   filezilla:
-    image: jlesage/filezilla
+    image: jlesage/filezilla:{{__ftp_filezilla_version}}
     container_name: filezilla
     volumes:
       - ./data-transfer:/data-transfer
@@ -1163,14 +1262,15 @@ services:
 #      - "/files:/storage:rw"
     environment:
       - VNC_PASSWORD=admin123
-{% endif %}   {# with_ftp #}
+{% endif %}   {#  FTP_enabled #}
 
-  #  Object Store (S3) ===============================================
 
-{% if with_minio | default(false) %}
+
+{% if MINIO_enabled | default(false) %}
+#  Object Store (S3) ===============================================
   minio:
     hostname: minio
-    image: minio/minio
+    image: minio/minio:{{__minio_version}}
     container_name: minio
     ports:
       - '28083:9000'
@@ -1181,11 +1281,12 @@ services:
       MINIO_ACCESS_KEY: V42FCGRVMK24JJ8DHUYG
       MINIO_SECRET_KEY: bKhWxVF3kQoLY9kFmt91l+tDrEoZjqnWXzY9Eza
     command: server /data
-    restart: always
-{% endif %}   {# with_minio #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  MINIO_enabled #}
 
+{% if AWSCLI_enabled | default(false) %}
   awscli:
-    image: xueshanf/awscli
+    image: xueshanf/awscli:{{__awscli_version}}
     container_name: awscli
     hostname: awscli
     volumes:
@@ -1196,14 +1297,16 @@ services:
       AWS_ACCESS_KEY_ID: V42FCGRVMK24JJ8DHUYG
       AWS_SECRET_ACCESS_KEY: bKhWxVF3kQoLY9kFmt91l+tDrEoZjqnWXzY9Eza
     command: tail -f /dev/null
-    restart: always
+    restart: {{container_restart_policy}}
+{% endif %}   {#  AWSCLI_enabled #}
 
 
+
+
+{% if PORTAINER_enabled | default(false) %}
   #  Container UI ===============================================
-
-{% if with_portainer | default(false) %}
   portainer:
-    image: portainer/portainer
+    image: portainer/portainer:{{__portainer_version}}
     container_name: portainer
     command: --admin-password '$$2y$$05$$NrPTXkUOIHTTbdHUqdAZVuSbncaZ9frWZYXDbA4v/WYqY0nAY1Sui'
     volumes:
@@ -1214,5 +1317,7 @@ services:
 #      - VIRTUAL_PORT=9000
     ports:
       - 28071:9000
-    restart: always
-{% endif %}   {# with_portainer #}
+    restart: {{container_restart_policy}}
+{% endif %}   {# PORTAINER_enabled #}
+
+
