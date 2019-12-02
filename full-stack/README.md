@@ -154,6 +154,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28033 | 9000 | portainer |
 28034 | 8088 | ksqldb-server-1 |
 28035 | 8089 | ksqldb-server-2 |
+28036 | 8089 | ksqldb-server-3 |
 28038 | 8000 | kafka-connect-ui     |
 28039 | 8000 | schema-registry-ui     |
 28040 | 8080 | kadmin     |
