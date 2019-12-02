@@ -103,17 +103,17 @@ services:
       KAFKA_JMX_HOSTNAME: 'broker-3'
     restart: always
       
-  schema-registry:
+  schema-registry-1:
     image: confluentinc/cp-schema-registry:5.3.0
-    hostname: schema-registry
-    container_name: schema-registry
+    hostname: schema-registry-1
+    container_name: schema-registry-1
     depends_on:
       - zookeeper-1
       - broker-1
     ports:
       - "28030:8081"
     environment:
-      SCHEMA_REGISTRY_HOST_NAME: schema-registry
+      SCHEMA_REGISTRY_HOST_NAME: schema-registry-1
       SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL: 'zookeeper-1:2181'
       SCHEMA_REGISTRY_ACCESS_CONTROL_ALLOW_ORIGIN: '*'
       SCHEMA_REGISTRY_ACCESS_CONTROL_ALLOW_METHODS: 'GET,POST,PUT,OPTIONS'
@@ -125,7 +125,7 @@ services:
     depends_on:
       - zookeeper-1
       - broker-1
-      - schema-registry
+      - schema-registry-1
     ports:
       - "28013:8083"
     environment:
@@ -141,9 +141,9 @@ services:
       CONNECT_STATUS_STORAGE_TOPIC: docker-connect-status
       CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 3
       CONNECT_KEY_CONVERTER: io.confluent.connect.avro.AvroConverter
-      CONNECT_KEY_CONVERTER_SCHEMA_REGISTRY_URL: 'http://schema-registry:8081'
+      CONNECT_KEY_CONVERTER_SCHEMA_REGISTRY_URL: 'http://schema-registry-1:8081'
       CONNECT_VALUE_CONVERTER: io.confluent.connect.avro.AvroConverter
-      CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL: 'http://schema-registry:8081'
+      CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL: 'http://schema-registry-1:8081'
       CONNECT_INTERNAL_KEY_CONVERTER: org.apache.kafka.connect.json.JsonConverter
       CONNECT_INTERNAL_VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
       CONNECT_ZOOKEEPER_CONNECT: 'zookeeper-1:2181'
@@ -162,7 +162,7 @@ services:
     depends_on:
       - zookeeper-1
       - broker-1
-      - schema-registry
+      - schema-registry-1
     ports:
       - "28014:8084"
     environment:
@@ -178,9 +178,9 @@ services:
       CONNECT_STATUS_STORAGE_TOPIC: docker-connect-status
       CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 3
       CONNECT_KEY_CONVERTER: io.confluent.connect.avro.AvroConverter
-      CONNECT_KEY_CONVERTER_SCHEMA_REGISTRY_URL: 'http://schema-registry:8081'
+      CONNECT_KEY_CONVERTER_SCHEMA_REGISTRY_URL: 'http://schema-registry-1:8081'
       CONNECT_VALUE_CONVERTER: io.confluent.connect.avro.AvroConverter
-      CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL: 'http://schema-registry:8081'
+      CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL: 'http://schema-registry-1:8081'
       CONNECT_INTERNAL_KEY_CONVERTER: org.apache.kafka.connect.json.JsonConverter
       CONNECT_INTERNAL_VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
       CONNECT_ZOOKEEPER_CONNECT: 'zookeeper-1:2181'
@@ -200,7 +200,7 @@ services:
       - '28031:8088'
     depends_on:
       - broker-1
-      - schema-registry
+      - schema-registry-1
     environment:
       KSQL_CONFIG_DIR: "/etc/ksql"
       KSQL_LOG4J_OPTS: "-Dlog4j.configuration=file:/etc/ksql/log4j-rolling.properties"
@@ -210,7 +210,7 @@ services:
       KSQL_LISTENERS: "http://0.0.0.0:8088"
       KSQL_CACHE_MAX_BYTES_BUFFERING: 0
       # Schema Registry using HTTPS
-      KSQL_KSQL_SCHEMA_REGISTRY_URL: "http://schema-registry:8081"
+      KSQL_KSQL_SCHEMA_REGISTRY_URL: "http://schema-registry-1:8081"
       KSQL_KSQL_SERVICE_ID: "kafka-demo"
       KSQL_PRODUCER_INTERCEPTOR_CLASSES: io.confluent.monitoring.clients.interceptor.MonitoringProducerInterceptor
       KSQL_CONSUMER_INTERCEPTOR_CLASSES: io.confluent.monitoring.clients.interceptor.MonitoringConsumerInterceptor
@@ -226,7 +226,7 @@ services:
       - '28032:8088'
     depends_on:
       - broker-1
-      - schema-registry
+      - schema-registry-1
     environment:
       KSQL_CONFIG_DIR: "/etc/ksql"
       KSQL_LOG4J_OPTS: "-Dlog4j.configuration=file:/etc/ksql/log4j-rolling.properties"
@@ -236,7 +236,7 @@ services:
       KSQL_LISTENERS: "http://0.0.0.0:8088"
       KSQL_CACHE_MAX_BYTES_BUFFERING: 0
       # Schema Registry using HTTPS
-      KSQL_KSQL_SCHEMA_REGISTRY_URL: "http://schema-registry:8081"
+      KSQL_KSQL_SCHEMA_REGISTRY_URL: "http://schema-registry-1:8081"
       KSQL_KSQL_SERVICE_ID: "kafka-demo"
       KSQL_PRODUCER_INTERCEPTOR_CLASSES: io.confluent.monitoring.clients.interceptor.MonitoringProducerInterceptor
       KSQL_CONSUMER_INTERCEPTOR_CLASSES: io.confluent.monitoring.clients.interceptor.MonitoringConsumerInterceptor
@@ -250,13 +250,13 @@ services:
     container_name: rest-proxy-1
     depends_on:
       - broker-1
-      - schema-registry
+      - schema-registry-1
     ports:
       - "28012:8086"
     environment:
       KAFKA_REST_ZOOKEEPER_CONNECT: '${DOCKER_HOST_IP}:2181'
       KAFKA_REST_LISTENERS: 'http://0.0.0.0:8086'
-      KAFKA_REST_SCHEMA_REGISTRY_URL: 'http://schema-registry:8081'
+      KAFKA_REST_SCHEMA_REGISTRY_URL: 'http://schema-registry-1:8081'
       KAFKA_REST_HOST_NAME: 'rest-proxy'
     restart: always
  
@@ -276,7 +276,7 @@ services:
     container_name: schema-registry-ui
     depends_on:
       - broker-1
-      - schema-registry
+      - schema-registry-1
     ports:
       - "28039:8000"
     environment:
@@ -351,7 +351,7 @@ services:
               properties:
                 bootstrap.servers: "broker-1:9092,broker-2:9093"
               schema-registry:
-                url: "http://schema-registry:8081"
+                url: "http://schema-registry-1:8081"
               connect:
                 url: "http://connect-1:8083"
     depends_on:
@@ -365,7 +365,7 @@ services:
       - ./conf/burrow:/etc/burrow/
       - ./tmp:/var/tmp/burrow
     ports:
-      - 28037:8000
+      - 28104:8000
     depends_on:
       - zookeeper-1
       - broker-1
@@ -375,9 +375,9 @@ services:
     image: generalmills/burrowui
     container_name: burrow-ui
     ports:
-      - 23000:3000
+      - 28104:3000
     environment:
-      - BURROW_HOME="http://${PUBLIC_IP}:28000/v3/kafka"
+      - BURROW_HOME="http://${PUBLIC_IP}:28104/v3/kafka"
     depends_on:
       - zookeeper-1
       - broker-1
@@ -387,9 +387,9 @@ services:
     image: joway/burrow-dashboard
     container_name: burrow-dashboard
     ports:
-      - 28036:80
+      - 28103:80
     environment:
-      - BURROW_BACKEND="http://${PUBLIC_IP}:28037"
+      - BURROW_BACKEND="http://${PUBLIC_IP}:28104"
     depends_on:
       - zookeeper-1
       - broker-1
@@ -660,7 +660,7 @@ services:
     container_name: atlas
     hostname: atlas    
     ports:
-      - 28034:21000
+      - 28105:21000
     environment:
       - ATLAS_PROVISION_EXAMPLES=true
     volumes:
