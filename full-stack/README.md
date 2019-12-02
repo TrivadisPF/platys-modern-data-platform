@@ -13,7 +13,7 @@ The following services are provisioned as part of the Modern Data Platform:
    * Zoonavigator (Mgmt UI)
  * Kafka (Confluent Platform)
    * Kafka Broker 1 -3
-   * Confluent Schema Registry
+   * Confluent Schema Registry 1 - 2
    * Kafka Connect 1-2
    * Confluent Rest Proxy 1 
    * KSQL Server 1-2
@@ -149,14 +149,11 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28027 | 10000 | hive-server |
 28028 | 10002 | hive-server |
 28029 | 18630 | streamsets     |
-28030 | 8081 | schema-registry     |
-28031 | 8088 | ksql-server-1 |
-28032 | 8089 | ksql-server-2 |
+28030 | 8081 | schema-registry-1     |
+28031 | 8081 | schema-registry-2     |
 28033 | 9000 | portainer |
-28034 | 21000 | atlas |
-28035 | 3000 | burrow-ui |
-28036 | 80 | burrow-dashboard |
-28037 | 8000 | burrow     |
+28034 | 8088 | ksqldb-server-1 |
+28035 | 8089 | ksqldb-server-2 |
 28038 | 8000 | kafka-connect-ui     |
 28039 | 8000 | schema-registry-ui     |
 28040 | 8080 | kadmin     |
@@ -217,5 +214,9 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28099 | 3000 | grafana |
 28100 | 1883 | mosquitto-1 |
 28101 | 1883 | mqtt-1 |
+28102 | 3000 | burrow-ui |
+28103 | 80 | burrow-dashboard |
+28104 | 8000 | burrow |
+28105 | 21000 | atlas |
 
 An overview of the URL for the various web-based UIs can be found [here](./environment/README.md).
