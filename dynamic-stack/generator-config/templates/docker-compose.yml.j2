@@ -18,6 +18,7 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
 {% set __tvd_hadoop_version = tvd_hadoop_version | default('latest') -%}
 
 {% set __tvd_spark_version = tvd_spark_version | default('latest') -%}
+{% set __tvd_spark_livy_version = tvd_spark_livy_version | default('latest') -%}
 
 {% set __hive_version = hive_version | default('latest') -%}
 
@@ -159,18 +160,26 @@ services:
 {% endif %} {# KAFKA_enabled #}
 
 {% if ( KAFKA_enabled and KAFKA_schema_registry_enabled ) | default(false) %}
-  schema-registry-1:
+  {% for num in range(KAFKA_schema_registry_nodes | default(1) ) %}
+    {% set external_port = 28030 + loop.index - 1 %}
+    {% set port = 8081 + loop.index - 1 %}
+  schema-registry-{{loop.index}}:
     image: confluentinc/cp-schema-registry:{{__confluent_platform_version}}
-    hostname: schema-registry-1
-    container_name: schema-registry-1
+    hostname: schema-registry-{{loop.index}}
+    container_name: schema-registry-{{loop.index}}
     depends_on:
       - zookeeper-1
       - broker-1
     ports:
-      - "28030:8081"
+      - "{{external_port}}:{{port}}"
     environment:
-      SCHEMA_REGISTRY_HOST_NAME: schema-registry-1
+      SCHEMA_REGISTRY_HOST_NAME: schema-registry-{{loop.index}}
+      {% if (KAFKA_schema_registry_use_zookeeper_election) | default(false) %}
       SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL: 'zookeeper-1:2181'
+      {% endif %} {# KAFKA_schema_registry_use_zookeeper_election #}
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: 'broker-1:9092'
+      SCHEMA_REGISTRY_MASTER_ELIGIBILITY: "true"
+      SCHEMA_REGISTRY_KAFKASTORE_TOPIC_REPLICATION_FACTOR: {{KAFKA_schema_registry_replication_factor}}
       SCHEMA_REGISTRY_ACCESS_CONTROL_ALLOW_ORIGIN: '*'
       SCHEMA_REGISTRY_ACCESS_CONTROL_ALLOW_METHODS: 'GET,POST,PUT,OPTIONS'
     restart: {{container_restart_policy}}
@@ -221,58 +230,38 @@ services:
 {% endif %}   {# KAFKA_enabled and KAFKA_connect_enabled  #}
 
 {% if (KAFKA_enabled and KAFKA_ksqldb_enabled )| default(false) %}
-  ksqldb-server-1:
+  {% for num in range(KAFKA_ksqldb_nodes | default(1) ) %}
+    {% set external_port = 28034 + loop.index - 1 %}
+    {% set port = 8088 + loop.index - 1 %}
+  ksqldb-server-{{loop.index}} :
     image: confluentinc/ksqldb-server:{{__ksql_db_version}}
-    hostname: ksqldb-server-1
-    container_name: ksqldb-server-1
+    hostname: ksqldb-server-{{loop.index}}
+    container_name: ksqldb-server-{{loop.index}}
     ports:
-      - "28034:8088"
+      - "{{external_port}}:{{port}}"
     depends_on:
       - broker-1
       - schema-registry-1
     environment:
       KSQL_CONFIG_DIR: "/etc/ksql"
       KSQL_LOG4J_OPTS: "-Dlog4j.configuration=file:/etc/ksql/log4j-rolling.properties"
-      KSQL_BOOTSTRAP_SERVERS: "broker-1:9092,broker-2:9093"
-      KSQL_HOST_NAME: ksqldb-server-1
+      KSQL_BOOTSTRAP_SERVERS: "broker-1:9092"
+      KSQL_HOST_NAME: ksqldb-server-{{loop.index}}
       KSQL_APPLICATION_ID: "kafka-demo"
-      KSQL_LISTENERS: http://0.0.0.0:8088
+      KSQL_LISTENERS: http://0.0.0.0:{{port}}
       KSQL_KSQL_LOGGING_PROCESSING_STREAM_AUTO_CREATE: "true"
       KSQL_KSQL_LOGGING_PROCESSING_TOPIC_AUTO_CREATE: "true"
       KSQL_KSQL_SERVICE_ID: "kafka-demo"
     volumes:
       - $PWD/ksql:/etc/ksql/ext
     restart: {{container_restart_policy}}
-
-  ksqldb-server-2:
-    image: confluentinc/ksqldb-server:{{__ksql_db_version}}
-    hostname: ksqldb-server-2
-    container_name: ksqldb-server-2
-    ports:
-      - "28035:8088"
-    depends_on:
-      - broker-1
-      - schema-registry-1
-    environment:
-      KSQL_CONFIG_DIR: "/etc/ksql"
-      KSQL_LOG4J_OPTS: "-Dlog4j.configuration=file:/etc/ksql/log4j-rolling.properties"
-      KSQL_BOOTSTRAP_SERVERS: "broker-1:9092,broker-2:9093"
-      KSQL_HOST_NAME: ksqldb-server-2
-      KSQL_APPLICATION_ID: "kafka-demo"
-      KSQL_LISTENERS: http://0.0.0.0:8088
-      KSQL_KSQL_LOGGING_PROCESSING_STREAM_AUTO_CREATE: "true"
-      KSQL_KSQL_LOGGING_PROCESSING_TOPIC_AUTO_CREATE: "true"
-      KSQL_KSQL_SERVICE_ID: "kafka-demo"
-    volumes:
-      - $PWD/ksql:/etc/ksql/ext
-    restart: {{container_restart_policy}}
+  {% endfor %}
 
   ksqldb-cli:
     image: confluentinc/ksqldb-cli:{{__ksql_db_version}}
     container_name: ksqldb-cli
     depends_on:
       - ksqldb-server-1
-      - ksqldb-server-2
     entrypoint: /bin/sh
     tty: true
 {% endif %}   {# KAFKA_broker_enabled and KAFKA_ksqldb_enabled #}
@@ -294,7 +283,6 @@ services:
       KAFKA_REST_HOST_NAME: 'rest-proxy'
     restart: {{container_restart_policy}}
 {% endif %}   {# KAFKA_enabled and KAFKA_ksqldb_enabled #}
-
 
 
 {% if (KAFKA_enabled and KAFKA_mqttproxy_enabled) | default(false) %}
@@ -324,7 +312,7 @@ services:
       restart: {{container_restart_policy}}
 {% endif %}   {# KAFKA_enabled and KAFKA_schema_registry_ui_enabled #}
 
-{% if (KAFKA_enabled and KAFKA_connect_ui_enabled) | default(false) %}
+{% if (KAFKA_enabled and KAFKA_connect_enabled AND KAFKA_connect_ui_enabled) | default(false) %}
   kafka-connect-ui:
     image: landoop/kafka-connect-ui:{{__kafka_connect_ui_version}}
     container_name: kafka-connect-ui
@@ -335,13 +323,8 @@ services:
       PROXY: "true"
     depends_on:
       - connect-1
-      - connect-2
     restart: {{container_restart_policy}}
 {% endif %}   {# KAFKA_enabled and KAFKA_connect_ui_enabled #}
-
-
-
-
 
 {% if (KAFKA_enabled and KAFKA_manager_enabled) | default(false) %}
   kafka-manager:
@@ -351,8 +334,6 @@ services:
     depends_on:
       - zookeeper-1
       - broker-1
-      - broker-2
-      - broker-3
     ports:
       - "28044:9000"
     environment:
@@ -405,7 +386,7 @@ services:
           connections:
             docker-kafka-server:
               properties:
-                bootstrap.servers: "broker-1:9092,broker-2:9093"
+                bootstrap.servers: "broker-1:9092"
               schema-registry:
                 url: "http://schema-registry-1:8081"
               connect:
@@ -414,7 +395,6 @@ services:
       - broker-1
     restart: {{container_restart_policy}}
 {% endif %}   {#  KAFKA_enabled and KAFKA_kafkahq_enabled #}
-
 
 
 {% if (KAFKA_enabled and KAFKA_burrow_enabled) | default(false) %}
@@ -577,7 +557,7 @@ services:
     restart: {{container_restart_policy}}
 
 
-    {% for num in range(SPARK_workers | default(1) ) %}
+  {% for num in range(SPARK_workers | default(1) ) %}
       {% set external_port = 28077 + loop.index - 1 %}
       {% set webui_port = 28077 + loop.index - 1 %}
 
@@ -602,8 +582,23 @@ services:
       - ./conf/spark/spark-defaults.conf:/spark/conf/spark/spark-defaults.conf
     restart: {{container_restart_policy}}
 
- {% endfor %}
+  {% endfor %}
 
+  # Initialize the folder for Spark logs in HDFS
+  hadoop-setup:
+    image: trivadis/apache-hadoop-client:{{__tvd_hadoop_version}}
+    hostname: hadoop-setup
+    container_name: hadoop-setup
+    env_file:
+      - ./conf/hadoop.env
+    depends_on:
+      - namenode
+    entrypoint: "bash -c 'echo Waiting for Hadoop to be ready... && \
+                       dockerize -wait tcp://namenode:9870 -timeout 120s && \
+                       hadoop fs -mkdir -p /var/log/spark/logs &&
+                       sleep infinity'"
+
+  {% if SPARK_history_enabled | default(false) %}
   spark-history:
     image: trivadis/apache-spark-worker:{{__tvd_spark_version}}
     command: /spark/bin/spark-class org.apache.spark.deploy.history.HistoryServer
@@ -616,7 +611,9 @@ services:
     volumes:
       - ./conf/spark/spark-defaults.conf:/spark/conf/spark/spark-defaults.conf
     restart: {{container_restart_policy}}
+  {% endif %}   {#  SPARK_history_enabled #}
 
+  {% if SPARK_thrift_enabled | default(false) %}
   spark-thrift-server:
     image: trivadis/apache-spark-master:{{__tvd_spark_version}}
     container_name: spark-thrift-server
@@ -628,18 +625,24 @@ services:
       - ./conf/hive-site.xml:/spark/conf/hive-site.xml
       - ./conf/spark/spark-defaults.conf:/spark/conf/spark/spark-defaults.conf
     command: bash -c "sleep 2m && /spark/sbin/start-thriftserver.sh && tail -f /spark/logs/spark--org.apache.spark.sql.hive.thriftserver.HiveThriftServer2-*.out"
+  {% endif %}   {#  SPARK_thrift_enabled #}
 
+  {% if SPARK_livy_enabled | default(false) %}
   livy:
-    image: registry.gitlab.com/rychly-edu/docker/docker-livy
+    image: trivadis/apache-livy:{{tvd_spark_livy_version}}
     container_name: livy
     hostname: livy
-    environment:
-      - LIVY_PORT=8998
-      - MASTER=spark://spark-master:7077
-      - DEPLOY_MODE=cluster
+    env_file:
+      - ./conf/hadoop.env
+    volumes:
+      - ./conf/spark/spark-defaults.conf:/spark/conf/spark-defaults.conf
     ports:
       - "28021:8998"
-    restart: {{container_restart_policy}}
+    environment:
+      - SPARK_MASTER=yarn
+      - DEPLOY_MODE=cluster
+    restart: always
+  {% endif %}   {#  SPARK_livy_enabled #}
 {% endif %}   {#  SPARK_enabled #}
 
 
@@ -830,6 +833,17 @@ services:
     hostname: streamsets
     ports:
       - "28029:18630"
+    environment:
+      SDC_OFFSET_DIRECTORY: /data/custom-offset-el
+      SDC_JAVA_OPTS: "-Xmx2g -Xms2g"
+      SDC_JAVA8_OPTS: "-XX:+UseG1GC"
+      SDC_CONF_MONITOR_MEMORY: "true"
+      SDC_CONF_PIPELINE_MAX_RUNNERS_COUNT: 50
+    volumes:
+#      - ./container-volume/streamsets/data:/data:Z
+#      - ./streamsets-extras/streamsets-libs-extras/streamsets-datacollector-jdbc-lib/postgresql-42.2.6.jar:/opt/streamsets-datacollector-{{__tvd_streamsets_version}}/streamsets-libs-extras/streamsets-datacollector-jdbc-lib/lib/postgresql-42.2.6.jar:Z
+#      - ./streamsets-extras/libs-common-lib:/opt/streamsets-datacollector-{{__tvd_streamsets_version}}/libs-common-lib:Z
+#      - ./streamsets-extras/user-libs:/opt/streamsets-datacollector-user-libs:Z
     restart: {{container_restart_policy}}
 {% endif %}   {#  STREAMSETS_enabled  #}
 
@@ -860,19 +874,29 @@ services:
     env_file:
       - ./conf/hadoop.env
     environment:
+      # AWS Credentials
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+
+      ZEPPELIN_ADDR: "0.0.0.0"
+      ZEPPELIN_PORT: "8080"
+      ZEPPELIN_INTERPRETER_CONNECT_TIMEOUT: 120000
       SPARK_MASTER: "spark://spark-master:7077"
+
       # set spark-master for Zeppelin interpreter
       MASTER: "spark://spark-master:7077"
       SPARK_DRIVER_HOST: zeppelin
       SPARK_DRIVER_BINDADDRESS: "0.0.0.0"
       PYSPARK_PYTHON: "python3"
-      SPARK_SUBMIT_OPTIONS: "--packages org.apache.commons:commons-lang3:3.5"
+# no longer necessary with 0.8.2 of Zepplin
+#      - SPARK_SUBMIT_OPTIONS="--packages org.apache.commons:commons-lang3:3.5"
+      # enableV4 to make it work with AWS Frankfurt region
+      SPARK_SUBMIT_OPTIONS: "--conf spark.driver.extraJavaOptions=-Dcom.amazonaws.services.s3.enableV4 --conf spark.executor.extraJavaOptions=-Dcom.amazonaws.services.s3.enableV4"
     volumes:
-      - ./conf/hive-site.xml:/spark/conf/hive-site.xml
       - ./conf/spark/spark-defaults.conf:/spark/conf/spark/spark-defaults.conf
       - ./conf/zeppelin/shiro.ini:/opt/zeppelin/conf/shiro.ini
       - ./conf/zeppelin/interpreter-setting.json:/opt/zeppelin/interpreter/spark/interpreter-setting.json
-      - './conf/s3cfg:/root/.s3cfg'
+      - ./data-transfer:/data-transfer
     restart: {{container_restart_policy}}
 {% endif %}   {#  ZEPPELIN_enabled  #}
 
@@ -1319,5 +1343,3 @@ services:
       - 28071:9000
     restart: {{container_restart_policy}}
 {% endif %}   {# PORTAINER_enabled #}
-
-
