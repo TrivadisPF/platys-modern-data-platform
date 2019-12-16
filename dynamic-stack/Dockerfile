@@ -4,4 +4,4 @@ COPY ./generator-config /opt/analytics-generator
 COPY ./static-data /opt/static-data
 
 # we asume that the output volume is mapped to /stacks
-CMD ["sh", "-c", "cp /opt/static-data /stacks && docker-compose-templer -f /opt/analytics-generator/stack-config.yml"  ]
+CMD ["sh", "-c", "cp -r /opt/static-data /stacks && docker-compose-templer -f /opt/analytics-generator/stack-config.yml"  ]
