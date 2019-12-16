@@ -9,7 +9,7 @@ then
    docker run --rm -v ${args[0]}:/tmp/custom-values.yml -v ${args[1]}:/opt/analytics-generator/stacks  --user $(id -u):$(id -g) trivadis/modern-data-platform-stack-generator:${args[2]}
    # Remove all empty lines at the end of the file
    sed -i -e :a -e '/^\n*$/{$d;N;ba' -e '}' ${args[1]}/**/docker-compose.yml
-   echo "Successfully generated the Modern Data Platform Stack to " + ${args[1]}
+   echo "Successfully generated the Modern Data Platform Stack to " ${args[1]}
 else
   echo "mdps-generate version 1.0.0"
   echo "Run the Modern Data Platform Stack Generator."
