@@ -2,83 +2,115 @@
 # This is the {{ stack_name }} stack
 # =====================================================
 
+## Modern Data Platform Stack - List of Services
+
+{% set __confluent_platform_version = confluent_platform_version | default('latest') -%}
+{% set __zoonavigator_version = zoonavigator_version | default('latest') -%}
+{% set __zoonavigator_api_version = zoonavigator_api_version | default('latest') -%}
+{% set __ksql_db_version = ksql_db_version | default('latest') -%}
+{% set __schema_registry_ui_version = schema_registry_ui_version | default('latest') -%}
+
+{% set __kafka_connect_ui_version = kafka_connect_ui_version | default('latest') -%}
+{% set __kafka_manager_version = kafka_manager_version | default('latest') -%}
+{% set __kafka_kafdrop_version = kafka_kafdrop_version | default('latest') -%}
+{% set __kafka_kadmin_version = kafka_kadmin_version | default('latest') -%}
+{% set __kafka_kafkahq_version = kafka_kafkahq_version | default('latest') -%}
+{% set __kafka_burrow_version = kafka_burrow_version | default('latest') -%}
+{% set __kafka_burrow_ui_version = kafka_burrow_ui_version | default('latest') -%}
+{% set __kafka_burrow_dashboard_version = kafka_burrow_dashboard_version | default('latest') -%}
+
+{% set __tvd_hadoop_version = tvd_hadoop_version | default('latest') -%}
+
+{% set __tvd_spark_version = tvd_spark_version | default('latest') -%}
+{% set __tvd_spark_livy_version = tvd_spark_livy_version | default('latest') -%}
+
+{% set __hive_version = hive_version | default('latest') -%}
+
+{% set __tvd_atlas_verion = tvd_atlas_verion | default('latest') -%}
+
+{% set __cassandra_version = cassandra_version | default('latest') -%}
+
+{% set __elasticsearch_version = elasticsearch_version | default('latest') -%}
+{% set __dejavu_version = dejavu_version | default('latest') -%}
+{% set __cerebro_version = cerebro_version | default('latest') -%}
+{% set __elasticsearchhq_version = elasticsearchhq_version | default('latest') -%}
+
+
+{% set __amundsen_frontend_version = amundsen_frontend_version | default('latest') -%}
+{% set __amundsen_search_version = amundsen_search_version | default('latest') -%}
+{% set __amundsen_metadata_version = amundsen_metadata_version | default('latest') -%}
+
+{% set __hue_version = hue_version | default('latest') -%}
+{% set __hue_postgres_version = hue_postgres_version | default('latest') -%}
+
+{% set __tvd_streamsets_version = tvd_streamsets_version | default('latest') -%}
+
+{% set __nifi_version = nifi_version | default('latest') -%}
+
+{% set __tvd_zeppelin_version = tvd_zeppelin_version | default('latest') -%}
+
+{% set __jupyter_version = jupyter_version | default('latest') -%}
+
+{% set __graphana_version = graphana_version | default('latest') -%}
+
+{% set __kibana_version = kibana_version | default('latest') -%}
+
+{% set __redis_version = redis_version | default('latest') -%}
+{% set __redis_commander_version = redis_commander_version | default('latest') -%}
+
+{% set __mongodb_version = mongodb_version | default('latest') -%}
+{% set __mongo_express_version = mongo_express_version | default('latest') -%}
+{% set __mongo_admin_version = mongo_admin_version | default('latest') -%}
+
+{% set __solr_version = solr_version | default('latest') -%}
+
+{% set __neo4j_version = neo4j_version | default('latest') -%}
+
+{% set __tile38_version = tile38_version | default('latest') -%}
+
+{% set __mysql_version = mysql_version | default('latest') -%}
+{% set __postgres_version = postgres_version | default('latest') -%}
+{% set __sqlserver_version = sqlserver_version | default('latest') -%}
+{% set __adminer_version = adminer_version | default('latest') -%}
+
+{% set __axon_version = axon_version | default('latest') -%}
+
+{% set __mosquitto_version = mosquitto_version | default('latest') -%}
+{% set __hivemq3_version = hivemq3_version | default('latest') -%}
+{% set __hivemq_mqtt_web_client_version = hivemq_mqtt_web_client_version | default('latest') -%}
+{% set __activemq_version = activemq_version | default('latest') -%}
+
+{% set __ftp_pureftpd_version = ftp_pureftpd_version | default('latest') -%}
+{% set __ftp_filezilla_version = ftp_filezilla_version | default('latest') -%}
+
+{% set __minio_version = minio_version | default('latest') -%}
+{% set __awscli_version = awscli_version | default('latest') -%}
+{% set __portainer_version = portainer_version | default('latest') %}
+
+
 Service          |  Image Tag  | Url
 ------------- | ----------|----------------
 {% if ZOOKEEPER_enabled | default(false) %}
- {% for num in range(ZOOKEEPER_nodes | default('1') ) %}
+  {% for num in range(ZOOKEEPER_nodes | default('1') ) %}
 zookeeper-{{loop.index}}     |  {{__confluent_platform_version}}         | -
- {% endfor %}
+  {% endfor %}
 zoonavigator  | {{__zoonavigator_version}} | http://analyticsplatform:28047
 zoonavigator-api  | {{__zoonavigator_api_version}} | http://analyticsplatform:28048
 {% endif %}   {# ZOOKEEPER_enabled #}
 {% if KAFKA_enabled | default(false) %}
- {% for num in range(KAFKA_nodes | default('1') ) %}
+  {% for num in range(KAFKA_nodes | default('1') ) %}
 broker-{{loop.index}}     |  {{__confluent_platform_version}}         | -
- {% endfor %}
-{% endif %}   {# ZOOKEEPER_enabled #}
-
-
-
-
-
-{% if KAFKA_enabled | default(false) %}
-# Kafka ===============================================
-  {% for num in range(KAFKA_broker_nodes | default(1) ) %}
-  {% set port = 9091 + loop.index %}
-  broker-{{loop.index}}:
-    image: confluentinc/cp-kafka:{{__confluent_platform_version}}
-    container_name: broker-{{loop.index}}
-    depends_on:
-      - zookeeper-1
-    ports:
-      - "{{port}}:{{port}}"
-  {% if KAFKA_volume_map_data | default(false) %}
-    volumes:
-      - ./container-volume/broker-{{loop.index}}:/var/lib/kafka/data
-  {% endif %}   {# KAFKA_volume_map_data #}
-    environment:
-      KAFKA_BROKER_ID: {{loop.index}}
-      KAFKA_BROKER_RACK: 'r{{loop.index}}'
-      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper-1:2181'
-      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://${PUBLIC_IP}:{{port}}'
-#      KAFKA_METRIC_REPORTERS: io.confluent.metrics.reporter.ConfluentMetricsReporter
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
-      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
-      KAFKA_DELETE_TOPIC_ENABLE: '{{ KAFKA_delete_topic_enable | default(omit) }}'
-      KAFKA_AUTO_CREATE_TOPICS_ENABLE: '{{ KAFKA_auto_create_topics_enable | default(omit) }}'
-      KAFKA_JMX_PORT: {{9093 + loop.index}}
-      KAFKA_JMX_OPTS: '-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.rmi.port={{9093 + loop.index}}'
-      KAFKA_JMX_HOSTNAME: 'broker-{{loop.index}}'
-    restart: {{container_restart_policy}}
-
   {% endfor %}
-
-{% endif %} {# KAFKA_enabled #}
+{% endif %}   {# ZOOKEEPER_enabled #}
+{% if ( KAFKA_enabled and KAFKA_schema_registry_enabled ) | default(false) %}
+  {% for num in range(KAFKA_schema_registry_nodes | default(1) ) %}
+  {% set external_port = 28030 + loop.index - 1 %}
 
 {% if ( KAFKA_enabled and KAFKA_schema_registry_enabled ) | default(false) %}
   {% for num in range(KAFKA_schema_registry_nodes | default(1) ) %}
     {% set external_port = 28030 + loop.index - 1 %}
     {% set port = 8081 + loop.index - 1 %}
-  schema-registry-{{loop.index}}:
-    image: confluentinc/cp-schema-registry:{{__confluent_platform_version}}
-    hostname: schema-registry-{{loop.index}}
-    container_name: schema-registry-{{loop.index}}
-    depends_on:
-      - zookeeper-1
-      - broker-1
-    ports:
-      - "{{external_port}}:{{port}}"
-    environment:
-      SCHEMA_REGISTRY_HOST_NAME: schema-registry-{{loop.index}}
-      {% if (KAFKA_schema_registry_use_zookeeper_election) | default(false) %}
-      SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL: 'zookeeper-1:2181'
-      {% endif %} {# KAFKA_schema_registry_use_zookeeper_election #}
-      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: 'broker-1:9092'
-      SCHEMA_REGISTRY_MASTER_ELIGIBILITY: "true"
-      SCHEMA_REGISTRY_KAFKASTORE_TOPIC_REPLICATION_FACTOR: {{KAFKA_schema_registry_replication_factor}}
-      SCHEMA_REGISTRY_ACCESS_CONTROL_ALLOW_ORIGIN: '*'
-      SCHEMA_REGISTRY_ACCESS_CONTROL_ALLOW_METHODS: 'GET,POST,PUT,OPTIONS'
-    restart: {{container_restart_policy}}
+schema-registry-{{loop.index}}  |  {{__confluent_platform_version}}         | http://analyticsplatform:{{external_port}}
   {% endfor %}
 {% endif %}   {# KAFKA_enabled and KAFKA_schema_registry_enabled #}
 
