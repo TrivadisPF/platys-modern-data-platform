@@ -9,7 +9,11 @@ then
    # Remove all empty lines at the end of the file
    sed -i -e :a -e '/^\n*$/{$d;N;ba' -e '}' ${args[1]}/**/docker-compose.yml
 else
-  echo "Usage : service-generator.sh [custom yml path] [output folder path]"
+  echo "mdps-generate version 1.0.0"
+  echo "Run the Modern Data Platform Stack Generator."
+  echo ""  
+  echo "Usage: "
+  echo "  mdps-generate [custom yml folder path] [output folder path] [mdp stack version]"
 fi
 
 
