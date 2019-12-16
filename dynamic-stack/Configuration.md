@@ -27,4 +27,11 @@ Config        |  Default | Description
  | | 
 `KAFKA_restproxy_enabled`  | `false` | Generate Confluent REST Proxy service
 `KAFKA_mqttproxy_enabled`  | `false` | Generate Confluent MQTT Proxy service
+`KAFKA_schema_registry_ui_enabled`  | `false` | Generate Landoop Schema-Registry UI service
+`KAFKA_connect_ui_enabled`  | `false` | Generate Landoop Connect UI service
+`KAFKA_manager_enabled`  | `false` | Generate Kafka Manger service
+`KAFKA_kafdrop_enabled`  | `false` | Generate Kafdrop service
+`KAFKA_kadmin_enabled`  | `false` | Generate KAdmin service
+`KAFKA_kafkahq_enabled`  | `false` | Generate KafkaHQ service
+`KAFKA_burrow_enabled`  | `false` | Generate Burrow service
 
