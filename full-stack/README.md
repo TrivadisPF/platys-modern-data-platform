@@ -16,7 +16,7 @@ The following services are provisioned as part of the Modern Data Platform:
    * Confluent Schema Registry 1 - 2
    * Kafka Connect 1-2
    * Confluent Rest Proxy 1 
-   * KSQL Server 1-2
+   * ksqlDB Server 1-2
    * Kafka REST Proxy
    * Confluent MQTT Proxy
    * Schema Registry UI
@@ -107,6 +107,9 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 7687 | 7687 | neo4j |
 8088 | 8088 | resourcemanager |
 8042 | 8042 | nodemanager |
+2181 | 2181 | zookeeper-1 |
+2182 | 2181 | zookeeper-2 |
+2183 | 2181 | zookeeper-3 |
 9092 | 9092 | broker-1     |
 9093 | 9093 | broker-2     |
 9094 | 9094 | broker-3     |
