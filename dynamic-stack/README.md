@@ -10,12 +10,18 @@ You can run the Modern Data Platform Stack Generator (MDP Stack Generator) on ma
 
 The service generator is available as a docker image from where it can be run. 
 
-It can be found here under `trivadis/modern-data-platform-stack-generator`.
+It can be found on [Docker Hub](https://hub.docker.com/repository/docker/trivadis/modern-data-platform-stack-generator) under `trivadis/modern-data-platform-stack-generator`.
 
 Tag           |  Description
 ------------- | --------------------------
 1.0.0         | Initial, first version
 
+
+To build the docker image locally, perfrom
+
+```
+docker build -t trivadis/modern-data-platform-stack-generator:1.0.0 .
+```
 
 ## Prerequisites
 
@@ -33,7 +39,7 @@ Follow the instructions below to install the MDP Stack Generator on a Mac or Lin
 * Run this command to download the current stable release of the MDP Stack Generator:
 
 ```
-sudo curl -L "https://raw.githubusercontent.com/TrivadisPF/modern-data-platform-stack/master/dynamic-stack/mdps-generate.sh" -o /usr/local/bin/mdps-generate
+sudo curl -L "https://github.com/TrivadisPF/modern-data-platform-stack/releases/download/1.0.0/mdps-generate.sh" -o /usr/local/bin/mdps-generate
 ```
 
 * Apply executable permissions to the binary:
@@ -75,20 +81,19 @@ Create a `custom.yml` inside the `config`folder. The list of variables that can 
 nano config/custom.yml
 ```
 
-and add the following content (please ensure indentation is respected in your custom file as this is important for YML files):
+Now add the following content (please ensure indentation is respected in your custom file as this is important for YML files) to the `custom.yml` file:
 
 ```
-      stack_name: kafka-stack
+  stack_name: kafka-stack
 
-      ZOOKEEPER_enabled: true
-      KAFKA_enabled: true
-      KAFKA_auto_create_topics_enable: true
-      KAFKA_manager_enabled: true
-      KAFKA_kafkahq_enabled: true
+  ZOOKEEPER_enabled: true
+  KAFKA_enabled: true
+  KAFKA_manager_enabled: true
+  KAFKA_kafkahq_enabled: true
 
 ```
 
-The value in the `custom.yml` file override the settings done in the `generator-config/vars/default-values.yml` file. 
+The value in the `custom.yml` file override the settings provided in `generator-config/vars/default-values.yml` file. These configuration settings are documented [here](Configuration.md).
 
 
 Now we can run the MDP Stack Generator providing 3 mandatory positional arguments:
