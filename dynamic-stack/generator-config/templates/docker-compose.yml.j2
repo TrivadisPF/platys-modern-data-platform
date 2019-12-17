@@ -48,7 +48,12 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
 
 {% set __tvd_zeppelin_version = tvd_zeppelin_version | default('latest') -%}
 
-{% set __jupyter_version = jupyter_version | default('latest') -%}
+{% set __jupyter_minimal_version = jupyter_minimal_version | default('latest') -%}
+{% set __jupyter_r_version = jupyter_r_version | default('latest') -%}
+{% set __jupyter_scipy_version = jupyter_scipy_version | default('latest') -%}
+{% set __jupyter_datascience_version = jupyter_datascience_version | default('latest') -%}
+{% set __jupyter_tensorflow_version = jupyter_tensorflow_version | default('latest') -%}
+{% set __jupyter_all_spark_version = jupyter_all_spark_version | default('latest') -%}
 
 {% set __graphana_version = graphana_version | default('latest') -%}
 
@@ -853,7 +858,7 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {#  STREAMSETS_enabled  #}
 
-{%if STREAMSETS_enabled | default(false) %}
+{%if NIFI_enabled | default(false) %}
 
   nifi:
     image: apache/nifi:{{__nifi_version}}
@@ -863,9 +868,7 @@ services:
       - "28054:8080"
     restart: {{container_restart_policy}}
 
-{% endif %}   {#  STREAMSETS_enabled  #}
-
-
+{% endif %}   {#  NIFI_enabled  #}
 
 {%if ZEPPELIN_enabled | default(false) %}
 # Data Science Tools ===============================================
@@ -906,27 +909,128 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {#  ZEPPELIN_enabled  #}
 
-{%if JUPYTER_enabled | default(false) %}
-# Data Science Tools ===============================================
+{# #}
+{#  ================================== Jupyter ========================================== #}
+{# #}
+{%if jupyter_minimal_enabled | default(false) %}
   # make sure to get Spark to fit with the version of spark master
-  # - 2.4.0 tag 59b402ce701d
-  # - 2.4.3 tag abdb27a6dfbb
   jupyter:
-    image: jupyter/all-spark-notebook:{{__jupyter_version}}
+    image: jupyter/r-notebook:{{__jupyter_minimal_version}}
     container_name: jupyter
     hostname: jupyter
     ports:
       - "28060:8888"
     environment:
       JUPYTER_ENABLE_LAB: "true"
-      JUPYTER_TOKEN: "abc123!"
+      JUPYTER_TOKEN: "{{admin_password}}"
       GRANT_SUDO: "true"
       TINI_SUBREAPER: "true"
+    {% if JUPYTER_volume_map_data %}
+    volumes:
+      - "./container-volume/jupyter/work:/home/jovyan/work"
+    {% endif %}
     restart: {{container_restart_policy}}
+{% endif %}   {#  jupyter_minimal_enabled  #}
 
+{%if jupyter_r_enabled | default(false) %}
+  # make sure to get Spark to fit with the version of spark master
+  jupyter:
+    image: jupyter/r-notebook:{{__jupyter_r_version}}
+    container_name: jupyter
+    hostname: jupyter
+    ports:
+      - "28060:8888"
+    environment:
+      JUPYTER_ENABLE_LAB: "true"
+      JUPYTER_TOKEN: "{{admin_password}}"
+      GRANT_SUDO: "true"
+      TINI_SUBREAPER: "true"
+    {% if JUPYTER_volume_map_data %}
+    volumes:
+      - "./container-volume/jupyter/work:/home/jovyan/work"
+    {% endif %}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  jupyter_r_enabled  #}
+
+{%if jupyter_scipy_enabled | default(false) %}
+  # make sure to get Spark to fit with the version of spark master
+  jupyter:
+    image: jupyter/scipy-notebook:{{__jupyter_scipy_version}}
+    container_name: jupyter
+    hostname: jupyter
+    ports:
+      - "28060:8888"
+    environment:
+      JUPYTER_ENABLE_LAB: "true"
+      JUPYTER_TOKEN: "{{admin_password}}"
+      GRANT_SUDO: "true"
+      TINI_SUBREAPER: "true"
+    {% if JUPYTER_volume_map_data %}
+    volumes:
+      - "./container-volume/jupyter/work:/home/jovyan/work"
+    {% endif %}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  jupyter_scipy_enabled  #}
+
+{%if JUPYTER_tensorflow_enabled | default(false) %}
+  # make sure to get Spark to fit with the version of spark master
+  jupyter:
+    image: jupyter/tensorflow-notebook:{{__jupyter_tensorflow_version}}
+    container_name: jupyter
+    hostname: jupyter
+    ports:
+      - "28060:8888"
+    environment:
+      JUPYTER_ENABLE_LAB: "true"
+      JUPYTER_TOKEN: "{{admin_password}}"
+      GRANT_SUDO: "true"
+      TINI_SUBREAPER: "true"
+    {% if JUPYTER_volume_map_data %}
+    volumes:
+      - "./container-volume/jupyter/work:/home/jovyan/work"
+    {% endif %}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  JUPYTER_tensorflow_enabled  #}
+
+{%if JUPYTER_datascience_enabled | default(false) %}
+  # make sure to get Spark to fit with the version of spark master
+  jupyter:
+    image: jupyter/datascience-notebook:{{__jupyter_datascience_version}}
+    container_name: jupyter
+    hostname: jupyter
+    ports:
+      - "28060:8888"
+    environment:
+      JUPYTER_ENABLE_LAB: "true"
+      JUPYTER_TOKEN: "{{admin_password}}"
+      GRANT_SUDO: "true"
+      TINI_SUBREAPER: "true"
+    {% if JUPYTER_volume_map_data %}
+    volumes:
+      - "./container-volume/jupyter/work:/home/jovyan/work"
+    {% endif %}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  JUPYTER_datascience_enabled  #}
+
+{%if JUPYTER_all_spark_enabled | default(false) %}
+  # make sure to get Spark to fit with the version of spark master
+  jupyter:
+    image: jupyter/all-spark-notebook:{{__jupyter_all_spark_version}}
+    container_name: jupyter
+    hostname: jupyter
+    ports:
+      - "28060:8888"
+    environment:
+      JUPYTER_ENABLE_LAB: "true"
+      JUPYTER_TOKEN: "{{admin_password}}"
+      GRANT_SUDO: "true"
+      TINI_SUBREAPER: "true"
+    {% if JUPYTER_volume_map_data %}
+    volumes:
+      - "./container-volume/jupyter/work:/home/jovyan/work"
+    {% endif %}
+    restart: {{container_restart_policy}}
 {% endif %}   {#  JUPYTER_enabled  #}
-
-
 
 {% if GRAFANA_enabled | default(false) %}
 # Data Visualization ===============================================
