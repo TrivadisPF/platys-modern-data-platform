@@ -121,3 +121,6 @@ Render template: 'templates/docker-compose.yml.j2' --> 'stacks/docker-compose.ym
 Modern Data Platform Stack generated successfully to /home/bigdata/mdp-kafka-stack-example/docker
 ```
 
+You should now find fully configured `docker-compose.yml` file (according to the settings chosen) as well as some static configuration files, necessary for some services. These static configuration files are not dynamically chosen and available, even if you haven't chosen the service they are for. 
+
+Additionally a `mdps-services.yml` file is generated, describing the services which are part of the stack. This is **not yet complete** and might be used to generate a more readable page (i.e. markdown).
