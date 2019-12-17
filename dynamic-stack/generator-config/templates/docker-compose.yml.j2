@@ -1303,22 +1303,27 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {#  AXON_enabled #}
 
-
-
-
 {% if MQTT_enabled | default(false) %}
 #  Data Integration ===============================================
 
   {% if MOSQUITTO_enabled | default(false) %}
-  mosquitto-1:
+    {% for num in range(MOSQUITTO_nodes | default(1) ) %}
+      {% set external_port_1 = 28100 + loop.index - 1 %}
+      {% set external_port_2 = 28023 + loop.index %}
+  mosquitto-{{loop.index}}:
     image: eclipse-mosquitto:{{__mosquitto_version}}
-    hostname: mosquitto-1
+    hostname: mosquitto-{{loop.index}}
+    container_name: mosquitto-{{loop.index}}
     ports:
-      - "28100:1883"
-      - "28023:9001"
+      - "{{external_port_1}}:1883"
+      - "{{external_port_2}}:9001"
     volumes:
-      - ./conf/mosquitto/mosquitto-1.conf:/mosquitto/config/mosquitto.conf
+      - ./conf/mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf
+    {% if MOSQUITTO_volume_map_data %}
+      - "./container-volume/mosquitto-{{loop.index}}:/mosquitto/data/"
+    {% endif %}
     restart: {{container_restart_policy}}
+    {% endfor %}
   {% endif %}   {#  MOSQUITTO_enabled #}
 
   {% if HIVEMQ_enabled | default(false) %}
