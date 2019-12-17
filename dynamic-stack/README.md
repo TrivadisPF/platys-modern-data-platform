@@ -17,7 +17,7 @@ Tag           |  Description
 1.0.0         | Initial, first version
 
 
-To build the docker image locally, perfrom
+If you want to build the docker image locally, perform (this is not necessary if you follow the installation instructions below).
 
 ```
 docker build -t trivadis/modern-data-platform-stack-generator:1.0.0 .
@@ -60,6 +60,7 @@ sudo rm /usr/local/bin/mdps-generate
 
 Let's see the MDP Stack Generator in Action. We will use it to create a stack running Kafka and Zookeeper.
 
+### Configuring the generator
 
 First create a directory for the project:
 
@@ -67,7 +68,7 @@ First create a directory for the project:
 mkdir mdps-kafka-example
 ```
 
-Inside the directory create a `config` folder for the custom configuration for the generator and a `docker` folder to hold the generated artefacts.
+In this new folder, create a `config` folder for the custom configuration for the generator and a `docker` folder to hold the generated artefacts.
 
 ```
 cd mdps-kafka-example
@@ -75,13 +76,14 @@ mkdir docker
 mkdir config
 ```
 
-Create a `custom.yml` inside the `config`folder. The list of variables that can be configured for the service generator can be found in the `generator-config/vars/default-values.yml`
+Create a `custom.yml` inside the `config` folder. This file will be used to override the default settings defined in the file  
+ [`generator-config/vars/default-values.yml`](./generator-config/vars/default-values.yml) file. These configuration settings are also documented [here](./Configuration.md).
 
 ```
 nano config/custom.yml
 ```
 
-Now add the following content (please ensure indentation is respected in your custom file as this is important for YML files) to the `custom.yml` file:
+Now add the following content (please ensure indentation is respected in your custom file as this is important for YML files) to the `custom.yml` file. 
 
 ```
   stack_name: kafka-stack
@@ -93,8 +95,9 @@ Now add the following content (please ensure indentation is respected in your cu
 
 ```
 
-The value in the `custom.yml` file override the settings provided in `generator-config/vars/default-values.yml` file. These configuration settings are documented [here](Configuration.md).
+You only have to explicitly enable what you need, as each service is disabled by default. Other settings have meaningful defaults as well. 
 
+### Running the generator
 
 Now we can run the MDP Stack Generator providing 3 mandatory positional arguments:
 
@@ -102,7 +105,7 @@ Now we can run the MDP Stack Generator providing 3 mandatory positional argument
   * the path on where the artefacts (such as `docker-compose.yml` file) should be generated to, i.e. `docker`
   * the version of the MDP Stack Generator, actual version is `1.0.0`
 
-From inside the mdps-kafka-example folder, run the following command:
+From inside the `mdps-kafka-example` folder, run the following command:
 
 ```
 mdps-generate ${PWD}/config/custom.yml ${PWD}/docker 1.0.0
