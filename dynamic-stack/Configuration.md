@@ -67,6 +67,43 @@ Config        |  Default | Description
 `JUPYTER_datascience_enabled`  | `false` | Generate Jupyter Datascience Notebook service
 `JUPYTER_all_spark_enabled`  | `false` | Generate Jupyter All Spark Notebook service
 `JUPYTER_volume_map_data`  | `false` | Volume map data folder into the Jupyter service
-
+**_Grafana_** |  | 
+`GRAFANA_enabled`  | `false` | Generate Grafana service
+**_Redis_** |  | 
+`REDIS_enabled`  | `false` | Generate Redis service
+**_Apache Cassandra_** |  | 
+`CASSANDRA_enabled`  | `false` | Generate Elasticsearch service
+**_MongoDB_** |  | 
+`MONGODB_enabled`  | `false` | Generate MongoDB service
+**_Apache Solr_** |  | 
+`SOLR_enabled`  | `false` | Generate Solr service
+**_Elasticsearch & Kibana_** |  | 
+`ELASTICSEARCH_enabled`  | `false` | Generate Elasticsearch service
+`KIBANA_enabled`  | `false` | Generate Kibana service
+**_Neo4J_** |  | 
+`NEO4J_enabled`  | `false` | Generate Neo4J service
+**_Tile38_** |  | 
+`TILE38_enabled`  | `false` | Generate Tile38 service
+**_RDBMS_** |  | 
+`MYSQL_enabled`  | `false` | Generate MySQL service
+`SQLSERVER_enabled`  | `false` | Generate SQL Server service
+`POSTGRESQL_enabled`  | `false` | Generate PostgreSQL service
+`ADMINER_enabled`  | `false` | Generate Adminer RDBMS Admin UI service
+**_Event Store_** |  | 
+`AXON_enabled`  | `false` | Generate Axon Server service
+**_MQTT_** |  | 
+`MQTT_enabled`  | `false` | Generate MQTT service, either using Mosquitto or HiveMQ
+`MOSQUITTO_enabled`  | `false` | Generate Mosquitto service
+`HIVEMQ_enabled`  | `false` | Generate HiveMQ service
+`MQTT_UI_enabled`  | `false` | Generate MQTT UI service
+**_ActiveMQ_** |  | 
+`ACTIVEMQ_enabled`  | `false` | Generate ActiveMQ service
+**_FTP_** |  | 
+`FTP_enabled`  | `false` | Generate FTP service
+**_Object Storage_** |  | 
+`MINIO_enabled`  | `false` | Generate Minio service
+`AWSCLI_enabled`  | `false` | Generate AWSCli service
+**_Container_** |  | 
+`PORTAINER_enabled`  | `false` | Generate Portainer Container UI service
 
 
