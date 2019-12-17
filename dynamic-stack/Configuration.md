@@ -26,7 +26,7 @@ Config        |  Default | Description
 `KAFKA_ksqldb_enabled`  | `false` | Generate ksqlDB service
 `KAFKA_ksqldb_nodes`   | `2` | number of ksqlDB nodes
 **_Confluent REST and MQTT Proxy_** |  | 
-``KAFKA_restproxy_enabled`  | `false` | Generate Confluent REST Proxy service
+`KAFKA_restproxy_enabled`  | `false` | Generate Confluent REST Proxy service
 `KAFKA_mqttproxy_enabled`  | `false` | Generate Confluent MQTT Proxy service
 **_Kafka UIs_** |  | 
 `KAFKA_schema_registry_ui_enabled`  | `false` | Generate Landoop Schema-Registry UI service
