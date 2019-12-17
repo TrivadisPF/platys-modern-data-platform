@@ -94,6 +94,8 @@ Config        |  Default | Description
 **_MQTT_** |  | 
 `MQTT_enabled`  | `false` | Generate MQTT service, either using Mosquitto or HiveMQ
 `MOSQUITTO_enabled`  | `false` | Generate Mosquitto service
+`MOSQUITTO_nodes `  | `1` | number of Mosquitto nodes
+`MOSQUITTO_volume_map_data `  | `false` | Volume map data folder into the Mosquitto broker
 `HIVEMQ_enabled`  | `false` | Generate HiveMQ service
 `MQTT_UI_enabled`  | `false` | Generate MQTT UI service
 **_ActiveMQ_** |  | 
