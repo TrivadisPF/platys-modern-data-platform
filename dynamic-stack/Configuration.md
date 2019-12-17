@@ -1,6 +1,6 @@
 ## Configuration
 
-The list of variables that can be configured for the service generator can be found in the `generator-config/vars/default-values.yml`
+The list of variables that can be configured for the service generator can be found in the [`generator-config/vars/default-values.yml`](./generator-config/vars/default-values.yml)
 
 
 Config        |  Default | Description
