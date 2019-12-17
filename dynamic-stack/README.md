@@ -12,15 +12,15 @@ The service generator is available as a docker image from where it can be run.
 
 It can be found on [Docker Hub](https://hub.docker.com/repository/docker/trivadis/modern-data-platform-stack-generator) under `trivadis/modern-data-platform-stack-generator`.
 
-Tag           |  Description
-------------- | --------------------------
-1.0.0         | Initial, first version
-
+Tag      | Status         |  Changes
+---------|----------------| --------------------------
+1.1.0    | on-going       | Support of different Jupyter versions, Support of multiple MQTT brokers
+1.0.0    | stable         | Initial, first version
 
 If you want to build the docker image locally, perform (this is not necessary if you follow the installation instructions below).
 
 ```
-docker build -t trivadis/modern-data-platform-stack-generator:1.0.0 .
+docker build -t trivadis/modern-data-platform-stack-generator:1.1.0 .
 ```
 
 ## Prerequisites
@@ -103,7 +103,7 @@ Now we can run the MDP Stack Generator providing 3 mandatory positional argument
 
   * the path for your custom yml stack file, i.e. `config/custom.yml`
   * the path on where the artefacts (such as `docker-compose.yml` file) should be generated to, i.e. `docker`
-  * the version of the MDP Stack Generator, actual version is `1.0.0`
+  * the version of the MDP Stack Generator, actual stable version is `1.0.0`
 
 From inside the `mdps-kafka-example` folder, run the following command:
 
