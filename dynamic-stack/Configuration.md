@@ -1,6 +1,9 @@
 ## Configuration
 
-The list of variables that can be configured for the service generator can be found in the [`generator-config/vars/default-values.yml`](./generator-config/vars/default-values.yml)
+This is the documentation of the configuration settings which can be overwritten using a custom YAML file. All the defaults are defined in [`generator-config/vars/default-values.yml`](./generator-config/vars/default-values.yml).
+
+There are configuration settings for enabling/disabling a given service. They are named `XXXXX_enabled` where XXXXX is the name of the service. 
+For each service there might be some other settings, such as controlling the number of nodes to start the service with, whether the service should map a data volume into the container or controlling some other proprietary configuration properties of the service itself.
 
 
 Config        |  Default | Since |  Description
