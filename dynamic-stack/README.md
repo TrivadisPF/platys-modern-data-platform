@@ -16,7 +16,7 @@ It can be found on [Docker Hub](https://hub.docker.com/repository/docker/trivadi
 
 Tag      | Status         |  Changes
 ---------|----------------| --------------------------
-1.1.0    | on-going       | Support of different Jupyter versions, Support of multiple MQTT brokers
+1.1.0    | on-going       | Support of different Jupyter versions, Support of multiple MQTT brokers, InfluxDB added
 1.0.0    | stable         | Initial, first version
 
 If you want to build the docker image locally, perform (this is not necessary if you follow the installation instructions below).
