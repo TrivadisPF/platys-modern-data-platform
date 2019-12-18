@@ -1,4 +1,4 @@
-# Modern Data Platform Stack   ![](https://pbs.twimg.com/profile_images/1115917118485217280/fvWGyi3J_400x400.png)
+# Modern Data Platform Stack   ![](https://www.trivadis.com/hubfs/tri_logo_high.jpg)
 
 This project sets up the infrastructure for testing a modern data platform stack with services such as
 
