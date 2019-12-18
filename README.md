@@ -1,4 +1,4 @@
-# Modern Analytical Data Platform Stack
+# Modern Analytical Data Platform Stack [Trivadis](https://www.google.com/search?q=trivadis&sxsrf=ACYBGNSrVDh4v1bnybYzErPPvQnrw-6TZg:1576679797684&source=lnms&tbm=isch&sa=X&ved=2ahUKEwj_zI_6tb_mAhVT8aYKHSQsDPYQ_AUoAXoECB0QAw&biw=2010&bih=1207#imgdii=YM633TsmdEuZfM:&imgrc=XXWVIANja06heM:)
 
 This project sets up the infrastructure for testing a modern data analytics stack with services such as
 
