@@ -1,3 +1,5 @@
+![](https://www.trivadis.com/hubfs/tri_logo_high.jpg)
+
 # Modern Data Platform (MDP) Stack Generator
 
 This is the dynamic version of the Modern Data Platform stack. It is the version we will continue with, the full-stack is no longer maintained. 
