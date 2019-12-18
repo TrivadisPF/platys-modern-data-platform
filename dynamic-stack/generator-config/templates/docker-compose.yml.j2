@@ -95,7 +95,7 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
 
 services:
 
-{% if ZOOKEEPER_enabled or KAFKA_enabled | default(false) %}
+{% if ZOOKEEPER_enabled or KAFKA_enabled or ATLAS_enabled | default(false) %}
   # Zookeeper ===============================================
 
   {% for num in range(ZOOKEEPER_nodes | default('1') ) %}
@@ -110,6 +110,7 @@ services:
     restart: {{container_restart_policy}}
   {% endfor %}
 
+  {% if ZOOKEEPER_navigator_enabled | default(false) %}
   zoonavigator:
     image: elkozmon/zoonavigator-web:{{__zoonavigator_version}}
     container_name: zoonavigator
@@ -130,8 +131,10 @@ services:
      - "28048:9010"
     environment:
       API_HTTP_PORT: 9010
+    restart: {{container_restart_policy}}
+  {% endif %}   {# ZOOKEEPER_navigator_enabled #}
 
-{% endif %}   {# zookeeper_enabled or KAFKA_enabled #}
+{% endif %}   {# zookeeper_enabled or KAFKA_enabled or ATLAS_enabled #}
 
 
 
