@@ -1,4 +1,4 @@
-![](https://www.trivadis.com/hubfs/tri_logo_high.jpg)
+![](tri_logo_high.jpg)
 
 # Modern Data Platform Stack 
 
