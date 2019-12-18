@@ -124,3 +124,40 @@ Modern Data Platform Stack generated successfully to /home/bigdata/mdp-kafka-sta
 You should now find fully configured `docker-compose.yml` file (according to the settings chosen) as well as some static configuration files, necessary for some services. These static configuration files are not dynamically chosen and available, even if you haven't chosen the service they are for. 
 
 Additionally a `mdps-services.yml` file is generated, describing the services which are part of the stack. This is **not yet complete** and might be used to generate a more readable page (i.e. markdown).
+
+### Running the Generated Stack
+
+Now your MDP Stack is ready to be started. Before doing that, you have to create some environment variables, depending on the services you use. In minimum you should create
+
+* `DOCKER\_HOST\_IP` - the IP address of the network interface of the Docker Host
+* `PUBLIC\_IP` - the IP address of the public network interface of the Docker Host (different to `DOCKER\_HOST\_IP` if in a public cloud environment
+
+You can set these environment variables persistently on machine (`/etc/environment`) or user (`~/.pam_environment` or `~/.profile`) level. Another option is to use the `.env` file inside the `docker` folder. All environment variables set in there are used when docker compose is started. 
+
+Now let's start the stack. In a terminal window, navigate into the `docker` folder and execute
+
+```
+docker-compose up -d
+```
+
+Docker will start downloading the necessary container images and then start the stack. 
+
+To see the logs of all the services, perform
+
+```
+docker-compose logs -f
+```
+
+You can list a number of service to only see a log for them
+
+```
+docker-compose logs -f <service-name> <service-name>
+```
+
+To stop and remove the running stack, perform
+
+```
+docker-compose down
+```
+
+**Note:** be aware that this completely removes the Docker containers and by that all the data within it. If you haven't mapped the data outside the container, then you might lose your work!
