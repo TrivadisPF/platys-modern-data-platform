@@ -1,6 +1,6 @@
-# Modern Analytical Data Platform Stack
+# Modern Data Platform Stack
 
-This project sets up the infrastructure for testing a modern data analytics stack with services such as
+This project sets up the infrastructure for testing a modern data platform stack with services such as
 
 * Kafka
 * Spark
