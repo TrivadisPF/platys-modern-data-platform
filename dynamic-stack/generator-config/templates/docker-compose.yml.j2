@@ -71,6 +71,8 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
 
 {% set __neo4j_version = neo4j_version | default('latest') -%}
 
+{% set __influxdb_version = influxdb_version | default('latest') -%}
+
 {% set __tile38_version = tile38_version | default('latest') -%}
 
 {% set __mysql_version = mysql_version | default('latest') -%}
@@ -1207,7 +1209,6 @@ services:
 {% endif %}   {#  ELASTICSEARCH_enabled #}
 
 {% if NEO4J_enabled | default(false) %}
-# NoSQL ===============================================
   neo4j:
     image: neo4j:{{__neo4j_version}}
     hostname: neo4j
@@ -1222,6 +1223,21 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {#  NEO4J_enabled #}
 
+{% if INFLUXDB_enabled | default(false) %}
+  influxdb:
+    image: influxdb:{{__influxdb_version}}
+    hostname: influxdb
+    container_name: influxdb
+    ports:
+      - "28080:8086"
+    volumes:
+      - ./conf/influxdb/influxdb.conf:/etc/influxdb/influxdb.conf
+    {% if INFLUXDB_volume_map_data %}
+      - "./container-volume/influxdb:/var/lib/influxdb"
+    {% endif %}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  INFLUXDB_enabled #}
+
 {% if TILE38_enabled | default(false) %}
 # NoSQL ===============================================
   tile38:
@@ -1231,9 +1247,6 @@ services:
       - "9851:9851"
     restart: {{container_restart_policy}}
 {% endif %}   {#  TILE38_enabled #}
-
-
-
 
 {% if MYSQL_enabled | default(false) %}
 # RDBMS ===============================================
