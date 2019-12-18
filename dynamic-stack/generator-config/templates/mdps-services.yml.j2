@@ -88,16 +88,39 @@
 {% set __portainer_version = portainer_version | default('latest') %}
 
 ---
-{% if ZOOKEEPER_enabled | default(false) %}
+services:
+{% if ZOOKEEPER_enabled or KAFKA_enabled | default(false) %}
   {% for num in range(ZOOKEEPER_nodes | default('1') ) %}
-- service: zookeeper-{{loop.index}}
-  version: {{__confluent_platform_version}}
-  url: none
+  - service: zookeeper-{{loop.index}}
+    version: {{__confluent_platform_version}}
+    url: none
   {% endfor %}
-- service: zoonavigator
-  version: {{__zoonavigator_version}}
-  url: http://analyticsplatform:28047
-- service: zoonavigator-api
-  version: {{__zoonavigator_api_version}}
-  url: http://analyticsplatform:28048
+
+  - service: zoonavigator
+    version: {{__zoonavigator_version}}
+    url: http://analyticsplatform:28047
+    type: webui
+
+  - service: zoonavigator-api
+    version: {{__zoonavigator_api_version}}
+    url: http://analyticsplatform:28048
+    type: restapi
 {% endif %}   {# zookeeper_enabled #}
+
+{% if KAFKA_enabled %}
+  {% for num in range(KAFKA_broker_nodes | default('1') ) %}
+  - service: broker-{{loop.index}}
+    version: {{__confluent_platform_version}}
+  {% endfor %}
+{% endif %}   {# KAFKA_enabled #}
+
+{% if ( KAFKA_enabled and KAFKA_connect_enabled ) | default(false) %}
+  {% for num in range(KAFKA_connect_nodes | default(1) ) %}
+    {% set external_port = 28013 + loop.index - 1 %}
+    {% set port = 8083 + loop.index - 1 %}
+  - service: connect-{{loop.index}}
+    version: {{__confluent_platform_version}}
+    url: http://analyticsplatform:{{external_port}}
+    type: restapi
+  {% endfor %}
+{% endif %}   {# KAFKA_enabled #}
