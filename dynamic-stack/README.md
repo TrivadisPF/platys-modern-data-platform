@@ -1,4 +1,4 @@
-![](https://www.trivadis.com/hubfs/tri_logo_high.jpg){:height="50%" width="50%"}
+![](./../tri_logo_high.jpg)
 
 # Modern Data Platform (MDP) Stack Generator
 
