@@ -43,6 +43,7 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
 {% set __hue_postgres_version = hue_postgres_version | default('latest') -%}
 
 {% set __tvd_streamsets_version = tvd_streamsets_version | default('latest') -%}
+{% set __tvd_streamsets_edge_version = tvd_streamsets_edge_version | default('latest') -%}
 
 {% set __nifi_version = nifi_version | default('latest') -%}
 
@@ -98,8 +99,7 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
 services:
 
 {% if ZOOKEEPER_enabled or KAFKA_enabled or ATLAS_enabled | default(false) %}
-  # Zookeeper ===============================================
-
+  #  ================================== Zookeeper ========================================== #}
   {% for num in range(ZOOKEEPER_nodes | default('1') ) %}
   zookeeper-{{loop.index}}:
     image: confluentinc/cp-zookeeper:{{__confluent_platform_version}}
@@ -141,7 +141,7 @@ services:
 
 
 {% if KAFKA_enabled | default(false) %}
-# Kafka ===============================================
+  #  ================================== Kafka ========================================== #}
   {% for num in range(KAFKA_broker_nodes | default(1) ) %}
   {% set port = 9091 + loop.index %}
   broker-{{loop.index}}:
@@ -175,6 +175,7 @@ services:
 {% endif %} {# KAFKA_enabled #}
 
 {% if ( KAFKA_enabled and KAFKA_schema_registry_enabled ) | default(false) %}
+  #  ================================== Schema Registry ========================================== #}
   {% for num in range(KAFKA_schema_registry_nodes | default(1) ) %}
     {% set external_port = 28030 + loop.index - 1 %}
     {% set port = 8081 + loop.index - 1 %}
@@ -202,6 +203,7 @@ services:
 {% endif %}   {# KAFKA_enabled and KAFKA_schema_registry_enabled #}
 
 {% if ( KAFKA_enabled and KAFKA_connect_enabled ) | default(false) %}
+  #  ================================== Kafka Connect ========================================== #}
   {% for num in range(KAFKA_connect_nodes | default(1) ) %}
     {% set external_port = 28013 + loop.index - 1 %}
     {% set port = 8083 + loop.index - 1 %}
@@ -246,6 +248,7 @@ services:
 {% endif %}   {# KAFKA_enabled and KAFKA_connect_enabled  #}
 
 {% if (KAFKA_enabled and KAFKA_ksqldb_enabled )| default(false) %}
+  #  ================================== ksqlDB ========================================== #}
   {% for num in range(KAFKA_ksqldb_nodes | default(1) ) %}
     {% set external_port = 28034 + loop.index - 1 %}
     {% set port = 8088 + loop.index - 1 %}
@@ -282,8 +285,8 @@ services:
     tty: true
 {% endif %}   {# KAFKA_broker_enabled and KAFKA_ksqldb_enabled #}
 
-
 {% if (KAFKA_enabled and KAFKA_restproxy_enabled) | default(false) %}
+  #  ================================== Confluent REST Proxy ========================================== #}
   kafka-rest-1:
     image: confluentinc/cp-kafka-rest:{{__confluent_platform_version}}
     container_name: rest-proxy-1
@@ -300,8 +303,8 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {# KAFKA_enabled and KAFKA_ksqldb_enabled #}
 
-
 {% if (KAFKA_enabled and KAFKA_mqttproxy_enabled) | default(false) %}
+  #  ================================== Confluent MQTT Proxy ========================================== #}
   kafka-mqtt-1:
     image: confluentinc/cp-kafka-mqtt:{{__confluent_platform_version}}
     hostname: mqtt-proxy
@@ -315,6 +318,7 @@ services:
 {% endif %}   {# KAFKA_enabled and KAFKA_mqttproxy_enabled #}
 
 {% if (KAFKA_enabled and KAFKA_schema_registry_ui_enabled) | default(false) %}
+  #  ================================== Schema Registry UI ========================================== #}
   schema-registry-ui:
       image: landoop/schema-registry-ui:{{__schema_registry_ui_version}}
       container_name: schema-registry-ui
@@ -455,7 +459,7 @@ services:
 
 {% if HADOOP_enabled or SPARK_enabled | default(false) %}
 
-# Hadoop ===============================================
+  #  ================================== Apache Hadoop ========================================== #
   namenode:
     image: trivadis/apache-hadoop-namenode:{{__tvd_hadoop_version}}
     container_name: namenode
@@ -553,7 +557,7 @@ services:
 
 
 {% if SPARK_enabled | default(false) %}
-# Spark ===============================================
+  #  ================================== Apache Spark ========================================== #
   spark-master:
     image: trivadis/apache-spark-master:{{__tvd_spark_version}}
     container_name: spark-master
@@ -644,6 +648,7 @@ services:
   {% endif %}   {#  SPARK_thrift_enabled #}
 
   {% if SPARK_livy_enabled | default(false) %}
+  #  ================================== Apache Livy ========================================== #
   livy:
     image: trivadis/apache-livy:{{tvd_spark_livy_version}}
     container_name: livy
@@ -663,7 +668,7 @@ services:
 
 
 {% if HIVE_enabled | default(false) %}
-# Hive ===============================================
+  #  ================================== Apache Hive ========================================== #
   hive-server:
     image: johannestang/hive:{{__hive_version}}
     container_name: hive-server
@@ -702,7 +707,7 @@ services:
 
 
 {% if ATLAS_enabled  | default(false) %}
-# Governance ===============================================
+  #  ================================== Apache Atlas ========================================== #
   atlas:
     image: trivadis/apache-atlas:{{__tvd_atlas_verion}}
     container_name: atlas
@@ -769,6 +774,7 @@ services:
     restart: {{container_restart_policy}}
 
  {% if AMUNDSEN_enabled  | default(false) %}
+  #  ================================== Amundsen ========================================== #
   amundsenfrontend:
     image: amundsendev/amundsen-frontend:{{__amundsen_frontend_version}}
     container_name: amundsenfrontend
@@ -814,8 +820,7 @@ services:
 {% endif %}   {#  ATLAS_enabled #}
 
 {% if (HUE_enabled and SOLR_enabled)  | default(false) %}
-  # Data Engineering Tools ===============================================
-
+  #  ================================== Apache Hue ========================================== #
   hue:
     image: gethue/hue:{{__hue_version}}
     container_name: hue
@@ -843,6 +848,7 @@ services:
 {% endif %}   {#  HUE_enabled and SOLR_enabled #}
 
 {%if STREAMSETS_enabled | default(false) %}
+  #  ================================== StreamSets DataCollector ========================================== #}
   streamsets:
     image: trivadis/streamsets-kafka-hadoop-aws:{{__tvd_streamsets_version}}
     container_name: streamsets
@@ -863,8 +869,19 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {#  STREAMSETS_enabled  #}
 
-{%if NIFI_enabled | default(false) %}
+{%if STREAMSETS_EDGE_enabled | default(false) %}
+  #  ================================== StreamSets DataCollector Edge ========================================== #}
+  streamsets-edge:
+    image: streamsets/datacollector-edge:{{__tvd_streamsets_edge_version}}
+    container_name: streamsets-edge
+    hostname: streamsets-edge
+    ports:
+      - "28110:18633"
+    restart: {{container_restart_policy}}
+{% endif %}   {#  STREAMSETS_enabled  #}
 
+{%if NIFI_enabled | default(false) %}
+  #  ================================== NiFi ========================================== #}
   nifi:
     image: apache/nifi:{{__nifi_version}}
     container_name: nifi
@@ -876,7 +893,7 @@ services:
 {% endif %}   {#  NIFI_enabled  #}
 
 {%if ZEPPELIN_enabled | default(false) %}
-# Data Science Tools ===============================================
+  #  ================================== Zeppelin ========================================== #}
   zeppelin:
     image: trivadis/apache-zeppelin:{{__tvd_zeppelin_version}}
     container_name: zeppelin
@@ -915,10 +932,9 @@ services:
 {% endif %}   {#  ZEPPELIN_enabled  #}
 
 {# #}
-{#  ================================== Jupyter ========================================== #}
 {# #}
 {%if jupyter_minimal_enabled | default(false) %}
-  # make sure to get Spark to fit with the version of spark master
+  #  ================================== Jupyter ========================================== #}
   jupyter:
     image: jupyter/r-notebook:{{__jupyter_minimal_version}}
     container_name: jupyter
@@ -938,7 +954,6 @@ services:
 {% endif %}   {#  jupyter_minimal_enabled  #}
 
 {%if jupyter_r_enabled | default(false) %}
-  # make sure to get Spark to fit with the version of spark master
   jupyter:
     image: jupyter/r-notebook:{{__jupyter_r_version}}
     container_name: jupyter
@@ -958,7 +973,6 @@ services:
 {% endif %}   {#  jupyter_r_enabled  #}
 
 {%if jupyter_scipy_enabled | default(false) %}
-  # make sure to get Spark to fit with the version of spark master
   jupyter:
     image: jupyter/scipy-notebook:{{__jupyter_scipy_version}}
     container_name: jupyter
@@ -978,7 +992,6 @@ services:
 {% endif %}   {#  jupyter_scipy_enabled  #}
 
 {%if JUPYTER_tensorflow_enabled | default(false) %}
-  # make sure to get Spark to fit with the version of spark master
   jupyter:
     image: jupyter/tensorflow-notebook:{{__jupyter_tensorflow_version}}
     container_name: jupyter
@@ -998,7 +1011,6 @@ services:
 {% endif %}   {#  JUPYTER_tensorflow_enabled  #}
 
 {%if JUPYTER_datascience_enabled | default(false) %}
-  # make sure to get Spark to fit with the version of spark master
   jupyter:
     image: jupyter/datascience-notebook:{{__jupyter_datascience_version}}
     container_name: jupyter
@@ -1018,7 +1030,6 @@ services:
 {% endif %}   {#  JUPYTER_datascience_enabled  #}
 
 {%if JUPYTER_all_spark_enabled | default(false) %}
-  # make sure to get Spark to fit with the version of spark master
   jupyter:
     image: jupyter/all-spark-notebook:{{__jupyter_all_spark_version}}
     container_name: jupyter
@@ -1038,7 +1049,7 @@ services:
 {% endif %}   {#  JUPYTER_enabled  #}
 
 {% if GRAFANA_enabled | default(false) %}
-# Data Visualization ===============================================
+  #  ================================== Grafana ========================================== #}
   grafana:
     image: grafana/grafana:{{__graphana_version}}
     hostname: grafana
@@ -1049,10 +1060,8 @@ services:
 {% endif %}   {#  GRAFANA_enabled #}
 
 
-
-
 {% if REDIS_enabled | default(false) %}
-# NoSQL ===============================================
+  #  ================================== Redis ========================================== #}
   redis:
     container_name: redis
     hostname: redis:{{__redis_version}}
@@ -1073,7 +1082,7 @@ services:
 {% endif %}   {#  REDIS_enabled #}
 
 {% if CASSANDRA_enabled | default(false) %}
-# NoSQL ===============================================
+  #  ================================== Cassandra ========================================== #}
   cassandra-1:
     image: cassandra:{{__cassandra_version}}
     container_name: cassandra-1
@@ -1103,7 +1112,7 @@ services:
 {% endif %}   {#  CASSANDRA_enabled #}
 
 {% if MONGODB_enabled | default(false) %}
-# NoSQL ===============================================
+  #  ================================== MongoDB ========================================== #}
   mongodb:
     image: mongo:{{__mongodb_version}}
     container_name: mongodb
@@ -1136,7 +1145,7 @@ services:
 {% endif %}   {#  MONGODB_enabled #}
 
 {% if SOLR_enabled | default(false) %}
-# NoSQL ===============================================
+  #  ================================== SolR ========================================== #}
   solr:
     image: solr:{{__solr_version}}
     container_name: solr
@@ -1146,7 +1155,7 @@ services:
 {% endif %}   {#  SOLR_enabled #}
 
 {% if ELASTICSEARCH_enabled | default(false) %}
-# NoSQL ===============================================
+  #  ================================== Elasticsearch ========================================== #}
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:{{__elasticsearch_version}}
     hostname: elasticsearch
@@ -1183,6 +1192,7 @@ services:
       - "28052:5000"
 
   {% if KIBANA_enabled | default(false) %}
+  #  ================================== Kibana ========================================== #}
   kibana:
     image: docker.elastic.co/kibana/kibana:{{__kibana_version}}
     hostname: kibana
@@ -1207,8 +1217,10 @@ services:
     restart: {{container_restart_policy}}
   {% endif %}   {#  KIBANA_enabled #}
 {% endif %}   {#  ELASTICSEARCH_enabled #}
-
+{# #}
+{# #}
 {% if NEO4J_enabled | default(false) %}
+  #  ================================== Neo4J ========================================== #}
   neo4j:
     image: neo4j:{{__neo4j_version}}
     hostname: neo4j
@@ -1224,6 +1236,7 @@ services:
 {% endif %}   {#  NEO4J_enabled #}
 
 {% if INFLUXDB_enabled | default(false) %}
+  #  ================================== InfluxDB ========================================== #}
   influxdb:
     image: influxdb:{{__influxdb_version}}
     hostname: influxdb
@@ -1239,7 +1252,7 @@ services:
 {% endif %}   {#  INFLUXDB_enabled #}
 
 {% if TILE38_enabled | default(false) %}
-# NoSQL ===============================================
+  #  ================================== Til38 ========================================== #}
   tile38:
     image: tile38/tile38:{{__tile38_version}}
     container_name: tile38
@@ -1249,7 +1262,7 @@ services:
 {% endif %}   {#  TILE38_enabled #}
 
 {% if MYSQL_enabled | default(false) %}
-# RDBMS ===============================================
+  #  ================================== MySQL ========================================== #}
   mysql:
     image: mysql:{{__mysql_version}}
     container_name: mysql
@@ -1265,7 +1278,7 @@ services:
 {% endif %}   {#  MYSQL_enabled #}
 
 {% if SQLSERVER_enabled | default(false) %}
-# RDBMS ===============================================
+  #  ================================== SQL Server ========================================== #}
   sqlserver:
     image: mcr.microsoft.com/mssql/server:{{__sqlserver_version}}
     hostname: sqlserver
@@ -1280,7 +1293,7 @@ services:
 {% endif %}   {#  SQLSERVER_enabled #}
 
 {% if POSTGRESQL_enabled | default(false) %}
-# RDBMS ===============================================
+  #  ================================== PostgreSQL ========================================== #}
   postgresql:
     image: mujz/pagila:{{__postgres_version}}
     container_name: postgresql
@@ -1292,6 +1305,7 @@ services:
 {% endif %}   {#  POSTGRESQL_enabled #}
 
 {% if ADMINER_enabled | default(false) %}
+  #  ================================== Adminer ========================================== #}
   adminer:
     image: adminer:{{__adminer_version}}
     container_name: adminer
@@ -1301,8 +1315,7 @@ services:
 {% endif %}   {#  ADMINER_enabled #}
 
 {% if AXON_enabled | default(false) %}
-  # Event Store ===============================================
-
+  #  ================================== Axon Server ========================================== #}
   axon-server:
     image: axoniq/axonserver:{{__axon_version}}
     container_name: axon-server
