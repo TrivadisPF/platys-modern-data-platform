@@ -34,6 +34,8 @@ The MDP Stack Generator relies on the Docker Engine for any meaningful work, so 
 
 For running the Modern Data Platform Stack you also have to install Docker-Compose. 
 
+You also need an internet connection in order to download the necessary images. 
+
 ## Installing MDP Stack Generator
 
 Follow the instructions below to install the MDP Stack Generator on a Mac or Linux systems. Running on Windows is not yet supported. 
