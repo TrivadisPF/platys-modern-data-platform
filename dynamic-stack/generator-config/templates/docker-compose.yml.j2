@@ -34,7 +34,6 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
 {% set __cerebro_version = cerebro_version | default('latest') -%}
 {% set __elasticsearchhq_version = elasticsearchhq_version | default('latest') -%}
 
-
 {% set __amundsen_frontend_version = amundsen_frontend_version | default('latest') -%}
 {% set __amundsen_search_version = amundsen_search_version | default('latest') -%}
 {% set __amundsen_metadata_version = amundsen_metadata_version | default('latest') -%}
@@ -60,6 +59,7 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
 
 {% set __kibana_version = kibana_version | default('latest') -%}
 
+{% set __chronograf_version = chronograf_version | default('latest') -%}
 
 {% set __redis_version = redis_version | default('latest') -%}
 {% set __redis_commander_version = redis_commander_version | default('latest') -%}
@@ -73,6 +73,7 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
 {% set __neo4j_version = neo4j_version | default('latest') -%}
 
 {% set __influxdb_version = influxdb_version | default('latest') -%}
+{% set __influxdb_ui_version = influxdb_ui_version | default('latest') -%}
 
 {% set __tile38_version = tile38_version | default('latest') -%}
 
@@ -1242,14 +1243,40 @@ services:
     hostname: influxdb
     container_name: influxdb
     ports:
-      - "28080:8086"
+      - "28150:8086"
     volumes:
       - ./conf/influxdb/influxdb.conf:/etc/influxdb/influxdb.conf
     {% if INFLUXDB_volume_map_data %}
       - "./container-volume/influxdb:/var/lib/influxdb"
     {% endif %}
     restart: {{container_restart_policy}}
+
+  influxdb-ui:
+    image: timeseriesadmin/timeseriesadmin:{{__influxdb_ui_version}}
+    hostname: influxdb-ui
+    container_name: influxdb-ui
+    ports:
+      - "28152:80"
+    restart: {{container_restart_policy}}
 {% endif %}   {#  INFLUXDB_enabled #}
+
+{% if CHRONOGRAF_enabled | default(false) %}
+  #  ================================== InfluxDB ========================================== #}
+  chronograf:
+    image: chronograf:{{__chronograf_version}}
+    hostname: chronograf
+    container_name: chronograf
+    ports:
+      - "28151:8888"
+    environment:
+      INFLUXDB_URL: http://influxdb:8086
+    volumes:
+      - ./conf/influxdb/influxdb.conf:/etc/influxdb/influxdb.conf
+    {% if INFLUXDB_volume_map_data %}
+      - "./container-volume/influxdb:/var/lib/influxdb"
+    {% endif %}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  CHRONOGRAF_enabled #}
 
 {% if TILE38_enabled | default(false) %}
   #  ================================== Til38 ========================================== #}
