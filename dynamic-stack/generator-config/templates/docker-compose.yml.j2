@@ -41,8 +41,9 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
 {% set __hue_version = hue_version | default('latest') -%}
 {% set __hue_postgres_version = hue_postgres_version | default('latest') -%}
 
-{% set __tvd_streamsets_version = tvd_streamsets_version | default('latest') -%}
-{% set __tvd_streamsets_edge_version = tvd_streamsets_edge_version | default('latest') -%}
+{% set __streamsets_version = streamsets_version | default('latest') -%}
+{% set __streamsets_transformer_version = streamsets_transforer_version | default('latest') -%}
+{% set __streamsets_edge_version = streamsets_edge_version | default('latest') -%}
 
 {% set __nifi_version = nifi_version | default('latest') -%}
 
@@ -96,10 +97,9 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
 {% set __awscli_version = awscli_version | default('latest') -%}
 {% set __portainer_version = portainer_version | default('latest') %}
 
-
 services:
 
-{% if ZOOKEEPER_enabled or KAFKA_enabled or ATLAS_enabled | default(false) %}
+{% if ZOOKEEPER_enable or KAFKA_enable or ATLAS_enable | default(false) %}
   #  ================================== Zookeeper ========================================== #}
   {% for num in range(ZOOKEEPER_nodes | default('1') ) %}
   zookeeper-{{loop.index}}:
@@ -113,7 +113,7 @@ services:
     restart: {{container_restart_policy}}
   {% endfor %}
 
-  {% if ZOOKEEPER_navigator_enabled | default(false) %}
+  {% if ZOOKEEPER_navigator_enable | default(false) %}
   zoonavigator:
     image: elkozmon/zoonavigator-web:{{__zoonavigator_version}}
     container_name: zoonavigator
@@ -135,13 +135,13 @@ services:
     environment:
       API_HTTP_PORT: 9010
     restart: {{container_restart_policy}}
-  {% endif %}   {# ZOOKEEPER_navigator_enabled #}
+  {% endif %}   {# ZOOKEEPER_navigator_enable #}
 
-{% endif %}   {# zookeeper_enabled or KAFKA_enabled or ATLAS_enabled #}
+{% endif %}   {# zookeeper_enable or KAFKA_enable or ATLAS_enable #}
 
 
 
-{% if KAFKA_enabled | default(false) %}
+{% if KAFKA_enable | default(false) %}
   #  ================================== Kafka ========================================== #}
   {% for num in range(KAFKA_broker_nodes | default(1) ) %}
   {% set port = 9091 + loop.index %}
@@ -173,9 +173,9 @@ services:
 
   {% endfor %}
 
-{% endif %} {# KAFKA_enabled #}
+{% endif %} {# KAFKA_enable #}
 
-{% if ( KAFKA_enabled and KAFKA_schema_registry_enabled ) | default(false) %}
+{% if ( KAFKA_enable and KAFKA_schema_registry_enable ) | default(false) %}
   #  ================================== Schema Registry ========================================== #}
   {% for num in range(KAFKA_schema_registry_nodes | default(1) ) %}
     {% set external_port = 28030 + loop.index - 1 %}
@@ -201,9 +201,9 @@ services:
       SCHEMA_REGISTRY_ACCESS_CONTROL_ALLOW_METHODS: 'GET,POST,PUT,OPTIONS'
     restart: {{container_restart_policy}}
   {% endfor %}
-{% endif %}   {# KAFKA_enabled and KAFKA_schema_registry_enabled #}
+{% endif %}   {# KAFKA_enable and KAFKA_schema_registry_enable #}
 
-{% if ( KAFKA_enabled and KAFKA_connect_enabled ) | default(false) %}
+{% if ( KAFKA_enable and KAFKA_connect_enable ) | default(false) %}
   #  ================================== Kafka Connect ========================================== #}
   {% for num in range(KAFKA_connect_nodes | default(1) ) %}
     {% set external_port = 28013 + loop.index - 1 %}
@@ -246,9 +246,9 @@ services:
     restart: {{container_restart_policy}}
 
   {% endfor %}
-{% endif %}   {# KAFKA_enabled and KAFKA_connect_enabled  #}
+{% endif %}   {# KAFKA_enable and KAFKA_connect_enable  #}
 
-{% if (KAFKA_enabled and KAFKA_ksqldb_enabled )| default(false) %}
+{% if (KAFKA_enable and KAFKA_ksqldb_enable )| default(false) %}
   #  ================================== ksqlDB ========================================== #}
   {% for num in range(KAFKA_ksqldb_nodes | default(1) ) %}
     {% set external_port = 28034 + loop.index - 1 %}
@@ -284,13 +284,14 @@ services:
       - ksqldb-server-1
     entrypoint: /bin/sh
     tty: true
-{% endif %}   {# KAFKA_broker_enabled and KAFKA_ksqldb_enabled #}
+{% endif %}   {# KAFKA_broker_enable and KAFKA_ksqldb_enable #}
 
-{% if (KAFKA_enabled and KAFKA_restproxy_enabled) | default(false) %}
+{% if (KAFKA_enable and KAFKA_restproxy_enable) | default(false) %}
   #  ================================== Confluent REST Proxy ========================================== #}
   kafka-rest-1:
     image: confluentinc/cp-kafka-rest:{{__confluent_platform_version}}
-    container_name: rest-proxy-1
+    container_name: kafka-rest-1
+    hostname: kafka-rest-1
     depends_on:
       - broker-1
       - schema-registry-1
@@ -302,12 +303,13 @@ services:
       KAFKA_REST_SCHEMA_REGISTRY_URL: 'http://schema-registry-1:8081'
       KAFKA_REST_HOST_NAME: 'rest-proxy'
     restart: {{container_restart_policy}}
-{% endif %}   {# KAFKA_enabled and KAFKA_ksqldb_enabled #}
+{% endif %}   {# KAFKA_enable and KAFKA_ksqldb_enable #}
 
-{% if (KAFKA_enabled and KAFKA_mqttproxy_enabled) | default(false) %}
+{% if (KAFKA_enable and KAFKA_mqttproxy_enable) | default(false) %}
   #  ================================== Confluent MQTT Proxy ========================================== #}
   kafka-mqtt-1:
     image: confluentinc/cp-kafka-mqtt:{{__confluent_platform_version}}
+    container_name: kafka-mqtt-1
     hostname: mqtt-proxy
     ports:
       - "28001:1882"
@@ -316,13 +318,16 @@ services:
       KAFKA_MQTT_LISTENERS: 0.0.0.0:1882
       KAFKA_MQTT_BOOTSTRAP_SERVERS: PLAINTEXT://broker-1:9092,broker-2:9093
       KAFKA_MQTT_CONFLUENT_TOPIC_REPLICATIN_FACTOR: 1
-{% endif %}   {# KAFKA_enabled and KAFKA_mqttproxy_enabled #}
+{% endif %}   {# KAFKA_enable and KAFKA_mqttproxy_enable #}
 
-{% if (KAFKA_enabled and KAFKA_schema_registry_ui_enabled) | default(false) %}
+{% if (KAFKA_enable and KAFKA_schema_registry_ui_enable) | default(false) %}
   #  ================================== Schema Registry UI ========================================== #}
   schema-registry-ui:
       image: landoop/schema-registry-ui:{{__schema_registry_ui_version}}
       container_name: schema-registry-ui
+      hostanme: schema-registry-ui
+      labels:
+        com.mdps.service.webui.url: "http://${PUBLIC_IP}:28039"
       depends_on:
         - broker-1
         - schema-registry-1
@@ -331,12 +336,15 @@ services:
       environment:
         SCHEMAREGISTRY_URL: 'http://${PUBLIC_IP}:28030'
       restart: {{container_restart_policy}}
-{% endif %}   {# KAFKA_enabled and KAFKA_schema_registry_ui_enabled #}
+{% endif %}   {# KAFKA_enable and KAFKA_schema_registry_ui_enable #}
 
-{% if (KAFKA_enabled and KAFKA_connect_enabled and KAFKA_connect_ui_enabled) | default(false) %}
+{% if (KAFKA_enable and KAFKA_connect_enable and KAFKA_connect_ui_enable) | default(false) %}
   kafka-connect-ui:
     image: landoop/kafka-connect-ui:{{__kafka_connect_ui_version}}
     container_name: kafka-connect-ui
+    hostname: kafka-connect-ui
+    labels:
+      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28038"
     ports:
       - "28038:8000"
     environment:
@@ -345,13 +353,15 @@ services:
     depends_on:
       - connect-1
     restart: {{container_restart_policy}}
-{% endif %}   {# KAFKA_enabled and KAFKA_connect_ui_enabled #}
+{% endif %}   {# KAFKA_enable and KAFKA_connect_ui_enable #}
 
-{% if (KAFKA_enabled and KAFKA_manager_enabled) | default(false) %}
+{% if (KAFKA_enable and KAFKA_manager_enable) | default(false) %}
   kafka-manager:
     image: trivadis/kafka-manager:{{__kafka_manager_version}}
     container_name: kafka-manager
     hostname: kafka-manager
+    labels:
+      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28038"
     depends_on:
       - zookeeper-1
       - broker-1
@@ -361,10 +371,10 @@ services:
       ZK_HOSTS: 'zookeeper-1:2181'
       APPLICATION_SECRET: 'abc123!'
     restart: {{container_restart_policy}}
-{% endif %}   {#  KAFKA_enabled and KAFKA_manager_enabled #}
+{% endif %}   {#  KAFKA_enable and KAFKA_manager_enable #}
 
 
-{% if (KAFKA_enabled and KAFKA_kafdrop_enabled) | default(false) %}
+{% if (KAFKA_enable and KAFKA_kafdrop_enable) | default(false) %}
   kafdrop:
     image: thomsch98/kafdrop:{{__kafka_kafdrop_version}}
     container_name: kafdrop
@@ -374,9 +384,9 @@ services:
       ZK_HOSTS: zookeeper-1:2181
       LISTEN: 9020
     restart: {{container_restart_policy}}
-{% endif %}   {#  KAFKA_enabled and KAFKA_kafdrop_enabled #}
+{% endif %}   {#  KAFKA_enable and KAFKA_kafdrop_enable #}
 
-{% if (KAFKA_enabled and KAFKA_kadmin_enabled) | default(false) %}
+{% if (KAFKA_enable and KAFKA_kadmin_enable) | default(false) %}
   kadmin:
     image: hasnat/kadmin:{{__kafka_kadmin_version}}
     container_name: kadmin
@@ -392,10 +402,10 @@ services:
       KEY_STORE_PASSWORD: password
       KEY_PASSWORD: password
     restart: {{container_restart_policy}}
-{% endif %}   {#  KAFKA_enabled and KAFKA_kadmin_enabled #}
+{% endif %}   {#  KAFKA_enable and KAFKA_kadmin_enable #}
 
 
-{% if (KAFKA_enabled and KAFKA_kafkahq_enabled) | default(false) %}
+{% if (KAFKA_enable and KAFKA_kafkahq_enable) | default(false) %}
   kafkahq:
     image: tchiotludo/kafkahq:{{kafka_kafkahq_version}}
     container_name: kafkahq
@@ -415,10 +425,10 @@ services:
     depends_on:
       - broker-1
     restart: {{container_restart_policy}}
-{% endif %}   {#  KAFKA_enabled and KAFKA_kafkahq_enabled #}
+{% endif %}   {#  KAFKA_enable and KAFKA_kafkahq_enable #}
 
 
-{% if (KAFKA_enabled and KAFKA_burrow_enabled) | default(false) %}
+{% if (KAFKA_enable and KAFKA_burrow_enable) | default(false) %}
   burrow:
     image: gschmutz/linkedin-burrow:{{__kafka_burrow_version}}
     container_name: burrow
@@ -454,11 +464,11 @@ services:
       - zookeeper-1
       - broker-1
     restart: {{container_restart_policy}}
-{% endif %}   {# KAFKA_enabled and KAFKA_burrow_enabled #}
+{% endif %}   {# KAFKA_enable and KAFKA_burrow_enable #}
 
 
 
-{% if HADOOP_enabled or SPARK_enabled | default(false) %}
+{% if HADOOP_enable or SPARK_enable | default(false) %}
 
   #  ================================== Apache Hadoop ========================================== #
   namenode:
@@ -554,10 +564,10 @@ services:
     command: tail -f /dev/null
     restart: {{container_restart_policy}}
 
-{% endif %}   {#  HADOOP_enabled or SPARK_enabled #}
+{% endif %}   {#  HADOOP_enable or SPARK_enable #}
 
 
-{% if SPARK_enabled | default(false) %}
+{% if SPARK_enable | default(false) %}
   #  ================================== Apache Spark ========================================== #
   spark-master:
     image: trivadis/apache-spark-master:{{__tvd_spark_version}}
@@ -619,7 +629,7 @@ services:
                        hadoop fs -mkdir -p /var/log/spark/logs &&
                        sleep infinity'"
 
-  {% if SPARK_history_enabled | default(false) %}
+  {% if SPARK_history_enable | default(false) %}
   spark-history:
     image: trivadis/apache-spark-worker:{{__tvd_spark_version}}
     command: /spark/bin/spark-class org.apache.spark.deploy.history.HistoryServer
@@ -632,9 +642,9 @@ services:
     volumes:
       - ./conf/spark/spark-defaults.conf:/spark/conf/spark/spark-defaults.conf
     restart: {{container_restart_policy}}
-  {% endif %}   {#  SPARK_history_enabled #}
+  {% endif %}   {#  SPARK_history_enable #}
 
-  {% if SPARK_thrift_enabled | default(false) %}
+  {% if SPARK_thrift_enable | default(false) %}
   spark-thrift-server:
     image: trivadis/apache-spark-master:{{__tvd_spark_version}}
     container_name: spark-thrift-server
@@ -646,9 +656,9 @@ services:
       - ./conf/hive-site.xml:/spark/conf/hive-site.xml
       - ./conf/spark/spark-defaults.conf:/spark/conf/spark/spark-defaults.conf
     command: bash -c "sleep 2m && /spark/sbin/start-thriftserver.sh && tail -f /spark/logs/spark--org.apache.spark.sql.hive.thriftserver.HiveThriftServer2-*.out"
-  {% endif %}   {#  SPARK_thrift_enabled #}
+  {% endif %}   {#  SPARK_thrift_enable #}
 
-  {% if SPARK_livy_enabled | default(false) %}
+  {% if SPARK_livy_enable | default(false) %}
   #  ================================== Apache Livy ========================================== #
   livy:
     image: trivadis/apache-livy:{{tvd_spark_livy_version}}
@@ -664,11 +674,11 @@ services:
       - SPARK_MASTER=yarn
       - DEPLOY_MODE=cluster
     restart: always
-  {% endif %}   {#  SPARK_livy_enabled #}
-{% endif %}   {#  SPARK_enabled #}
+  {% endif %}   {#  SPARK_livy_enable #}
+{% endif %}   {#  SPARK_enable #}
 
 
-{% if HIVE_enabled | default(false) %}
+{% if HIVE_enable | default(false) %}
   #  ================================== Apache Hive ========================================== #
   hive-server:
     image: johannestang/hive:{{__hive_version}}
@@ -704,10 +714,10 @@ services:
     hostname: hive-metastore-db
     image: bde2020/hive-metastore-postgresql:2.3.0
     restart: {{container_restart_policy}}
-{% endif %}   {#  HIVE_enabled #}
+{% endif %}   {#  HIVE_enable #}
 
 
-{% if ATLAS_enabled  | default(false) %}
+{% if ATLAS_enable  | default(false) %}
   #  ================================== Apache Atlas ========================================== #
   atlas:
     image: trivadis/apache-atlas:{{__tvd_atlas_verion}}
@@ -728,7 +738,7 @@ services:
       - cassandra-atlas
     restart: {{container_restart_policy}}
 
-  {% if KAFKA_enabled  | default(false) %}
+  {% if KAFKA_enable  | default(false) %}
   atlas-kafka-setup:
     image: confluentinc/cp-kafka:{{__confluent_platform_version}}
     hostname: atlas-kafka-setup
@@ -745,7 +755,7 @@ services:
       # We override the image's `command` anyways, hence this container will not start a broker.
       KAFKA_BROKER_ID: ignored
       KAFKA_ZOOKEEPER_CONNECT: ignored
-  {% endif %} {#  KAFKA_enabled #}
+  {% endif %} {#  KAFKA_enable #}
 
   cassandra-atlas:
     image: cassandra:{{__cassandra_version}}
@@ -768,13 +778,13 @@ services:
       - "network.host=0.0.0.0"
       - "transport.host=127.0.0.1"
       - "cluster.name=docker-cluster"
-      - "xpack.security.enabled=false"
+      - "xpack.security.enable=false"
       - "discovery.zen.minimum_master_nodes=1"
     ports:
       - "28065:9200"
     restart: {{container_restart_policy}}
 
- {% if AMUNDSEN_enabled  | default(false) %}
+ {% if AMUNDSEN_enable  | default(false) %}
   #  ================================== Amundsen ========================================== #
   amundsenfrontend:
     image: amundsendev/amundsen-frontend:{{__amundsen_frontend_version}}
@@ -817,10 +827,10 @@ services:
       - PROXY_PORT=21000
       - PROXY_CLIENT=ATLAS
     restart: {{container_restart_policy}}
-  {% endif %}   {#  AMUNDSEN_enabled #}
-{% endif %}   {#  ATLAS_enabled #}
+  {% endif %}   {#  AMUNDSEN_enable #}
+{% endif %}   {#  ATLAS_enable #}
 
-{% if (HUE_enabled and SOLR_enabled)  | default(false) %}
+{% if (HUE_enable and SOLR_enable)  | default(false) %}
   #  ================================== Apache Hue ========================================== #
   hue:
     image: gethue/hue:{{__hue_version}}
@@ -846,14 +856,17 @@ services:
       POSTGRES_USER: hue
     restart: {{container_restart_policy}}
 
-{% endif %}   {#  HUE_enabled and SOLR_enabled #}
+{% endif %}   {#  HUE_enable and SOLR_enable #}
 
-{%if STREAMSETS_enabled | default(false) %}
+{%if STREAMSETS_enable | default(false) %}
   #  ================================== StreamSets DataCollector ========================================== #}
   streamsets:
-    image: trivadis/streamsets-kafka-hadoop-aws:{{__tvd_streamsets_version}}
+    image: trivadis/streamsets-kafka-hadoop-aws:{{__streamsets_version}}
     container_name: streamsets
     hostname: streamsets
+    labels:
+      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28029"
+      com.mdps.service.restapi.url: "http://${PUBLIC_IP}:28110/collector/restapi"
     ports:
       - "28029:18630"
     environment:
@@ -862,26 +875,49 @@ services:
       SDC_JAVA8_OPTS: "-XX:+UseG1GC"
       SDC_CONF_MONITOR_MEMORY: "true"
       SDC_CONF_PIPELINE_MAX_RUNNERS_COUNT: 50
-#    volumes:
+    volumes:
+      - ./data-transfer:/data-transfer
 #      - ./container-volume/streamsets/data:/data:Z
-#      - ./streamsets-extras/streamsets-libs-extras/streamsets-datacollector-jdbc-lib/postgresql-42.2.6.jar:/opt/streamsets-datacollector-{{__tvd_streamsets_version}}/streamsets-libs-extras/streamsets-datacollector-jdbc-lib/lib/postgresql-42.2.6.jar:Z
-#      - ./streamsets-extras/libs-common-lib:/opt/streamsets-datacollector-{{__tvd_streamsets_version}}/libs-common-lib:Z
+#      - ./streamsets-extras/streamsets-libs-extras/streamsets-datacollector-jdbc-lib/postgresql-42.2.6.jar:/opt/streamsets-datacollector-{{__streamsets_version}}/streamsets-libs-extras/streamsets-datacollector-jdbc-lib/lib/postgresql-42.2.6.jar:Z
+#      - ./streamsets-extras/libs-common-lib:/opt/streamsets-datacollector-{{__streamsets_version}}/libs-common-lib:Z
 #      - ./streamsets-extras/user-libs:/opt/streamsets-datacollector-user-libs:Z
     restart: {{container_restart_policy}}
-{% endif %}   {#  STREAMSETS_enabled  #}
+{% endif %}   {#  STREAMSETS_enable  #}
 
-{%if STREAMSETS_EDGE_enabled | default(false) %}
+{%if STREAMSETS_TRANSFORMER_enable | default(false) %}
+  #  ================================== StreamSets Transformer ========================================== #}
+  streamsets-transformer-1:
+    image: streamsets/transformer:{{__streamsets_transformer_version}}
+    container_name: streamsets-transformer-1
+    hostname: streamsets-transformer-1
+    labels:
+      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28148"
+      com.mdps.service.restapi.url: "http://${PUBLIC_IP}:28148/collector/restapi"
+    ports:
+      - "28148:19630"
+    volumes:
+      - ./data-transfer:/data-transfer
+#      - ./container-volume/streamsets-transformer/data:/data:Z
+#      - ./streamsets-extras/streamsets-libs-extras/streamsets-datacollector-jdbc-lib/postgresql-42.2.6.jar:/opt/streamsets-datacollector-{{__streamsets_version}}/streamsets-libs-extras/streamsets-datacollector-jdbc-lib/lib/postgresql-42.2.6.jar:Z
+#      - ./streamsets-extras/libs-common-lib:/opt/streamsets-datacollector-{{__streamsets_version}}/libs-common-lib:Z
+#      - ./streamsets-extras/user-libs:/opt/streamsets-datacollector-user-libs:Z
+    restart: {{container_restart_policy}}
+{% endif %}   {#  STREAMSETS_TRANSFORMER_enable  #}
+
+{%if STREAMSETS_EDGE_enable | default(false) %}
   #  ================================== StreamSets DataCollector Edge ========================================== #}
   streamsets-edge:
-    image: streamsets/datacollector-edge:{{__tvd_streamsets_edge_version}}
+    image: streamsets/datacollector-edge:{{__streamsets_edge_version}}
     container_name: streamsets-edge
     hostname: streamsets-edge
+    labels:
+      com.mdps.service.restapi.url: "http://${PUBLIC_IP}:28110"
     ports:
       - "28110:18633"
     restart: {{container_restart_policy}}
-{% endif %}   {#  STREAMSETS_enabled  #}
+{% endif %}   {#  STREAMSETS_enable  #}
 
-{%if NIFI_enabled | default(false) %}
+{%if NIFI_enable | default(false) %}
   #  ================================== NiFi ========================================== #}
   nifi:
     image: apache/nifi:{{__nifi_version}}
@@ -891,9 +927,9 @@ services:
       - "28054:8080"
     restart: {{container_restart_policy}}
 
-{% endif %}   {#  NIFI_enabled  #}
+{% endif %}   {#  NIFI_enable  #}
 
-{%if ZEPPELIN_enabled | default(false) %}
+{%if ZEPPELIN_enable | default(false) %}
   #  ================================== Zeppelin ========================================== #}
   zeppelin:
     image: trivadis/apache-zeppelin:{{__tvd_zeppelin_version}}
@@ -930,11 +966,11 @@ services:
       - ./conf/zeppelin/interpreter-setting.json:/opt/zeppelin/interpreter/spark/interpreter-setting.json
       - ./data-transfer:/data-transfer
     restart: {{container_restart_policy}}
-{% endif %}   {#  ZEPPELIN_enabled  #}
+{% endif %}   {#  ZEPPELIN_enable  #}
 
 {# #}
 {# #}
-{%if jupyter_minimal_enabled | default(false) %}
+{%if jupyter_minimal_enable | default(false) %}
   #  ================================== Jupyter ========================================== #}
   jupyter:
     image: jupyter/r-notebook:{{__jupyter_minimal_version}}
@@ -952,9 +988,9 @@ services:
       - "./container-volume/jupyter/work:/home/jovyan/work"
     {% endif %}
     restart: {{container_restart_policy}}
-{% endif %}   {#  jupyter_minimal_enabled  #}
+{% endif %}   {#  jupyter_minimal_enable  #}
 
-{%if jupyter_r_enabled | default(false) %}
+{%if jupyter_r_enable | default(false) %}
   jupyter:
     image: jupyter/r-notebook:{{__jupyter_r_version}}
     container_name: jupyter
@@ -971,9 +1007,9 @@ services:
       - "./container-volume/jupyter/work:/home/jovyan/work"
     {% endif %}
     restart: {{container_restart_policy}}
-{% endif %}   {#  jupyter_r_enabled  #}
+{% endif %}   {#  jupyter_r_enable  #}
 
-{%if jupyter_scipy_enabled | default(false) %}
+{%if jupyter_scipy_enable | default(false) %}
   jupyter:
     image: jupyter/scipy-notebook:{{__jupyter_scipy_version}}
     container_name: jupyter
@@ -990,9 +1026,9 @@ services:
       - "./container-volume/jupyter/work:/home/jovyan/work"
     {% endif %}
     restart: {{container_restart_policy}}
-{% endif %}   {#  jupyter_scipy_enabled  #}
+{% endif %}   {#  jupyter_scipy_enable  #}
 
-{%if JUPYTER_tensorflow_enabled | default(false) %}
+{%if JUPYTER_tensorflow_enable | default(false) %}
   jupyter:
     image: jupyter/tensorflow-notebook:{{__jupyter_tensorflow_version}}
     container_name: jupyter
@@ -1009,9 +1045,9 @@ services:
       - "./container-volume/jupyter/work:/home/jovyan/work"
     {% endif %}
     restart: {{container_restart_policy}}
-{% endif %}   {#  JUPYTER_tensorflow_enabled  #}
+{% endif %}   {#  JUPYTER_tensorflow_enable  #}
 
-{%if JUPYTER_datascience_enabled | default(false) %}
+{%if JUPYTER_datascience_enable | default(false) %}
   jupyter:
     image: jupyter/datascience-notebook:{{__jupyter_datascience_version}}
     container_name: jupyter
@@ -1028,9 +1064,9 @@ services:
       - "./container-volume/jupyter/work:/home/jovyan/work"
     {% endif %}
     restart: {{container_restart_policy}}
-{% endif %}   {#  JUPYTER_datascience_enabled  #}
+{% endif %}   {#  JUPYTER_datascience_enable  #}
 
-{%if JUPYTER_all_spark_enabled | default(false) %}
+{%if JUPYTER_all_spark_enable | default(false) %}
   jupyter:
     image: jupyter/all-spark-notebook:{{__jupyter_all_spark_version}}
     container_name: jupyter
@@ -1047,9 +1083,9 @@ services:
       - "./container-volume/jupyter/work:/home/jovyan/work"
     {% endif %}
     restart: {{container_restart_policy}}
-{% endif %}   {#  JUPYTER_enabled  #}
+{% endif %}   {#  JUPYTER_enable  #}
 
-{% if GRAFANA_enabled | default(false) %}
+{% if GRAFANA_enable | default(false) %}
   #  ================================== Grafana ========================================== #}
   grafana:
     image: grafana/grafana:{{__graphana_version}}
@@ -1058,10 +1094,10 @@ services:
     ports:
       - "28099:3000"
     restart: {{container_restart_policy}}
-{% endif %}   {#  GRAFANA_enabled #}
+{% endif %}   {#  GRAFANA_enable #}
 
 
-{% if REDIS_enabled | default(false) %}
+{% if REDIS_enable | default(false) %}
   #  ================================== Redis ========================================== #}
   redis:
     container_name: redis
@@ -1080,9 +1116,9 @@ services:
     ports:
       - "28057:8081"
     restart: {{container_restart_policy}}
-{% endif %}   {#  REDIS_enabled #}
+{% endif %}   {#  REDIS_enable #}
 
-{% if CASSANDRA_enabled | default(false) %}
+{% if CASSANDRA_enable | default(false) %}
   #  ================================== Cassandra ========================================== #}
   cassandra-1:
     image: cassandra:{{__cassandra_version}}
@@ -1110,9 +1146,9 @@ services:
       - CASSANDRA_USERNAME=cassandra
       - CASSANDRA_PASSWORD=cassandra
     restart: {{container_restart_policy}}
-{% endif %}   {#  CASSANDRA_enabled #}
+{% endif %}   {#  CASSANDRA_enable #}
 
-{% if MONGODB_enabled | default(false) %}
+{% if MONGODB_enable | default(false) %}
   #  ================================== MongoDB ========================================== #}
   mongodb:
     image: mongo:{{__mongodb_version}}
@@ -1143,9 +1179,9 @@ services:
     ports:
       - 28051:1234
     restart: {{container_restart_policy}}
-{% endif %}   {#  MONGODB_enabled #}
+{% endif %}   {#  MONGODB_enable #}
 
-{% if SOLR_enabled | default(false) %}
+{% if SOLR_enable | default(false) %}
   #  ================================== SolR ========================================== #}
   solr:
     image: solr:{{__solr_version}}
@@ -1153,9 +1189,9 @@ services:
     ports:
       - "28081:8983"
     restart: {{container_restart_policy}}
-{% endif %}   {#  SOLR_enabled #}
+{% endif %}   {#  SOLR_enable #}
 
-{% if ELASTICSEARCH_enabled | default(false) %}
+{% if ELASTICSEARCH_enable | default(false) %}
   #  ================================== Elasticsearch ========================================== #}
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:{{__elasticsearch_version}}
@@ -1165,8 +1201,8 @@ services:
       - "9200:9200"
       - "9300:9300"
     environment:
-      XPACK_SECURITY_ENABLED: "false"
-      xpack.monitoring.enabled: "false"
+      XPACK_SECURITY_enable: "false"
+      xpack.monitoring.enable: "false"
     restart: {{container_restart_policy}}
 
   dejavu:
@@ -1192,7 +1228,7 @@ services:
     ports:
       - "28052:5000"
 
-  {% if KIBANA_enabled | default(false) %}
+  {% if KIBANA_enable | default(false) %}
   #  ================================== Kibana ========================================== #}
   kibana:
     image: docker.elastic.co/kibana/kibana:{{__kibana_version}}
@@ -1203,24 +1239,24 @@ services:
     ports:
       - "28006:5601"
     environment:
-      xpack.monitoring.enabled: "false"
+      xpack.monitoring.enable: "false"
       discovery.type: "single-node"
       elasticsearch.url: http://elasticsearch:9200
       server.host: "0.0.0.0"
       SERVER_HOST: "0.0.0.0"
       server.name: "kibana"
       SERVER_NAME: "kibana"
-      XPACK_GRAPH_ENABLED: "false"
-      XPACK_MONITORING_ENABLED: "false"
-      XPACK_REPORTING_ENABLED: "false"
-      XPACK_SECURITY_ENABLED: "false"
+      XPACK_GRAPH_enable: "false"
+      XPACK_MONITORING_enable: "false"
+      XPACK_REPORTING_enable: "false"
+      XPACK_SECURITY_enable: "false"
     command: [ "/bin/bash", "-c", "/usr/share/kibana/bin/kibana-plugin remove x-pack; /usr/local/bin/kibana-docker" ]
     restart: {{container_restart_policy}}
-  {% endif %}   {#  KIBANA_enabled #}
-{% endif %}   {#  ELASTICSEARCH_enabled #}
+  {% endif %}   {#  KIBANA_enable #}
+{% endif %}   {#  ELASTICSEARCH_enable #}
 {# #}
 {# #}
-{% if NEO4J_enabled | default(false) %}
+{% if NEO4J_enable | default(false) %}
   #  ================================== Neo4J ========================================== #}
   neo4j:
     image: neo4j:{{__neo4j_version}}
@@ -1231,12 +1267,12 @@ services:
       - "7687:7687"
     environment:
       - NEO4J_dbms_security_procedures_unrestricted=apoc.*
-      - NEO4J_apoc_import_file_enabled=true
-      - NEO4J_dbms_shell_enabled=true
+      - NEO4J_apoc_import_file_enable=true
+      - NEO4J_dbms_shell_enable=true
     restart: {{container_restart_policy}}
-{% endif %}   {#  NEO4J_enabled #}
+{% endif %}   {#  NEO4J_enable #}
 
-{% if INFLUXDB_enabled | default(false) %}
+{% if INFLUXDB_enable | default(false) %}
   #  ================================== InfluxDB ========================================== #}
   influxdb:
     image: influxdb:{{__influxdb_version}}
@@ -1258,9 +1294,9 @@ services:
     ports:
       - "28152:80"
     restart: {{container_restart_policy}}
-{% endif %}   {#  INFLUXDB_enabled #}
+{% endif %}   {#  INFLUXDB_enable #}
 
-{% if CHRONOGRAF_enabled | default(false) %}
+{% if CHRONOGRAF_enable | default(false) %}
   #  ================================== InfluxDB ========================================== #}
   chronograf:
     image: chronograf:{{__chronograf_version}}
@@ -1276,9 +1312,9 @@ services:
       - "./container-volume/influxdb:/var/lib/influxdb"
     {% endif %}
     restart: {{container_restart_policy}}
-{% endif %}   {#  CHRONOGRAF_enabled #}
+{% endif %}   {#  CHRONOGRAF_enable #}
 
-{% if TILE38_enabled | default(false) %}
+{% if TILE38_enable | default(false) %}
   #  ================================== Til38 ========================================== #}
   tile38:
     image: tile38/tile38:{{__tile38_version}}
@@ -1286,9 +1322,9 @@ services:
     ports:
       - "9851:9851"
     restart: {{container_restart_policy}}
-{% endif %}   {#  TILE38_enabled #}
+{% endif %}   {#  TILE38_enable #}
 
-{% if MYSQL_enabled | default(false) %}
+{% if MYSQL_enable | default(false) %}
   #  ================================== MySQL ========================================== #}
   mysql:
     image: mysql:{{__mysql_version}}
@@ -1302,9 +1338,9 @@ services:
       - MYSQL_ROOT_PASSWORD=manager
       - MYSQL_LOG_CONSOLE=true
     restart: {{container_restart_policy}}
-{% endif %}   {#  MYSQL_enabled #}
+{% endif %}   {#  MYSQL_enable #}
 
-{% if SQLSERVER_enabled | default(false) %}
+{% if SQLSERVER_enable | default(false) %}
   #  ================================== SQL Server ========================================== #}
   sqlserver:
     image: mcr.microsoft.com/mssql/server:{{__sqlserver_version}}
@@ -1317,9 +1353,9 @@ services:
       SA_PASSWORD: "SqlServerAdmin123!"
       MSSQL_PID: "Express"
     restart: {{container_restart_policy}}
-{% endif %}   {#  SQLSERVER_enabled #}
+{% endif %}   {#  SQLSERVER_enable #}
 
-{% if POSTGRESQL_enabled | default(false) %}
+{% if POSTGRESQL_enable | default(false) %}
   #  ================================== PostgreSQL ========================================== #}
   postgresql:
     image: mujz/pagila:{{__postgres_version}}
@@ -1329,9 +1365,9 @@ services:
       - POSTGRES_USER=sample
       - POSTGRES_DB=sample
     restart: {{container_restart_policy}}
-{% endif %}   {#  POSTGRESQL_enabled #}
+{% endif %}   {#  POSTGRESQL_enable #}
 
-{% if ADMINER_enabled | default(false) %}
+{% if ADMINER_enable | default(false) %}
   #  ================================== Adminer ========================================== #}
   adminer:
     image: adminer:{{__adminer_version}}
@@ -1339,9 +1375,9 @@ services:
     ports:
       - 28041:8080
     restart: {{container_restart_policy}}
-{% endif %}   {#  ADMINER_enabled #}
+{% endif %}   {#  ADMINER_enable #}
 
-{% if AXON_enabled | default(false) %}
+{% if AXON_enable | default(false) %}
   #  ================================== Axon Server ========================================== #}
   axon-server:
     image: axoniq/axonserver:{{__axon_version}}
@@ -1357,12 +1393,12 @@ services:
       - AXONSERVER_HTTP_PORT=8024
       - AXONSERVER_GRPC_PORT=8124
     restart: {{container_restart_policy}}
-{% endif %}   {#  AXON_enabled #}
+{% endif %}   {#  AXON_enable #}
 
-{% if MQTT_enabled | default(false) %}
+{% if MQTT_enable | default(false) %}
 #  Data Integration ===============================================
 
-  {% if MOSQUITTO_enabled | default(false) %}
+  {% if MOSQUITTO_enable | default(false) %}
     {% for num in range(MOSQUITTO_nodes | default(1) ) %}
       {% set external_port_1 = 28100 + loop.index - 1 %}
       {% set external_port_2 = 28023 + loop.index %}
@@ -1380,9 +1416,9 @@ services:
     {% endif %}
     restart: {{container_restart_policy}}
     {% endfor %}
-  {% endif %}   {#  MOSQUITTO_enabled #}
+  {% endif %}   {#  MOSQUITTO_enable #}
 
-  {% if HIVEMQ_enabled | default(false) %}
+  {% if HIVEMQ_enable | default(false) %}
   mqtt-1:
     image: hivemq/hivemq3:{{__hivemq3_version}}
     hostname: mqtt-1
@@ -1391,9 +1427,9 @@ services:
       - "28101:1883"
       - "28024:8080"
     restart: {{container_restart_policy}}
-  {% endif %}   {#  HIVEMQ_enabled #}
+  {% endif %}   {#  HIVEMQ_enable #}
 
-  {% if MQTT_UI_enabled | default(false) %}
+  {% if MQTT_UI_enable | default(false) %}
   mqtt-ui:
     image: vergissberlin/hivemq-mqtt-web-client:{{__hivemq_mqtt_web_client_version}}
 
@@ -1402,10 +1438,10 @@ services:
     restart: {{container_restart_policy}}
     ports:
       - '28082:80'
-  {% endif %}   {#  MQTT_UI_enabled #}
-{% endif %}   {#  MQTT_enabled #}
+  {% endif %}   {#  MQTT_UI_enable #}
+{% endif %}   {#  MQTT_enable #}
 
-{% if ACTIVEMQ_enabled | default(false) %}
+{% if ACTIVEMQ_enable | default(false) %}
   activemq:
     image: rmohr/activemq:{{__activemq_version}}
     container_name: activemq
@@ -1425,9 +1461,9 @@ services:
     volumes:
       - ./container-volume/activemq/data:/opt/activemq/data
     restart: {{container_restart_policy}}
-{% endif %}   {#  ACTIVEMQ_enabled #}
+{% endif %}   {#  ACTIVEMQ_enable #}
 
-{% if FTP_enabled | default(false) %}
+{% if FTP_enable | default(false) %}
   ftp:
     image: stilliard/pure-ftpd:{{__ftp_pureftpd_version}}
     container_name: ftp
@@ -1457,11 +1493,11 @@ services:
 #      - "/files:/storage:rw"
     environment:
       - VNC_PASSWORD=admin123
-{% endif %}   {#  FTP_enabled #}
+{% endif %}   {#  FTP_enable #}
 
 
 
-{% if MINIO_enabled | default(false) %}
+{% if MINIO_enable | default(false) %}
 #  Object Store (S3) ===============================================
   minio:
     hostname: minio
@@ -1477,9 +1513,9 @@ services:
       MINIO_SECRET_KEY: bKhWxVF3kQoLY9kFmt91l+tDrEoZjqnWXzY9Eza
     command: server /data
     restart: {{container_restart_policy}}
-{% endif %}   {#  MINIO_enabled #}
+{% endif %}   {#  MINIO_enable #}
 
-{% if AWSCLI_enabled | default(false) %}
+{% if AWSCLI_enable | default(false) %}
   awscli:
     image: xueshanf/awscli:{{__awscli_version}}
     container_name: awscli
@@ -1493,12 +1529,12 @@ services:
       AWS_SECRET_ACCESS_KEY: bKhWxVF3kQoLY9kFmt91l+tDrEoZjqnWXzY9Eza
     command: tail -f /dev/null
     restart: {{container_restart_policy}}
-{% endif %}   {#  AWSCLI_enabled #}
+{% endif %}   {#  AWSCLI_enable #}
 
 
 
 
-{% if PORTAINER_enabled | default(false) %}
+{% if PORTAINER_enable | default(false) %}
   #  Container UI ===============================================
   portainer:
     image: portainer/portainer:{{__portainer_version}}
@@ -1513,4 +1549,4 @@ services:
     ports:
       - 28071:9000
     restart: {{container_restart_policy}}
-{% endif %}   {# PORTAINER_enabled #}
+{% endif %}   {# PORTAINER_enable #}
