@@ -89,7 +89,7 @@
 
 ---
 services:
-{% if ZOOKEEPER_enabled or KAFKA_enabled | default(false) %}
+{% if ZOOKEEPER_enable or KAFKA_enable | default(false) %}
   {% for num in range(ZOOKEEPER_nodes | default('1') ) %}
   - service: zookeeper-{{loop.index}}
     version: {{__confluent_platform_version}}
@@ -105,16 +105,16 @@ services:
     version: {{__zoonavigator_api_version}}
     url: http://analyticsplatform:28048
     type: restapi
-{% endif %}   {# zookeeper_enabled #}
+{% endif %}   {# zookeeper_enable #}
 
-{% if KAFKA_enabled %}
+{% if KAFKA_enable %}
   {% for num in range(KAFKA_broker_nodes | default('1') ) %}
   - service: broker-{{loop.index}}
     version: {{__confluent_platform_version}}
   {% endfor %}
-{% endif %}   {# KAFKA_enabled #}
+{% endif %}   {# KAFKA_enable #}
 
-{% if ( KAFKA_enabled and KAFKA_connect_enabled ) | default(false) %}
+{% if ( KAFKA_enable and KAFKA_connect_enable ) | default(false) %}
   {% for num in range(KAFKA_connect_nodes | default(1) ) %}
     {% set external_port = 28013 + loop.index - 1 %}
     {% set port = 8083 + loop.index - 1 %}
@@ -123,4 +123,4 @@ services:
     url: http://analyticsplatform:{{external_port}}
     type: restapi
   {% endfor %}
-{% endif %}   {# KAFKA_enabled #}
+{% endif %}   {# KAFKA_enable #}
