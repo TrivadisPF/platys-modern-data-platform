@@ -18,14 +18,14 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
 {% set __kafka_burrow_ui_version = kafka_burrow_ui_version | default('latest') -%}
 {% set __kafka_burrow_dashboard_version = kafka_burrow_dashboard_version | default('latest') -%}
 
-{% set __tvd_hadoop_version = tvd_hadoop_version | default('latest') -%}
+{% set __hadoop_version = hadoop_version | default('latest') -%}
 
-{% set __tvd_spark_version = tvd_spark_version | default('latest') -%}
-{% set __tvd_spark_livy_version = tvd_spark_livy_version | default('latest') -%}
+{% set __spark_version = spark_version | default('latest') -%}
+{% set __spark_livy_version = spark_livy_version | default('latest') -%}
 
 {% set __hive_version = hive_version | default('latest') -%}
 
-{% set __tvd_atlas_verion = tvd_atlas_verion | default('latest') -%}
+{% set __atlas_verion = atlas_verion | default('latest') -%}
 
 {% set __cassandra_version = cassandra_version | default('latest') -%}
 
@@ -43,11 +43,11 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
 
 {% set __streamsets_version = streamsets_version | default('latest') -%}
 {% set __streamsets_transformer_version = streamsets_transforer_version | default('latest') -%}
-{% set __streamsets_edge_version = streamsets_edge_version | default('latest') -%}
+{% set __streamsets_edge_version = streamsets_edge_version | default('3.12.0') -%}
 
 {% set __nifi_version = nifi_version | default('latest') -%}
 
-{% set __tvd_zeppelin_version = tvd_zeppelin_version | default('latest') -%}
+{% set __zeppelin_version = zeppelin_version | default('latest') -%}
 
 {% set __jupyter_minimal_version = jupyter_minimal_version | default('latest') -%}
 {% set __jupyter_r_version = jupyter_r_version | default('latest') -%}
@@ -87,6 +87,7 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
 
 {% set __mosquitto_version = mosquitto_version | default('latest') -%}
 {% set __hivemq3_version = hivemq3_version | default('latest') -%}
+{% set __hivemq4_version = hivemq4_version | default('latest') -%}
 {% set __hivemq_mqtt_web_client_version = hivemq_mqtt_web_client_version | default('latest') -%}
 {% set __activemq_version = activemq_version | default('latest') -%}
 
@@ -95,7 +96,39 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
 
 {% set __minio_version = minio_version | default('latest') -%}
 {% set __awscli_version = awscli_version | default('latest') -%}
-{% set __portainer_version = portainer_version | default('latest') %}
+{% set __portainer_version = portainer_version | default('latest') -%}
+
+# if we use stack type ARM, then disable some containers which do not support ARM
+{% if stack_type == 'ARM' %}
+  {% set ZOOKEEPER_enable = false -%}
+  {% set KAFKA_enable = false -%}
+  {% set HADOOP_enable = false -%}
+  {% set SPARK_enable = false -%}
+  {% set HIVE_enable = false -%}
+  {% set ATLAS_enable = false -%}
+  {% set HUE_enable = false -%}
+  {% set STREAMSETS_enable = false -%}
+  {% set STREAMSETS_TRANSFORMER_enable = false -%}
+  {% set NIFI_enable = false -%}
+  {% set ZEPPELIN_enable = false -%}
+  {% set JUPYTER_enable = false -%}
+  {% set ELASTICSEARCH_enable = false -%}
+  {% set KIBANA_enable = false -%}
+  {% set NEO4J_enable = false -%}
+  {% set TILE38_enable = false -%}
+  {% set MYSQL_enable = false -%}
+  {% set SQLSERVER_enable = false -%}
+  {% set POSTGRESQL_enable = false -%}
+  {% set ADMINER_enable = false -%}
+  {% set AXON_enable = false -%}
+  {% set HIMEMQ3_enable = false -%}
+  {% set HIMEMQ4_enable = false -%}
+  {% set MQTT_UI_enable = false -%}
+  {% set ACTIVEMQ_enable = false -%}
+  {% set FTP_enable = false -%}
+  {% set MINIO_enable = false -%}
+  {% set AWSCLI_enable = false -%}
+{% endif %}   {# PLATFORM_ARM_enable #}
 
 services:
 
@@ -108,8 +141,11 @@ services:
     ports:
       - "2181:2181"
     environment:
+      ZOOKEEPER_SERVER_ID: {{loop.index}}
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
+      ZOOKEEPER_INIT_LIMIT: 5
+      ZOOKEEPER_SYNC_LIMIT: 2
     restart: {{container_restart_policy}}
   {% endfor %}
 
@@ -472,7 +508,7 @@ services:
 
   #  ================================== Apache Hadoop ========================================== #
   namenode:
-    image: trivadis/apache-hadoop-namenode:{{__tvd_hadoop_version}}
+    image: trivadis/apache-hadoop-namenode:{{__hadoop_version}}
     container_name: namenode
     hostname: namenode
     volumes:
@@ -490,7 +526,7 @@ services:
     {% set external_port = 28085 + loop.index - 1 %}
 
   datanode-{{loop.index}}:
-    image: trivadis/apache-hadoop-datanode:{{__tvd_hadoop_version}}
+    image: trivadis/apache-hadoop-datanode:{{__hadoop_version}}
     container_name: datanode-{{loop.index}}
     volumes:
       - ./container-volume/datanode-{{loop.index}}:/hadoop/dfs/data
@@ -504,7 +540,7 @@ services:
   {% endfor %}
 
   resourcemanager:
-    image: trivadis/apache-hadoop-resourcemanager:{{__tvd_hadoop_version}}
+    image: trivadis/apache-hadoop-resourcemanager:{{__hadoop_version}}
     container_name: resourcemanager
     hostname: resourcemanager
     ports:
@@ -522,7 +558,7 @@ services:
     restart: {{container_restart_policy}}
 
   nodemanager:
-    image: trivadis/apache-hadoop-nodemanager:{{__tvd_hadoop_version}}
+    image: trivadis/apache-hadoop-nodemanager:{{__hadoop_version}}
     container_name: nodemanager
     hostname: nodemanager
     ports:
@@ -541,7 +577,7 @@ services:
     restart: {{container_restart_policy}}
 
   historyserver:
-    image: trivadis/apache-hadoop-historyserver:{{__tvd_hadoop_version}}
+    image: trivadis/apache-hadoop-historyserver:{{__hadoop_version}}
     container_name: historyserver
     hostname: historyserver
     ports:
@@ -556,7 +592,7 @@ services:
     restart: {{container_restart_policy}}
 
   hadoop-client:
-    image: trivadis/apache-hadoop-client:{{__tvd_hadoop_version}}
+    image: trivadis/apache-hadoop-client:{{__hadoop_version}}
     container_name: hadoop-client
     hostname: hadoop-client
     env_file:
@@ -570,7 +606,7 @@ services:
 {% if SPARK_enable | default(false) %}
   #  ================================== Apache Spark ========================================== #
   spark-master:
-    image: trivadis/apache-spark-master:{{__tvd_spark_version}}
+    image: trivadis/apache-spark-master:{{__spark_version}}
     container_name: spark-master
     hostname: spark-master
     ports:
@@ -594,7 +630,7 @@ services:
 
 
   spark-worker-{{loop.index}}:
-    image: trivadis/apache-spark-worker:{{__tvd_spark_version}}
+    image: trivadis/apache-spark-worker:{{__spark_version}}
     container_name: spark-worker-{{loop.index}}
     hostname: spark-worker-{{loop.index}}
     depends_on:
@@ -617,7 +653,7 @@ services:
 
   # Initialize the folder for Spark logs in HDFS
   hadoop-setup:
-    image: trivadis/apache-hadoop-client:{{__tvd_hadoop_version}}
+    image: trivadis/apache-hadoop-client:{{__hadoop_version}}
     hostname: hadoop-setup
     container_name: hadoop-setup
     env_file:
@@ -631,7 +667,7 @@ services:
 
   {% if SPARK_history_enable | default(false) %}
   spark-history:
-    image: trivadis/apache-spark-worker:{{__tvd_spark_version}}
+    image: trivadis/apache-spark-worker:{{__spark_version}}
     command: /spark/bin/spark-class org.apache.spark.deploy.history.HistoryServer
     container_name: spark-history
     hostname: spark-history
@@ -646,7 +682,7 @@ services:
 
   {% if SPARK_thrift_enable | default(false) %}
   spark-thrift-server:
-    image: trivadis/apache-spark-master:{{__tvd_spark_version}}
+    image: trivadis/apache-spark-master:{{__spark_version}}
     container_name: spark-thrift-server
     ports:
       - "28073:10000"
@@ -661,7 +697,7 @@ services:
   {% if SPARK_livy_enable | default(false) %}
   #  ================================== Apache Livy ========================================== #
   livy:
-    image: trivadis/apache-livy:{{tvd_spark_livy_version}}
+    image: trivadis/apache-livy:{{spark_livy_version}}
     container_name: livy
     hostname: livy
     env_file:
@@ -720,7 +756,7 @@ services:
 {% if ATLAS_enable  | default(false) %}
   #  ================================== Apache Atlas ========================================== #
   atlas:
-    image: trivadis/apache-atlas:{{__tvd_atlas_verion}}
+    image: trivadis/apache-atlas:{{__atlas_verion}}
     container_name: atlas
     hostname: atlas
     ports:
@@ -860,10 +896,10 @@ services:
 
 {%if STREAMSETS_enable | default(false) %}
   #  ================================== StreamSets DataCollector ========================================== #}
-  streamsets:
+  streamsets-1:
     image: trivadis/streamsets-kafka-hadoop-aws:{{__streamsets_version}}
-    container_name: streamsets
-    hostname: streamsets
+    container_name: streamsets-1
+    hostname: streamsets-1
     labels:
       com.mdps.service.webui.url: "http://${PUBLIC_IP}:28029"
       com.mdps.service.restapi.url: "http://${PUBLIC_IP}:28110/collector/restapi"
@@ -877,6 +913,9 @@ services:
       SDC_CONF_PIPELINE_MAX_RUNNERS_COUNT: 50
     volumes:
       - ./data-transfer:/data-transfer
+    {% if STREAMSETS_volume_map_data %}
+      - ./container-volume/streamsets-1:/data:Z
+    {% endif %}
 #      - ./container-volume/streamsets/data:/data:Z
 #      - ./streamsets-extras/streamsets-libs-extras/streamsets-datacollector-jdbc-lib/postgresql-42.2.6.jar:/opt/streamsets-datacollector-{{__streamsets_version}}/streamsets-libs-extras/streamsets-datacollector-jdbc-lib/lib/postgresql-42.2.6.jar:Z
 #      - ./streamsets-extras/libs-common-lib:/opt/streamsets-datacollector-{{__streamsets_version}}/libs-common-lib:Z
@@ -897,6 +936,9 @@ services:
       - "28148:19630"
     volumes:
       - ./data-transfer:/data-transfer
+    {% if STREAMSETS_TRANSFORMER_volume_map_data %}
+      - ./container-volume/streamsets-transformer-1:/data:Z
+    {% endif %}
 #      - ./container-volume/streamsets-transformer/data:/data:Z
 #      - ./streamsets-extras/streamsets-libs-extras/streamsets-datacollector-jdbc-lib/postgresql-42.2.6.jar:/opt/streamsets-datacollector-{{__streamsets_version}}/streamsets-libs-extras/streamsets-datacollector-jdbc-lib/lib/postgresql-42.2.6.jar:Z
 #      - ./streamsets-extras/libs-common-lib:/opt/streamsets-datacollector-{{__streamsets_version}}/libs-common-lib:Z
@@ -923,16 +965,38 @@ services:
     image: apache/nifi:{{__nifi_version}}
     container_name: nifi
     hostname: nifi
+    labels:
+      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28054/nifi"
     ports:
       - "28054:8080"
     restart: {{container_restart_policy}}
 
 {% endif %}   {#  NIFI_enable  #}
 
+{%if NODERED_enable | default(false) %}
+  #  ================================== Node-RED ========================================== #}
+  nodered:
+    image: nodered/node-red:{{__nifi_version}}
+    container_name: nodered
+    hostname: nodered
+    labels:
+      com.mdps.service.webui.url: "http://${PUBLIC_IP}:1880"
+    ports:
+      - "1880:1880"
+    volumes:
+      - ./data-transfer:/data-transfer
+    {% if NODERED_volume_map_data %}
+      - ./container-volume/nodered:/data:Z
+    {% endif %}
+
+    restart: {{container_restart_policy}}
+
+{% endif %}   {#  NODERED_enable  #}
+
 {%if ZEPPELIN_enable | default(false) %}
   #  ================================== Zeppelin ========================================== #}
   zeppelin:
-    image: trivadis/apache-zeppelin:{{__tvd_zeppelin_version}}
+    image: trivadis/apache-zeppelin:{{__zeppelin_version}}
     container_name: zeppelin
     hostname: zeppelin
     ports:
@@ -1418,16 +1482,27 @@ services:
     {% endfor %}
   {% endif %}   {#  MOSQUITTO_enable #}
 
-  {% if HIVEMQ_enable | default(false) %}
-  mqtt-1:
+  {% if HIVEMQ3_enable | default(false) %}
+  hivemq3-1:
     image: hivemq/hivemq3:{{__hivemq3_version}}
-    hostname: mqtt-1
-    container_name: mqtt-1
+    hostname: hivemq3-1
+    container_name: hivemq3-1
     ports:
       - "28101:1883"
       - "28024:8080"
     restart: {{container_restart_policy}}
-  {% endif %}   {#  HIVEMQ_enable #}
+  {% endif %}   {#  HIVEMQ3_enable #}
+
+  {% if HIVEMQ4_enable | default(false) %}
+  hivemq4-1:
+    image: hivemq/hivemq3:{{__hivemq4_version}}
+    hostname: hivemq4-1
+    container_name: hivemq4-1
+    ports:
+      - "28101:1883"
+      - "28024:8080"
+    restart: {{container_restart_policy}}
+  {% endif %}   {#  HIVEMQ4_enable #}
 
   {% if MQTT_UI_enable | default(false) %}
   mqtt-ui:
@@ -1530,8 +1605,6 @@ services:
     command: tail -f /dev/null
     restart: {{container_restart_policy}}
 {% endif %}   {#  AWSCLI_enable #}
-
-
 
 
 {% if PORTAINER_enable | default(false) %}
