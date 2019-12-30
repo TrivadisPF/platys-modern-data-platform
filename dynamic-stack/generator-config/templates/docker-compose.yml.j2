@@ -60,8 +60,6 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
 
 {% set __kibana_version = kibana_version | default('latest') -%}
 
-{% set __chronograf_version = chronograf_version | default('latest') -%}
-
 {% set __redis_version = redis_version | default('latest') -%}
 {% set __redis_commander_version = redis_commander_version | default('latest') -%}
 
@@ -74,6 +72,10 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
 {% set __neo4j_version = neo4j_version | default('latest') -%}
 
 {% set __influxdb_version = influxdb_version | default('latest') -%}
+{% set __telegraf_version = telegraf_version | default('latest') -%}
+{% set __chronograf_version = chronograf_version | default('latest') -%}
+{% set __kapacitor_version = kapacitor_version | default('latest') -%}
+{% set __influxdb2_version = influxdb2_version | default('2.2.0-alpha') -%}
 {% set __influxdb_ui_version = influxdb_ui_version | default('latest') -%}
 
 {% set __tile38_version = tile38_version | default('latest') -%}
@@ -98,6 +100,11 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
 {% set __awscli_version = awscli_version | default('latest') -%}
 {% set __portainer_version = portainer_version | default('latest') -%}
 
+# enforce some dependencies
+{% if KAFKA_kadmin_enable or ATLAS_enable %}
+  {% set ZOOKEEPER_enable = true -%}
+{% endif %}   {# PLATFORM_ARM_enable #}
+
 # if we use stack type ARM, then disable some containers which do not support ARM
 {% if stack_type == 'ARM' %}
   {% set ZOOKEEPER_enable = false -%}
@@ -114,6 +121,7 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
   {% set JUPYTER_enable = false -%}
   {% set ELASTICSEARCH_enable = false -%}
   {% set KIBANA_enable = false -%}
+  {% set INFLUXDB2_enable = false -%}
   {% set NEO4J_enable = false -%}
   {% set TILE38_enable = false -%}
   {% set MYSQL_enable = false -%}
@@ -1339,17 +1347,19 @@ services:
 {% endif %}   {#  NEO4J_enable #}
 
 {% if INFLUXDB_enable | default(false) %}
-  #  ================================== InfluxDB ========================================== #}
+  #  ================================== InfluxData InfluxDB ========================================== #}
   influxdb:
     image: influxdb:{{__influxdb_version}}
     hostname: influxdb
     container_name: influxdb
+    labels:
+      com.mdps.service.restapi.url: "http://${PUBLIC_IP}:28150"
     ports:
       - "28150:8086"
     volumes:
-      - ./conf/influxdb/influxdb.conf:/etc/influxdb/influxdb.conf
+      - ./conf/influxdata/influxdb/influxdb.conf:/etc/influxdb/influxdb.conf
     {% if INFLUXDB_volume_map_data %}
-      - "./container-volume/influxdb:/var/lib/influxdb"
+      - "./container-volume/influxdata/influxdb:/var/lib/influxdb"
     {% endif %}
     restart: {{container_restart_policy}}
 
@@ -1357,28 +1367,95 @@ services:
     image: timeseriesadmin/timeseriesadmin:{{__influxdb_ui_version}}
     hostname: influxdb-ui
     container_name: influxdb-ui
+    labels:
+      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28152"
     ports:
-      - "28152:80"
+      - "28151:80"
     restart: {{container_restart_policy}}
 {% endif %}   {#  INFLUXDB_enable #}
 
-{% if CHRONOGRAF_enable | default(false) %}
-  #  ================================== InfluxDB ========================================== #}
+{% if INFLUXDB_telegraf_enable | default(false) %}
+  #  ================================== InfluxData Telegraf ========================================== #}
+  telegraf:
+    image: telegraf:{{__telegraf_version}}
+    hostname: telegraf
+    container_name: telegraf
+    environment:
+      HOSTNAME: telegraf
+    volumes:
+      - ./conf/influxdata/telegraf/telegraf.conf:/etc/telegraf/telegraf.conf
+      # Mount for Docker API access
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      - influxdb
+    restart: {{container_restart_policy}}
+{% endif %}   {#  INFLUXDB_chronograf_enable #}
+
+{% if INFLUXDB_chronograf_enable | default(false) %}
+  #  ================================== InfluxData Chronograf ========================================== #}
   chronograf:
     image: chronograf:{{__chronograf_version}}
     hostname: chronograf
     container_name: chronograf
+    labels:
+      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28151"
     ports:
-      - "28151:8888"
+      - "28152:8888"
     environment:
-      INFLUXDB_URL: http://influxdb:8086
+      RESOURCES_PATH: "/usr/share/chronograf/resources"
+      PORT: 8888
+      HOST: chronograf
+      INFLUXDB_URL: "http://influxdb:8086"
+    {% if INFLUXDB_CHRONOGRAF_volume_map_data %}
     volumes:
-      - ./conf/influxdb/influxdb.conf:/etc/influxdb/influxdb.conf
-    {% if INFLUXDB_volume_map_data %}
+      - "./container-volume/influxdata/chronograf:/var/lib/chronograf"
+    {% endif %}
+    depends_on:
+      - influxdb
+    restart: {{container_restart_policy}}
+{% endif %}   {#  INFLUXDB_chronograf_enable #}
+
+{% if INFLUXDB_kapacitor_enable | default(false) %}
+  #  ================================== InfluxData Kapacitor ========================================== #}
+  kapacitor:
+    image: kapacitor:{{__kapacitor_version}}
+    hostname: kapacitor
+    container_name: kapacitor
+    labels:
+      com.mdps.service.restapi.url: "http://${PUBLIC_IP}:28152/kapacitor/v1"
+    ports:
+      - "28153:9092"
+    environment:
+      KAPACITOR_HOSTNAME: kapacitor
+      KAPACITOR_DATA_DIR: "var/lib/kapacitor"
+      KAPACITOR_LOGGING_LEVEL: INFO
+      KAPACITOR_INFLUXDB_0_URLS_0: http://influxdb:8086
+    {% if INFLUXDB_KAPACITOR_volume_map_data %}
+    volumes:
+      - "./container-volume/influxdata/kapacitor:/var/lib/kapacitor"
+    {% endif %}
+    restart: {{container_restart_policy}}
+{% endif %}   {# INFLUXDB_kapacitor_enable #}
+
+{% if INFLUXDB2_enable | default(false) %}
+  #  ================================== InfluxDB 2 ========================================== #}
+  influxdb2:
+    image: quay.io/influxdb/influxdb:{{__influxdb2_version}}
+    hostname: influxdb2
+    container_name: influxdb2
+    labels:
+      com.mdps.service.webui.url: "http://${PUBLIC_IP}:9999"
+    ports:
+      - "9999:9999"
+#    volumes:
+#      - ./conf/influxdb/influxdb.conf:/etc/influxdb/influxdb.conf
+    {% if INFLUXDB2_volume_map_data %}
+    volumes:
       - "./container-volume/influxdb:/var/lib/influxdb"
     {% endif %}
     restart: {{container_restart_policy}}
-{% endif %}   {#  CHRONOGRAF_enable #}
+{% endif %}   {# INFLUXDB2_enable #}
+
 
 {% if TILE38_enable | default(false) %}
   #  ================================== Til38 ========================================== #}
