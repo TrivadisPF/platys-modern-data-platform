@@ -78,6 +78,8 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
 {% set __influxdb2_version = influxdb2_version | default('2.2.0-alpha') -%}
 {% set __influxdb_ui_version = influxdb_ui_version | default('latest') -%}
 
+{% set __prometheus_version = prometheus_version | default('latest') -%}
+
 {% set __tile38_version = tile38_version | default('latest') -%}
 
 {% set __mysql_version = mysql_version | default('latest') -%}
@@ -989,13 +991,18 @@ services:
     hostname: nodered
     labels:
       com.mdps.service.webui.url: "http://${PUBLIC_IP}:1880"
+      com.mdps.service.restapi.url: "http://${PUBLIC_IP}:1880"
     ports:
       - "1880:1880"
+    environment:
+      - TZ=Europe/Amsterdam
     volumes:
+#      - ./conf/nodered/settings.js:/usr/src/node-red/node_modules/node-red/settings.js
       - ./data-transfer:/data-transfer
     {% if NODERED_volume_map_data %}
       - ./container-volume/nodered:/data:Z
     {% endif %}
+      - /dev/i2c-1:/dev/i2c-1
 
     restart: {{container_restart_policy}}
 
@@ -1456,9 +1463,28 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {# INFLUXDB2_enable #}
 
+{% if PROMETHEUS_enable | default(false) %}
+  #  ================================== Prometheus ========================================== #}
+  prometheus:
+    image: prom/prometheus:{{__prometheus_version}}
+    container_name: prometheus
+    hostname: prometheus
+    labels:
+      com.mdps.service.webui.url: "http://${PUBLIC_IP}:9090/graph"
+      com.mdps.service.restapi.url: "http://${PUBLIC_IP}:9090/api/v1"
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./conf/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    {% if PROMETHEUS_volume_map_data %}
+      - "./container-volume/prometheus:/prometheus"
+    {% endif %}
+    command: "--config.file=/etc/prometheus/prometheus.yml --storage.tsdb.path=/prometheus"
+    restart: {{container_restart_policy}}
+{% endif %}   {#  PROMETHEUS_enable #}
 
 {% if TILE38_enable | default(false) %}
-  #  ================================== Til38 ========================================== #}
+  #  ================================== Tile38 ========================================== #}
   tile38:
     image: tile38/tile38:{{__tile38_version}}
     container_name: tile38
