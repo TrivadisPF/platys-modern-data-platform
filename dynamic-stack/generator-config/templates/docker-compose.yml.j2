@@ -145,17 +145,26 @@ services:
 {% if ZOOKEEPER_enable or KAFKA_enable or ATLAS_enable | default(false) %}
   #  ================================== Zookeeper ========================================== #}
   {% for num in range(ZOOKEEPER_nodes | default('1') ) %}
+  {% set port = 2180 + loop.index %}
   zookeeper-{{loop.index}}:
     image: confluentinc/cp-zookeeper:{{__confluent_platform_version}}
     container_name: zookeeper-{{loop.index}}
+    hostname: zookeeper-{{loop.index}}
     ports:
-      - "2181:2181"
+      - "{{port}}:{{port}}"
+    {% if ZOOKEEPER_volume_map_data %}
+    volumes:
+      - "./container-volume/zookeeper-{{loop.index}}:/var/lib/zookeeper/data"
+    {% endif %}
     environment:
       ZOOKEEPER_SERVER_ID: {{loop.index}}
-      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_CLIENT_PORT: {{port}}
       ZOOKEEPER_TICK_TIME: 2000
       ZOOKEEPER_INIT_LIMIT: 5
       ZOOKEEPER_SYNC_LIMIT: 2
+    {% if ZOOKEEPER_nodes == 3 %}
+      ZOOKEEPER_SERVERS: zookeeper-1:22888:23888;zookeeper-2:32888:33888;zookeeper-3:42888:43888
+    {% endif %}
     restart: {{container_restart_policy}}
   {% endfor %}
 
@@ -163,6 +172,7 @@ services:
   zoonavigator:
     image: elkozmon/zoonavigator-web:{{__zoonavigator_version}}
     container_name: zoonavigator
+    hostname: zoonavigator
     ports:
      - "28047:8010"
     environment:
@@ -186,18 +196,19 @@ services:
 {% endif %}   {# zookeeper_enable or KAFKA_enable or ATLAS_enable #}
 
 
-
 {% if KAFKA_enable | default(false) %}
   #  ================================== Kafka ========================================== #}
   {% for num in range(KAFKA_broker_nodes | default(1) ) %}
   {% set port = 9091 + loop.index %}
-  broker-{{loop.index}}:
+  kafka-{{loop.index}}:
     image: confluentinc/cp-kafka:{{__confluent_platform_version}}
-    container_name: broker-{{loop.index}}
+    container_name: kafka-{{loop.index}}
+    hostname: kafka-{{loop.index}}
     depends_on:
       - zookeeper-1
     ports:
       - "{{port}}:{{port}}"
+      - "2{{port}}:2{{port}}"
     {% if KAFKA_volume_map_data %}
     volumes:
       - "./container-volume/broker-{{loop.index}}:/var/lib/kafka/data"
@@ -206,7 +217,10 @@ services:
       KAFKA_BROKER_ID: {{loop.index}}
       KAFKA_BROKER_RACK: 'r{{loop.index}}'
       KAFKA_ZOOKEEPER_CONNECT: 'zookeeper-1:2181'
-      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://${PUBLIC_IP}:{{port}}'
+      KAFKA_LISTENERS: 'LISTENER_INTERNAL://kafka-{{loop.index}}:1{{port}},LISTENER_DOCKERHOST://kafka-{{loop.index}}:2{{port}},LISTENER_EXTERNAL://kafka-{{loop.index}}:{{port}}'
+      KAFKA_ADVERTISED_LISTENERS: 'LISTENER_INTERNAL://kafka-{{loop.index}}:1{{port}},LISTENER_DOCKERHOST://localhost:2{{port}},LISTENER_EXTERNAL://${PUBLIC_IP:-127.0.0.1}:{{port}}'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'LISTENER_INTERNAL:PLAINTEXT,LISTENER_DOCKERHOST:PLAINTEXT,LISTENER_EXTERNAL:PLAINTEXT'
+      KAFKA_INTER_BROKER_LISTENER_NAME: LISTENER_INTERNAL
 #      KAFKA_METRIC_REPORTERS: io.confluent.metrics.reporter.ConfluentMetricsReporter
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
@@ -232,7 +246,7 @@ services:
     container_name: schema-registry-{{loop.index}}
     depends_on:
       - zookeeper-1
-      - broker-1
+      - kafka-1
     ports:
       - "{{external_port}}:{{port}}"
     environment:
@@ -240,7 +254,7 @@ services:
     {% if KAFKA_schema_registry_use_zookeeper_election %}
       SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL: 'zookeeper-1:2181'
     {% endif %}
-      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: 'broker-1:9092'
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: 'kafka-1:9092'
       SCHEMA_REGISTRY_MASTER_ELIGIBILITY: "true"
       SCHEMA_REGISTRY_KAFKASTORE_TOPIC_REPLICATION_FACTOR: {{KAFKA_schema_registry_replication_factor}}
       SCHEMA_REGISTRY_ACCESS_CONTROL_ALLOW_ORIGIN: '*'
@@ -259,12 +273,12 @@ services:
     container_name: connect-{{loop.index}}
     depends_on:
       - zookeeper-1
-      - broker-1
+      - kafka-1
       - schema-registry-1
     ports:
       - "{{external_port}}:{{port}}"
     environment:
-      CONNECT_BOOTSTRAP_SERVERS: 'broker-1:9092'
+      CONNECT_BOOTSTRAP_SERVERS: 'kafka-1:9092'
       CONNECT_REST_ADVERTISED_HOST_NAME: connect-{{loop.index}}
       CONNECT_REST_PORT: {{port}}
       CONNECT_GROUP_ID: compose-connect-group
@@ -306,12 +320,12 @@ services:
     ports:
       - "{{external_port}}:{{port}}"
     depends_on:
-      - broker-1
+      - kafka-1
       - schema-registry-1
     environment:
       KSQL_CONFIG_DIR: "/etc/ksql"
       KSQL_LOG4J_OPTS: "-Dlog4j.configuration=file:/etc/ksql/log4j-rolling.properties"
-      KSQL_BOOTSTRAP_SERVERS: "broker-1:9092"
+      KSQL_BOOTSTRAP_SERVERS: "kafka-1:9092"
       KSQL_HOST_NAME: ksqldb-server-{{loop.index}}
       KSQL_APPLICATION_ID: "kafka-demo"
       KSQL_LISTENERS: http://0.0.0.0:{{port}}
@@ -339,7 +353,7 @@ services:
     container_name: kafka-rest-1
     hostname: kafka-rest-1
     depends_on:
-      - broker-1
+      - kafka-1
       - schema-registry-1
     ports:
       - "28012:8086"
@@ -362,7 +376,7 @@ services:
     environment:
       KAFKA_MQTT_TOPIC_REGEX_LIST: 'truck_position:.*position,truck_engine:.*engine'
       KAFKA_MQTT_LISTENERS: 0.0.0.0:1882
-      KAFKA_MQTT_BOOTSTRAP_SERVERS: PLAINTEXT://broker-1:9092,broker-2:9093
+      KAFKA_MQTT_BOOTSTRAP_SERVERS: PLAINTEXT://kafka-1:9092
       KAFKA_MQTT_CONFLUENT_TOPIC_REPLICATIN_FACTOR: 1
 {% endif %}   {# KAFKA_enable and KAFKA_mqttproxy_enable #}
 
@@ -375,7 +389,7 @@ services:
       labels:
         com.mdps.service.webui.url: "http://${PUBLIC_IP}:28039"
       depends_on:
-        - broker-1
+        - kafka-1
         - schema-registry-1
       ports:
         - "28039:8000"
@@ -410,7 +424,7 @@ services:
       com.mdps.service.webui.url: "http://${PUBLIC_IP}:28038"
     depends_on:
       - zookeeper-1
-      - broker-1
+      - kafka-1
     ports:
       - "28044:9000"
     environment:
@@ -440,7 +454,7 @@ services:
       - "28040:8080"
     environment:
       ZOOKEEPER_HOST: zookeeper-1:2181
-      KAFKA_HOST: broker-1:9092
+      KAFKA_HOST: kafka-1:9092
       #SECURITY_PROTOCOL: SSL
       TRUST_STORE_LOCATION: ssl/client.truststore.jks
       TRUST_STORE_PASSWORD: password
@@ -463,13 +477,13 @@ services:
           connections:
             docker-kafka-server:
               properties:
-                bootstrap.servers: "broker-1:9092"
+                bootstrap.servers: "kafka-1:9092"
               schema-registry:
                 url: "http://schema-registry-1:8081"
               connect:
                 url: "http://connect-1:8083"
     depends_on:
-      - broker-1
+      - kafka-1
     restart: {{container_restart_policy}}
 {% endif %}   {#  KAFKA_enable and KAFKA_kafkahq_enable #}
 
@@ -485,7 +499,7 @@ services:
       - 28104:8000
     depends_on:
       - zookeeper-1
-      - broker-1
+      - kafka-1
     restart: {{container_restart_policy}}
 
   burrow-ui:
@@ -497,7 +511,7 @@ services:
       - BURROW_HOME="http://${PUBLIC_IP}:28104/v3/kafka"
     depends_on:
       - zookeeper-1
-      - broker-1
+      - kafka-1
     restart: {{container_restart_policy}}
   burrow-dashboard:
     image: joway/burrow-dashboard:{{__kafka_burrow_dashboard_version}}
@@ -508,7 +522,7 @@ services:
       - BURROW_BACKEND="http://${PUBLIC_IP}:28104"
     depends_on:
       - zookeeper-1
-      - broker-1
+      - kafka-1
     restart: {{container_restart_policy}}
 {% endif %}   {# KAFKA_enable and KAFKA_burrow_enable #}
 
@@ -779,7 +793,7 @@ services:
       - ./conf/atlas/credentials:/tmp/credentials
     depends_on:
       - zookeeper-1
-      - broker-1
+      - kafka-1
       - atlas-kafka-setup
       - cassandra-atlas
     restart: {{container_restart_policy}}
@@ -790,10 +804,10 @@ services:
     hostname: atlas-kafka-setup
     container_name: atlas-kafka-setup
     depends_on:
-      - broker-1
+      - kafka-1
       - zookeeper-1
     command: "bash -c 'echo Waiting for Kafka to be ready... && \
-                       cub kafka-ready -b broker-1:9092 1 120 && \
+                       cub kafka-ready -b kafka-1:9092 1 120 && \
                        kafka-topics --create --if-not-exists --zookeeper zookeeper-1:2181 --partitions 1 --replication-factor 1 --topic ATLAS_HOOK && \
                        kafka-topics --create --if-not-exists --zookeeper zookeeper-1:2181 --partitions 1 --replication-factor 1 --topic ATLAS_ENTITIES'"
     environment:
