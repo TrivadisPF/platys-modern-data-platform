@@ -1,0 +1,1 @@
+Contains the data of prometheus service, if flag PROMETHEUS_volume_map_data is set to true.
