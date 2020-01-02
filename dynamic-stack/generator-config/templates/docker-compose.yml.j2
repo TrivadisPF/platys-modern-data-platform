@@ -1487,10 +1487,10 @@ services:
     container_name: influxdb2
     labels:
       com.mdps.service.webui.url: "http://${PUBLIC_IP}:9999"
+      com.mdps.service.restapi.url: "http://${PUBLIC_IP}:9999/api/v2"
+    command: "--reporting-disabled"
     ports:
       - "9999:9999"
-#    volumes:
-#      - ./conf/influxdb/influxdb.conf:/etc/influxdb/influxdb.conf
     {% if INFLUXDB2_volume_map_data %}
     volumes:
       - "./container-volume/influxdb2:/var/lib/influxdb"
@@ -1507,6 +1507,7 @@ services:
     labels:
       com.mdps.service.webui.url: "http://${PUBLIC_IP}:9090/graph"
       com.mdps.service.restapi.url: "http://${PUBLIC_IP}:9090/api/v1"
+    command: "--config.file=/etc/prometheus/prometheus.yml --storage.tsdb.path=/prometheus"
     ports:
       - "9090:9090"
     volumes:
@@ -1514,7 +1515,6 @@ services:
     {% if PROMETHEUS_volume_map_data %}
       - "./container-volume/prometheus:/prometheus"
     {% endif %}
-    command: "--config.file=/etc/prometheus/prometheus.yml --storage.tsdb.path=/prometheus"
     restart: {{container_restart_policy}}
 {% endif %}   {#  PROMETHEUS_enable #}
 
