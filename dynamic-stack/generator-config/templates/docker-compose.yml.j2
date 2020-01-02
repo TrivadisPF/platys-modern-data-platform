@@ -302,7 +302,7 @@ services:
       AWS_ACCESS_KEY_ID: V42FCGRVMK24JJ8DHUYG
       AWS_SECRET_ACCESS_KEY: bKhWxVF3kQoLY9kFmt91l+tDrEoZjqnWXzY9Eza
     volumes:
-      - $PWD/kafka-connect:/etc/kafka-connect/custom-plugins
+      - ./kafka-connect:/etc/kafka-connect/custom-plugins
     restart: {{container_restart_policy}}
 
   {% endfor %}
@@ -333,7 +333,7 @@ services:
       KSQL_KSQL_LOGGING_PROCESSING_TOPIC_AUTO_CREATE: "true"
       KSQL_KSQL_SERVICE_ID: "kafka-demo"
     volumes:
-      - $PWD/ksql:/etc/ksql/ext
+      - ./ksql:/etc/ksql/ext
     restart: {{container_restart_policy}}
   {% endfor %}
 
@@ -1357,13 +1357,23 @@ services:
     image: neo4j:{{__neo4j_version}}
     hostname: neo4j
     container_name: neo4j
+    labels:
+      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28080"
     ports:
       - "28080:7474"
       - "7687:7687"
     environment:
-      - NEO4J_dbms_security_procedures_unrestricted=apoc.*
-      - NEO4J_apoc_import_file_enable=true
-      - NEO4J_dbms_shell_enable=true
+      - NEO4J_ACCEPT_LICENSE_AGREEMENT=yes
+      - NEO4J_HEAP_MEMORY=2048
+      - NEO4J_CACHE_MEMORY=1G
+      - NEO4J_AUTH=neo4j/{{admin_password}}
+    volumes:
+#      - "./conf/neo4j/neo4j.conf:/conf/neo4j.conf"
+      - "./plugins/neo4j/:/plugins"
+    {% if NEO4J_volume_map_data %}
+      - "./container-volume/neo4j/data:/data"
+      - "./container-volume/neo4j/logs:/logs"
+    {% endif %}
     restart: {{container_restart_policy}}
 {% endif %}   {#  NEO4J_enable #}
 
@@ -1472,7 +1482,7 @@ services:
 #      - ./conf/influxdb/influxdb.conf:/etc/influxdb/influxdb.conf
     {% if INFLUXDB2_volume_map_data %}
     volumes:
-      - "./container-volume/influxdb:/var/lib/influxdb"
+      - "./container-volume/influxdb2:/var/lib/influxdb"
     {% endif %}
     restart: {{container_restart_policy}}
 {% endif %}   {# INFLUXDB2_enable #}
