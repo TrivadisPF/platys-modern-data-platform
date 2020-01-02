@@ -302,7 +302,7 @@ services:
       AWS_ACCESS_KEY_ID: V42FCGRVMK24JJ8DHUYG
       AWS_SECRET_ACCESS_KEY: bKhWxVF3kQoLY9kFmt91l+tDrEoZjqnWXzY9Eza
     volumes:
-      - ./kafka-connect:/etc/kafka-connect/custom-plugins
+      - ./plugins/kafka-connect:/etc/kafka-connect/custom-plugins
     restart: {{container_restart_policy}}
 
   {% endfor %}
@@ -333,7 +333,7 @@ services:
       KSQL_KSQL_LOGGING_PROCESSING_TOPIC_AUTO_CREATE: "true"
       KSQL_KSQL_SERVICE_ID: "kafka-demo"
     volumes:
-      - ./ksql:/etc/ksql/ext
+      - ./plugins/ksql:/etc/ksql/ext
     restart: {{container_restart_policy}}
   {% endfor %}
 
@@ -438,6 +438,9 @@ services:
   kafdrop:
     image: thomsch98/kafdrop:{{__kafka_kafdrop_version}}
     container_name: kafdrop
+    hostname: kafdrop
+    labels:
+      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28045"
     ports:
       - "28045:9020"
     environment:
@@ -450,6 +453,9 @@ services:
   kadmin:
     image: hasnat/kadmin:{{__kafka_kadmin_version}}
     container_name: kadmin
+    hostname: kadmin
+    labels:
+      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28040"
     ports:
       - "28040:8080"
     environment:
@@ -469,6 +475,9 @@ services:
   kafkahq:
     image: tchiotludo/kafkahq:{{kafka_kafkahq_version}}
     container_name: kafkahq
+    hostname: kafkahq
+    labels:
+      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28042"
     ports:
       - 28042:8080
     environment:
