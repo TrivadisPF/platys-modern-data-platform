@@ -1,0 +1,1 @@
+Contains the data of postgresql db service, if flag POSTGRESQL_volume_map_data is set to true.

@@ -130,7 +130,6 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
   {% set TILE38_enable = false -%}
   {% set MYSQL_enable = false -%}
   {% set SQLSERVER_enable = false -%}
-  {% set POSTGRESQL_enable = false -%}
   {% set TIMESCALEDB_enable = false -%}
   {% set ADMINER_enable = false -%}
   {% set AXON_enable = false -%}
@@ -1561,13 +1560,19 @@ services:
 {% if POSTGRESQL_enable | default(false) %}
   #  ================================== PostgreSQL ========================================== #}
   postgresql:
-    image: mujz/pagila:{{__postgres_version}}
+    image: postgres:{{__postgres_version}}
     container_name: postgresql
     hostname: postgresql
     environment:
       - POSTGRES_PASSWORD=sample
       - POSTGRES_USER=sample
       - POSTGRES_DB=sample
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    volumes:
+      - ./init/postgresql:/docker-entrypoint-initdb.d/
+    {% if POSTGRESQL_volume_map_data %}
+      - ./container-volume/postgresql/data:/var/lib/postgresql/data/pgdata:Z
+    {% endif %}
     restart: {{container_restart_policy}}
 {% endif %}   {#  POSTGRESQL_enable #}
 
