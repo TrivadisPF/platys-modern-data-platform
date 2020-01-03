@@ -48,7 +48,8 @@ Config        |  Default | Since |  Description
 `SPARK_workers`  | `2` | 1.0.0 | number of Spark Worker nodes
 `SPARK_history_enable`  | `false` | 1.0.0 | Generate Spark History Server
 `SPARK_thrift_enable`  | `false` | 1.0.0 | Generate Spark Thrift Server
-`SPARK_livy_enable`  | `false` | 1.0.0 | Generate Spark Livy Server
+**_Apache Livy_** |  |  |
+`LIVY_enable`  | `false` | 1.1.0 | Generate Spark Livy Server
 **_Apache Hive_** |  |  |
 `HIVE_enable`  | `false` | 1.0.0 | Generate Hive service
 **_Apache Atlas & Amundsen_** |  |  |
@@ -125,8 +126,9 @@ Config        |  Default | Since |  Description
 `FTP_enable`  | `false` | 1.0.0 | Generate FTP service
 **_Object Storage_** |  |  |
 `MINIO_enable`  | `false` | 1.0.0 | Generate Minio service
+`MINIO_volume_map_data`  | `false` | 1.1.0 | Volume map data folder into the Minio service
 `AWSCLI_enable`  | `false` | 1.0.0 | Generate AWSCli service
-**_Container_** |  |  |
+**_Container Management_** |  |  |
 `PORTAINER_enable`  | `false` | 1.0.0 | Generate Portainer Container UI service
 
 
