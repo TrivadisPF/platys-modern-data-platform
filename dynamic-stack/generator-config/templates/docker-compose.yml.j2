@@ -85,6 +85,7 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
 
 {% set __mysql_version = mysql_version | default('latest') -%}
 {% set __postgres_version = postgres_version | default('latest') -%}
+{% set __timescaledb_version = timescale_version | default('latest') -%}
 {% set __sqlserver_version = sqlserver_version | default('latest') -%}
 {% set __adminer_version = adminer_version | default('latest') -%}
 
@@ -130,6 +131,7 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
   {% set MYSQL_enable = false -%}
   {% set SQLSERVER_enable = false -%}
   {% set POSTGRESQL_enable = false -%}
+  {% set TIMESCALEDB_enable = false -%}
   {% set ADMINER_enable = false -%}
   {% set AXON_enable = false -%}
   {% set HIMEMQ3_enable = false -%}
@@ -1569,6 +1571,25 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {#  POSTGRESQL_enable #}
 
+{% if TIMESCALEDB_enable | default(false) %}
+  #  ================================== Timescale DB ========================================== #}
+  timescaledb:
+    image: timescale/timescaledb:{{__timescaledb_version}}
+    container_name: timescaledb
+    hostname: timescaledb
+    environment:
+      POSTGRES_PASSWORD: "6AXL3g7}+2G2Kc;"
+      POSTGRES_USER: "timescaledb"
+      POSTGRES_DB: "timescaledb"
+    ports:
+      - "5433:5432"
+    {% if TIMESCALEDB_volume_map_data %}
+    volumes:
+      - /container-volume/timescaledb/data:/var/lib/postgresql/data:Z
+    {% endif %}
+    restart: always
+{% endif %}   {#  TIMESCALEDB_enable #}
+
 {% if ADMINER_enable | default(false) %}
   #  ================================== Adminer ========================================== #}
   adminer:
@@ -1601,8 +1622,7 @@ services:
 {% endif %}   {#  AXON_enable #}
 
 {% if MQTT_enable | default(false) %}
-#  Data Integration ===============================================
-
+  #  ================================== Mosquitto ========================================== #}
   {% if MOSQUITTO_enable | default(false) %}
     {% for num in range(MOSQUITTO_nodes | default(1) ) %}
       {% set external_port_1 = 28100 + loop.index - 1 %}
@@ -1646,6 +1666,7 @@ services:
   {% endif %}   {#  HIVEMQ4_enable #}
 
   {% if MQTT_UI_enable | default(false) %}
+  #  ================================== MQTT UI ========================================== #}
   mqtt-ui:
     image: vergissberlin/hivemq-mqtt-web-client:{{__hivemq_mqtt_web_client_version}}
 
@@ -1658,6 +1679,7 @@ services:
 {% endif %}   {#  MQTT_enable #}
 
 {% if ACTIVEMQ_enable | default(false) %}
+  #  ================================== Active MQ ========================================== #}
   activemq:
     image: rmohr/activemq:{{__activemq_version}}
     container_name: activemq
@@ -1680,6 +1702,7 @@ services:
 {% endif %}   {#  ACTIVEMQ_enable #}
 
 {% if FTP_enable | default(false) %}
+  #  ================================== FTP Server ========================================== #}
   ftp:
     image: stilliard/pure-ftpd:{{__ftp_pureftpd_version}}
     container_name: ftp
@@ -1696,6 +1719,7 @@ services:
       - "30000-30009:30000-30009"
     restart: {{container_restart_policy}}
 
+  #  ================================== Filezilla ========================================== #}
   filezilla:
     image: jlesage/filezilla:{{__ftp_filezilla_version}}
     container_name: filezilla
