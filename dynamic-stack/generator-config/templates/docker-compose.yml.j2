@@ -80,6 +80,7 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
 {% set __influxdb_ui_version = influxdb_ui_version | default('latest') -%}
 
 {% set __prometheus_version = prometheus_version | default('latest') -%}
+{% set __prometheus_pushgateway_version = prometheus_pushgateway_version | default('latest') -%}
 
 {% set __tile38_version = tile38_version | default('latest') -%}
 
@@ -103,6 +104,7 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
 {% set __minio_version = minio_version | default('latest') -%}
 {% set __awscli_version = awscli_version | default('latest') -%}
 {% set __portainer_version = portainer_version | default('latest') -%}
+{% set __cadvisor_version = cadvisor_version | default('latest') -%}
 
 # enforce some dependencies
 {% if KAFKA_kadmin_enable or ATLAS_enable %}
@@ -140,6 +142,7 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
   {% set FTP_enable = false -%}
   {% set MINIO_enable = false -%}
   {% set AWSCLI_enable = false -%}
+  {% set CADVISOR_enable = false -%}
 {% endif %}   {# PLATFORM_ARM_enable #}
 
 services:
@@ -1191,8 +1194,17 @@ services:
     image: grafana/grafana:{{__graphana_version}}
     hostname: grafana
     container_name: grafana
+    labels:
+      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28099"
+    expose:
+      - 3000
     ports:
       - "28099:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD="{{admin_password}}"
+    volumes:
+      - ./plugins/grafana:/etc/grafana/provisioning
     restart: {{container_restart_policy}}
 {% endif %}   {#  GRAFANA_enable #}
 
@@ -1334,6 +1346,8 @@ services:
     image: docker.elastic.co/kibana/kibana:{{__kibana_version}}
     hostname: kibana
     container_name: kibana
+    labels:
+      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28006"
     depends_on:
       - elasticsearch
     ports:
@@ -1512,6 +1526,21 @@ services:
       - "./container-volume/prometheus:/prometheus"
     {% endif %}
     restart: {{container_restart_policy}}
+
+  {% if PROMETHEUS_PUSHGATEWAY_enable | default(false) %}
+  pushgateway:
+    image: prom/pushgateway:{{__prometheus_pushgateway_version}}
+    container_name: pushgateway
+    hostname: pushgateway
+    labels:
+      com.mdps.service.restapi.url: "http://${PUBLIC_IP}:9091"
+    expose:
+      - 9091
+    ports:
+      - "9091:9091"
+    restart: {{container_restart_policy}}
+  {% endif %}   {#  PROMETHEUS_PUSHGATEWAY_enable #}
+
 {% endif %}   {#  PROMETHEUS_enable #}
 
 {% if TILE38_enable | default(false) %}
@@ -1728,22 +1757,24 @@ services:
   filezilla:
     image: jlesage/filezilla:{{__ftp_filezilla_version}}
     container_name: filezilla
-    volumes:
-      - ./data-transfer:/data-transfer
+    hostname: filezilla
     ports:
       - "28008:5800"
       - "28009:5900"
+    volumes:
+      - ./data-transfer:/data-transfer
+    environment:
+      - VNC_PASSWORD=admin123
 #    volumes:
 #      - "/docker/appdata/filezilla:/config:rw"
 #      - "/files:/storage:rw"
-    environment:
-      - VNC_PASSWORD=admin123
+    restart: {{container_restart_policy}}
 {% endif %}   {#  FTP_enable #}
 
 
 
 {% if MINIO_enable | default(false) %}
-#  Object Store (S3) ===============================================
+  #  ================================== Minio ========================================== #}
   minio:
     image: minio/minio:{{__minio_version}}
     container_name: minio
@@ -1764,6 +1795,7 @@ services:
 {% endif %}   {#  MINIO_enable #}
 
 {% if AWSCLI_enable | default(false) %}
+  #  ================================== Awscli ========================================== #}
   awscli:
     image: xueshanf/awscli:{{__awscli_version}}
     container_name: awscli
@@ -1781,10 +1813,13 @@ services:
 
 
 {% if PORTAINER_enable | default(false) %}
-  #  Container UI ===============================================
+  #  ================================== Portainer ========================================== #}
   portainer:
     image: portainer/portainer:{{__portainer_version}}
     container_name: portainer
+    hostname: portainer
+    labels:
+      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28071"
     command: --admin-password '$$2y$$05$$NrPTXkUOIHTTbdHUqdAZVuSbncaZ9frWZYXDbA4v/WYqY0nAY1Sui'
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
@@ -1796,3 +1831,19 @@ services:
       - 28071:9000
     restart: {{container_restart_policy}}
 {% endif %}   {# PORTAINER_enable #}
+
+  #  ================================== cAdvisor ========================================== #}
+  cadvisor:
+    image: google/cadvisor:{{__cadvisor_version}}
+    container_name: cadvisor
+    hostname: cadvisor
+    labels:
+      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28160"
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    ports:
+      - 28160:8080
+    restart: {{container_restart_policy}}

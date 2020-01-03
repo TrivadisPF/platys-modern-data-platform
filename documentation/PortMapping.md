@@ -143,5 +143,6 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28151 | 80 | influxdb-ui |
 28152 | 8888 | chronograf |
 28153 | 9092 | kapacitor |
+28160 | 8080 | cadvisor |
 
 An overview of the URL for the various web-based UIs can be found [here](./environment/README.md).
