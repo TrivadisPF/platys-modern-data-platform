@@ -21,7 +21,8 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
 {% set __hadoop_version = hadoop_version | default('latest') -%}
 
 {% set __spark_version = spark_version | default('latest') -%}
-{% set __spark_livy_version = spark_livy_version | default('latest') -%}
+
+{% set __livy_version = livy_version | default('latest') -%}
 
 {% set __hive_version = hive_version | default('latest') -%}
 
@@ -537,7 +538,7 @@ services:
 
 
 
-{% if HADOOP_enable or SPARK_enable | default(false) %}
+{% if HADOOP_enable | default(false) %}
 
   #  ================================== Apache Hadoop ========================================== #
   namenode:
@@ -637,7 +638,7 @@ services:
 
 
 {% if SPARK_enable | default(false) %}
-  #  ================================== Apache Spark ========================================== #
+  #  ================================== Apache Spark 2.x ========================================== #
   spark-master:
     image: trivadis/apache-spark-master:{{__spark_version}}
     container_name: spark-master
@@ -653,14 +654,16 @@ services:
       - INIT_DAEMON_STEP=setup_spark
 #      - CORE_CONF_fs_defaultFS=hdfs://namenode:8020
     volumes:
-      - ./conf/spark/spark-defaults.conf:/spark/conf/spark/spark-defaults.conf
+      - ./conf/spark/spark-defaults.conf:/spark/conf/spark-defaults.conf
+  {% if SPARK_history_enable | default(false) %}
+      - ./container-volume/spark/logs/:/var/log/spark/logs
+  {% endif -%}   {#  SPARK_history_enable #}
+      - ./data-transfer:/data-transfer
     restart: {{container_restart_policy}}
-
 
   {% for num in range(SPARK_workers | default(1) ) %}
       {% set external_port = 28077 + loop.index - 1 %}
       {% set webui_port = 28077 + loop.index - 1 %}
-
 
   spark-worker-{{loop.index}}:
     image: trivadis/apache-spark-worker:{{__spark_version}}
@@ -679,24 +682,14 @@ services:
       SPARK_WORKER_WEBUI_PORT: "{{webui_port}}"
       SPARK_PUBLIC_DNS: ${PUBLIC_IP}
     volumes:
-      - ./conf/spark/spark-defaults.conf:/spark/conf/spark/spark-defaults.conf
+      - ./conf/spark/spark-defaults.conf:/spark/conf/spark-defaults.conf
+  {% if SPARK_history_enable | default(false) %}
+      - ./container-volume/spark/logs/:/var/log/spark/logs
+  {% endif -%}   {#  SPARK_history_enable #}
+      - ./data-transfer:/data-transfer
     restart: {{container_restart_policy}}
 
   {% endfor %}
-
-  # Initialize the folder for Spark logs in HDFS
-  hadoop-setup:
-    image: trivadis/apache-hadoop-client:{{__hadoop_version}}
-    hostname: hadoop-setup
-    container_name: hadoop-setup
-    env_file:
-      - ./conf/hadoop.env
-    depends_on:
-      - namenode
-    entrypoint: "bash -c 'echo Waiting for Hadoop to be ready... && \
-                       dockerize -wait tcp://namenode:9870 -timeout 120s && \
-                       hadoop fs -mkdir -p /var/log/spark/logs &&
-                       sleep infinity'"
 
   {% if SPARK_history_enable | default(false) %}
   spark-history:
@@ -709,7 +702,8 @@ services:
     ports:
       - 28072:18080
     volumes:
-      - ./conf/spark/spark-defaults.conf:/spark/conf/spark/spark-defaults.conf
+      - ./conf/spark/spark-defaults.conf:/spark/conf/spark-defaults.conf
+      - ./container-volume/spark/logs/:/var/log/spark/logs
     restart: {{container_restart_policy}}
   {% endif %}   {#  SPARK_history_enable #}
 
@@ -727,10 +721,12 @@ services:
     command: bash -c "sleep 2m && /spark/sbin/start-thriftserver.sh && tail -f /spark/logs/spark--org.apache.spark.sql.hive.thriftserver.HiveThriftServer2-*.out"
   {% endif %}   {#  SPARK_thrift_enable #}
 
-  {% if SPARK_livy_enable | default(false) %}
+{% endif %}   {#  SPARK_enable #}
+
+{% if SPARK_enable and LIVY_enable | default(false) %}
   #  ================================== Apache Livy ========================================== #
   livy:
-    image: trivadis/apache-livy:{{spark_livy_version}}
+    image: trivadis/apache-livy:{{livy_version}}
     container_name: livy
     hostname: livy
     env_file:
@@ -743,9 +739,7 @@ services:
       - SPARK_MASTER=yarn
       - DEPLOY_MODE=cluster
     restart: always
-  {% endif %}   {#  SPARK_livy_enable #}
-{% endif %}   {#  SPARK_enable #}
-
+{% endif %}   {#  SPARK_livy_enable #}
 
 {% if HIVE_enable | default(false) %}
   #  ================================== Apache Hive ========================================== #
@@ -1064,6 +1058,7 @@ services:
       SPARK_SUBMIT_OPTIONS: "--conf spark.driver.extraJavaOptions=-Dcom.amazonaws.services.s3.enableV4 --conf spark.executor.extraJavaOptions=-Dcom.amazonaws.services.s3.enableV4"
     volumes:
       - ./conf/spark/spark-defaults.conf:/spark/conf/spark/spark-defaults.conf
+      - './conf/s3cfg:/root/.s3cfg'
       - ./conf/zeppelin/shiro.ini:/opt/zeppelin/conf/shiro.ini
       - ./conf/zeppelin/interpreter-setting.json:/opt/zeppelin/interpreter/spark/interpreter-setting.json
       - ./data-transfer:/data-transfer
@@ -1721,14 +1716,17 @@ services:
 {% if MINIO_enable | default(false) %}
 #  Object Store (S3) ===============================================
   minio:
-    hostname: minio
     image: minio/minio:{{__minio_version}}
     container_name: minio
+    hostname: minio
+    labels:
+      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28083"
     ports:
       - '28083:9000'
-#    volumes:
-#      - './minio/data/:/data'
-#      - './minio/config:/root/.minio'
+    {% if MINIO_volume_map_data %}
+    volumes:
+      - "./container-volume/minio:/data/"
+    {% endif %}
     environment:
       MINIO_ACCESS_KEY: V42FCGRVMK24JJ8DHUYG
       MINIO_SECRET_KEY: bKhWxVF3kQoLY9kFmt91l+tDrEoZjqnWXzY9Eza
