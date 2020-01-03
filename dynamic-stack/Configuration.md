@@ -118,7 +118,8 @@ Config        |  Default | Since |  Description
 `MOSQUITTO_enable`  | `false` | 1.0.0 | Generate Mosquitto service
 `MOSQUITTO_nodes `  | `1` | 1.1.0 | number of Mosquitto nodes
 `MOSQUITTO_volume_map_data `  | `false` | 1.1.0 | Volume map data folder into the Mosquitto broker
-`HIVEMQ_enable`  | `false` | 1.0.0 | Generate HiveMQ service
+`HIVEMQ3_enable`  | `false` | 1.1.0 | Generate HiveMQ 3.x service
+`HIVEMQ4_enable`  | `false` | 1.1.0 | Generate HiveMQ 4.x service
 `MQTT_UI_enable`  | `false` | 1.0.0 | Generate MQTT UI service
 **_ActiveMQ_** |  |  |
 `ACTIVEMQ_enable`  | `false` | 1.0.0 | Generate ActiveMQ service
