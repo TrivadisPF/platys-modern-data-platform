@@ -4,17 +4,16 @@
     Script to run the MDP Stack Generator with PowerShell
 
 .DESCRIPTION
-    This scrip runs the MDP Stack Generator. Docker has to be installed
+    This scrip runs the MDP Stack Generator. Docker has to be installed. And the target directory created
 
 .PARAMETER defintion
-    custom values definition file
+    Custom values definition yml file 
 
 .PARAMETER folder
     Folder where the result should be deployed (has to exists)
     
-
 .PARAMETER version
-    Version of the MDP Stack Generator used.
+    Version of the MDP Stack Generator to use.
     
 
 .EXAMPLE 
