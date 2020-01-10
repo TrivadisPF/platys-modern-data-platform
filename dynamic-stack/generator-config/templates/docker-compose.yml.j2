@@ -105,14 +105,20 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
 {% set __awscli_version = awscli_version | default('latest') -%}
 {% set __portainer_version = portainer_version | default('latest') -%}
 {% set __cadvisor_version = cadvisor_version | default('latest') -%}
+{% set __stack_type = stack_type | default('INTEL') -%}
 
+
+{% if KAFKA_kadmin_enable or ATLAS_enable -%}
 # enforce some dependencies
-{% if KAFKA_kadmin_enable or ATLAS_enable %}
   {% set ZOOKEEPER_enable = true -%}
-{% endif %}   {# PLATFORM_ARM_enable #}
+{% endif -%}   {# PLATFORM_ARM_enable #}
 
+
+
+
+
+{% if __stack_type == 'ARM' -%}
 # if we use stack type ARM, then disable some containers which do not support ARM
-{% if stack_type == 'ARM' %}
   {% set ZOOKEEPER_enable = false -%}
   {% set KAFKA_enable = false -%}
   {% set HADOOP_enable = false -%}
@@ -205,12 +211,12 @@ services:
 {% endif %}   {# zookeeper_enable or KAFKA_enable or ATLAS_enable #}
 
 
-{% if KAFKA_enable | default(false) %}
+{% if (KAFKA_enable or KAFKA_entreprise_enable) | default(false) %}
   #  ================================== Kafka ========================================== #}
   {% for num in range(KAFKA_broker_nodes | default(1) ) %}
   {% set port = 9091 + loop.index %}
   kafka-{{loop.index}}:
-    image: confluentinc/cp-kafka:{{__confluent_platform_version}}
+    image: confluentinc/{{ 'cp-enterprise-kafka' if KAFKA_entreprise_enable else 'cp-kafka' }}:{{__confluent_platform_version}}
     container_name: kafka-{{loop.index}}
     hostname: kafka-{{loop.index}}
     depends_on:
@@ -230,7 +236,10 @@ services:
       KAFKA_ADVERTISED_LISTENERS: 'LISTENER_INTERNAL://kafka-{{loop.index}}:1{{port}},LISTENER_DOCKERHOST://localhost:2{{port}},LISTENER_EXTERNAL://${PUBLIC_IP:-127.0.0.1}:{{port}}'
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'LISTENER_INTERNAL:PLAINTEXT,LISTENER_DOCKERHOST:PLAINTEXT,LISTENER_EXTERNAL:PLAINTEXT'
       KAFKA_INTER_BROKER_LISTENER_NAME: LISTENER_INTERNAL
-#      KAFKA_METRIC_REPORTERS: io.confluent.metrics.reporter.ConfluentMetricsReporter
+      {% if KAFKA_CCC_enable | default(false) %}
+      KAFKA_METRIC_REPORTERS: io.confluent.metrics.reporter.ConfluentMetricsReporter
+      KAFKA_CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: 'kafka-1:19092'
+      {% endif %}
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
       KAFKA_DELETE_TOPIC_ENABLE: '{{ KAFKA_delete_topic_enable | default(omit) }}'
@@ -398,7 +407,7 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {# KAFKA_enable and KAFKA_mqttproxy_enable #}
 
-{% if (KAFKA_enable and KAFKA_CCC_enable) | default(false) %}
+{% if (KAFKA_entreprise_enable and KAFKA_CCC_enable) | default(false) %}
   control-center:
     image: confluentinc/cp-enterprise-control-center:{{__confluent_platform_version}}
     hostname: control-center
@@ -409,9 +418,9 @@ services:
       - zookeeper-1
       - kafka-1
     ports:
-      - "28046:9021"
+      - "9021:9021"
     environment:
-      CONTROL_CENTER_BOOTSTRAP_SERVERS: 'kafka-1:19092'
+      CONTROL_CENTER_BOOTSTRAP_SERVERS: 'kafka-1:9092'
       CONTROL_CENTER_ZOOKEEPER_CONNECT: 'zookeeper-1:2181'
   {% if ( KAFKA_connect_enable ) | default(false) %}
       CONTROL_CENTER_CONNECT_CLUSTER: 'connect-1:8083'
@@ -427,7 +436,7 @@ services:
       CONFLUENT_METRICS_TOPIC_REPLICATION: 1
       PORT: 9021
     restart: {{container_restart_policy}}
-{% endif %}   {# KAFKA_enable and KAFKA_mqttproxy_enable #}
+{% endif %}   {# KAFKA_enable and KAFKA_CCC_enable #}
 
 {% if (KAFKA_enable and KAFKA_schema_registry_ui_enable) | default(false) %}
   #  ================================== Schema Registry UI ========================================== #}
