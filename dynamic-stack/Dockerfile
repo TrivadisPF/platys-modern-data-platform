@@ -3,5 +3,9 @@ RUN pip install docker-compose-templer && mkdir /opt/analytics-generator && chmo
 COPY ./generator-config /opt/analytics-generator
 COPY ./static-data /opt/static-data
 
+COPY generate.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/generate.sh
+
+
 # we asume that the output volume is mapped to /opt/analytics-generator/stacks
-CMD ["sh", "-c", "cp -r /opt/static-data/* /opt/analytics-generator/stacks && docker-compose-templer -v -f /opt/analytics-generator/stack-config.yml"  ]
+CMD generate.sh
