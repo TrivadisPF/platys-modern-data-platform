@@ -71,7 +71,7 @@ then
    mkdir "${OUTPUT}"
 fi   
    
-docker run --rm -v "${CONFIG_FILE}":/tmp/custom-values.yml -v "${OUTPUT}":/opt/analytics-generator/stacks -e CONFIG_REF="${CONFIG_REF}" --user $(id -u):$(id -g) trivadis/modern-data-platform-stack-generator:"${VERSION:-LATEST}"
+docker run --rm -v "${CONFIG_FILE}":/tmp/filebased-custom-values.yml -v "${OUTPUT}":/opt/analytics-generator/stacks -e CONFIG_REF="${CONFIG_REF}" -e DEBUG="${DEBUG}" --user $(id -u):$(id -g) trivadis/modern-data-platform-stack-generator:"${VERSION:-LATEST}"
 
 echo "Modern Data Platform Stack generated successfully to ${args[1]}"
 
