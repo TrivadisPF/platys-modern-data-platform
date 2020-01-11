@@ -3,7 +3,7 @@
 args=("$@")
 len=${#args[@]}
 
-if [ $len = 3 ] #3 arguments are required
+if [ "$len" = 3 ] #3 arguments are required
 then
    echo "Running the Modern Data Platform Stack Generator ...."
 
@@ -14,7 +14,7 @@ then
    
    docker run --rm -v "${args[0]}":/tmp/custom-values.yml -v "${args[1]}":/opt/analytics-generator/stacks  --user $(id -u):$(id -g) trivadis/modern-data-platform-stack-generator:"${args[2]}"
    # Remove all empty lines at the end of the file
-  # sed -i '/^[[:space:]]*$/d' "${args[1]}/docker-compose.yml"
+   sed -i '' -e :a -e '/^\n*$/{$d;N;};/\n$/ba' "${args[1]}/docker-compose.yml"
    echo "Modern Data Platform Stack generated successfully to ${args[1]}"
 else
   echo "mdps-generate version 1.0.0"
