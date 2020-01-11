@@ -1586,23 +1586,6 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {#  INFLUXDB_enable #}
 
-{% if INFLUXDB_telegraf_enable | default(false) %}
-  #  ================================== InfluxData Telegraf ========================================== #}
-  telegraf:
-    image: telegraf:{{__telegraf_version}}
-    container_name: telegraf
-    hostname: telegraf
-    environment:
-      HOSTNAME: telegraf
-    volumes:
-      - ./conf/influxdata/telegraf/telegraf.conf:/etc/telegraf/telegraf.conf
-      # Mount for Docker API access
-      - /var/run/docker.sock:/var/run/docker.sock
-    depends_on:
-      - influxdb
-    restart: {{container_restart_policy}}
-{% endif %}   {#  INFLUXDB_chronograf_enable #}
-
 {% if INFLUXDB_chronograf_enable | default(false) %}
   #  ================================== InfluxData Chronograf ========================================== #}
   chronograf:
@@ -1650,6 +1633,21 @@ services:
     {% endif %}
     restart: {{container_restart_policy}}
 {% endif %}   {# INFLUXDB_kapacitor_enable #}
+
+{% if INFLUXDB_telegraf_enable | default(false) %}
+  #  ================================== InfluxData Telegraf ========================================== #}
+  telegraf:
+    image: telegraf:{{__telegraf_version}}
+    container_name: telegraf
+    hostname: telegraf
+    environment:
+      HOSTNAME: telegraf
+    volumes:
+      - ./conf/influxdata/telegraf/telegraf.conf:/etc/telegraf/telegraf.conf
+      # Mount for Docker API access
+      - /var/run/docker.sock:/var/run/docker.sock
+    restart: {{container_restart_policy}}
+{% endif %}   {#  INFLUXDB_chronograf_enable #}
 
 {% if INFLUXDB2_enable | default(false) %}
   #  ================================== InfluxDB 2 ========================================== #}
