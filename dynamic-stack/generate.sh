@@ -1,12 +1,12 @@
 #!/bin/sh
 
-# WGET the config reference from the URL configured by the CONFIG_REF environment variable
-if [ ${CONFIG_REF} ]
+# WGET the config reference from the URL configured by the CONFIG_URL environment variable
+if [ ${CONFIG_URL} ]
 then 
-   wget ${CONFIG_REF} -O /tmp/refbased-custom-values.yml
-   cp /tmp/refbased-custom-values.yml /tmp/custom-values.yml
+   wget ${CONFIG_URL} -O /tmp/refbased-stack-config.yml
+   cp /tmp/refbased-stack-config.yml /tmp/custom-values.yml
 else
-   cp /tmp/filebased-custom-values.yml /tmp/custom-values.yml
+   cp /tmp/filebased-stack-config.yml /tmp/custom-values.yml
 fi
 
 cp -r /opt/static-data/* /opt/mdps-generator/stacks

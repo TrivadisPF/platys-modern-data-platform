@@ -1,19 +1,21 @@
 #!/bin/bash
 
 version="Trivadis Docker-based Modern Data Platform Generator v2.0.0"
-usage="${version}
+usage-global="${version}
 
-Usage: $(basename "$0") [-h] [-d|--debug] [-cf|--configfile FILE] [-cr|--configref URL] [-o |--output PATH] [-t]--tag TAG]
+Generates the Docker-Compose stack
 
-generates the Docker-Compose stack
+Usage: 
+  $(basename "$0") [options]
 
-    -h      display this help text
-    -v      display version of the docker-based platform generator
-    -cf     path to a local config file
-    -cr     URL of a remote config file 
-    -o      path where the generator output should be placed in
-    -t      the container tag (version) for the modern data platform stack to use
-    -d      add extra debug (verbose) output"
+Options:
+  -h, --help                       display this help text
+  -v, --version                    display version of the docker-based platform generator 
+  -cf, --config-file FILE          a local config file
+  -cr, --config-url URL            a URL of a remote config file 
+  -o, --output-directory PATH      path where the generator output should be placed in
+  -t, --tag TAG                    the container tag (version) for the modern data platform stack to use
+  -d, --debug                      add extra debug (verbose) output"
 		
 POSITIONAL=()
 while [[ $# -gt 0 ]]
@@ -29,13 +31,13 @@ case $key in
     echo "$version"
     exit
     ;;
-    -cf|--configfile)
+    -cf|--config-file)
     CONFIG_FILE="$2"
     shift # past argument
     shift # past value
     ;;
-    -cr|--configref)
-    CONFIG_REF="$2"
+    -cu|--config-url)
+    CONFIG_URL="$2"
     shift # past argument
     shift # past value
     ;;
@@ -65,10 +67,10 @@ echo "Running the Modern Data Platform Stack Generator ...."
 
 if [ ${DEBUG:-0} -eq 1 ] 
 then
-   echo "configfile  = ${CONFIG_FILE}"
-   echo "configref   = ${CONFIG_REF}"
-   echo "output      = ${OUTPUT}"
-   echo "tag         = ${TAG}"
+   echo "config-file  = ${CONFIG_FILE}"
+   echo "config-url   = ${CONFIG_URL}"
+   echo "output       = ${OUTPUT}"
+   echo "tag          = ${TAG}"
 fi
 
 # check if the output folder exists, if not create it
@@ -77,7 +79,7 @@ then
    mkdir "${OUTPUT}"
 fi   
    
-docker run --rm -v "${CONFIG_FILE}":/tmp/filebased-custom-values.yml -v "${OUTPUT}":/opt/mdps-generator/stacks -e CONFIG_REF="${CONFIG_REF}" -e DEBUG="${DEBUG}" --user $(id -u):$(id -g) trivadis/modern-data-platform-stack-generator:"${TAG:-LATEST}"
+docker run --rm -v "${CONFIG_FILE}":/tmp/filebased-stack-config.yml -v "${OUTPUT}":/opt/mdps-generator/stacks -e CONFIG_URL="${CONFIG_URL}" -e DEBUG="${DEBUG}" --user $(id -u):$(id -g) trivadis/modern-data-platform-stack-generator:"${TAG:-LATEST}"
 
 echo "Modern Data Platform Stack generated successfully to ${args[1]}"
 
