@@ -7,13 +7,13 @@ Usage: $(basename "$0") [-h] [-d|--debug] [-cf|--configfile FILE] [-cr|--config
 
 generates the Docker-Compose stack
 
-    -h      display this help text
+    -h  	display this help text
     -v      display version of the docker-based platform generator
-    -cf     path to a local config file
-    -cr     URL of a remote config file 
-    -o      path where the generator output should be placed in
-    -t      the container tag (version) for the modern data platform stack to use
-    -d      add extra debug (verbose) output"
+    -cf  	path to a local config file
+    -cr		URL of a remote config file 
+    -o 		path where the generator output should be placed in
+    -t  	the container tag (version) for the modern data platform stack to use
+    -d 		add extra debug (verbose) output"
 		
 POSITIONAL=()
 while [[ $# -gt 0 ]]
