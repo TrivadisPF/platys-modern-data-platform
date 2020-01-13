@@ -45,6 +45,9 @@ Usage: $(basename "$0") gen [OPTIONS]
 
   Generates a docker-based Modern Data Platform Stack.
 
+  The stack configuration can either be passed as a local file (using --config-filename or using the default name 'stack-config.yml') or as an URL
+  referencing a file on the Internet (using the --config-url option). 
+
   -cf, --config-filename TEXT     the name of the local config file.
                                   [default: stack-config.yml]
   -cu, --config-url TEXT          the URL to a remote config file
@@ -142,6 +145,7 @@ then
 
    echo "Running the Modern Data Platform Stack Generator ...."
 
+   # in the Python implementation, this should be read from the stack-config.yml file
    source ${context_file}
 
    if [ ${VERBOSE:-0} -eq 1 ] 
@@ -190,6 +194,9 @@ then
    then
       echo "Initializing the Modern Data Platform Stack Generator ...."
 
+      # in the python script, that should be copied out of the docker image (file default-values.yml)
+      # (the header with stackimage-name and stackimage_version could already be in the file and does not have to be added)
+
       echo "# =============== Do to remove ==========================" >> ${stack_file}
       echo "# stackimage_name=${STACK_IMAGE_NAME}" >> ${stack_file}
       echo "# stackimage_version=${STACK_IMAGE_VERSION}" >> ${stack_file}
@@ -198,6 +205,7 @@ then
       echo "   stack_type: I86" >> ${stack_file}
       echo "   KAFKA_enable: TRUE" >> ${stack_file}
 
+      # in this PoC the data is also added to a INI formatted file, as I was not able to read the YML in the bash script with minimal invest
       echo -e "platform_name=${PLATFORM_NAME}\nstackimage_name=${STACK_IMAGE_NAME}\nstackimage_version=${STACK_IMAGE_VERSION}\n" >> ${context_file}
       
    else
@@ -205,3 +213,4 @@ then
    fi
 
 fi
+
