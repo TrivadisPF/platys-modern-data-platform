@@ -1,13 +1,13 @@
 FROM python:3.8.0-alpine3.10
 
 # install docker-compose-templer
-RUN pip install docker-compose-templer && mkdir /opt/mdps-generator && chmod 777 -R /opt/mdps-generator
+RUN pip install docker-compose-templer && mkdir /opt/mdps-gen && chmod 777 -R /opt/mdps-gen
 
 # copy generator config into the image (templates & config.yml)
-COPY ./generator-config /opt/mdps-generator
+COPY ./generator-config /opt/mdps-gen
 
 # copy static data needed for the stack to run into the image
-COPY ./static-data /opt/static-data
+COPY ./static-data /opt/mdps-gen/static-data
 
 # copy the generator script and make it executable
 COPY generate.sh /usr/local/bin/
