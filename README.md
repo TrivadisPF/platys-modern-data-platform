@@ -4,7 +4,7 @@
 [![Code Climate](https://codeclimate.com/github/codeclimate/codeclimate/badges/gpa.svg)](https://codeclimate.com/github/TrivadisPF/modern-data-platform-stack)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com)
 
-# Modern Data Platform Stack 
+# Trivadis Modern Data Platform Stack (MDPS)
 
 This project sets up the infrastructure for testing a modern data platform stack with services such as
 
