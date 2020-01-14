@@ -5,7 +5,7 @@ if [ ${CONFIG_URL} ]
 then 
    wget ${CONFIG_URL} -O /tmp/custom-stack-config.yml
 else
-   cp /opt/mdps-gen/stack-config/stack-config.yml /tmp/custom-stack-config.yml
+   cp /opt/mdps-gen/stack-config/config.yml /tmp/custom-stack-config.yml
 fi
 
 cp -r /opt/mdps-gen/static-data/* /opt/mdps-gen/destination
@@ -13,7 +13,7 @@ cp -r /opt/mdps-gen/static-data/* /opt/mdps-gen/destination
 if [ ${VERBOSE:-0} -eq 1 ]
 then
    echo "======================================================================"
-   echo "Generating using the following custom stack-config.yml:"
+   echo "Generating using the following custom config.yml:"
    cat /tmp/custom-stack-config.yml
    echo "======================================================================"
 fi
