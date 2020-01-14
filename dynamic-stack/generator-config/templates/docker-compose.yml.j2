@@ -1825,6 +1825,46 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {#  AXON_enable #}
 
+
+{% if MINIO_enable | default(false) %}
+  #  ================================== Minio ========================================== #}
+  minio:
+    image: minio/minio:{{__minio_version}}
+    container_name: minio
+    hostname: minio
+    labels:
+      com.mdps.service.webui.name: "MinIO UI"
+      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28083"
+    ports:
+      - '28083:9000'
+    {% if MINIO_volume_map_data %}
+    volumes:
+      - "./container-volume/minio:/data/"
+    {% endif %}
+    environment:
+      MINIO_ACCESS_KEY: V42FCGRVMK24JJ8DHUYG
+      MINIO_SECRET_KEY: bKhWxVF3kQoLY9kFmt91l+tDrEoZjqnWXzY9Eza
+    command: server /data
+    restart: {{container_restart_policy}}
+{% endif %}   {#  MINIO_enable #}
+
+{% if AWSCLI_enable | default(false) %}
+  #  ================================== Awscli ========================================== #}
+  awscli:
+    image: xueshanf/awscli:{{__awscli_version}}
+    container_name: awscli
+    hostname: awscli
+    volumes:
+      - './conf/s3cfg:/root/.s3cfg'
+      - './data-transfer:/tmp/data-transfer'
+#      - './minio/config:/root/.minio'
+    environment:
+      AWS_ACCESS_KEY_ID: V42FCGRVMK24JJ8DHUYG
+      AWS_SECRET_ACCESS_KEY: bKhWxVF3kQoLY9kFmt91l+tDrEoZjqnWXzY9Eza
+    command: tail -f /dev/null
+    restart: {{container_restart_policy}}
+{% endif %}   {#  AWSCLI_enable #}
+
 {% if MQTT_enable | default(false) %}
   #  ================================== Mosquitto ========================================== #}
   {% if MOSQUITTO_enable | default(false) %}
@@ -1945,47 +1985,6 @@ services:
 #      - "/files:/storage:rw"
     restart: {{container_restart_policy}}
 {% endif %}   {#  FTP_enable #}
-
-
-{% if MINIO_enable | default(false) %}
-  #  ================================== Minio ========================================== #}
-  minio:
-    image: minio/minio:{{__minio_version}}
-    container_name: minio
-    hostname: minio
-    labels:
-      com.mdps.service.webui.name: "MinIO UI"
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28083"
-    ports:
-      - '28083:9000'
-    {% if MINIO_volume_map_data %}
-    volumes:
-      - "./container-volume/minio:/data/"
-    {% endif %}
-    environment:
-      MINIO_ACCESS_KEY: V42FCGRVMK24JJ8DHUYG
-      MINIO_SECRET_KEY: bKhWxVF3kQoLY9kFmt91l+tDrEoZjqnWXzY9Eza
-    command: server /data
-    restart: {{container_restart_policy}}
-{% endif %}   {#  MINIO_enable #}
-
-{% if AWSCLI_enable | default(false) %}
-  #  ================================== Awscli ========================================== #}
-  awscli:
-    image: xueshanf/awscli:{{__awscli_version}}
-    container_name: awscli
-    hostname: awscli
-    volumes:
-      - './conf/s3cfg:/root/.s3cfg'
-      - './data-transfer:/tmp/data-transfer'
-#      - './minio/config:/root/.minio'
-    environment:
-      AWS_ACCESS_KEY_ID: V42FCGRVMK24JJ8DHUYG
-      AWS_SECRET_ACCESS_KEY: bKhWxVF3kQoLY9kFmt91l+tDrEoZjqnWXzY9Eza
-    command: tail -f /dev/null
-    restart: {{container_restart_policy}}
-{% endif %}   {#  AWSCLI_enable #}
-
 
 {% if PORTAINER_enable | default(false) %}
   #  ================================== Portainer ========================================== #}
