@@ -35,8 +35,8 @@ def gen(config_filename, config_url, stack_image, stack_version, del_empty_lines
 #
 @cli.command()  # @cli, not @click!
 @click.option('-n', '--platform-name', 'platform_name', type=click.STRING, required=True, help='the name of the platform stack to generate.')
-@click.option('-in', '--stack-name', 'stack_name', default='modern-data-platform-stack-generator', type=click.STRING, show_default=True, help='the modern data platform stack image')
-@click.option('-iv', '--stack-version', 'stack_version', default='LATEST', type=click.STRING, show_default=True, help='the modern data platform stack image version to use')
+@click.option('-sn', '--stack-name', 'stack_name', default='modern-data-platform-stack-generator', type=click.STRING, show_default=True, help='the modern data platform stack image')
+@click.option('-sv', '--stack-version', 'stack_version', default='LATEST', type=click.STRING, show_default=True, help='the modern data platform stack image version to use')
 @click.option('-cf', '--config-filename', 'config_filename', default='config.yml', type=click.STRING, show_default=True, help='the name of the local config file.')
 @click.option('-sc', '--seed-config', 'seed_config', type=click.STRING, help='the name of a predefined stack to base this new platform on')
 @click.option('-f', '--force', is_flag=True, help='If specified, this command will overwrite any existing config file')
