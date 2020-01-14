@@ -21,8 +21,8 @@ Usage: $(basename "$0") init [OPTIONS]
   environment by creating an initial stack config file, if one does not
   already exists.
 
-  The stack to use as well as its version need to be passed by the --stack-
-  image-name and --stack-image-version options. By default 'config.yml' is
+  The stack to use as well as its version need to be passed by the --stack-name 
+  and --stack-version options. By default 'config.yml' is
   used for the name of the config file, which is created by the init.
 
 Options:
@@ -32,12 +32,12 @@ Options:
                                trivadis/modern-data-platform-stack-generator]
   -iv, --stack-version TEXT    the modern data platform stack image version to
                                use  [default: LATEST]
-  -cf, --config-filename TEXT  the name of the local config file.  [default:
-                               config.yml]
   -sc, --seed-config TEXT      the name of a predefined stack to base this new
                                platform on
   -f, --force                  If specified, this command will overwrite any
                                existing config file
+  -hw, --hw-arch [ARM|ARM64|x86-64]
+                               Hardware architecture for the platform
   -h, --help                   Show this message and exit.
 "
 
@@ -47,14 +47,11 @@ Usage: $(basename "$0") gen [OPTIONS]
   Generates a docker-based Modern Data Platform Stack.
 
   The stack configuration can either be passed as a local file (using the
-  --config-filename option or using the default name 'config.yml') or
-  as an URL referencing a file on the Internet (using the --config-url
-  option).
+  default file name 'config.yml') or as an URL referencing a file on the Internet 
+  (using the --config-url option).
 
 Options:
 
-  -cf, --config-filename TEXT     the name of the local config file.
-                                  [default: config.yml]
   -cu, --config-url TEXT          the URL to a remote config file
   --del-empty-lines / --no-del-emptylines
                                   remove empty lines from the docker-
@@ -121,6 +118,11 @@ case $key in
     shift # past argument
     shift # past value
     ;;
+    -hw|--hw-arch)
+    HW_ARCH="$2"
+    shift # past argument
+    shift # past value
+    ;;
     -f|--force)
     FORCE=1
     shift # past argument
@@ -157,8 +159,6 @@ then
 
    if [ ${VERBOSE:-0} -eq 1 ] 
    then
-      echo "config-filename     = ${CONFIG_FILENAME}"
-
       echo "stack-name = $stack_name"
       echo "stack-version = $stack_name"
       echo "platform-name = $platform_name"
@@ -180,10 +180,10 @@ then
 
    if [ ${VERBOSE:-0} -eq 1 ] 
    then
-	echo "Running container with this docker cmd:" docker run --rm -v "${PWD}":/opt/mdps-gen/stack-config -v "${destination}":/opt/mdps-gen/destination -e CONFIG_URL="${CONFIG_URL}" -e VERBOSE="${VERBOSE}" --user $(id -u):$(id -g) trivadis/"$stack_name":"${stack_version:-LATEST}"
-
+	echo "Running container with this docker cmd:" docker run --rm -v "${PWD}":/opt/mdps-gen/stack-config -v "${destination}":/opt/mdps-gen/destination -e CONFIG_URL="${CONFIG_URL}" -e VERBOSE="${VERBOSE}" --user $(id -u):$(id -g) "${stack_name:-trivadis/modern-data-platform-stack-generator}":"${stack_version:-LATEST}"
    fi
-   docker run --rm -v "${PWD}":/opt/mdps-gen/stack-config -v "${destination}":/opt/mdps-gen/destination -e CONFIG_URL="${CONFIG_URL}" -e VERBOSE="${VERBOSE}" --user $(id -u):$(id -g) trivadis/"$stack_name":"${stack_version:-LATEST}"
+
+   docker run --rm -v "${PWD}":/opt/mdps-gen/stack-config -v "${destination}":/opt/mdps-gen/destination -e CONFIG_URL="${CONFIG_URL}" -e VERBOSE="${VERBOSE}" --user $(id -u):$(id -g) "${stack_name:-trivadis/modern-data-platform-stack-generator}":"${stack_version:-LATEST}"
 
    echo "Modern Data Platform Stack generated successfully to ${args[1]}"
 
@@ -204,7 +204,7 @@ then
       # in the python script, that should be copied out of the docker image (file default-values.yml)
       # (the header with stack_name and stack_version could already be in the file and does not have to be added)
 
-      docker create --name cont1 trivadis/"$STACK_NAME":"${STACK_VERSION:-LATEST}"
+      docker create --name cont1 "${STACK_NAME:-trivadis/modern-data-platform-stack-generator}":"${STACK_VERSION:-LATEST}"
       docker cp cont1:/opt/mdps-gen/vars/default-values.yml tmp-${stack_file}
       docker rm cont1
  
@@ -212,7 +212,7 @@ then
       echo "      stack_name: ${STACK_NAME}" >> ${stack_file}
       echo "      stack_version: ${STACK_VERSION}" >> ${stack_file}
       echo "      platform_name: ${PLATFORM_NAME}" >> ${stack_file}
-      echo "      hw_arch: x86-64" >> ${stack_file}
+      echo "      hw_arch: ${HW_ARCH:-x86-64}" >> ${stack_file}
       echo "      # =============== Do to remove ==========================" >> ${stack_file}
       echo "" >> ${stack_file}
       cat tmp-${stack_file} >> ${stack_file}
