@@ -31,7 +31,7 @@ Options:
   -in, --stack-name TEXT       the modern data platform stack image  [default:
                                trivadis/modern-data-platform-stack-generator]
   -iv, --stack-version TEXT    the modern data platform stack image version to
-                               use  [default: LATEST]
+                               use  [default: latest]
   -sc, --seed-config TEXT      the name of a predefined stack to base this new
                                platform on
   -f, --force                  If specified, this command will overwrite any
