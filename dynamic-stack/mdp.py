@@ -42,7 +42,7 @@ def gen(config_filename, config_url, stack_image, stack_version, del_empty_lines
 @click.option('-cf', '--config-filename', 'config_filename', default='config.yml', type=click.STRING, show_default=True, help='the name of the local config file.')
 @click.option('-sc', '--seed-config', 'seed_config', type=click.STRING, help='the name of a predefined stack to base this new platform on')
 @click.option('-f', '--force', is_flag=True, help='If specified, this command will overwrite any existing config file')
-@click.option('-hw', '--hw_arch', 'hw_arch', type=click.Choice(['ARM', 'ARM64', 'x86-64']), default='x86-64', help='Hardware architecture for the platform')
+@click.option('-hw', '--hw-arch', 'hw_arch', type=click.Choice(['ARM', 'ARM64', 'x86-64']), default='x86-64', help='Hardware architecture for the platform')
 def init(platform_name, stack_name, stack_version, config_filename, seed_config, force, hw_arch):
     """Initializes the current directory to be a Modern Data Platform Stack environment by creating an initial
     config file, if one does not already exists.
