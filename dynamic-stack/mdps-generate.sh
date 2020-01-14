@@ -21,45 +21,52 @@ Usage: $(basename "$0") init [OPTIONS]
   environment by creating an initial stack config file, if one does not
   already exists.
 
+  The stack to use as well as its version need to be passed by the --stack-
+  image-name and --stack-image-version options. By default 'config.yml' is
+  used for the name of the config file, which is created by the init.
+
 Options:
-  -n, --platform-name TEXT        the name of the platform stack to generate.
-                                  [required]
-  -in, --stack-image-name TEXT    the modern data platform stack image
-                                  [default: modern-data-platform-stack-
-                                  generator]
-  -iv, --stack-image-version TEXT
-                                  the modern data platform stack image version
-                                  to use  [default: LATEST]
-  -cf, --config-filename TEXT     the name of the local config file.
-                                  [default: stack-config.yml]
-  -ps, --predef-stack-config TEXT
-                                  the name of a predefined stack to base this
-                                  new platform on
-  -f, --force                     If specified, this command will overwrite
-                                  any existing config file
-  -h, --help                      Show this message and exit.
+  -n, --platform-name TEXT     the name of the platform stack to generate.
+                               [required]
+  -in, --stack-name TEXT       the modern data platform stack image  [default:
+                               trivadis/modern-data-platform-stack-generator]
+  -iv, --stack-version TEXT    the modern data platform stack image version to
+                               use  [default: LATEST]
+  -cf, --config-filename TEXT  the name of the local config file.  [default:
+                               config.yml]
+  -sc, --seed-config TEXT      the name of a predefined stack to base this new
+                               platform on
+  -f, --force                  If specified, this command will overwrite any
+                               existing config file
+  -h, --help                   Show this message and exit.
 "
 
 usageGen="${version}
 Usage: $(basename "$0") gen [OPTIONS] 
 
-  Generates a docker-based Modern Data Platform Stack.
+  Generates a docker-based Modern Data Platform Stack.
 
-  The stack configuration can either be passed as a local file (using --config-filename or using the default name 'stack-config.yml') or as an URL
-  referencing a file on the Internet (using the --config-url option). 
+  The stack configuration can either be passed as a local file (using the
+  --config-filename option or using the default name 'config.yml') or
+  as an URL referencing a file on the Internet (using the --config-url
+  option).
+
+Options:
 
   -cf, --config-filename TEXT     the name of the local config file.
-                                  [default: stack-config.yml]
+                                  [default: config.yml]
   -cu, --config-url TEXT          the URL to a remote config file
   --del-empty-lines / --no-del-emptylines
                                   remove empty lines from the docker-
                                   compose.yml file.  [default: True]
   --flat                          generate the stack into same folder as
-                                  stack-config.yml
+                                  config.yml
   --subfolder                     generate the stack into a subfolder, which
-                                  by default is the name of the stack
+                                  by default is the name of the platform
+                                  provided when initializing the stack
   -v, --verbose                   Verbose logging  [default: False]
   -h, --help                      Show this message and exit.
+
 "
 		
 POSITIONAL=()
@@ -89,13 +96,13 @@ case $key in
     shift # past argument
     shift # past value
     ;;
-    -in|--stackimage-name)
-    STACK_IMAGE_NAME="$2"
+    -sn|--stack-name)
+    STACK_NAME="$2"
     shift # past argument
     shift # past value
     ;;
-    -iv|--stackimage-version)
-    STACK_IMAGE_VERSION="$2"
+    -sv|--stack-version)
+    STACK_VERSION="$2"
     shift # past argument
     shift # past value
     ;;
@@ -109,8 +116,8 @@ case $key in
     shift # past argument
     shift # past value
     ;;
-    -psc|--predef-stack-config)
-    PREDEF_STACK_CONFIG="$2"
+    -sc|--seed-config)
+    SEED_CONFIG="$2"
     shift # past argument
     shift # past value
     ;;
@@ -145,15 +152,15 @@ then
 
    echo "Running the Modern Data Platform Stack Generator ...."
 
-   # in the Python implementation, this should be read from the stack-config.yml file
+   # in the Python implementation, this should be read from the config.yml file
    source ${context_file}
 
    if [ ${VERBOSE:-0} -eq 1 ] 
    then
       echo "config-filename     = ${CONFIG_FILENAME}"
 
-      echo "stackimage-name = $stackimage_name"
-      echo "stackimage-version = $stackimage_name"
+      echo "stack-name = $stack_name"
+      echo "stack-version = $stack_name"
       echo "platform-name = $platform_name"
    fi
 
@@ -173,16 +180,16 @@ then
 
    if [ ${VERBOSE:-0} -eq 1 ] 
    then
-	echo "Running container with this docker cmd:" docker run --rm -v "${PWD}":/opt/mdps-gen/stack-config -v "${destination}":/opt/mdps-gen/destination -e CONFIG_URL="${CONFIG_URL}" -e VERBOSE="${VERBOSE}" --user $(id -u):$(id -g) trivadis/"$stackimage_name":"${stackimage_version:-LATEST}"
+	echo "Running container with this docker cmd:" docker run --rm -v "${PWD}":/opt/mdps-gen/stack-config -v "${destination}":/opt/mdps-gen/destination -e CONFIG_URL="${CONFIG_URL}" -e VERBOSE="${VERBOSE}" --user $(id -u):$(id -g) trivadis/"$stack_name":"${stack_version:-LATEST}"
 
    fi
-   docker run --rm -v "${PWD}":/opt/mdps-gen/stack-config -v "${destination}":/opt/mdps-gen/destination -e CONFIG_URL="${CONFIG_URL}" -e VERBOSE="${VERBOSE}" --user $(id -u):$(id -g) trivadis/"$stackimage_name":"${stackimage_version:-LATEST}"
+   docker run --rm -v "${PWD}":/opt/mdps-gen/stack-config -v "${destination}":/opt/mdps-gen/destination -e CONFIG_URL="${CONFIG_URL}" -e VERBOSE="${VERBOSE}" --user $(id -u):$(id -g) trivadis/"$stack_name":"${stack_version:-LATEST}"
 
    echo "Modern Data Platform Stack generated successfully to ${args[1]}"
 
 elif [[ $POSITIONAL == "init" ]]
 then
-   stack_file=stack-config.yml
+   stack_file=config.yml
 
    if [ ${VERBOSE:-0} -eq 1 ] 
    then
@@ -195,18 +202,24 @@ then
       echo "Initializing the Modern Data Platform Stack Generator ...."
 
       # in the python script, that should be copied out of the docker image (file default-values.yml)
-      # (the header with stackimage-name and stackimage_version could already be in the file and does not have to be added)
+      # (the header with stack_name and stack_version could already be in the file and does not have to be added)
 
-      echo "# =============== Do to remove ==========================" >> ${stack_file}
-      echo "# stackimage_name=${STACK_IMAGE_NAME}" >> ${stack_file}
-      echo "# stackimage_version=${STACK_IMAGE_VERSION}" >> ${stack_file}
-      echo "# =============== Do to remove ==========================" >> ${stack_file}
-      echo "   stack_name: ${PLATFORM_NAME}" >> ${stack_file}
-      echo "   stack_type: I86" >> ${stack_file}
-      echo "   KAFKA_enable: TRUE" >> ${stack_file}
+      docker create --name cont1 trivadis/"$STACK_NAME":"${STACK_VERSION:-LATEST}"
+      docker cp cont1:/opt/mdps-gen/vars/default-values.yml tmp-${stack_file}
+      docker rm cont1
+ 
+      echo "      # =============== Do to remove ==========================" >> ${stack_file}
+      echo "      stack_name: ${STACK_NAME}" >> ${stack_file}
+      echo "      stack_version: ${STACK_VERSION}" >> ${stack_file}
+      echo "      platform_name: ${PLATFORM_NAME}" >> ${stack_file}
+      echo "      hw_arch: x86-64" >> ${stack_file}
+      echo "      # =============== Do to remove ==========================" >> ${stack_file}
+      echo "" >> ${stack_file}
+      cat tmp-${stack_file} >> ${stack_file}
+      rm tmp-${stack_file}
 
       # in this PoC the data is also added to a INI formatted file, as I was not able to read the YML in the bash script with minimal invest
-      echo -e "platform_name=${PLATFORM_NAME}\nstackimage_name=${STACK_IMAGE_NAME}\nstackimage_version=${STACK_IMAGE_VERSION}\n" >> ${context_file}
+      echo -e "platform_name=${PLATFORM_NAME}\nstack_name=${STACK_NAME}\nstack_version=${STACK_VERSION}\n" >> ${context_file}
       
    else
       echo "A Data Platform Stack already exists in this folder ...."
