@@ -1,6 +1,6 @@
 ![](./../tri_logo_high.jpg)
 
-# Modern Data Platform (MDP) Stack Generator
+# Modern Data Platform (MDP) Stack Generator 2.0.0
 
 This is the dynamic version of the Modern Data Platform stack. It is the version we will continue with, the full-stack is no longer maintained. 
 
@@ -16,13 +16,13 @@ It can be found on [Docker Hub](https://hub.docker.com/repository/docker/trivadi
 
 Tag      | Status         |  Changes
 ---------|----------------| --------------------------
-1.1.0    | on-going       | Support of different Jupyter versions, Support of multiple MQTT brokers, InfluxDB added
+1.2.0-preview | on-going  | Support of different Jupyter versions, Support of multiple MQTT brokers, InfluxDB added, new version of bash script
 1.0.0    | stable         | Initial, first version
 
 If you want to build the docker image locally, perform (this is not necessary if you follow the installation instructions below).
 
 ```
-docker build -t trivadis/modern-data-platform-stack-generator:1.1.0 .
+docker build -t trivadis/modern-data-platform-stack-generator:1.2.0-preview .
 ```
 
 ## Prerequisites
@@ -36,98 +36,137 @@ For running the Modern Data Platform Stack you also have to install Docker-Compo
 
 You also need an internet connection in order to download the necessary images. 
 
-## Installing MDP Stack Generator
+## Installing Stack Generator
 
 Follow the instructions below to install the MDP Stack Generator on a Mac or Linux systems. Running on Windows is not yet supported. 
 
 * Run this command to download the current stable release of the MDP Stack Generator:
 
 ```
-sudo curl -L "https://github.com/TrivadisPF/modern-data-platform-stack/releases/download/1.0.0/mdps-generate.sh" -o /usr/local/bin/mdps-generate
+sudo curl -L "https://github.com/TrivadisPF/modern-data-platform-stack/releases/download/2.0.0-preview/mdp.sh" -o /usr/local/bin/mdp
 ```
 
 * Apply executable permissions to the binary:
 
 ```
-sudo chmod +x /usr/local/bin/mdps-generate
+sudo chmod +x /usr/local/bin/mdp 
+```
+
+Use the `--version` option to check that the generator has been installed successfully.
+
+```
+$ mdp --version
+Trivadis Docker-based Modern Data Platform Generator v2.0.0
 ```
    
 ## Uninstalling
 
-To uninstall Docker Compose if you installed using `curl`:
+To uninstall `mdp` perform
 
 ```
-sudo rm /usr/local/bin/mdps-generate
+sudo rm /usr/local/bin/mdp
 ```
    
 ## Getting Started with the MDP Stack Generator
 
 Let's see the MDP Stack Generator in Action. We will use it to create a stack running Kafka and Zookeeper.
 
-### Configuring the generator
+### Initialize the environment
 
-First create a directory for the project:
-
-```
-mkdir mdps-kafka-example
-```
-
-In this new folder, create a `config` folder for the custom configuration for the generator and a `docker` folder to hold the generated artefacts.
+First create a directory holding the platform generator configuration as well as the generated artefacts:
 
 ```
-cd mdps-kafka-example
-mkdir docker
-mkdir config
+mkdir kafka-plaform-example
 ```
 
-Create a `custom.yml` inside the `config` folder. This file will be used to override the default settings defined in the file  
- [`generator-config/vars/default-values.yml`](./generator-config/vars/default-values.yml) file. These configuration settings are also documented [here](./Configuration.md).
+Now let's initialize the current directory to be a Modern Data Platform Stack environment. We specify the concreate stack to use `trivais/modern-data-platform-stack-generator` as well as the version `1.2.0-preview` which is the current version of this generator. With the `-n` option we give the platform a meaningful name. 
 
 ```
-nano config/custom.yml
+mdp init -n kafka-platform -sn trivadis/modern-data-platform-stack-generator -sv 1.2.0-preview
 ```
 
-Now add the following content (please ensure indentation is respected in your custom file as this is important for YML files) to the `custom.yml` file. 
+This generates a `config.yml` file, if it does not exist already, with all the services which can be configured for the platform.
+
+### Configuring the platform
+
+Now we have to configure the platform, using the `config.yml` file which have been created by the `init` command above.
 
 ```
-  stack_name: kafka-stack
-
-  ZOOKEEPER_enabled: true
-  KAFKA_enabled: true
-  KAFKA_manager_enabled: true
-  KAFKA_kafkahq_enabled: true
-
+nano config.yml
 ```
 
-You only have to explicitly enable what you need, as each service is disabled by default. Other settings have meaningful defaults as well. 
-
-### Running the generator
-
-Now we can run the MDP Stack Generator providing 3 mandatory positional arguments:
-
-  * the path for your custom yml stack file, i.e. `config/custom.yml`
-  * the path on where the artefacts (such as `docker-compose.yml` file) should be generated to, i.e. `docker`
-  * the version of the MDP Stack Generator, actual stable version is `1.0.0`
-
-From inside the `mdps-kafka-example` folder, run the following command:
+You should see all the configuration option, similar to this (only showing the first few lines)
 
 ```
-mdps-generate ${PWD}/config/custom.yml ${PWD}/docker 1.0.0
+      # =============== Do to remove ==========================
+      stack_name: trivadis/modern-data-platform-stack-generator 
+      stack_version: 1.2.0-preview 
+      platform_name: kafka-platform 
+      hw_arch: x86-64 
+      # =============== Do to remove ==========================
+
+
+      #zookeeper
+      ZOOKEEPER_enable: false
+      ZOOKEEPER_volume_map_data: false
+      ZOOKEEPER_nodes: 1            # either 1 or 3
+
+      #kafka
+      KAFKA_enable: false
+      KAFKA_entreprise_enable: false
+      KAFKA_volume_map_data: false
+      KAFKA_broker_nodes: 3
+      KAFKA_delete_topic_enable: false
+      KAFKA_auto_create_topics_enable: false
+
+      ...
+```
+You can now enable the options for the services you like for your stack by changing the `false` to `true` value.
+
+You only have to explicitly enable what you need, as each service is disabled by default. Other settings have meaningful defaults as well. So you can also remove the services you don't need. 
+
+All configuration settings are documented [here](./Configuration.md).
+
+
+### Generate the platform
+
+Now we are ready to generate the platform. From the `kafka-plaform-example` folder, run the following command:
+
+```
+cd kafka-plaform-example
+mdp gen
 ```
 
 and you should see an output similar to this
 
 ```
 Running the Modern Data Platform Stack Generator ....
+Destination = /home/bigdata/mdps-stack-test
 
-Process Definition: '/opt/analytics-generator/stack-config.yml'
-Render template: 'templates/docker-compose.yml.j2' --> 'stacks/docker-compose.yml'
-Modern Data Platform Stack generated successfully to /home/bigdata/mdp-kafka-stack-example/docker
+Process Definition: '/opt/mdps-gen/stack-config.yml'
+Loading file '/opt/mdps-gen/stack-config.yml'...
+Parsing YAML...
+Loading file '/opt/mdps-gen/vars/default-values.yml'...
+Parsing YAML...
+Loading file '/tmp/custom-stack-config.yml'...
+Parsing YAML...
+Return cached file '/opt/mdps-gen/vars/default-values.yml'...
+Parsing YAML...
+Return cached file '/tmp/custom-stack-config.yml'...
+Parsing YAML...
+Render template: 'templates/docker-compose.yml.j2' --> 'destination/docker-compose.yml'
+Loading file '/opt/mdps-gen/templates/docker-compose.yml.j2'...
+Parsing YAML...
+Dumping YAML...
+Writing file '/opt/mdps-gen/destination/docker-compose.yml'...
+Render template: 'templates/mdps-services.yml.j2' --> 'destination/mdps-services.yml'
+Loading file '/opt/mdps-gen/templates/mdps-services.yml.j2'...
+Parsing YAML...
+Dumping YAML...
+Writing file '/opt/mdps-gen/destination/mdps-services.yml'...
 ```
 
 You should now find fully configured `docker-compose.yml` file (according to the settings chosen) as well as some static configuration files, necessary for some services. These static configuration files are not dynamically chosen and available, even if you haven't chosen the service they are for. 
-
-Additionally a `mdps-services.yml` file is generated, describing the services which are part of the stack. This is **not yet complete** and might be used to generate a more readable page (i.e. markdown).
 
 ### Running the Generated Stack
 
