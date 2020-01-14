@@ -1,4 +1,5 @@
 import click
+import docker
 
 __version__ = '2.0.0'
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
@@ -36,19 +37,35 @@ def gen(config_filename, config_url, stack_image, stack_version, del_empty_lines
 #
 @cli.command()  # @cli, not @click!
 @click.option('-n', '--platform-name', 'platform_name', type=click.STRING, required=True, help='the name of the platform stack to generate.')
-@click.option('-sn', '--stack-name', 'stack_name', default='modern-data-platform-stack-generator', type=click.STRING, show_default=True, help='the modern data platform stack image')
-@click.option('-sv', '--stack-version', 'stack_version', default='LATEST', type=click.STRING, show_default=True, help='the modern data platform stack image version to use')
+@click.option('-sn', '--stack-name', 'stack_name', default='trivadis/modern-data-platform-stack-generator', type=click.STRING, show_default=True, help='the modern data platform stack image')
+@click.option('-sv', '--stack-version', 'stack_version', default='latest', type=click.STRING, show_default=True, help='the modern data platform stack image version to use')
 @click.option('-cf', '--config-filename', 'config_filename', default='config.yml', type=click.STRING, show_default=True, help='the name of the local config file.')
 @click.option('-sc', '--seed-config', 'seed_config', type=click.STRING, help='the name of a predefined stack to base this new platform on')
 @click.option('-f', '--force', is_flag=True, help='If specified, this command will overwrite any existing config file')
-def init(platform_name, stackimage_name, stackimage_version, config_filename, seed_config, force):
-    """Initializes the current directory to be a Modern Data Platform Stack environment by creating an initial stack
+@click.option('-hw', '--hw_arch', 'hw_arch', type=click.Choice(['ARM', 'ARM64', 'x86-64']), default='x86-64', help='Hardware architecture for the platform')
+def init(platform_name, stack_name, stack_version, config_filename, seed_config, force, hw_arch):
+    """Initializes the current directory to be a Modern Data Platform Stack environment by creating an initial
     config file, if one does not already exists.
     
     The stack to use as well as its version need to be passed by the --stack-image-name and --stack-image-version options.
     By default 'config.yml' is used for the name of the config file, which is created by the init.
     """
     click.echo('Will create the folder with a base config file')
+
+    client = docker.from_env()
+    dp_container = client.containers.run(image=f'{stack_name}:{stack_version}', detach=True)
+
+
+
+    # f = open('./config.tar', 'wb')
+    # bits, stat = container.get_archive('/tmp/stack-config.yml')
+    # print(stat)
+    # {'name': 'sh', 'size': 1075464, 'mode': 493,
+    #  'mtime': '2018-10-01T15:37:48-07:00', 'linkTarget': ''}
+    # for chunk in bits:
+    #
+    #     f.write(chunk)
+    # f.close()
 
 
 @cli.command()
