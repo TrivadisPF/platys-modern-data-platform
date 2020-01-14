@@ -23,6 +23,7 @@ def cli():
 @click.option('-v', '--verbose', is_flag=True, default=False, show_default=True, help='Verbose logging')
 def gen(config_filename, config_url, stack_image, stack_version, del_empty_lines, stackorg, verbose):
     """Generates a docker-based Modern Data Platform Stack.
+    
     The stack configuration can either be passed as a local file (using the --config-filename option or using the default name 'stack-config.yml') or as an URL
     referencing a file on the Internet (using the --config-url option).
     """
@@ -43,6 +44,7 @@ def gen(config_filename, config_url, stack_image, stack_version, del_empty_lines
 def init(platform_name, stackimage_name, stackimage_version, config_filename, seed_config, force):
     """Initializes the current directory to be a Modern Data Platform Stack environment by creating an initial stack
     config file, if one does not already exists.
+    
     The stack to use as well as its version need to be passed by the --stack-image-name and --stack-image-version options.
     By default 'config.yml' is used for the name of the config file, which is created by the init.
     """
