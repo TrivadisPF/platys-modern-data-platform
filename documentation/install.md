@@ -47,5 +47,5 @@ sudo rm /usr/local/bin/mdp
 ## Where to go next
 
 * [Getting Started](getting-started.md)
-* [Explore the full list of MDP commands](commands.md)
+* [Explore the full list of MDP commands](command-line-ref.md)
 * [MDP configuration file reference](configuration.md)
