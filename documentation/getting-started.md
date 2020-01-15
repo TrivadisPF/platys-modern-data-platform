@@ -9,13 +9,16 @@ Make sure that you have already installed the [Docker Engine](https://docs.docke
 
 ## Step 1: Initialize the environment
 
-First create a directory holding the platform generator configuration as well as the generated artefacts:
+First create a directory, which will hold the platform generator configuration as well as the generated artefacts:
 
 ```
 mkdir kafka-plaform-example
+cd kafka-plaform-example
 ```
 
-Now let's initialize the current directory to be a Modern Data Platform Stack environment. We specify the concreate stack to use `trivais/modern-data-platform-stack-generator` as well as the version `1.2.0-preview` which is the current version of this generator. With the `-n` option we give the platform a meaningful name. 
+Now let's initialize the current directory to be a Modern Data Platform Stack environment. 
+
+We specify the concreate stack to use `trivais/modern-data-platform-stack-generator` as well as the version `1.2.0-preview` which is the current version of this generator. With the `-n` option we give the platform a meaningful name. 
 
 ```
 mdp init -n kafka-platform -sn trivadis/modern-data-platform-stack-generator -sv 1.2.0-preview
