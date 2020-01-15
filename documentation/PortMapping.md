@@ -33,6 +33,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 9300 | 9300 | elasticsearch-1 |
 9851 | 9851 | tile38 |
 9999 | 9999 | influxdb2 |
+21000 | 21000 | atlas |
 
 ### External Ports
 
@@ -137,7 +138,6 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28102 | 3000 | burrow-ui |
 28103 | 80 | burrow-dashboard |
 28104 | 8000 | burrow |
-28105 | 21000 | atlas |
 28150 | 8086 | influxdb |
 28150 | 8086 | influxdb |
 28151 | 80 | influxdb-ui |
