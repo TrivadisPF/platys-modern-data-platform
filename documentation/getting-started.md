@@ -30,6 +30,8 @@ This generates a `config.yml` file, if it does not exist already, with all the s
 
 Now we have to configure the platform, using the `config.yml` file which have been created by the `init` command above.
 
+In an editor (i.e. `nano`) open this configuration file. 
+
 ```
 nano config.yml
 ```
@@ -61,6 +63,21 @@ You should see all the configuration option, similar to this (only showing the f
       ...
 ```
 You can now enable the options for the services you like for your stack by changing the `false` to `true` value.
+
+For enabling Kafka and Zookeeper, all we have to do is set the `ZOOKEEPER_enable` and `KAFKA_enable` flag to `true`
+
+      #zookeeper
+      ZOOKEEPER_enable: true
+      ZOOKEEPER_volume_map_data: false
+      ZOOKEEPER_nodes: 1            # either 1 or 3
+
+      #kafka
+      KAFKA_enable: true
+      KAFKA_entreprise_enable: false
+      KAFKA_volume_map_data: false
+      KAFKA_broker_nodes: 3
+      KAFKA_delete_topic_enable: false
+      KAFKA_auto_create_topics_enable: false
 
 You only have to explicitly enable what you need, as each service is disabled by default. Other settings have meaningful defaults as well. So you can also remove the services you don't need. 
 
