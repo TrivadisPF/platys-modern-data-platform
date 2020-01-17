@@ -81,7 +81,7 @@ mkdir config
 ```
 
 Create a `custom.yml` inside the `config` folder. This file will be used to override the default settings defined in the file  
- [`generator-config/vars/default-values.yml`](./generator-config/vars/default-values.yml) file. These configuration settings are also documented [here](./Configuration.md).
+ [`generator-config/vars/config.yml`](generator-config/vars/config.yml) file. These configuration settings are also documented [here](./Configuration.md).
 
 ```
 nano config/custom.yml

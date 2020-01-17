@@ -1,5 +1,10 @@
+import os
+import time
+
 import click
 import docker
+import tempfile
+import tarfile
 
 __version__ = '2.0.0'
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
@@ -52,31 +57,39 @@ def init(platform_name, stack_name, stack_version, config_filename, seed_config,
     """
     click.echo('Will create the folder with a base config file')
 
-    client = docker.from_env()
-    dp_container = client.containers.run(image=f'{stack_name}:{stack_version}', detach=True)
+    if not force and os.path.isfile('config.yml'):
+        print("config.yml already exists if you want to override it use the [-f] option")
+    else:
+        # init and start docker container
+        client = docker.from_env()
+        dp_container = client.containers.run(image=f'{stack_name}:{stack_version}', detach=True, auto_remove=True)
 
+        # copy default config file (with default values to the current folder
+        tar_config = tempfile.gettempdir() + '/config.tar'
+        f = open(tar_config, 'wb')
+        bits, stats = dp_container.get_archive('/opt/mdps-gen/vars/config.yml')
 
+        for chunk in bits:
+            f.write(chunk)
+        f.close()
 
-    # f = open('./config.tar', 'wb')
-    # bits, stat = container.get_archive('/tmp/stack-config.yml')
-    # print(stat)
-    # {'name': 'sh', 'size': 1075464, 'mode': 493,
-    #  'mtime': '2018-10-01T15:37:48-07:00', 'linkTarget': ''}
-    # for chunk in bits:
-    #
-    #     f.write(chunk)
-    # f.close()
+        # extract the config file from the tar in to the current folder
+        tar_file = tarfile.open(tar_config)
+        tar_file.extractall(path="./")
+        tar_file.close()
 
 
 @cli.command()
 def list_predef_stacks():
     """Lists the predefined stacks available for the init"""
+
     click.echo('Will run the stack, once it is generated')
 
 
 @cli.command()
 def show_services():
     """Shows the services interfaces of the stack, web and/or apis"""
+
     click.echo('Show the service interfaces of the stack')
 
 
