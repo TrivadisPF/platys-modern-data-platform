@@ -50,12 +50,19 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
 
 {% set __ZEPPELIN_version = ZEPPELIN_version | default('latest') -%}
 
-{% set __JUPYTER_MINIMAL_version = JUPYTER_MINIMAL_version | default('latest') -%}
-{% set __JUPYTER_R_version = JUPYTER_R_version | default('latest') -%}
-{% set __JUPYTER_SCIPY_version = JUPYTER_SCIPY_version | default('latest') -%}
-{% set __JUPYTER_DATASCIENCE_version = JUPYTER_DATASCIENCE_version | default('latest') -%}
-{% set __JUPYTER_TENSORFLOW_version = JUPYTER_TENSORFLOW_version | default('latest') -%}
-{% set __JUPYTER_ALL_SPARK_version = JUPYTER_ALL_SPARK_version | default('latest') -%}
+{%if (JUPYTER_edition | lower) == 'minimal' | default(false) %}
+  {% set __JUPYTER_version = JUPYTER_MINIMAL_version | default('latest') -%}
+{%elif (JUPYTER_edition | lower) == 'r' | default(false) %}
+  {% set __JUPYTER_version = JUPYTER_R_version | default('latest') -%}
+{%elif (JUPYTER_edition | lower) == 'scipy' | default(false) %}
+  {% set __JUPYTER_version = JUPYTER_SCIPY_version | default('latest') -%}
+{%elif (JUPYTER_edition | lower) == 'datascience' | default(false) %}
+  {% set __JUPYTER_version = JUPYTER_DATASCIENCE_version | default('latest') -%}
+{%elif (JUPYTER_edition | lower) == 'tensorflow' | default(false) %}
+  {% set __JUPYTER_version = JUPYTER_TENSORFLOW_version | default('latest') -%}
+{%elif (JUPYTER_edition | lower) == 'all_spark' | default(false) %}
+  {% set __JUPYTER_version = JUPYTER_ALL_SPARK_version | default('latest') -%}
+{% endif -%}
 
 {% set __GRAFANA_version = GRAFANA_version | default('latest') -%}
 
@@ -106,19 +113,15 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
 {% set __PORTAINER_version = PORTAINER_version | default('latest') -%}
 {% set __CADVISOR_version = CADVISOR_version | default('latest') -%}
 
-{% set __hw_arch = hw_arch | default('x86-64') -%}
+{% set __hw_arch = hw_arch | default('X86-64') -%}
 
 
-{% if KAFKA_KADMIN_enable or ATLAS_enable -%}
+{% if KAFKA_enable or ATLAS_enable -%}
 # enforce some dependencies
   {% set ZOOKEEPER_enable = true -%}
 {% endif -%}   {# PLATFORM_ARM_enable #}
 
-
-
-
-
-{% if __hw_arch == 'ARM' -%}
+{% if (__hw_arch | upper) == 'ARM' -%}
 # if we use stack type ARM, then disable some containers which do not support ARM
   {% set ZOOKEEPER_enable = false -%}
   {% set KAFKA_enable = false -%}
@@ -154,7 +157,7 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
 
 services:
 
-{% if ZOOKEEPER_enable or KAFKA_enable or ATLAS_enable | default(false) %}
+{% if ZOOKEEPER_enable | default(false) %}
   #  ================================== Zookeeper ========================================== #}
   {% for num in range(ZOOKEEPER_nodes | default('1') ) %}
   {% set port = 2180 + loop.index %}
@@ -212,12 +215,12 @@ services:
 {% endif %}   {# zookeeper_enable or KAFKA_enable or ATLAS_enable #}
 
 
-{% if (KAFKA_enable or KAFKA_ENTERPRISE_enable) | default(false) %}
+{% if (KAFKA_enable) | default(false) %}
   #  ================================== Kafka ========================================== #}
   {% for num in range(KAFKA_broker_nodes | default(1) ) %}
   {% set port = 9091 + loop.index %}
   kafka-{{loop.index}}:
-    image: confluentinc/{{ 'cp-enterprise-kafka' if KAFKA_ENTERPRISE_enable else 'cp-kafka' }}:{{__CONFLUENT_PLATFORM_version}}
+    image: confluentinc/{{ 'cp-enterprise-kafka' if (KAFKA_edition | lower) == 'enterprise' else 'cp-kafka' }}:{{__CONFLUENT_PLATFORM_version}}
     container_name: kafka-{{loop.index}}
     hostname: kafka-{{loop.index}}
     depends_on:
@@ -237,11 +240,11 @@ services:
       KAFKA_ADVERTISED_LISTENERS: 'LISTENER_INTERNAL://kafka-{{loop.index}}:1{{port}},LISTENER_DOCKERHOST://localhost:2{{port}},LISTENER_EXTERNAL://${PUBLIC_IP:-127.0.0.1}:{{port}}'
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'LISTENER_INTERNAL:PLAINTEXT,LISTENER_DOCKERHOST:PLAINTEXT,LISTENER_EXTERNAL:PLAINTEXT'
       KAFKA_INTER_BROKER_LISTENER_NAME: LISTENER_INTERNAL
-      {% if KAFKA_CCC_enable | default(false) %}
+      {% if KAFKA_CCC_enable and (KAFKA_edition | lower) == 'enterprise' | default(false) %}
       KAFKA_METRIC_REPORTERS: io.confluent.metrics.reporter.ConfluentMetricsReporter
       KAFKA_CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: 'kafka-1:19092'
       {% endif %}
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: {{KAFKA_broker_nodes | default(1)}}
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
       KAFKA_DELETE_TOPIC_ENABLE: '{{ KAFKA_delete_topic_enable | default(omit) }}'
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: '{{ KAFKA_auto_create_topics_enable | default(omit) }}'
@@ -306,12 +309,12 @@ services:
       CONNECT_REST_PORT: {{port}}
       CONNECT_GROUP_ID: compose-connect-group
       CONNECT_CONFIG_STORAGE_TOPIC: docker-connect-configs
-      CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: 3
+      CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: {{KAFKA_broker_nodes | default(1)}}
       CONNECT_OFFSET_FLUSH_INTERVAL_MS: 10000
       CONNECT_OFFSET_STORAGE_TOPIC: docker-connect-offsets
-      CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: 3
+      CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: {{KAFKA_broker_nodes | default(1)}}
       CONNECT_STATUS_STORAGE_TOPIC: docker-connect-status
-      CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 3
+      CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: {{KAFKA_broker_nodes | default(1)}}
       CONNECT_KEY_CONVERTER: io.confluent.connect.avro.AvroConverter
       CONNECT_KEY_CONVERTER_SCHEMA_REGISTRY_URL: 'http://schema-registry-1:8081'
       CONNECT_VALUE_CONVERTER: io.confluent.connect.avro.AvroConverter
@@ -408,7 +411,7 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {# KAFKA_enable and KAFKA_MQTTPROXY_enable #}
 
-{% if (KAFKA_ENTERPRISE_enable and KAFKA_CCC_enable) | default(false) %}
+{% if (KAFKA_enable and (KAFKA_edition | lower) == 'enterprise' and KAFKA_CCC_enable) | default(false) %}
   control-center:
     image: confluentinc/cp-enterprise-control-center:{{__CONFLUENT_PLATFORM_version}}
     hostname: control-center
@@ -419,7 +422,7 @@ services:
       - zookeeper-1
       - kafka-1
     ports:
-      - "9021:9021"
+      - "28046:9021"
     environment:
       CONTROL_CENTER_BOOTSTRAP_SERVERS: 'kafka-1:9092'
       CONTROL_CENTER_ZOOKEEPER_CONNECT: 'zookeeper-1:2181'
@@ -1180,10 +1183,9 @@ services:
 {# #}
 {# #}
 {%if JUPYTER_enable | default(false) %}
-  {%if JUPYTER_MINIMAL_enable | default(false) %}
   #  ================================== Jupyter ========================================== #}
   jupyter:
-    image: jupyter/r-notebook:{{__JUPYTER_MINIMAL_version}}
+    image: jupyter/{{ (JUPYTER_edition | lower) }}-notebook:{{__JUPYTER_version}}
     container_name: jupyter
     hostname: jupyter
     labels:
@@ -1201,117 +1203,7 @@ services:
       - "./container-volume/jupyter/work:/home/jovyan/work"
     {% endif %}
     restart: {{container_restart_policy}}
-  {% endif %}   {#  JUPYTER_MINIMAL_enable  #}
 
-  {%if JUPYTER_R_enable | default(false) %}
-  jupyter:
-    image: jupyter/r-notebook:{{__JUPYTER_R_version}}
-    container_name: jupyter
-    hostname: jupyter
-    labels:
-      com.mdps.service.webui.name: "Jupyter UI"
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28060"
-    ports:
-      - "28060:8888"
-    environment:
-      JUPYTER_ENABLE_LAB: "true"
-      JUPYTER_TOKEN: "{{admin_password}}"
-      GRANT_SUDO: "true"
-      TINI_SUBREAPER: "true"
-    {% if JUPYTER_volume_map_data %}
-    volumes:
-      - "./container-volume/jupyter/work:/home/jovyan/work"
-    {% endif %}
-    restart: {{container_restart_policy}}
-  {% endif %}   {#  JUPYTER_R_enable  #}
-
-  {%if JUPYTER_SCIPY_enable | default(false) %}
-  jupyter:
-    image: jupyter/scipy-notebook:{{__JUPYTER_SCIPY_version}}
-    container_name: jupyter
-    hostname: jupyter
-    labels:
-      com.mdps.service.webui.name: "Jupyter UI"
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28060"
-    ports:
-      - "28060:8888"
-    environment:
-      JUPYTER_ENABLE_LAB: "true"
-      JUPYTER_TOKEN: "{{admin_password}}"
-      GRANT_SUDO: "true"
-      TINI_SUBREAPER: "true"
-    {% if JUPYTER_volume_map_data %}
-    volumes:
-      - "./container-volume/jupyter/work:/home/jovyan/work"
-    {% endif %}
-    restart: {{container_restart_policy}}
-  {% endif %}   {#  JUPYTER_SCIPY_enable  #}
-
-  {%if JUPYTER_TENSORFLOW_enable | default(false) %}
-  jupyter:
-    image: jupyter/tensorflow-notebook:{{__JUPYTER_TENSORFLOW_version}}
-    container_name: jupyter
-    hostname: jupyter
-    labels:
-      com.mdps.service.webui.name: "Jupyter UI"
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28060"
-    ports:
-      - "28060:8888"
-    environment:
-      JUPYTER_ENABLE_LAB: "true"
-      JUPYTER_TOKEN: "{{admin_password}}"
-      GRANT_SUDO: "true"
-      TINI_SUBREAPER: "true"
-    {% if JUPYTER_volume_map_data %}
-    volumes:
-      - "./container-volume/jupyter/work:/home/jovyan/work"
-    {% endif %}
-    restart: {{container_restart_policy}}
-  {% endif %}   {#  JUPYTER_TENSORFLOW_enable  #}
-
-  {%if JUPYTER_DATASCIENCE_enable | default(false) %}
-  jupyter:
-    image: jupyter/datascience-notebook:{{__JUPYTER_DATASCIENCE_version}}
-    container_name: jupyter
-    hostname: jupyter
-    labels:
-      com.mdps.service.webui.name: "Jupyter UI"
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28060"
-    ports:
-      - "28060:8888"
-    environment:
-      JUPYTER_ENABLE_LAB: "true"
-      JUPYTER_TOKEN: "{{admin_password}}"
-      GRANT_SUDO: "true"
-      TINI_SUBREAPER: "true"
-    {% if JUPYTER_volume_map_data %}
-    volumes:
-      - "./container-volume/jupyter/work:/home/jovyan/work"
-    {% endif %}
-    restart: {{container_restart_policy}}
-  {% endif %}   {#  JUPYTER_DATASCIENCE_enable  #}
-
-  {%if JUPYTER_ALL_SPARK_enable | default(false) %}
-  jupyter:
-    image: jupyter/all-spark-notebook:{{__JUPYTER_ALL_SPARK_version}}
-    container_name: jupyter
-    hostname: jupyter
-    labels:
-      com.mdps.service.webui.name: "Jupyter UI"
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28060"
-    ports:
-      - "28060:8888"
-    environment:
-      JUPYTER_ENABLE_LAB: "true"
-      JUPYTER_TOKEN: "{{admin_password}}"
-      GRANT_SUDO: "true"
-      TINI_SUBREAPER: "true"
-    {% if JUPYTER_volume_map_data %}
-    volumes:
-      - "./container-volume/jupyter/work:/home/jovyan/work"
-    {% endif %}
-    restart: {{container_restart_policy}}
-  {% endif %}   {#  JUPYTER_ALL_SPARK_enable  #}
 {% endif %}   {#  JUPYTER_enable  #}
 
 {% if GRAFANA_enable | default(false) %}
