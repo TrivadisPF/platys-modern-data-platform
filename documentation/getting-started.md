@@ -86,10 +86,9 @@ All configuration settings are documented [here](./Configuration.md).
 
 ## Step 3: Generate the platform
 
-Now we are ready to generate the platform. From the `kafka-plaform-example` folder, run the following command:
+Now we are ready to generate the platform. Still in the `kafka-plaform-example` folder, run the following command:
 
 ```
-cd kafka-plaform-example
 mdp gen
 ```
 
@@ -120,6 +119,7 @@ Loading file '/opt/mdps-gen/templates/mdps-services.yml.j2'...
 Parsing YAML...
 Dumping YAML...
 Writing file '/opt/mdps-gen/destination/mdps-services.yml'...
+Modern Data Platform Stack generated successfully to /home/docker/Desktop/kafka-plaform-example
 ```
 
 You should now find fully configured `docker-compose.yml` file (according to the settings chosen) as well as some static configuration files, necessary for some services. These static configuration files are not dynamically chosen and available, even if you haven't chosen the service they are for. 
