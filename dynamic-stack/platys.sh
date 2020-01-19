@@ -1,6 +1,6 @@
 #!/bin/bash
 
-version="Trivadis Docker-based Modern Data Platform Generator v2.0.0"
+version="A toolset for provisioning Modern Platforms - v2.0.0"
 
 usage="
 Usage: $(basename "$0") [OPTIONS] COMMAND [ARGS]... 
