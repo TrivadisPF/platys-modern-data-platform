@@ -4,7 +4,7 @@
 [![Code Climate](https://codeclimate.com/github/codeclimate/codeclimate/badges/gpa.svg)](https://codeclimate.com/github/TrivadisPF/modern-data-platform-stack)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com)
 
-# Trivadis Modern Data Platform Stack (MDPS)
+# Trivadis Modern Data Platform (MDP)
 
 This project sets up the infrastructure for testing a modern data platform stack with services such as
 
@@ -21,10 +21,6 @@ Each service runs as a Docker container and the whole stack is composed using [D
 
 The **new way for using the stack** is in a dynamic way. It can be found in the [`dynamic-stack`](./dynamic-stack/README.md) folder. The idea here is to keep a complete version of the stack in one single docker-compose template file from where an instance of a `docker-compose.yml` file can be generated.    
 
-The **full stack** is no longer mainained. It can be found in the [`full-stack`](./full-stack/README.md) folder. 
-
-Customised versions of the stack (mainly downsized to only the services needed for a given project) can be found under the [`customer-poc`](./full-stack/README.md) folder.
-
 ## Changes
 
-The change log can be found [here](./full-stack/Changes.md).
+The change log can be found [here](./documentation/changes.md).

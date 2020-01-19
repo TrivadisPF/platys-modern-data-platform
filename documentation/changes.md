@@ -21,7 +21,7 @@ The Modern Analytical Data Platform Stack version 1.2.0 contains the following n
 * Rename `connect-n` service to `kafka-connect-n` to be more clear
 * Rename `broker-n` service to `kafka-n` to be more clear
 * Upgrade to Confluent Platform 5.4.0
-* Add concept of edition for Kafka and Jupyter
+* Add [concept of edition](service-design.md) for Kafka and Jupyter services
 
 
 
