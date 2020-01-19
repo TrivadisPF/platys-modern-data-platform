@@ -1,13 +1,13 @@
-# Overview of mdp CLI
+# Overview of platys CLI
 
-This page provides the usage information for the `mdp` Command.
+This page provides the usage information for the `platys` Command.
 
 ## Command options overview and help
 
-You can also see this information by running `mdp --help` from the command line.
+You can also see this information by running `platys --help` from the command line.
 
 ```
-Usage: mdp [OPTIONS] COMMAND [ARGS]... 
+Usage: platys [OPTIONS] COMMAND [ARGS]... 
 
 Options:
   --version       Show the version and exit.
@@ -18,12 +18,12 @@ Commands:
   gen             Generates a docker-based Data Platform Stack.  
 ```
    
-You can use MDP binary, mdp [OPTIONS] [COMMAND] [ARGS...], to generate and manage docker compose files. 
+You can use platys binary, mdp [OPTIONS] [COMMAND] [ARGS...], to generate and manage docker compose files. 
 
-### Use `--version` to shwo the version of MDP
+### Use `--version` to shwo the version of `platys`
 
 ```
-$ mdp --version
+$ platys --version
 Trivadis Docker-based Modern Data Platform Generator v2.0.0   
 ```
    

@@ -1,27 +1,29 @@
 
-# Getting Started with MDP Stack Generator
+# Getting Started with `platys`
 
-On this page you generate a simple platform which can then be run on Docker Compose. The platform uses Kafka and Zookeeper and it should be understandable even if you haven't worked with Kafka before. 
+On this page you generate a simple platform which can then be run on Docker Compose. The platform we create, uses Kafka and Zookeeper and it should be understandable even if you haven't worked with Kafka before. 
 
 ## Prerequisites
 
-Make sure that you have already installed the [Docker Engine](https://docs.docker.com/install/), [Docker Compose](https://docs.docker.com/compose/install/) and the [MDP Generator](install.md). 
+Make sure that you have already installed the [Docker Engine](https://docs.docker.com/install/), [Docker Compose](https://docs.docker.com/compose/install/) and the [`platys`](install.md) toolset. 
 
 ## Step 1: Initialize the environment
 
-First create a directory, which will hold the platform generator configuration as well as the generated artefacts:
+First create a directory, which will hold the `platys` configuration as well as the generated artefacts:
 
 ```
 mkdir kafka-plaform-example
 cd kafka-plaform-example
 ```
 
-Now let's initialize the current directory to be a Modern Data Platform Stack environment. 
+Now let's initialize the current directory to use a Modern Data Analytics Platform Stack. 
 
-We specify the concreate stack to use `trivais/modern-data-platform-stack-generator` as well as the version `1.2.0-preview` which is the current version of this generator. With the `-n` option we give the platform a meaningful name. 
+We specify the concreate platform stack `trivadis/mdp-stack` to use as well as the stack version `1.2.0` (the current version of this platform stack). 
+
+With the `-n` option we give the platform a meaningful name. 
 
 ```
-mdp init -n kafka-platform -sn trivadis/modern-data-platform-stack-generator -sv 1.2.0-preview
+platys init -n kafka-platform -sn trivadis/data-platform-stack -sv 1.2.0-preview
 ```
 
 This generates a `config.yml` file, if it does not exist already, with all the services which can be configured for the platform.
@@ -62,7 +64,7 @@ You should see all the configuration option, similar to this (only showing the f
 
       ...
 ```
-You can now enable the options for the services you like for your stack by changing the `false` to `true` value.
+You can now enable the options for the services you like for your platform by changing the `false` to `true` value.
 
 For enabling Kafka and Zookeeper, all we have to do is set the `ZOOKEEPER_enable` and `KAFKA_enable` flag to `true`
 
@@ -89,7 +91,7 @@ All configuration settings are documented [here](./Configuration.md).
 Now we are ready to generate the platform. Still in the `kafka-plaform-example` folder, run the following command:
 
 ```
-mdp gen
+platys gen
 ```
 
 and you should see an output similar to this

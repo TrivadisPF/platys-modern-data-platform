@@ -1,7 +1,7 @@
-# mdp gen
+# platys gen
 
 ```
-Usage: mdp gen [OPTIONS] 
+Usage: platys gen [OPTIONS] 
 
   Generates a docker-based Modern Data Platform Stack.
 

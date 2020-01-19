@@ -1,7 +1,7 @@
-# mdp init
+# platys init
 
 ```
-Usage: mdp init [OPTIONS] 
+Usage: platys init [OPTIONS] 
 
   Initializes the current directory to be a Modern Data Platform Stack
   environment by creating an initial stack config file, if one does not

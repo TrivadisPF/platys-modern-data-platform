@@ -2,9 +2,9 @@
 
 If you don’t see your question here, feel free to add an issue on Github. 
 
-## How can I add additional services, not supported by MDP?
+## How can I add additional services, not supported by the Platform Stack?
 
-If you have a service which is not supported by the current MDP stack, then you can add it by using [the method of using multiple compose files](https://docs.docker.com/compose/extends/#multiple-compose-files) and creating a `docker-compose.override.yml` file.
+If you have a service which is not supported by the Platform Stack you base on, then you can add it by using [the method of using multiple compose files](https://docs.docker.com/compose/extends/#multiple-compose-files) and creating a `docker-compose.override.yml` file.
 
 Just create a new file in the same folder as the `docker-compose.yml`, name it `docker-compose.override.yml` and add the a header similar to the one, where the version should be the same as the one as in the generated `docker-compose.yml` file (currently `3.0` by default).
 
@@ -162,8 +162,8 @@ Use the follwoing service block for provisioning Kafka Connect Connector instanc
 Add this service to the `docker-compose.override.yml` file. 
 
    
-## MDP documentation
+## `platys` documentation
 
 * [Getting Started](getting-started.md)
-* [Explore the full list of MDP commands](commands.md)
-* [MDP configuration file reference](configuration.md)
+* [Explore the full list of Platys commands](commands.md)
+* [Data Platform Stack configuration file reference](configuration.md)
