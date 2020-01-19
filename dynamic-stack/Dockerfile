@@ -14,4 +14,4 @@ COPY generate.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/generate.sh
 
 # we asume that the output volume is mapped to /opt/analytics-generator/stacks
-#CMD generate.sh
+CMD generate.sh

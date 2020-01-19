@@ -1,10 +1,12 @@
 import os
-import time
-
 import click
 import docker
 import tempfile
 import tarfile
+import logging
+import yaml
+from pathlib import Path
+import sys
 
 __version__ = '2.0.0'
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
@@ -20,27 +22,71 @@ def cli():
 # Gen
 #
 @cli.command()  # @cli, not @click!
-@click.option('-cf', '--config-filename', 'config_filename', default='config.yml', type=click.STRING,
-              show_default=True, help='the name of the local config file.')
+@click.option('-cf', '--config-filename', 'config_filename', default='config.yml', type=click.STRING, show_default=True, help='the name of the local config file.')
 @click.option('-cu', '--config-url', 'config_url', type=click.STRING, help='the URL to a remote config file')
 @click.option('--del-empty-lines/--no-del-emptylines', 'del_empty_lines', default=True, show_default=True, help='remove empty lines from the docker-compose.yml file.')
-@click.option('--flat', 'stackorg', flag_value="flat", default=True, help='generate the stack into same folder as config.yml')
-@click.option('--subfolder', 'stackorg', flag_value="subfolder", help='generate the stack into a subfolder, which by default is the name of the platform provided when initializing the stack')
+@click.option('--structure', 'structure', type=click.Choice(['flat', 'subfolder']), default='subfolder',
+              help='defines the where the stack will be generated '
+                   'flat : as in same folder as script generate the stack into same folder as config.yml'
+                   'subfolder : generate the stack into a subfolder, which by default is the name of the platform provided when initializing the stack'
+              )
 @click.option('-v', '--verbose', is_flag=True, default=False, show_default=True, help='Verbose logging')
-def gen(config_filename, config_url, stack_image, stack_version, del_empty_lines, stackorg, verbose):
+def gen(config_filename, config_url, del_empty_lines, structure, verbose):
     """Generates a docker-based Modern Data Platform Stack.
     
     The stack configuration can either be passed as a local file (using the --config-filename option or using the default name 'config.yml') or as an URL
     referencing a file on the Internet (using the --config-url option).
     """
-    click.echo('gen: config-filename = %s, stack-image = %s, stack-version = %s, stackorg = %s' % (
-        config_filename, stack_image, stack_version, stackorg))
+    click.echo(f'gen: config-filename = {config_filename}, structure = {structure}')
+
+    with open(rf'{config_filename}') as file:
+        config_yml = yaml.load(file, Loader=yaml.FullLoader)
+        mdp_config = config_yml.get('mdp')
+
+        if mdp_config is None:
+            logging.error(f'Unable to parse config file please ensure the yml file has the proper configuration under the mdp tag')
+            sys.exit()
+
+        if mdp_config["platform-name"] is None or mdp_config["stack-image-name"] is None or mdp_config["stack-image-version"] is None:
+            logging.error(f'The config file is not properly formatted or missing information '
+                          f'please ensure [platform-name], [stack-image-name] and [stack-image-version] are properly configured')
+            sys.exit()
+
+    if verbose:
+        print(f'using configuration file {config_filename}')
+        print(f'with values '
+              f' platform-name: {mdp_config["platform-name"]}'
+              f' stack-image-name: {mdp_config["stack-image-name"]}'
+              f' stack-image-version: {mdp_config["stack-image-version"]}'
+              )
+
+    destination = Path().absolute()
+
+    if structure == "subfolder":
+        # create the folder if not exists
+        destination = destination / mdp_config['platform-name']
+        Path(destination).mkdir(parents=True, exist_ok=True)
+
+    print(f'generating stack on destination [{destination}]')
+
+    client = docker.from_env()
+    dp_container = client.containers.run(image=f'{mdp_config["stack-image-name"]}:{mdp_config["stack-image-version"]}',
+                                         auto_remove=True, detach=True,
+                                         volumes=[
+                                             str(Path().absolute()) + '/config.yml:/tmp/config.yml',
+                                             str(destination) + ':/opt/mdps-gen/destination'
+                                         ],
+                                         environment=[f"VERBOSE={int(verbose == True)}"]
+                                         )
+
+    for line in dp_container.logs(stream=True):
+        print(line.strip())
 
 
 #
 # Init
 #
-@cli.command()  # @cli, not @click!
+@cli.command()
 @click.option('-n', '--platform-name', 'platform_name', type=click.STRING, required=True, help='the name of the platform stack to generate.')
 @click.option('-sn', '--stack-name', 'stack_name', default='trivadis/modern-data-platform-stack-generator', type=click.STRING, show_default=True, help='the modern data platform stack image')
 @click.option('-sv', '--stack-version', 'stack_version', default='latest', type=click.STRING, show_default=True, help='the modern data platform stack image version to use')
