@@ -17,15 +17,15 @@ First only a fixed set of services were supported using one `docker-compose.yml`
 
 A _Modern Data Platform_ is always generated based on a given _Platform Stack_. A platform stack defines the set of availble and usable services. A platform stack has a name and a version. Currently only one Platform Stack is avilable. In the future other platform stacks might be added.
 
-## What do I need for `mdp` ?
+## Where can I run `mdp` ?
 
 Currently the **mdp** toolset only runs on macOS and 64-bit Linux, but we are working on a plaform-independent version, to be released with the final 1.2.0 version. 
 
-`mdp` runs the generator for a given Platform Stack as a Docker container in the background. Therefore you need to have [Docker](https://www.docker.com/get-started) installed on the machine where you create the Platform. To run the Platform, you also need to have [Docker Compose](https://docs.docker.com/compose/) installed on the target machine, which can be different to the one where you generate the platform.  
+`mdp` runs the generator (supporting given Platform Stack) as a Docker container in the background. Therefore you need to have [Docker](https://www.docker.com/get-started) installed on the machine where you create the Platform. To run the Platform, you also need to have [Docker Compose](https://docs.docker.com/compose/) installed on the target machine, which can be different to the one where you generate the platform.  
 
 See [Installing mdp](./documentation/install.md) and [Getting Started](./documentation/getting-started.md) for how to install and use `mdp`.
 
-## Where can I run the generated platform ?
+## Where can I run the platform ?
 
 The generated platform can be provisioned either locally or in the cloud. See [Provisioning of Modern Data Platform](./documentation/environment/README.md) for various versions of how to deploy the stack. 
 
