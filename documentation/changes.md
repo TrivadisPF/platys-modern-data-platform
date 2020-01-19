@@ -23,5 +23,3 @@ The Modern Analytical Data Platform Stack version 1.2.0 contains the following n
 * Upgrade to Confluent Platform 5.4.0
 * Add [concept of edition](service-design.md) for Kafka and Jupyter services
 
-
-
