@@ -1,8 +1,8 @@
 # Frequently Asked Questions
 
-If you don’t see your question here, feel free to add an issue on Github. 
+If you don’t see your question here, feel free to add an issue on GitHub. 
 
-## How can I add additional services, not supported by the Platform Stack?
+## How can I add additional services, not supported by a Platform Stack?
 
 If you have a service which is not supported by the Platform Stack you base on, then you can add it by using [the method of using multiple compose files](https://docs.docker.com/compose/extends/#multiple-compose-files) and creating a `docker-compose.override.yml` file.
 

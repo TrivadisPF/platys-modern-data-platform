@@ -9,15 +9,15 @@ Copyright (c) 2019-2020 Trivadis
 
 ## What is `platys`?
 
-**`platys`** is a tool for genearting and provisioning Modern Data Platforms based on [Docker](https://www.docker.com/get-started) and [Docker Compose](https://docs.docker.com/compose/). 
+`platys` is a tool for generating and provisioning a Modern Data Platforms based on [Docker](https://www.docker.com/get-started) and [Docker Compose](https://docs.docker.com/compose/). 
 
 Its main use is for small-scale Data Lab projects, Proof-of-Concepts (PoC) or Proof-of-value (PoV) projects as well as trainings.
 
 First only a fixed set of services were supported using one `docker-compose.yml` file. This approach was quite unflexible and due to the amount of services we support also quite heavy weight. Therefore we went to a generated approach, where the user of **platys** can decide which features to enable and based on that generate the necessary artifacts.  
 
-A _Modern Data Platform_ is always generated based on a given _Platform Stack_. A platform stack defines the set of availble and usable services. A platform stack has a name and a version. Currently only one Platform Stack is avilable:
+A _Modern Data Platform_ is always generated based on a given _Platform Stack_. A platform stack defines the set of available and usable services. A platform stack has a name and a version. Currently only one Platform Stack is avilable:
 
-* `madp-stack` - a Platform Stack for supporting Modern (Analytical) Data Platforms
+* `madp-stack` - a Platform Stack for supporting a Modern (Analytical) Data Platforms
 
 In the future other platform stacks might be added.
 
@@ -39,7 +39,6 @@ The generated platform can be provisioned either locally or in the cloud. See [P
 
 * [Installing platys](./documentation/install.md)
 * [Getting Started](./documentation/getting-started.md)
-* [Available Platform Stacks](./documentation/available-platform-stacks.md)
 * [Frequently Asked Questions](./documentation/faq.md)
 * [Command line reference](./documentation/command-line-ref.md)
 * [Configuration file reference](./documentation/configuration.md)

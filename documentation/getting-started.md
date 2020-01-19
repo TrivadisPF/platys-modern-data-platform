@@ -1,7 +1,7 @@
 
 # Getting Started with `platys`
 
-On this page you generate a simple platform which can then be run on Docker Compose. The platform we create, uses Kafka and Zookeeper and it should be understandable even if you haven't worked with Kafka before. 
+On this page you generate a simple platform, which we can then run on Docker Compose. The platform we create, uses Kafka and Zookeeper and it should be understandable even if you haven't worked with Kafka before. 
 
 ## Prerequisites
 
@@ -16,21 +16,21 @@ mkdir kafka-plaform-example
 cd kafka-plaform-example
 ```
 
-Now let's initialize the current directory to use a Modern Data Analytics Platform Stack. 
+Now let's initialize the current directory to use the Modern Data Analytics Platform Stack. 
 
-We specify the concreate platform stack `trivadis/mdp-stack` to use as well as the stack version `1.2.0` (the current version of this platform stack). 
+We specify the platform stack name `trivadis/mdp-stack` to use as well as the stack version `1.2.0` (the current version of this platform stack). 
 
 With the `-n` option we give the platform a meaningful name. 
 
 ```
-platys init -n kafka-platform -sn trivadis/data-platform-stack -sv 1.2.0-preview
+platys init -n kafka-platform -sn trivadis/mdp-stack -sv 1.2.0-preview
 ```
 
 This generates a `config.yml` file, if it does not exist already, with all the services which can be configured for the platform.
 
 ## Step 2: Configure the platform
 
-Now we have to configure the platform, using the `config.yml` file which have been created by the `init` command above.
+Now we can configure the platform, using the `config.yml` file which has been created by the `init` command above.
 
 In an editor (i.e. `nano`) open this configuration file. 
 
@@ -38,7 +38,7 @@ In an editor (i.e. `nano`) open this configuration file.
 nano config.yml
 ```
 
-You should see all the configuration option, similar to this (only showing the first few lines)
+You can see the configuration options, available through this platform stack, similar to this (only showing the first few lines)
 
 ```
       # =============== Do to remove ==========================
@@ -64,7 +64,7 @@ You should see all the configuration option, similar to this (only showing the f
 
       ...
 ```
-You can now enable the options for the services you like for your platform by changing the `false` to `true` value.
+You can now enable the options for the services you want for your platform, just by changing `false` to `true`.
 
 For enabling Kafka and Zookeeper, all we have to do is set the `ZOOKEEPER_enable` and `KAFKA_enable` flag to `true`
 
@@ -124,24 +124,24 @@ Writing file '/opt/mdps-gen/destination/mdps-services.yml'...
 Modern Data Platform Stack generated successfully to /home/docker/Desktop/kafka-plaform-example
 ```
 
-You should now find fully configured `docker-compose.yml` file (according to the settings chosen) as well as some static configuration files, necessary for some services. These static configuration files are not dynamically chosen and available, even if you haven't chosen the service they are for. 
+You should now find fully configured `docker-compose.yml` file (according to the settings chosen) as well as some static configuration files, necessary for some of the services.
 
 ## Step 4: Run the platform 
 
-Now your MDP Stack is ready to be started. Before doing that, you have to create some environment variables, depending on the services you use. In minimum you should create
+Now your Platform is ready to be started. Before doing that, you have to create some environment variables, depending on the services you use. In minimum you should create
 
 * `DOCKER\_HOST\_IP` - the IP address of the network interface of the Docker Host
 * `PUBLIC\_IP` - the IP address of the public network interface of the Docker Host (different to `DOCKER\_HOST\_IP` if in a public cloud environment
 
-You can set these environment variables persistently on machine (`/etc/environment`) or user (`~/.pam_environment` or `~/.profile`) level. Another option is to use the `.env` file inside the `docker` folder. All environment variables set in there are used when docker compose is started. 
+You can set these environment variables persistently on the machine (`/etc/environment`) or user (`~/.pam_environment` or `~/.profile`) level. Another option is to use the `.env` file in the folder where the `docker-compose.yml` file is located. All environment variables set in there are used when the docker compose environment is started. 
 
-Now let's start the stack. In a terminal window, navigate into the `docker` folder and execute
+Now let's start the platform. In a terminal window, execute
 
 ```
 docker-compose up -d
 ```
 
-Docker will start downloading the necessary container images and then start the stack. 
+Docker will start downloading the necessary container images and then start the platform. 
 
 To see the logs of all the services, perform
 
@@ -164,7 +164,7 @@ docker-compose down
 **Note:** be aware that this completely removes the Docker containers and by that all the data within it. If you haven't mapped the data outside the container, then you might lose your work!
 
 
-At this point, you have seen the basics of how MDP works.
+At this point, you have seen the basics of how `platys` works, using the `mdp-stack` as an example.
 
 ## Where to go next
 

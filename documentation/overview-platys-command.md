@@ -18,7 +18,7 @@ Commands:
   gen             Generates a docker-based Data Platform Stack.  
 ```
    
-You can use platys binary, mdp [OPTIONS] [COMMAND] [ARGS...], to generate and manage docker compose files. 
+You can use platys binary, `platys [OPTIONS] [COMMAND] [ARGS...]`, to generate and manage docker compose files. 
 
 ### Use `--version` to shwo the version of `platys`
 
