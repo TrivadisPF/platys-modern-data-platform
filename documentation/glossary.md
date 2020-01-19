@@ -4,7 +4,7 @@ This page is the glossary written to help users of the MDP tool.
 
 ### M
 
-* **mdp tool** - a tool for working with a _Platform Stack_
+* **mdp** - a tool for working with a _Platform Stack_
 * **Modern Data Platform (MDP)** - a set of services forming a data platform supporting modern data-driven solutions. 
 
 ### P
