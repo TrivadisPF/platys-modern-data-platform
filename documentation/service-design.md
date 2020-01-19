@@ -1,4 +1,4 @@
-# Services Design
+# Service Design Decisions
 
 This document describes some design decisions in the way the services are built by the generator.
 

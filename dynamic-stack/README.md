@@ -19,6 +19,9 @@ Tag      | Status         |  Changes
 1.2.0-preview | on-going  | Support of different Jupyter versions, Support of multiple MQTT brokers, InfluxDB added, new version of bash script
 1.0.0    | stable         | Initial, first version
 
+
+Check [What's new?](../documentation/changes.md) for a more detailled list of changes.
+
 If you want to build the docker image locally, perform (this is not necessary if you follow the installation instructions below).
 
 ```
@@ -27,9 +30,16 @@ docker build -t trivadis/modern-data-platform-stack-generator:1.2.0-preview .
 
 ## MDP Documentation
 
+**Usage**
+
 * [Installing MDP](../documentation/install.md)
 * [Getting Started](../documentation/getting-started.md)
 * [Frequently Asked Questions](../documentation/faq.md)
 * [Command line reference](../documentation/command-line-ref.md)
 * [Configuration file reference](../documentation/configuration.md)
+
+**Development**
+
+* [Service Design Decisions](../documentation/service-design.md)
+* [Port Mapping Overview](../documentation/port-mapping.md)
 
