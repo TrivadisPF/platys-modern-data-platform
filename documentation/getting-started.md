@@ -168,5 +168,5 @@ At this point, you have seen the basics of how `platys` works, using the `mdp-st
 
 ## Where to go next
 
-* [Explore the full list of MDP commands](commands.md)
-* [MDP configuration file reference](configuration.md)
+* [Explore the full list of Platys commands](commands.md)
+* [Modern Data Platform Stack configuration file reference](configuration.md)
