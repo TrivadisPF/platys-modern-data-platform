@@ -83,8 +83,6 @@ def gen(config_filename, config_url, del_empty_lines, structure, verbose):
         print(line.strip())
 
 
-
-
 #
 # Init
 #
@@ -131,11 +129,25 @@ def init(platform_name, stack_name, stack_version, config_filename, seed_config,
                 print(line.rstrip())
 
 
-@cli.command()
+@cli.command("stacks")
 def list_predef_stacks():
     """Lists the predefined stacks available for the init"""
 
-    click.echo('Will run the stack, once it is generated')
+    client = get_docker()
+    # make this dynamic from an argument
+    container = client.containers.run(image='trivadis/modern-data-platform-stack-generator:1.2.0', auto_remove=False)
+    container.start()
+
+    log = container.exec_run('ls /opt/mdps-gen/seed-stacks',
+                             stderr=True,
+                             stdout=True)
+
+    for line in log:
+        print(line, end='')
+
+    container.stop()
+    print(container.status)
+    container.remove()
 
 
 @cli.command()
@@ -173,7 +185,13 @@ def stop():
     click.echo('Stops the stack, once it is generated')
 
 
+def get_docker():
+    return docker.from_env()
+
+
 if __name__ == '__main__':
     cli()
 
 cli.add_command(init)
+cli.add_command(gen)
+cli.add_command(list_predef_stacks)
