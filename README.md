@@ -4,7 +4,7 @@
 [![Code Climate](https://codeclimate.com/github/codeclimate/codeclimate/badges/gpa.svg)](https://codeclimate.com/github/TrivadisPF/modern-data-platform-stack)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com)
 
-# platys - toolset for provisioning Modern Platforms 
+# platys - A toolset for provisioning Modern Platforms 
 Copyright (c) 2019-2020 Trivadis
 
 ## What is `platys`?
