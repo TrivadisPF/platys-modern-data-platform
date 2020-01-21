@@ -944,8 +944,9 @@ services:
     ports:
       - "28065:9200"
     restart: {{container_restart_policy}}
+{% endif %}   {#  ATLAS_enable #}
 
- {% if AMUNDSEN_enable  | default(false) %}
+{% if AMUNDSEN_enable  | default(false) %}
   #  ================================== Amundsen ========================================== #
   amundsenfrontend:
     image: amundsendev/amundsen-frontend:{{__AMUNDSEN_FRONTEND_version}}
@@ -972,13 +973,15 @@ services:
       com.mdps.service.restapi.url: "http://${PUBLIC_IP}:28004"
     ports:
       - 28004:5000
-    depends_on:
-      - atlas
     environment:
+  {%if (AMUNDSEN_edition | lower) == 'amundsen-metastore' | default(false) %}
+      - PROXY_ENDPOINT=amundsen-elasticsearch
+  {% else -%}   {#  AMUNDSEN_edition #}
       - CREDENTIALS_PROXY_USER=admin
       - CREDENTIALS_PROXY_PASSWORD=abc123!
       - PROXY_ENDPOINT=atlas:21000
       - PROXY_CLIENT=ATLAS
+  {% endif -%}   {#  AMUNDSEN_edition #}
     restart: {{container_restart_policy}}
 
   amundsenmetadata:
@@ -988,19 +991,53 @@ services:
     labels:
       com.mdps.service.restapi.name: "Amundsensearch REST API"
       com.mdps.service.restapi.url: "http://${PUBLIC_IP}:28005"
-    depends_on:
-      - atlas
     ports:
       - 28005:5000
     environment:
+  {%if (AMUNDSEN_edition | lower) == 'amundsen-metastore' | default(false) %}
+      - PROXY_HOST=bolt://amundsen-neo4j  
+  {% else -%}   {#  AMUNDSEN_edition #}
+      - PROXY_ENDPOINT=amundsen-elasticsearch
       - CREDENTIALS_PROXY_USER=admin
       - CREDENTIALS_PROXY_PASSWORD=abc123!
       - PROXY_HOST=atlas
       - PROXY_PORT=21000
       - PROXY_CLIENT=ATLAS
+  {% endif -%}   {#  AMUNDSEN_edition #}
     restart: {{container_restart_policy}}
-  {% endif %}   {#  AMUNDSEN_enable #}
-{% endif %}   {#  ATLAS_enable #}
+
+  {%if (AMUNDSEN_edition | lower) == 'amundsen-metastore' | default(false) %}
+  amundsen-neo4j:
+    image: neo4j:3.3.0
+    container_name: amundsen-neo4j
+    hostname: amundsen-neo4j
+    labels:
+      com.mdps.service.restapi.name: "Amundsensearch REST API"
+      com.mdps.service.restapi.url: "http://${PUBLIC_IP}:28005"
+    ulimits:
+      nofile:
+        soft: 40000
+        hard: 40000
+    ports:
+      - 7474:7474
+      - 7687:7687
+    environment:
+      - NEO4J_AUTH=neo4j/test
+    volumes:
+      - ./conf/amundsen/neo4j/conf:/conf
+    restart: {{container_restart_policy}}
+
+  amundsen-elasticsearch:
+    image: elasticsearch:6.7.0
+    container_name: amundsen-elasticsearch
+    hostname: amundsen-elasticsearch
+    ports:
+      - 9200:9200
+#   volumes:
+#     - ./container-volume/amundsen/es:/usr/share/elasticsearch/data
+    restart: {{container_restart_policy}}
+  {% endif %}   {#  AMUNDSEN_edition #}
+{% endif %}   {#  AMUNDSEN_enable #}
 
 {% if (HUE_enable) | default(false) %}
   #  ================================== Apache Hue ========================================== #
