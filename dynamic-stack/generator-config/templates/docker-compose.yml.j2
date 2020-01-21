@@ -121,6 +121,11 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
   {% set ZOOKEEPER_enable = true -%}
 {% endif -%}   {# PLATFORM_ARM_enable #}
 
+{% if HUE_enable -%}
+# enforce some dependencies
+  {% set SOLR_enable = true -%}
+{% endif -%}   {# PLATFORM_ARM_enable #}
+
 {% if (__hw_arch | upper) == 'ARM' -%}
 # if we use stack type ARM, then disable some containers which do not support ARM
   {% set ZOOKEEPER_enable = false -%}
@@ -997,7 +1002,7 @@ services:
   {% endif %}   {#  AMUNDSEN_enable #}
 {% endif %}   {#  ATLAS_enable #}
 
-{% if (HUE_enable and SOLR_enable)  | default(false) %}
+{% if (HUE_enable) | default(false) %}
   #  ================================== Apache Hue ========================================== #
   hue:
     image: gethue/hue:{{__HUE_version}}
@@ -1023,7 +1028,7 @@ services:
       POSTGRES_USER: hue
     restart: {{container_restart_policy}}
 
-{% endif %}   {#  HUE_enable and SOLR_enable #}
+{% endif %}   {#  HUE_enable #}
 
 {%if STREAMSETS_enable | default(false) %}
   #  ================================== StreamSets DataCollector ========================================== #}
