@@ -7,15 +7,15 @@ This page provides the usage information for the `platys` Command.
 You can also see this information by running `platys --help` from the command line.
 
 ```
-Usage: platys [OPTIONS] COMMAND [ARGS]... 
+Usage: platys.py [OPTIONS] COMMAND [ARGS]...
 
 Options:
-  --version       Show the version and exit.
-  -h, --help      Show this message and exit.
+  --version   Show the version and exit.
+  -h, --help  Show this message and exit.
 
 Commands:
-  init            Initializes a new docker-based Data Platform Stack.
-  gen             Generates a docker-based Data Platform Stack.  
+  gen            Generates all the needed artefacts for the docker-based...
+  init           Initializes the current directory to be the root for the...
 ```
    
 You can use platys binary, `platys [OPTIONS] [COMMAND] [ARGS...]`, to generate and manage docker compose files. 
