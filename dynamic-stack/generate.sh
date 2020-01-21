@@ -5,7 +5,7 @@ if [ ${CONFIG_URL} ]
 then
    wget ${CONFIG_URL} -O /tmp/config.yml
 else
-   cp /opt/mdps-gen/config.yml /tmp/config.yml
+   cp /opt/mdps-gen/conf/config.yml /tmp/config.yml
 fi
 
 cp -r /opt/mdps-gen/static-data/* /opt/mdps-gen/destination

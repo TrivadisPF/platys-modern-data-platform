@@ -183,7 +183,7 @@ then
 	echo "Running container with this docker cmd:" docker run --rm -v "${PWD}":/opt/mdps-gen/stack-config -v "${destination}":/opt/mdps-gen/destination -e CONFIG_URL="${CONFIG_URL}" -e VERBOSE="${VERBOSE}" --user $(id -u):$(id -g) "${stack_name:-trivadis/modern-data-platform-stack-generator}":"${stack_version:-LATEST}"
    fi
 
-   docker run --rm -v "${PWD}":/opt/mdps-gen/stack-config -v "${destination}":/opt/mdps-gen/destination -e CONFIG_URL="${CONFIG_URL}" -e VERBOSE="${VERBOSE}" --user $(id -u):$(id -g) "${stack_name:-trivadis/modern-data-platform-stack-generator}":"${stack_version:-LATEST}"
+   docker run --rm -v "${PWD}":/opt/mdps-gen/conf -v "${destination}":/opt/mdps-gen/destination -e CONFIG_URL="${CONFIG_URL}" -e VERBOSE="${VERBOSE}" --user $(id -u):$(id -g) "${stack_name:-trivadis/modern-data-platform-stack-generator}":"${stack_version:-LATEST}"
 
    echo "Modern Data Platform Stack generated successfully to ${destination}"
 
