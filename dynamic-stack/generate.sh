@@ -14,7 +14,7 @@ if [ ${VERBOSE:-0} -eq 1 ]
 then
    echo "======================================================================"
    echo "Generating using the following custom stack-config.yml:"
-   cat /tmp/stack-config.yml
+   cat /tmp/config.yml
    echo "======================================================================"
 fi
 
