@@ -1,4 +1,6 @@
 import os
+import re
+
 import click
 import docker
 import tempfile
@@ -145,8 +147,15 @@ def list_predef_stacks():
                              stderr=True,
                              stdout=True)
 
+    # collect the seed stacks present in the 'seed-stacks' folder
+    # please note that for it to be considered stacks should be uppercase characters as well as _ or -
+    stacks = []
     for line in log:
-        print(line, end='')
+        stack = re.search("([A-Z0-9_-]+).yml", str(line))
+        if stack is not None:
+            stacks.append(stack.group(1))
+
+    print(*stacks)
 
     container.stop()
     print(container.status)
