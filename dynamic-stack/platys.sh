@@ -205,19 +205,9 @@ then
       # (the header with stack_name and stack_version could already be in the file and does not have to be added)
 
       docker create --name cont1 "${STACK_NAME:-trivadis/modern-data-platform-stack-generator}":"${STACK_VERSION:-LATEST}"
-      docker cp cont1:/opt/mdps-gen/vars/default-values.yml tmp-${stack_file}
+      docker cp cont1:/opt/mdps-gen/vars/config.yml ${stack_file}
       docker rm cont1
  
-      echo "      # =============== Do to remove ==========================" >> ${stack_file}
-      echo "      stack_name: ${STACK_NAME}" >> ${stack_file}
-      echo "      stack_version: ${STACK_VERSION}" >> ${stack_file}
-      echo "      platform_name: ${PLATFORM_NAME}" >> ${stack_file}
-      echo "      hw_arch: ${HW_ARCH:-x86-64}" >> ${stack_file}
-      echo "      # =============== Do to remove ==========================" >> ${stack_file}
-      echo "" >> ${stack_file}
-      cat tmp-${stack_file} >> ${stack_file}
-      rm tmp-${stack_file}
-
       # in this PoC the data is also added to a INI formatted file, as I was not able to read the YML in the bash script with minimal invest
       echo -e "platform_name=${PLATFORM_NAME}\nstack_name=${STACK_NAME}\nstack_version=${STACK_VERSION}\n" >> ${context_file}
       
