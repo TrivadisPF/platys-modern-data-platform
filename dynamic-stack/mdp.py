@@ -124,7 +124,7 @@ def init(platform_name, stack_name, stack_version, config_filename, seed_config,
         tar_file.extractall(path="./")
         tar_file.close()
 
-        with open('init_banner.txt', 'r') as f:
+        with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'init_banner.txt'), 'r') as f:
             for line in f:
                 print(line.rstrip())
 
