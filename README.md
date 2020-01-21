@@ -17,7 +17,7 @@ First only a fixed set of services were supported using one `docker-compose.yml`
 
 A _Modern Data Platform_ is always generated based on a given _Platform Stack_. A platform stack defines the set of available and usable services. A platform stack has a name and a version. Currently only one Platform Stack is avilable:
 
-* `madp-stack` - a Platform Stack for supporting a Modern (Analytical) Data Platforms
+* `modern-data-platform` - a Platform Stack for supporting a Modern (Analytical) Data Platforms
 
 In the future other platform stacks might be added.
 
