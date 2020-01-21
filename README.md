@@ -4,7 +4,7 @@
 [![Code Climate](https://codeclimate.com/github/codeclimate/codeclimate/badges/gpa.svg)](https://codeclimate.com/github/TrivadisPF/modern-data-platform-stack)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com)
 
-# platys - A toolset for provisioning Modern Platforms 
+# platys - Trivadis Platform in a Box
 Copyright (c) 2019-2020 Trivadis
 
 ## What is `platys`?
@@ -17,7 +17,7 @@ First only a fixed set of services were supported using one `docker-compose.yml`
 
 A _Modern Data Platform_ is always generated based on a given _Platform Stack_. A platform stack defines the set of available and usable services. A platform stack has a name and a version. Currently only one Platform Stack is avilable:
 
-* `madp-stack` - a Platform Stack for supporting a Modern (Analytical) Data Platforms
+* `modern-data-platform` - a Platform Stack for supporting a Modern (Analytical) Data Platforms
 
 In the future other platform stacks might be added.
 
