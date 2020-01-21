@@ -44,7 +44,7 @@ def gen(config_filename, config_url, del_empty_lines, structure, verbose):
         platys_config = config_yml.get('platys')
 
         if platys_config is None:
-            logging.error(f'Unable to parse config file please ensure the yml file has the proper configuration under the mdp tag')
+            logging.error(f'Unable to parse config file please ensure the yml file has the proper configuration under the platys tag')
             sys.exit()
 
         if platys_config["platform-name"] is None or platys_config["stack-image-name"] is None or platys_config["stack-image-version"] is None:
@@ -76,9 +76,12 @@ def gen(config_filename, config_url, del_empty_lines, structure, verbose):
                                              str(Path().absolute()) + '/config.yml:/tmp/config.yml',
                                              str(destination) + ':/opt/mdps-gen/destination'
                                          ],
-                                         environment=[f"VERBOSE={int(verbose == True)}"]
+                                         environment=[
+                                         	f"CONFIG_URL={config_url}",
+                                         	f"VERBOSE={int(verbose == True)}",
+                                         ]
                                          )
-
+                                         
     for line in dp_container.logs(stream=True):
         print(line.strip())
 
