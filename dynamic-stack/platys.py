@@ -32,7 +32,7 @@ def cli():
               )
 @click.option('-v', '--verbose', is_flag=True, default=False, show_default=True, help='Verbose logging')
 def gen(config_filename, config_url, del_empty_lines, structure, verbose):
-    """Generates a docker-based Modern Data Platform Stack.
+    """Generates all the needed artefacts for the docker-based modern (data) platform.
     
     The stack configuration can either be passed as a local file (using the --config-filename option or using the default name 'config.yml') or as an URL
     referencing a file on the Internet (using the --config-url option).
@@ -87,15 +87,15 @@ def gen(config_filename, config_url, del_empty_lines, structure, verbose):
 # Init
 #
 @cli.command()
-@click.option('-n', '--platform-name', 'platform_name', type=click.STRING, required=True, help='the name of the platform stack to generate.')
-@click.option('-sn', '--stack-name', 'stack_name', default='trivadis/modern-data-platform-stack-generator', type=click.STRING, show_default=True, help='the modern data platform stack image')
-@click.option('-sv', '--stack-version', 'stack_version', default='latest', type=click.STRING, show_default=True, help='the modern data platform stack image version to use')
+@click.option('-n', '--platform-name', 'platform_name', type=click.STRING, required=True, help='the name of the platform to generate.')
+@click.option('-sn', '--stack-name', 'stack_name', default='trivadis/modern-data-platform-stack-generator', type=click.STRING, show_default=True, help='the platform stack image')
+@click.option('-sv', '--stack-version', 'stack_version', default='latest', type=click.STRING, show_default=True, help='the platform stack image version to use')
 @click.option('-cf', '--config-filename', 'config_filename', default='config.yml', type=click.STRING, show_default=True, help='the name of the local config file.')
 @click.option('-sc', '--seed-config', 'seed_config', type=click.STRING, help='the name of a predefined stack to base this new platform on')
 @click.option('-f', '--force', is_flag=True, help='If specified, this command will overwrite any existing config file')
 @click.option('-hw', '--hw-arch', 'hw_arch', type=click.Choice(['ARM', 'ARM64', 'x86-64']), default='x86-64', help='Hardware architecture for the platform')
 def init(platform_name, stack_name, stack_version, config_filename, seed_config, force, hw_arch):
-    """Initializes the current directory to be a Modern Data Platform Stack environment by creating an initial
+    """Initializes the current directory to be the root for the Modern (Data) Platform by creating an initial
     config file, if one does not already exists.
     
     The stack to use as well as its version need to be passed by the --stack-image-name and --stack-image-version options.
@@ -135,7 +135,7 @@ def list_predef_stacks():
 
     client = get_docker()
     # make this dynamic from an argument
-    container = client.containers.run(image='trivadis/modern-data-platform-stack-generator:1.2.0', auto_remove=False)
+    container = client.containers.run(image='trivadis/modern-data-platform-stack-generator:1.2.0-preview2', auto_remove=False)
     container.start()
 
     log = container.exec_run('ls /opt/mdps-gen/seed-stacks',
