@@ -4,6 +4,7 @@
 if [ ${CONFIG_URL} ]
 then
    wget ${CONFIG_URL} -O /tmp/config.yml
+# we can remove the else, once the bash shell script is no longer needed
 else
    cp /opt/mdps-gen/conf/config.yml /tmp/config.yml
 fi
