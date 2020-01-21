@@ -140,7 +140,7 @@ def list_predef_stacks():
 
     client = get_docker()
     # make this dynamic from an argument
-    container = client.containers.run(image='trivadis/modern-data-platform-stack-generator:1.2.0-preview2', auto_remove=False)
+    container = client.containers.create(image='trivadis/modern-data-platform-stack-generator:1.2.0-preview2', auto_remove=False)
     container.start()
 
     log = container.exec_run('ls /opt/mdps-gen/seed-stacks',
@@ -158,7 +158,6 @@ def list_predef_stacks():
     print(*stacks)
 
     container.stop()
-    print(container.status)
     container.remove()
 
 
