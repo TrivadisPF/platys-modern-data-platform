@@ -41,13 +41,13 @@ def gen(config_filename, config_url, del_empty_lines, structure, verbose):
 
     with open(rf'{config_filename}') as file:
         config_yml = yaml.load(file, Loader=yaml.FullLoader)
-        mdp_config = config_yml.get('mdp')
+        platys_config = config_yml.get('platys')
 
-        if mdp_config is None:
+        if platys_config is None:
             logging.error(f'Unable to parse config file please ensure the yml file has the proper configuration under the mdp tag')
             sys.exit()
 
-        if mdp_config["platform-name"] is None or mdp_config["stack-image-name"] is None or mdp_config["stack-image-version"] is None:
+        if platys_config["platform-name"] is None or platys_config["stack-image-name"] is None or platys_config["stack-image-version"] is None:
             logging.error(f'The config file is not properly formatted or missing information '
                           f'please ensure [platform-name], [stack-image-name] and [stack-image-version] are properly configured')
             sys.exit()
@@ -55,22 +55,22 @@ def gen(config_filename, config_url, del_empty_lines, structure, verbose):
     if verbose:
         print(f'using configuration file {config_filename}')
         print(f'with values '
-              f' platform-name: {mdp_config["platform-name"]}'
-              f' stack-image-name: {mdp_config["stack-image-name"]}'
-              f' stack-image-version: {mdp_config["stack-image-version"]}'
+              f' platform-name: {platys_config["platform-name"]}'
+              f' stack-image-name: {platys_config["stack-image-name"]}'
+              f' stack-image-version: {platys_config["stack-image-version"]}'
               )
 
     destination = Path().absolute()
 
     if structure == "subfolder":
         # create the folder if not exists
-        destination = destination / mdp_config['platform-name']
+        destination = destination / platys_config['platform-name']
         Path(destination).mkdir(parents=True, exist_ok=True)
 
     print(f'generating stack on destination [{destination}]')
 
     client = docker.from_env()
-    dp_container = client.containers.run(image=f'{mdp_config["stack-image-name"]}:{mdp_config["stack-image-version"]}',
+    dp_container = client.containers.run(image=f'{platys_config["stack-image-name"]}:{platys_config["stack-image-version"]}',
                                          auto_remove=True, detach=True,
                                          volumes=[
                                              str(Path().absolute()) + '/config.yml:/tmp/config.yml',
