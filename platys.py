@@ -160,7 +160,6 @@ def list_predef_stacks():
     container.stop()
     container.remove()
 
-
 @cli.command()
 def show_services():
     """Shows the services interfaces of the stack, web and/or apis"""
