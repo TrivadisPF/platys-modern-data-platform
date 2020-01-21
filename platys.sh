@@ -180,10 +180,10 @@ then
 
    if [ ${VERBOSE:-0} -eq 1 ] 
    then
-	echo "Running container with this docker cmd:" docker run --rm -v "${PWD}":/opt/mdps-gen/stack-config -v "${destination}":/opt/mdps-gen/destination -e CONFIG_URL="${CONFIG_URL}" -e VERBOSE="${VERBOSE}" --user $(id -u):$(id -g) "${stack_name:-trivadis/modern-data-platform-stack-generator}":"${stack_version:-LATEST}"
+	echo "Running container with this docker cmd:" docker run --rm -v "${PWD}":/opt/mdps-gen/stack-config -v "${destination}":/opt/mdps-gen/destination -e CONFIG_URL="${CONFIG_URL}" -e VERBOSE="${VERBOSE}" --user $(id -u):$(id -g) "${stack_name:-trivadis/platys-modern-data-platform}":"${stack_version:-1.2.0}"
    fi
 
-   docker run --rm -v "${PWD}":/opt/mdps-gen/conf -v "${destination}":/opt/mdps-gen/destination -e CONFIG_URL="${CONFIG_URL}" -e VERBOSE="${VERBOSE}" --user $(id -u):$(id -g) "${stack_name:-trivadis/modern-data-platform-stack-generator}":"${stack_version:-LATEST}"
+   docker run --rm -v "${PWD}":/opt/mdps-gen/conf -v "${destination}":/opt/mdps-gen/destination -e CONFIG_URL="${CONFIG_URL}" -e VERBOSE="${VERBOSE}" --user $(id -u):$(id -g) "${stack_name:-trivadis/platys-modern-data-platform}":"${stack_version:-1.2.0}"
 
    echo "Modern Data Platform Stack generated successfully to ${destination}"
 
@@ -204,7 +204,7 @@ then
       # in the python script, that should be copied out of the docker image (file default-values.yml)
       # (the header with stack_name and stack_version could already be in the file and does not have to be added)
 
-      docker create --name cont1 "${STACK_NAME:-trivadis/modern-data-platform-stack-generator}":"${STACK_VERSION:-LATEST}"
+      docker create --name cont1 "${STACK_NAME:-trivadis/platys-modern-data-platform}":"${STACK_VERSION:-1.2.0}"
       docker cp cont1:/opt/mdps-gen/vars/config.yml ${stack_file}
       docker rm cont1
  
