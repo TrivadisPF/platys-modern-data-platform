@@ -856,7 +856,7 @@ services:
       HIVE_SITE_CONF_hive_exec_post_hooks: "org.apache.atlas.hive.hook.HiveHook"
       HIVE_AUX_JARS_PATH: "/opt/atlas/hook/hive"
     volumes:
-      - ./conf/atlas/atlas-application.properties:/opt/atlas/conf/atlas-application.properties
+      - ./conf/atlas/atlas-application.properties:/opt/hive/conf/atlas-application.properties
       - ./plugins/hive-server/apache-atlas-hive-hook/hook:/opt/atlas/hook
   {% endif -%}   {#  SPARK_HISTORY_enable #}
     restart: {{container_restart_policy}}
@@ -894,8 +894,13 @@ services:
     ports:
       - 21000:21000     # don't change the port without also changing in the properties file as well as in the ATLAS_PROVISION_EXAMPLES script
     environment:
+      - NONE="not_used_just_for_syntax"
+  {% if ATLAS_provision_atlas_sample_date  | default(false) %}
       - ATLAS_PROVISION_EXAMPLES=true
+  {% endif %}
+  {% if ATLAS_provision_amundsen_sample_date  | default(false) %}
       - ATLAS_KICKSTART_AMUNDSEN=true
+  {% endif %}
     volumes:
       - ./conf/atlas/atlas-application.properties:/opt/atlas/conf/atlas-application.properties
       - ./conf/atlas/users-credentials.properties:/opt/atlas/conf/users-credentials.properties
