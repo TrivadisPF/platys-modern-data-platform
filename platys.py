@@ -93,7 +93,7 @@ def gen(config_filename, config_url, del_empty_lines, structure, verbose):
 #
 @cli.command()
 @click.option('-n', '--platform-name', 'platform_name', type=click.STRING, required=True, help='the name of the platform to generate.')
-@click.option('-sn', '--stack-name', 'stack_name', default='trivadis/modern-data-platform-stack-generator', type=click.STRING, show_default=True, help='the platform stack image')
+@click.option('-sn', '--stack-name', 'stack_name', default='trivadis/platys-modern-data-platform', type=click.STRING, show_default=True, help='the platform stack image')
 @click.option('-sv', '--stack-version', 'stack_version', default='latest', type=click.STRING, show_default=True, help='the platform stack image version to use')
 @click.option('-cf', '--config-filename', 'config_filename', default='config.yml', type=click.STRING, show_default=True, help='the name of the local config file.')
 @click.option('-sc', '--seed-config', 'seed_config', type=click.STRING, help='the name of a predefined stack to base this new platform on')
@@ -140,7 +140,7 @@ def list_predef_stacks():
 
     client = get_docker()
     # make this dynamic from an argument
-    container = client.containers.create(image='trivadis/modern-data-platform-stack-generator:1.2.0-preview2', auto_remove=False)
+    container = client.containers.create(image='trivadis/platys-modern-data-platform:1.2.0g', auto_remove=False)
     container.start()
 
     log = container.exec_run('ls /opt/mdps-gen/seed-stacks',
