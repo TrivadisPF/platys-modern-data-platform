@@ -25,6 +25,7 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
 {% set __LIVY_version = LIVY_version | default('latest') -%}
 
 {% set __HIVE_version = HIVE_version | default('latest') -%}
+{% set __HIVE_version_suffix = HIVE_version_suffix | default('postgresql-metastore-s3') -%}
 
 {% set __ATLAS_version = ATLAS_version | default('latest') -%}
 
@@ -838,7 +839,7 @@ services:
 {% if HIVE_enable | default(false) %}
   #  ================================== Apache Hive ========================================== #
   hive-server:
-    image: johannestang/hive:{{__HIVE_version}}
+    image: trivadis/apache-hive:{{__HIVE_version}}-{{__HIVE_version_suffix}}
     container_name: hive-server
     hostname: hive-server
     ports:
@@ -854,7 +855,7 @@ services:
     restart: {{container_restart_policy}}
 
   hive-metastore:
-    image: johannestang/hive:{{__HIVE_version}}
+    image: trivadis/apache-hive:{{__HIVE_version}}-{{__HIVE_version_suffix}}
     container_name: hive-metastore
     hostname: hive-metastore
     ports:
@@ -867,9 +868,9 @@ services:
     restart: {{container_restart_policy}}
 
   hive-metastore-db:
+    image: honomoa/hive-metastore-postgresql:{{__HIVE_version}}
     container_name: hive-metastore-db
     hostname: hive-metastore-db
-    image: bde2020/hive-metastore-postgresql:2.3.0
     restart: {{container_restart_policy}}
 {% endif %}   {#  HIVE_enable #}
 
@@ -995,7 +996,7 @@ services:
       - 28005:5000
     environment:
   {%if (AMUNDSEN_edition | lower) == 'amundsen-metastore' | default(false) %}
-      - PROXY_HOST=bolt://amundsen-neo4j  
+      - PROXY_HOST=bolt://amundsen-neo4j
   {% else -%}   {#  AMUNDSEN_edition #}
       - PROXY_ENDPOINT=amundsen-elasticsearch
       - CREDENTIALS_PROXY_USER=admin
