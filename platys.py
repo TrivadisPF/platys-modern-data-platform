@@ -79,11 +79,11 @@ def gen(config_filename, config_url, del_empty_lines, structure, verbose):
                                              str(destination) + ':/opt/mdps-gen/destination'
                                          ],
                                          environment=[
-                                         	f"CONFIG_URL={config_url}",
-                                         	f"VERBOSE={int(verbose == True)}",
+                                             f"CONFIG_URL={config_url}",
+                                             f"VERBOSE={int(verbose == True)}",
                                          ]
                                          )
-                                         
+
     for line in dp_container.logs(stream=True):
         print(line.strip())
 
@@ -159,6 +159,7 @@ def list_predef_stacks():
 
     container.stop()
     container.remove()
+
 
 @cli.command()
 def show_services():
