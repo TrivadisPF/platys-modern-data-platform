@@ -34,7 +34,7 @@ def cli():
               )
 @click.option('-v', '--verbose', is_flag=True, default=False, show_default=True, help='Verbose logging')
 def gen(config_filename, config_url, del_empty_lines, structure, verbose):
-    """Generates all the needed artefacts for the docker-based modern (data) platform.
+    """Generates all the needed artifacts for the docker-based modern (data) platform.
     
     The stack configuration can either be passed as a local file (using the --config-filename option or using the default name 'config.yml') or as an URL
     referencing a file on the Internet (using the --config-url option).

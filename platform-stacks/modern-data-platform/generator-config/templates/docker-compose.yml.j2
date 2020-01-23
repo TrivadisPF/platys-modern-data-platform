@@ -1977,10 +1977,17 @@ services:
 
 
 {% if PYTHON_enable | default(false) %}
-  #  ================================== cAdvisor ========================================== #}
-  cadvisor:
+  #  ================================== python ========================================== #}
+  python:
     image: python:{{__PYTHON_VERSION}}
     container_name: python
     hostname: python
+    {% if PYTHON_script_folder is defined and PYTHON_script_folder|length %}
+    volumes:
+      - {{PYTHON_script_folder}}:/tmp:ro
+    {% endif %}
+    {% if PYTHON_script is defined and PYTHON_script|length %}
+    command: ['python3', '/tmp/{{PYTHON_script}}']
+    {% endif %}
     restart: {{container_restart_policy}}
-{% endif %}   {# CADVISOR_enable #}
+{% endif %}   {# PYTHON_enable #}
