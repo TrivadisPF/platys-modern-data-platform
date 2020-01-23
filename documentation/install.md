@@ -33,7 +33,7 @@ Use the `--version` option to check that the generator has been installed succes
 
 ```
 $ platys --version
-A toolset for provisioning Modern Platforms - v2.0.0
+Trivadis Platform in a Box - v2.0.0
 ```
    
 ## Uninstallation
