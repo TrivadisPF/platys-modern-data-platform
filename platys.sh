@@ -1,6 +1,6 @@
 #!/bin/bash
 
-version="A toolset for provisioning Modern Platforms - v2.0.0"
+version="Trivadis Platform in a Box - v2.0.0"
 
 usage="
 Usage: $(basename "$0") [OPTIONS] COMMAND [ARGS]... 
@@ -29,7 +29,7 @@ Options:
   -n, --platform-name TEXT     the name of the platform stack to generate.
                                [required]
   -in, --stack-name TEXT       the modern data platform stack image  [default:
-                               trivadis/modern-data-platform-stack-generator]
+                               trivadis/platys-modern-data-platform]
   -iv, --stack-version TEXT    the modern data platform stack image version to
                                use  [default: latest]
   -sc, --seed-config TEXT      the name of a predefined stack to base this new

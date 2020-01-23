@@ -18,12 +18,12 @@ cd kafka-plaform-example
 
 Now let's initialize the current directory to use the Modern Data Analytics Platform Stack. 
 
-We specify the platform stack name `trivadis/mdp-stack` to use as well as the stack version `1.2.0` (the current version of this platform stack). 
+We specify the platform stack name `trivadis/platys-modern-data-platform` to use as well as the stack version `1.2.0` (the current version of this platform stack). 
 
 With the `-n` option we give the platform a meaningful name. 
 
 ```
-platys init -n kafka-platform -sn trivadis/mdp-stack -sv 1.2.0-preview
+platys init -n kafka-platform -sn trivadis/platys-modern-data-platform -sv 1.2.0
 ```
 
 This generates a `config.yml` file, if it does not exist already, with all the services which can be configured for the platform.
@@ -42,8 +42,8 @@ You can see the configuration options, available through this platform stack, si
 
 ```
       # =============== Do to remove ==========================
-      stack_name: trivadis/modern-data-platform-stack-generator 
-      stack_version: 1.2.0-preview 
+      stack_name: trivadis/platys-modern-data-platform
+      stack_version: 1.2.0
       platform_name: kafka-platform 
       hw_arch: x86-64 
       # =============== Do to remove ==========================

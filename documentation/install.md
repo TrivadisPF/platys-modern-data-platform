@@ -20,7 +20,7 @@ Follow the instructions below to install `platys` on a Mac or Linux systems. Run
 * Run this command to download the current stable release of the platys Stack Generator:
 
 ```
-sudo curl -L "https://github.com/TrivadisPF/modern-data-platform-stack/releases/download/2.0.0-preview/platys.sh" -o /usr/local/bin/platys
+sudo curl -L "https://github.com/TrivadisPF/platys/releases/download/2.0.0-preview2/platys.sh" -o /usr/local/bin/platys
 ```
 
 * Apply executable permissions to the binary:
@@ -33,7 +33,7 @@ Use the `--version` option to check that the generator has been installed succes
 
 ```
 $ platys --version
-Trivadis Docker-based Modern Data Platform Generator v2.0.0
+A toolset for provisioning Modern Platforms - v2.0.0
 ```
    
 ## Uninstallation
