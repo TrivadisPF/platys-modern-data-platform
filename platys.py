@@ -26,7 +26,7 @@ def cli():
 @cli.command()  # @cli, not @click!
 @click.option('-cf', '--config-filename', 'config_filename', default='config.yml', type=click.STRING, show_default=True, help='the name of the local config file.')
 @click.option('-cu', '--config-url', 'config_url', type=click.STRING, help='the URL to a remote config file')
-@click.option('--del-empty-lines/--no-del-emptylines', 'del_empty_lines', default=True, show_default=True, help='remove empty lines from the docker-compose.yml file.')
+@click.option('de', '--del-empty-lines', 'del_empty_lines', default=True, show_default=True, help='remove empty lines from the docker-compose.yml file.')
 @click.option('--structure', 'structure', type=click.Choice(['flat', 'subfolder']), default='subfolder',
               help='defines the where the stack will be generated '
                    'flat : as in same folder as script generate the stack into same folder as config.yml'
@@ -81,6 +81,7 @@ def gen(config_filename, config_url, del_empty_lines, structure, verbose):
                                          environment=[
                                              f"CONFIG_URL={config_url}",
                                              f"VERBOSE={int(verbose == True)}",
+                                             f"DEL_EMPTY_LINES={int(del_empty_lines == True)}",
                                          ]
                                          )
 
