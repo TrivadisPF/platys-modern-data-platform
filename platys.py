@@ -26,7 +26,7 @@ def cli():
 @cli.command()  # @cli, not @click!
 @click.option('-cf', '--config-filename', 'config_filename', default='config.yml', type=click.STRING, show_default=True, help='the name of the local config file.')
 @click.option('-cu', '--config-url', 'config_url', type=click.STRING, help='the URL to a remote config file')
-@click.option('de', '--del-empty-lines', 'del_empty_lines', default=True, show_default=True, help='remove empty lines from the docker-compose.yml file.')
+@click.option('-de', '--del-empty-lines', 'del_empty_lines', default=True, show_default=True, help='remove empty lines from the docker-compose.yml file.')
 @click.option('--structure', 'structure', type=click.Choice(['flat', 'subfolder']), default='subfolder',
               help='defines the where the stack will be generated '
                    'flat : as in same folder as script generate the stack into same folder as config.yml'
@@ -112,19 +112,7 @@ def init(platform_name, stack_name, stack_version, config_filename, seed_config,
     if not force and os.path.isfile('config.yml'):
         print("config.yml already exists if you want to override it use the [-f] option")
     else:
-        # init and start docker container
-        client = docker.from_env()
-        dp_container = client.containers.run(image=f'{stack_name}:{stack_version}', detach=True, auto_remove=True)
-
-        # copy default config file (with default values to the current folder
-        tar_config = tempfile.gettempdir() + '/config.tar'
-        f = open(tar_config, 'wb')
-        bits, stats = dp_container.get_archive('/opt/mdps-gen/vars/config.yml')
-
-        for chunk in bits:
-            f.write(chunk)
-        f.close()
-
+        tar_config = pull_config(stack_name, stack_version)
         # extract the config file from the tar in to the current folder
         tar_file = tarfile.open(tar_config)
         tar_file.extractall(path="./")
@@ -162,11 +150,25 @@ def list_predef_stacks():
     container.remove()
 
 
-@cli.command()
-def show_services():
+@cli.command("list_services")
+@click.option('-sn', '--stack-name', 'stack_name', default='trivadis/platys-modern-data-platform', type=click.STRING, show_default=True, help='the platform stack image')
+@click.option('-sv', '--stack-version', 'stack_version', default='latest', type=click.STRING, show_default=True, help='the platform stack image version to use')
+def list_services(stack_name, stack_version):
     """Shows the services interfaces of the stack, web and/or apis"""
 
-    click.echo('Show the service interfaces of the stack')
+    tar_config = pull_config(stack_name, stack_version)
+
+    # extract the config file from the tar in to the current folder
+    tar_file = tarfile.open(tar_config)
+    tar_file.extractall(path=tempfile.gettempdir())
+    tar_file.close()
+
+    with open(rf'{tempfile.gettempdir()}/config.yml') as file:
+        config_yml = yaml.load(file, Loader=yaml.FullLoader)
+        for c in config_yml:
+            service = re.search("([A-Z0-9_-]+)_enable", str(c)) # if variable follows regex it's considered a service and will be printed
+            if service is not None:
+                print(service.group(1))
 
 
 # ----------------------------------------------
@@ -197,6 +199,23 @@ def stop():
     click.echo('Stops the stack, once it is generated')
 
 
+def pull_config(stack_name, stack_version):
+    # init and start docker container
+    client = docker.from_env()
+    dp_container = client.containers.run(image=f'{stack_name}:{stack_version}', detach=True, auto_remove=True)
+
+    # copy default config file (with default values to the current folder
+    tar_config = tempfile.gettempdir() + '/config.tar'
+    f = open(tar_config, 'wb')
+    bits, stats = dp_container.get_archive('/opt/mdps-gen/vars/config.yml')
+
+    for chunk in bits:
+        f.write(chunk)
+    f.close()
+
+    return tar_config
+
+
 def get_docker():
     return docker.from_env()
 
@@ -207,3 +226,4 @@ if __name__ == '__main__':
 cli.add_command(init)
 cli.add_command(gen)
 cli.add_command(list_predef_stacks)
+cli.add_command(list_services)
