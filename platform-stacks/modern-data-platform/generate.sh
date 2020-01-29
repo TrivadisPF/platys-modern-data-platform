@@ -22,5 +22,8 @@ fi
 # we asume that the output volume is mapped to /opt/mdps-gen/destination
 docker-compose-templer -v -f /opt/mdps-gen/stack-config.yml
 
-# Remove all empty lines
-sed -i '/^[[:space:]]*$/d' "/opt/mdps-gen/destination/docker-compose.yml"
+if [ ${DEL_EMPTY_LINES:-0} -eq 1 ]
+then
+  # Remove all empty lines
+  sed -i '/^[[:space:]]*$/d' "/opt/mdps-gen/destination/docker-compose.yml"
+fi
