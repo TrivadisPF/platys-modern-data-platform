@@ -31,6 +31,8 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
 
 {% set __CASSANDRA_version = CASSANDRA_version | default('latest') -%}
 
+{% set __DATASTAX_version = DATASTAX_version | default('latest') -%}
+
 {% set __ELASTICSEARCH_version = ELASTICSEARCH_version | default('latest') -%}
 {% set __DEJAVU_version = DEJAVU_version | default('latest') -%}
 {% set __CEREBRO_version = CEREBRO_version | default('latest') -%}
@@ -1346,11 +1348,68 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {#  CASSANDRA_enable #}
 
+{% if DATASTAX_enable | default(false) %}
+  #  ================================== DataStax Enterprise (DSE) ========================================== #}
+  {% for num in range(DATASTAX_nodes| default(1) ) %}
+    {% set external_port = 9042 + loop.index - 1 %}
+
+  dse-{{loop.index}}: # DataStax Enterprise Database
+    image: datastax/dse-server:{{__DATASTAX_version}}
+    hostname: dse-{{loop.index}}
+    container_name: dse-{{loop.index}}
+    command: [ -s -k ] # Run with Search and Spark capabilities enabled
+  {% if loop.index == 1 %}
+    ports:
+      - "{{external_port}}:9042" # Exposes DSE port
+  {% endif %}
+    environment:
+      DS_LICENSE: accept # Accept licence on start
+      SPARK_SCALA_VERSION: "2.11"
+      OPSCENTER_IP: dse-opscenter      
+  {% if loop.index > 1 %}
+      SEEDS: "dse-1"
+  {% endif %}
+    volumes:
+#      - "./dse.yaml:/opt/dse/resources/dse/conf/dse.yaml"
+      - "./data-transfer:/data-transfer"
+    cap_add:
+      - IPC_LOCK # Allow DSE to lock memory with mlock
+    ulimits:
+      memlock: -1
+    restart: {{container_restart_policy}}
+  {% endfor %}
+
+  dse-studio:  # Datastax Studio provides convenient web interface to work directly with the Apache Cassandra or DataStax Enterprise
+    image: datastax/dse-studio:6.7.0
+    container_name: dse-studio
+    hostname: dse-studio
+    labels:
+      com.mdps.service.webui.name: "DataStax Studio Web UI"
+      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28170"
+    ports:
+      - "28170:9091" # Exposes port to be available externally
+    environment:
+      DS_LICENSE: accept
+    restart: {{container_restart_policy}}
+
+  dse-opscenter:
+    image: "datastax/dse-opscenter"
+    container_name: dse-opscenter
+    hostname: dse-opscenter
+    ports:
+      - 8888:8888
+    environment:
+      - DS_LICENSE=accept
+    restart: {{container_restart_policy}}
+
+{% endif %}   {#  DATASTAX_enable #}
+
 {% if MONGO_enable | default(false) %}
   #  ================================== MongoDB ========================================== #}
   mongo:
     image: mongo:{{__MONGO_version}}
     container_name: mongo
+    hostname: mongo
     ports:
       - 27017:27017
     environment:
@@ -1526,6 +1585,7 @@ services:
     {% if INFLUXDB_volume_map_data %}
       - "./container-volume/influxdata/influxdb:/var/lib/influxdb"
     {% endif %}
+      - ./data-transfer:/data-transfer
     restart: {{container_restart_policy}}
 
   influxdb-ui:
@@ -1598,6 +1658,7 @@ services:
       HOSTNAME: telegraf
     volumes:
       - ./conf/influxdata/telegraf/telegraf.conf:/etc/telegraf/telegraf.conf
+      - ./data-transfer:/data-transfer
       # Mount for Docker API access
       - /var/run/docker.sock:/var/run/docker.sock
     restart: {{container_restart_policy}}
