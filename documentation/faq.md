@@ -42,7 +42,7 @@ Add this service to the `docker-compose.override.yml` file.
  
 ## How can I provision StreamSets Pipelines automatically?
 
-Use the follwoing service block for provisioning StreamSets Pipelines automatically as part of the stack: 
+Use the following service block for provisioning StreamSets Pipelines automatically as part of the stack: 
 
 ``` 
   streamsets-setup:
@@ -72,7 +72,7 @@ Add this service to the `docker-compose.override.yml` file.
 
 ## How can I provision Kafka Connect Connector instances automatically?
 
-Use the follwoing service block for provisioning Kafka Connect Connector instances automatically as part of the stack: 
+Use the following service block for provisioning Kafka Connect Connector instances automatically as part of the stack: 
 
 ``` 
   connect:
@@ -132,7 +132,7 @@ Add this service to the `docker-compose.override.yml` file.
 
 ## How can I provision Kafka Connect Connector instances automatically?
 
-Use the follwoing service block for provisioning Kafka Connect Connector instances automatically as part of the stack: 
+Use the following service block for provisioning Kafka Connect Connector instances automatically as part of the stack: 
 
 ```
   schema-registry-setup:
@@ -165,5 +165,4 @@ Add this service to the `docker-compose.override.yml` file.
 ## `platys` documentation
 
 * [Getting Started](getting-started.md)
-* [Explore the full list of Platys commands](commands.md)
-* [Data Platform Stack configuration file reference](configuration.md)
+* [Explore the full list of Platys commands](overview-platys-command.md)
