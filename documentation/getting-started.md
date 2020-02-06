@@ -84,7 +84,7 @@ For enabling Kafka and Zookeeper, all we have to do is set the `ZOOKEEPER_enable
 
 You only have to explicitly enable what you need, as each service is disabled by default. Other settings have meaningful defaults as well. So you can also remove the services you don't need. 
 
-All configuration settings for the `platys-modern-data-platform` platform stack are documented [here](./../platform-stack/modern-data-platform/documentation/Configuration.md).
+All configuration settings for the `platys-modern-data-platform` platform stack are documented [here](./../platform-stacks/modern-data-platform/documentation/Configuration.md).
 
 
 ## Step 3: Generate the platform
@@ -171,4 +171,4 @@ At this point, you have seen the basics of how `platys` works, using the `mdp-st
 ## Where to go next
 
 * [Explore the full list of Platys commands](overview-platys-command.md)
-* [Modern Data Platform Stack configuration file reference](../platform-stack/modern-data-platform/documentation/configuration.md)
+* [Modern Data Platform Stack configuration file reference](../platform-stacks/modern-data-platform/documentation/configuration.md)
