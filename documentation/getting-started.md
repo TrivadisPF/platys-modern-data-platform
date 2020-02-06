@@ -130,8 +130,8 @@ You should now find fully configured `docker-compose.yml` file (according to the
 
 Now your MDP Stack is ready to be started. Before doing that, you have to create some environment variables, depending on the services you use. In minimum you should create
 
-* `DOCKER\_HOST\_IP` - the IP address of the network interface of the Docker Host
-* `PUBLIC\_IP` - the IP address of the public network interface of the Docker Host (different to `DOCKER\_HOST\_IP` if in a public cloud environment
+* `DOCKER_HOST_IP` - the IP address of the network interface of the Docker Host
+* `PUBLIC_IP` - the IP address of the public network interface of the Docker Host (different to `DOCKER_HOST_IP` if in a public cloud environment
 
 You can set these environment variables persistently on machine (`/etc/environment`) or user (`~/.pam_environment` or `~/.profile`) level. Another option is to use the `.env` file inside the `docker` folder. All environment variables set in there are used when docker compose is started. 
 
