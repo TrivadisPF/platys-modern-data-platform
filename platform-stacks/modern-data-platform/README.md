@@ -15,17 +15,17 @@ and many others.
 
 The following services are provisioned as part of the Modern Data Platform: 
 
-![Alt Image Text](./images/modern-data-platform-overview.png "Modern Data Platform Overview")
+![Alt Image Text](./documentation/images/modern-data-platform-overview.png "Modern Data Platform Overview")
 
 For new services to be added, please either create an [GitHub issue](https://github.com/TrivadisPF/modern-data-analytics-stack/issues/new) or create a Pull Request.
 
 ## Changes 
-See [What's new?](../documentation/changes.md) for a detailed list of changes.
+See [What's new?](./documentation/changes.md) for a detailed list of changes.
 
 ## Documentation
 
-  * [Configuration](../documentation/configuration.md)
-  * [Port Mapping](../documentation/port-mapping.md)
+  * [Configuration](./documentation/configuration.md)
+  * [Port Mapping](./documentation/port-mapping.md)
 
 
 
