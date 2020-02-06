@@ -41,8 +41,8 @@ The generated platform can be provisioned either locally or in the cloud. See [P
 * [Getting Started](./documentation/getting-started.md)
 * [Frequently Asked Questions](./documentation/faq.md)
 * [Command line reference](./documentation/command-line-ref.md)
-* [Configuration file reference](./documentation/configuration.md)
 * [Glossary of Terms](./documentation/glossary.md)
+* [Available Platform Stacks](./platform-stacks)
 
 **Development**
 
