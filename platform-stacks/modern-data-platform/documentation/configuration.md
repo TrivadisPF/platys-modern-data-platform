@@ -4,6 +4,7 @@ This is the documentation of the configuration settings which can be overwritten
 
 There are configuration settings for enabling/disabling a given service. They are named `XXXXX_enable` where XXXXX is the name of the service (he used to be named `XXXXX_enabled` in version 1.0.0).
 For each service there might be some other settings, such as controlling the number of nodes to start the service with, whether the service should map a data volume into the container or controlling some other proprietary configuration properties of the service itself.
+
 +------------------------------------------------+-------------+-------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------+--------------------------------+
 | Config                                         |   Default   | Since | Description                                                                                                                                                                         | ARM Support | Depends on                     |
 +------------------------------------------------+-------------+-------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------+--------------------------------+
