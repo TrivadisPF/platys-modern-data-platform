@@ -13,9 +13,9 @@ Copyright (c) 2019-2020 Trivadis
 
 Its main use is for small-scale Data Lab projects, Proof-of-Concepts (PoC) or Proof-of-value (PoV) projects as well as trainings.
 
-First only a fixed set of services were supported using one `docker-compose.yml` file. This approach was quite unflexible and due to the amount of services we support also quite heavy weight. Therefore we went to a generated approach, where the user of **platys** can decide which features to enable and based on that generate the necessary artifacts.  
+First only a fixed set of services were supported using one `docker-compose.yml` file. This approach was quite unflexible and due to the amount of services we support also quite heavy weight. Therefore we went to a generated approach, where the user of **platys** can decide which features to enable and based on that generate the necessary artefacts.  
 
-A _Modern Data Platform_ is always generated based on a given _Platform Stack_. A platform stack defines the set of available and usable services. A platform stack has a name and a version. Currently only one Platform Stack is avilable:
+A _Modern Data Platform_ is always generated based on a given _Platform Stack_. A platform stack defines the set of available and usable services. A platform stack has a name and a version. Currently only one Platform Stack is available:
 
 * `modern-data-platform` - a Platform Stack for supporting a Modern (Analytical) Data Platforms
 

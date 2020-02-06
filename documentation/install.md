@@ -15,23 +15,23 @@ You also need an internet connection in order to download the necessary images.
 
 ## Install
 
-Follow the instructions below to install `platys` on a Mac or Linux systems. Running on Windows will be supported soon. 
+Follow the instructions below to install `platys` on a Mac or Linux systems. Running `platys` on Windows will be supported soon. 
 
-* Run this command to download the current stable release of the platys Stack Generator:
+1. Run this command to download the current stable release of the platys Stack Generator:
 
-```
+  ```
 sudo curl -L "https://github.com/TrivadisPF/platys/releases/download/2.0.0-preview2/platys.sh" -o /usr/local/bin/platys
 ```
 
-* Apply executable permissions to the binary:
+2. Apply executable permissions to the binary:
 
-```
+  ```
 sudo chmod +x /usr/local/bin/platys 
 ```
 
-Use the `--version` option to check that the generator has been installed successfully.
+3. Use the `--version` option to check that the generator has been installed successfully.
 
-```
+  ```
 $ platys --version
 Trivadis Platform in a Box - v2.0.0
 ```
