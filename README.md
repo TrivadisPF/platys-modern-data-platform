@@ -47,7 +47,7 @@ The generated platform can be provisioned either locally or in the cloud. See [P
 **Development**
 
 * [Service Design Decisions](./documentation/service-design.md)
- [Creating and maintaining a Platform Stack](./documentation/creating-and-maintaining-platform-stack.md)
+* [Creating and maintaining a Platform Stack](./documentation/creating-and-maintaining-platform-stack.md)
 
 
 
