@@ -16,7 +16,7 @@ mkdir kafka-plaform-example
 cd kafka-plaform-example
 ```
 
-Now let's initialize the current directory to use the Modern Data Analytics Platform Stack. 
+Now let's initialise the current directory to use the Modern Data Analytics Platform Stack. 
 
 We specify the platform stack name `trivadis/platys-modern-data-platform` to use as well as the stack version `1.2.0` (the current version of this platform stack). 
 
@@ -64,7 +64,8 @@ You can see the configuration options, available through this platform stack, si
 
       ...
 ```
-You can now enable the options for the services you want for your platform, just by changing `false` to `true`.
+
+You can now enable the options for the services you want the platform to support by changing `false` to `true`.
 
 For enabling Kafka and Zookeeper, all we have to do is set the `ZOOKEEPER_enable` and `KAFKA_enable` flag to `true`
 
@@ -83,12 +84,12 @@ For enabling Kafka and Zookeeper, all we have to do is set the `ZOOKEEPER_enable
 
 You only have to explicitly enable what you need, as each service is disabled by default. Other settings have meaningful defaults as well. So you can also remove the services you don't need. 
 
-All configuration settings are documented [here](./Configuration.md).
+All configuration settings for the `platys-modern-data-platform` platform stack are documented [here](./../platform-stack/modern-data-platform/documentation/Configuration.md).
 
 
 ## Step 3: Generate the platform
 
-Now we are ready to generate the platform. Still in the `kafka-plaform-example` folder, run the following command:
+Now we are ready to generate the platform. In the `kafka-plaform-example` folder, run the following command:
 
 ```
 platys gen
@@ -124,16 +125,17 @@ Writing file '/opt/mdps-gen/destination/mdps-services.yml'...
 Modern Data Platform Stack generated successfully to /home/docker/Desktop/kafka-plaform-example
 ```
 
-You should now find fully configured `docker-compose.yml` file (according to the settings chosen) as well as some static configuration files, necessary for some of the services.
+You now find a fully configured `docker-compose.yml` file (with the services enabled in the `config.yml`) as well as some static configuration files, necessary for the services.
 
 ## Step 4: Run the platform 
 
-Now your Platform is ready to be started. Before doing that, you have to create some environment variables, depending on the services you use. In minimum you should create
+Now the Platform is ready to be started. Before doing that, you have to create some environment variables, depending on the services you use. In minimum you should create
 
 * `DOCKER\_HOST\_IP` - the IP address of the network interface of the Docker Host
 * `PUBLIC\_IP` - the IP address of the public network interface of the Docker Host (different to `DOCKER\_HOST\_IP` if in a public cloud environment
 
-You can set these environment variables persistently on the machine (`/etc/environment`) or user (`~/.pam_environment` or `~/.profile`) level. Another option is to use the `.env` file in the folder where the `docker-compose.yml` file is located. All environment variables set in there are used when the docker compose environment is started. 
+You can set these environment variables persistently on the machine (`/etc/environment`) or user (`~/.pam_environment` or `~/.profile`) level. 
+Another option is to use the `.env` file in the folder where the `docker-compose.yml` file is located. All environment variables set in there are used when the docker compose environment is started. 
 
 Now let's start the platform. In a terminal window, execute
 
@@ -168,5 +170,5 @@ At this point, you have seen the basics of how `platys` works, using the `mdp-st
 
 ## Where to go next
 
-* [Explore the full list of Platys commands](commands.md)
-* [Modern Data Platform Stack configuration file reference](configuration.md)
+* [Explore the full list of Platys commands](overview-platys-command.md)
+* [Modern Data Platform Stack configuration file reference](../platform-stack/modern-data-platform/documentation/configuration.md)
