@@ -1,4 +1,4 @@
-## Configuration v1.2.0
+# `modern-data-platform` - Configuration v1.2.0
 
 This is the documentation of the configuration settings which can be overwritten using a custom YAML file. All the defaults are defined in [`generator-config/vars/default-values.yml`](generator-config/vars/config.yml).
 

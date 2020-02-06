@@ -1,4 +1,4 @@
-# What's new?
+# `modern-data-platform` - What's new?
 
 ## What's new in 1.2.0 (preview)
 

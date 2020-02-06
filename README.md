@@ -29,9 +29,12 @@ Currently the **platys** toolset only runs on macOS and 64-bit Linux, but we are
 
 See [Installing platys](./documentation/install.md) and [Getting Started](./documentation/getting-started.md) for how to install and use `platys`.
 
-## Where can I run the platform ?
+## Where can I run a generated platform ?
 
 The generated platform can be provisioned either locally or in the cloud. See [Provisioning of Modern Data Platform](./documentation/environment/README.md) for various versions of how to deploy the stack. 
+
+## Changes 
+See [What's new?](../documentation/changes.md) for a detailed list of changes.
 
 ## Documentation
 
