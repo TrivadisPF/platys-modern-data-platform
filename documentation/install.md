@@ -48,4 +48,4 @@ sudo rm /usr/local/bin/platys
 
 * [Getting Started](getting-started.md)
 * [Explore the full list of platys commands](command-line-ref.md)
-* [Configuration file reference](configuration.md)
+* [Configuration file reference](../platform-stacks/modern-data-platform/documentation/configuration.md)
