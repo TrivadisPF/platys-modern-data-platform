@@ -1,3 +1,0 @@
-# Creating a new platform stack
-
-to be documented ....
