@@ -206,7 +206,7 @@ services:
     labels:
       com.mdps.service.webui.url: "http://${PUBLIC_IP}:28047"
     ports:
-     - "28047:8010"
+     - "28100:8010"
     environment:
       WEB_HTTP_PORT: 8010
       API_HOST: "zoonavigator-api"
@@ -221,7 +221,7 @@ services:
     labels:
       com.mdps.service.restapi.url: "http://${PUBLIC_IP}:28048"
     ports:
-     - "28048:9010"
+     - "28101:9010"
     environment:
       API_HTTP_PORT: 9010
     restart: {{container_restart_policy}}
@@ -275,7 +275,7 @@ services:
 {% if ( KAFKA_enable and KAFKA_SCHEMA_REGISTRY_enable ) | default(false) %}
   #  ================================== Schema Registry ========================================== #}
   {% for num in range(KAFKA_SCHEMA_REGISTRY_nodes | default(1) ) %}
-    {% set external_port = 28030 + loop.index - 1 %}
+    {% set external_port = 8081 + loop.index - 1 %}
     {% set port = 8081 + loop.index - 1 %}
   schema-registry-{{loop.index}}:
     image: confluentinc/cp-schema-registry:{{__CONFLUENT_PLATFORM_version}}
@@ -305,7 +305,7 @@ services:
 {% if ( KAFKA_enable and KAFKA_CONNECT_enable ) | default(false) %}
   #  ================================== Kafka Connect ========================================== #}
   {% for num in range(KAFKA_CONNECT_nodes | default(1) ) %}
-    {% set external_port = 28013 + loop.index - 1 %}
+    {% set external_port = 8083 + loop.index - 1 %}
     {% set port = 8083 + loop.index - 1 %}
   kafka-connect-{{loop.index}} :
     image: confluentinc/cp-kafka-connect:{{__CONFLUENT_PLATFORM_version}}
@@ -352,8 +352,8 @@ services:
 {% if (KAFKA_enable and KAFKA_KSQLDB_enable )| default(false) %}
   #  ================================== ksqlDB ========================================== #}
   {% for num in range(KAFKA_KSQLDB_nodes | default(1) ) %}
-    {% set external_port = 28034 + loop.index - 1 %}
-    {% set port = 8088 + loop.index - 1 %}
+    {% set external_port = 8088 + loop.index - 1 %}
+    {% set port = 8088 %}
   ksqldb-server-{{loop.index}} :
     image: confluentinc/ksqldb-server:{{__KSQLDB_version}}
     hostname: ksqldb-server-{{loop.index}}
@@ -396,12 +396,12 @@ services:
     container_name: kafka-rest-1
     hostname: kafka-rest-1
     labels:
-      com.mdps.service.restapi.url: "http://${PUBLIC_IP}:28012"
+      com.mdps.service.restapi.url: "http://${PUBLIC_IP}:18086"
     depends_on:
       - kafka-1
       - schema-registry-1
     ports:
-      - "28012:8086"
+      - "18086:8086"
     environment:
       KAFKA_REST_ZOOKEEPER_CONNECT: '${DOCKER_HOST_IP}:2181'
       KAFKA_REST_LISTENERS: 'http://0.0.0.0:8086'
@@ -417,7 +417,7 @@ services:
     container_name: kafka-mqtt-1
     hostname: mqtt-proxy
     ports:
-      - "28001:1882"
+      - "1882:1882"
     environment:
       KAFKA_MQTT_TOPIC_REGEX_LIST: 'truck_position:.*position,truck_engine:.*engine'
       KAFKA_MQTT_LISTENERS: 0.0.0.0:1882
@@ -432,12 +432,12 @@ services:
     hostname: control-center
     container_name: control-center
     labels:
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28046"
+      com.mdps.service.webui.url: "http://${PUBLIC_IP}:9021"
     depends_on:
       - zookeeper-1
       - kafka-1
     ports:
-      - "28046:9021"
+      - "9021:9021"
     environment:
       CONTROL_CENTER_BOOTSTRAP_SERVERS: 'kafka-1:9092'
       CONTROL_CENTER_ZOOKEEPER_CONNECT: 'zookeeper-1:2181'
@@ -464,12 +464,12 @@ services:
     container_name: schema-registry-ui
     hostname: schema-registry-ui
     labels:
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28039"
+      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28102"
     depends_on:
       - kafka-1
       - schema-registry-1
     ports:
-      - "28039:8000"
+      - "28102:8000"
     environment:
       SCHEMAREGISTRY_URL: 'http://${PUBLIC_IP}:28030'
     restart: {{container_restart_policy}}
@@ -481,9 +481,9 @@ services:
     container_name: kafka-connect-ui
     hostname: kafka-connect-ui
     labels:
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28038"
+      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28103"
     ports:
-      - "28038:8000"
+      - "28103:8000"
     environment:
       CONNECT_URL: "http://${PUBLIC_IP}:28013/,http://${PUBLIC_IP}:28014/"
       PROXY: "true"
@@ -498,12 +498,12 @@ services:
     container_name: kafka-manager
     hostname: kafka-manager
     labels:
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28044"
+      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28104"
     depends_on:
       - zookeeper-1
       - kafka-1
     ports:
-      - "28044:9000"
+      - "28104:9000"
     environment:
       ZK_HOSTS: 'zookeeper-1:2181'
       APPLICATION_SECRET: 'abc123!'
@@ -517,9 +517,9 @@ services:
     container_name: kafdrop
     hostname: kafdrop
     labels:
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28045"
+      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28105"
     ports:
-      - "28045:9020"
+      - "28105:9020"
     environment:
       ZK_HOSTS: zookeeper-1:2181
       LISTEN: 9020
@@ -532,9 +532,9 @@ services:
     container_name: kadmin
     hostname: kadmin
     labels:
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28040"
+      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28106"
     ports:
-      - "28040:8080"
+      - "28106:8080"
     environment:
       ZOOKEEPER_HOST: zookeeper-1:2181
       KAFKA_HOST: kafka-1:19092
@@ -547,7 +547,6 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {#  KAFKA_enable and KAFKA_KADMIN_enable #}
 
-
 {% if (KAFKA_enable and KAFKA_KAFKAHQ_enable) | default(false) %}
   kafkahq:
     image: tchiotludo/kafkahq:{{KAFKA_KAFKAHQ_version}}
@@ -556,7 +555,7 @@ services:
     labels:
       com.mdps.service.webui.url: "http://${PUBLIC_IP}:28042"
     ports:
-      - 28042:8080
+      - 28107:8080
     environment:
       KAFKAHQ_CONFIGURATION: |
         kafkahq:
@@ -580,12 +579,12 @@ services:
     container_name: burrow
     hostname: burrow
     labels:
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28104"
+      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28110"
     volumes:
       - ./conf/burrow:/etc/burrow/
       - ./tmp:/var/tmp/burrow
     ports:
-      - 28104:8000
+      - 28110:8000
     depends_on:
       - zookeeper-1
       - kafka-1
@@ -596,9 +595,9 @@ services:
     container_name: burrow-ui
     hostname: burrow-ui
     labels:
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28104"
+      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28108"
     ports:
-      - 28104:3000
+      - 28108:3000
     environment:
       - BURROW_HOME="http://${PUBLIC_IP}:28104/v3/kafka"
     depends_on:
@@ -610,9 +609,9 @@ services:
     container_name: burrow-dashboard
     hostname: burrow-dashboard
     ports:
-      - 28103:80
+      - 28109:80
     environment:
-      - BURROW_BACKEND="http://${PUBLIC_IP}:28104"
+      - BURROW_BACKEND="http://${PUBLIC_IP}:28110"
     depends_on:
       - zookeeper-1
       - kafka-1
@@ -628,12 +627,12 @@ services:
     hostname: namenode
     labels:
       com.mdps.service.webui.name: "Hadoop NameNode UI"
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28084"
+      com.mdps.service.webui.url: "http://${PUBLIC_IP}:9870"
     volumes:
       - ./container-volume/namenode:/hadoop/dfs/name
       - ./data-transfer:/tmp/data-transfer
     ports:
-      - "28084:9870"
+      - "9870:9870"
     environment:
       - CLUSTER_NAME=test
     env_file:
@@ -641,7 +640,7 @@ services:
     restart: {{container_restart_policy}}
 
   {% for num in range(HADOOP_datanodes| default(1) ) %}
-    {% set external_port = 28085 + loop.index - 1 %}
+    {% set external_port = 9864 + loop.index - 1 %}
 
   datanode-{{loop.index}}:
     image: trivadis/apache-hadoop-datanode:{{__HADOOP_version}}
@@ -666,17 +665,17 @@ services:
     hostname: resourcemanager
     labels:
       com.mdps.service.webui.name: "YARN RessourceManager UI"
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:8088"
+      com.mdps.service.webui.url: "http://${PUBLIC_IP}:18088"
     ports:
-      - "8088:8088"
+      - "18088:8088"
     depends_on:
       - namenode
       - datanode-1
     env_file:
       - ./conf/hadoop.env
     environment:
-      - YARN_CONF_yarn_resourcemanager_webapp_address=${PUBLIC_IP}:8088
-      - YARN_CONF_yarn_nodemanager_webapp_address=${PUBLIC_IP}:8042
+      - YARN_CONF_yarn_resourcemanager_webapp_address=${PUBLIC_IP}:18088
+      - YARN_CONF_yarn_nodemanager_webapp_address=${PUBLIC_IP}:18042
       - YARN_CONF_yarn_timeline___service_webapp_address=${PUBLIC_IP}:28020
       - YARN_CONF_yarn_log_server_url=${PUBLIC_IP}:28020
     restart: {{container_restart_policy}}
@@ -687,17 +686,17 @@ services:
     hostname: nodemanager
     labels:
       com.mdps.service.webui.name: "YARN NodeManager UI"
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:8042"
+      com.mdps.service.webui.url: "http://${PUBLIC_IP}:18042"
     ports:
-      - "8042:8042"
+      - "18042:8042"
     depends_on:
       - namenode
       - datanode-1
     env_file:
       - ./conf/hadoop.env
     environment:
-      - YARN_CONF_yarn_resourcemanager_webapp_address=${PUBLIC_IP}:8088
-      - YARN_CONF_yarn_nodemanager_webapp_address=${PUBLIC_IP}:8042
+      - YARN_CONF_yarn_resourcemanager_webapp_address=${PUBLIC_IP}:18088
+      - YARN_CONF_yarn_nodemanager_webapp_address=${PUBLIC_IP}:18042
       - YARN_CONF_yarn_timeline___service_webapp_address=${PUBLIC_IP}:28020
       - YARN_CONF_yarn_log_server_url=${PUBLIC_IP}:28020
     restart: {{container_restart_policy}}
@@ -708,16 +707,16 @@ services:
     hostname: historyserver
     labels:
       com.mdps.service.webui.name: "YARN History Server"
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28020"
+      com.mdps.service.webui.url: "http://${PUBLIC_IP}:18188"
     ports:
-      - "28020:8188"
+      - "18188:8188"
     depends_on:
       - namenode
       - datanode-1
     env_file:
       - ./conf/hadoop.env
     environment:
-      SERVICE_PRECONDITION: "namenode:9870 datanode-1:9864 datanode-2:9864 resourcemanager:8088"
+      SERVICE_PRECONDITION: "namenode:9870 datanode-1:9864 datanode-2:9864 resourcemanager:18088"
     restart: {{container_restart_policy}}
 
   hadoop-client:
@@ -741,7 +740,7 @@ services:
     ports:
       - 6066:6066
       - 7077:7077
-      - 28076:8080
+      - 8080:8080
     env_file:
       - ./conf/hadoop.env
     environment:
@@ -757,8 +756,8 @@ services:
     restart: {{container_restart_policy}}
 
   {% for num in range(SPARK_workers | default(1) ) %}
-      {% set external_port = 28077 + loop.index - 1 %}
-      {% set webui_port = 28077 + loop.index - 1 %}
+      {% set external_port = 28111 + loop.index - 1 %}
+      {% set webui_port = 28111 + loop.index - 1 %}
 
   spark-worker-{{loop.index}}:
     image: trivadis/apache-spark-worker:{{__SPARK_version}}
@@ -767,7 +766,7 @@ services:
     depends_on:
       - spark-master
     ports:
-      - "{{external_port}}:{{external_port}}"
+      - "{{external_port}}:{{webui_port}}"
     env_file:
       - ./conf/hadoop.env
     environment:
@@ -794,11 +793,11 @@ services:
     hostname: spark-history
     labels:
       com.mdps.service.webui.name: "Spark History Server"
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28072"
+      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28117"
     expose:
       - 18080
     ports:
-      - 28072:18080
+      - 28117:18080
     volumes:
       - ./conf/spark/spark-defaults.conf:/spark/conf/spark-defaults.conf
       - ./container-volume/spark/logs/:/var/log/spark/logs
@@ -810,7 +809,7 @@ services:
     image: trivadis/apache-spark-master:{{__SPARK_version}}
     container_name: spark-thrift-server
     ports:
-      - "28073:10000"
+      - "28118:10000"
     env_file:
       - ./conf/hadoop.env
     volumes:
@@ -829,15 +828,15 @@ services:
     hostname: livy
     labels:
       com.mdps.service.webui.name: "Livy Server UI"
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28021/ui#"
+      com.mdps.service.webui.url: "http://${PUBLIC_IP}:8998/ui#"
       com.mdps.service.restapi.name: "Livy API"
-      com.mdps.service.restapi.url: "http://${PUBLIC_IP}:28021/"
+      com.mdps.service.restapi.url: "http://${PUBLIC_IP}:8998/"
     env_file:
       - ./conf/hadoop.env
     volumes:
       - ./conf/spark/spark-defaults.conf:/spark/conf/spark-defaults.conf
     ports:
-      - "28021:8998"
+      - "8998:8998"
     environment:
       - SPARK_MASTER=yarn
       - DEPLOY_MODE=cluster
@@ -851,8 +850,8 @@ services:
     container_name: hive-server
     hostname: hive-server
     ports:
-      - "28027:10000"
-      - "28028:10002"
+      - "10000:10000"
+      - "10002:10002"
     env_file:
       - ./conf/hadoop.env
     environment:
@@ -874,7 +873,7 @@ services:
     container_name: hive-metastore
     hostname: hive-metastore
     ports:
-      - "28026:9083"
+      - "9083:9083"
     env_file:
       - ./conf/hadoop.env
     command: /opt/hive/bin/hive --service metastore
@@ -944,8 +943,8 @@ services:
     container_name: cassandra-atlas
     hostname: cassandra-atlas
     ports:
-      - "28062:9042"
-      - "28064:9160"
+      - "19042:9042"
+      - "19160:9160"
     environment:
       - CASSANDRA_START_RPC=true
     restart: {{container_restart_policy}}
@@ -963,7 +962,7 @@ services:
       - "xpack.security.enabled=false"
       - "discovery.zen.minimum_master_nodes=1"
     ports:
-      - "28065:9200"
+      - "19200:9200"
     restart: {{container_restart_policy}}
 {% endif %}   {#  ATLAS_enable #}
 
@@ -975,12 +974,12 @@ services:
     hostname: amundsenfrontend
     labels:
       com.mdps.service.webui.name: "Amundsen UI"
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28105"
+      com.mdps.service.webui.url: "http://${PUBLIC_IP}:5000"
     depends_on:
       - amundsenmetadata
       - amundsensearch
     ports:
-      - 28003:5000
+      - 5000:5000
     environment:
       - METADATASERVICE_BASE=http://amundsenmetadata:5000
       - SEARCHSERVICE_BASE=http://amundsensearch:5000
@@ -991,9 +990,9 @@ services:
     container_name: amundsensearch
     labels:
       com.mdps.service.restapi.name: "Amundsensearch REST API"
-      com.mdps.service.restapi.url: "http://${PUBLIC_IP}:28004"
+      com.mdps.service.restapi.url: "http://${PUBLIC_IP}:5001"
     ports:
-      - 28004:5000
+      - 5001:5000
     environment:
   {%if (AMUNDSEN_edition | lower) == 'amundsen-metastore' | default(false) %}
       - PROXY_ENDPOINT=amundsen-elasticsearch
@@ -1011,9 +1010,9 @@ services:
     hostname: amundsenmetadata
     labels:
       com.mdps.service.restapi.name: "Amundsensearch REST API"
-      com.mdps.service.restapi.url: "http://${PUBLIC_IP}:28005"
+      com.mdps.service.restapi.url: "http://${PUBLIC_IP}:5002"
     ports:
-      - 28005:5000
+      - 5002:5000
     environment:
   {%if (AMUNDSEN_edition | lower) == 'amundsen-metastore' | default(false) %}
       - PROXY_HOST=bolt://amundsen-neo4j
@@ -1033,15 +1032,15 @@ services:
     container_name: amundsen-neo4j
     hostname: amundsen-neo4j
     labels:
-      com.mdps.service.restapi.name: "Amundsensearch REST API"
-      com.mdps.service.restapi.url: "http://${PUBLIC_IP}:28005"
+      com.mdps.service.restapi.name: "Amundsen Neo4J UI"
+      com.mdps.service.restapi.url: "http://${PUBLIC_IP}:17474"
     ulimits:
       nofile:
         soft: 40000
         hard: 40000
     ports:
-      - 7474:7474
-      - 7687:7687
+      - 17474:7474
+      - 17687:7687
     environment:
       - NEO4J_AUTH=neo4j/test
     volumes:
@@ -1052,8 +1051,11 @@ services:
     image: elasticsearch:6.7.0
     container_name: amundsen-elasticsearch
     hostname: amundsen-elasticsearch
+    labels:
+      com.mdps.service.restapi.name: "Amundsen ElasticSearch REST API"
+      com.mdps.service.restapi.url: "http://${PUBLIC_IP}:19201"
     ports:
-      - 9200:9200
+      - 19201:9200
 #   volumes:
 #     - ./container-volume/amundsen/es:/usr/share/elasticsearch/data
     restart: {{container_restart_policy}}
@@ -1068,7 +1070,7 @@ services:
     hostname: hue
     dns: 8.8.8.8
     ports:
-      - "28043:8888"
+      - "8888:8888"
     volumes:
       - ./conf/hue/hue.ini:/usr/share/hue/desktop/conf/hue.ini
     depends_on:
@@ -1096,11 +1098,11 @@ services:
     hostname: streamsets-1
     labels:
       com.mdps.service.webui.name: "StreamSets Data Collector UI"
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28029"
+      com.mdps.service.webui.url: "http://${PUBLIC_IP}:18630"
       com.mdps.service.restapi.name: "StreamSets Data Collector REST API"
-      com.mdps.service.restapi.url: "http://${PUBLIC_IP}:28110/collector/restapi"
+      com.mdps.service.restapi.url: "http://${PUBLIC_IP}:18630/collector/restapi"
     ports:
-      - "28029:18630"
+      - "18630:18630"
     environment:
       SDC_OFFSET_DIRECTORY: /data/custom-offset-el
       SDC_JAVA_OPTS: "-Xmx2g -Xms2g"
@@ -1127,11 +1129,11 @@ services:
     hostname: streamsets-transformer-1
     labels:
       com.mdps.service.webui.name: "StreamSets Transformer UI"
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28148"
+      com.mdps.service.webui.url: "http://${PUBLIC_IP}:19630"
       com.mdps.service.restapi.name: "StreamSets Transformer REST API"
-      com.mdps.service.restapi.url: "http://${PUBLIC_IP}:28148/collector/restapi"
+      com.mdps.service.restapi.url: "http://${PUBLIC_IP}:19630/collector/restapi"
     ports:
-      - "28148:19630"
+      - "19630:19630"
     volumes:
       - ./data-transfer:/data-transfer
     {% if STREAMSETS_TRANSFORMER_volume_map_data %}
@@ -1146,39 +1148,39 @@ services:
 
 {%if STREAMSETS_EDGE_enable | default(false) %}
   #  ================================== StreamSets DataCollector Edge ========================================== #}
-  streamsets-edge:
+  streamsets-edge-1:
     image: streamsets/datacollector-edge:{{__streamsets_edge_version}}
-    container_name: streamsets-edge
-    hostname: streamsets-edge
+    container_name: streamsets-edge-1
+    hostname: streamsets-edge-1
     labels:
       com.mdps.service.restapi.name: "StreamSets Data Collector Edge REST API"
-      com.mdps.service.restapi.url: "http://${PUBLIC_IP}:28110"
+      com.mdps.service.restapi.url: "http://${PUBLIC_IP}:18633"
     ports:
-      - "28110:18633"
+      - "18633:18633"
     restart: {{container_restart_policy}}
 {% endif %}   {#  STREAMSETS_enable  #}
 
 {%if NIFI_enable | default(false) %}
   #  ================================== NiFi ========================================== #}
-  nifi:
+  nifi-1:
     image: apache/nifi:{{__NIFI_version}}
-    container_name: nifi
-    hostname: nifi
+    container_name: nifi-1
+    hostname: nifi-1
     labels:
       com.mdps.service.webui.name: "Apache NiFi UI"
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28054/nifi"
+      com.mdps.service.webui.url: "http://${PUBLIC_IP}:18080/nifi"
     ports:
-      - "28054:8080"
+      - "18080:8080"
     restart: {{container_restart_policy}}
 
 {% endif %}   {#  NIFI_enable  #}
 
 {%if NODERED_enable | default(false) %}
   #  ================================== Node-RED ========================================== #}
-  nodered:
+  nodered-1:
     image: nodered/node-red:{{__NIFI_version}}
-    container_name: nodered
-    hostname: nodered
+    container_name: nodered-1
+    hostname: nodered-1
     labels:
       com.mdps.service.webui.name: "Node-RED UI"
       com.mdps.service.webui.url: "http://${PUBLIC_IP}:1880"
@@ -1208,9 +1210,9 @@ services:
     hostname: zeppelin
     labels:
       com.mdps.service.webui.name: "Apache Zeppelin UI"
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28055"
+      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28080"
     ports:
-      - "28055:8080"
+      - "28080:8080"
 #      - "4040:4040"
 #      - "42331:42331"
     env_file:
@@ -1253,9 +1255,9 @@ services:
     hostname: jupyter
     labels:
       com.mdps.service.webui.name: "Jupyter UI"
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28060"
+      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28888"
     ports:
-      - "28060:8888"
+      - "28888:8888"
     environment:
       JUPYTER_ENABLE_LAB: "true"
       JUPYTER_TOKEN: "{{admin_password}}"
@@ -1277,11 +1279,11 @@ services:
     container_name: grafana
     labels:
       com.mdps.service.webui.name: "Grafana UI"
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28099"
+      com.mdps.service.webui.url: "http://${PUBLIC_IP}:3000"
     expose:
       - 3000
     ports:
-      - "28099:3000"
+      - "3000:3000"
     environment:
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD={{admin_password}}
@@ -1307,9 +1309,9 @@ services:
     hostname: redis-commander
     labels:
       com.mdps.service.webui.name: "Redis Commander UI"
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28057"
+      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28119"
     ports:
-      - "28057:8081"
+      - "28119:8081"
     environment:
       - REDIS_HOSTS=local:redis:6379
     restart: {{container_restart_policy}}
@@ -1322,7 +1324,7 @@ services:
     container_name: cassandra-1
     hostname: cassandra-1
     ports:
-      - 28090:9042
+      - 29042:9042
       - 7199:7199
       - 9160:9160
     environment:
@@ -1338,9 +1340,9 @@ services:
     hostname: cassandra-web
     labels:
       com.mdps.service.webui.name: "Cassandra Web UI"
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28053"
+      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28200"
     ports:
-      - "28053:3000"
+      - "28200:3000"
     environment:
       - CASSANDRA_HOSTNAME=cassandra-1
       - CASSANDRA_PORT=9042
@@ -1386,9 +1388,9 @@ services:
     hostname: dse-studio
     labels:
       com.mdps.service.webui.name: "DataStax Studio Web UI"
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28170"
+      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28201"
     ports:
-      - "28170:9091" # Exposes port to be available externally
+      - "28201:9091" # Exposes port to be available externally
     environment:
       DS_LICENSE: accept
     restart: {{container_restart_policy}}
@@ -1398,7 +1400,7 @@ services:
     container_name: dse-opscenter
     hostname: dse-opscenter
     ports:
-      - 8888:8888
+      - 28202:8888
     environment:
       - DS_LICENSE=accept
     restart: {{container_restart_policy}}
@@ -1428,9 +1430,9 @@ services:
     hostname: mongo-express
     labels:
       com.mdps.service.webui.name: "Cassandra Web UI"
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28056"
+      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28203"
     ports:
-      - 28056:8081
+      - 28203:8081
     environment:
       - ME_CONFIG_MONGODB_SERVER=mongo
     restart: {{container_restart_policy}}
@@ -1441,9 +1443,9 @@ services:
     hostname: admin-mongo
     labels:
       com.mdps.service.webui.name: "Admin Mongo UI"
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28051"
+      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28204"
     ports:
-      - 28051:1234
+      - 28204:1234
     restart: {{container_restart_policy}}
 {% endif %}   {#  MONGO_enable #}
 
@@ -1455,9 +1457,9 @@ services:
     hostname: solr
     labels:
       com.mdps.service.webui.name: "SolR UI"
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28081"
+      com.mdps.service.webui.url: "http://${PUBLIC_IP}:8983"
     ports:
-      - "28081:8983"
+      - "8983:8983"
     restart: {{container_restart_policy}}
 {% endif %}   {#  SOLR_enable #}
 
@@ -1484,9 +1486,9 @@ services:
     hostname: dejuvu
     labels:
       com.mdps.service.webui.name: "Elasticsearch Dejavu UI"
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28000"
+      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28205"
     ports:
-      - "28000:1358"
+      - "28205:1358"
     restart: {{container_restart_policy}}
 
   cerebro:
@@ -1495,9 +1497,9 @@ services:
     hostname: cerebro
     labels:
       com.mdps.service.webui.name: "Elasticsearch Cerbero UI"
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28061"
+      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28206"
     ports:
-      - "28061:9000"
+      - "28206:9000"
     restart: {{container_restart_policy}}
 
   elastichq:
@@ -1506,9 +1508,9 @@ services:
     hostname: elatichq
     labels:
       com.mdps.service.webui.name: "ElasticHQ UI"
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28052"
+      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28207"
     ports:
-      - "28052:5000"
+      - "28207:5000"
 
   {% if KIBANA_enable | default(false) %}
   #  ================================== Kibana ========================================== #}
@@ -1518,11 +1520,11 @@ services:
     container_name: kibana
     labels:
       com.mdps.service.webui.name: "Kibana UI"
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28006"
+      com.mdps.service.webui.url: "http://${PUBLIC_IP}:5601"
     depends_on:
       - elasticsearch
     ports:
-      - "28006:5601"
+      - "5601:5601"
     environment:
       xpack.monitoring.enabled: "false"
       discovery.type: "single-node"
@@ -1543,15 +1545,15 @@ services:
 {# #}
 {% if NEO4J_enable | default(false) %}
   #  ================================== Neo4J ========================================== #}
-  neo4j:
+  neo4j-1:
     image: neo4j:{{__NEO4J_version}}
-    hostname: neo4j
-    container_name: neo4j
+    hostname: neo4j-1
+    container_name: neo4j-1
     labels:
-      com.mdps.service.webui.name: "Kibana UI"
+      com.mdps.service.webui.name: "Neo4J UI"
       com.mdps.service.webui.url: "http://${PUBLIC_IP}:28080"
     ports:
-      - "28080:7474"
+      - "7474:7474"
       - "7687:7687"
     environment:
       - NEO4J_ACCEPT_LICENSE_AGREEMENT=yes
@@ -1580,7 +1582,7 @@ services:
       com.mdps.service.restapi.name: "InfluxDB Rest API"
       com.mdps.service.restapi.url: "http://${PUBLIC_IP}:28150"
     ports:
-      - "28150:8086"
+      - "8086:8086"
     volumes:
       - ./conf/influxdata/influxdb/influxdb.conf:/etc/influxdb/influxdb.conf
     {% if INFLUXDB_volume_map_data %}
@@ -1595,9 +1597,9 @@ services:
     hostname: influxdb-ui
     labels:
       com.mdps.service.webui.name: "InfluxDB UI"
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28152"
+      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28208"
     ports:
-      - "28151:80"
+      - "28208:80"
     restart: {{container_restart_policy}}
 {% endif %}   {#  INFLUXDB_enable #}
 
@@ -1609,9 +1611,9 @@ services:
     container_name: chronograf
     labels:
       com.mdps.service.webui.name: "Chronograf UI"
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28151"
+      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28209"
     ports:
-      - "28152:8888"
+      - "28209:8888"
     environment:
       RESOURCES_PATH: "/usr/share/chronograf/resources"
       PORT: 8888
@@ -1634,9 +1636,9 @@ services:
     container_name: kapacitor
     labels:
       com.mdps.service.restapi.name: "Kapacitor UI"
-      com.mdps.service.restapi.url: "http://${PUBLIC_IP}:28152/kapacitor/v1"
+      com.mdps.service.restapi.url: "http://${PUBLIC_IP}:28209/kapacitor/v1"
     ports:
-      - "28153:9092"
+      - "28209:9092"
     environment:
       KAPACITOR_HOSTNAME: kapacitor
       KAPACITOR_DATA_DIR: "var/lib/kapacitor"
@@ -1688,10 +1690,10 @@ services:
 
 {% if PROMETHEUS_enable | default(false) %}
   #  ================================== Prometheus ========================================== #}
-  prometheus:
+  prometheus-1:
     image: prom/prometheus:{{__PROMETHEUS_version}}
-    container_name: prometheus
-    hostname: prometheus
+    container_name: prometheus-1
+    hostname: prometheus-1
     labels:
       com.mdps.service.webui.name: "Prometheus UI"
       com.mdps.service.webui.url: "http://${PUBLIC_IP}:9090/graph"
@@ -1708,10 +1710,10 @@ services:
     restart: {{container_restart_policy}}
 
   {% if PROMETHEUS_PUSHGATEWAY_enable | default(false) %}
-  pushgateway:
+  prometheus-pushgateway:
     image: prom/pushgateway:{{__PROMETHEUS_PUSHGATEWAY_version}}
-    container_name: pushgateway
-    hostname: pushgateway
+    container_name: prometheus-pushgateway
+    hostname: prometheus-pushgateway
     labels:
       com.mdps.service.restapi.name: "Pushgateway API"
       com.mdps.service.restapi.url: "http://${PUBLIC_IP}:9091"
@@ -1816,7 +1818,7 @@ services:
       com.mdps.service.webui.name: "Adminer UI"
       com.mdps.service.webui.url: "http://${PUBLIC_IP}:28041"
     ports:
-      - 28041:8080
+      - 28210:8080
     restart: {{container_restart_policy}}
 {% endif %}   {#  ADMINER_enable #}
 
@@ -1828,10 +1830,10 @@ services:
     hostname: axon-server
     labels:
       com.mdps.service.webui.name: "Axon UI"
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28010"
+      com.mdps.service.webui.url: "http://${PUBLIC_IP}:8024"
     ports:
-      - 28010:8024
-      - 28018:8124
+      - 8024:8024
+      - 8124:8124
     environment:
       - AXONSERVER_HOSTNAME=axon-server
       - AXONSERVER_EVENTSTORE=/eventstore
@@ -1850,9 +1852,9 @@ services:
     hostname: minio
     labels:
       com.mdps.service.webui.name: "MinIO UI"
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28083"
+      com.mdps.service.webui.url: "http://${PUBLIC_IP}:9000"
     ports:
-      - '28083:9000'
+      - '9000:9000'
     {% if MINIO_volume_map_data %}
     volumes:
       - "./container-volume/minio:/data/"
@@ -1884,8 +1886,8 @@ services:
   #  ================================== Mosquitto ========================================== #}
 {% if MOSQUITTO_enable | default(false) %}
     {% for num in range(MOSQUITTO_nodes | default(1) ) %}
-      {% set external_port_1 = 28100 + loop.index - 1 %}
-      {% set external_port_2 = 28023 + loop.index %}
+      {% set external_port_1 = 1883 + loop.index - 1 %}
+      {% set external_port_2 = 9001 + loop.index %}
   mosquitto-{{loop.index}}:
     image: eclipse-mosquitto:{{__MOSQUITTO_version}}
     hostname: mosquitto-{{loop.index}}
@@ -1908,19 +1910,19 @@ services:
     hostname: hivemq3-1
     container_name: hivemq3-1
     ports:
-      - "28101:1883"
-      - "28024:8080"
+      - "1886:1883"
+      - "28211:8080"
     restart: {{container_restart_policy}}
 {% endif %}   {#  HIVEMQ3_enable #}
 
 {% if HIVEMQ4_enable | default(false) %}
   hivemq4-1:
-    image: hivemq/hivemq3:{{__HIVEMQ4_version}}
+    image: hivemq/hivemq4:{{__HIVEMQ4_version}}
     hostname: hivemq4-1
     container_name: hivemq4-1
     ports:
-      - "28101:1883"
-      - "28024:8080"
+      - "1888:1883"
+      - "28213:8080"
     restart: {{container_restart_policy}}
 {% endif %}   {#  HIVEMQ4_enable #}
 
@@ -1932,9 +1934,9 @@ services:
     hostname: mqtt-ui
     labels:
       com.mdps.service.webui.name: "HiveMQ UI"
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28082"
+      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28215"
     ports:
-      - '28082:80'
+      - '28215:80'
     restart: {{container_restart_policy}}
 {% endif %}   {#  MQTT_UI_enable #}
 
@@ -1943,19 +1945,22 @@ services:
   activemq:
     image: rmohr/activemq:{{__ACTIVEMQ_version}}
     container_name: activemq
+    labels:
+      com.mdps.service.webui.name: "ActiveMQ UI"
+      com.mdps.service.webui.url: "http://${PUBLIC_IP}:8161"
     ports:
       # mqtt
       - "1883:1883"
       # amqp
-      - "28007:5672"
+      - "5672:5672"
       # ui
-      - "28019:8161"
+      - "8161:8161"
       # stomp
-      - "28068:61613"
+      - "61613:61613"
       # ws
-      - "28069:61614"
+      - "61614:61614"
       # jms
-      - "28070:61616"
+      - "61616:61616"
     volumes:
       - ./container-volume/activemq/data:/opt/activemq/data
     restart: {{container_restart_policy}}
@@ -1986,10 +1991,10 @@ services:
     hostname: filezilla
     labels:
       com.mdps.service.webui.name: "Filezilla UI"
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28008"
+      com.mdps.service.webui.url: "http://${PUBLIC_IP}:5800"
     ports:
-      - "28008:5800"
-      - "28009:5900"
+      - "5800:5800"
+      - "5900:5900"
     volumes:
       - ./data-transfer:/data-transfer
     environment:
@@ -2017,7 +2022,7 @@ services:
 #      - VIRTUAL_HOST=monitor.bioatlas.se
 #      - VIRTUAL_PORT=9000
     ports:
-      - 28071:9000
+      - 28216:9000
     restart: {{container_restart_policy}}
 {% endif %}   {# PORTAINER_enable #}
 
@@ -2029,14 +2034,14 @@ services:
     hostname: cadvisor
     labels:
       com.mdps.service.webui.name: "cAdvisor UI"
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28160"
+      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28217"
     volumes:
       - /:/rootfs:ro
       - /var/run:/var/run:rw
       - /sys:/sys:ro
       - /var/lib/docker/:/var/lib/docker:ro
     ports:
-      - 28160:8080
+      - 28217:8080
     restart: {{container_restart_policy}}
 {% endif %}   {# CADVISOR_enable #}
 
