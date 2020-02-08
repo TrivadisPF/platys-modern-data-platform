@@ -14,5 +14,5 @@ It can be found on [Docker Hub](https://hub.docker.com/repository/docker/trivadi
 If you want to build the docker image locally, perform (this is not necessary if you follow the installation instructions below).
 
 ```
-docker build -t trivadis/modern-data-platform-stack-generator:1.2.0-preview .
+docker build -t trivadis/platys-modern-data-platform:1.2.0 .
 ```
