@@ -149,6 +149,7 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
   {% set NIFI_enable = false -%}
   {% set ZEPPELIN_enable = false -%}
   {% set JUPYTER_enable = false -%}
+  {% set MONGO_enable = false -%}
   {% set ELASTICSEARCH_enable = false -%}
   {% set KIBANA_enable = false -%}
   {% set INFLUXDB2_enable = false -%}
@@ -1880,9 +1881,8 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {#  AWSCLI_enable #}
 
-{% if MQTT_enable | default(false) %}
   #  ================================== Mosquitto ========================================== #}
-  {% if MOSQUITTO_enable | default(false) %}
+{% if MOSQUITTO_enable | default(false) %}
     {% for num in range(MOSQUITTO_nodes | default(1) ) %}
       {% set external_port_1 = 28100 + loop.index - 1 %}
       {% set external_port_2 = 28023 + loop.index %}
@@ -1900,9 +1900,9 @@ services:
     {% endif %}
     restart: {{container_restart_policy}}
     {% endfor %}
-  {% endif %}   {#  MOSQUITTO_enable #}
+{% endif %}   {#  MOSQUITTO_enable #}
 
-  {% if HIVEMQ3_enable | default(false) %}
+{% if HIVEMQ3_enable | default(false) %}
   hivemq3-1:
     image: hivemq/hivemq3:{{__HIVEMQ3_version}}
     hostname: hivemq3-1
@@ -1911,9 +1911,9 @@ services:
       - "28101:1883"
       - "28024:8080"
     restart: {{container_restart_policy}}
-  {% endif %}   {#  HIVEMQ3_enable #}
+{% endif %}   {#  HIVEMQ3_enable #}
 
-  {% if HIVEMQ4_enable | default(false) %}
+{% if HIVEMQ4_enable | default(false) %}
   hivemq4-1:
     image: hivemq/hivemq3:{{__HIVEMQ4_version}}
     hostname: hivemq4-1
@@ -1922,9 +1922,9 @@ services:
       - "28101:1883"
       - "28024:8080"
     restart: {{container_restart_policy}}
-  {% endif %}   {#  HIVEMQ4_enable #}
+{% endif %}   {#  HIVEMQ4_enable #}
 
-  {% if MQTT_UI_enable | default(false) %}
+{% if MQTT_UI_enable | default(false) %}
   #  ================================== MQTT UI ========================================== #}
   mqtt-ui:
     image: vergissberlin/hivemq-mqtt-web-client:{{__HIVEMQ_MQTT_WEB_CLIENT_version}}
@@ -1936,8 +1936,7 @@ services:
     ports:
       - '28082:80'
     restart: {{container_restart_policy}}
-  {% endif %}   {#  MQTT_UI_enable #}
-{% endif %}   {#  MQTT_enable #}
+{% endif %}   {#  MQTT_UI_enable #}
 
 {% if ACTIVEMQ_enable | default(false) %}
   #  ================================== Active MQ ========================================== #}
