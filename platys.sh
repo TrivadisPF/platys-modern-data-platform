@@ -180,10 +180,10 @@ then
 
    if [ ${VERBOSE:-0} -eq 1 ] 
    then
-	echo "Running container with this docker cmd:" docker run --rm -v "${PWD}":/opt/mdps-gen/stack-config -v "${destination}":/opt/mdps-gen/destination -e CONFIG_URL="${CONFIG_URL}" -e VERBOSE="${VERBOSE}" --user $(id -u):$(id -g) "${stack_name:-trivadis/platys-modern-data-platform}":"${stack_version:-1.2.0}"
+	echo "Running container with this docker cmd:" docker run --rm -v "${PWD}":/opt/mdps-gen/stack-config -v "${destination}":/opt/mdps-gen/destination -e CONFIG_URL="${CONFIG_URL}" -e VERBOSE="${VERBOSE}" -e DEL_EMPTY_LINES=1 --user $(id -u):$(id -g) "${stack_name:-trivadis/platys-modern-data-platform}":"${stack_version:-1.2.0}"
    fi
 
-   docker run --rm -v "${PWD}":/opt/mdps-gen/conf -v "${destination}":/opt/mdps-gen/destination -e CONFIG_URL="${CONFIG_URL}" -e VERBOSE="${VERBOSE}" --user $(id -u):$(id -g) "${stack_name:-trivadis/platys-modern-data-platform}":"${stack_version:-1.2.0}"
+   docker run --rm -v "${PWD}":/opt/mdps-gen/conf -v "${destination}":/opt/mdps-gen/destination -e CONFIG_URL="${CONFIG_URL}" -e VERBOSE="${VERBOSE}" -e DEL_EMPTY_LINES=1 --user $(id -u):$(id -g) "${stack_name:-trivadis/platys-modern-data-platform}":"${stack_version:-1.2.0}"
 
    echo "Modern Data Platform Stack generated successfully to ${destination}"
 
