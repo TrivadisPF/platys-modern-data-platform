@@ -6,7 +6,7 @@ import docker
 import tempfile
 import tarfile
 import logging
-import yaml
+import ruamel.yaml
 from pathlib import Path
 import sys
 
@@ -92,6 +92,7 @@ def gen(config_filename, config_url, del_empty_lines, structure, verbose):
 #
 # Init
 #
+
 @cli.command()
 @click.option('-n', '--platform-name', 'platform_name', type=click.STRING, required=True, help='the name of the platform to generate.')
 @click.option('-sn', '--stack-name', 'stack_name', default='trivadis/platys-modern-data-platform', type=click.STRING, show_default=True, help='the platform stack image')
@@ -100,7 +101,8 @@ def gen(config_filename, config_url, del_empty_lines, structure, verbose):
 @click.option('-sc', '--seed-config', 'seed_config', type=click.STRING, help='the name of a predefined stack to base this new platform on')
 @click.option('-f', '--force', is_flag=True, help='If specified, this command will overwrite any existing config file')
 @click.option('-hw', '--hw-arch', 'hw_arch', type=click.Choice(['ARM', 'ARM64', 'x86-64']), default='x86-64', help='Hardware architecture for the platform')
-def init(platform_name, stack_name, stack_version, config_filename, seed_config, force, hw_arch):
+@click.option('-s', '--enable-services', 'enable_services', help='List of services to enable in the config file')
+def init(platform_name, stack_name, stack_version, config_filename, seed_config, force, hw_arch, enable_services):
     """Initializes the current directory to be the root for the Modern (Data) Platform by creating an initial
     config file, if one does not already exists.
     
@@ -117,6 +119,22 @@ def init(platform_name, stack_name, stack_version, config_filename, seed_config,
         tar_file = tarfile.open(tar_config)
         tar_file.extractall(path="./")
         tar_file.close()
+
+    if enable_services:
+        yaml = ruamel.yaml.YAML()
+        yaml.indent(mapping=4, sequence=6, offset=4)
+
+
+        with open(os.path.join(sys.path[0], "config.yml"), 'r') as file:
+            config_yml = yaml.load(file)
+
+            for s in enable_services.split(','):
+                if s + '_enable' in config_yml:
+                    config_yml[s + '_enable'] = True
+
+        with open(os.path.join(sys.path[0], "config.yml"), 'w') as file:
+            yaml.dump(config_yml, file)
+
 
         with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'init_banner.txt'), 'r') as f:
             for line in f:
@@ -162,11 +180,11 @@ def list_services(stack_name, stack_version):
     tar_file = tarfile.open(tar_config)
     tar_file.extractall(path=tempfile.gettempdir())
     tar_file.close()
-
+    yaml = ruamel.yaml.YAML()
     with open(rf'{tempfile.gettempdir()}/config.yml') as file:
-        config_yml = yaml.load(file, Loader=yaml.FullLoader)
+        config_yml = yaml.load(file)
         for c in config_yml:
-            service = re.search("([A-Z0-9_-]+)_enable", str(c)) # if variable follows regex it's considered a service and will be printed
+            service = re.search("([A-Z0-9_-]+)_enable", str(c))  # if variable follows regex it's considered a service and will be printed
             if service is not None:
                 print(service.group(1))
 
