@@ -28,8 +28,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 5001 | 5000 | amundsensearch
 5002 | 5000 | amundsenmetadata
 5500 | 5500 | oracle-db |
-     | 5432 | hive-metastore-db |
-     | 5432 | hue-db |
+\-     | 5432 | hive-metastore-db |
+\-     | 5432 | hue-db |
 5432 | 5432 | postgresql |
 5433 | 5432 | timescaledb |
 5601 | 5601 | kibana |
