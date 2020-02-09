@@ -1,8 +1,8 @@
-## Port to Service Mappings
+# `modern-data-platform` - Port Mappings
 
 This table reserves the external ports for the various services. Not all services have to be used in the platform at a given time. But by reserving, we can assure that there are no conflicts if a service is added at a later time.
 
-### Internal Port
+## "Original" Ports
 
 Container Port(s) | Internal Port(s)           | Service (alternatives) |
 --------------------|------------------|-----------------------|
@@ -138,7 +138,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 61614 | 61614 | activemq (ws) |
 61616 | 61616 | activemq (jms) |
 
-## from 28000
+## Ports > 28100
 
 Container Port(s) | Internal Port(s)           | Service (alternatives) |
 --------------------|------------------|-----------------------|
@@ -181,18 +181,6 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28215 | 80 | mqtt-ui |
 28216 | 9000 | portainer |
 28217 | 8080 | cadvisor | 
-
-----------------
-
-
-### External Ports
-
-Container Port(s) | Internal Port(s)           | Service (alternatives) |
---------------------|------------------|-----------------------|
-28011 | 8047 | drill |
-28022 | 8888 | oracle-rest-1 |
-28058 | 8080 | webspoon (penthao) | 
-28059 | 8080 | hawtio |
 
 
 An overview of the URL for the various web-based UIs can be found [here](./environment/README.md).
