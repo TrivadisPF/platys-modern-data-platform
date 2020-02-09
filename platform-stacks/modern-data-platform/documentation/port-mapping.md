@@ -120,6 +120,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 21000 | 21000 | atlas |
 27017 | 27017 | mongodb |
 28080 | 28080 | zeppelin |
+28081 | 8080 | presto |
 28888 | 8888 | jupyter |
 29042 | 9042 | cassandra-1 |
 29043 | 9042 | cassandra-1 |
@@ -186,7 +187,6 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 Container Port(s) | Internal Port(s)           | Service (alternatives) |
 --------------------|------------------|-----------------------|
 28011 | 8047 | drill |
-28017 | 8080 | presto |
 28022 | 8888 | oracle-rest-1 |
 28025 | 9047 | dremio |
 28050 | 31010 | dremio | 
