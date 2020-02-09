@@ -103,6 +103,7 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
 {% set __AXON_version = AXON_version | default('latest') -%}
 
 {% set __PRESTO_version = PRESTO_version | default('latest') -%}
+{% set __DREMIO_version = DREMIO_version | default('latest') -%}
 
 {% set __MOSQUITTO_version = MOSQUITTO_version | default('latest') -%}
 {% set __HIVEMQ3_version = HIVEMQ3_version | default('latest') -%}
@@ -163,6 +164,7 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
   {% set ADMINER_enable = false -%}
   {% set AXON_enable = false -%}
   {% set PRESTO_enable = false -%}
+  {% set DREMIO_enable = false -%}
   {% set HIVEMQ3_enable = false -%}
   {% set HIVEMQ4_enable = false -%}
   {% set MQTT_UI_enable = false -%}
@@ -1878,13 +1880,32 @@ services:
     hostname: presto
     image: {{ 'starburstdata/presto' if (PRESTO_edition | lower) == 'starburstdata' else 'prestosql/presto' }}:{{__PRESTO_version}}
     container_name: presto
+    labels:
+      com.mdps.service.webui.name: "Presto UI"
+      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28081"
     ports:
       - '28081:8080'
 #    volumes:
 #      - './conf/presto/minio.properties:/usr/lib/presto/etc/catalog/minio.properties'
 #      - './conf/presto/postgresql.properties:/usr/lib/presto/etc/catalog/postgresql.properties'
-    restart: always
+    restart: {{container_restart_policy}}
 {% endif %}   {#  PRESTO_enable #}
+
+{% if DREMIO_enable | default(false) %}
+  #  ================================== Presto ========================================== #}
+  dremio:
+    hostname: dremio
+    image: dremio/dremio-oss:{{__DREMIO_version}}
+    container_name: dremio
+    labels:
+      com.mdps.service.webui.name: "Dremio UI"
+      com.mdps.service.webui.url: "http://${PUBLIC_IP}:9047"
+    ports:
+      - '9047:9047'
+      - '31010:31010'
+      - '45678:45678'
+    restart: {{container_restart_policy}}
+{% endif %}   {#  DREMIO_enable #}
 
 {% if MINIO_enable | default(false) %}
   #  ================================== Minio ========================================== #}

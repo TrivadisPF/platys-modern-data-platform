@@ -70,6 +70,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 9042 | 9042 | dse-1 |
 9043 | 9042 | dse-2 |
 9044 | 9042 | dse-3 |
+9047 | 9047 | dremio |
 9200 | 9200 | elasticsearch-1 |
 9300 | 9300 | elasticsearch-1 |
 9000 | 9000 | minio |
@@ -131,6 +132,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 29095 | 29095 | kafka-4 (docker-host)   |
 29096 | 29096 | kafka-5 (docker-host)   |
 29097 | 29097 | kafka-6 (docker-host)   |
+31010 | 31010 | dremio |
+45678 | 45678 | dremio |
 61613 | 61613 | activemq (stomp) |
 61614 | 61614 | activemq (ws) |
 61616 | 61616 | activemq (jms) |
@@ -188,9 +191,6 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 --------------------|------------------|-----------------------|
 28011 | 8047 | drill |
 28022 | 8888 | oracle-rest-1 |
-28025 | 9047 | dremio |
-28050 | 31010 | dremio | 
-28066 | 45678 | dremio |
 28058 | 8080 | webspoon (penthao) | 
 28059 | 8080 | hawtio |
 
