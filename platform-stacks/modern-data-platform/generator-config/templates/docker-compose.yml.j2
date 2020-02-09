@@ -102,6 +102,8 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
 
 {% set __AXON_version = AXON_version | default('latest') -%}
 
+{% set __PRESTO_version = PRESTO_version | default('latest') -%}
+
 {% set __MOSQUITTO_version = MOSQUITTO_version | default('latest') -%}
 {% set __HIVEMQ3_version = HIVEMQ3_version | default('latest') -%}
 {% set __HIVEMQ4_version = HIVEMQ4_version | default('latest') -%}
@@ -160,6 +162,7 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
   {% set TIMESCALEDB_enable = false -%}
   {% set ADMINER_enable = false -%}
   {% set AXON_enable = false -%}
+  {% set PRESTO_enable = false -%}
   {% set HIVEMQ3_enable = false -%}
   {% set HIVEMQ4_enable = false -%}
   {% set MQTT_UI_enable = false -%}
@@ -1869,6 +1872,19 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {#  AXON_enable #}
 
+{% if PRESTO_enable | default(false) %}
+  #  ================================== Presto ========================================== #}
+  presto:
+    hostname: presto
+    image: {{ 'starburstdata/presto' if (PRESTO_edition | lower) == 'starburstdata' else 'prestosql/presto' }}:{{__PRESTO_version}}
+    container_name: presto
+    ports:
+      - '28081:8080'
+#    volumes:
+#      - './conf/presto/minio.properties:/usr/lib/presto/etc/catalog/minio.properties'
+#      - './conf/presto/postgresql.properties:/usr/lib/presto/etc/catalog/postgresql.properties'
+    restart: always
+{% endif %}   {#  PRESTO_enable #}
 
 {% if MINIO_enable | default(false) %}
   #  ================================== Minio ========================================== #}
