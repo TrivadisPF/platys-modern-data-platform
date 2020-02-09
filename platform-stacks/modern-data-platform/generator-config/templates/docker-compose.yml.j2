@@ -530,7 +530,7 @@ services:
 
 {% if (KAFKA_enable and KAFKA_KADMIN_enable) | default(false) %}
   kadmin:
-    image: hasnat/kadmin:{{__KAFKA_KADMIN_version}}
+    image: bettercloud/kadmin:{{__KAFKA_KADMIN_version}}
     container_name: kadmin
     hostname: kadmin
     labels:
@@ -750,7 +750,11 @@ services:
       - INIT_DAEMON_STEP=setup_spark
 #      - CORE_CONF_fs_defaultFS=hdfs://namenode:8020
     volumes:
-      - ./conf/spark/spark-defaults.conf:/spark/conf/spark-defaults.conf
+  {%if (SPARK_catalog | lower) == 'in-memory' | default(false) %}
+      - ./conf/spark/spark-defaults-memory.conf:/spark/conf/spark-defaults.conf
+  {% else -%}
+      - ./conf/spark/spark-defaults-hive.conf:/spark/conf/spark-defaults.conf
+  {% endif -%}   {#  SPARK_catalog #}
   {% if SPARK_HISTORY_enable | default(false) %}
       - ./container-volume/spark/logs/:/var/log/spark/logs
   {% endif -%}   {#  SPARK_HISTORY_enable #}
@@ -778,7 +782,11 @@ services:
       SPARK_WORKER_WEBUI_PORT: "{{webui_port}}"
       SPARK_PUBLIC_DNS: ${PUBLIC_IP}
     volumes:
-      - ./conf/spark/spark-defaults.conf:/spark/conf/spark-defaults.conf
+  {%if (SPARK_catalog | lower) == 'in-memory' | default(false) %}
+      - ./conf/spark/spark-defaults-memory.conf:/spark/conf/spark-defaults.conf
+  {% else -%}
+      - ./conf/spark/spark-defaults-hive.conf:/spark/conf/spark-defaults.conf
+  {% endif -%}   {#  SPARK_catalog #}
   {% if SPARK_HISTORY_enable | default(false) %}
       - ./container-volume/spark/logs/:/var/log/spark/logs
   {% endif -%}   {#  SPARK_HISTORY_enable #}
@@ -801,7 +809,11 @@ services:
     ports:
       - 28117:18080
     volumes:
-      - ./conf/spark/spark-defaults.conf:/spark/conf/spark-defaults.conf
+  {%if (SPARK_catalog | lower) == 'in-memory' | default(false) %}
+      - ./conf/spark/spark-defaults-memory.conf:/spark/conf/spark-defaults.conf
+  {% else -%}
+      - ./conf/spark/spark-defaults-hive.conf:/spark/conf/spark-defaults.conf
+  {% endif -%}   {#  SPARK_catalog #}
       - ./container-volume/spark/logs/:/var/log/spark/logs
     restart: {{container_restart_policy}}
   {% endif %}   {#  SPARK_HISTORY_enable #}
@@ -816,7 +828,11 @@ services:
       - ./conf/hadoop.env
     volumes:
       - ./conf/hive-site.xml:/spark/conf/hive-site.xml
-      - ./conf/spark/spark-defaults.conf:/spark/conf/spark/spark-defaults.conf
+  {%if (SPARK_catalog | lower) == 'in-memory' | default(false) %}
+      - ./conf/spark/spark-defaults-memory.conf:/spark/conf/spark-defaults.conf
+  {% else -%}
+      - ./conf/spark/spark-defaults-hive.conf:/spark/conf/spark-defaults.conf
+  {% endif -%}   {#  SPARK_catalog #}
     command: bash -c "sleep 2m && /spark/sbin/start-thriftserver.sh && tail -f /spark/logs/spark--org.apache.spark.sql.hive.thriftserver.HiveThriftServer2-*.out"
   {% endif %}   {#  SPARK_THRIFT_enable #}
 
@@ -836,7 +852,11 @@ services:
     env_file:
       - ./conf/hadoop.env
     volumes:
-      - ./conf/spark/spark-defaults.conf:/spark/conf/spark-defaults.conf
+  {%if (SPARK_catalog | lower) == 'in-memory' | default(false) %}
+      - ./conf/spark/spark-defaults-memory.conf:/spark/conf/spark-defaults.conf
+  {% else -%}
+      - ./conf/spark/spark-defaults-hive.conf:/spark/conf/spark-defaults.conf
+  {% endif -%}   {#  SPARK_catalog #}
     ports:
       - "8998:8998"
     environment:
@@ -1239,7 +1259,11 @@ services:
       # enableV4 to make it work with AWS Frankfurt region
       SPARK_SUBMIT_OPTIONS: "--conf spark.driver.extraJavaOptions=-Dcom.amazonaws.services.s3.enableV4 --conf spark.executor.extraJavaOptions=-Dcom.amazonaws.services.s3.enableV4"
     volumes:
-      - ./conf/spark/spark-defaults.conf:/spark/conf/spark/spark-defaults.conf
+  {%if (SPARK_catalog | lower) == 'in-memory' | default(false) %}
+      - ./conf/spark/spark-defaults-memory.conf:/spark/conf/spark-defaults.conf
+  {% else -%}
+      - ./conf/spark/spark-defaults-hive.conf:/spark/conf/spark-defaults.conf
+  {% endif -%}   {#  SPARK_catalog #}
       - './conf/s3cfg:/root/.s3cfg'
       - ./conf/zeppelin/shiro.ini:/opt/zeppelin/conf/shiro.ini
       - ./conf/zeppelin/interpreter-setting.json:/opt/zeppelin/interpreter/spark/interpreter-setting.json
