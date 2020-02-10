@@ -162,25 +162,25 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28117 | 18080 | spark-history |
 28118 | 10000 | spark-thrift-server |
 28119 | 8081 | redis-commander |
-28200 | 3000 | cassandra-web |
-28201 | 9091 | dse-studio |
-28202 | 8888 | dse-opscenter |
-28203 | 8081 | mongo-express |
-28204 | 1234 | admin-mongo |
-28205 | 1358 | dejavu |
-28206 | 9000 | cerebro |
-28207 | 5000 | elastichq |
-28208 | 80 | influxdb-ui |
-28209 | 8888 | chronograf |
-28209 | 9092 | kapacitor |
-28210 | 8080 | adminer |
-28211 | 8080 | hivemq3_1 |
-28212 | 8080 | hivemq3_2 |
-28213 | 8080 | hivemq4_1 |
-28214 | 8080 | hivemq4_2 |
-28215 | 80 | mqtt-ui |
-28216 | 9000 | portainer |
-28217 | 8080 | cadvisor | 
+28120 | 3000 | cassandra-web |
+28121 | 9091 | dse-studio |
+28122 | 8888 | dse-opscenter |
+28123 | 8081 | mongo-express |
+28124 | 1234 | admin-mongo |
+28125 | 1358 | dejavu |
+28126 | 9000 | cerebro |
+28127 | 5000 | elastichq |
+28128 | 80 | influxdb-ui |
+28129 | 8888 | chronograf |
+28130 | 9092 | kapacitor |
+28131 | 8080 | adminer |
+28132 | 8080 | hivemq3_1 |
+28133 | 8080 | hivemq3_2 |
+28134 | 8080 | hivemq4_1 |
+28135 | 8080 | hivemq4_2 |
+28136 | 80 | mqtt-ui |
+28137 | 9000 | portainer |
+28138 | 8080 | cadvisor | 
 
 
 An overview of the URL for the various web-based UIs can be found [here](./environment/README.md).
