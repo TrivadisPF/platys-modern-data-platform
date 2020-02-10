@@ -14,6 +14,21 @@ __version__ = '2.0.0'
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 
 
+class PushRootLeft:
+    def __init__(self, positions=42):
+        self.positions = positions
+
+    def __call__(self, s):
+        result = []
+        for line in s.splitlines(True):
+            sline = line.strip()
+            if not sline or sline[0] == '#':
+                result.append(line)
+            else:
+                result.append(' ' * self.positions + line)
+        return ''.join(result)
+
+
 @click.group(context_settings=CONTEXT_SETTINGS)
 @click.version_option(__version__)
 def cli():
@@ -42,7 +57,8 @@ def gen(config_filename, config_url, del_empty_lines, structure, verbose):
     click.echo(f'gen: config-filename = {config_filename}, structure = {structure}')
 
     with open(rf'{config_filename}') as file:
-        config_yml = yaml.load(file, Loader=yaml.FullLoader)
+        yaml = ruamel.yaml.YAML()
+        config_yml = yaml.load(file)
         platys_config = config_yml.get('platys')
 
         if platys_config is None:
@@ -122,23 +138,51 @@ def init(platform_name, stack_name, stack_version, config_filename, seed_config,
 
     if enable_services:
         yaml = ruamel.yaml.YAML()
-        yaml.indent(mapping=4, sequence=6, offset=4)
+        yaml.indent(sequence=18)
+        yaml.preserve_quotes = True
 
+        services = enable_services.split(',')
+
+        slim_yml = {}
 
         with open(os.path.join(sys.path[0], "config.yml"), 'r') as file:
             config_yml = yaml.load(file)
 
-            for s in enable_services.split(','):
+            for s in services:
                 if s + '_enable' in config_yml:
                     config_yml[s + '_enable'] = True
 
+        keys_to_del = []
+
+        for key, value in config_yml.items():
+            if not contained(services, key) and key != "platys":
+                keys_to_del.append(key)
+
+        for key in [key for key in config_yml if key in keys_to_del]:
+            del config_yml[key]
+
         with open(os.path.join(sys.path[0], "config.yml"), 'w') as file:
-            yaml.dump(config_yml, file)
+            yaml.dump(config_yml, file, transform=PushRootLeft(6))
+
+        print_banner()
 
 
-        with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'init_banner.txt'), 'r') as f:
-            for line in f:
-                print(line.rstrip())
+def contained(services, k):
+
+
+
+    for s in services:
+        pattern = re.compile(s+'_[a-z]+')
+        if pattern.match(k):
+            return True
+
+    return False
+
+
+def print_banner():
+    with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'init_banner.txt'), 'r') as f:
+        for line in f:
+            print(line.rstrip())
 
 
 @cli.command("stacks")
