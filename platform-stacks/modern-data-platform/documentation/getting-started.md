@@ -43,22 +43,18 @@ nano config.yml
 You can see the configuration options, available through this platform stack, similar to this (only showing the first few lines)
 
 ```
-      # =============== Do to remove ==========================
-      stack_name: trivadis/platys-modern-data-platform
-      stack_version: 1.2.0
-      platform_name: kafka-platform 
-      hw_arch: x86-64 
-      # =============== Do to remove ==========================
+ # Default values for the generator
+ # this file can be used as a template for a custom configuration
+ # or to know about the different variables available for the generator
+      platys:
+        platform-name: 'default'
+        stack-image-name: 'trivadis/platys-modern-data-platform'
+        stack-image-version: '1.2.0'
 
-
-      #zookeeper
-      ZOOKEEPER_enable: false
-      ZOOKEEPER_volume_map_data: false
-      ZOOKEEPER_nodes: 1            # either 1 or 3
-
-      #kafka
-      KAFKA_enable: false
-      KAFKA_entreprise_enable: false
+      # ===== Apache Zookeeper ========
+      KAFKA_enable: true
+      # one of enterprise, community
+      KAFKA_edition: 'community'
       KAFKA_volume_map_data: false
       KAFKA_broker_nodes: 3
       KAFKA_delete_topic_enable: false
