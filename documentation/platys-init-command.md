@@ -1,7 +1,7 @@
 # platys init
 
 ```
-Usage: platys.py init [OPTIONS]
+Usage: platys init [OPTIONS]
 
   Initializes the current directory to be the root for the Modern (Data)
   Platform by creating an initial config file, if one does not already
@@ -15,8 +15,7 @@ Options:
   -n, --platform-name TEXT        the name of the platform to generate.
                                   [required]
   -sn, --stack-name TEXT          the platform stack image  [default:
-                                  trivadis/modern-data-platform-stack-
-                                  generator]
+                                  trivadis/platys-modern-data-platform]
   -sv, --stack-version TEXT       the platform stack image version to use
                                   [default: latest]
   -cf, --config-filename TEXT     the name of the local config file.
@@ -27,6 +26,8 @@ Options:
                                   any existing config file
   -hw, --hw-arch [ARM|ARM64|x86-64]
                                   Hardware architecture for the platform
+  -s, --enable-services TEXT      List of services to enable in the config
+                                  file
   -h, --help                      Show this message and exit.
 ```
 
