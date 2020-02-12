@@ -16,6 +16,7 @@ Options:
 Commands:
   gen            Generates all the needed artefacts for the docker-based...
   init           Initializes the current directory to be the root for the...
+  list_services  Shows the services interfaces of the stack, web and/or apis
 ```
    
 You can use platys binary, `platys [OPTIONS] [COMMAND] [ARGS...]`, to generate and manage docker compose files. 
