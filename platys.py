@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import os
 import re
 
@@ -143,8 +144,6 @@ def init(platform_name, stack_name, stack_version, config_filename, seed_config,
 
         services = enable_services.split(',')
 
-        slim_yml = {}
-
         with open(os.path.join(sys.path[0], "config.yml"), 'r') as file:
             config_yml = yaml.load(file)
 
@@ -156,9 +155,11 @@ def init(platform_name, stack_name, stack_version, config_filename, seed_config,
 
         for key, value in config_yml.items():
             if not contained(services, key) and key != "platys":
+                print(f"adding {key} to deletion array")
                 keys_to_del.append(key)
 
         for key in [key for key in config_yml if key in keys_to_del]:
+            print(f"about to delete {key} to deletion array")
             del config_yml[key]
 
         with open(os.path.join(sys.path[0], "config.yml"), 'w') as file:
