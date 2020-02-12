@@ -1,1 +1,0 @@
-Contains the data of timescale db service, if flag TIMESCALEDB_volume_map_data is set to true.

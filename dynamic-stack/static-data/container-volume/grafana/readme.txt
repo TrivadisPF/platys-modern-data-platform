@@ -1,1 +1,0 @@
-Contains the data of grafana service, if flag GRAFANA_volume_map_data is set to true.
