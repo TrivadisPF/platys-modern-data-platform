@@ -55,7 +55,7 @@ See [What's new?](./documentation/changes.md) for a detailed list of changes.
 **Usage**
 
 * [Installing platys](./documentation/install.md)
-* [Getting Started with `platys` and the `modern-data-platform` platform stack](./documentation/getting-started.md)
+* [Getting Started with `platys` and the `modern-data-platform` platform stack](./platform-stacks/modern-data-platform/documentation/getting-started.md)
 * [Frequently Asked Questions](./documentation/faq.md)
 * [Command line reference](./documentation/command-line-ref.md)
 * [Glossary of Terms](./documentation/glossary.md)
