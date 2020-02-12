@@ -48,6 +48,13 @@ Follow the instructions below to install `platys` on a Windows system.
 curl "https://github.com/TrivadisPF/platys/releases/download/2.0.0/platys.exe" -o c:/Windows/platys.exe
 ```
 
+2. Use the `--version` option to check that the generator has been installed successfully.
+
+  ```
+$ platys --version
+Platys - Trivadis Platform in a Box - v2.0.0
+```
+
    
 ## Uninstallation
 
