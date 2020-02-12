@@ -1,13 +1,15 @@
 
-# Getting Started with `platys`
+# Getting Started with `platys` and `modern-data-platform` stack
 
-On this page you generate a simple platform, which we can then run on Docker Compose. The platform we create, uses Kafka and Zookeeper and it should be understandable even if you haven't worked with Kafka before. 
+On this page you generate a simple platform which is based on the `modern-data-platform` stack and can then be run using Docker Compose. 
+
+The platform we will create here, uses Kafka and Zookeeper, but the process should be understandable even if you haven't worked with Kafka before. 
 
 ## Prerequisites
 
 Make sure that you have already installed the [Docker Engine](https://docs.docker.com/install/), [Docker Compose](https://docs.docker.com/compose/install/) and the [`platys`](install.md) toolset. 
 
-## Step 1: Initialize the environment
+## Step 1: Initialise the environment
 
 First create a directory, which will hold the `platys` configuration as well as the generated artefacts:
 
