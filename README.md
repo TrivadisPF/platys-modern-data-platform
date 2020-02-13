@@ -7,6 +7,8 @@
 # platys - Trivadis Platform in a Box
 Copyright (c) 2019-2020 Trivadis
 
+THIS IS STILL WORK IN PROGRESS .... USE IT WITH CAUTION! 
+
 ## What is `platys`?
 
 `platys` is a tool for generating and provisioning Modern Data Platforms based on [Docker](https://www.docker.com/get-started) and [Docker Compose](https://docs.docker.com/compose/). 
