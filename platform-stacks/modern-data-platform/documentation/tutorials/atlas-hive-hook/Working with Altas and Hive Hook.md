@@ -2,18 +2,25 @@
 
 This tutorial will show the Hive Hook and Atlas in Action.
 
-## Setup a platform
+## Initialise a platform with Atlas and Hive
 
-First [initialise a platys-supported data platform](../../getting-started.md) with the following minimal services enabled. 
+First [initialise a platys-supported data platform](../../getting-started.md) with the following services enabled in the `config.yml`
 
 ```
       KAFKA_enable: true
       HADOOP_enable: true
       HIVE_enable: true
       ATLAS_enable: true
-      ATLAS_install_hive_hook: true
       HUE_enable: true
 ```
+
+Additionally make sure that the Atlas Hive hook is installed into the hive server:
+
+```
+      ATLAS_install_hive_hook: true
+```
+
+Now generate and start the data platform. 
 
 ## Listen on the ATLAS_HOOK
 
