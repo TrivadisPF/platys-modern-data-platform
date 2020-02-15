@@ -147,6 +147,9 @@ def init(platform_name, stack_name, stack_version, config_filename, seed_config,
         with open(os.path.join(sys.path[0], "config.yml"), 'r') as file:
             config_yml = yaml.load(file)
 
+            if platform_name: # a name has been defined for the platform name override default
+                config_yml['platys']['platform-name'] = platform_name
+
             for s in services:
                 if s + '_enable' in config_yml:
                     config_yml[s + '_enable'] = True
