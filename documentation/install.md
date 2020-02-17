@@ -52,15 +52,15 @@ sudo curl -L "https://github.com/TrivadisPF/platys/releases/download/2.0.0/platy
 
   ```
 tar zvxf /tmp/platys.tar.gz 
-sudo mv platys.dist/ /usr/local/bin
-sudo mv platys.sh /usr/local/bin/platys
+sudo mv platys.dist/ /usr/local/lib/
+sudo chown -R root:root /usr/local/lib/platys.dist/
 rm /tmp/platys.tar.gz 
 ```
 
 3. Apply executable permissions to the binary:
 
   ```
-sudo chmod +x /usr/local/bin/platys 
+sudo ln /usr/local/lib/platys /usr/local/bin/platys
 ```
 
 4. Use the `--version` option to check that the generator has been installed successfully.
@@ -69,7 +69,6 @@ sudo chmod +x /usr/local/bin/platys
 $ platys --version
 Platys - Trivadis Platform in a Box - v2.0.0
 ```
-
 
 ### Windows 
 

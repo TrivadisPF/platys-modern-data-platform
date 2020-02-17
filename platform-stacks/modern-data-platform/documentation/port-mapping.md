@@ -107,6 +107,9 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 18087 | 8086 | kafka-rest-2 |
 18088 | 8086 | kafka-rest-3 |
 18188 | 8188 | historyserver |
+18620 | 18629 | streamsets-1     |
+18621 | 18629 | streamsets-2     |
+18622 | 18629 | streamsets-3     |
 18630 | 18630 | streamsets-1     |
 18631 | 18630 | streamsets-2     |
 18632 | 18630 | streamsets-3     |
@@ -120,7 +123,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 19632 | 19630 | streamsets-transformer-1 | 
 21000 | 21000 | atlas |
 27017 | 27017 | mongodb |
-28080 | 28080 | zeppelin |
+28080 | 8080 | zeppelin |
 28081 | 8080 | presto |
 28888 | 8888 | jupyter |
 29042 | 9042 | cassandra-1 |
@@ -181,6 +184,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28136 | 80 | mqtt-ui |
 28137 | 9000 | portainer |
 28138 | 8080 | cadvisor | 
+28500 - 28510 | 28500 - 28510 | streamsets-1 (additional ports) |
 
 
 An overview of the URL for the various web-based UIs can be found [here](./environment/README.md).

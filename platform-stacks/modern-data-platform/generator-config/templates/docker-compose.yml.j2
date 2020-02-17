@@ -377,6 +377,7 @@ services:
       KSQL_HOST_NAME: ksqldb-server-{{loop.index}}
       KSQL_APPLICATION_ID: "kafka-demo"
       KSQL_LISTENERS: http://0.0.0.0:{{port}}
+      KSQL_KSQL_SCHEMA_REGISTRY_URL: "http://schema-registry-1:8081"
       KSQL_KSQL_LOGGING_PROCESSING_STREAM_AUTO_CREATE: "true"
       KSQL_KSQL_LOGGING_PROCESSING_TOPIC_AUTO_CREATE: "true"
       KSQL_KSQL_SERVICE_ID: "kafka-demo"
@@ -1129,12 +1130,23 @@ services:
       com.mdps.service.restapi.url: "http://${PUBLIC_IP}:18630/collector/restapi"
     ports:
       - "18630:18630"
+    {%if STREAMSETS_activate_https | default(false) %}
+      - "18629:18629"
+    {% endif %}
+  {% for num in range(STREAMSETS_additional_port_mappings | default(0) ) %}
+      {% set external_port = 28500 + loop.index - 1 %}
+      {% set webui_port = 28500 + loop.index - 1 %}
+      - "{{external_port}}:{{webui_port}}"
+  {% endfor %}
     environment:
       SDC_OFFSET_DIRECTORY: /data/custom-offset-el
       SDC_JAVA_OPTS: "-Xmx2g -Xms2g"
       SDC_JAVA8_OPTS: "-XX:+UseG1GC"
       SDC_CONF_MONITOR_MEMORY: "true"
       SDC_CONF_PIPELINE_MAX_RUNNERS_COUNT: 50
+    {%if STREAMSETS_activate_https | default(false) %}
+      SDC_CONF_HTTPS_PORT: 18629
+    {% endif %}
     volumes:
       - ./data-transfer:/data-transfer
     {% if STREAMSETS_volume_map_data %}
@@ -1144,6 +1156,10 @@ services:
 #      - ./streamsets-extras/streamsets-libs-extras/streamsets-datacollector-jdbc-lib/postgresql-42.2.6.jar:/opt/streamsets-datacollector-{{__STREAMSETS_version}}/streamsets-libs-extras/streamsets-datacollector-jdbc-lib/lib/postgresql-42.2.6.jar:Z
 #      - ./streamsets-extras/libs-common-lib:/opt/streamsets-datacollector-{{__STREAMSETS_version}}/libs-common-lib:Z
 #      - ./streamsets-extras/user-libs:/opt/streamsets-datacollector-user-libs:Z
+    ulimits:
+      nofile:
+        soft: 32768
+        hard: 32768
     restart: {{container_restart_policy}}
 {% endif %}   {#  STREAMSETS_enable  #}
 
