@@ -50,7 +50,7 @@ Use the following service block for provisioning StreamSets Pipelines automatica
     hostname: streamsets-setup
     container_name: streamsets-setup
     depends_on:
-      - streamsets
+      - streamsets-1
     volumes:
       - ./streamsets-pipelines:/import
     command:
