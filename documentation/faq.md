@@ -29,7 +29,7 @@ Use the follwoing service block for provisioning Kafka topics automatically as p
     hostname: kafka-setup
     container_name: kafka-setup
     command: "bash -c 'echo Waiting for Kafka to be ready... && \
-                       cub kafka-ready -b kafka-1:9092 1 20 && \
+                       cub kafka-ready -b kafka-1:19092 1 20 && \
                        kafka-topics --create --if-not-exists --zookeeper zookeeper-1:2181 --partitions 1 --replication-factor 1 --topic orders"
     environment:
       # The following settings are listed here only to satisfy the image's requirements.
@@ -50,7 +50,7 @@ Use the following service block for provisioning StreamSets Pipelines automatica
     hostname: streamsets-setup
     container_name: streamsets-setup
     depends_on:
-      - streamsets
+      - streamsets-1
     volumes:
       - ./streamsets-pipelines:/import
     command:
@@ -88,7 +88,7 @@ Use the following service block for provisioning Kafka Connect Connector instanc
     volumes:
       - ./kafka-connect-jdbc-sink-hafen-vm.json:/opt/kafka-connect-jdbc-sink-hafen-vm.json:Z
     environment:
-      CONNECT_BOOTSTRAP_SERVERS: 'kafka-1:9092'
+      CONNECT_BOOTSTRAP_SERVERS: 'kafka-1:19092'
       CONNECT_REST_ADVERTISED_HOST_NAME: connect
       CONNECT_REST_PORT: 8083
       CONNECT_GROUP_ID: compose-connect-group
@@ -130,7 +130,7 @@ Use the following service block for provisioning Kafka Connect Connector instanc
 
 Add this service to the `docker-compose.override.yml` file. 
 
-## How can I provision Kafka Connect Connector instances automatically?
+## How can I provision Avro Schema instances automatically?
 
 Use the following service block for provisioning Kafka Connect Connector instances automatically as part of the stack: 
 
@@ -164,5 +164,5 @@ Add this service to the `docker-compose.override.yml` file.
    
 ## `platys` documentation
 
-* [Getting Started](getting-started.md)
+* [Getting Started with `platys` and the `modern-data-platform` platform stack](../platform-stacks/modern-data-platform/documentation/getting-started.md)
 * [Explore the full list of Platys commands](overview-platys-command.md)
