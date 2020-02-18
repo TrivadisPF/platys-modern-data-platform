@@ -100,9 +100,10 @@ def gen(config_filename, config_url, del_empty_lines, structure, verbose):
                                              f"VERBOSE={int(verbose == True)}",
                                              f"DEL_EMPTY_LINES={int(del_empty_lines == True)}",
                                          ],
-                                         user=pwd.getpwuid(os.getuid()).pw_uid
+                                         user=f"{pwd.getpwuid(os.getuid()).pw_uid}:{os.getgid()}"
 
                                          )
+
 
     for line in dp_container.logs(stream=True):
         print(line.strip())
