@@ -98,6 +98,6 @@ sudo rm /usr/local/bin/platys
    
 ## Where to go next
 
-* [Getting Started](getting-started.md)
+* [Getting Started with `platys` and the `modern-data-platform` platform stack](../platform-stacks/modern-data-platform/documentation/getting-started.md)
 * [Explore the full list of platys commands](command-line-ref.md)
 * [Configuration file reference](../platform-stacks/modern-data-platform/documentation/configuration.md)
