@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
 import re
-
+import pwd
 import click
 import docker
 import tempfile
@@ -99,8 +99,11 @@ def gen(config_filename, config_url, del_empty_lines, structure, verbose):
                                              f"CONFIG_URL={config_url}",
                                              f"VERBOSE={int(verbose == True)}",
                                              f"DEL_EMPTY_LINES={int(del_empty_lines == True)}",
-                                         ]
+                                         ],
+                                         user=f"{pwd.getpwuid(os.getuid()).pw_uid}:{os.getgid()}"
+
                                          )
+
 
     for line in dp_container.logs(stream=True):
         print(line.strip())
@@ -146,6 +149,7 @@ def init(platform_name, stack_name, stack_version, config_filename, seed_config,
 
         with open(os.path.join(sys.path[0], "config.yml"), 'r') as file:
             config_yml = yaml.load(file)
+            config_yml['platys']['platform-name'] = platform_name
 
             for s in services:
                 if s + '_enable' in config_yml:
@@ -169,11 +173,8 @@ def init(platform_name, stack_name, stack_version, config_filename, seed_config,
 
 
 def contained(services, k):
-
-
-
     for s in services:
-        pattern = re.compile(s+'_[a-z]+')
+        pattern = re.compile(s + '_[a-z]+')
         if pattern.match(k):
             return True
 
