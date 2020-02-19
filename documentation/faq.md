@@ -58,13 +58,13 @@ Use the following service block for provisioning StreamSets Pipelines automatica
       - -c 
       - |
         echo "Waiting for Streamsets to start listening on connect..."
-        while [ $$(curl -s -o /dev/null -w %{http_code} http://streamsets-1:18630/rest/v1/pipelines/status) -ne 200 ] ; do 
-          echo -e $$(date) " Streamsets state: " $$(curl -s -o /dev/null -w %{http_code} http://streamsets-1:18630/rest/v1/pipelines/status) " (waiting for 200)"
+        while [ $$(curl -s -o /dev/null -w %{http_code} --insecure http://streamsets-1:18630/rest/v1/pipelines/status) -ne 200 ] ; do 
+          echo -e $$(date) " Streamsets state: " $$(curl -s -o /dev/null -w %{http_code} --insecure http://streamsets-1:18630/rest/v1/pipelines/status) " (waiting for 200)"
           sleep 5 
         done
-        nc -vz streamsets 18630
+        nc -vz streamsets-1 18630
         echo -e "\n--\n+> Creating Streamsets Pipelines"
-        curl -XPOST -u admin:admin -v -H 'Content-Type: multipart/form-data' -H 'X-Requested-By: My Import Process' -F file=@/import/pipelines-V1.0.zip http://streamsets:18630/rest/v1/pipelines/import
+        curl -XPOST -u admin:admin -v -H 'Content-Type: multipart/form-data' -H 'X-Requested-By: My Import Process' -F file=@/import/pipelines-v1.0.zip --insecure http://streamsets:18630/rest/v1/pipelines/import
         sleep infinity
 ``` 
 
