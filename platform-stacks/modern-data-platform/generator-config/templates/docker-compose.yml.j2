@@ -1454,12 +1454,14 @@ services:
 
 {% if MONGO_enable | default(false) %}
   #  ================================== MongoDB ========================================== #}
-  mongo:
+  {% for num in range(MONGO_nodes| default(1) ) %}
+    {% set external_port = 27017 + loop.index - 1 %}
+  mongo-{{loop.index}}:
     image: mongo:{{__MONGO_version}}
-    container_name: mongo
-    hostname: mongo
+    container_name: mongo-{{loop.index}}
+    hostname: mongo-{{loop.index}}
     ports:
-      - 27017:27017
+      - {{external_port}}:27017
     environment:
       - MONGO_INITDB_DATABASE=sample
       - MONGO_INITDB_USERNAME=admin
@@ -1479,7 +1481,7 @@ services:
     ports:
       - 28123:8081
     environment:
-      - ME_CONFIG_MONGODB_SERVER=mongo
+      - ME_CONFIG_MONGODB_SERVER=mongo-1
     restart: {{container_restart_policy}}
 
   admin-mongo:

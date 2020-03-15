@@ -1,4 +1,4 @@
-# `modern-data-platform` - Configuration v1.2.0
+# `modern-data-platform` - Configuration v1.3.0
 
 This is the documentation of the configuration settings which can be overwritten using a custom YAML file. All the defaults are defined in [`generator-config/vars/default-values.yml`](generator-config/vars/config.yml).
 
@@ -92,6 +92,7 @@ For each service there might be some other settings, such as controlling the num
 | `CASSANDRA_enable`                             	| `false` 	| 1.0.0 	| Generate Elasticsearch service                                                                                                                                                      	|             	|                                	|
 | **_MongoDB_**  &nbsp;&nbsp;&nbsp;&nbsp;![x86-64](./images/x86-64.png)                              	|         	|       	|                                                                                                                                                                                     	|             	|                                	|
 | `MONGO_enable`                               	| `false` 	| 1.2.0 	| Generate MongoDB service                                                                                                                                                            	|             	|                                	|
+| `MONGO_nodes`                             	|   `1	`   | 1.3.0 	| number of MongoDB nodes in replicaset                                                                                                                                                      	| 
 | **_Apache Solr_**   &nbsp;&nbsp;&nbsp;&nbsp;![x86-64](./images/x86-64.png)  ![arm](./images/arm.png)                                    	|         	|       	|                                                                                                                                                                                     	|             	|                                	|
 | `SOLR_enable`                                  	| `false` 	| 1.0.0 	| Generate Solr service                                                                                                                                                               	|             	|                                	|
 | **_Elasticsearch & Kibana_**   &nbsp;&nbsp;&nbsp;&nbsp;![x86-64](./images/x86-64.png)               	|         	|       	|                                                                                                                                                                                     	|      NO     	|                                	|
