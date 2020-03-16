@@ -51,6 +51,10 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
 
 {% set __NIFI_version = NIFI_version | default('latest') -%}
 
+{% set __NODERED_version = NODERED_version | default('latest') -%}
+
+{% set __AIRFLOW_version = AIRFLOW_version | default('latest') -%}
+
 {% set __ZEPPELIN_version = ZEPPELIN_version | default('latest') -%}
 
 {%if (JUPYTER_edition | lower) == 'minimal' | default(false) %}
@@ -150,6 +154,7 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
   {% set STREAMSETS_enable = false -%}
   {% set STREAMSETS_TRANSFORMER_enable = false -%}
   {% set NIFI_enable = false -%}
+  {% set AIRFLOW_enable = false -%}
   {% set ZEPPELIN_enable = false -%}
   {% set JUPYTER_enable = false -%}
   {% set MONGO_enable = false -%}
@@ -1216,7 +1221,7 @@ services:
 {%if NODERED_enable | default(false) %}
   #  ================================== Node-RED ========================================== #}
   nodered-1:
-    image: nodered/node-red:{{__NIFI_version}}
+    image: nodered/node-red:{{__NODERED_version}}
     container_name: nodered-1
     hostname: nodered-1
     labels:
@@ -1239,6 +1244,77 @@ services:
     restart: {{container_restart_policy}}
 
 {% endif %}   {#  NODERED_enable  #}
+
+{%if AIRFLOW_enable | default(false) %}
+  #  ================================== Node-RED ========================================== #}
+  airflow:
+    image: bitnami/airflow:{{__AIRFLOW_version}}
+    container_name: airflow
+    hostname: airflow
+    labels:
+      com.mdps.service.webui.name: "Airflow UI"
+      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28139"
+      com.mdps.service.restapi.name: "Airflow REST API"
+      com.mdps.service.restapi.url: "http://${PUBLIC_IP}:28139/api/experimental/"
+    ports:
+      - "28139:8080"
+    environment:
+      - AIRFLOW_EXECUTOR=LocalExecutor
+      - AIRFLOW_FERNET_KEY=46BKJoQYlPPOexq0OhDZnIlNepKFf87WFwLbfzqDDho=
+      - AIRFLOW_DATABASE_HOST=airflow-postgresql
+      - AIRFLOW_DATABASE_NAME=bitnami_airflow
+      - AIRFLOW_DATABASE_PORT_NUMBER=5432
+      - AIRFLOW_DATABASE_USERNAME=bn_airflow
+      - AIRFLOW_DATABASE_PASSWORD=abc123!
+      - AIRFLOW_LOAD_EXAMPLES=yes
+      - AIRFLOW_PASSWORD=abc123!
+      - AIRFLOW_USERNAME=airflow
+    volumes:
+      - ./data-transfer:/data-transfer
+    {% if AIRFLOW_volume_map_data %}
+      - ./container-volume/airflow:/bitnami:Z
+    {% endif %}
+
+    restart: {{container_restart_policy}}
+
+  airflow-scheduler:
+    image: bitnami/airflow-scheduler:{{__AIRFLOW_version}}
+    container_name: airflow-scheduler
+    hostname: airflow-scheduler
+    environment:
+      - AIRFLOW_EXECUTOR=LocalExecutor
+      - AIRFLOW_FERNET_KEY=46BKJoQYlPPOexq0OhDZnIlNepKFf87WFwLbfzqDDho=
+      - AIRFLOW_DATABASE_HOST=airflow-postgresql
+      - AIRFLOW_DATABASE_NAME=bitnami_airflow
+      - AIRFLOW_DATABASE_PORT_NUMBER=5432
+      - AIRFLOW_DATABASE_USERNAME=bn_airflow
+      - AIRFLOW_DATABASE_PASSWORD=abc123!
+      - AIRFLOW_LOAD_EXAMPLES=yes
+      - AIRFLOW_PASSWORD=abc123!
+      - AIRFLOW_USERNAME=airflow
+    volumes:
+      - ./data-transfer:/data-transfer
+    {% if AIRFLOW_volume_map_data %}
+      - ./container-volume/airflow:/bitnami:Z
+    {% endif %}
+
+    restart: {{container_restart_policy}}
+
+  airflow-postgresql:
+    image: 'bitnami/postgresql:10'
+    container_name: airflow-postgresql
+    hostname: airflow-postgresql
+    environment:
+      - POSTGRESQL_DATABASE=bitnami_airflow
+      - POSTGRESQL_USERNAME=bn_airflow
+      - POSTGRESQL_PASSWORD=abc123!
+      - ALLOW_EMPTY_PASSWORD=yes
+#    volumes:
+#      - ./container-volume/airflow/db:/bitnami/postgresql:Z
+
+    restart: {{container_restart_policy}}
+
+{% endif %}   {#  AIRFLOW_enable  #}
 
 {%if ZEPPELIN_enable | default(false) %}
   #  ================================== Zeppelin ========================================== #}
@@ -1470,6 +1546,7 @@ services:
       # seeding scripts
       - ./conf/mongo-entrypoint:/docker-entrypoint-initdb.d
     restart: {{container_restart_policy}}
+  {% endfor %}
 
   mongo-express:
     image: mongo-express:{{__MONGO_EXPRESS_version}}

@@ -122,7 +122,9 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 19631 | 19630 | streamsets-transformer-1 | 
 19632 | 19630 | streamsets-transformer-1 | 
 21000 | 21000 | atlas |
-27017 | 27017 | mongodb |
+27017 | 27017 | mongodb-1 |
+27018 | 27017 | mongodb-2 |
+27019 | 27017 | mongodb-3 |
 28080 | 8080 | zeppelin |
 28081 | 8080 | presto |
 28888 | 8888 | jupyter |
@@ -184,6 +186,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28136 | 80 | mqtt-ui |
 28137 | 9000 | portainer |
 28138 | 8080 | cadvisor | 
+28139 | 8080 | airflow |
 28500 - 28510 | 28500 - 28510 | streamsets-1 (additional ports) |
 
 
