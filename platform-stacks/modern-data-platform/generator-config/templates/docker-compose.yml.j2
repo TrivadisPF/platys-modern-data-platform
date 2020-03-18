@@ -10,7 +10,7 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
 {% set __SCHEMA_REGISTRY_UI_version = SCHEMA_REGISTRY_UI_version | default('latest') -%}
 
 {% set __KAFKA_CONNECT_UI_version = KAFKA_CONNECT_UI_version | default('latest') -%}
-{% set __KAFKA_MANAGER_version = KAFKA_MANAGER_version | default('latest') -%}
+{% set __CMAK_version = CMAK_version | default('latest') -%}
 {% set __KAFKA_KAFDROP_version = KAFKA_KAFDROP_version | default('latest') -%}
 {% set __KAFKA_KADMIN_version = KAFKA_KADMIN_version | default('latest') -%}
 {% set __KAFKA_KAFKAHQ_version = KAFKA_KAFKAHQ_version | default('latest') -%}
@@ -19,12 +19,14 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
 {% set __KAFKA_BURROW_DASHBOARD_version = KAFKA_BURROW_DASHBOARD_version | default('latest') -%}
 
 {% set __HADOOP_version = HADOOP_version | default('latest') -%}
+{% set __SQOOP_version = SQOOP_version | default('latest') -%}
 
 {% set __SPARK_version = SPARK_version | default('latest') -%}
 
 {% set __LIVY_version = LIVY_version | default('latest') -%}
 
 {% set __HIVE_version = HIVE_version | default('latest') -%}
+{% set __HIVE_MAJOR_MINOR_version = HIVE_MAJOR_MINOR_version | default('latest') -%}
 {% set __HIVE_version_suffix = HIVE_version_suffix | default('postgresql-metastore-s3') -%}
 
 {% set __ATLAS_version = ATLAS_version | default('latest') -%}
@@ -503,11 +505,11 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {# KAFKA_enable and KAFKA_CONNECT_UI_enable #}
 
-{% if (KAFKA_enable and KAFKA_MANAGER_enable) | default(false) %}
-  kafka-manager:
-    image: trivadis/kafka-manager:{{__KAFKA_MANAGER_version}}
-    container_name: kafka-manager
-    hostname: kafka-manager
+{% if (KAFKA_enable and CMAK_enable) | default(false) %}
+  cmak:
+    image: trivadis/cmak:{{__CMAK_version}}
+    container_name: cmak
+    hostname: cmak
     labels:
       com.mdps.service.webui.url: "http://${PUBLIC_IP}:28104"
     depends_on:
@@ -519,7 +521,7 @@ services:
       ZK_HOSTS: 'zookeeper-1:2181'
       APPLICATION_SECRET: 'abc123!'
     restart: {{container_restart_policy}}
-{% endif %}   {#  KAFKA_enable and KAFKA_MANAGER_enable #}
+{% endif %}   {#  KAFKA_enable and CMAK_enable #}
 
 
 {% if (KAFKA_enable and KAFKA_KAFDROP_enable) | default(false) %}
@@ -635,7 +637,7 @@ services:
 
   #  ================================== Apache Hadoop ========================================== #
   namenode:
-    image: trivadis/apache-hadoop-namenode:{{__HADOOP_version}}
+    image: bde2020/hadoop-namenode:{{__HADOOP_version}}
     container_name: namenode
     hostname: namenode
     labels:
@@ -656,7 +658,7 @@ services:
     {% set external_port = 9864 + loop.index - 1 %}
 
   datanode-{{loop.index}}:
-    image: trivadis/apache-hadoop-datanode:{{__HADOOP_version}}
+    image: bde2020/hadoop-datanode:{{__HADOOP_version}}
     container_name: datanode-{{loop.index}}
     labels:
       com.mdps.service.webui.name: "Hadoop DataNode-{{loop.index}} UI"
@@ -673,7 +675,7 @@ services:
   {% endfor %}
 
   resourcemanager:
-    image: trivadis/apache-hadoop-resourcemanager:{{__HADOOP_version}}
+    image: bde2020/hadoop-resourcemanager:{{__HADOOP_version}}
     container_name: resourcemanager
     hostname: resourcemanager
     labels:
@@ -694,7 +696,7 @@ services:
     restart: {{container_restart_policy}}
 
   nodemanager:
-    image: trivadis/apache-hadoop-nodemanager:{{__HADOOP_version}}
+    image: bde2020/hadoop-nodemanager:{{__HADOOP_version}}
     container_name: nodemanager
     hostname: nodemanager
     labels:
@@ -715,7 +717,7 @@ services:
     restart: {{container_restart_policy}}
 
   historyserver:
-    image: trivadis/apache-hadoop-historyserver:{{__HADOOP_version}}
+    image: bde2020/hadoop-historyserver:{{__HADOOP_version}}
     container_name: historyserver
     hostname: historyserver
     labels:
@@ -732,14 +734,16 @@ services:
       SERVICE_PRECONDITION: "namenode:9870 datanode-1:9864 resourcemanager:18088"
     restart: {{container_restart_policy}}
 
-  hadoop-client:
-    image: trivadis/apache-hadoop-client:{{__HADOOP_version}}
-    container_name: hadoop-client
-    hostname: hadoop-client
+  {% if SQOOP_enable | default(false) %}
+  sqoop:
+    image: trivadis/apache-sqoop:{{__SQOOP_version}}
+    container_name: sqoop
+    hostname: sqoop
     env_file:
       - ./conf/hadoop.env
     command: tail -f /dev/null
     restart: {{container_restart_policy}}
+  {% endif %}   {#  SQOOP_enable #}
 
 {% endif %}   {#  HADOOP_enable or SPARK_enable #}
 
@@ -910,7 +914,7 @@ services:
     restart: {{container_restart_policy}}
 
   hive-metastore-db:
-    image: honomoa/hive-metastore-postgresql:{{__HIVE_version}}
+    image: trivadis/apache-hive-metastore-postgresql:{{__HIVE_MAJOR_MINOR_version}}-postgres9.5.3
     container_name: hive-metastore-db
     hostname: hive-metastore-db
     restart: {{container_restart_policy}}
