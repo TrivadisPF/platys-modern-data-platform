@@ -875,8 +875,8 @@ services:
     restart: always
 {% endif %}   {#  SPARK_livy_enable #}
 
-{% if HIVE_enable | default(false) %}
-  #  ================================== Apache Hive ========================================== #
+{% if HIVE_SERVER_enable | default(false) %}
+  #  ================================== Apache Hive Server ========================================== #
   hive-server:
     image: trivadis/apache-hive:{{__HIVE_version}}-{{__HIVE_version_suffix}}
     container_name: hive-server
@@ -887,6 +887,7 @@ services:
     env_file:
       - ./conf/hadoop.env
     environment:
+      CORE_CONF_fs_defaultFS: ""
       HIVE_CORE_CONF_javax_jdo_option_ConnectionURL: "jdbc:postgresql://hive-metastore/metastore"
       SERVICE_PRECONDITION: "hive-metastore:9083"
 #      HDFS_CONF_fs_s3a_access_key: ${MINIO_ACCESS_KEY}
@@ -899,7 +900,10 @@ services:
       - ./plugins/hive-server/apache-atlas-hive-hook/hook:/opt/atlas/hook
   {% endif -%}   {#  SPARK_HISTORY_enable #}
     restart: {{container_restart_policy}}
+{% endif %}   {#  HIVE_enable #}
 
+{% if HIVE_METASTORE_enable | default(false) %}
+  #  ================================== Apache Hive Metastore ========================================== #
   hive-metastore:
     image: trivadis/apache-hive:{{__HIVE_version}}-{{__HIVE_version_suffix}}
     container_name: hive-metastore
@@ -910,7 +914,8 @@ services:
       - ./conf/hadoop.env
     command: /opt/hive/bin/hive --service metastore
     environment:
-      - "SERVICE_PRECONDITION=namenode:9870 datanode-1:9864 hive-metastore-db:5432"
+      - CORE_CONF_fs_defaultFS="s3a://test-bucket"
+      - "SERVICE_PRECONDITION=hive-metastore-db:5432"
     restart: {{container_restart_policy}}
 
   hive-metastore-db:
@@ -2038,7 +2043,7 @@ services:
     hostname: awscli
     volumes:
       - './conf/s3cfg:/root/.s3cfg'
-      - './data-transfer:/tmp/data-transfer'
+      - './data-transfer:/data-transfer'
 #      - './minio/config:/root/.minio'
     environment:
       AWS_ACCESS_KEY_ID: V42FCGRVMK24JJ8DHUYG
