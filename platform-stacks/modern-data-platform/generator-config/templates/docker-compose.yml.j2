@@ -6,7 +6,7 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
 {% set __CONFLUENT_PLATFORM_version = CONFLUENT_PLATFORM_version | default('latest') -%}
 {% set __ZOONAVIGATOR_version = ZOONAVIGATOR_version | default('latest') -%}
 {% set __ZOONAVIGATOR_API_version = ZOONAVIGATOR_API_version | default('latest') -%}
-{% set __KSQLDB_version = KSQLDB_version | default('latest') -%}
+{% set __KAFKA_KSQLDB_version = KAFKA_KSQLDB_version | default('latest') -%}
 {% set __SCHEMA_REGISTRY_UI_version = SCHEMA_REGISTRY_UI_version | default('latest') -%}
 
 {% set __KAFKA_CONNECT_UI_version = KAFKA_CONNECT_UI_version | default('latest') -%}
@@ -137,7 +137,7 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
 {% if KAFKA_KSQLDB_enable -%}
 # enforce some dependencies
   {% set KAFKA_SCHEMA_REGISTRY_enable = true -%}
-{% endif -%}   {# KSQLDB_enable #}
+{% endif -%}   {# KAFKA_KSQLDB_enable #}
 
 {% if HUE_enable -%}
 # enforce some dependencies
@@ -367,7 +367,7 @@ services:
     {% set external_port = 8088 + loop.index - 1 %}
     {% set port = 8088 %}
   ksqldb-server-{{loop.index}} :
-    image: confluentinc/ksqldb-server:{{__KSQLDB_version}}
+    image: confluentinc/ksqldb-server:{{__KAFKA_KSQLDB_version}}
     hostname: ksqldb-server-{{loop.index}}
     container_name: ksqldb-server-{{loop.index}}
     labels:
@@ -421,7 +421,7 @@ services:
       KAFKA_REST_SCHEMA_REGISTRY_URL: 'http://schema-registry-1:8081'
       KAFKA_REST_HOST_NAME: 'rest-proxy'
     restart: {{container_restart_policy}}
-{% endif %}   {# KAFKA_enable and KAFKA_KSQLDB_enable #}
+{% endif %}   {# KAFKA_enable and KAFKA_RESTPROXY_enable #}
 
 {% if (KAFKA_enable and KAFKA_MQTTPROXY_enable) | default(false) %}
   #  ================================== Confluent MQTT Proxy ========================================== #}
