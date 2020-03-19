@@ -151,10 +151,10 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28101 | 9010 | zoonavigator-api     |
 28102 | 8000 | schema-registry-ui   |
 28103 | 8000 | kafka-connect-ui     |
-28104 | 9000 | kafka-manager     |
+28104 | 9000 | cmak |
 28105 | 9020 | kafdrop     |
 28106 | 8080 | kadmin     |
-28107 | 8080 | kafkahq     |
+28107 | 8080 | akhq     |
 28108 | 3000 | burrow-ui |
 28109 | 80 | burrow-dashboard |
 28110 | 8000 | burrow |
