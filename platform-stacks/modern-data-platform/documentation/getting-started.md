@@ -7,7 +7,7 @@ The platform we will create here, uses Kafka and Zookeeper, but the process shou
 
 ## Prerequisites
 
-Make sure that you have already installed the [Docker Engine](https://docs.docker.com/install/), [Docker Compose](https://docs.docker.com/compose/install/) and the [`platys`](install.md) toolset. 
+Make sure that you have already installed the [Docker Engine](https://docs.docker.com/install/), [Docker Compose](https://docs.docker.com/compose/install/) and the [`platys`](../../../documentation/install.md) toolset. 
 
 ## Step 1: Initialise the environment
 
@@ -20,12 +20,12 @@ cd kafka-plaform-example
 
 Now let's initialise the current directory to use the Modern Data Analytics Platform Stack. 
 
-We specify the platform stack name `trivadis/platys-modern-data-platform` to use as well as the stack version `1.2.0` (the current version of this platform stack). 
+We specify the platform stack name `trivadis/platys-modern-data-platform` to use as well as the stack version `1.3.0` (the current version of this platform stack). 
 
 With the `-n` option we give the platform a meaningful name. 
 
 ```
-platys init -n kafka-platform -sn trivadis/platys-modern-data-platform -sv 1.2.0
+platys init -n kafka-platform -sn trivadis/platys-modern-data-platform -sv 1.3.0
 ```
 
 This generates a `config.yml` file, if it does not exist already, with all the services which can be configured for the platform.
@@ -49,7 +49,7 @@ You can see the configuration options, available through this platform stack, si
       platys:
         platform-name: 'default'
         stack-image-name: 'trivadis/platys-modern-data-platform'
-        stack-image-version: '1.2.0'
+        stack-image-version: '1.3.0'
 
       # ===== Apache Zookeeper ========
       KAFKA_enable: true
