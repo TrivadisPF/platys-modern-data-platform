@@ -122,6 +122,7 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
 
 {% set __MINIO_version = MINIO_version | default('latest') -%}
 {% set __AWSCLI_version = AWSCLI_version | default('latest') -%}
+{% set __CODE_SERVER_version = CODE_SERVER_version | default('latest') -%}
 {% set __PORTAINER_version = PORTAINER_version | default('latest') -%}
 {% set __CADVISOR_version = CADVISOR_version | default('latest') -%}
 
@@ -179,6 +180,7 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
   {% set FTP_enable = false -%}
   {% set MINIO_enable = false -%}
   {% set AWSCLI_enable = false -%}
+  {% set CODE_SERVER_enable = false -%}
   {% set CADVISOR_enable = false -%}
 {% endif %}   {# PLATFORM_ARM_enable #}
 
@@ -2175,6 +2177,24 @@ services:
 #      - "/files:/storage:rw"
     restart: {{container_restart_policy}}
 {% endif %}   {#  FTP_enable #}
+
+{% if CODE_SERVER_enable | default(false) %}
+  #  ================================== Code-Server IDE (VS Code in Browser) ================= #}
+  code-server:
+    image: trivadis/code-server:{{__CODE_SERVER_version}}
+    container_name: code-server
+    hostname: code-server
+    labels:
+      com.mdps.service.webui.name: "Code-Server UI"
+      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28140"
+    ports:
+      - 28140:8080
+    environment:
+      PASSWORD: 'abc123!'
+    volumes:
+      - ../:/home/coder/platform-root
+    restart: unless-stopped
+{% endif %}   {# CODE_SERVER_enable #}
 
 {% if PORTAINER_enable | default(false) %}
   #  ================================== Portainer ========================================== #}
