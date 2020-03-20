@@ -54,13 +54,13 @@ sudo curl -L "https://github.com/TrivadisPF/platys/releases/download/2.0.0/platy
 tar zvxf /tmp/platys.tar.gz 
 sudo mv platys.dist/ /usr/local/lib/
 sudo chown -R root:root /usr/local/lib/platys.dist/
-rm /tmp/platys.tar.gz 
+sudo rm /tmp/platys.tar.gz 
 ```
 
-3. Apply executable permissions to the binary:
+3. Create a symbolic link to the platys executable
 
   ```
-sudo ln /usr/local/lib/platys /usr/local/bin/platys
+sudo ln -s /usr/local/lib/platys.dist/platys /usr/local/bin/platys
 ```
 
 4. Use the `--version` option to check that the generator has been installed successfully.
