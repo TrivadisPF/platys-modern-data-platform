@@ -877,7 +877,7 @@ services:
     restart: always
 {% endif %}   {#  SPARK_livy_enable #}
 
-{% if HIVE_SERVER_enable | default(false) %}
+{% if HIVE_SERVER_enable and HAOOP_enable | default(false) %}
   #  ================================== Apache Hive Server ========================================== #
   hive-server:
     image: trivadis/apache-hive:{{__HIVE_version}}-{{__HIVE_version_suffix}}
@@ -889,20 +889,13 @@ services:
     env_file:
       - ./conf/hadoop.env
     environment:
-      "CORE_CONF_fs_defaultFS: s3a://test-bucket"
-      HIVE_CORE_CONF_javax_jdo_option_ConnectionURL: "jdbc:postgresql://hive-metastore/metastore"
-      SERVICE_PRECONDITION: "hive-metastore:9083"
-#      HDFS_CONF_fs_s3a_access_key: ${MINIO_ACCESS_KEY}
-#      HDFS_CONF_fs_s3a_secret_key: ${MINIO_SECRET_KEY}
-  {% if ATLAS_install_hive_hook | default(false) %}
-      HIVE_SITE_CONF_hive_exec_post_hooks: "org.apache.atlas.hive.hook.HiveHook"
-      HIVE_AUX_JARS_PATH: "/opt/atlas/hook/hive"
-    volumes:
-      - ./conf/atlas/atlas-application.properties:/opt/hive/conf/atlas-application.properties
-      - ./plugins/hive-server/apache-atlas-hive-hook/hook:/opt/atlas/hook
-  {% endif -%}   {#  SPARK_HISTORY_enable #}
+      CORE_CONF_fs_defaultFS: "s3a://test-bucket"
+      HIVE_SITE_CONF_javax_jdo_option_ConnectionURL: "jdbc:postgresql://hive-metastore/metastore"
+      SERVICE_PRECONDITION=hive-metastore: "9083"
+#      - HDFS_CONF_fs_s3a_access_key: ${MINIO_ACCESS_KEY}
+#      - HDFS_CONF_fs_s3a_secret_key: ${MINIO_SECRET_KEY}
     restart: {{container_restart_policy}}
-{% endif %}   {#  HIVE_enable #}
+{% endif %}   {#  HIVE_SERVER_enable #}
 
 {% if HIVE_METASTORE_enable | default(false) %}
   #  ================================== Apache Hive Metastore ========================================== #
@@ -916,8 +909,15 @@ services:
       - ./conf/hadoop.env
     command: /opt/hive/bin/hive --service metastore
     environment:
-      - "CORE_CONF_fs_defaultFS=s3a://test-bucket"
-      - "SERVICE_PRECONDITION=hive-metastore-db:5432"
+      CORE_CONF_fs_defaultFS: "s3a://test-bucket"
+      SERVICE_PRECONDITION: "hive-metastore-db:5432"
+  {% if ATLAS_install_hive_hook | default(false) %}
+      HIVE_SITE_CONF_hive_exec_post_hooks: "org.apache.atlas.hive.hook.HiveHook"
+      HIVE_AUX_JARS_PATH: "/opt/atlas/hook/hive"
+    volumes:
+      - ./conf/atlas/atlas-application.properties:/opt/hive/conf/atlas-application.properties
+      - ./plugins/hive-server/apache-atlas-hive-hook/hook:/opt/atlas/hook
+  {% endif -%}   {#  ATLAS_install_hive_hook #}
     restart: {{container_restart_policy}}
 
   hive-metastore-db:
