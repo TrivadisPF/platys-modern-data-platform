@@ -1178,7 +1178,7 @@ services:
 {%if STREAMSETS_TRANSFORMER_enable | default(false) %}
   #  ================================== StreamSets Transformer ========================================== #}
   streamsets-transformer-1:
-    image: streamsets/transformer:{{__streamsets_transformer_version}}
+    image: streamsets/transformer:{{__STREAMSETS_TRANSFORMER_version}}
     container_name: streamsets-transformer-1
     hostname: streamsets-transformer-1
     labels:
@@ -1203,7 +1203,7 @@ services:
 {%if STREAMSETS_EDGE_enable | default(false) %}
   #  ================================== StreamSets DataCollector Edge ========================================== #}
   streamsets-edge-1:
-    image: streamsets/datacollector-edge:{{__streamsets_edge_version}}
+    image: streamsets/datacollector-edge:{{__STREAMSETS_EDGE_version}}
     container_name: streamsets-edge-1
     hostname: streamsets-edge-1
     labels:
@@ -1270,6 +1270,7 @@ services:
     ports:
       - "28139:8080"
     environment:
+      - AIRFLOW_HOME=/opt/bitnami/airflow
       - AIRFLOW_EXECUTOR=LocalExecutor
       - AIRFLOW_FERNET_KEY=46BKJoQYlPPOexq0OhDZnIlNepKFf87WFwLbfzqDDho=
       - AIRFLOW_DATABASE_HOST=airflow-db
@@ -1277,14 +1278,13 @@ services:
       - AIRFLOW_DATABASE_PORT_NUMBER=5432
       - AIRFLOW_DATABASE_USERNAME=bn_airflow
       - AIRFLOW_DATABASE_PASSWORD=abc123!
-      - AIRFLOW_LOAD_EXAMPLES=yes
+      - AIRFLOW_LOAD_EXAMPLES={{ 'yes' if (AIRFLOW_provision_examples ) else 'no' }}
       - AIRFLOW_PASSWORD=abc123!
       - AIRFLOW_USERNAME=airflow
     volumes:
+      - ./scripts/airflow/dags:/opt/bitnami/airflow/dags:Z
+      - ./plugins/airflow/:/opt/bitnami/airflow/plugins:Z
       - ./data-transfer:/data-transfer
-    {% if AIRFLOW_volume_map_data %}
-      - ./container-volume/airflow:/bitnami:Z
-    {% endif %}
 
     restart: {{container_restart_policy}}
 
@@ -1293,6 +1293,7 @@ services:
     container_name: airflow-scheduler
     hostname: airflow-scheduler
     environment:
+      - AIRFLOW_HOME=/opt/bitnami/airflow
       - AIRFLOW_EXECUTOR=LocalExecutor
       - AIRFLOW_FERNET_KEY=46BKJoQYlPPOexq0OhDZnIlNepKFf87WFwLbfzqDDho=
       - AIRFLOW_DATABASE_HOST=airflow-db
@@ -1300,21 +1301,20 @@ services:
       - AIRFLOW_DATABASE_PORT_NUMBER=5432
       - AIRFLOW_DATABASE_USERNAME=bn_airflow
       - AIRFLOW_DATABASE_PASSWORD=abc123!
-      - AIRFLOW_LOAD_EXAMPLES=yes
+      - AIRFLOW_LOAD_EXAMPLES={{ 'yes' if (AIRFLOW_provision_examples ) else 'no' }}
       - AIRFLOW_PASSWORD=abc123!
       - AIRFLOW_USERNAME=airflow
     volumes:
+      - ./scripts/airflow/dags:/opt/bitnami/airflow/dags:Z
+      - ./plugins/airflow/:/opt/bitnami/airflow/plugins:Z
       - ./data-transfer:/data-transfer
-    {% if AIRFLOW_volume_map_data %}
-      - ./container-volume/airflow:/bitnami:Z
-    {% endif %}
 
     restart: {{container_restart_policy}}
 
   airflow-db:
     image: 'bitnami/postgresql:10'
-    container_name: airflow-postgresql
-    hostname: airflow-postgresql
+    container_name: airflow-db
+    hostname: airflow-db
     environment:
       - POSTGRESQL_DATABASE=bitnami_airflow
       - POSTGRESQL_USERNAME=bn_airflow
