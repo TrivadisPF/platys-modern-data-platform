@@ -1,0 +1,1 @@
+Contains the data of airflow postgresql service, if flag AIRFLOW_volume_map_data is set to true.

@@ -1,6 +1,23 @@
 # `modern-data-platform` - What's new?
 
-## What's new in 1.2.0 (preview)
+## What's new in 1.3.0
+
+The Modern Analytical Data Platform Stack version 1.3.0 contains the following new services and enhancements:
+
+### New Services
+
+* Apache Airflow
+* Apache Sqoop (previously part of `hadoop-client` service)
+* Code-Server (VS Code IDE in Browser) 
+
+### Enhancements / Changes
+
+* Some first simple Tutorials added, showing how to use the services
+* Hadoop images changed to the ones from Big Data Europe
+* Service Kafka Manger is now CMAK (due to the name change at Yahoo GitHub)
+* KafkaHQ has been renamed to AKHQ by the developer and we now use this image
+
+## What's new in 1.2.0
 
 The Modern Analytical Data Platform Stack version 1.2.0 contains the following new services and enhancements:
 

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
 import re
-
+import pwd
 import click
 import docker
 import tempfile
@@ -10,6 +10,7 @@ import logging
 import ruamel.yaml
 from pathlib import Path
 import sys
+from typing import Dict
 
 __version__ = '2.0.0'
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
@@ -28,6 +29,26 @@ class PushRootLeft:
             else:
                 result.append(' ' * self.positions + line)
         return ''.join(result)
+
+
+# Checks that the max amount of nodes for a given service is not higher than the max amount
+def check_node_limits(config_yml: dict):
+    node_limits: Dict[str, int] = {
+        "ZOOKEEPER_nodes": 3,
+        "KAFKA_broker_nodes": 6,
+        "KAFKA_SCHEMA_REGISTRY_nodes": 2,
+        "KAFKA_CONNECT_nodes": 3,
+        "KAFKA_KSQLDB_nodes": 3,
+        "HADOOP_datanodes": 6,
+        "DATASTAX_nodes": 3,
+        "MOSQUITTO_nodes": 3
+    }
+
+    for k, v in node_limits.items():
+        if config_yml.get(k):
+            print(f'[{k}] -> [{config_yml.get(k)}] v: [{v}]')
+            if config_yml.get(k) > v:
+                raise Exception(f'Unable to generate config file since because the number of nodes configured for service [{k}] -> [{config_yml.get(k)}] is higher than max value [{v}]')
 
 
 @click.group(context_settings=CONTEXT_SETTINGS)
@@ -60,6 +81,7 @@ def gen(config_filename, config_url, del_empty_lines, structure, verbose):
     with open(rf'{config_filename}') as file:
         yaml = ruamel.yaml.YAML()
         config_yml = yaml.load(file)
+        check_node_limits(config_yml)
         platys_config = config_yml.get('platys')
 
         if platys_config is None:
@@ -99,7 +121,9 @@ def gen(config_filename, config_url, del_empty_lines, structure, verbose):
                                              f"CONFIG_URL={config_url}",
                                              f"VERBOSE={int(verbose == True)}",
                                              f"DEL_EMPTY_LINES={int(del_empty_lines == True)}",
-                                         ]
+                                         ],
+                                         user=f"{pwd.getpwuid(os.getuid()).pw_uid}:{os.getgid()}"
+
                                          )
 
     for line in dp_container.logs(stream=True):
@@ -146,6 +170,7 @@ def init(platform_name, stack_name, stack_version, config_filename, seed_config,
 
         with open(os.path.join(sys.path[0], "config.yml"), 'r') as file:
             config_yml = yaml.load(file)
+            config_yml['platys']['platform-name'] = platform_name
 
             for s in services:
                 if s + '_enable' in config_yml:
@@ -169,11 +194,8 @@ def init(platform_name, stack_name, stack_version, config_filename, seed_config,
 
 
 def contained(services, k):
-
-
-
     for s in services:
-        pattern = re.compile(s+'_[a-z]+')
+        pattern = re.compile(s + '_[a-z]+')
         if pattern.match(k):
             return True
 
