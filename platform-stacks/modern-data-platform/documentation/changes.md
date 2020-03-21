@@ -12,6 +12,7 @@ The Modern Analytical Data Platform Stack version 1.3.0 contains the following n
 
 ### Enhancements / Changes
 
+* Some first simple Tutorials added, showing how to use the services
 * Hadoop images changed to the ones from Big Data Europe
 * Service Kafka Manger is now CMAK (due to the name change at Yahoo GitHub)
 * KafkaHQ has been renamed to AKHQ by the developer and we now use this image
