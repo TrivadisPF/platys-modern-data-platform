@@ -763,8 +763,12 @@ services:
     env_file:
       - ./conf/hadoop.env
     environment:
-      - SPARK_PUBLIC_DNS=${PUBLIC_IP}
-      - INIT_DAEMON_STEP=setup_spark
+  {%if MINIO_enable | default(false) %}
+      CORE_CONF_fs_s3a_endpoint: 'http://minio:9000'
+      CORE_CONF_fs_s3a_path_style_access: 'true'
+  {% endif %}
+      SPARK_PUBLIC_DNS: ${PUBLIC_IP}
+      INIT_DAEMON_STEP: setup_spark
 #      - CORE_CONF_fs_defaultFS=hdfs://namenode:8020
     volumes:
   {%if (SPARK_catalog | lower) == 'in-memory' | default(false) %}
@@ -796,6 +800,10 @@ services:
 #      SPARK_WORKER_MEMORY: 1g
       SPARK_WORKER_WEBUI_PORT: "{{webui_port}}"
       SPARK_PUBLIC_DNS: ${PUBLIC_IP}
+  {%if MINIO_enable | default(false) %}
+      CORE_CONF_fs_s3a_endpoint: 'http://minio:9000'
+      CORE_CONF_fs_s3a_path_style_access: 'true'
+  {% endif %}
     volumes:
   {%if (SPARK_catalog | lower) == 'in-memory' | default(false) %}
       - ./conf/spark/spark-defaults-memory.conf:/spark/conf/spark-defaults.conf
@@ -889,7 +897,7 @@ services:
     env_file:
       - ./conf/hadoop.env
     environment:
-      CORE_CONF_fs_defaultFS: "s3a://test-bucket"
+      CORE_CONF_fs_defaultFS: "hdfs://namenode:9000"
       HIVE_SITE_CONF_javax_jdo_option_ConnectionURL: "jdbc:postgresql://hive-metastore/metastore"
       SERVICE_PRECONDITION=hive-metastore: "9083"
 #      - HDFS_CONF_fs_s3a_access_key: ${MINIO_ACCESS_KEY}
@@ -909,7 +917,11 @@ services:
       - ./conf/hadoop.env
     command: /opt/hive/bin/hive --service metastore
     environment:
+  {%if MINIO_enable | default(false) %}
       CORE_CONF_fs_defaultFS: "s3a://test-bucket"
+      CORE_CONF_fs_s3a_endpoint: 'http://minio:9000'
+      CORE_CONF_fs_s3a_path_style_access: 'true'
+  {% endif %}
       SERVICE_PRECONDITION: "hive-metastore-db:5432"
   {% if ATLAS_install_hive_hook | default(false) %}
       HIVE_SITE_CONF_hive_exec_post_hooks: "org.apache.atlas.hive.hook.HiveHook"
@@ -1343,13 +1355,17 @@ services:
     env_file:
       - ./conf/hadoop.env
     environment:
-      # AWS Credentials
-      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
-      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
-
+    {%if MINIO_enable | default(false) %}
+      CORE_CONF_fs_s3a_endpoint: 'http://minio:9000'
+      CORE_CONF_fs_s3a_path_style_access: 'true'
+    {% endif %}
+    {%if HADOOP_enable | default(false) %}
+      CORE_CONF_fs_defaultFS: 'hdfs://namenode:9000'
+    {% endif %}
       ZEPPELIN_ADDR: "0.0.0.0"
       ZEPPELIN_PORT: "8080"
       ZEPPELIN_INTERPRETER_CONNECT_TIMEOUT: 120000
+      ZEPPELIN_INTERPRETER_DEP_MVNREPO: 'https://repo.maven.apache.org/maven2'
       SPARK_MASTER: "spark://spark-master:7077"
 
       # set spark-master for Zeppelin interpreter
@@ -1367,6 +1383,7 @@ services:
   {% else -%}
       - ./conf/spark/spark-defaults-hive.conf:/spark/conf/spark-defaults.conf
   {% endif -%}   {#  SPARK_catalog #}
+      - ./container-volume/spark/logs/:/var/log/spark/logs
       - './conf/s3cfg:/root/.s3cfg'
       - ./conf/zeppelin/shiro.ini:/opt/zeppelin/conf/shiro.ini
       - ./conf/zeppelin/interpreter-setting.json:/opt/zeppelin/interpreter/spark/interpreter-setting.json
