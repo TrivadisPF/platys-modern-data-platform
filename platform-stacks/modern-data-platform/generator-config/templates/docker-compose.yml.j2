@@ -773,7 +773,7 @@ services:
     volumes:
   {%if (SPARK_catalog | lower) == 'in-memory' | default(false) %}
       - ./conf/spark/spark-defaults-memory.conf:/spark/conf/spark-defaults.conf
-  {% else -%}
+  {% else %}
       - ./conf/spark/spark-defaults-hive.conf:/spark/conf/spark-defaults.conf
   {% endif -%}   {#  SPARK_catalog #}
       - ./container-volume/spark/logs/:/var/log/spark/logs
@@ -807,7 +807,7 @@ services:
     volumes:
   {%if (SPARK_catalog | lower) == 'in-memory' | default(false) %}
       - ./conf/spark/spark-defaults-memory.conf:/spark/conf/spark-defaults.conf
-  {% else -%}
+  {% else %}
       - ./conf/spark/spark-defaults-hive.conf:/spark/conf/spark-defaults.conf
   {% endif -%}   {#  SPARK_catalog #}
       - ./container-volume/spark/logs/:/var/log/spark/logs
@@ -832,7 +832,7 @@ services:
     volumes:
   {%if (SPARK_catalog | lower) == 'in-memory' | default(false) %}
       - ./conf/spark/spark-defaults-memory.conf:/spark/conf/spark-defaults.conf
-  {% else -%}
+  {% else %}
       - ./conf/spark/spark-defaults-hive.conf:/spark/conf/spark-defaults.conf
   {% endif -%}   {#  SPARK_catalog #}
       - ./container-volume/spark/logs/:/var/log/spark/logs
@@ -850,7 +850,7 @@ services:
     volumes:
   {%if (SPARK_catalog | lower) == 'in-memory' | default(false) %}
       - ./conf/spark/spark-defaults-memory.conf:/spark/conf/spark-defaults.conf
-  {% else -%}
+  {% else %}
       - ./conf/spark/spark-defaults-hive.conf:/spark/conf/spark-defaults.conf
   {% endif -%}   {#  SPARK_catalog #}
     command: bash -c "sleep 2m && /spark/sbin/start-thriftserver.sh && tail -f /spark/logs/spark--org.apache.spark.sql.hive.thriftserver.HiveThriftServer2-*.out"
@@ -874,7 +874,7 @@ services:
     volumes:
   {%if (SPARK_catalog | lower) == 'in-memory' | default(false) %}
       - ./conf/spark/spark-defaults-memory.conf:/spark/conf/spark-defaults.conf
-  {% else -%}
+  {% else %}
       - ./conf/spark/spark-defaults-hive.conf:/spark/conf/spark-defaults.conf
   {% endif -%}   {#  SPARK_catalog #}
     ports:
@@ -917,8 +917,8 @@ services:
       - ./conf/hadoop.env
     command: /opt/hive/bin/hive --service metastore
     environment:
+      CORE_CONF_fs_defaultFS: "file:///tmp"
   {%if MINIO_enable | default(false) %}
-      CORE_CONF_fs_defaultFS: "s3a://test-bucket"
       CORE_CONF_fs_s3a_endpoint: 'http://minio:9000'
       CORE_CONF_fs_s3a_path_style_access: 'true'
   {% endif %}
@@ -1380,7 +1380,7 @@ services:
     volumes:
   {%if (SPARK_catalog | lower) == 'in-memory' | default(false) %}
       - ./conf/spark/spark-defaults-memory.conf:/spark/conf/spark-defaults.conf
-  {% else -%}
+  {% else %}
       - ./conf/spark/spark-defaults-hive.conf:/spark/conf/spark-defaults.conf
   {% endif -%}   {#  SPARK_catalog #}
       - ./container-volume/spark/logs/:/var/log/spark/logs
@@ -2010,9 +2010,14 @@ services:
       com.mdps.service.webui.url: "http://${PUBLIC_IP}:28081"
     ports:
       - '28081:8080'
-#    volumes:
-#      - './conf/presto/minio.properties:/usr/lib/presto/etc/catalog/minio.properties'
-#      - './conf/presto/postgresql.properties:/usr/lib/presto/etc/catalog/postgresql.properties'
+    volumes:
+      - ./data-transfer:/data-transfer
+  {% if MINIO_enable | default(false) %}
+      - './conf/presto/minio.properties:/usr/lib/presto/etc/catalog/minio.properties'
+  {% endif %}
+  {% if POSTGRESQL_enable | default(false) %}
+      - './conf/presto/postgresql.properties:/usr/lib/presto/etc/catalog/postgresql.properties'
+  {% endif %}
     restart: {{container_restart_policy}}
 {% endif %}   {#  PRESTO_enable #}
 
