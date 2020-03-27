@@ -188,6 +188,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28138 | 8080 | cadvisor | 
 28139 | 8080 | airflow |
 28140 | 8080 | code-server |
+28141 | 8000 | kafka-topics-ui |
 28500 - 28510 | 28500 - 28510 | streamsets-1 (additional ports) |
 
 

@@ -1,5 +1,15 @@
 # `modern-data-platform` - What's new?
 
+## What's new in 1.4.0
+
+The Modern Analytical Data Platform Stack version 1.4.0 contains the following new services and enhancements:
+
+### New Services
+
+* Topics UI added
+
+### Enhancements / Changes
+
 ## What's new in 1.3.0
 
 The Modern Analytical Data Platform Stack version 1.3.0 contains the following new services and enhancements:

@@ -9,6 +9,7 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
 {% set __KAFKA_KSQLDB_version = KAFKA_KSQLDB_version | default('latest') -%}
 {% set __SCHEMA_REGISTRY_UI_version = SCHEMA_REGISTRY_UI_version | default('latest') -%}
 
+{% set __KAFKA_TOPICS_UI_version = KAFKA_TOPICS_UI_version | default('latest') -%}
 {% set __KAFKA_CONNECT_UI_version = KAFKA_CONNECT_UI_version | default('latest') -%}
 {% set __KAFKA_CMAK_version = KAFKA_CMAK_version | default('latest') -%}
 {% set __KAFKA_KAFDROP_version = KAFKA_KAFDROP_version | default('latest') -%}
@@ -133,7 +134,12 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
 {% if KAFKA_enable or ATLAS_enable -%}
 # enforce some dependencies
   {% set ZOOKEEPER_enable = true -%}
-{% endif -%}   {# PLATFORM_ARM_enable #}
+{% endif -%}   {# KAFKA_enable or ATLAS_enable #}
+
+{% if KAFKA_TOPICS_UI_enable -%}
+# enforce some dependencies
+  {% set KAFKA_RESTPROXY_enable = true -%}
+{% endif -%}   {# KAFKA_TOPICS_UI_enable #}
 
 {% if KAFKA_KSQLDB_enable -%}
 # enforce some dependencies
@@ -418,10 +424,10 @@ services:
     ports:
       - "18086:8086"
     environment:
-      KAFKA_REST_ZOOKEEPER_CONNECT: '${DOCKER_HOST_IP}:2181'
+      KAFKA_REST_BOOTSTRAP_SERVERS: 'PLAINTEXT://kafka-1:19092'
       KAFKA_REST_LISTENERS: 'http://0.0.0.0:8086'
       KAFKA_REST_SCHEMA_REGISTRY_URL: 'http://schema-registry-1:8081'
-      KAFKA_REST_HOST_NAME: 'rest-proxy'
+      KAFKA_REST_HOST_NAME: 'kafka-rest-1'
     restart: {{container_restart_policy}}
 {% endif %}   {# KAFKA_enable and KAFKA_RESTPROXY_enable #}
 
@@ -487,6 +493,26 @@ services:
       - "28102:8000"
     environment:
       SCHEMAREGISTRY_URL: 'http://${PUBLIC_IP}:8081'
+    restart: {{container_restart_policy}}
+{% endif %}   {# KAFKA_enable and KAFKA_SCHEMA_REGISTRY_UI_enable #}
+
+{% if (KAFKA_enable and KAFKA_TOPICS_UI_enable) | default(false) %}
+  #  ================================== Schema Registry UI ========================================== #}
+  kafka-topics-ui:
+    image: landoop/kafka-topics-ui:{{__KAFKA_TOPICS_UI_version}}
+    container_name: kafka-topics-ui
+    hostname: kafka-topics-ui
+    labels:
+      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28141"
+    depends_on:
+      - kafka-1
+      - kafka-rest-1
+    ports:
+      - "28141:8000"
+    environment:
+      KAFKA_REST_PROXY_URL: 'http://kafka-rest-1:8086'
+      LAZY_LOAD_TOPIC_META: 'false'
+      PROXY: 'true'
     restart: {{container_restart_policy}}
 {% endif %}   {# KAFKA_enable and KAFKA_SCHEMA_REGISTRY_UI_enable #}
 
