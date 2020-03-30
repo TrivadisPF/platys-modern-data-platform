@@ -1043,6 +1043,87 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {#  ATLAS_enable #}
 
+{% if DATAHUB_enable  | default(false) %}
+  #  ================================== Amundsen ========================================== #
+  datahub-gms:
+    image: keremsahin/datahub-gms:latest
+    hostname: datahub-gms
+    container_name: datahub-gms
+    ports:
+      - "8080:8080"
+    environment:
+      - EBEAN_DATASOURCE_USERNAME=datahub
+      - EBEAN_DATASOURCE_PASSWORD=datahub
+      - EBEAN_DATASOURCE_HOST=mysql:3306
+      - EBEAN_DATASOURCE_URL=jdbc:mysql://mysql:3306/datahub?verifyServerCertificate=false&useSSL=true
+      - EBEAN_DATASOURCE_DRIVER=com.mysql.jdbc.Driver
+      - KAFKA_BOOTSTRAP_SERVER=broker:29092
+      - KAFKA_SCHEMAREGISTRY_URL=http://schema-registry:8081
+      - ELASTICSEARCH_HOST=elasticsearch
+      - ELASTICSEARCH_PORT=9200
+      - NEO4J_URI=bolt://neo4j
+      - NEO4J_USERNAME=neo4j
+      - NEO4J_PASSWORD=datahub
+    depends_on:
+      - elasticsearch
+      - broker
+      - mysql
+      - schema-registry
+      - neo4j
+    command: "bash -c 'dockerize -wait tcp://mysql:3306 -wait tcp://broker:29092 -wait http://elasticsearch:9200 \
+                                   -timeout 240s \
+                                   java -jar jetty-runner-9.4.20.v20190813.jar gms.war'"
+
+  datahub-frontend:
+    image: keremsahin/datahub-frontend:latest
+    hostname: datahub-frontend
+    container_name: datahub-frontend
+    ports:
+      - "9001:9001"
+    environment:
+      - DATAHUB_GMS_HOST=datahub-gms
+      - DATAHUB_GMS_PORT=8080
+      - DATAHUB_SECRET=YouKnowNothing
+      - DATAHUB_APP_VERSION=1.0
+      - DATAHUB_PLAY_MEM_BUFFER_SIZE=10MB
+    depends_on:
+      - datahub-gms
+
+  datahub-mae-consumer:
+    image: keremsahin/datahub-mae-consumer:latest
+    hostname: datahub-mae-consumer
+    container_name: datahub-mae-consumer
+    environment:
+      - KAFKA_BOOTSTRAP_SERVER=broker:29092
+      - KAFKA_SCHEMAREGISTRY_URL=http://schema-registry:8081
+      - ELASTICSEARCH_HOST=elasticsearch
+      - ELASTICSEARCH_PORT=9200
+      - NEO4J_URI=bolt://neo4j
+      - NEO4J_USERNAME=neo4j
+      - NEO4J_PASSWORD=datahub
+    depends_on:
+      - kafka-setup
+      - elasticsearch
+      - neo4j
+    command: "bash -c 'while ping -c1 kafka-setup &>/dev/null; do echo waiting for kafka-setup... && sleep 1; done; \
+              echo kafka-setup done! && ./mae-consumer-job/bin/mae-consumer-job'"
+
+  datahub-mce-consumer:
+    image: keremsahin/datahub-mce-consumer:latest
+    hostname: datahub-mce-consumer
+    container_name: datahub-mce-consumer
+    environment:
+      - KAFKA_BOOTSTRAP_SERVER=broker:29092
+      - KAFKA_SCHEMAREGISTRY_URL=http://schema-registry:8081
+      - GMS_HOST=datahub-gms
+      - GMS_PORT=8080
+    depends_on:
+      - kafka-setup
+      - datahub-gms
+    command: "bash -c 'while ping -c1 kafka-setup &>/dev/null; do echo waiting for kafka-setup... && sleep 1; done; \
+              echo kafka-setup done! && ./mce-consumer-job/bin/mce-consumer-job'"
+{% endif %}   {#  DATALAB_enable #}
+
 {% if AMUNDSEN_enable  | default(false) %}
   #  ================================== Amundsen ========================================== #
   amundsenfrontend:
