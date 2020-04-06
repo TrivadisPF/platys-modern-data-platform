@@ -1,0 +1,1 @@
+Contains the data of kafka-1 service, if flag KAFKA_volume_map_data is set to true.
