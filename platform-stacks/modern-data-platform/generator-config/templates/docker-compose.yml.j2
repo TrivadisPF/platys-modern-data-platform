@@ -27,8 +27,8 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
 {% set __LIVY_version = LIVY_version | default('latest') -%}
 
 {% set __HIVE_version = HIVE_version | default('latest') -%}
-{% set __HIVE_MAJOR_MINOR_version = HIVE_MAJOR_MINOR_version | default('latest') -%}
 {% set __HIVE_version_suffix = HIVE_version_suffix | default('postgresql-metastore-s3') -%}
+{% set __HIVE_METASTORE_DB_version = HIVE_METASTORE_DB_version | default('latest') -%}
 
 {% set __ATLAS_version = ATLAS_version | default('latest') -%}
 
@@ -204,7 +204,8 @@ services:
       - "{{port}}:{{port}}"
     {% if ZOOKEEPER_volume_map_data %}
     volumes:
-      - "./container-volume/zookeeper-{{loop.index}}:/var/lib/zookeeper/data"
+      - "./container-volume/zookeeper-{{loop.index}}/data:/var/lib/zookeeper/data"
+      - "./container-volume/zookeeper-{{loop.index}}/log:/var/lib/zookeeper/log"
     {% endif %}
     environment:
       ZOOKEEPER_SERVER_ID: {{loop.index}}
@@ -851,6 +852,8 @@ services:
     labels:
       com.mdps.service.webui.name: "Spark History Server"
       com.mdps.service.webui.url: "http://${PUBLIC_IP}:28117"
+      com.mdps.service.restapi.name: "Spark History Server"
+      com.mdps.service.restapi.url: "http://${PUBLIC_IP}:28117/api/v1"
     expose:
       - 18080
     ports:
@@ -898,6 +901,7 @@ services:
     env_file:
       - ./conf/hadoop.env
     volumes:
+      - ./container-volume/spark/logs/:/var/log/spark/logs
   {%if (SPARK_catalog | lower) == 'in-memory' | default(false) %}
       - ./conf/spark/spark-defaults-memory.conf:/spark/conf/spark-defaults.conf
   {% else %}
@@ -906,7 +910,11 @@ services:
     ports:
       - "8998:8998"
     environment:
+  {%if HADOOP_enable | default(false) %}
       - SPARK_MASTER=yarn
+  {% else %}
+      - SPARK_MASTER=spark://spark-master:7077
+  {% endif -%}   {#  HADOOP_enable #}
       - DEPLOY_MODE=cluster
     restart: always
 {% endif %}   {#  SPARK_livy_enable #}
@@ -959,7 +967,7 @@ services:
     restart: {{container_restart_policy}}
 
   hive-metastore-db:
-    image: trivadis/apache-hive-metastore-postgresql:{{__HIVE_MAJOR_MINOR_version}}-postgres9.5.3
+    image: trivadis/apache-hive-metastore-postgresql:{{__HIVE_METASTORE_DB_version}}
     container_name: hive-metastore-db
     hostname: hive-metastore-db
     restart: {{container_restart_policy}}
@@ -1283,7 +1291,6 @@ services:
     {% if STREAMSETS_volume_map_data %}
       - ./container-volume/streamsets-1:/data:Z
     {% endif %}
-#      - ./container-volume/streamsets/data:/data:Z
 #      - ./streamsets-extras/streamsets-libs-extras/streamsets-datacollector-jdbc-lib/postgresql-42.2.6.jar:/opt/streamsets-datacollector-{{__STREAMSETS_version}}/streamsets-libs-extras/streamsets-datacollector-jdbc-lib/lib/postgresql-42.2.6.jar:Z
 #      - ./streamsets-extras/libs-common-lib:/opt/streamsets-datacollector-{{__STREAMSETS_version}}/libs-common-lib:Z
 #      - ./streamsets-extras/user-libs:/opt/streamsets-datacollector-user-libs:Z
