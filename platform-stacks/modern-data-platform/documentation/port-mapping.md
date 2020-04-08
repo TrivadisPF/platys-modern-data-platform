@@ -49,6 +49,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 7688 | 7687 | neo4j-2 |
 7689 | 7687 | neo4j-3 |
 8024 | 8024 | axon-server |
+8047 | 8047 | drill |
 8080 | 8080 | spark-master |
 8081 | 8081 | schema-registry-1     |
 8082 | 8081 | schema-registry-2     |

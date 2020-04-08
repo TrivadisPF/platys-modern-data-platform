@@ -7,8 +7,11 @@ The Modern Analytical Data Platform Stack version 1.4.0 contains the following n
 ### New Services
 
 * Topics UI added
+* Apache Drill added
 
 ### Enhancements / Changes
+
+* 
 
 ## What's new in 1.3.0
 

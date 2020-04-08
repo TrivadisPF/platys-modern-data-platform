@@ -111,6 +111,7 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
 
 {% set __PRESTO_version = PRESTO_version | default('latest') -%}
 {% set __DREMIO_version = DREMIO_version | default('latest') -%}
+{% set __DRILL_version = DRILL_version | default('latest') -%}
 
 {% set __MOSQUITTO_version = MOSQUITTO_version | default('latest') -%}
 {% set __HIVEMQ3_version = HIVEMQ3_version | default('latest') -%}
@@ -179,6 +180,7 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
   {% set AXON_enable = false -%}
   {% set PRESTO_enable = false -%}
   {% set DREMIO_enable = false -%}
+  {% set DRILL_enable = false -%}
   {% set HIVEMQ3_enable = false -%}
   {% set HIVEMQ4_enable = false -%}
   {% set MQTT_UI_enable = false -%}
@@ -2156,6 +2158,20 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {#  DREMIO_enable #}
 
+{% if DRILL_enable | default(false) %}
+  #  ================================== Presto ========================================== #}
+  drill:
+    hostname: drill
+    image: apache/drill:{{__DRILL_version}}
+    container_name: drill
+    labels:
+      com.mdps.service.webui.name: "Drill UI"
+      com.mdps.service.webui.url: "http://${PUBLIC_IP}:8047"
+    ports:
+      - '8047:8047'
+    restart: {{container_restart_policy}}
+{% endif %}   {#  DREMIO_enable #}
+
 {% if MINIO_enable | default(false) %}
   #  ================================== Minio ========================================== #}
   minio:
@@ -2328,6 +2344,7 @@ services:
     labels:
       com.mdps.service.webui.name: "Code-Server UI"
       com.mdps.service.webui.url: "http://${PUBLIC_IP}:28140"
+    user: 0:0
     ports:
       - 28140:8080
     environment:
@@ -2335,7 +2352,7 @@ services:
     volumes:
       - ./data-transfer:/home/coder/data-transfer
     {% if CODE_SERVER_volume_map_platform_root %}
-      - ../:/home/coder/platform-root
+      - ../:/home/coder/platform-root:Z
     {% endif %}
     restart: unless-stopped
 {% endif %}   {# CODE_SERVER_enable #}
