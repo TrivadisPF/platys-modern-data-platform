@@ -24,6 +24,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 2183 | 2181 | zookeeper-3 |
 3000 | 3000 | grafana |
 3306 | 3306 | mysql |
+3307 | 3306 | datahub-mysql |
 5000 | 5000 | amundsenfrontend
 5001 | 5000 | amundsensearch
 5002 | 5000 | amundsenmetadata
@@ -49,6 +50,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 7688 | 7687 | neo4j-2 |
 7689 | 7687 | neo4j-3 |
 8024 | 8024 | axon-server |
+8047 | 8047 | drill |
 8080 | 8080 | spark-master |
 8081 | 8081 | schema-registry-1     |
 8082 | 8081 | schema-registry-2     |
@@ -100,6 +102,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 10002 | 10002 | hive-server |
 17474 | 7474 | amundsen-neo4j |
 17687 | 7687 | amundsen-neo4j |
+17475 | 7474 | datahub-neo4j |
+17688 | 7687 | datahub-neo4j |
 18080 | 18080 | nifi-1 |
 18088 | 8088 | resourcemanager |
 18042 | 8042 | nodemanager |
@@ -118,6 +122,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 19160 | 9160 | cassandra-atlas |
 19200 | 9200 | elasticsearch-atlas |
 19201 | 9200 | amundsen-elasticsearch |
+19202 | 9200 | datahub-elasticsearch |
 19630 | 19630 | streamsets-transformer-1 | 
 19631 | 19630 | streamsets-transformer-1 | 
 19632 | 19630 | streamsets-transformer-1 | 
@@ -188,6 +193,11 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28138 | 8080 | cadvisor | 
 28139 | 8080 | airflow |
 28140 | 8080 | code-server |
+28141 | 8000 | kafka-topics-ui |
+28142 | 8080 | datahub-gms |
+28143 | 9001 | datahub-frontend |
+28144 | 9091 | datahub-mae-consumer | 
+28145 | 9092 | datahub-mce-consumer |
 28500 - 28510 | 28500 - 28510 | streamsets-1 (additional ports) |
 
 
