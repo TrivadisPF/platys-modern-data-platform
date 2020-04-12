@@ -81,6 +81,8 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
 
 {% set __KIBANA_version = KIBANA_version | default('latest') -%}
 
+{% set __SUPERSET_version = SUPERSET_version | default('latest') -%}
+
 {% set __REDIS_version = REDIS_version | default('latest') -%}
 {% set __REDIS_COMMANDER_version = REDIS_COMMANDER_version | default('latest') -%}
 
@@ -1664,6 +1666,23 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {#  GRAFANA_enable #}
 
+{% if SUPERSET_enable | default(false) %}
+  #  ================================== Grafana ========================================== #}
+  superset:
+    image: amancevice/superset:{{__SUPERSET_version}}
+    hostname: superset
+    container_name: superset
+    labels:
+      com.mdps.service.webui.name: "Superset UI"
+      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28151"
+    ports:
+      - "28151:8088"
+    environment:
+      - MAPBOX_API_KEY= "${MAPBOX_API_KEY}"
+#    volumes:
+#      - ./superset_config.py:/etc/superset/superset_config.py
+    restart: {{container_restart_policy}}
+{% endif %}   {#  GRAFANA_enable #}
 
 {% if REDIS_enable | default(false) %}
   #  ================================== Redis ========================================== #}

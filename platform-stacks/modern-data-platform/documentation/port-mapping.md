@@ -200,6 +200,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28145 | 9092 | datahub-mce-consumer |
 28150 | 8888 | druid-router |
 28150 | 8888 | druid-sandbox |
+28151 | 8088 | superset |
 28500 - 28510 | 28500 - 28510 | streamsets-1 (additional ports) |
 
 
