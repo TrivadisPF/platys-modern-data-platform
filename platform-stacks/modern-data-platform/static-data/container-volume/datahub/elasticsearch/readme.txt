@@ -1,0 +1,1 @@
+Contains the data of datahub elasticsearch service, if flag DATAHUB_volume_map_data is set to true.

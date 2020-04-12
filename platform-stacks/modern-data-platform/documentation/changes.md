@@ -9,6 +9,8 @@ The Modern Analytical Data Platform Stack version 1.4.0 contains the following n
 * Kafka Topics UI added
 * Apache Drill added
 * DataHub added
+* Apache Druid added (currently supports only single-server Sandbox)
+* Apache Superset added
 
 ### Enhancements / Changes
 

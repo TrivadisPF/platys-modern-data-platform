@@ -81,6 +81,8 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
 
 {% set __KIBANA_version = KIBANA_version | default('latest') -%}
 
+{% set __SUPERSET_version = SUPERSET_version | default('latest') -%}
+
 {% set __REDIS_version = REDIS_version | default('latest') -%}
 {% set __REDIS_COMMANDER_version = REDIS_COMMANDER_version | default('latest') -%}
 
@@ -98,6 +100,8 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
 {% set __KAPACITOR_version = KAPACITOR_version | default('latest') -%}
 {% set __INFLUXDB2_version = INFLUXDB2_version | default('2.2.0-alpha') -%}
 {% set __INFLUXDB_UI_version = INFLUXDB_UI_version | default('latest') -%}
+
+{% set __DRUID_version = DRUID_version | default('latest') -%}
 
 {% set __PROMETHEUS_version = PROMETHEUS_version | default('latest') -%}
 {% set __PROMETHEUS_PUSHGATEWAY_version = PROMETHEUS_PUSHGATEWAY_version | default('latest') -%}
@@ -1102,6 +1106,9 @@ services:
     image: keremsahin/datahub-frontend:latest
     hostname: datahub-frontend
     container_name: datahub-frontend
+    labels:
+      com.mdps.service.webui.name: "DataHub UI"
+      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28143"
     ports:
       - "28143:9001"
     environment:
@@ -1659,6 +1666,23 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {#  GRAFANA_enable #}
 
+{% if SUPERSET_enable | default(false) %}
+  #  ================================== Grafana ========================================== #}
+  superset:
+    image: amancevice/superset:{{__SUPERSET_version}}
+    hostname: superset
+    container_name: superset
+    labels:
+      com.mdps.service.webui.name: "Superset UI"
+      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28151"
+    ports:
+      - "28151:8088"
+    environment:
+      - MAPBOX_API_KEY= "${MAPBOX_API_KEY}"
+#    volumes:
+#      - ./superset_config.py:/etc/superset/superset_config.py
+    restart: {{container_restart_policy}}
+{% endif %}   {#  GRAFANA_enable #}
 
 {% if REDIS_enable | default(false) %}
   #  ================================== Redis ========================================== #}
@@ -2070,6 +2094,129 @@ services:
     {% endif %}
     restart: {{container_restart_policy}}
 {% endif %}   {# INFLUXDB2_enable #}
+
+{% if DRUID_enable | default(false) %}
+  #  ================================== InfluxDB 2 ========================================== #}
+  {% if (DRUID_edition| lower) == 'oss-sandbox' | default(false) %}
+  druid-sandbox:
+    image: fokkodriesprong/docker-druid:{{__DRUID_version}}
+    hostname: druid-sandbox
+    container_name: druid-sandbox
+    labels:
+      com.mdps.service.webui.name: "Druid Console UI"
+      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28150"
+    ports:
+      - "28150:8888"
+    restart: {{container_restart_policy}}
+  {% endif %}   {# DRUID_edition #}
+
+  {% if (DRUID_edition| lower) == 'oss-cluster' | default(false) %}
+  druid-coordinator:
+    image: apache/incubator-druid:{{__DRUID_version}}
+    hostname: druid-coordinator
+    container_name: druid-coordinator
+    volumes:
+      - ./container-volume/druid/storage:/opt/data
+#      - coordinator_var:/opt/druid/var
+    depends_on:
+      - zookeeper-1
+      - druid-postgres
+    ports:
+      - "28146:8081"
+    command:
+      - coordinator
+    env_file:
+      - ./conf/druid/druid.env
+    restart: {{container_restart_policy}}
+
+  druid-broker-1:
+    image: apache/incubator-druid:{{__DRUID_version}}
+    hostname: druid-broker-1
+    container_name: druid-broker-1
+#    volumes:
+#      - broker_var:/opt/druid/var
+    depends_on:
+      - zookeeper-1
+      - druid-postgres
+      - druid-coordinator
+    ports:
+      - "28147:8082"
+    command:
+      - broker
+    env_file:
+      - ./conf/druid/druid.env
+    restart: {{container_restart_policy}}
+
+  druid-historical-1:
+    image: apache/incubator-druid:{{__DRUID_version}}
+    hostname: druid-historical-1
+    container_name: druid-historical-1
+    volumes:
+      - ./container-volume/druid/storage:/opt/data
+#      - historical_var:/opt/druid/var
+    depends_on:
+      - zookeeper-1
+      - druid-postgres
+      - druid-coordinator
+    ports:
+      - "28148:8083"
+    command:
+      - historical
+    env_file:
+      - ./conf/druid/druid.env
+    restart: {{container_restart_policy}}
+
+  druid-middlemanager:
+    image: apache/incubator-druid:{{__DRUID_version}}
+    container_name: druid-middlemanager
+    volumes:
+      - ./container-volume/druid/storage:/opt/data
+#      - middle_var:/opt/druid/var
+    depends_on:
+      - zookeeper-1
+      - druid-postgres
+      - druid-coordinator
+    ports:
+      - "28149:8091"
+    command:
+      - middleManager
+    env_file:
+      - ./conf/druid/druid.env
+    restart: {{container_restart_policy}}
+
+  druid-router:
+    image: apache/incubator-druid:{{__DRUID_version}}
+    container_name: druid-router
+    labels:
+      com.mdps.service.webui.name: "Druid Console UI"
+      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28150/graph"
+    ports:
+      - "28150:8888"
+    depends_on:
+      - zookeeper-1
+      - druid-postgres
+      - druid-coordinator
+    env_file:
+      - ./conf/druid/druid.env
+    command:
+      - router
+#    volumes:
+#      - router_var:/opt/druid/var
+    restart: {{container_restart_policy}}
+
+  druid-postgres:
+    image: postgres:latest
+    hostname: druid-postgres
+    container_name: druid-postgres
+    volumes:
+      - ./container-volume/druid/postgresql:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=abc123!
+      - POSTGRES_USER=druid
+      - POSTGRES_DB=druid
+    restart: {{container_restart_policy}}
+  {% endif %}   {# DRUID_edition #}
+{% endif %}   {# DRUID_enable #}
 
 {% if PROMETHEUS_enable | default(false) %}
   #  ================================== Prometheus ========================================== #}

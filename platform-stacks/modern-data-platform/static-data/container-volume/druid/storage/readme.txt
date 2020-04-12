@@ -1,0 +1,1 @@
+Contains the data of druid storage service, if flag DRUID_volume_map_data is set to true.
