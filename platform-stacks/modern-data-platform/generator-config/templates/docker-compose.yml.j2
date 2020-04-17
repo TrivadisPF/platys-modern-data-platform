@@ -108,6 +108,8 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
 
 {% set __TILE38_version = TILE38_version | default('latest') -%}
 
+{% set __ORACLE_XE_version = ORACLE_XE_version | default('latest') -%}
+{% set __ORACLE_EE_version = ORACLE_EE_version | default('latest') -%}
 {% set __MYSQL_version = MYSQL_version | default('latest') -%}
 {% set __POSTGRES_version = POSTGRES_version | default('latest') -%}
 {% set __TIMESCALEDB_version = TIMESCALEDB_version | default('latest') -%}
@@ -996,7 +998,6 @@ services:
     hostname: hive-metastore-db
     restart: {{container_restart_policy}}
 {% endif %}   {#  HIVE_enable #}
-
 
 {% if ATLAS_enable  | default(false) %}
   #  ================================== Apache Atlas ========================================== #
@@ -2266,6 +2267,7 @@ services:
   tile38:
     image: tile38/tile38:{{__TILE38_version}}
     container_name: tile38
+    hostname: tile38
     labels:
       com.mdps.service.webui.name: "Tile38 UI"
       com.mdps.service.webui.url: "http://${PUBLIC_IP}:9851"
@@ -2273,6 +2275,51 @@ services:
       - "9851:9851"
     restart: {{container_restart_policy}}
 {% endif %}   {#  TILE38_enable #}
+
+{% if ORACLE_enable | default(false) %}
+  #  ================================== Oracle ========================================== #}
+  {% if (ORACLE_edition | lower) == 'xe' | default(true) %}
+  oracledb:
+    image: trivadis/ora_db:{{__ORACLE_XE_version}}
+    container_name: oracledb
+    hostname: oracledb
+    ports:
+      - "1521:1521"
+      - "28152:8080"
+      - "5500:5500"
+    environment:
+      ORACLE_PWD: abc123!
+      ORACLE_CHARACTERSET: AL32UTF8
+    {% if ORACLE_volume_map_data %}
+    volumes:
+      - ./container-volume/oracle/data:/opt/oracle/oradata:Z
+    {% endif %}
+    restart: {{container_restart_policy}}
+  {% endif %}   {#  ORACLE_edition #}
+
+  {% if (ORACLE_edition | lower) == 'ee' | default(false) %}
+  oracledb:
+    image: trivadis/ora_db:{{__ORACLE_EE_version}}
+    container_name: oracledb
+    hostname: oracledb
+    ports:
+      - "1521:1521"
+      - "28152:8080"
+      - "5500:5500"
+    environment:
+      ORACLE_SID: ORCLCDB
+      ORACLE_PDB: ORCLPDB1
+      ORACLE_PWD: abc123!
+      ORACLE_CHARACTERSET: AL32UTF8
+    volumes:
+    {% if ORACLE_volume_map_data %}
+      - ./container-volume/oracle/data:/opt/oracle/oradata:Z
+    {% endif %}
+      - ./init/oracle/startup:/opt/oracle/scripts/startup
+      - ./init/oracle/setup:/opt/oracle/scripts/setup
+    restart: {{container_restart_policy}}
+  {% endif %}   {#  ORACLE_edition #}
+{% endif %}   {#  ORACLE_enable #}
 
 {% if MYSQL_enable | default(false) %}
   #  ================================== MySQL ========================================== #}

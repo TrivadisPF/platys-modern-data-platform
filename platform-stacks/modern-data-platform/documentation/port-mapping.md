@@ -8,7 +8,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 --------------------|------------------|-----------------------|
 21 | 21 | ftp |
 1433 | 1433 | sqlserver |
-1521 | 1521 | oracle-db |
+1521 | 1521 | oracledb |
 1880 | 1880 | nodered-1 |
 1882 | 1882 | kafka-mqtt-1 |
 1883 | 1883 | mosquitto-1 |
@@ -28,7 +28,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 5000 | 5000 | amundsenfrontend
 5001 | 5000 | amundsensearch
 5002 | 5000 | amundsenmetadata
-5500 | 5500 | oracle-db |
+5500 | 5500 | oracledb |
 \-     | 5432 | hive-metastore-db |
 \-     | 5432 | hue-db |
 5432 | 5432 | postgresql |
@@ -201,6 +201,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28150 | 8888 | druid-router |
 28150 | 8888 | druid-sandbox |
 28151 | 8088 | superset |
+28152 | 8080 | superset |
 28500 - 28510 | 28500 - 28510 | streamsets-1 (additional ports) |
 
 
