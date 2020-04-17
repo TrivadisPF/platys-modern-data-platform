@@ -22,7 +22,7 @@ Follow the instructions below for installing `platys` on a Mac systems.
 1. Run this command to download the current stable release of the platys Stack Generator:
 
   ```
-sudo curl -L "https://github.com/TrivadisPF/platys/releases/download/2.0.0/platys.bin" -o /usr/local/bin/platys
+sudo curl -L "https://github.com/TrivadisPF/platys/releases/download/2.1.0/platys.bin" -o /usr/local/bin/platys
 ```
 
 2. Apply executable permissions to the binary:
@@ -45,7 +45,7 @@ Follow the instructions below for installing `platys` on a Linux systems.
 1. Run this command to download the current stable release of the platys Stack Generator:
 
   ```
-sudo curl -L "https://github.com/TrivadisPF/platys/releases/download/2.0.0/platys.tar.gz" -o /tmp/platys.tar.gz
+sudo curl -L "https://github.com/TrivadisPF/platys/releases/download/2.1.0/platys.tar.gz" -o /tmp/platys.tar.gz
 ```
 
 2. Untar and move it to `/usr/local/bin`
@@ -67,7 +67,7 @@ sudo ln -s /usr/local/lib/platys.dist/platys /usr/local/bin/platys
 
   ```
 $ platys --version
-Platys - Trivadis Platform in a Box - v2.0.0
+Platys - Trivadis Platform in a Box - v2.1.0
 ```
 
 ### Windows 
@@ -77,14 +77,14 @@ Follow the instructions below for installing `platys` on a Windows system.
 1. Run this command to download the current stable release of the platys Stack Generator from Windows Powershell:
 
   ```
-curl "https://github.com/TrivadisPF/platys/releases/download/2.0.0/platys.exe" -o c:/Windows/platys.exe
+curl "https://github.com/TrivadisPF/platys/releases/download/2.1.0/platys.exe" -o c:/Windows/platys.exe
 ```
 
 2. Use the `--version` option to check that the generator has been installed successfully.
 
   ```
 $ platys --version
-Platys - Trivadis Platform in a Box - v2.0.0
+Platys - Trivadis Platform in a Box - v2.1.0
 ```
 
    
