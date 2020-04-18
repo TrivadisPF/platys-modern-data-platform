@@ -30,6 +30,9 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
 {% set __HIVE_version_suffix = HIVE_version_suffix | default('postgresql-metastore-s3') -%}
 {% set __HIVE_METASTORE_DB_version = HIVE_METASTORE_DB_version | default('latest') -%}
 
+{% set __RANGER_version = RANGER_version | default('latest') -%}
+{% set __RANGER_POSTGRES_version = RANGER_POSTGRES_version | default('latest') -%}
+
 {% set __ATLAS_version = ATLAS_version | default('latest') -%}
 
 {% set __DATAHUB_version = DATAHUB_version | default('latest') -%}
@@ -173,6 +176,8 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
   {% set HADOOP_enable = false -%}
   {% set SPARK_enable = false -%}
   {% set HIVE_enable = false -%}
+  {% set RANGER_enable = false -%}
+  {% set RANGER_POSTGRES_enable = false -%}
   {% set ATLAS_enable = false -%}
   {% set DATAHUB_enable = false -%}
   {% set AMUNDSEN_enable = false -%}
@@ -192,6 +197,7 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
   {% set INFLUXDB2_enable = false -%}
   {% set NEO4J_enable = false -%}
   {% set TILE38_enable = false -%}
+  {% set ORACLE_enable = false -%}
   {% set MYSQL_enable = false -%}
   {% set SQLSERVER_enable = false -%}
   {% set TIMESCALEDB_enable = false -%}
@@ -270,7 +276,6 @@ services:
   {% endif %}   {# ZOOKEEPER_navigator_enable #}
 
 {% endif %}   {# zookeeper_enable or KAFKA_enable or ATLAS_enable #}
-
 
 {% if (KAFKA_enable) | default(false) %}
   #  ================================== Kafka ========================================== #}
@@ -998,6 +1003,36 @@ services:
     hostname: hive-metastore-db
     restart: {{container_restart_policy}}
 {% endif %}   {#  HIVE_enable #}
+
+{% if RANGER_enable  | default(false) %}
+  #  ================================== Apache Ranger ========================================== #
+  ranger-admin:
+    image: trivadis/apache-ranger:{{__RANGER_version}}
+    container_name: ranger-admin
+    hostname: ranger-admin
+    stdin_open: true
+    tty: true
+    depends_on:
+      - postgresql
+    ports:
+      - "6080:6080"
+
+  ranger-postgresql:
+    image: postgres:{{__RANGER_POSTGRES_version}}
+    container_name: ranger-postgresql
+    hostname: ranger-postgresql
+    environment:
+      - POSTGRES_PASSWORD=abc123!
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=ranger-admin
+      - PGDATA=/var/lib/postgresql/data
+    volumes:
+      - ./init/ranger/postgresql:/docker-entrypoint-initdb.d/
+    {% if RANGER_POSTRESQL_volume_map_data %}
+      - ./container-volume/ranger/postgresql/data:/var/lib/postgresql/data:Z
+    {% endif %}
+    restart: {{container_restart_policy}}{% endif %}
+{#  RANGER_enable #}
 
 {% if ATLAS_enable  | default(false) %}
   #  ================================== Apache Atlas ========================================== #

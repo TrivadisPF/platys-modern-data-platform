@@ -38,6 +38,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 5800 | 5800 | filezilla |  
 5900 | 5900 | filezilla |  
 6066 | 6066 | spark-master |
+6080 | 6080 | ranger-admin |
 6379 | 6379 | redis |
 7077 | 7077 | spark-master |
 7199 | 7199 | cassandra-1 |
