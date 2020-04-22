@@ -39,7 +39,7 @@ The following diagram shows the building blocks of `platys` and the basic flow w
 
 ## Where can I run `platys`?
 
-Currently the **platys** toolset only runs on macOS and 64-bit Linux, but we are working on a platform independent version, to be released with the final 1.2.0 version. 
+The **platys** toolset runs on Windows, macOS and 64-bit Linux. 
 
 `platys` runs the generator (supporting given Platform Stack) as a Docker container in the background. Therefore you need to have [Docker](https://www.docker.com/get-started) installed on the machine where you create the Platform. To run the Platform, you also need to have [Docker Compose](https://docs.docker.com/compose/) installed on the target machine, which can be different to the one where you generate the platform.  
 
