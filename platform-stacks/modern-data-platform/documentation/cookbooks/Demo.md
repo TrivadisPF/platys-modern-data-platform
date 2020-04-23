@@ -1,0 +1,5 @@
+* [Using StreamSets Transformer to transform CSV to Parquet & Delta Lake](https://github.com/TrivadisPF/platys/blob/1.5.0/platform-stacks/modern-data-platform/documentation/cookbooks/streamsets-transformer/StreamsetsTransformer_CSV_to_Parquet.md)
+* [Using StreamSets Transformer to aggregate data](https://github.com/TrivadisPF/platys/blob/1.5.0/platform-stacks/modern-data-platform/documentation/cookbooks/streamsets-transformer/Using%20StreamSets%20Transformer%20to%20calculate%20data.md)
+* [Presto and S3 (Delta Lake)](https://github.com/TrivadisPF/platys/blob/1.5.0/platform-stacks/modern-data-platform/documentation/cookbooks/delta-lake-and-presto/Presto-and-DeltaLake.md)
+* [Querying data in Postgresql from Presto and Joining with S3 Data](https://github.com/TrivadisPF/platys/tree/1.5.0/platform-stacks/modern-data-platform/documentation/cookbooks/presto-and-postgresql)
+* [Querying data in Postgresql from Apache Drill](https://github.com/TrivadisPF/platys/tree/1.5.0/platform-stacks/modern-data-platform/documentation/cookbooks/drill-and-postgresql)
