@@ -1,4 +1,4 @@
-# Hive and Delta Lake
+# Presto and Delta Lake
 
 This tutorial will show how to access Delta Lake table from with Presto.
 
@@ -23,9 +23,16 @@ docker exec -ti awscli s3cmd mb s3://flight-bucket
 ```
 
 ```
-docker exec -ti awscli s3cmd put /data-transfer/samples/flight-data/flights_2018_4_1.csv s3://flight-bucket/landing/flights/flights_2018_4_1.csv
+docker exec -ti awscli s3cmd put /data-transfer/samples/flight-data/flights_2018_4_1.csv s3://flight-bucket/raw/flights/flights_2018_4_1.csv
 
-docker exec -ti awscli s3cmd put /data-transfer/samples/flight-data/flights_2018_5_1.csv s3://flight-bucket/landing/flights/flights_2018_5_1.csv
+docker exec -ti awscli s3cmd put /data-transfer/samples/flight-data/flights_2018_4_2.csv s3://flight-bucket/raw/flights/flights_2018_4_2.csv
+
+
+docker exec -ti awscli s3cmd put /data-transfer/samples/flight-data/airports.csv s3://flight-bucket/raw/airports/airports.csv
+
+docker exec -ti awscli s3cmd put /data-transfer/samples/flight-data/carriers.csv s3://flight-bucket/raw/carriers/carriers.csv
+
+docker exec -ti awscli s3cmd put /data-transfer/samples/flight-data/plane-data.csv s3://flight-bucket/raw/plane-data/plane-data.csv
 ```
 
 ## Prepare the Delta Lake table
@@ -72,17 +79,18 @@ val flightsSchema = StructType(Array(
   StructField("lateAircraftDelay", StringType, true)
   )
 )
+```
 
 ```
 val flightsDf = spark.read.format("csv")
   .option("delimiter",",")
   .option("header", "false")
   .schema(flightsSchema)
-  .load("s3a://flight-bucket/landing/flights/flights_2018_5_1.csv")
+  .load("s3a://flight-bucket/raw/flights/flights_2018_5_1.csv")
 ```
 
 ```
-flightsDf.write.format("delta").mode("append").partitionBy("year","month").save("s3a://flight-bucket/delta/flights")
+flightsDf.write.format("delta").mode("append").partitionBy("year","month").save("s3a://flight-bucket/refined/delta-presto/flights")
 ```
 
 ## Create a Manifest
@@ -90,7 +98,7 @@ flightsDf.write.format("delta").mode("append").partitionBy("year","month").save(
 ```
 import io.delta.tables._
 
-val deltaTable = DeltaTable.forPath(spark,"s3a://flight-bucket/delta/flights")
+val deltaTable = DeltaTable.forPath(spark,"s3a://flight-bucket/refined/delta-presto/flights")
 deltaTable.generate("symlink_format_manifest")
 ```
 
@@ -101,6 +109,9 @@ docker exec -ti hive-metastore hive
 ```
 
 ```
+CREATE DATABASE flight_data;
+USE flight_data;
+
 DROP TABLE flights_t;
 CREATE EXTERNAL TABLE flights_t ( dayOfMonth integer
                              , dayOfWeek integer
@@ -123,7 +134,7 @@ PARTITIONED BY (year integer, month integer)
 ROW FORMAT SERDE 'org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe'                       
 STORED AS INPUTFORMAT 'org.apache.hadoop.hive.ql.io.SymlinkTextInputFormat'
 OUTPUTFORMAT 'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat'
-LOCATION 's3a://flight-bucket/delta/flights/_symlink_format_manifest/'
+LOCATION 's3a://flight-bucket/refined/delta-presto/flights/_symlink_format_manifest/'
 TBLPROPERTIES ("parquet.compression"="SNAPPY");
 
 MSCK REPAIR TABLE flights_t;
@@ -136,10 +147,32 @@ SELECT * FROM flights_t;
 
 
 ```
-docker exec -ti presto presto-cli
+docker exec -ti presto-1 presto-cli
 ```
 
 
-use minio.default;
+```
+use minio.flight_data;
 
 show tables;
+```
+
+```
+SELECT * FROM flights_t;
+```
+
+```
+SELECT count(*) FROM flights_t;
+```
+
+```
+SELECT origin, dest, count(*) 
+FROM flights_t
+GROUP BY origin, dest;
+```
+
+
+
+
+
+
