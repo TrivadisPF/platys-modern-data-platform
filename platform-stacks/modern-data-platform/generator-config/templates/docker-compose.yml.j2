@@ -2532,10 +2532,10 @@ services:
 
 {% if PRESTO_enable | default(false) %}
   #  ================================== Presto ========================================== #}
-  presto:
-    hostname: presto
+  presto-1:
     image: {{ 'starburstdata/presto' if (PRESTO_edition | lower) == 'starburstdata' else 'prestosql/presto' }}:{{__PRESTO_version}}
-    container_name: presto
+    hostname: presto-1
+    container_name: presto-1
     labels:
       com.mdps.service.webui.name: "Presto UI"
       com.mdps.service.webui.url: "http://${PUBLIC_IP}:28081"
@@ -2554,10 +2554,10 @@ services:
 
 {% if DREMIO_enable | default(false) %}
   #  ================================== Presto ========================================== #}
-  dremio:
-    hostname: dremio
+  dremio-1:
     image: dremio/dremio-oss:{{__DREMIO_version}}
-    container_name: dremio
+    container_name: dremio-1
+    hostname: dremio-1
     labels:
       com.mdps.service.webui.name: "Dremio UI"
       com.mdps.service.webui.url: "http://${PUBLIC_IP}:9047"
@@ -2570,15 +2570,22 @@ services:
 
 {% if DRILL_enable | default(false) %}
   #  ================================== Presto ========================================== #}
-  drill:
-    hostname: drill
-    image: apache/drill:{{__DRILL_version}}
-    container_name: drill
+  drill-1:
+    image: smizy/apache-drill:{{__DRILL_version}}
+    container_name: drill-1
+    hostname: drill-1
     labels:
       com.mdps.service.webui.name: "Drill UI"
       com.mdps.service.webui.url: "http://${PUBLIC_IP}:8047"
     ports:
       - '8047:8047'
+    environment:
+      - SERVICE_8047_NAME=drillbit
+      - DRILL_HEAP=512M
+      - DRILL_MAX_DIRECT_MEMORY=1G
+      - DRILL_ZOOKEEPER_QUORUM=zookeeper-1:2181
+    volumes:
+      - ./data-transfer:/data-transfer
     restart: {{container_restart_policy}}
 {% endif %}   {#  DREMIO_enable #}
 
