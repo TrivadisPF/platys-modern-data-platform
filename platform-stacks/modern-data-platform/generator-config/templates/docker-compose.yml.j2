@@ -143,6 +143,7 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
 {% set __hw_arch = hw_arch | default('x86-64') -%}
 {% set __PYTHON_VERSION = PYTHON_version | default('3') -%}
 
+
 {% if KAFKA_enable or ATLAS_enable or DATAHUB_enable -%}
 # enforce some dependencies
   {% set ZOOKEEPER_enable = true -%}
@@ -826,23 +827,13 @@ services:
   {% endif %}
       SPARK_PUBLIC_DNS: ${PUBLIC_IP}
       INIT_DAEMON_STEP: setup_spark
-      SPARK_DEFAULTS_CONF_spark_jars_packages: io.delta:delta-core_2.11:0.5.0,org.apache.spark:spark-avro_2.11:2.4.5
-      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
-      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_endpoint: org.apache.hadoop.fs.s3a.S3AFileSystem
-      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_path_style_access: 'true'
-  {%if (SPARK_catalog | lower) == 'in-memory' | default(false) %}
-      SPARK_DEFAULTS_CONF_spark_sql_catalogImplementation: in-memory
-  {% else %}
-      SPARK_DEFAULTS_CONF_spark_sql_catalogImplementation: hive
-      SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: hdfs://namenode:9000/user/hive/warehouse
-  {% endif -%}   {#  SPARK_catalog #}
-      SPARK_DEFAULTS_CONF_spark_yarn_dist_files: '/etc/spark/conf/hive-site.xml'
-      SPARK_DEFAULTS_CONF_spark_driver_extraJavaOptions: -Dcom.amazonaws.services.s3.enableV4
-      SPARK_DEFAULTS_CONF_spark_executor_extraJavaOptions: -Dcom.amazonaws.services.s3.enableV4
 #      - CORE_CONF_fs_defaultFS=hdfs://namenode:8020
     volumes:
-      - "/etc/timezone:/etc/timezone:ro"
-      - "/etc/localtime:/etc/localtime:ro"
+  {%if (SPARK_catalog | lower) == 'in-memory' | default(false) %}
+      - ./conf/spark/spark-defaults-memory.conf:/spark/conf/spark-defaults.conf
+  {% else %}
+      - ./conf/spark/spark-defaults-hive.conf:/spark/conf/spark-defaults.conf
+  {% endif -%}   {#  SPARK_catalog #}
       - ./container-volume/spark/logs/:/var/log/spark/logs
       - ./data-transfer:/data-transfer
     restart: {{container_restart_policy}}
@@ -871,22 +862,12 @@ services:
       CORE_CONF_fs_s3a_endpoint: 'http://minio:9000'
       CORE_CONF_fs_s3a_path_style_access: 'true'
   {% endif %}
-      SPARK_DEFAULTS_CONF_spark_jars_packages: io.delta:delta-core_2.11:0.5.0,org.apache.spark:spark-avro_2.11:2.4.5
-      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
-      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_endpoint: org.apache.hadoop.fs.s3a.S3AFileSystem
-      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_path_style_access: 'true'
-  {%if (SPARK_catalog | lower) == 'in-memory' | default(false) %}
-      SPARK_DEFAULTS_CONF_spark_sql_catalogImplementation: in-memory
-  {% else %}
-      SPARK_DEFAULTS_CONF_spark_sql_catalogImplementation: hive
-      SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: hdfs://namenode:9000/user/hive/warehouse
-  {% endif -%}   {#  SPARK_catalog #}
-      SPARK_DEFAULTS_CONF_spark_yarn_dist_files: '/etc/spark/conf/hive-site.xml'
-      SPARK_DEFAULTS_CONF_spark_driver_extraJavaOptions: -Dcom.amazonaws.services.s3.enableV4
-      SPARK_DEFAULTS_CONF_spark_executor_extraJavaOptions: -Dcom.amazonaws.services.s3.enableV4
     volumes:
-      - "/etc/timezone:/etc/timezone:ro"
-      - "/etc/localtime:/etc/localtime:ro"
+  {%if (SPARK_catalog | lower) == 'in-memory' | default(false) %}
+      - ./conf/spark/spark-defaults-memory.conf:/spark/conf/spark-defaults.conf
+  {% else %}
+      - ./conf/spark/spark-defaults-hive.conf:/spark/conf/spark-defaults.conf
+  {% endif -%}   {#  SPARK_catalog #}
       - ./container-volume/spark/logs/:/var/log/spark/logs
       - ./data-transfer:/data-transfer
     restart: {{container_restart_policy}}
@@ -908,23 +889,12 @@ services:
       - 18080
     ports:
       - 28117:18080
-    environment:
-      SPARK_DEFAULTS_CONF_spark_jars_packages: io.delta:delta-core_2.11:0.5.0,org.apache.spark:spark-avro_2.11:2.4.5
-      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
-      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_endpoint: org.apache.hadoop.fs.s3a.S3AFileSystem
-      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_path_style_access: 'true'
-  {%if (SPARK_catalog | lower) == 'in-memory' | default(false) %}
-      SPARK_DEFAULTS_CONF_spark_sql_catalogImplementation: in-memory
-  {% else %}
-      SPARK_DEFAULTS_CONF_spark_sql_catalogImplementation: hive
-      SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: hdfs://namenode:9000/user/hive/warehouse
-  {% endif -%}   {#  SPARK_catalog #}
-      SPARK_DEFAULTS_CONF_spark_yarn_dist_files: '/etc/spark/conf/hive-site.xml'
-      SPARK_DEFAULTS_CONF_spark_driver_extraJavaOptions: -Dcom.amazonaws.services.s3.enableV4
-      SPARK_DEFAULTS_CONF_spark_executor_extraJavaOptions: -Dcom.amazonaws.services.s3.enableV4
     volumes:
-      - "/etc/timezone:/etc/timezone:ro"
-      - "/etc/localtime:/etc/localtime:ro"
+  {%if (SPARK_catalog | lower) == 'in-memory' | default(false) %}
+      - ./conf/spark/spark-defaults-memory.conf:/spark/conf/spark-defaults.conf
+  {% else %}
+      - ./conf/spark/spark-defaults-hive.conf:/spark/conf/spark-defaults.conf
+  {% endif -%}   {#  SPARK_catalog #}
       - ./container-volume/spark/logs/:/var/log/spark/logs
     restart: {{container_restart_policy}}
   {% endif %}   {#  SPARK_HISTORY_enable #}
@@ -937,23 +907,12 @@ services:
       - "28118:10000"
     env_file:
       - ./conf/hadoop.env
-    environment:
-      SPARK_DEFAULTS_CONF_spark_jars_packages: io.delta:delta-core_2.11:0.5.0,org.apache.spark:spark-avro_2.11:2.4.5
-      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
-      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_endpoint: org.apache.hadoop.fs.s3a.S3AFileSystem
-      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_path_style_access: 'true'
-  {%if (SPARK_catalog | lower) == 'in-memory' | default(false) %}
-      SPARK_DEFAULTS_CONF_spark_sql_catalogImplementation: in-memory
-  {% else %}
-      SPARK_DEFAULTS_CONF_spark_sql_catalogImplementation: hive
-      SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: hdfs://namenode:9000/user/hive/warehouse
-  {% endif -%}   {#  SPARK_catalog #}
-      SPARK_DEFAULTS_CONF_spark_yarn_dist_files: '/etc/spark/conf/hive-site.xml'
-      SPARK_DEFAULTS_CONF_spark_driver_extraJavaOptions: -Dcom.amazonaws.services.s3.enableV4
-      SPARK_DEFAULTS_CONF_spark_executor_extraJavaOptions: -Dcom.amazonaws.services.s3.enableV4
     volumes:
-      - "/etc/timezone:/etc/timezone:ro"
-      - "/etc/localtime:/etc/localtime:ro"
+  {%if (SPARK_catalog | lower) == 'in-memory' | default(false) %}
+      - ./conf/spark/spark-defaults-memory.conf:/spark/conf/spark-defaults.conf
+  {% else %}
+      - ./conf/spark/spark-defaults-hive.conf:/spark/conf/spark-defaults.conf
+  {% endif -%}   {#  SPARK_catalog #}
     command: bash -c "sleep 2m && /spark/sbin/start-thriftserver.sh && tail -f /spark/logs/spark--org.apache.spark.sql.hive.thriftserver.HiveThriftServer2-*.out"
   {% endif %}   {#  SPARK_THRIFT_enable #}
 
@@ -972,32 +931,22 @@ services:
       com.mdps.service.restapi.url: "http://${PUBLIC_IP}:8998/"
     env_file:
       - ./conf/hadoop.env
-    environment:
-  {%if HADOOP_enable | default(false) %}
-      SPARK_MASTER: yarn
-  {% else %}
-      SPARK_MASTER: spark://spark-master:7077
-  {% endif -%}   {#  HADOOP_enable #}
-      DEPLOY_MODE: client
-      SPARK_DEFAULTS_CONF_spark_jars_packages: io.delta:delta-core_2.11:0.5.0,org.apache.spark:spark-avro_2.11:2.4.5
-      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
-      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_endpoint: org.apache.hadoop.fs.s3a.S3AFileSystem
-      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_path_style_access: 'true'
-  {%if (SPARK_catalog | lower) == 'in-memory' | default(false) %}
-      SPARK_DEFAULTS_CONF_spark_sql_catalogImplementation: in-memory
-  {% else %}
-      SPARK_DEFAULTS_CONF_spark_sql_catalogImplementation: hive
-      SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: hdfs://namenode:9000/user/hive/warehouse
-  {% endif -%}   {#  SPARK_catalog #}
-      SPARK_DEFAULTS_CONF_spark_yarn_dist_files: '/etc/spark/conf/hive-site.xml'
-      SPARK_DEFAULTS_CONF_spark_driver_extraJavaOptions: -Dcom.amazonaws.services.s3.enableV4
-      SPARK_DEFAULTS_CONF_spark_executor_extraJavaOptions: -Dcom.amazonaws.services.s3.enableV4
     volumes:
-      - "/etc/timezone:/etc/timezone:ro"
-      - "/etc/localtime:/etc/localtime:ro"
       - ./container-volume/spark/logs/:/var/log/spark/logs
+  {%if (SPARK_catalog | lower) == 'in-memory' | default(false) %}
+      - ./conf/spark/spark-defaults-memory.conf:/spark/conf/spark-defaults.conf
+  {% else %}
+      - ./conf/spark/spark-defaults-hive.conf:/spark/conf/spark-defaults.conf
+  {% endif -%}   {#  SPARK_catalog #}
     ports:
       - "8998:8998"
+    environment:
+  {%if HADOOP_enable | default(false) %}
+      - SPARK_MASTER=yarn
+  {% else %}
+      - SPARK_MASTER=spark://spark-master:7077
+  {% endif -%}   {#  HADOOP_enable #}
+      - DEPLOY_MODE=client
     restart: always
 {% endif %}   {#  SPARK_livy_enable #}
 
@@ -1031,6 +980,7 @@ services:
       - "9083:9083"
     env_file:
       - ./conf/hadoop.env
+    command: /opt/hive/bin/hive --service metastore
     environment:
       CORE_CONF_fs_defaultFS: "file:///tmp"
   {%if MINIO_enable | default(false) %}
@@ -1045,7 +995,6 @@ services:
       - ./conf/atlas/atlas-application.properties:/opt/hive/conf/atlas-application.properties
       - ./plugins/hive-server/apache-atlas-hive-hook/hook:/opt/atlas/hook
   {% endif -%}   {#  ATLAS_install_hive_hook #}
-    command: /opt/hive/bin/hive --service metastore
     restart: {{container_restart_policy}}
 
   hive-metastore-db:
@@ -1123,15 +1072,15 @@ services:
     depends_on:
       - kafka-1
       - zookeeper-1
+    command: "bash -c 'echo Waiting for Kafka to be ready... && \
+                       cub kafka-ready -b kafka-1:19092 1 120 && \
+                       kafka-topics --create --if-not-exists --zookeeper zookeeper-1:2181 --partitions 1 --replication-factor 1 --topic ATLAS_HOOK && \
+                       kafka-topics --create --if-not-exists --zookeeper zookeeper-1:2181 --partitions 1 --replication-factor 1 --topic ATLAS_ENTITIES'"
     environment:
       # The following settings are listed here only to satisfy the image's requirements.
       # We override the image's `command` anyways, hence this container will not start a broker.
       KAFKA_BROKER_ID: ignored
       KAFKA_ZOOKEEPER_CONNECT: ignored
-    command: "bash -c 'echo Waiting for Kafka to be ready... && \
-                       cub kafka-ready -b kafka-1:19092 1 120 && \
-                       kafka-topics --create --if-not-exists --zookeeper zookeeper-1:2181 --partitions 1 --replication-factor 1 --topic ATLAS_HOOK && \
-                       kafka-topics --create --if-not-exists --zookeeper zookeeper-1:2181 --partitions 1 --replication-factor 1 --topic ATLAS_ENTITIES'"
   {% endif %} {#  KAFKA_enable #}
 
   cassandra-atlas:
@@ -1682,20 +1631,6 @@ services:
     {%if HADOOP_enable | default(false) %}
       CORE_CONF_fs_defaultFS: 'hdfs://namenode:9000'
     {% endif %}
-      SPARK_DEFAULTS_CONF_spark_jars_packages: io.delta:delta-core_2.11:0.5.0,org.apache.spark:spark-avro_2.11:2.4.5
-      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
-      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_endpoint: org.apache.hadoop.fs.s3a.S3AFileSystem
-      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_path_style_access: 'true'
-  {%if (SPARK_catalog | lower) == 'in-memory' | default(false) %}
-      SPARK_DEFAULTS_CONF_spark_sql_catalogImplementation: in-memory
-  {% else %}
-      SPARK_DEFAULTS_CONF_spark_sql_catalogImplementation: hive
-      SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: hdfs://namenode:9000/user/hive/warehouse
-  {% endif -%}   {#  SPARK_catalog #}
-      SPARK_DEFAULTS_CONF_spark_yarn_dist_files: '/etc/spark/conf/hive-site.xml'
-      SPARK_DEFAULTS_CONF_spark_driver_extraJavaOptions: -Dcom.amazonaws.services.s3.enableV4
-      SPARK_DEFAULTS_CONF_spark_executor_extraJavaOptions: -Dcom.amazonaws.services.s3.enableV4
-
       ZEPPELIN_ADDR: "0.0.0.0"
       ZEPPELIN_PORT: "8080"
       ZEPPELIN_INTERPRETER_CONNECT_TIMEOUT: 120000
@@ -1712,6 +1647,11 @@ services:
       # enableV4 to make it work with AWS Frankfurt region
       SPARK_SUBMIT_OPTIONS: "--conf spark.driver.extraJavaOptions=-Dcom.amazonaws.services.s3.enableV4 --conf spark.executor.extraJavaOptions=-Dcom.amazonaws.services.s3.enableV4"
     volumes:
+  {%if (SPARK_catalog | lower) == 'in-memory' | default(false) %}
+      - ./conf/spark/spark-defaults-memory.conf:/spark/conf/spark-defaults.conf
+  {% else %}
+      - ./conf/spark/spark-defaults-hive.conf:/spark/conf/spark-defaults.conf
+  {% endif -%}   {#  SPARK_catalog #}
       - ./container-volume/spark/logs/:/var/log/spark/logs
       - './conf/s3cfg:/root/.s3cfg'
       - ./conf/zeppelin/shiro.ini:/opt/zeppelin/conf/shiro.ini
