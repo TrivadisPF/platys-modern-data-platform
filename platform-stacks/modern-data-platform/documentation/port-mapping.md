@@ -64,6 +64,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 8090 | 8088 | ksqldb-server-3 |
 8124 | 8124 | axon-server |
 8161 | 8161 | activemq |
+8200 | 8200 | vault |
 8888 | 8888 | hue |
 8983 | 8983 | solr |
 8998 | 8998 | livy |
