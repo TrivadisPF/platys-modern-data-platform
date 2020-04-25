@@ -229,11 +229,6 @@ services:
     hostname: zookeeper-{{loop.index}}
     ports:
       - "{{port}}:{{port}}"
-    {% if ZOOKEEPER_volume_map_data %}
-    volumes:
-      - "./container-volume/zookeeper-{{loop.index}}/data:/var/lib/zookeeper/data"
-      - "./container-volume/zookeeper-{{loop.index}}/log:/var/lib/zookeeper/log"
-    {% endif %}
     environment:
       ZOOKEEPER_SERVER_ID: {{loop.index}}
       ZOOKEEPER_CLIENT_PORT: {{port}}
@@ -243,6 +238,16 @@ services:
     {% if ZOOKEEPER_nodes == 3 %}
       ZOOKEEPER_SERVERS: zookeeper-1:22888:23888;zookeeper-2:32888:33888;zookeeper-3:42888:43888
     {% endif %}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {% if ZOOKEEPER_volume_map_data %}
+      - "./container-volume/zookeeper-{{loop.index}}/data:/var/lib/zookeeper/data"
+      - "./container-volume/zookeeper-{{loop.index}}/log:/var/lib/zookeeper/log"
+    {% endif %}
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     restart: {{container_restart_policy}}
   {% endfor %}
 
@@ -255,12 +260,18 @@ services:
       com.mdps.service.webui.url: "http://${PUBLIC_IP}:28100"
     ports:
      - "28100:8010"
+    depends_on:
+     - zoonavigator-api
     environment:
       WEB_HTTP_PORT: 8010
       API_HOST: "zoonavigator-api"
       API_PORT: 9010
-    depends_on:
-     - zoonavigator-api
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     restart: {{container_restart_policy}}
 
   zoonavigator-api:
@@ -272,6 +283,12 @@ services:
      - "28101:9010"
     environment:
       API_HTTP_PORT: 9010
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     restart: {{container_restart_policy}}
   {% endif %}   {# ZOOKEEPER_navigator_enable #}
 
@@ -290,10 +307,15 @@ services:
     ports:
       - "{{port}}:{{port}}"
       - "2{{port}}:2{{port}}"
-    {% if KAFKA_volume_map_data %}
     volumes:
+      - ./data-transfer:/data-transfer
+    {% if KAFKA_volume_map_data %}
       - "./container-volume/kafka-{{loop.index}}:/var/lib/kafka/data"
     {% endif %}
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     environment:
       KAFKA_BROKER_ID: {{loop.index}}
       KAFKA_BROKER_RACK: 'r{{loop.index}}'
@@ -345,6 +367,12 @@ services:
       SCHEMA_REGISTRY_KAFKASTORE_TOPIC_REPLICATION_FACTOR: {{KAFKA_SCHEMA_REGISTRY_replication_factor}}
       SCHEMA_REGISTRY_ACCESS_CONTROL_ALLOW_ORIGIN: '*'
       SCHEMA_REGISTRY_ACCESS_CONTROL_ALLOW_METHODS: 'GET,POST,PUT,OPTIONS'
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     restart: {{container_restart_policy}}
   {% endfor %}
 {% endif %}   {# KAFKA_enable and KAFKA_SCHEMA_REGISTRY_enable #}
@@ -390,7 +418,12 @@ services:
       AWS_ACCESS_KEY_ID: V42FCGRVMK24JJ8DHUYG
       AWS_SECRET_ACCESS_KEY: bKhWxVF3kQoLY9kFmt91l+tDrEoZjqnWXzY9Eza
     volumes:
+      - ./data-transfer:/data-transfer
       - ./plugins/kafka-connect:/etc/kafka-connect/custom-plugins
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     restart: {{container_restart_policy}}
 
   {% endfor %}
@@ -424,15 +457,27 @@ services:
       KSQL_KSQL_LOGGING_PROCESSING_TOPIC_AUTO_CREATE: "true"
       KSQL_KSQL_SERVICE_ID: "kafka-demo"
     volumes:
+      - ./data-transfer:/data-transfer
       - ./plugins/ksql:/etc/ksql/ext
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     restart: {{container_restart_policy}}
   {% endfor %}
 
   ksqldb-cli:
     image: confluentinc/ksqldb-cli:{{__KAFKA_KSQLDB_version}}
     container_name: ksqldb-cli
+    hostname: ksqldb-cli
     depends_on:
       - ksqldb-server-1
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     entrypoint: /bin/sh
     tty: true
 {% endif %}   {# KAFKA_broker_enable and KAFKA_KSQLDB_enable #}
@@ -455,6 +500,12 @@ services:
       KAFKA_REST_LISTENERS: 'http://0.0.0.0:8086'
       KAFKA_REST_SCHEMA_REGISTRY_URL: 'http://schema-registry-1:8081'
       KAFKA_REST_HOST_NAME: 'kafka-rest-1'
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     restart: {{container_restart_policy}}
 {% endif %}   {# KAFKA_enable and KAFKA_RESTPROXY_enable #}
 
@@ -471,6 +522,12 @@ services:
       KAFKA_MQTT_LISTENERS: 0.0.0.0:1882
       KAFKA_MQTT_BOOTSTRAP_SERVERS: PLAINTEXT://kafka-1:19092
       KAFKA_MQTT_CONFLUENT_TOPIC_REPLICATIN_FACTOR: 1
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     restart: {{container_restart_policy}}
 {% endif %}   {# KAFKA_enable and KAFKA_MQTTPROXY_enable #}
 
@@ -503,6 +560,12 @@ services:
       CONTROL_CENTER_MONITORING_INTERCEPTOR_TOPIC_PARTITIONS: 1
       CONFLUENT_METRICS_TOPIC_REPLICATION: 1
       PORT: 9021
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     restart: {{container_restart_policy}}
 {% endif %}   {# KAFKA_enable and KAFKA_CCC_enable #}
 
@@ -521,6 +584,12 @@ services:
       - "28102:8000"
     environment:
       SCHEMAREGISTRY_URL: 'http://${PUBLIC_IP}:8081'
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     restart: {{container_restart_policy}}
 {% endif %}   {# KAFKA_enable and KAFKA_SCHEMA_REGISTRY_UI_enable #}
 
@@ -541,6 +610,12 @@ services:
       KAFKA_REST_PROXY_URL: 'http://kafka-rest-1:8086'
       LAZY_LOAD_TOPIC_META: 'false'
       PROXY: 'true'
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     restart: {{container_restart_policy}}
 {% endif %}   {# KAFKA_enable and KAFKA_SCHEMA_REGISTRY_UI_enable #}
 
@@ -552,13 +627,19 @@ services:
     hostname: kafka-connect-ui
     labels:
       com.mdps.service.webui.url: "http://${PUBLIC_IP}:28103"
+    depends_on:
+      - kafka-connect-1
     ports:
       - "28103:8000"
     environment:
       CONNECT_URL: "http://${PUBLIC_IP}:8083/,http://${PUBLIC_IP}:8084/"
       PROXY: "true"
-    depends_on:
-      - kafka-connect-1
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     restart: {{container_restart_policy}}
 {% endif %}   {# KAFKA_enable and KAFKA_CONNECT_UI_enable #}
 
@@ -578,6 +659,12 @@ services:
     environment:
       ZK_HOSTS: 'zookeeper-1:2181'
       APPLICATION_SECRET: 'abc123!'
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  KAFKA_enable and KAFKA_CMAK_enable #}
 
@@ -597,6 +684,12 @@ services:
       JVM_OPTS: "-Xms32M -Xmx64M"
       SERVER_SERVLET_CONTEXTPATH: "/"
       SERVER_PORT: 9020
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  KAFKA_enable and KAFKA_KAFDROP_enable #}
 
@@ -619,6 +712,12 @@ services:
       KEY_STORE_LOCATION: ssl/server.keystore.jks
       KEY_STORE_PASSWORD: password
       KEY_PASSWORD: password
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  KAFKA_enable and KAFKA_KADMIN_enable #}
 
@@ -645,6 +744,12 @@ services:
                 url: "http://kafka-connect-1:8083"
     depends_on:
       - kafka-1
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  KAFKA_enable and KAFKA_KAFKAHQ_enable #}
 
@@ -663,6 +768,12 @@ services:
     depends_on:
       - zookeeper-1
       - kafka-1
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     restart: {{container_restart_policy}}
 
   burrow-ui:
@@ -678,6 +789,12 @@ services:
     depends_on:
       - zookeeper-1
       - kafka-1
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     restart: {{container_restart_policy}}
   burrow-dashboard:
     image: joway/burrow-dashboard:{{__KAFKA_BURROW_DASHBOARD_version}}
@@ -690,6 +807,12 @@ services:
     depends_on:
       - zookeeper-1
       - kafka-1
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     restart: {{container_restart_policy}}
 {% endif %}   {# KAFKA_enable and KAFKA_BURROW_enable #}
 
@@ -704,14 +827,20 @@ services:
       com.mdps.service.webui.name: "Hadoop NameNode UI"
       com.mdps.service.webui.url: "http://${PUBLIC_IP}:9870"
     volumes:
+      - ./data-transfer:/data-transfer
       - ./container-volume/namenode:/hadoop/dfs/name
-      - ./data-transfer:/tmp/data-transfer
     ports:
       - "9870:9870"
-    environment:
-      - CLUSTER_NAME=test
     env_file:
       - ./conf/hadoop.env
+    environment:
+      - CLUSTER_NAME=test
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     restart: {{container_restart_policy}}
 
   {% for num in range(HADOOP_datanodes| default(1) ) %}
@@ -731,6 +860,12 @@ services:
       SERVICE_PRECONDITION: "namenode:9870"
     env_file:
       - ./conf/hadoop.env
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     restart: {{container_restart_policy}}
   {% endfor %}
 
@@ -753,6 +888,12 @@ services:
       - YARN_CONF_yarn_nodemanager_webapp_address=${PUBLIC_IP}:18042
       - YARN_CONF_yarn_timeline___service_webapp_address=${PUBLIC_IP}:28020
       - YARN_CONF_yarn_log_server_url=${PUBLIC_IP}:28020
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     restart: {{container_restart_policy}}
 
   nodemanager:
@@ -774,6 +915,12 @@ services:
       - YARN_CONF_yarn_nodemanager_webapp_address=${PUBLIC_IP}:18042
       - YARN_CONF_yarn_timeline___service_webapp_address=${PUBLIC_IP}:28020
       - YARN_CONF_yarn_log_server_url=${PUBLIC_IP}:28020
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     restart: {{container_restart_policy}}
 
   historyserver:
@@ -792,6 +939,12 @@ services:
       - ./conf/hadoop.env
     environment:
       SERVICE_PRECONDITION: "namenode:9870 datanode-1:9864 resourcemanager:18088"
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     restart: {{container_restart_policy}}
 
   {% if SQOOP_enable | default(false) %}
@@ -801,6 +954,12 @@ services:
     hostname: sqoop
     env_file:
       - ./conf/hadoop.env
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     command: tail -f /dev/null
     restart: {{container_restart_policy}}
   {% endif %}   {#  SQOOP_enable #}
@@ -842,10 +1001,12 @@ services:
       SPARK_DEFAULTS_CONF_spark_executor_extraJavaOptions: -Dcom.amazonaws.services.s3.enableV4
 #      - CORE_CONF_fs_defaultFS=hdfs://namenode:8020
     volumes:
+      - ./data-transfer:/data-transfer
+      - ./container-volume/spark/logs/:/var/log/spark/logs
+    {%if use_docker_engine_timezone | default(false) %}
       - "/etc/timezone:/etc/timezone:ro"
       - "/etc/localtime:/etc/localtime:ro"
-      - ./container-volume/spark/logs/:/var/log/spark/logs
-      - ./data-transfer:/data-transfer
+    {% endif -%}   {#  use_docker_engine_timezone #}
     restart: {{container_restart_policy}}
 
   {% for num in range(SPARK_workers | default(1) ) %}
@@ -886,10 +1047,12 @@ services:
       SPARK_DEFAULTS_CONF_spark_driver_extraJavaOptions: -Dcom.amazonaws.services.s3.enableV4
       SPARK_DEFAULTS_CONF_spark_executor_extraJavaOptions: -Dcom.amazonaws.services.s3.enableV4
     volumes:
+      - ./data-transfer:/data-transfer
+      - ./container-volume/spark/logs/:/var/log/spark/logs
+    {%if use_docker_engine_timezone | default(false) %}
       - "/etc/timezone:/etc/timezone:ro"
       - "/etc/localtime:/etc/localtime:ro"
-      - ./container-volume/spark/logs/:/var/log/spark/logs
-      - ./data-transfer:/data-transfer
+    {% endif -%}   {#  use_docker_engine_timezone #}
     restart: {{container_restart_policy}}
 
   {% endfor %}
@@ -924,9 +1087,12 @@ services:
       SPARK_DEFAULTS_CONF_spark_driver_extraJavaOptions: -Dcom.amazonaws.services.s3.enableV4
       SPARK_DEFAULTS_CONF_spark_executor_extraJavaOptions: -Dcom.amazonaws.services.s3.enableV4
     volumes:
+      - ./data-transfer:/data-transfer
+      - ./container-volume/spark/logs/:/var/log/spark/logs
+    {%if use_docker_engine_timezone | default(false) %}
       - "/etc/timezone:/etc/timezone:ro"
       - "/etc/localtime:/etc/localtime:ro"
-      - ./container-volume/spark/logs/:/var/log/spark/logs
+    {% endif -%}   {#  use_docker_engine_timezone #}
     restart: {{container_restart_policy}}
   {% endif %}   {#  SPARK_HISTORY_enable #}
 
@@ -953,8 +1119,11 @@ services:
       SPARK_DEFAULTS_CONF_spark_driver_extraJavaOptions: -Dcom.amazonaws.services.s3.enableV4
       SPARK_DEFAULTS_CONF_spark_executor_extraJavaOptions: -Dcom.amazonaws.services.s3.enableV4
     volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_docker_engine_timezone | default(false) %}
       - "/etc/timezone:/etc/timezone:ro"
       - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     command: bash -c "sleep 2m && /spark/sbin/start-thriftserver.sh && tail -f /spark/logs/spark--org.apache.spark.sql.hive.thriftserver.HiveThriftServer2-*.out"
   {% endif %}   {#  SPARK_THRIFT_enable #}
 
@@ -994,9 +1163,12 @@ services:
       SPARK_DEFAULTS_CONF_spark_driver_extraJavaOptions: -Dcom.amazonaws.services.s3.enableV4
       SPARK_DEFAULTS_CONF_spark_executor_extraJavaOptions: -Dcom.amazonaws.services.s3.enableV4
     volumes:
+      - ./data-transfer:/data-transfer
+      - ./container-volume/spark/logs/:/var/log/spark/logs
+    {%if use_docker_engine_timezone | default(false) %}
       - "/etc/timezone:/etc/timezone:ro"
       - "/etc/localtime:/etc/localtime:ro"
-      - ./container-volume/spark/logs/:/var/log/spark/logs
+    {% endif -%}   {#  use_docker_engine_timezone #}
     ports:
       - "8998:8998"
     restart: always
@@ -1019,6 +1191,12 @@ services:
       SERVICE_PRECONDITION=hive-metastore: "9083"
 #      - HDFS_CONF_fs_s3a_access_key: ${MINIO_ACCESS_KEY}
 #      - HDFS_CONF_fs_s3a_secret_key: ${MINIO_SECRET_KEY}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  HIVE_SERVER_enable #}
 
@@ -1042,10 +1220,17 @@ services:
   {% if ATLAS_install_hive_hook | default(false) %}
       HIVE_SITE_CONF_hive_exec_post_hooks: "org.apache.atlas.hive.hook.HiveHook"
       HIVE_AUX_JARS_PATH: "/opt/atlas/hook/hive"
+  {% endif -%}   {#  ATLAS_install_hive_hook #}
     volumes:
+      - ./data-transfer:/data-transfer
+  {% if ATLAS_install_hive_hook | default(false) %}
       - ./conf/atlas/atlas-application.properties:/opt/hive/conf/atlas-application.properties
       - ./plugins/hive-server/apache-atlas-hive-hook/hook:/opt/atlas/hook
   {% endif -%}   {#  ATLAS_install_hive_hook #}
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     command: /opt/hive/bin/hive --service metastore
     restart: {{container_restart_policy}}
 
@@ -1053,6 +1238,12 @@ services:
     image: trivadis/apache-hive-metastore-postgresql:{{__HIVE_METASTORE_DB_version}}
     container_name: hive-metastore-db
     hostname: hive-metastore-db
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  HIVE_enable #}
 
@@ -1068,6 +1259,13 @@ services:
       - postgresql
     ports:
       - "6080:6080"
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
+    restart: {{container_restart_policy}}
 
   ranger-postgresql:
     image: postgres:{{__RANGER_POSTGRES_version}}
@@ -1079,10 +1277,15 @@ services:
       - POSTGRES_DB=ranger-admin
       - PGDATA=/var/lib/postgresql/data
     volumes:
+      - ./data-transfer:/data-transfer
       - ./init/ranger/postgresql:/docker-entrypoint-initdb.d/
     {% if RANGER_POSTRESQL_volume_map_data %}
       - ./container-volume/ranger/postgresql/data:/var/lib/postgresql/data:Z
     {% endif %}
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     restart: {{container_restart_policy}}{% endif %}
 {#  RANGER_enable #}
 
@@ -1095,6 +1298,11 @@ services:
     labels:
       com.mdps.service.webui.name: "Atlas UI"
       com.mdps.service.webui.url: "http://${PUBLIC_IP}:21000"
+    depends_on:
+      - zookeeper-1
+      - kafka-1
+      - atlas-kafka-setup
+      - cassandra-atlas
     ports:
       - 21000:21000     # don't change the port without also changing in the properties file as well as in the ATLAS_PROVISION_EXAMPLES script
     environment:
@@ -1106,14 +1314,14 @@ services:
       - ATLAS_KICKSTART_AMUNDSEN=true
   {% endif %}
     volumes:
+      - ./data-transfer:/data-transfer
       - ./conf/atlas/atlas-application.properties:/opt/atlas/conf/atlas-application.properties
       - ./conf/atlas/users-credentials.properties:/opt/atlas/conf/users-credentials.properties
       - ./conf/atlas/credentials:/tmp/credentials
-    depends_on:
-      - zookeeper-1
-      - kafka-1
-      - atlas-kafka-setup
-      - cassandra-atlas
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     restart: {{container_restart_policy}}
 
   {% if KAFKA_enable  | default(false) %}
@@ -1129,6 +1337,12 @@ services:
       # We override the image's `command` anyways, hence this container will not start a broker.
       KAFKA_BROKER_ID: ignored
       KAFKA_ZOOKEEPER_CONNECT: ignored
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     command: "bash -c 'echo Waiting for Kafka to be ready... && \
                        cub kafka-ready -b kafka-1:19092 1 120 && \
                        kafka-topics --create --if-not-exists --zookeeper zookeeper-1:2181 --partitions 1 --replication-factor 1 --topic ATLAS_HOOK && \
@@ -1144,6 +1358,12 @@ services:
       - "19160:9160"
     environment:
       - CASSANDRA_START_RPC=true
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     restart: {{container_restart_policy}}
 
   elasticsearch-atlas:
@@ -1160,6 +1380,12 @@ services:
       - "discovery.zen.minimum_master_nodes=1"
     ports:
       - "19200:9200"
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  ATLAS_enable #}
 
@@ -1190,6 +1416,12 @@ services:
       - datahub-mysql
       - schema-registry-1
       - datahub-neo4j
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     command: "sh -c 'dockerize -wait tcp://datahub-mysql:3306 -wait tcp://kafka-1:19092 -wait http://datahub-elasticsearch:19202 \
                                    -timeout 240s \
                                    java -jar jetty-runner-9.4.20.v20190813.jar gms.war'"
@@ -1212,6 +1444,12 @@ services:
       - DATAHUB_PLAY_MEM_BUFFER_SIZE=10MB
     depends_on:
       - datahub-gms
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     restart: {{container_restart_policy}}
 
   datahub-mae-consumer:
@@ -1232,6 +1470,12 @@ services:
       - kafka-setup
       - datahub-elasticsearch
       - datahub-neo4j
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     command: "sh -c 'while ping -c1 kafka-setup &>/dev/null; do echo waiting for kafka-setup... && sleep 1; done; \
               echo kafka-setup done! && \
               dockerize -wait http://datahub-neo4j:7474 -timeout 240s && java -jar mae-consumer-job.jar'"
@@ -1251,6 +1495,12 @@ services:
     depends_on:
       - kafka-setup
       - datahub-gms
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     command: "sh -c 'while ping -c1 kafka-setup &>/dev/null; do echo waiting for kafka-setup... && sleep 1; done; \
                   echo kafka-setup done! && java -jar mce-consumer-job.jar'"
     restart: {{container_restart_policy}}
@@ -1267,10 +1517,15 @@ services:
     ports:
       - "3307:3306"
     volumes:
+      - ./data-transfer:/data-transfer
       - ./init/datahub/mysql/init.sql:/docker-entrypoint-initdb.d/init.sql
     {% if DATAHUB_volume_map_data %}
       - "./container-volume/datahub/mysql:/var/lib/mysql"
     {% endif %}
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     restart: {{container_restart_policy}}
 
   datahub-neo4j:
@@ -1282,10 +1537,15 @@ services:
     ports:
       - "17475:7474"
       - "17688:7687"
-    {% if DATAHUB_volume_map_data %}
     volumes:
+      - ./data-transfer:/data-transfer
+    {% if DATAHUB_volume_map_data %}
       - ./container-volume/datahub/neo4j:/data
     {% endif %}
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     restart: {{container_restart_policy}}
 
   datahub-elasticsearch:
@@ -1298,10 +1558,15 @@ services:
       - discovery.type=single-node
       - xpack.security.enabled=false
       - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
-    {% if DATAHUB_volume_map_data %}
     volumes:
+      - ./data-transfer:/data-transfer
+    {% if DATAHUB_volume_map_data %}
       - ./container-volume/datahub/elasticsearch:/usr/share/elasticsearch/data
     {% endif %}
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     restart: {{container_restart_policy}}
 
   # This "container" is a workaround to pre-create search indices
@@ -1312,12 +1577,20 @@ services:
     depends_on:
       - datahub-elasticsearch
     volumes:
+      - ./data-transfer:/data-transfer
       - ./init/datahub/elasticsearch:/init
+    {% if DATAHUB_volume_map_data %}
       - ./container-volume/mysql:/var/lib/mysql
+    {% endif %}
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     command: dockerize -wait datahub-elasticsearch:9200 \
             -timeout 120s; \
             curl -XPUT datahub-elasticsearch:9200/corpuserinfodocument --data @init/corpuser-index-config.json; \
             curl -XPUT datahub-elasticsearch:9200/datasetdocument --data @init/dataset-index-config.json
+    restart: {{container_restart_policy}}
 
   # This "container" is a workaround to pre-create topics
   kafka-setup:
@@ -1337,6 +1610,13 @@ services:
       # We override the image's `command` anyways, hence this container will not start a broker.
       KAFKA_BROKER_ID: ignored
       KAFKA_ZOOKEEPER_CONNECT: ignored
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
+    restart: {{container_restart_policy}}
 {% endif %}   {#  DATALAB_enable #}
 
 {% if AMUNDSEN_enable  | default(false) %}
@@ -1356,6 +1636,12 @@ services:
     environment:
       - METADATASERVICE_BASE=http://amundsenmetadata:5000
       - SEARCHSERVICE_BASE=http://amundsensearch:5000
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     restart: {{container_restart_policy}}
 
   amundsensearch:
@@ -1375,6 +1661,12 @@ services:
       - PROXY_ENDPOINT=atlas:21000
       - PROXY_CLIENT=ATLAS
   {% endif -%}   {#  AMUNDSEN_metastore #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     restart: {{container_restart_policy}}
 
   amundsenmetadata:
@@ -1397,6 +1689,12 @@ services:
       - PROXY_PORT=21000
       - PROXY_CLIENT=ATLAS
   {% endif -%}   {#  AMUNDSEN_metastore #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     restart: {{container_restart_policy}}
 
   {%if (AMUNDSEN_edition | lower) == 'amundsen-metastore' | default(false) %}
@@ -1417,7 +1715,12 @@ services:
     environment:
       - NEO4J_AUTH=neo4j/test
     volumes:
+      - ./data-transfer:/data-transfer
       - ./conf/amundsen/neo4j/conf:/conf
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     restart: {{container_restart_policy}}
 
   amundsen-elasticsearch:
@@ -1429,8 +1732,12 @@ services:
       com.mdps.service.restapi.url: "http://${PUBLIC_IP}:19201"
     ports:
       - 19201:9200
-#   volumes:
-#     - ./container-volume/amundsen/es:/usr/share/elasticsearch/data
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     restart: {{container_restart_policy}}
   {% endif %}   {#  AMUNDSEN_edition #}
 {% endif %}   {#  AMUNDSEN_enable #}
@@ -1442,13 +1749,18 @@ services:
     container_name: hue
     hostname: hue
     dns: 8.8.8.8
-    ports:
-      - "8888:8888"
-    volumes:
-      - ./conf/hue/hue.ini:/usr/share/hue/desktop/conf/hue.ini
     depends_on:
       - hue-db
       - solr
+    ports:
+      - "8888:8888"
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./conf/hue/hue.ini:/usr/share/hue/desktop/conf/hue.ini
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     restart: {{container_restart_policy}}
 
   hue-db:
@@ -1459,6 +1771,12 @@ services:
       POSTGRES_DB: hue
       POSTGRES_PASSWORD: hue
       POSTGRES_USER: hue
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     restart: {{container_restart_policy}}
 
 {% endif %}   {#  HUE_enable #}
@@ -1501,6 +1819,10 @@ services:
 #      - ./streamsets-extras/streamsets-libs-extras/streamsets-datacollector-jdbc-lib/postgresql-42.2.6.jar:/opt/streamsets-datacollector-{{__STREAMSETS_version}}/streamsets-libs-extras/streamsets-datacollector-jdbc-lib/lib/postgresql-42.2.6.jar:Z
 #      - ./streamsets-extras/libs-common-lib:/opt/streamsets-datacollector-{{__STREAMSETS_version}}/libs-common-lib:Z
 #      - ./streamsets-extras/user-libs:/opt/streamsets-datacollector-user-libs:Z
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     ulimits:
       nofile:
         soft: 32768
@@ -1530,6 +1852,10 @@ services:
 #      - ./streamsets-extras/streamsets-libs-extras/streamsets-datacollector-jdbc-lib/postgresql-42.2.6.jar:/opt/streamsets-datacollector-{{__STREAMSETS_version}}/streamsets-libs-extras/streamsets-datacollector-jdbc-lib/lib/postgresql-42.2.6.jar:Z
 #      - ./streamsets-extras/libs-common-lib:/opt/streamsets-datacollector-{{__STREAMSETS_version}}/libs-common-lib:Z
 #      - ./streamsets-extras/user-libs:/opt/streamsets-datacollector-user-libs:Z
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  STREAMSETS_TRANSFORMER_enable  #}
 
@@ -1544,6 +1870,12 @@ services:
       com.mdps.service.restapi.url: "http://${PUBLIC_IP}:18633"
     ports:
       - "18633:18633"
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  STREAMSETS_enable  #}
 
@@ -1558,6 +1890,12 @@ services:
       com.mdps.service.webui.url: "http://${PUBLIC_IP}:18080/nifi"
     ports:
       - "18080:8080"
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     restart: {{container_restart_policy}}
 
 {% endif %}   {#  NIFI_enable  #}
@@ -1578,13 +1916,15 @@ services:
     environment:
       - TZ=Europe/Amsterdam
     volumes:
-#      - ./conf/nodered/settings.js:/usr/src/node-red/node_modules/node-red/settings.js
       - ./data-transfer:/data-transfer
     {% if NODERED_volume_map_data %}
       - ./container-volume/nodered:/data:Z
     {% endif %}
       - /dev/i2c-1:/dev/i2c-1
-
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     restart: {{container_restart_policy}}
 
 {% endif %}   {#  NODERED_enable  #}
@@ -1615,10 +1955,13 @@ services:
       - AIRFLOW_PASSWORD=abc123!
       - AIRFLOW_USERNAME=airflow
     volumes:
+      - ./data-transfer:/data-transfer
       - ./scripts/airflow/dags:/opt/bitnami/airflow/dags:Z
       - ./plugins/airflow/:/opt/bitnami/airflow/plugins:Z
-      - ./data-transfer:/data-transfer
-
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     restart: {{container_restart_policy}}
 
   airflow-scheduler:
@@ -1638,10 +1981,13 @@ services:
       - AIRFLOW_PASSWORD=abc123!
       - AIRFLOW_USERNAME=airflow
     volumes:
+      - ./data-transfer:/data-transfer
       - ./scripts/airflow/dags:/opt/bitnami/airflow/dags:Z
       - ./plugins/airflow/:/opt/bitnami/airflow/plugins:Z
-      - ./data-transfer:/data-transfer
-
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     restart: {{container_restart_policy}}
 
   airflow-db:
@@ -1653,9 +1999,12 @@ services:
       - POSTGRESQL_USERNAME=bn_airflow
       - POSTGRESQL_PASSWORD=abc123!
       - ALLOW_EMPTY_PASSWORD=yes
-#    volumes:
-#      - ./container-volume/airflow/db:/bitnami/postgresql:Z
-
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     restart: {{container_restart_policy}}
 
 {% endif %}   {#  AIRFLOW_enable  #}
@@ -1713,11 +2062,15 @@ services:
       # enableV4 to make it work with AWS Frankfurt region
       SPARK_SUBMIT_OPTIONS: "--conf spark.driver.extraJavaOptions=-Dcom.amazonaws.services.s3.enableV4 --conf spark.executor.extraJavaOptions=-Dcom.amazonaws.services.s3.enableV4"
     volumes:
+      - ./data-transfer:/data-transfer
       - ./container-volume/spark/logs/:/var/log/spark/logs
       - './conf/s3cfg:/root/.s3cfg'
       - ./conf/zeppelin/shiro.ini:/opt/zeppelin/conf/shiro.ini
       - ./conf/zeppelin/interpreter-setting.json:/opt/zeppelin/interpreter/spark/interpreter-setting.json
-      - ./data-transfer:/data-transfer
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  ZEPPELIN_enable  #}
 
@@ -1741,7 +2094,12 @@ services:
       TINI_SUBREAPER: "true"
     {% if JUPYTER_volume_map_data %}
     volumes:
+      - ./data-transfer:/data-transfer
       - "./container-volume/jupyter/work:/home/jovyan/work"
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     {% endif %}
     restart: {{container_restart_policy}}
 
@@ -1764,7 +2122,12 @@ services:
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD={{admin_password}}
     volumes:
+      - ./data-transfer:/data-transfer
       - ./plugins/grafana:/etc/grafana/provisioning
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  GRAFANA_enable #}
 
@@ -1782,7 +2145,12 @@ services:
     environment:
       - MAPBOX_API_KEY= "${MAPBOX_API_KEY}"
     volumes:
+      - ./data-transfer:/data-transfer
       - ./conf/superset/superset_config.py:/etc/superset/superset_config.py
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  GRAFANA_enable #}
 
@@ -1794,6 +2162,12 @@ services:
     image: redis
     ports:
       - 6379:6379
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     restart: {{container_restart_policy}}
 
   redis-commander:
@@ -1807,6 +2181,12 @@ services:
       - "28119:8081"
     environment:
       - REDIS_HOSTS=local:redis:6379
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  REDIS_enable #}
 
@@ -1825,6 +2205,12 @@ services:
       - CASSANDRA_CLUSTER_NAME="Test Cluster"
       - CASSANDRA_DC=se1
       - CASSANDRA_ENDPOINT_SNITCH=GossipingPropertyFileSnitch
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     restart: {{container_restart_policy}}
 
   cassandra-web:
@@ -1841,6 +2227,12 @@ services:
       - CASSANDRA_PORT=9042
       - CASSANDRA_USERNAME=cassandra
       - CASSANDRA_PASSWORD=cassandra
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  CASSANDRA_enable #}
 
@@ -1866,8 +2258,12 @@ services:
       SEEDS: "dse-1"
   {% endif %}
     volumes:
+      - ./data-transfer:/data-transfer
 #      - "./dse.yaml:/opt/dse/resources/dse/conf/dse.yaml"
-      - "./data-transfer:/data-transfer"
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     cap_add:
       - IPC_LOCK # Allow DSE to lock memory with mlock
     ulimits:
@@ -1886,6 +2282,12 @@ services:
       - "28121:9091" # Exposes port to be available externally
     environment:
       DS_LICENSE: accept
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     restart: {{container_restart_policy}}
 
   dse-opscenter:
@@ -1899,6 +2301,12 @@ services:
       - 28122:8888
     environment:
       - DS_LICENSE=accept
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     restart: {{container_restart_policy}}
 
 {% endif %}   {#  DATASTAX_enable #}
@@ -1918,8 +2326,13 @@ services:
       - MONGO_INITDB_USERNAME=admin
       - MONGO_INITDB_PASSWORD=admin
     volumes:
+      - ./data-transfer:/data-transfer
       # seeding scripts
       - ./conf/mongo-entrypoint:/docker-entrypoint-initdb.d
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     restart: {{container_restart_policy}}
   {% endfor %}
 
@@ -1934,6 +2347,12 @@ services:
       - 28123:8081
     environment:
       - ME_CONFIG_MONGODB_SERVER=mongo-1
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     restart: {{container_restart_policy}}
 
   admin-mongo:
@@ -1945,6 +2364,12 @@ services:
       com.mdps.service.webui.url: "http://${PUBLIC_IP}:28124"
     ports:
       - 28124:1234
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  MONGO_enable #}
 
@@ -1959,6 +2384,12 @@ services:
       com.mdps.service.webui.url: "http://${PUBLIC_IP}:8983"
     ports:
       - "8983:8983"
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  SOLR_enable #}
 
@@ -1981,6 +2412,12 @@ services:
       http.cors.allow-origin: "http://dejavu:1358,http://dataplatform:28125,http://analyticsplatform:28125,http://${PUBLIC_IP}:28125,http://${DOCKER_HOST_IP}:28125,http://127.0.0.1:1358"
       http.cors.allow-headers: "X-Requested-With,X-Auth-Token,Content-Type,Content-Length,Authorization"
       http.cors.allow-credentials: "true"
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  ELASTICSEARCH_enable #}
 
@@ -1994,6 +2431,12 @@ services:
       com.mdps.service.webui.url: "http://${PUBLIC_IP}:28125"
     ports:
       - "28125:1358"
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  ELASTICSEARCH_enable #}
 
@@ -2007,6 +2450,12 @@ services:
       com.mdps.service.webui.url: "http://${PUBLIC_IP}:28126"
     ports:
       - "28126:9000"
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  CEREBRO_enable #}
 
@@ -2020,6 +2469,13 @@ services:
       com.mdps.service.webui.url: "http://${PUBLIC_IP}:28127"
     ports:
       - "28127:5000"
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
+    restart: {{container_restart_policy}}
 {% endif %}   {#  ELASTICHQ_enable #}
 
 {% if KIBANA_enable | default(false) %}
@@ -2047,6 +2503,12 @@ services:
       XPACK_MONITORING_enabled: "false"
       XPACK_REPORTING_enabled: "false"
       XPACK_SECURITY_enabled: "false"
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     command: [ "/bin/bash", "-c", "/usr/share/kibana/bin/kibana-plugin remove x-pack; /usr/local/bin/kibana-docker" ]
     restart: {{container_restart_policy}}
 {% endif %}   {#  KIBANA_enable #}
@@ -2070,6 +2532,7 @@ services:
       - NEO4J_CACHE_MEMORY=1G
       - NEO4J_AUTH=neo4j/{{admin_password}}
     volumes:
+      - ./data-transfer:/data-transfer
 #      - "./conf/neo4j/neo4j.conf:/conf/neo4j.conf"
       - "./plugins/neo4j/:/plugins"
     {% if NEO4J_volume_map_data %}
@@ -2078,6 +2541,10 @@ services:
     {% if NEO4J_volume_map_logs %}
       - "./container-volume/neo4j/logs:/logs"
     {% endif %}
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  NEO4J_enable #}
 
@@ -2093,11 +2560,15 @@ services:
     ports:
       - "8086:8086"
     volumes:
+      - ./data-transfer:/data-transfer
       - ./conf/influxdata/influxdb/influxdb.conf:/etc/influxdb/influxdb.conf
     {% if INFLUXDB_volume_map_data %}
       - "./container-volume/influxdata/influxdb:/var/lib/influxdb"
     {% endif %}
-      - ./data-transfer:/data-transfer
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     restart: {{container_restart_policy}}
 
   influxdb-ui:
@@ -2109,6 +2580,8 @@ services:
       com.mdps.service.webui.url: "http://${PUBLIC_IP}:28128"
     ports:
       - "28128:80"
+    volumes:
+      - ./data-transfer:/data-transfer
     restart: {{container_restart_policy}}
 {% endif %}   {#  INFLUXDB_enable #}
 
@@ -2123,17 +2596,22 @@ services:
       com.mdps.service.webui.url: "http://${PUBLIC_IP}:28129"
     ports:
       - "28129:8888"
+    depends_on:
+      - influxdb
     environment:
       RESOURCES_PATH: "/usr/share/chronograf/resources"
       PORT: 8888
       HOST: chronograf
       INFLUXDB_URL: "http://influxdb:8086"
-    {% if INFLUXDB_CHRONOGRAF_volume_map_data %}
     volumes:
+      - ./data-transfer:/data-transfer
+    {% if INFLUXDB_CHRONOGRAF_volume_map_data %}
       - "./container-volume/influxdata/chronograf:/var/lib/chronograf"
     {% endif %}
-    depends_on:
-      - influxdb
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  INFLUXDB_CHRONOGRAF_enable #}
 
@@ -2153,10 +2631,15 @@ services:
       KAPACITOR_DATA_DIR: "var/lib/kapacitor"
       KAPACITOR_LOGGING_LEVEL: INFO
       KAPACITOR_INFLUXDB_0_URLS_0: http://influxdb:8086
-    {% if INFLUXDB_KAPACITOR_volume_map_data %}
     volumes:
+      - ./data-transfer:/data-transfer
+    {% if INFLUXDB_KAPACITOR_volume_map_data %}
       - "./container-volume/influxdata/kapacitor:/var/lib/kapacitor"
     {% endif %}
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     restart: {{container_restart_policy}}
 {% endif %}   {# INFLUXDB_KAPACITOR_enable #}
 
@@ -2169,10 +2652,14 @@ services:
     environment:
       HOSTNAME: telegraf
     volumes:
-      - ./conf/influxdata/telegraf/telegraf.conf:/etc/telegraf/telegraf.conf
       - ./data-transfer:/data-transfer
+      - ./conf/influxdata/telegraf/telegraf.conf:/etc/telegraf/telegraf.conf
       # Mount for Docker API access
       - /var/run/docker.sock:/var/run/docker.sock
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  INFLUXDB_CHRONOGRAF_enable #}
 
@@ -2190,10 +2677,15 @@ services:
     command: "--reporting-disabled"
     ports:
       - "9999:9999"
-    {% if INFLUXDB2_volume_map_data %}
     volumes:
+      - ./data-transfer:/data-transfer
+    {% if INFLUXDB2_volume_map_data %}
       - "./container-volume/influxdb2:/var/lib/influxdb"
     {% endif %}
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     restart: {{container_restart_policy}}
 {% endif %}   {# INFLUXDB2_enable #}
 
@@ -2209,6 +2701,12 @@ services:
       com.mdps.service.webui.url: "http://${PUBLIC_IP}:28150"
     ports:
       - "28150:8888"
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     restart: {{container_restart_policy}}
   {% endif %}   {# DRUID_edition #}
 
@@ -2217,36 +2715,45 @@ services:
     image: apache/incubator-druid:{{__DRUID_version}}
     hostname: druid-coordinator
     container_name: druid-coordinator
-    volumes:
-      - ./container-volume/druid/storage:/opt/data
-#      - coordinator_var:/opt/druid/var
     depends_on:
       - zookeeper-1
       - druid-postgres
     ports:
       - "28146:8081"
-    command:
-      - coordinator
     env_file:
       - ./conf/druid/druid.env
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./container-volume/druid/storage:/opt/data
+#      - coordinator_var:/opt/druid/var
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
+    command:
+      - coordinator
     restart: {{container_restart_policy}}
 
   druid-broker-1:
     image: apache/incubator-druid:{{__DRUID_version}}
     hostname: druid-broker-1
     container_name: druid-broker-1
-#    volumes:
-#      - broker_var:/opt/druid/var
     depends_on:
       - zookeeper-1
       - druid-postgres
       - druid-coordinator
     ports:
       - "28147:8082"
-    command:
-      - broker
     env_file:
       - ./conf/druid/druid.env
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
+    command:
+      - broker
     restart: {{container_restart_policy}}
 
   druid-historical-1:
@@ -2262,10 +2769,16 @@ services:
       - druid-coordinator
     ports:
       - "28148:8083"
-    command:
-      - historical
     env_file:
       - ./conf/druid/druid.env
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
+    command:
+      - historical
     restart: {{container_restart_policy}}
 
   druid-middlemanager:
@@ -2280,10 +2793,16 @@ services:
       - druid-coordinator
     ports:
       - "28149:8091"
-    command:
-      - middleManager
     env_file:
       - ./conf/druid/druid.env
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
+    command:
+      - middleManager
     restart: {{container_restart_policy}}
 
   druid-router:
@@ -2300,22 +2819,31 @@ services:
       - druid-coordinator
     env_file:
       - ./conf/druid/druid.env
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     command:
       - router
-#    volumes:
-#      - router_var:/opt/druid/var
     restart: {{container_restart_policy}}
 
   druid-postgres:
     image: postgres:latest
     hostname: druid-postgres
     container_name: druid-postgres
-    volumes:
-      - ./container-volume/druid/postgresql:/var/lib/postgresql/data
     environment:
       - POSTGRES_PASSWORD=abc123!
       - POSTGRES_USER=druid
       - POSTGRES_DB=druid
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./container-volume/druid/postgresql:/var/lib/postgresql/data
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     restart: {{container_restart_policy}}
   {% endif %}   {# DRUID_edition #}
 {% endif %}   {# DRUID_enable #}
@@ -2335,10 +2863,15 @@ services:
     ports:
       - "9090:9090"
     volumes:
+      - ./data-transfer:/data-transfer
       - ./conf/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
     {% if PROMETHEUS_volume_map_data %}
       - "./container-volume/prometheus:/prometheus"
     {% endif %}
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     restart: {{container_restart_policy}}
 
   {% if PROMETHEUS_PUSHGATEWAY_enable | default(false) %}
@@ -2353,6 +2886,12 @@ services:
       - 9091
     ports:
       - "9091:9091"
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     restart: {{container_restart_policy}}
   {% endif %}   {#  PROMETHEUS_PUSHGATEWAY_enable #}
 
@@ -2369,6 +2908,12 @@ services:
       com.mdps.service.webui.url: "http://${PUBLIC_IP}:9851"
     ports:
       - "9851:9851"
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  TILE38_enable #}
 
@@ -2388,6 +2933,12 @@ services:
       SERVICE_7000_NAME: yb-master
 #    volumes:
 #      - yb-master-data-1:/mnt/master
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     restart: {{container_restart_policy}}
 
   yb-tserver-1:
@@ -2414,7 +2965,14 @@ services:
       SERVICE_9000_NAME: yb-tserver-1
 #    volumes:
 #      - yb-tserver-data-1:/mnt/tserver
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     restart: {{container_restart_policy}}
+
   yb-tserver-2:
     image: yugabytedb/yugabyte:latest
     container_name: yb-tserver-2
@@ -2438,6 +2996,12 @@ services:
       SERVICE_9000_NAME: yb-tserver-2
 #    volumes:
 #      - yb-tserver-data-1:/mnt/tserver
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  YUGABYTE_enable #}
 
@@ -2455,10 +3019,15 @@ services:
     environment:
       ORACLE_PWD: abc123!
       ORACLE_CHARACTERSET: AL32UTF8
-    {% if ORACLE_volume_map_data %}
     volumes:
+      - ./data-transfer:/data-transfer
+    {% if ORACLE_volume_map_data %}
       - ./container-volume/oracle/data:/opt/oracle/oradata:Z
     {% endif %}
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     restart: {{container_restart_policy}}
   {% endif %}   {#  ORACLE_edition #}
 
@@ -2477,11 +3046,16 @@ services:
       ORACLE_PWD: abc123!
       ORACLE_CHARACTERSET: AL32UTF8
     volumes:
+      - ./data-transfer:/data-transfer
     {% if ORACLE_volume_map_data %}
       - ./container-volume/oracle/data:/opt/oracle/oradata:Z
     {% endif %}
       - ./init/oracle/startup:/opt/oracle/scripts/startup
       - ./init/oracle/setup:/opt/oracle/scripts/setup
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     restart: {{container_restart_policy}}
   {% endif %}   {#  ORACLE_edition #}
 {% endif %}   {#  ORACLE_enable #}
@@ -2499,6 +3073,12 @@ services:
       - MYSQL_PASSWORD=sample
       - MYSQL_ROOT_PASSWORD=manager
       - MYSQL_LOG_CONSOLE=true
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  MYSQL_enable #}
 
@@ -2514,6 +3094,12 @@ services:
       ACCEPT_EULA: "Y"
       SA_PASSWORD: "SqlServerAdmin123!"
       MSSQL_PID: "Express"
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  SQLSERVER_enable #}
 
@@ -2529,11 +3115,15 @@ services:
       - POSTGRES_DB=sample
       - PGDATA=/var/lib/postgresql/data/pgdata
     volumes:
-      - ./init/postgresql:/docker-entrypoint-initdb.d/
       - ./data-transfer:/data-transfer
+      - ./init/postgresql:/docker-entrypoint-initdb.d/
     {% if POSTGRESQL_volume_map_data %}
       - ./container-volume/postgresql/data:/var/lib/postgresql/data/pgdata:Z
     {% endif %}
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  POSTGRESQL_enable #}
 
@@ -2549,10 +3139,15 @@ services:
       POSTGRES_DB: "timescaledb"
     ports:
       - "5433:5432"
-    {% if TIMESCALEDB_volume_map_data %}
     volumes:
+      - ./data-transfer:/data-transfer
+    {% if TIMESCALEDB_volume_map_data %}
       - /container-volume/timescaledb/data:/var/lib/postgresql/data:Z
     {% endif %}
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     restart: always
 {% endif %}   {#  TIMESCALEDB_enable #}
 
@@ -2567,6 +3162,12 @@ services:
       com.mdps.service.webui.url: "http://${PUBLIC_IP}:28131"
     ports:
       - 28131:8080
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  ADMINER_enable #}
 
@@ -2588,6 +3189,12 @@ services:
       - AXONSERVER_CONTROLDB=/controldb
       - AXONSERVER_HTTP_PORT=8024
       - AXONSERVER_GRPC_PORT=8124
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  AXON_enable #}
 
@@ -2610,6 +3217,10 @@ services:
   {% if POSTGRESQL_enable | default(false) %}
       - './conf/presto/postgresql.properties:/usr/lib/presto/etc/catalog/postgresql.properties'
   {% endif %}
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  PRESTO_enable #}
 
@@ -2626,6 +3237,12 @@ services:
       - '9047:9047'
       - '31010:31010'
       - '45678:45678'
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  DREMIO_enable #}
 
@@ -2647,6 +3264,10 @@ services:
       - DRILL_ZOOKEEPER_QUORUM=zookeeper-1:2181
     volumes:
       - ./data-transfer:/data-transfer
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  DREMIO_enable #}
 
@@ -2661,13 +3282,18 @@ services:
       com.mdps.service.webui.url: "http://${PUBLIC_IP}:9000"
     ports:
       - '9000:9000'
-    {% if MINIO_volume_map_data %}
-    volumes:
-      - "./container-volume/minio:/data/"
-    {% endif %}
     environment:
       MINIO_ACCESS_KEY: V42FCGRVMK24JJ8DHUYG
       MINIO_SECRET_KEY: bKhWxVF3kQoLY9kFmt91l+tDrEoZjqnWXzY9Eza
+    volumes:
+      - ./data-transfer:/data-transfer
+    {% if MINIO_volume_map_data %}
+      - "./container-volume/minio:/data/"
+    {% endif %}
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     command: server /data
     restart: {{container_restart_policy}}
 {% endif %}   {#  MINIO_enable #}
@@ -2678,13 +3304,17 @@ services:
     image: xueshanf/awscli:{{__AWSCLI_version}}
     container_name: awscli
     hostname: awscli
-    volumes:
-      - './conf/s3cfg:/root/.s3cfg'
-      - './data-transfer:/data-transfer'
-#      - './minio/config:/root/.minio'
     environment:
       AWS_ACCESS_KEY_ID: V42FCGRVMK24JJ8DHUYG
       AWS_SECRET_ACCESS_KEY: bKhWxVF3kQoLY9kFmt91l+tDrEoZjqnWXzY9Eza
+    volumes:
+      - ./data-transfer:/data-transfer
+      - './conf/s3cfg:/root/.s3cfg'
+#      - './minio/config:/root/.minio'
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     command: tail -f /dev/null
     restart: {{container_restart_policy}}
 {% endif %}   {#  AWSCLI_enable #}
@@ -2702,10 +3332,15 @@ services:
       - "{{external_port_1}}:1883"
       - "{{external_port_2}}:9001"
     volumes:
+      - ./data-transfer:/data-transfer
       - ./conf/mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf
     {% if MOSQUITTO_volume_map_data %}
       - "./container-volume/mosquitto-{{loop.index}}:/mosquitto/data/"
     {% endif %}
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     restart: {{container_restart_policy}}
     {% endfor %}
 {% endif %}   {#  MOSQUITTO_enable #}
@@ -2719,6 +3354,12 @@ services:
     ports:
       - "1886:1883"
       - "28132:8080"
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  HIVEMQ3_enable #}
 
@@ -2731,6 +3372,12 @@ services:
     ports:
       - "1888:1883"
       - "28134:8080"
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  HIVEMQ4_enable #}
 
@@ -2745,6 +3392,12 @@ services:
       com.mdps.service.webui.url: "http://${PUBLIC_IP}:28136"
     ports:
       - '28136:80'
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  MQTT_UI_enable #}
 
@@ -2770,7 +3423,12 @@ services:
       # jms
       - "61616:61616"
     volumes:
+      - ./data-transfer:/data-transfer
       - ./container-volume/activemq/data:/opt/activemq/data
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  ACTIVEMQ_enable #}
 
@@ -2790,6 +3448,12 @@ services:
     ports:
       - "21:21"
       - "30000-30009:30000-30009"
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     restart: {{container_restart_policy}}
 
   #  ================================== Filezilla ========================================== #}
@@ -2803,13 +3467,17 @@ services:
     ports:
       - "5800:5800"
       - "5900:5900"
-    volumes:
-      - ./data-transfer:/data-transfer
     environment:
       - VNC_PASSWORD=admin123
 #    volumes:
 #      - "/docker/appdata/filezilla:/config:rw"
 #      - "/files:/storage:rw"
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  FTP_enable #}
 
@@ -2832,6 +3500,10 @@ services:
     {% if CODE_SERVER_volume_map_platform_root %}
       - ../:/home/coder/platform-root:Z
     {% endif %}
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     restart: unless-stopped
 {% endif %}   {# CODE_SERVER_enable #}
 
@@ -2853,11 +3525,16 @@ services:
       - VAULT_DEV_LISTEN_ADDRESS=0.0.0.0:8200
       - VAULT_DEV_ROOT_TOKEN_ID=abc123!
     volumes:
+      - ./data-transfer:/data-transfer
       - ./conf/vault/config:/vault/config
       - ./conf/vault/policies:/vault/policies
     {% if VAULT_volume_map_data %}
       - "./container-volume/vault/data:/vault/data"
     {% endif %}
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     cap_add:
       - IPC_LOCK
     command: vault server -config=/vault/config/vault.json
@@ -2872,15 +3549,19 @@ services:
     labels:
       com.mdps.service.webui.name: "Portainer UI"
       com.mdps.service.webui.url: "http://${PUBLIC_IP}:28137"
-    command: --admin-password '$$2y$$05$$NrPTXkUOIHTTbdHUqdAZVuSbncaZ9frWZYXDbA4v/WYqY0nAY1Sui'
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-#      - data_portainer:/data
+    ports:
+      - 28137:9000
 #    environment:
 #      - VIRTUAL_HOST=monitor.bioatlas.se
 #      - VIRTUAL_PORT=9000
-    ports:
-      - 28137:9000
+    volumes:
+      - ./data-transfer:/data-transfer
+      - /var/run/docker.sock:/var/run/docker.sock
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
+    command: --admin-password '$$2y$$05$$NrPTXkUOIHTTbdHUqdAZVuSbncaZ9frWZYXDbA4v/WYqY0nAY1Sui'
     restart: {{container_restart_policy}}
 {% endif %}   {# PORTAINER_enable #}
 
@@ -2894,10 +3575,15 @@ services:
       com.mdps.service.webui.name: "cAdvisor UI"
       com.mdps.service.webui.url: "http://${PUBLIC_IP}:28138"
     volumes:
+      - ./data-transfer:/data-transfer
       - /:/rootfs:ro
       - /var/run:/var/run:rw
       - /sys:/sys:ro
       - /var/lib/docker/:/var/lib/docker:ro
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     ports:
       - 28138:8080
     restart: {{container_restart_policy}}
@@ -2910,10 +3596,15 @@ services:
     image: python:{{__PYTHON_VERSION}}
     container_name: python
     hostname: python
-    {% if PYTHON_script_folder is defined and PYTHON_script_folder|length %}
     volumes:
+      - ./data-transfer:/data-transfer
+    {% if PYTHON_script_folder is defined and PYTHON_script_folder|length %}
       - {{PYTHON_script_folder}}:/tmp:ro
     {% endif %}
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
     {% if PYTHON_script is defined and PYTHON_script|length %}
     command: ['python3', '/tmp/{{PYTHON_script}}']
     {% endif %}
