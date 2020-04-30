@@ -40,6 +40,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 6066 | 6066 | spark-master |
 6080 | 6080 | ranger-admin |
 6379 | 6379 | redis |
+7000 | 7000 | yb-master |
 7077 | 7077 | spark-master |
 7199 | 7199 | cassandra-1 |
 7200 | 7199 | cassandra-2 |
