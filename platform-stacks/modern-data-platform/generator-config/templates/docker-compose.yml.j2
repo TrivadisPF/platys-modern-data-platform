@@ -986,7 +986,7 @@ services:
   {% endif %}
       SPARK_PUBLIC_DNS: ${PUBLIC_IP}
       INIT_DAEMON_STEP: setup_spark
-      SPARK_DEFAULTS_CONF_spark_jars_packages: io.delta:delta-core_2.11:0.5.0,org.apache.spark:spark-avro_2.11:2.4.5
+      SPARK_DEFAULTS_CONF_spark_jars_packages: {{SPARK_packages}}
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_endpoint: http://minio:9000
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_path_style_access: 'true'
@@ -1033,7 +1033,7 @@ services:
       CORE_CONF_fs_s3a_endpoint: 'http://minio:9000'
       CORE_CONF_fs_s3a_path_style_access: 'true'
   {% endif %}
-      SPARK_DEFAULTS_CONF_spark_jars_packages: io.delta:delta-core_2.11:0.5.0,org.apache.spark:spark-avro_2.11:2.4.5
+      SPARK_DEFAULTS_CONF_spark_jars_packages: {{SPARK_packages}}
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_endpoint: http://minio:9000
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_path_style_access: 'true'
@@ -1073,7 +1073,7 @@ services:
     ports:
       - 28117:18080
     environment:
-      SPARK_DEFAULTS_CONF_spark_jars_packages: io.delta:delta-core_2.11:0.5.0,org.apache.spark:spark-avro_2.11:2.4.5
+      SPARK_DEFAULTS_CONF_spark_jars_packages: {{SPARK_packages}}
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_endpoint: http://minio:9000
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_path_style_access: 'true'
@@ -1105,7 +1105,7 @@ services:
     env_file:
       - ./conf/hadoop.env
     environment:
-      SPARK_DEFAULTS_CONF_spark_jars_packages: io.delta:delta-core_2.11:0.5.0,org.apache.spark:spark-avro_2.11:2.4.5
+      SPARK_DEFAULTS_CONF_spark_jars_packages: {{SPARK_packages}}
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_endpoint: http://minio:9000
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_path_style_access: 'true'
@@ -1149,7 +1149,7 @@ services:
       SPARK_MASTER: spark://spark-master:7077
   {% endif -%}   {#  HADOOP_enable #}
       DEPLOY_MODE: client
-      SPARK_DEFAULTS_CONF_spark_jars_packages: io.delta:delta-core_2.11:0.5.0,org.apache.spark:spark-avro_2.11:2.4.5
+      SPARK_DEFAULTS_CONF_spark_jars_packages: {{SPARK_packages}}
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_endpoint: http://minio:9000
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_path_style_access: 'true'
@@ -2032,7 +2032,7 @@ services:
     {%if HADOOP_enable | default(false) %}
       CORE_CONF_fs_defaultFS: 'hdfs://namenode:9000'
     {% endif %}
-      SPARK_DEFAULTS_CONF_spark_jars_packages: io.delta:delta-core_2.11:0.5.0,org.apache.spark:spark-avro_2.11:2.4.5
+      SPARK_DEFAULTS_CONF_spark_jars_packages: {{SPARK_packages}}
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_endpoint: http://minio:9000
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_path_style_access: 'true'
@@ -2918,6 +2918,7 @@ services:
 {% endif %}   {#  TILE38_enable #}
 
 {% if YUGABYTE_enable | default(false) %}
+  #  ================================== Yugabyte ========================================== #}
   yb-master:
     image: yugabytedb/yugabyte:latest
     container_name: yb-master
@@ -2928,7 +2929,7 @@ services:
                 "--rpc_bind_addresses=yb-master:7100",
                 "--replication_factor=1"]
     ports:
-      - "17000:7000"
+      - "7000:7000"
     environment:
       SERVICE_7000_NAME: yb-master
 #    volumes:
@@ -2973,36 +2974,6 @@ services:
     {% endif -%}   {#  use_docker_engine_timezone #}
     restart: {{container_restart_policy}}
 
-  yb-tserver-2:
-    image: yugabytedb/yugabyte:latest
-    container_name: yb-tserver-2
-    hostname: yb-tserver-2
-    depends_on:
-      - yb-master
-    command: [ "/home/yugabyte/bin/yb-tserver",
-                "--fs_data_dirs=/mnt/tserver",
-                "--start_pgsql_proxy",
-                "--rpc_bind_addresses=yb-tserver-2:9100",
-                "--tserver_master_addrs=yb-master:7100"]
-    ports:
-      - "29042:9042"
-      - "26379:6379"
-      - "25433:5433"
-      - "29000:9000"
-    environment:
-      SERVICE_5433_NAME: ysql
-      SERVICE_9042_NAME: ycql
-      SERVICE_6379_NAME: yedis
-      SERVICE_9000_NAME: yb-tserver-2
-#    volumes:
-#      - yb-tserver-data-1:/mnt/tserver
-    volumes:
-      - ./data-transfer:/data-transfer
-    {%if use_docker_engine_timezone | default(false) %}
-      - "/etc/timezone:/etc/timezone:ro"
-      - "/etc/localtime:/etc/localtime:ro"
-    {% endif -%}   {#  use_docker_engine_timezone #}
-    restart: {{container_restart_policy}}
 {% endif %}   {#  YUGABYTE_enable #}
 
 {% if ORACLE_enable | default(false) %}
