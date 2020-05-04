@@ -1,0 +1,35 @@
+unless Vagrant.has_plugin?("vagrant-docker-compose")
+  system("vagrant plugin install vagrant-docker-compose")
+  puts "Dependencies installed, please try the command again."
+  exit
+end
+
+VAGRANTFILE_API_VERSION = "2"
+
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+#  config.vm.box = "ubuntu/bionic64"
+  config.vm.box = "hashicorp/bionic64"
+
+  config.vm.provider :virtualbox do |vb|
+    vb.name = "platys"
+  end
+  
+  config.vm.provider :vmware_desktop do |vb|
+  end
+
+  #config.vm.network "public_network", ip: "192.168.0.17"
+  config.vm.network "private_network", type: "dhcp"
+
+  #config.vm.network(:forwarded_port, guest: 3333, host: 3333)
+
+  config.vm.provision :shell, inline: "apt-get update"
+  config.vm.provision :docker
+  config.vm.provision :docker_compose
+
+  config.vm.provision :shell, inline: "sudo curl -L 'https://github.com/TrivadisPF/platys/releases/download/2.1.0/platys.tar.gz' -o /tmp/platys.tar.gz"
+  config.vm.provision :shell, inline: "tar zvxf /tmp/platys.tar.gz  && sudo mv platys.dist/ /usr/local/lib/ && sudo chown -R root:root /usr/local/lib/platys.dist/ && sudo rm /tmp/platys.tar.gz"
+  config.vm.provision :shell, inline: "sudo ln -s /usr/local/lib/platys.dist/platys /usr/local/bin/platys"
+  
+  config.vm.provision "shell", inline: "echo ""export DOCKER_HOST_IP=$(ifconfig eth0 | awk '/inet /{print $2}' | cut -f2 -d':')"" > /etc/profile.d/env.sh"
+  config.vm.provision "shell", inline: "echo ""export PUPLIC_IP=$(ifconfig eth0 | awk '/inet /{print $2}' | cut -f2 -d':')"" > /etc/profile.d/env.sh"
+end
