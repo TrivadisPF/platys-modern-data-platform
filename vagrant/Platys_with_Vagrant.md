@@ -28,6 +28,11 @@ If you want to use another provider than the [`virtualbox`](https://www.vagrantu
 export VAGRANT_DEFAULT_PROVIDER=vmware_desktop
 ```
 
+Change to the right directory (where _this_ file is located) if you are not already in
+```
+cd vagrant
+```
+
 Now you are ready to start and provision the Vagrant environment:
 
 ```
