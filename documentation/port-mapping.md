@@ -8,7 +8,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 --------------------|------------------|-----------------------|
 21 | 21 | ftp |
 1433 | 1433 | sqlserver |
-1521 | 1521 | oracle-db |
+1521 | 1521 | oracledb |
 1880 | 1880 | nodered-1 |
 1882 | 1882 | kafka-mqtt-1 |
 1883 | 1883 | mosquitto-1 |
@@ -28,7 +28,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 5000 | 5000 | amundsenfrontend
 5001 | 5000 | amundsensearch
 5002 | 5000 | amundsenmetadata
-5500 | 5500 | oracle-db |
+5500 | 5500 | oracledb |
 \-     | 5432 | hive-metastore-db |
 \-     | 5432 | hue-db |
 5432 | 5432 | postgresql |
@@ -38,7 +38,9 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 5800 | 5800 | filezilla |  
 5900 | 5900 | filezilla |  
 6066 | 6066 | spark-master |
+6080 | 6080 | ranger-admin |
 6379 | 6379 | redis |
+7000 | 7000 | yb-master |
 7077 | 7077 | spark-master |
 7199 | 7199 | cassandra-1 |
 7200 | 7199 | cassandra-2 |
@@ -63,6 +65,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 8090 | 8088 | ksqldb-server-3 |
 8124 | 8124 | axon-server |
 8161 | 8161 | activemq |
+8200 | 8200 | vault |
 8888 | 8888 | hue |
 8983 | 8983 | solr |
 8998 | 8998 | livy |
@@ -201,6 +204,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28150 | 8888 | druid-router |
 28150 | 8888 | druid-sandbox |
 28151 | 8088 | superset |
+28152 | 8080 | superset |
 28500 - 28510 | 28500 - 28510 | streamsets-1 (additional ports) |
 
 
