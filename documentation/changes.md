@@ -1,5 +1,19 @@
 # `modern-data-platform` - What's new?
 
+## What's new in 1.5.0
+
+The Modern Analytical Data Platform Stack version 1.5.0 contains the following new services and enhancements:
+
+### New Services
+
+* Oracle XE and Oracle EE
+* Hashicorp Vault
+* Yugabyte Database
+
+### Enhancements / Changes
+
+* change `drill`, `dremio` and `presto` to include the service instance number, i.e. `<service>-1` to prepare to support multiple instances
+
 ## What's new in 1.4.0
 
 The Modern Analytical Data Platform Stack version 1.4.0 contains the following new services and enhancements:
