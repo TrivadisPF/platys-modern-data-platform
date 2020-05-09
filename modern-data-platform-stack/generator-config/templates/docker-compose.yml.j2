@@ -41,6 +41,9 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
 {% set __AMUNDSEN_SEARCH_version = AMUNDSEN_SEARCH_version | default('latest') -%}
 {% set __AMUNDSEN_METADATA_version = AMUNDSEN_METADATA_version | default('latest') -%}
 
+{% set __MARQUEZversion = MARQUEZ_version | default('latest') -%}
+{% set __MARQUEZ_WEB_version = MARQUEZ_WEB_version | default('latest') -%}
+
 {% set __CASSANDRA_version = CASSANDRA_version | default('latest') -%}
 
 {% set __DATASTAX_version = DATASTAX_version | default('latest') -%}
@@ -181,6 +184,7 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
   {% set ATLAS_enable = false -%}
   {% set DATAHUB_enable = false -%}
   {% set AMUNDSEN_enable = false -%}
+  {% set MARQUEZ_enable = false -%}
   {% set HUE_enable = false -%}
   {% set STREAMSETS_enable = false -%}
   {% set STREAMSETS_TRANSFORMER_enable = false -%}
@@ -1741,6 +1745,76 @@ services:
     restart: {{container_restart_policy}}
   {% endif %}   {#  AMUNDSEN_edition #}
 {% endif %}   {#  AMUNDSEN_enable #}
+
+{% if MARQUEZ_enable  | default(false) %}
+  #  ================================== Marquez ========================================== #
+  marquez-web:
+    image: marquezproject/marquez-web:{{__MARQUEZ_WEB_version}}
+    container_name: marquez-web
+    hostname: marquez-web
+    environment:
+      - MARQUEZ_HOST=marquez
+      - MARQUEZ_PORT=5010
+    ports:
+      - "3005:3000"
+    depends_on:
+      - marquez
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
+    restart: {{container_restart_policy}}
+
+  marquez:
+    image: marquezproject/marquez:{{__MARQUEZ_version}}
+    container_name: marquez
+    hostname: marquez
+    ports:
+      - "5010:5000"
+      - "5011:5001"
+    environment:
+      - MARQUEZ_PORT=5000
+      - MARQUEZ_ADMIN_PORT=5001
+      - MARQUEZ_CONFIG=/usr/src/app/config.yml
+      - POSTGRES_HOST=marquez-db
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=marquez
+      - POSTGRES_USER=marquez
+      - POSTGRES_PASSWORD=abc123!
+    depends_on:
+      - marquez-db
+    entrypoint: ["./wait-for-it.sh", "marquez-db:5432", "--", "./entrypoint.sh"]
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./init/docker/wait-for-it.sh:/usr/src/app/wait-for-it.sh
+      - ./conf/marquez/marquez.yml:/usr/src/app/config.yml
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
+    restart: {{container_restart_policy}}
+
+  marquez_db:
+    image: "postgres:9.6"
+    ports:
+      - "5434:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=abc123!
+      - MARQUEZ_DB=marquez
+      - MARQUEZ_USER=marquez
+      - MARQUEZ_PASSWORD=abc123!
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./init/marquez/postgres/init-db.sh:/docker-entrypoint-initdb.d/init-db.sh
+    {%if use_docker_engine_timezone | default(false) %}
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_docker_engine_timezone #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  MARQUEZ_enable #}
 
 {% if (HUE_enable) | default(false) %}
   #  ================================== Apache Hue ========================================== #

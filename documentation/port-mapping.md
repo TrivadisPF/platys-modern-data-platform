@@ -23,16 +23,20 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 2182 | 2181 | zookeeper-2 |
 2183 | 2181 | zookeeper-3 |
 3000 | 3000 | grafana |
+3005 | 3000 | marquez-web |
 3306 | 3306 | mysql |
 3307 | 3306 | datahub-mysql |
 5000 | 5000 | amundsenfrontend
 5001 | 5000 | amundsensearch
 5002 | 5000 | amundsenmetadata
+5010 | 5000 | marquez
+5011 | 5001 | marquez
 5500 | 5500 | oracledb |
 \-     | 5432 | hive-metastore-db |
 \-     | 5432 | hue-db |
 5432 | 5432 | postgresql |
 5433 | 5432 | timescaledb |
+5434 | 5432 | marquez-db |
 5601 | 5601 | kibana |
 5672 | 5672 | activemq |
 5800 | 5800 | filezilla |  
