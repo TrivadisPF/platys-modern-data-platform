@@ -1,5 +1,15 @@
 #!/bin/sh
 
+# should be passed to docker run
+TIMEZONE=Europe/Brussels
+
+if [ ${TIMEZONE} ]
+then
+  mkdir -p /opt/mdps-gen/destination/etc
+  cp /usr/share/zoneinfo/${TIMEZONE} /opt/mdps-gen/destination/etc/localtime
+  echo "${TIMEZONE}" > /opt/mdps-gen/destination/etc/timezone
+fi
+
 # WGET the config reference from the URL configured by the CONFIG_URL environment variable
 if [ ${CONFIG_URL} ]
 then

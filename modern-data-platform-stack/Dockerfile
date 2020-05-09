@@ -11,6 +11,9 @@ FROM python:3.8.0-alpine3.10
 # install docker-compose-templer
 RUN pip install docker-compose-templer && mkdir /opt/mdps-gen && chmod 777 -R /opt/mdps-gen
 
+# Install timezone support
+RUN apk add tzdata
+
 # copy generator config into the image (templates & config.yml)
 COPY ./generator-config /opt/mdps-gen
 
