@@ -11,14 +11,6 @@ FROM python:3.8.0-alpine3.10
 # install docker-compose-templer
 RUN pip install docker-compose-templer && mkdir /opt/mdps-gen && chmod 777 -R /opt/mdps-gen
 
-# Handle timezone
-export TIMEZONE=Europe/Zurich
-RUN apk add tzdata
-cp /usr/share/zoneinfo/${TIMEZONE} /etc/localtime
-echo "${TIMEZONE}" > /etc/timezone 
-COPY /etc/timezone /opt/mdps-gen/static-data/etc
-COPY /etc/localtime /opt/mdps-gen/static-data/etc
-
 # copy generator config into the image (templates & config.yml)
 COPY ./generator-config /opt/mdps-gen
 
