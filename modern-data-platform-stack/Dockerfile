@@ -1,3 +1,11 @@
+#
+# This image assumes that either a config.yml file is located in /tmp/config.yml by either copying it to this location (when deriving from this image) or through a
+# volume mapping (automatically done when using gen with the --config-filename flag).
+# When the CONFIG_URL environment is set, then the URL is used to download a config.yml file and the content is placed in /tmp/config.yml.
+#
+# The DEL_EMPTY_LINES environment variable, when set, causes empty lines to be removed.
+# The VERBOSE environment variable, when set, switches to a more verbose output.
+#
 FROM python:3.8.0-alpine3.10
 
 # install docker-compose-templer
@@ -13,5 +21,5 @@ COPY ./static-data /opt/mdps-gen/static-data
 COPY generate.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/generate.sh
 
-# we asume that the output volume is mapped to /opt/analytics-generator/stacks
+# we assume that the output volume is mapped to /opt/analytics-generator/stacks
 CMD generate.sh

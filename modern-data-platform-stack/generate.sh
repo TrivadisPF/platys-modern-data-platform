@@ -1,12 +1,17 @@
 #!/bin/sh
 
+fi
+
 # WGET the config reference from the URL configured by the CONFIG_URL environment variable
 if [ ${CONFIG_URL} ]
 then
-   wget ${CONFIG_URL} -O /tmp/config.yml
-# we can remove the else, once the bash shell script is no longer needed
-else
-   cp /opt/mdps-gen/conf/config.yml /tmp/config.yml
+  if [ ${VERBOSE:-0} -eq 1 ]
+  then
+     echo "======================================================================"
+     echo "CONFIG_URL is set: downloading config.yml from ${CONFIG_URL}"
+     echo "======================================================================"
+  fi     
+  wget ${CONFIG_URL} -O /tmp/config.yml
 fi
 
 cp -r /opt/mdps-gen/static-data/* /opt/mdps-gen/destination
