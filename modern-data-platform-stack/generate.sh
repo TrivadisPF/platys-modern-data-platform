@@ -1,7 +1,5 @@
 #!/bin/sh
 
-fi
-
 # WGET the config reference from the URL configured by the CONFIG_URL environment variable
 if [ ${CONFIG_URL} ]
 then
