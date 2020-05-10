@@ -6,13 +6,18 @@ The Modern Analytical Data Platform Stack version 1.5.0 contains the following n
 
 ### New Services
 
-* Oracle XE and Oracle EE
-* Hashicorp Vault
-* Yugabyte Database
+* Oracle XE (only as a private image) added
+* Oracle EE (only as a private image) added
+* Oracle REST Data Service (only over private image) added
+* Hashicorp Vault added 
+* Yugabyte Database added 
+* Marquez added
+* Apache Ranger added
 
 ### Enhancements / Changes
 
 * change `drill`, `dremio` and `presto` to include the service instance number, i.e. `<service>-1` to prepare to support multiple instances
+* fixed the JMX ports of the Kafka service
 
 ## What's new in 1.4.0
 
