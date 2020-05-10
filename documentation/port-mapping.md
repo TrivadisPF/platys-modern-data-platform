@@ -107,6 +107,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 9999 | 9999 | influxdb2 |
 10000 | 10000 | hive-server |
 10002 | 10002 | hive-server |
+15433 | 5433| yb-tserver-1 |
+16379 | 6379| yb-tserver-1 |
 17474 | 7474 | amundsen-neo4j |
 17687 | 7687 | amundsen-neo4j |
 17475 | 7474 | datahub-neo4j |
@@ -125,7 +127,9 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 18631 | 18630 | streamsets-2     |
 18632 | 18630 | streamsets-3     |
 18633 | 18633 | streamsets-edge-1 |
+19000 | 9000 | yb-tserver-1 |
 19042 | 9042 | cassandra-atlas |
+19043 | 9042 | cassandra-atlas |
 19160 | 9160 | cassandra-atlas |
 19200 | 9200 | elasticsearch-atlas |
 19201 | 9200 | amundsen-elasticsearch |
@@ -209,6 +213,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28150 | 8888 | druid-sandbox |
 28151 | 8088 | superset |
 28152 | 8080 | superset |
+28153 | 8888 | oracle-rest-1 |
 28500 - 28510 | 28500 - 28510 | streamsets-1 (additional ports) |
 
 
