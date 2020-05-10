@@ -1,15 +1,5 @@
 #!/bin/sh
 
-# should be passed to docker run
-TIMEZONE=Europe/Brussels
-
-if [ ${TIMEZONE} ]
-then
-  mkdir -p /opt/mdps-gen/destination/etc
-  cp /usr/share/zoneinfo/${TIMEZONE} /opt/mdps-gen/destination/etc/localtime
-  echo "${TIMEZONE}" > /opt/mdps-gen/destination/etc/timezone
-fi
-
 # WGET the config reference from the URL configured by the CONFIG_URL environment variable
 if [ ${CONFIG_URL} ]
 then
@@ -40,3 +30,14 @@ then
   # Remove all empty lines
   sed -i '/^[[:space:]]*$/d' "/opt/mdps-gen/destination/docker-compose.yml"
 fi
+
+# Setting Timezone, if needed
+TIMEZONE=`yq r /tmp/config.yml timezone`
+
+if [ ${TIMEZONE} ]
+then
+  mkdir -p /opt/mdps-gen/destination/etc
+  cp /usr/share/zoneinfo/${TIMEZONE} /opt/mdps-gen/destination/etc/localtime
+  echo "${TIMEZONE}" > /opt/mdps-gen/destination/etc/timezone
+fi
+
