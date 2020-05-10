@@ -32,7 +32,14 @@ then
 fi
 
 # Setting Timezone, if needed
-TIMEZONE=`yq r /tmp/config.yml timezone`
+TIMEZONE=`yq r /tmp/config.yml use_timezone`
+
+if [ ${VERBOSE:-0} -eq 1 ]
+then
+   echo "======================================================================"
+   echo "Using timezone = ${TIMEZONE}"
+   echo "======================================================================"
+fi
 
 if [ ${TIMEZONE} ]
 then

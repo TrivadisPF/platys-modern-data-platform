@@ -2,7 +2,17 @@
 
 This is the documentation of the configuration settings which can be overwritten using a custom YAML file. All the defaults are defined in [`generator-config/vars/default-values.yml`](generator-config/vars/config.yml).
 
-There are configuration settings for enabling/disabling a given service. They are named `XXXXX_enable` where XXXXX is the name of the service (he used to be named `XXXXX_enabled` in version 1.0.0).
+## Overall Settings
+
+There are some overall settings which will control the behaviour for all or a group of services. These are listed in the table below.
+
+| Config                                         	| Default 	| Since 	| Description                                                                                                                                                                        	                    	|
+|------------------------------------------------	|:-------:	|-------	|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------	|
+| `use_timezone`                             	| `` 	| 1.5.0 | The timezone to use for the whole stack. By default is empty so the timezone of the docker engine is not changed and it will run as `Etc/UTC`. If you want to set it to another timezone, then specify a Unix timezone string, such as `Europe/Zurich` or `America/New_York`. An overview on the valid timezones can be found here: <https://en.wikipedia.org/wiki/List_of_tz_database_time_zones> |  
+
+## Service Specific
+
+The configuration settings for enabling/disabling a given service are named `XXXXX_enable` where XXXXX is the name of the service (he used to be named `XXXXX_enabled` in version 1.0.0).
 For each service there might be some other settings, such as controlling the number of nodes to start the service with, whether the service should map a data volume into the container or controlling some other proprietary configuration properties of the service itself.
 
 | Config                                         	| Default 	| Since 	| Description                                                                                                                                                                        	                    	|
