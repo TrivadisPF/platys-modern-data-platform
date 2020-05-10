@@ -104,6 +104,12 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 9867 | 9864 | datanode-4 |
 9868 | 9864 | datanode-5 |
 9869 | 9864 | datanode-6 |
+9992 | 9992 | kafka-1 (jmx) |
+9993 | 9993 | kafka-2 (jmx) |
+9992 | 9994 | kafka-3 (jmx) |
+9992 | 9995 | kafka-4 (jmx) |
+9992 | 9996 | kafka-5 (jmx) |
+9992 | 9997 | kafka-6 (jmx) |
 9999 | 9999 | influxdb2 |
 10000 | 10000 | hive-server |
 10002 | 10002 | hive-server |
