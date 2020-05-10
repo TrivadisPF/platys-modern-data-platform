@@ -116,6 +116,7 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
 
 {% set __ORACLE_XE_version = ORACLE_XE_version | default('latest') -%}
 {% set __ORACLE_EE_version = ORACLE_EE_version | default('latest') -%}
+{% set __ORACLE_REST_DATA_SERVICE_version = ORACLE_REST_DATA_SERVICE_version | default('latest') -%}
 {% set __MYSQL_version = MYSQL_version | default('latest') -%}
 {% set __POSTGRES_version = POSTGRES_version | default('latest') -%}
 {% set __TIMESCALEDB_version = TIMESCALEDB_version | default('latest') -%}
@@ -202,6 +203,7 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
   {% set NEO4J_enable = false -%}
   {% set TILE38_enable = false -%}
   {% set ORACLE_enable = false -%}
+  {% set ORACLE_REST_DATA_SERVICE_enable = false -%}
   {% set MYSQL_enable = false -%}
   {% set SQLSERVER_enable = false -%}
   {% set TIMESCALEDB_enable = false -%}
@@ -3434,6 +3436,9 @@ services:
     image: {{private_docker_repository_name}}/ora_db:{{__ORACLE_XE_version}}
     container_name: oracledb
     hostname: oracledb
+    labels:
+      com.mdps.service.webui.name: "Oracle UI"
+      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28152"
     ports:
       - "1521:1521"
       - "28152:8080"
@@ -3461,6 +3466,9 @@ services:
     image: {{private_docker_repository_name}}/ora_db:{{__ORACLE_EE_version}}
     container_name: oracledb
     hostname: oracledb
+    labels:
+      com.mdps.service.webui.name: "Oracle UI"
+      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28152"
     ports:
       - "1521:1521"
       - "28152:8080"
@@ -3486,6 +3494,22 @@ services:
     {% endif -%}   {#  use_timezone #}
     restart: {{container_restart_policy}}
   {% endif %}   {#  ORACLE_edition #}
+
+  {% if ORACLE_REST_DATA_SERVICE_enable | default(false) %}
+  oracle-rest-1:
+    image: {{private_docker_repository_name}}/restdataservices:{{__ORACLE_REST_DATA_SERVICE_version}}
+    container_name: oracle-rest-1
+    hostname: oracle-rest-1
+    ports:
+      - "28153:8888"
+    environment:
+      ORACLE_HOST: oracledb
+      ORACLE_PORT: 1521
+      ORACLE_SERVICE: ORCLCDB
+      ORACLE_PWD: abc123!
+      ORDS_PWD: abc123!
+    restart: always
+  {% endif %}   {#  ORACLE_REST_DATA_SERVICE_enable #}
 {% endif %}   {#  ORACLE_enable #}
 
 {% if MYSQL_enable | default(false) %}
