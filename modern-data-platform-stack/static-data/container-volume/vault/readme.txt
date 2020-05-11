@@ -1,0 +1,1 @@
+Contains the data of vault service, if flag VAULT_volume_map_data is set to true.
