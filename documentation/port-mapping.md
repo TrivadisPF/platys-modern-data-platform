@@ -8,7 +8,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 --------------------|------------------|-----------------------|
 21 | 21 | ftp |
 1433 | 1433 | sqlserver |
-1521 | 1521 | oracle-db |
+1521 | 1521 | oracledb |
 1880 | 1880 | nodered-1 |
 1882 | 1882 | kafka-mqtt-1 |
 1883 | 1883 | mosquitto-1 |
@@ -23,22 +23,28 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 2182 | 2181 | zookeeper-2 |
 2183 | 2181 | zookeeper-3 |
 3000 | 3000 | grafana |
+3005 | 3000 | marquez-web |
 3306 | 3306 | mysql |
 3307 | 3306 | datahub-mysql |
 5000 | 5000 | amundsenfrontend
 5001 | 5000 | amundsensearch
 5002 | 5000 | amundsenmetadata
-5500 | 5500 | oracle-db |
+5010 | 5000 | marquez
+5011 | 5001 | marquez
+5500 | 5500 | oracledb |
 \-     | 5432 | hive-metastore-db |
 \-     | 5432 | hue-db |
 5432 | 5432 | postgresql |
 5433 | 5432 | timescaledb |
+5434 | 5432 | marquez-db |
 5601 | 5601 | kibana |
 5672 | 5672 | activemq |
 5800 | 5800 | filezilla |  
 5900 | 5900 | filezilla |  
 6066 | 6066 | spark-master |
+6080 | 6080 | ranger-admin |
 6379 | 6379 | redis |
+7000 | 7000 | yb-master |
 7077 | 7077 | spark-master |
 7199 | 7199 | cassandra-1 |
 7200 | 7199 | cassandra-2 |
@@ -63,6 +69,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 8090 | 8088 | ksqldb-server-3 |
 8124 | 8124 | axon-server |
 8161 | 8161 | activemq |
+8200 | 8200 | vault |
 8888 | 8888 | hue |
 8983 | 8983 | solr |
 8998 | 8998 | livy |
@@ -97,9 +104,17 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 9867 | 9864 | datanode-4 |
 9868 | 9864 | datanode-5 |
 9869 | 9864 | datanode-6 |
+9992 | 9992 | kafka-1 (jmx) |
+9993 | 9993 | kafka-2 (jmx) |
+9992 | 9994 | kafka-3 (jmx) |
+9992 | 9995 | kafka-4 (jmx) |
+9992 | 9996 | kafka-5 (jmx) |
+9992 | 9997 | kafka-6 (jmx) |
 9999 | 9999 | influxdb2 |
 10000 | 10000 | hive-server |
 10002 | 10002 | hive-server |
+15433 | 5433| yb-tserver-1 |
+16379 | 6379| yb-tserver-1 |
 17474 | 7474 | amundsen-neo4j |
 17687 | 7687 | amundsen-neo4j |
 17475 | 7474 | datahub-neo4j |
@@ -118,7 +133,9 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 18631 | 18630 | streamsets-2     |
 18632 | 18630 | streamsets-3     |
 18633 | 18633 | streamsets-edge-1 |
+19000 | 9000 | yb-tserver-1 |
 19042 | 9042 | cassandra-atlas |
+19043 | 9042 | cassandra-atlas |
 19160 | 9160 | cassandra-atlas |
 19200 | 9200 | elasticsearch-atlas |
 19201 | 9200 | amundsen-elasticsearch |
@@ -201,6 +218,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28150 | 8888 | druid-router |
 28150 | 8888 | druid-sandbox |
 28151 | 8088 | superset |
+28152 | 8080 | superset |
+28153 | 8888 | oracle-rest-1 |
 28500 - 28510 | 28500 - 28510 | streamsets-1 (additional ports) |
 
 

@@ -1,4 +1,4 @@
-# Querying data in Minio (S3) from Hive and Presto
+# Querying data in Minio (S3) from Presto
 
 This tutorial will show how to query Minio with Hive and Presto. 
 
@@ -19,11 +19,13 @@ Now generate and start the data platform.
 ## Create Data in Minio
 
 ```
-docker exec -ti awscli s3cmd mb s3://test-bucket
+docker exec -ti awscli s3cmd mb s3://flight-bucket
 ```
 
 ```
-docker exec -ti awscli s3cmd put /data-transfer/samples/movies.json s3://test-bucket/landing/movies.json
+docker exec -ti awscli s3cmd put /data-transfer/samples/flight-data/airports.json s3://flight-bucket/landing/airports/airports.json
+
+docker exec -ti awscli s3cmd put /data-transfer/samples/flight-data/plane-data.json s3://flight-bucket/landing/plane/plane-data.json
 ```
 
 ## Create a table in Hive
@@ -34,18 +36,22 @@ On the docker host, start the Hive CLI
 docker exec -ti hive-metastore hive
 ```
 
-and create a new database `test_db` and in that database a table `movies_t`:
+and create a new database `flight_db` and in that database a table `plane_t`:
 
 ```
-create database test_db;
-use test_db;
+create database flight_db;
+use flight_db;
 
-
-CREATE EXTERNAL TABLE movies_t (movieId integer
-									, title string
-									, genres string									 )
+CREATE EXTERNAL TABLE plane_t (tailnum string
+									, type string
+									, manufacturer string									, issue_date string
+									, model string
+									, status string
+									, aircraft_type string
+									, engine_type string
+									, year string									 )
 ROW FORMAT SERDE 'org.apache.hive.hcatalog.data.JsonSerDe'
-LOCATION 's3a://test-bucket/landing/';
+LOCATION 's3a://flight-bucket/landing/plane';
 ```
 
 
@@ -60,7 +66,7 @@ docker exec -it presto presto-cli
 Now on the Presto command prompt, switch to the right database. 
 
 ```
-use minio.test_db;
+use minio.flight_db;
 ```
 
 Let's see that there is one table available:
@@ -69,16 +75,22 @@ Let's see that there is one table available:
 show tables;
 ```
 
-We can see the `movies_t` table we created in the Hive Metastore before
+We can see the `plane_t` table we created in the Hive Metastore before
 
 ```
 presto:default> show tables;
      Table
 ---------------
- truck_mileage
+ plane_t
 (1 row)
 ```
 
 ```
-SELECT * FROM movies_t;
+SELECT * FROM plane_t;
+```
+
+```
+SELECT year, count(*)
+FROM plane_t
+GROUP BY year;
 ```

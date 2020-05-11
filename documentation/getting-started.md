@@ -14,18 +14,18 @@ Make sure that you have already installed the [Docker Engine](https://docs.docke
 First create a directory, which will hold the `platys` configuration as well as the generated artefacts:
 
 ```
-mkdir kafka-plaform-example
-cd kafka-plaform-example
+mkdir kafka-platform-example
+cd kafka-platform-example
 ```
 
 Now let's initialise the current directory to use the Modern Data Analytics Platform Stack. 
 
-We specify the platform stack name `trivadis/platys-modern-data-platform` to use as well as the stack version `1.4.0` (the current version of this platform stack). 
+We specify the platform stack name `trivadis/platys-modern-data-platform` to use as well as the stack version `1.5.0` (the current version of this platform stack). 
 
 With the `-n` option we give the platform a meaningful name. 
 
 ```
-platys init -n kafka-platform -sn trivadis/platys-modern-data-platform -sv 1.4.0
+platys init -n kafka-platform -sn trivadis/platys-modern-data-platform -sv 1.5.0 --structure flat
 ```
 
 This generates a `config.yml` file, if it does not exist already, with all the services which can be configured for the platform.
@@ -47,9 +47,10 @@ You can see the configuration options, available through this platform stack, si
  # this file can be used as a template for a custom configuration
  # or to know about the different variables available for the generator
       platys:
-        platform-name: 'default'
+        platform-name: 'kafka-platform'
         stack-image-name: 'trivadis/platys-modern-data-platform'
-        stack-image-version: '1.4.0'
+        stack-image-version: '1.5.0'
+        structure: 'flat'
 
       # ===== Apache Zookeeper ========
       KAFKA_enable: true

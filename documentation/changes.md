@@ -1,5 +1,27 @@
 # `modern-data-platform` - What's new?
 
+## What's new in 1.5.0
+
+The Modern Data Platform version 1.5.0 contains the following new services and enhancements:
+
+### New Services
+
+* Oracle XE (only through private docker image) added
+* Oracle EE (only through private docker image) added
+* Oracle REST Data Service (only through private docker image) added
+* Hashicorp Vault added 
+* Yugabyte Database added 
+* Marquez added
+* Apache Ranger added
+
+### Enhancements / Changes
+
+* change `drill`, `dremio` and `presto` to include the service instance number, i.e. `<service>-1` to prepare to support multiple instances
+* support for changing the timezone globally for all docker images (`use_timezone`)
+* new configuration setting (`private_docker_repository_name `) for changing the the private repository to use for private docker images
+* fixed the JMX ports of the Kafka service
+* support for additional Kafka properties added
+
 ## What's new in 1.4.0
 
 The Modern Analytical Data Platform Stack version 1.4.0 contains the following new services and enhancements:
