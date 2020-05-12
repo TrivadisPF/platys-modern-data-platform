@@ -901,9 +901,6 @@ services:
     labels:
       com.mdps.service.webui.name: "Hadoop NameNode UI"
       com.mdps.service.webui.url: "http://${PUBLIC_IP}:9870"
-    volumes:
-      - ./data-transfer:/data-transfer
-      - ./container-volume/namenode:/hadoop/dfs/name
     ports:
       - "9870:9870"
     env_file:
@@ -915,6 +912,7 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
+      - ./container-volume/namenode:/hadoop/dfs/name
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -930,8 +928,6 @@ services:
     labels:
       com.mdps.service.webui.name: "Hadoop DataNode-{{loop.index}} UI"
       com.mdps.service.webui.url: "http://${PUBLIC_IP}:{{external_port}}"
-    volumes:
-      - ./container-volume/datanode-{{loop.index}}:/hadoop/dfs/data
     ports:
       - "{{external_port}}:9864"
     env_file:
@@ -943,6 +939,7 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
+      - ./container-volume/datanode-{{loop.index}}:/hadoop/dfs/data
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -965,10 +962,10 @@ services:
     env_file:
       - ./conf/hadoop.env
     environment:
-      - YARN_CONF_yarn_resourcemanager_webapp_address: ''${PUBLIC_IP}:18088'
-      - YARN_CONF_yarn_nodemanager_webapp_address: ''${PUBLIC_IP}:18042'
-      - YARN_CONF_yarn_timeline___service_webapp_address: ''${PUBLIC_IP}:28020'
-      - YARN_CONF_yarn_log_server_url: ''${PUBLIC_IP}:28020'
+      YARN_CONF_yarn_resourcemanager_webapp_address: '${PUBLIC_IP}:18088'
+      YARN_CONF_yarn_nodemanager_webapp_address: '${PUBLIC_IP}:18042'
+      YARN_CONF_yarn_timeline___service_webapp_address: '${PUBLIC_IP}:28020'
+      YARN_CONF_yarn_log_server_url: '${PUBLIC_IP}:28020'
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -995,10 +992,10 @@ services:
     env_file:
       - ./conf/hadoop.env
     environment:
-      - YARN_CONF_yarn_resourcemanager_webapp_address: '${PUBLIC_IP}:18088'
-      - YARN_CONF_yarn_nodemanager_webapp_address: ''${PUBLIC_IP}:18042'
-      - YARN_CONF_yarn_timeline___service_webapp_address: ''${PUBLIC_IP}:28020'
-      - YARN_CONF_yarn_log_server_url: ''${PUBLIC_IP}:28020'
+      YARN_CONF_yarn_resourcemanager_webapp_address: '${PUBLIC_IP}:18088'
+      YARN_CONF_yarn_nodemanager_webapp_address: '${PUBLIC_IP}:18042'
+      YARN_CONF_yarn_timeline___service_webapp_address: '${PUBLIC_IP}:28020'
+      YARN_CONF_yarn_log_server_url: '${PUBLIC_IP}:28020'
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -2402,6 +2399,7 @@ services:
       - ./container-volume/spark/logs/:/var/log/spark/logs
       - './conf/s3cfg:/root/.s3cfg'
       - ./conf/zeppelin/shiro.ini:/opt/zeppelin/conf/shiro.ini
+      - ./conf/zeppelin/interpreter.json:/opt/zeppelin/conf/interpreter.json
       - ./conf/zeppelin/interpreter-setting.json:/opt/zeppelin/interpreter/spark/interpreter-setting.json
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"

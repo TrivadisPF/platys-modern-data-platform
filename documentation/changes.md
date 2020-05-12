@@ -1,5 +1,11 @@
 # `modern-data-platform` - What's new?
 
+## What's new in 1.5.1
+
+### Bug Fixes
+
+* Fix Hadoop service
+
 ## What's new in 1.5.0
 
 The Modern Data Platform version 1.5.0 contains the following new services and enhancements:
