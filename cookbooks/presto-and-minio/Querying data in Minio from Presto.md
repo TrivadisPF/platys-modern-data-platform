@@ -4,7 +4,7 @@ This tutorial will show how to query Minio with Hive and Presto.
 
 ## Initialise a platform
 
-First [initialise a platys-supported data platform](../../getting-started.md) with the following services enabled in the `condfig.yml`
+First [initialise a platys-supported data platform](../../getting-started.md) with the following services enabled in the `config.yml`
 
 ```
       HIVE_METASTORE_enable: true
@@ -16,6 +16,17 @@ First [initialise a platys-supported data platform](../../getting-started.md) wi
 
 Now generate and start the data platform. 
 
+```
+cd data-transfer
+mkdir -p flight-data
+cd flight-data
+wget https://gschmutz-datasets.s3.eu-central-1.amazonaws.com/datasets/flight-data.zip
+unzip -o flight-data.zip
+rm flight-data.zip
+rm -R __MACOSX/
+```
+
+
 ## Create Data in Minio
 
 ```
@@ -23,9 +34,9 @@ docker exec -ti awscli s3cmd mb s3://flight-bucket
 ```
 
 ```
-docker exec -ti awscli s3cmd put /data-transfer/samples/flight-data/airports.json s3://flight-bucket/landing/airports/airports.json
+docker exec -ti awscli s3cmd put /data-transfer/flight-data/airports.json s3://flight-bucket/landing/airports/airports.json
 
-docker exec -ti awscli s3cmd put /data-transfer/samples/flight-data/plane-data.json s3://flight-bucket/landing/plane/plane-data.json
+docker exec -ti awscli s3cmd put /data-transfer/flight-data/plane-data.json s3://flight-bucket/landing/plane/plane-data.json
 ```
 
 ## Create a table in Hive
