@@ -1,6 +1,21 @@
 # `modern-data-platform` - What's new?
 
+## What's new in 1.5.2
+
+1.5.2 is just a but fix release with no new services.
+
+### Enhancements / Changes
+
+* add possibility to specify a private maven repository for downloading maven packages in Spark, Livy and Zeppelin
+* Allow to specify additional runtime environment properties in `spark-defaults.conf`
+
+### Bug Fixes
+
+* Fix generation of Burrow and Zookeeper Navigator service
+
 ## What's new in 1.5.1
+
+1.5.1 is just a but fix release with no new services.
 
 ### Bug Fixes
 
