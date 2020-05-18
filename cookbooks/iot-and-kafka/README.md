@@ -24,7 +24,7 @@ Create the `sensor-reading` topic by either
 
    ```
 docker exec -ti kafka-1 kafka-topics --create --zookeeper zookeeper-1:2181 --topic sensor-reading --replication-factor 1 --partitions 8
-```
+   ```
 
 2. use the AKHQ utility (set `AKHQ_enable` to `true`) by browsing to <http://dataplatform:28107>.
 
@@ -38,13 +38,13 @@ There are three different ways to do it:
 
   ```
 docker run --network docker-compose_default trivadis/iot-simulator  trivadis/iot-simulator -dt KAFKA -u kafka-1:19092 -cl https://raw.githubusercontent.com/gschmutz/IotSimulator/master/config/sensor-reading-sample.json
-```
+  ```
 
 1. run docker container by connecting over the public IP 
 
   ```
 docker run trivadis/iot-simulator -dt KAFKA -u ${PUBLIC_IP}:9092 -cl https://raw.githubusercontent.com/gschmutz/IotSimulator/master/config/sensor-reading-sample.json
-```
+  ```
 
 1. run docker container as part of the platform by adding it to  `docker-compose.override.yml`:
 
