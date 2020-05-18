@@ -41,7 +41,7 @@ CREATE TABLE flight_data.airport_t
 
 ```
 COPY flight_data.airport_t(iata,airport,city,state,country,lat,long) 
-FROM '/data-transfer/samples/flight-data/airports.csv' DELIMITER ',' CSV HEADER;
+FROM '/data-transfer/flight-data/airports.csv' DELIMITER ',' CSV HEADER;
 ```
 
 ## Query Table from Presto
@@ -55,7 +55,7 @@ docker exec -it presto-1 presto-cli
 Now on the Presto command prompt, switch to the right database. 
 
 ```
-use posgresql.flight_data;
+use postgresql.flight_data;
 ```
 
 Let's see that there is one table available:
@@ -64,7 +64,7 @@ Let's see that there is one table available:
 show tables;
 ```
 
-We can see the `plane_t` table we created in the Hive Metastore before
+We can see the `airport_t` table we created in the Hive Metastore before
 
 ```
 presto:default> show tables;
@@ -77,6 +77,7 @@ presto:default> show tables;
 ```
 SELECT * FROM airport_t;
 ```
+
 
 ```
 SELECT country, count(*)

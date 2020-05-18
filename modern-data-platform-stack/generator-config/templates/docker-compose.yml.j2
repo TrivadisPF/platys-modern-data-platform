@@ -293,10 +293,7 @@ services:
       com.mdps.service.restapi.url: "http://${PUBLIC_IP}:28101"
     ports:
      - "28101:9010"
-    {%if use_timezone | default(false) %}
     environment:
-      TZ: {{use_timezone}}
-    {% endif -%}   {#  use_timezone #}
       API_HTTP_PORT: 9010
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
@@ -825,9 +822,6 @@ services:
     hostname: burrow
     labels:
       com.mdps.service.webui.url: "http://${PUBLIC_IP}:28110"
-    volumes:
-      - ./conf/burrow:/etc/burrow/
-      - ./tmp:/var/tmp/burrow
     ports:
       - 28110:8000
     depends_on:
@@ -839,6 +833,8 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
+      - ./conf/burrow:/etc/burrow/
+      - ./tmp:/var/tmp/burrow
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -1077,7 +1073,8 @@ services:
   {% endif %}
       SPARK_PUBLIC_DNS: ${PUBLIC_IP}
       INIT_DAEMON_STEP: setup_spark
-      SPARK_DEFAULTS_CONF_spark_jars_packages: {{SPARK_packages}}
+      SPARK_DEFAULTS_CONF_spark_jars_packages: {{SPARK_jars_packages}}
+      SPARK_DEFAULTS_CONF_spark_jars_ivySettings: {{SPARK_jars_ivySettings}}
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_endpoint: http://minio:9000
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_path_style_access: 'true'
@@ -1088,8 +1085,8 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: hdfs://namenode:9000/user/hive/warehouse
   {% endif -%}   {#  SPARK_catalog #}
       SPARK_DEFAULTS_CONF_spark_yarn_dist_files: '/etc/spark/conf/hive-site.xml'
-      SPARK_DEFAULTS_CONF_spark_driver_extraJavaOptions: -Dcom.amazonaws.services.s3.enableV4
-      SPARK_DEFAULTS_CONF_spark_executor_extraJavaOptions: -Dcom.amazonaws.services.s3.enableV4
+      SPARK_DEFAULTS_CONF_spark_driver_extraJavaOptions: {{SPARK_driver_extraJavaOptions}}
+      SPARK_DEFAULTS_CONF_spark_executor_extraJavaOptions: {{SPARK_executor_extraJavaOptions}}
 #      - CORE_CONF_fs_defaultFS=hdfs://namenode:8020
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
@@ -1127,7 +1124,8 @@ services:
       CORE_CONF_fs_s3a_endpoint: 'http://minio:9000'
       CORE_CONF_fs_s3a_path_style_access: 'true'
   {% endif %}
-      SPARK_DEFAULTS_CONF_spark_jars_packages: {{SPARK_packages}}
+      SPARK_DEFAULTS_CONF_spark_jars_packages: {{SPARK_jars_packages}}
+      SPARK_DEFAULTS_CONF_spark_jars_ivySettings: {{SPARK_jars_ivySettings}}
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_endpoint: http://minio:9000
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_path_style_access: 'true'
@@ -1138,8 +1136,8 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: hdfs://namenode:9000/user/hive/warehouse
   {% endif -%}   {#  SPARK_catalog #}
       SPARK_DEFAULTS_CONF_spark_yarn_dist_files: '/etc/spark/conf/hive-site.xml'
-      SPARK_DEFAULTS_CONF_spark_driver_extraJavaOptions: -Dcom.amazonaws.services.s3.enableV4
-      SPARK_DEFAULTS_CONF_spark_executor_extraJavaOptions: -Dcom.amazonaws.services.s3.enableV4
+      SPARK_DEFAULTS_CONF_spark_driver_extraJavaOptions: {{SPARK_driver_extraJavaOptions}}
+      SPARK_DEFAULTS_CONF_spark_executor_extraJavaOptions: {{SPARK_executor_extraJavaOptions}}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -1170,7 +1168,8 @@ services:
     ports:
       - 28117:18080
     environment:
-      SPARK_DEFAULTS_CONF_spark_jars_packages: {{SPARK_packages}}
+      SPARK_DEFAULTS_CONF_spark_jars_packages: {{SPARK_jars_packages}}
+      SPARK_DEFAULTS_CONF_spark_jars_ivySettings: {{SPARK_jars_ivySettings}}
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_endpoint: http://minio:9000
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_path_style_access: 'true'
@@ -1181,8 +1180,8 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: hdfs://namenode:9000/user/hive/warehouse
   {% endif -%}   {#  SPARK_catalog #}
       SPARK_DEFAULTS_CONF_spark_yarn_dist_files: '/etc/spark/conf/hive-site.xml'
-      SPARK_DEFAULTS_CONF_spark_driver_extraJavaOptions: -Dcom.amazonaws.services.s3.enableV4
-      SPARK_DEFAULTS_CONF_spark_executor_extraJavaOptions: -Dcom.amazonaws.services.s3.enableV4
+      SPARK_DEFAULTS_CONF_spark_driver_extraJavaOptions: {{SPARK_driver_extraJavaOptions}}
+      SPARK_DEFAULTS_CONF_spark_executor_extraJavaOptions: {{SPARK_executor_extraJavaOptions}}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -1205,7 +1204,8 @@ services:
     env_file:
       - ./conf/hadoop.env
     environment:
-      SPARK_DEFAULTS_CONF_spark_jars_packages: {{SPARK_packages}}
+      SPARK_DEFAULTS_CONF_spark_jars_packages: {{SPARK_jars_packages}}
+      SPARK_DEFAULTS_CONF_spark_jars_ivySettings: {{SPARK_jars_ivySettings}}
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_endpoint: http://minio:9000
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_path_style_access: 'true'
@@ -1216,8 +1216,8 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: hdfs://namenode:9000/user/hive/warehouse
   {% endif -%}   {#  SPARK_catalog #}
       SPARK_DEFAULTS_CONF_spark_yarn_dist_files: '/etc/spark/conf/hive-site.xml'
-      SPARK_DEFAULTS_CONF_spark_driver_extraJavaOptions: -Dcom.amazonaws.services.s3.enableV4
-      SPARK_DEFAULTS_CONF_spark_executor_extraJavaOptions: -Dcom.amazonaws.services.s3.enableV4
+      SPARK_DEFAULTS_CONF_spark_driver_extraJavaOptions: {{SPARK_driver_extraJavaOptions}}
+      SPARK_DEFAULTS_CONF_spark_executor_extraJavaOptions: {{SPARK_executor_extraJavaOptions}}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -1252,7 +1252,8 @@ services:
       SPARK_MASTER: spark://spark-master:7077
   {% endif -%}   {#  HADOOP_enable #}
       DEPLOY_MODE: client
-      SPARK_DEFAULTS_CONF_spark_jars_packages: {{SPARK_packages}}
+      SPARK_DEFAULTS_CONF_spark_jars_packages: {{SPARK_jars_packages}}
+      SPARK_DEFAULTS_CONF_spark_jars_ivySettings: {{SPARK_jars_ivySettings}}
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_endpoint: http://minio:9000
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_path_style_access: 'true'
@@ -1263,8 +1264,8 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: hdfs://namenode:9000/user/hive/warehouse
   {% endif -%}   {#  SPARK_catalog #}
       SPARK_DEFAULTS_CONF_spark_yarn_dist_files: '/etc/spark/conf/hive-site.xml'
-      SPARK_DEFAULTS_CONF_spark_driver_extraJavaOptions: -Dcom.amazonaws.services.s3.enableV4
-      SPARK_DEFAULTS_CONF_spark_executor_extraJavaOptions: -Dcom.amazonaws.services.s3.enableV4
+      SPARK_DEFAULTS_CONF_spark_driver_extraJavaOptions: {{SPARK_driver_extraJavaOptions}}
+      SPARK_DEFAULTS_CONF_spark_executor_extraJavaOptions: {{SPARK_executor_extraJavaOptions}}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -2362,7 +2363,8 @@ services:
     {%if HADOOP_enable | default(false) %}
       CORE_CONF_fs_defaultFS: 'hdfs://namenode:9000'
     {% endif %}
-      SPARK_DEFAULTS_CONF_spark_jars_packages: {{SPARK_packages}}
+      SPARK_DEFAULTS_CONF_spark_jars_packages: {{SPARK_jars_packages}}
+      SPARK_DEFAULTS_CONF_spark_jars_ivySettings: {{SPARK_jars_ivySettings}}
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_endpoint: http://minio:9000
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_path_style_access: 'true'
@@ -2373,8 +2375,8 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: hdfs://namenode:9000/user/hive/warehouse
   {% endif -%}   {#  SPARK_catalog #}
       SPARK_DEFAULTS_CONF_spark_yarn_dist_files: '/etc/spark/conf/hive-site.xml'
-      SPARK_DEFAULTS_CONF_spark_driver_extraJavaOptions: -Dcom.amazonaws.services.s3.enableV4
-      SPARK_DEFAULTS_CONF_spark_executor_extraJavaOptions: -Dcom.amazonaws.services.s3.enableV4
+      SPARK_DEFAULTS_CONF_spark_driver_extraJavaOptions: {{SPARK_driver_extraJavaOptions}}
+      SPARK_DEFAULTS_CONF_spark_executor_extraJavaOptions: {{SPARK_executor_extraJavaOptions}}
 
       ZEPPELIN_ADDR: "0.0.0.0"
       ZEPPELIN_PORT: "8080"
@@ -2386,6 +2388,8 @@ services:
       MASTER: "spark://spark-master:7077"
       SPARK_DRIVER_HOST: zeppelin
       SPARK_DRIVER_BINDADDRESS: "0.0.0.0"
+      SPARK_DRIVER_extraJavaOptions: {{SPARK_driver_extraJavaOptions}}
+      SPARK_EXECUTOR_extraJavaOptions: {{SPARK_executor_extraJavaOptions}}
       PYSPARK_PYTHON: "python3"
 # no longer necessary with 0.8.2 of Zepplin
 #      - SPARK_SUBMIT_OPTIONS="--packages org.apache.commons:commons-lang3:3.5"
@@ -4080,7 +4084,6 @@ services:
       - VAULT_DEV_LISTEN_ADDRESS=0.0.0.0:8200
       - VAULT_DEV_ROOT_TOKEN_ID=abc123!
     {%if use_timezone | default(false) %}
-    environment:
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:

@@ -23,16 +23,17 @@ docker exec -ti awscli s3cmd mb s3://flight-bucket
 ```
 
 ```
-docker exec -ti awscli s3cmd put /data-transfer/samples/flight-data/flights_2018_4_1.csv s3://flight-bucket/raw/flights/flights_2018_4_1.csv
+docker exec -ti awscli s3cmd put /data-transfer/flight-data/flights-small/flights_2008_4_1.csv s3://flight-bucket/raw/flights/flights_2008_4_1.csv
 
-docker exec -ti awscli s3cmd put /data-transfer/samples/flight-data/flights_2018_4_2.csv s3://flight-bucket/raw/flights/flights_2018_4_2.csv
+docker exec -ti awscli s3cmd put /data-transfer//flight-data/flights-small/flights_2008_4_2.csv s3://flight-bucket/raw/flights/flights_2008_4_2.csv
 
+docker exec -ti awscli s3cmd put /data-transfer/flight-data/flights-small/flights_2008_5_1.csv s3://flight-bucket/raw/flights/flights_2008_5_1.csv
 
-docker exec -ti awscli s3cmd put /data-transfer/samples/flight-data/airports.csv s3://flight-bucket/raw/airports/airports.csv
+docker exec -ti awscli s3cmd put /data-transfer/flight-data/airports.csv s3://flight-bucket/raw/airports/airports.csv
 
-docker exec -ti awscli s3cmd put /data-transfer/samples/flight-data/carriers.csv s3://flight-bucket/raw/carriers/carriers.csv
+docker exec -ti awscli s3cmd put /data-transfer/flight-data/carriers.csv s3://flight-bucket/raw/carriers/carriers.csv
 
-docker exec -ti awscli s3cmd put /data-transfer/samples/flight-data/plane-data.csv s3://flight-bucket/raw/plane-data/plane-data.csv
+docker exec -ti awscli s3cmd put /data-transfer/flight-data/plane-data.csv s3://flight-bucket/raw/plane-data/plane-data.csv
 ```
 
 ## Prepare the Delta Lake table
@@ -40,9 +41,6 @@ docker exec -ti awscli s3cmd put /data-transfer/samples/flight-data/plane-data.c
 ```
 docker exec -it spark-master spark-shell  --conf spark.hadoop.fs.s3a.endpoint=http://minio:9000 --conf spark.hadoop.fs.s3a.access.key=V42FCGRVMK24JJ8DHUYG --conf spark.hadoop.fs.s3a.secret.key=bKhWxVF3kQoLY9kFmt91l+tDrEoZjqnWXzY9Eza --conf spark.hadoop.fs.s3a.path.style.access=true --conf spark.hadoop.fs.s3a.impl=org.apache.hadoop.fs.s3a.S3AFileSystem --packages io.delta:delta-core_2.11:0.5.0,org.apache.spark:spark-avro_2.11:2.4.5
 ```
-
-,TaxiIn,TaxiOut,Cancelled,CancellationCode,Diverted,CarrierDelay,WeatherDelay,NASDelay,SecurityDelay,LateAircraftDelay
-2007,1,1,1,1232,1225,1341,1340,WN,2891,N351,69,75,54,1,7,SMF,ONT,389,4,11,0,,0,0,0,0,0,0
 
 ```
 import org.apache.spark.sql.types._
@@ -134,7 +132,7 @@ PARTITIONED BY (year integer, month integer)
 ROW FORMAT SERDE 'org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe'                       
 STORED AS INPUTFORMAT 'org.apache.hadoop.hive.ql.io.SymlinkTextInputFormat'
 OUTPUTFORMAT 'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat'
-LOCATION 's3a://flight-bucket/refined/delta-presto/flights/_symlink_format_manifest/'
+LOCATION 's3a://flight-bucket/refined/delta/flights/_symlink_format_manifest/'
 TBLPROPERTIES ("parquet.compression"="SNAPPY");
 
 MSCK REPAIR TABLE flights_t;
