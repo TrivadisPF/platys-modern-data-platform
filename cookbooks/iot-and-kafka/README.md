@@ -46,7 +46,7 @@ docker run --network docker-compose_default trivadis/iot-simulator  trivadis/iot
 docker run trivadis/iot-simulator -dt KAFKA -u ${PUBLIC_IP}:9092 -cl https://raw.githubusercontent.com/gschmutz/IotSimulator/master/config/sensor-reading-sample.json
 ```
 
-3. run docker container as part of the platform by adding it to  `docker-compose.override.yml`:
+3. run docker container as part of the platform by adding it to  `docker-compose.override.yml` and then run a `docker-compose up -d iot-simulator`
 
   ```
   version: "3.0"
@@ -60,7 +60,6 @@ docker run trivadis/iot-simulator -dt KAFKA -u ${PUBLIC_IP}:9092 -cl https://raw
       restart: unless-stopped
 ```
 
-  and then run a `docker-compose up -d iot-simulator`. 
 
 ## Check for the messages in Kafka
 
