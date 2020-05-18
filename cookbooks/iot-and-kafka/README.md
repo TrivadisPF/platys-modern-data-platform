@@ -48,7 +48,7 @@ docker run trivadis/iot-simulator -dt KAFKA -u ${PUBLIC_IP}:9092 -cl https://raw
 
 3. run docker container as part of the platform by adding it to  `docker-compose.override.yml`:
 
-```
+  ```
   version: "3.0"
 
   services:
