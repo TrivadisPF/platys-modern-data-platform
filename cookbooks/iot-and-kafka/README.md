@@ -40,13 +40,13 @@ There are three different ways to do it:
 docker run --network docker-compose_default trivadis/iot-simulator  trivadis/iot-simulator -dt KAFKA -u kafka-1:19092 -cl https://raw.githubusercontent.com/gschmutz/IotSimulator/master/config/sensor-reading-sample.json
 ```
 
-1. run docker container by connecting over the public IP 
+2. run docker container by connecting over the public IP 
 
 ```
 docker run trivadis/iot-simulator -dt KAFKA -u ${PUBLIC_IP}:9092 -cl https://raw.githubusercontent.com/gschmutz/IotSimulator/master/config/sensor-reading-sample.json
 ```
 
-1. run docker container as part of the platform by adding it to  `docker-compose.override.yml`:
+3. run docker container as part of the platform by adding it to  `docker-compose.override.yml`:
 
 ```
   version: "3.0"
@@ -72,7 +72,7 @@ You can use various tools for checking for the messages in Kafka
 kafkacat -b ${PUBlIC_IP} -t sensor-reading
 ```
 
-1. use dockerized `kafkacat` (replace `docker-compose-default` by your network)
+2. use dockerized `kafkacat` (replace `docker-compose-default` by your network)
 
   ```
 docker run --tty \
