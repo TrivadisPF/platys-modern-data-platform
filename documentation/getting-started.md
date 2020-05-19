@@ -20,12 +20,12 @@ cd kafka-platform-example
 
 Now let's initialise the current directory to use the Modern Data Analytics Platform Stack. 
 
-We specify the platform stack name `trivadis/platys-modern-data-platform` to use as well as the stack version `1.5.1` (the current version of this platform stack). 
+We specify the platform stack name `trivadis/platys-modern-data-platform` to use as well as the stack version `1.5.2` (the current version of this platform stack). 
 
 With the `-n` option we give the platform a meaningful name. 
 
 ```
-platys init -n kafka-platform -sn trivadis/platys-modern-data-platform -sv 1.5.1 --structure flat
+platys init -n kafka-platform -sn trivadis/platys-modern-data-platform -sv 1.5.2 --structure flat
 ```
 
 This generates a `config.yml` file, if it does not exist already, with all the services which can be configured for the platform.
@@ -49,7 +49,7 @@ You can see the configuration options, available through this platform stack, si
       platys:
         platform-name: 'kafka-platform'
         stack-image-name: 'trivadis/platys-modern-data-platform'
-        stack-image-version: '1.5.1'
+        stack-image-version: '1.5.2'
         structure: 'flat'
 
       # ===== Apache Zookeeper ========
