@@ -26,11 +26,22 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 3005 | 3000 | marquez-web |
 3306 | 3306 | mysql |
 3307 | 3306 | datahub-mysql |
-5000 | 5000 | amundsenfrontend
-5001 | 5000 | amundsensearch
-5002 | 5000 | amundsenmetadata
-5010 | 5000 | marquez
-5011 | 5001 | marquez
+4040 | 4040 | spark-master (ui) |
+4041 | 4041 | spark-master (ui) |
+4042 | 4042 | spark-master (ui) |
+4043 | 4043 | spark-master (ui) |
+4044 | 4044 | spark-master (ui) |
+4050 | 4050 | zeppelin (spark ui) |
+4051 | 4051 | zeppelin (spark ui) |
+4052 | 4052 | zeppelin (spark ui) |
+4053 | 4053 | zeppelin (spark ui) |
+4054 | 4054 | zeppelin (spark ui) |
+5000 | 5000 | amundsenfrontend |
+5001 | 5000 | amundsensearch |
+5002 | 5000 | amundsenmetadata |
+5010 | 5000 | marquez |
+5011 | 5001 | marquez |
+5050 | 5050 | zeppelin |
 5500 | 5500 | oracledb |
 \-     | 5432 | hive-metastore-db |
 \-     | 5432 | hue-db |
@@ -41,6 +52,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 5672 | 5672 | activemq |
 5800 | 5800 | filezilla |  
 5900 | 5900 | filezilla |  
+6060 | 6060 | zeppelin |
 6066 | 6066 | spark-master |
 6080 | 6080 | ranger-admin |
 6379 | 6379 | redis |
