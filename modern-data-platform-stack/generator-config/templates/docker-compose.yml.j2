@@ -1064,6 +1064,7 @@ services:
       - 6066:6066
       - 7077:7077
       - 8080:8080
+      - "4040-4044:4040-4044"
     env_file:
       - ./conf/hadoop.env
     environment:
@@ -2351,8 +2352,9 @@ services:
       com.mdps.service.webui.url: "http://${PUBLIC_IP}:28080"
     ports:
       - "28080:8080"
-#      - "4040:4040"
-#      - "42331:42331"
+      - "6060:6060"
+      - "5050:5050"
+      - "4050-4054:4050-4054"
     env_file:
       - ./conf/hadoop.env
     environment:
@@ -2382,18 +2384,20 @@ services:
       ZEPPELIN_PORT: "8080"
       ZEPPELIN_INTERPRETER_CONNECT_TIMEOUT: 120000
       ZEPPELIN_INTERPRETER_DEP_MVNREPO: 'https://repo.maven.apache.org/maven2'
-      SPARK_MASTER: "spark://spark-master:7077"
+#      SPARK_MASTER: "spark://spark-master:7077"
 
       # set spark-master for Zeppelin interpreter
       MASTER: "spark://spark-master:7077"
-      SPARK_DRIVER_HOST: zeppelin
+      SPARK_DRIVER_HOST: ${DOCKER_HOST_IP}
       SPARK_DRIVER_BINDADDRESS: "0.0.0.0"
-      SPARK_DRIVER_extraJavaOptions: {{SPARK_driver_extraJavaOptions}}
-      SPARK_EXECUTOR_extraJavaOptions: {{SPARK_executor_extraJavaOptions}}
+      SPARK_UI_PORT: 4050
+      SPARK_DRIVER_PORT: 5050
+      SPARK_BLOCKMANGER_PORT: 6060
+      SPARK_DRIVER_EXTRAJAVAOPTIONS: {{SPARK_driver_extraJavaOptions}}
+      SPARK_EXECUTOR_EXTRAJAVAOPTIONS: {{SPARK_executor_extraJavaOptions}}
+      SPARK_HADOOP_FS_S3A_ACCESS_KEY: V42FCGRVMK24JJ8DHUYG
+      SPARK_HADOOP_FS_S3A_SECRET_KEY: bKhWxVF3kQoLY9kFmt91l+tDrEoZjqnWXzY9Eza
       PYSPARK_PYTHON: "python3"
-# no longer necessary with 0.8.2 of Zepplin
-#      - SPARK_SUBMIT_OPTIONS="--packages org.apache.commons:commons-lang3:3.5"
-      # enableV4 to make it work with AWS Frankfurt region
       SPARK_SUBMIT_OPTIONS: "--conf spark.driver.extraJavaOptions=-Dcom.amazonaws.services.s3.enableV4 --conf spark.executor.extraJavaOptions=-Dcom.amazonaws.services.s3.enableV4"
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
