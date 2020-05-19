@@ -12,6 +12,7 @@
 ### Bug Fixes
 
 * Fix generation of Burrow and Zookeeper Navigator service
+* Fix the non-working link to Spark UI from the Spark Master UI
 
 ## What's new in 1.5.1
 
