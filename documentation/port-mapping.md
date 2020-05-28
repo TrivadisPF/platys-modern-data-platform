@@ -57,6 +57,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 6080 | 6080 | ranger-admin |
 6379 | 6379 | redis |
 7000 | 7000 | yb-master |
+7050 | 7050 | kudu-tserver-1 |
+7051 | 7051 | kudo-master-1 |
 7077 | 7077 | spark-master |
 7199 | 7199 | cassandra-1 |
 7200 | 7199 | cassandra-2 |
@@ -69,6 +71,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 7689 | 7687 | neo4j-3 |
 8024 | 8024 | axon-server |
 8047 | 8047 | drill |
+8050 | 8050 | kudu-tserver-1 |
+8051 | 8051 | kudo-master-1 |
 8080 | 8080 | spark-master |
 8081 | 8081 | schema-registry-1     |
 8082 | 8081 | schema-registry-2     |
