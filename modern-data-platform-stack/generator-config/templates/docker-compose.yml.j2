@@ -107,6 +107,8 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
 {% set __INFLUXDB2_version = INFLUXDB2_version | default('2.2.0-alpha') -%}
 {% set __INFLUXDB_UI_version = INFLUXDB_UI_version | default('latest') -%}
 
+{% set __KUDO_version = KUDO_version | default('latest') -%}
+
 {% set __DRUID_version = DRUID_version | default('latest') -%}
 
 {% set __PROMETHEUS_version = PROMETHEUS_version | default('latest') -%}
@@ -137,6 +139,8 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
 
 {% set __FTP_PUREFTPD_version = FTP_PUREFTPD_version | default('latest') -%}
 {% set __FTP_FILEZILLA_version = FTP_FILEZILLA_version | default('latest') -%}
+
+{% set __PENTHAO_version = PENTHAO_version | default('latest') -%}
 
 {% set __MINIO_version = MINIO_version | default('latest') -%}
 {% set __AWSCLI_version = AWSCLI_version | default('latest') -%}
@@ -217,6 +221,7 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
   {% set MQTT_UI_enable = false -%}
   {% set ACTIVEMQ_enable = false -%}
   {% set FTP_enable = false -%}
+  {% set PENTHAO_enable = false -%}
   {% set MINIO_enable = false -%}
   {% set AWSCLI_enable = false -%}
   {% set CODE_SERVER_enable = false -%}
@@ -3118,6 +3123,56 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {# INFLUXDB2_enable #}
 
+{% if KUDO_enable | default(false) %}
+  kudu-master-1:
+    image: apache/kudu:{{__KUDO_version}}
+    hostname: kudu-master-1
+    container_name: kudu-master-1
+    ports:
+      - "7051:7051"
+      - "8051:8051"
+    command: ["master"]
+    environment:
+      - KUDU_MASTERS=kudu-master-1,kudu-master-2,kudu-master-3
+    restart: {{container_restart_policy}}
+  kudu-master-2:
+    image: apache/kudu:{{__KUDO_version}}
+    hostname: kudu-master-2
+    container_name: kudu-master-2
+    ports:
+      - "7051"
+      - "8051"
+    command: ["master"]
+    environment:
+      - KUDU_MASTERS=kudu-master-1,kudu-master-2,kudu-master-3
+    restart: {{container_restart_policy}}
+  kudu-master-3:
+    image: apache/kudu:{{__KUDO_version}}
+    hostname: kudu-master-3
+    container_name: kudu-master-3
+    ports:
+      - "7051"
+      - "8051"
+    command: ["master"]
+    environment:
+      - KUDU_MASTERS=kudu-master-1,kudu-master-2,kudu-master-3
+    restart: {{container_restart_policy}}
+  kudu-tserver-1:
+    image: apache/kudu:latest
+    hostname: kudu-tserver-1
+    container_name: kudu-tserver-1
+    depends_on:
+      - kudu-master-1
+      - kudu-master-2
+      - kudu-master-3
+    ports:
+      - "7050:7050"
+      - "8050:8050"
+    command: ["tserver"]
+    environment:
+      - KUDU_MASTERS=kudu-master-1,kudu-master-2,kudu-master-3
+{% endif %}   {# KUDO_enable #}
+
 {% if DRUID_enable | default(false) %}
   #  ================================== InfluxDB 2 ========================================== #}
   {% if (DRUID_edition| lower) == 'oss-sandbox' | default(false) %}
@@ -4040,6 +4095,23 @@ services:
     {% endif -%}   {#  use_timezone #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  FTP_enable #}
+
+{% if PENTHAO_enable | default(false) %}
+  #  ================================== Penthao Webspoon ========================================== #}
+  penthao:
+    image: hiromuhota/webspoon
+    container_name: penthao
+    hostname: penthao
+    ports:
+      - '28154:8080'
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  PENTHAO_enable #}
 
 {% if CODE_SERVER_enable | default(false) %}
   #  ================================== Code-Server IDE (VS Code in Browser) ================= #}

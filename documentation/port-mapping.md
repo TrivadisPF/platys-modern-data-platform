@@ -1,4 +1,4 @@
-# `modern-data-platform` - Port Mappings - 1.5.2
+# `modern-data-platform` - Port Mappings - 1.6.0
 
 This table reserves the external ports for the various services. Not all services have to be used in the platform at a given time. But by reserving, we can assure that there are no conflicts if a service is added at a later time.
 
@@ -232,6 +232,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28151 | 8088 | superset |
 28152 | 8080 | superset |
 28153 | 8888 | oracle-rest-1 |
+28154 | 8080 | penthao |
 28500 - 28510 | 28500 - 28510 | streamsets-1 (additional ports) |
 
 
