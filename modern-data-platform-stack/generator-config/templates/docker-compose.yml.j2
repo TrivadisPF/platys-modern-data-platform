@@ -148,6 +148,7 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
 {% set __VAULT_version = VAULT_version | default('latest') -%}
 {% set __PORTAINER_version = PORTAINER_version | default('latest') -%}
 {% set __CADVISOR_version = CADVISOR_version | default('latest') -%}
+{% set __HAWTIO_version = HAWTIO_version | default('latest') -%}
 
 {% set __hw_arch = hw_arch | default('x86-64') -%}
 {% set __PYTHON_VERSION = PYTHON_version | default('3') -%}
@@ -226,6 +227,7 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
   {% set AWSCLI_enable = false -%}
   {% set CODE_SERVER_enable = false -%}
   {% set CADVISOR_enable = false -%}
+  {% set HAWTIO_enable = false -%}
 {% endif %}   {# PLATFORM_ARM_enable #}
 
 services:
@@ -4099,11 +4101,15 @@ services:
 {% if PENTHAO_enable | default(false) %}
   #  ================================== Penthao Webspoon ========================================== #}
   penthao:
-    image: hiromuhota/webspoon
+    image: hiromuhota/webspoon:{{__PENTHAO_version}}
     container_name: penthao
     hostname: penthao
     ports:
       - '28154:8080'
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
     {%if use_timezone | default(false) %}
@@ -4216,6 +4222,8 @@ services:
     labels:
       com.mdps.service.webui.name: "cAdvisor UI"
       com.mdps.service.webui.url: "http://${PUBLIC_IP}:28138"
+    ports:
+      - 28138:8080
     {%if use_timezone | default(false) %}
     environment:
       TZ: {{use_timezone}}
@@ -4230,11 +4238,29 @@ services:
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
-    ports:
-      - 28138:8080
     restart: {{container_restart_policy}}
 {% endif %}   {# CADVISOR_enable #}
 
+{% if HAWTIO_enable | default(false) %}
+  #  ================================== cAdvisor ========================================== #}
+  hawtio:
+    image: erikwramner/hawtio:{{__HAWTIO_version}}
+    container_name: hawtio
+    hostname: hawtio
+    ports:
+      - "28155:8080"
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+{% endif %}   {# HAWTIO_enable #}
 
 {% if PYTHON_enable | default(false) %}
   #  ================================== python ========================================== #}

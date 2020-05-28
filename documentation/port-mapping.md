@@ -237,6 +237,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28152 | 8080 | superset |
 28153 | 8888 | oracle-rest-1 |
 28154 | 8080 | penthao |
+28155 | 8080 | hawtio |
 28500 - 28510 | 28500 - 28510 | streamsets-1 (additional ports) |
 
 
