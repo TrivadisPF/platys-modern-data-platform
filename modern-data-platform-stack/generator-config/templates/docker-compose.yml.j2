@@ -53,7 +53,6 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
 {% set __CEREBRO_version = CEREBRO_version | default('latest') -%}
 {% set __ELASTICSEARCHHQ_version = ELASTICSEARCHHQ_version | default('latest') -%}
 
-
 {% set __HUE_version = HUE_version | default('latest') -%}
 {% set __HUE_POSTGRES_version = HUE_POSTGRES_version | default('latest') -%}
 
@@ -136,6 +135,7 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
 {% set __HIVEMQ4_version = HIVEMQ4_version | default('latest') -%}
 {% set __HIVEMQ_MQTT_WEB_CLIENT_version = HIVEMQ_MQTT_WEB_CLIENT_version | default('latest') -%}
 {% set __ACTIVEMQ_version = ACTIVEMQ_version | default('latest') -%}
+{% set __RABBITMQ_version = RABBITMQ_version | default('latest') -%}
 
 {% set __FTP_PUREFTPD_version = FTP_PUREFTPD_version | default('latest') -%}
 {% set __FTP_FILEZILLA_version = FTP_FILEZILLA_version | default('latest') -%}
@@ -4035,13 +4035,45 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
+    {% if ACTIVEMQ_volume_map_data %}
       - ./container-volume/activemq/data:/opt/activemq/data
+    {% endif -%}   {#  ACTIVEMQ_volume_map_data #}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  ACTIVEMQ_enable #}
+
+{% if RABBITMQ_enable | default(false) %}
+  #  ================================== Active MQ ========================================== #}
+  rabbitmq:
+    image: rabbitmq:{{__RABBITMQ_version}}
+    container_name: rabbitmq
+    hostname: rabbitmq
+    labels:
+      com.mdps.service.webui.name: "RabbitMQ UI"
+      com.mdps.service.webui.url: "http://${PUBLIC_IP}:15672"
+    ports:
+      - 5673:5672
+      - 15672:15672
+    environment:
+      RABBITMQ_ERLANG_COOKIE: "62cd4092-dbb3-4e7a-ac6d-ffd7cee850ee"
+      RABBITMQ_DEFAULT_USER: rabbitmq
+      RABBITMQ_DEFAULT_PASS: abc123!
+    volumes:
+      - ./data-transfer:/data-transfer
+    {% if RABBITMQ_volume_map_data %}
+      - ./container-volume/rabbitmq/data:/var/lib/rabbitmq/
+    {% endif -%}   {#  RABBITMQ_volume_map_data #}
+    {% if RABBITMQ_volume_map_logs %}
+      - ./container-volume/rabbitmq/logs/:/var/log/rabbitmq/
+    {% endif -%}   {#  RABBITMQ_volume_map_logs #}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+{% endif %}   {#  RABBITMQ_enable #}
 
 {% if FTP_enable | default(false) %}
   #  ================================== FTP Server ========================================== #}

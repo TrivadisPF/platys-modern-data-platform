@@ -50,6 +50,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 5434 | 5432 | marquez-db |
 5601 | 5601 | kibana |
 5672 | 5672 | activemq |
+5673 | 5672 | rabbitmq (amqp) |
 5800 | 5800 | filezilla |  
 5900 | 5900 | filezilla |  
 6060 | 6060 | zeppelin |
@@ -130,6 +131,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 10000 | 10000 | hive-server |
 10002 | 10002 | hive-server |
 15433 | 5433| yb-tserver-1 |
+15672 | 15672 | rabbitmq (ui) |
 16379 | 6379| yb-tserver-1 |
 17474 | 7474 | amundsen-neo4j |
 17687 | 7687 | amundsen-neo4j |

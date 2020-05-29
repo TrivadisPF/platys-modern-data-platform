@@ -1,0 +1,1 @@
+Contains the data of rabbitmq service, if flag RABBITMQ_volume_map_data is set to true.
