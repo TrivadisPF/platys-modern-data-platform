@@ -88,6 +88,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 8161 | 8161 | activemq |
 8200 | 8200 | vault |
 8888 | 8888 | hue |
+8978 | 8978 | cloudbeaver |
 8983 | 8983 | solr |
 8998 | 8998 | livy |
 9001 | 9001 | mosquitto-1 |

@@ -123,6 +123,7 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
 {% set __TIMESCALEDB_version = TIMESCALEDB_version | default('latest') -%}
 {% set __SQLSERVER_version = SQLSERVER_version | default('latest') -%}
 {% set __ADMINER_version = ADMINER_version | default('latest') -%}
+{% set __CLOUDBEAVER_version = CLOUDBEAVER_version | default('latest') -%}
 
 {% set __AXON_version = AXON_version | default('latest') -%}
 
@@ -213,6 +214,7 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
   {% set SQLSERVER_enable = false -%}
   {% set TIMESCALEDB_enable = false -%}
   {% set ADMINER_enable = false -%}
+  {% set CLOUDBEAVER_enable = false -%}
   {% set AXON_enable = false -%}
   {% set PRESTO_enable = false -%}
   {% set DREMIO_enable = false -%}
@@ -3753,6 +3755,20 @@ services:
     {% endif -%}   {#  use_timezone #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  ADMINER_enable #}
+
+{% if CLOUDBEAVER_enable | default(false) %}
+  #  ================================== Cloudbeaver ========================================== #}
+  cloudbeaver:
+    image: dalongrong/cloudbeaver:{{__CLOUDBEAVER_version}}
+    container_name: cloudbeaver
+    hostname: cloudbeaver
+    labels:
+      com.mdps.service.webui.name: "Cloudbeaver UI"
+      com.mdps.service.webui.url: "http://${PUBLIC_IP}:8978"
+    ports:
+      - "8978:8978"
+    restart: {{container_restart_policy}}
+{% endif %}   {#  CLOUDBEAVER_enable #}
 
 {% if AXON_enable | default(false) %}
   #  ================================== Axon Server ========================================== #}
