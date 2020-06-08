@@ -151,6 +151,9 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
 {% set __CADVISOR_version = CADVISOR_version | default('latest') -%}
 {% set __HAWTIO_version = HAWTIO_version | default('latest') -%}
 
+{% set __SWAGGER_EDITOR_version = SWAGGER_EDITOR_version | default('latest') -%}
+{% set __SWAGGER_UI_version = SWAGGER_UI_version | default('latest') -%}
+
 {% set __hw_arch = hw_arch | default('x86-64') -%}
 {% set __PYTHON_VERSION = PYTHON_version | default('3') -%}
 
@@ -230,6 +233,8 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
   {% set CODE_SERVER_enable = false -%}
   {% set CADVISOR_enable = false -%}
   {% set HAWTIO_enable = false -%}
+  {% set SWAGGER_EDITOR_enable = false -%}
+  {% set SWAGGER_UI_enable = false -%}
 {% endif %}   {# PLATFORM_ARM_enable #}
 
 services:
@@ -4243,6 +4248,52 @@ services:
       - IPC_LOCK
     command: vault server -config=/vault/config/vault.json
 {% endif %}   {#  VAULT_enable #}
+
+{% if SWAGGER_EDITOR_enable | default(false) %}
+  #  ================================== Swagger Editor ================= #}
+  swagger-editor:
+    image: swaggerapi/swagger-editor:{{__SWAGGER_EDITOR_version}}
+    container_name: swagger-editor
+    hostname: swagger-editor
+    labels:
+      com.mdps.service.webui.name: "Swagger Editor UI"
+      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28156"
+    ports:
+      - 28156:8080
+    {%if use_timezone | default(false) %}
+    environment:
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+{% endif %}   {#  SWAGGER_EDITOR_enable #}
+
+{% if SWAGGER_UI_enable | default(false) %}
+  #  ================================== Swagger UI ================= #}
+  swagger-ui:
+    image: swaggerapi/swagger-ui:{{__SWAGGER_EDITOR_version}}
+    container_name: swagger-ui
+    hostname: swagger-ui
+    labels:
+      com.mdps.service.webui.name: "Swagger UI"
+      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28157"
+    ports:
+      - 28157:8080
+    {%if use_timezone | default(false) %}
+    environment:
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+{% endif %}   {#  SWAGGER_UI_enable #}
 
 {% if PORTAINER_enable | default(false) %}
   #  ================================== Portainer ========================================== #}
