@@ -188,6 +188,7 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
 # if we use stack type ARM, then disable some containers which do not support ARM
   {% set ZOOKEEPER_enable = false -%}
   {% set KAFKA_enable = false -%}
+  {% set KAFKACAT_enable = false -%}
   {% set HADOOP_enable = false -%}
   {% set SPARK_enable = false -%}
   {% set HIVE_enable = false -%}
@@ -326,6 +327,10 @@ services:
 {% endif %}   {# zookeeper_enable or KAFKA_enable or ATLAS_enable #}
 
 {% if (KAFKA_enable) | default(false) %}
+  # make sure that internal replication factor is not larger than the number of Kafka nodes
+  {% if KAFKA_internal_replication_factor > KAFKA_broker_nodes -%}
+    {% set KAFKA_internal_replication_factor = KAFKA_broker_nodes -%}
+  {% endif -%}
   #  ================================== Kafka ========================================== #}
   {% for num in range(KAFKA_broker_nodes | default(1) ) %}
   {% set port = 9091 + loop.index %}
@@ -351,8 +356,10 @@ services:
       KAFKA_METRIC_REPORTERS: io.confluent.metrics.reporter.ConfluentMetricsReporter
       KAFKA_CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: 'kafka-1:19092'
       {% endif %}
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: {{KAFKA_broker_nodes | default(1)}}
-      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: {{KAFKA_internal_replication_factor | default(1)}}
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: {{KAFKA_internal_replication_factor | default(1)}}
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 100
       KAFKA_DELETE_TOPIC_ENABLE: '{{ KAFKA_delete_topic_enable | default(omit) }}'
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: '{{ KAFKA_auto_create_topics_enable | default(omit) }}'
       KAFKA_JMX_PORT: {{9991 + loop.index}}
@@ -437,12 +444,12 @@ services:
       CONNECT_REST_PORT: {{port}}
       CONNECT_GROUP_ID: compose-connect-group
       CONNECT_CONFIG_STORAGE_TOPIC: docker-connect-configs
-      CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: {{KAFKA_broker_nodes | default(1)}}
+      CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: {{KAFKA_internal_replication_factor | default(1)}}
       CONNECT_OFFSET_FLUSH_INTERVAL_MS: 10000
       CONNECT_OFFSET_STORAGE_TOPIC: docker-connect-offsets
-      CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: {{KAFKA_broker_nodes | default(1)}}
+      CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: {{KAFKA_internal_replication_factor | default(1)}}
       CONNECT_STATUS_STORAGE_TOPIC: docker-connect-status
-      CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: {{KAFKA_broker_nodes | default(1)}}
+      CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: {{KAFKA_internal_replication_factor | default(1)}}
       CONNECT_KEY_CONVERTER: io.confluent.connect.avro.AvroConverter
       CONNECT_KEY_CONVERTER_SCHEMA_REGISTRY_URL: 'http://schema-registry-1:8081'
       CONNECT_VALUE_CONVERTER: io.confluent.connect.avro.AvroConverter
@@ -572,7 +579,7 @@ services:
       KAFKA_MQTT_TOPIC_REGEX_LIST: 'truck_position:.*position,truck_engine:.*engine'
       KAFKA_MQTT_LISTENERS: 0.0.0.0:1882
       KAFKA_MQTT_BOOTSTRAP_SERVERS: PLAINTEXT://kafka-1:19092
-      KAFKA_MQTT_CONFLUENT_TOPIC_REPLICATIN_FACTOR: 1
+      KAFKA_MQTT_CONFLUENT_TOPIC_REPLICATIN_FACTOR: {{KAFKA_internal_replication_factor | default(1)}}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
