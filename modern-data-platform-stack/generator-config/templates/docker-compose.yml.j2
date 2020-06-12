@@ -9,6 +9,8 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
 {% set __KAFKA_KSQLDB_version = KAFKA_KSQLDB_version | default('latest') -%}
 {% set __SCHEMA_REGISTRY_UI_version = SCHEMA_REGISTRY_UI_version | default('latest') -%}
 
+{% set __KAFKACAT_version = KAFKACAT_version | default('1.5.0') -%}
+
 {% set __KAFKA_TOPICS_UI_version = KAFKA_TOPICS_UI_version | default('latest') -%}
 {% set __KAFKA_CONNECT_UI_version = KAFKA_CONNECT_UI_version | default('latest') -%}
 {% set __KAFKA_CMAK_version = KAFKA_CMAK_version | default('latest') -%}
@@ -623,6 +625,31 @@ services:
     {% endif -%}   {#  use_timezone #}
     restart: {{container_restart_policy}}
 {% endif %}   {# KAFKA_enable and KAFKA_CCC_enable #}
+
+{% if (KAFKA_enable and KAFKACAT_enable and KAFKACAT_enable) | default(false) %}
+  #  ================================== Kafkacat  ========================================== #}
+  kafkacat:
+    image: edenhill/kafkacat:1.5.0
+    container_name: kafkacat
+    hostname: kafkacat
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        apk add jq;
+        while [ 1 -eq 1 ];do sleep 60;done
+    restart: {{container_restart_policy}}
+{% endif %}   {# KAFKA_enable and KAFKACAT_enable #}
 
 {% if (KAFKA_enable and KAFKA_SCHEMA_REGISTRY_UI_enable) | default(false) %}
   #  ================================== Schema Registry UI ========================================== #}
