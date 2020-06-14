@@ -463,19 +463,35 @@ services:
       CLASSPATH: /usr/share/java/monitoring-interceptors/monitoring-interceptors-4.0.0.jar
       AWS_ACCESS_KEY_ID: V42FCGRVMK24JJ8DHUYG
       AWS_SECRET_ACCESS_KEY: bKhWxVF3kQoLY9kFmt91l+tDrEoZjqnWXzY9Eza
-      CONNECT_PLUGIN_PATH: "/usr/share/java,/etc/kafka-connect/custom-plugins"
+      CONNECT_PLUGIN_PATH: "/usr/share/java,/etc/kafka-connect/addl-plugins"
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
-      - ./plugins/kafka-connect:/etc/kafka-connect/custom-plugins
+      - ./plugins/kafka-connect:/etc/kafka-connect/addl-plugins
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
     restart: {{container_restart_policy}}
-
+    {%if loop.index == 1 | default(false) %}
+    command:
+      # In the command section, $ are replaced with $$ to avoid the error 'Invalid interpolation format for "command" option'
+      - bash
+      - -c
+      - |
+        echo "Installing Connectors"
+        for i in $$(echo "{{KAFKA_CONNECT_connectors}}" | sed "s/,/ /g")
+        do
+          confluent-hub install --no-prompt --component-dir /etc/kafka-connect/addl-plugins --verbose "$$i"
+        done
+        #
+        echo "Launching Kafka Connect worker"
+        /etc/confluent/docker/run &
+        #
+        sleep infinity
+    {% endif %}
   {% endfor %}
 {% endif %}   {# KAFKA_enable and KAFKA_CONNECT_enable  #}
 
