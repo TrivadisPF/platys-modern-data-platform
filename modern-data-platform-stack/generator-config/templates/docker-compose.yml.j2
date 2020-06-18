@@ -66,6 +66,8 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
 
 {% set __NODERED_version = NODERED_version | default('latest') -%}
 
+{% set __STREAMSHEETS_version = STREAMSHEETS_version | default('latest') -%}
+
 {% set __AIRFLOW_version = AIRFLOW_version | default('latest') -%}
 
 {% set __ZEPPELIN_version = ZEPPELIN_version | default('latest') -%}
@@ -203,6 +205,7 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
   {% set STREAMSETS_enable = false -%}
   {% set STREAMSETS_TRANSFORMER_enable = false -%}
   {% set NIFI_enable = false -%}
+  {% set STREAMSHEETS_enable = false -%}
   {% set AIRFLOW_enable = false -%}
   {% set ZEPPELIN_enable = false -%}
   {% set JUPYTER_enable = false -%}
@@ -2371,6 +2374,29 @@ services:
     restart: {{container_restart_policy}}
 
 {% endif %}   {#  NODERED_enable  #}
+
+{% if (STREAMSHEETS_enable) | default(false) %}
+  #  ================================== Streamsheet ========================================== #}
+  streamsheets:
+    image: cedalo/streamsheets:{{__STREAMSHEETS_version}}
+    container_name: streamsheets
+    hostname: streamsheets
+    labels:
+      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28107"
+    ports:
+      - 28158:8081
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  STREAMSHEETS_enable #}
 
 {%if AIRFLOW_enable | default(false) %}
   #  ================================== Node-RED ========================================== #}

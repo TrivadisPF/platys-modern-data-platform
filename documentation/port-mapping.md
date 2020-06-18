@@ -244,6 +244,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28155 | 8080 | hawtio |
 28156 | 8080 | swagger-editor |
 28157 | 8080 | swagger-ui |
+28158 | 8081 | streamsheets |
 28500 - 28510 | 28500 - 28510 | streamsets-1 (additional ports) |
 
 
