@@ -141,6 +141,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 18080 | 18080 | nifi-1 |
 18088 | 8088 | resourcemanager |
 18042 | 8042 | nodemanager |
+18083 | 8083 | replicator-1 |
 18086 | 8086 | kafka-rest-1 |
 18087 | 8086 | kafka-rest-2 |
 18088 | 8086 | kafka-rest-3 |
