@@ -3936,7 +3936,16 @@ services:
 {% if PRESTO_enable | default(false) %}
   #  ================================== Presto ========================================== #}
   presto-1:
-    image: {{ 'starburstdata/presto' if (PRESTO_edition | lower) == 'starburstdata' else 'prestosql/presto' }}:{{__PRESTO_version}}
+  {% if (PRESTO_edition | lower) == 'starburstdata'  %}
+    image: starburstdata/presto
+    {% set presto_etc_dir = '/usr/lib/presto/etc' %}
+  {% elif (PRESTO_edition | lower) == 'prestosql' %}
+    image: prestosql/presto
+    {% set presto_etc_dir = '/usr/lib/presto/default/etc' %}
+  {% elif (PRESTO_edition | lower) == 'prestodb' %}
+    image: trivadis/prestodb
+    {% set presto_etc_dir = '/opt/presto/default/etc' %}
+  {% endif -%}   {#  PRESTO_edition #}
     hostname: presto-1
     container_name: presto-1
     labels:
@@ -3950,17 +3959,61 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
+  {% if (PRESTO_install | lower) == 'cluster'  %}
+      - ./conf/presto/cluster/coordinator.config.properties:{{presto_etc_dir}}/config.properties
+  {% else %}
+      - ./conf/presto/single/config.properties:{{presto_etc_dir}}/config.properties
+  {% endif %}
+      - ./conf/presto/cluster/node.properties:{{presto_etc_dir}}/node.properties
   {% if MINIO_enable | default(false) %}
-      - './conf/presto/minio.properties:/usr/lib/presto/etc/catalog/minio.properties'
+      - './conf/presto/catalog/minio.properties:{{presto_etc_dir}}/catalog/minio.properties'
   {% endif %}
   {% if POSTGRESQL_enable | default(false) %}
-      - './conf/presto/postgresql.properties:/usr/lib/presto/etc/catalog/postgresql.properties'
+      - './conf/presto/catalog/postgresql.properties:/usr/lib/presto/etc/catalog/postgresql.properties'
   {% endif %}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
     restart: {{container_restart_policy}}
+
+  {% if (PRESTO_install | lower) == 'cluster'  %}
+    {% for num in range(PRESTO_workers | default(1) ) %}
+  presto-worker-{{loop.index}}:
+  {% if (PRESTO_edition | lower) == 'starburstdata'  %}
+    image: starburstdata/presto
+    {% set presto_etc_dir = '/usr/lib/presto/etc' %}
+  {% elif (PRESTO_edition | lower) == 'prestosql' %}
+    image: prestosql/presto
+    {% set presto_etc_dir = '/usr/lib/presto/default/etc' %}
+  {% elif (PRESTO_edition | lower) == 'prestodb' %}
+    image: trivadis/prestodb
+    {% set presto_etc_dir = '/opt/presto/default/etc' %}
+  {% endif -%}   {#  PRESTO_edition #}
+    hostname: presto-worker-{{loop.index}}
+    container_name: presto-worker-{{loop.index}}
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./conf/presto/cluster/worker.config.properties:{{presto_etc_dir}}/config.properties
+      - ./conf/presto/cluster/node.properties:{{presto_etc_dir}}/node.properties
+  {% if MINIO_enable | default(false) %}
+      - './conf/presto/catalog/minio.properties:{{presto_etc_dir}}/catalog/minio.properties'
+  {% endif %}
+  {% if POSTGRESQL_enable | default(false) %}
+      - './conf/presto/catalog/postgresql.properties:/usr/lib/presto/etc/catalog/postgresql.properties'
+  {% endif %}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+    {% endfor %}
+  {% endif -%}   {#  PRESTO_install #}
+
 {% endif %}   {#  PRESTO_enable #}
 
 {% if DREMIO_enable | default(false) %}
