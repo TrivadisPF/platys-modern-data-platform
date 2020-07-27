@@ -3945,6 +3945,9 @@ services:
   {% elif (PRESTO_edition | lower) == 'prestodb' %}
     image: trivadis/prestodb
     {% set presto_etc_dir = '/opt/presto/default/etc' %}
+  {% elif (PRESTO_edition | lower) == 'ahana' %}
+    image: ahanaio/prestodb
+    {% set presto_etc_dir = '/opt/presto/default/etc' %}
   {% endif -%}   {#  PRESTO_edition #}
     hostname: presto-1
     container_name: presto-1
@@ -3989,6 +3992,9 @@ services:
   {% elif (PRESTO_edition | lower) == 'prestodb' %}
     image: trivadis/prestodb
     {% set presto_etc_dir = '/opt/presto/default/etc' %}
+  {% elif (PRESTO_edition | lower) == 'ahana' %}
+    image: ahanaio/prestodb
+    {% set presto_etc_dir = '/opt/presto/default/etc' %}
   {% endif -%}   {#  PRESTO_edition #}
     hostname: presto-worker-{{loop.index}}
     container_name: presto-worker-{{loop.index}}
@@ -4013,6 +4019,32 @@ services:
     restart: {{container_restart_policy}}
     {% endfor %}
   {% endif -%}   {#  PRESTO_install #}
+
+  presto-cli:
+  {% if (PRESTO_edition | lower) == 'starburstdata'  %}
+    image: starburstdata/presto-cli
+  {% elif (PRESTO_edition | lower) == 'prestosql' %}
+    image: starburstdata/prestosql-cli
+  {% elif (PRESTO_edition | lower) == 'prestodb' %}
+    image: ahanaio/prestodb-cli
+    {% set presto_etc_dir = '/opt/presto/default/etc' %}
+  {% elif (PRESTO_edition | lower) == 'ahana' %}
+    image: ahanaio/prestodb-cli
+    {% set presto_etc_dir = '/opt/presto/default/etc' %}
+  {% endif -%}   {#  PRESTO_edition #}
+    hostname: presto-1
+    container_name: presto-1
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
 
 {% endif %}   {#  PRESTO_enable #}
 
