@@ -1,5 +1,29 @@
 # `modern-data-platform` - What's new?
 
+## What's new in 1.6.0
+
+The Modern Data Platform version 1.6.0 contains the following new services and enhancements:
+
+### New Services
+
+* Penthao Webspoon
+* Hawtio
+* RabbitMQ
+* Cloudbeaver
+* Swagger Editor & Swagger UI
+* Kafkacat
+* StreamSheets
+* Confluent Replicator
+* Presto CLI
+
+### Enhancements / Changes
+
+* Only display verbose output from docker-compose-templer generator if the `-v` flag is passed on the `platys` command line
+* Upgrade `ksqlDB` default version to latest `0.9.0`
+* Support automatic installation of Confluent Hub connectors into Kafka Connect upon startup
+* Support for Presto Clusters together with single Presto instance
+* Support for Prestosql and Prestodb open source Presto forks as well as new Ahana Prestodb subscription
+
 ## What's new in 1.5.2
 
 1.5.2 is just a but fix release with no new services.
