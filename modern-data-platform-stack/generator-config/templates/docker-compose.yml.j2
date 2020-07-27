@@ -132,6 +132,7 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
 {% set __AXON_version = AXON_version | default('latest') -%}
 
 {% set __PRESTO_version = PRESTO_version | default('latest') -%}
+{% set __PRESTO_CLI_version = PRESTO_CLI_version | default('latest') -%}
 {% set __DREMIO_version = DREMIO_version | default('latest') -%}
 {% set __DRILL_version = DRILL_version | default('latest') -%}
 
@@ -227,6 +228,7 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
   {% set CLOUDBEAVER_enable = false -%}
   {% set AXON_enable = false -%}
   {% set PRESTO_enable = false -%}
+  {% set PRESTO_CLI_enable = false -%}
   {% set DREMIO_enable = false -%}
   {% set DRILL_enable = false -%}
   {% set HIVEMQ3_enable = false -%}
@@ -3937,16 +3939,16 @@ services:
   #  ================================== Presto ========================================== #}
   presto-1:
   {% if (PRESTO_edition | lower) == 'starburstdata'  %}
-    image: starburstdata/presto
+    image: starburstdata/presto:{{__PRESTO_version}}
     {% set presto_etc_dir = '/usr/lib/presto/etc' %}
   {% elif (PRESTO_edition | lower) == 'prestosql' %}
-    image: prestosql/presto
+    image: prestosql/presto:{{__PRESTO_version}}
     {% set presto_etc_dir = '/usr/lib/presto/default/etc' %}
   {% elif (PRESTO_edition | lower) == 'prestodb' %}
-    image: trivadis/prestodb
+    image: trivadis/prestodb:{{__PRESTO_version}}
     {% set presto_etc_dir = '/opt/presto/default/etc' %}
   {% elif (PRESTO_edition | lower) == 'ahana' %}
-    image: ahanaio/prestodb
+    image: ahanaio/prestodb:{{__PRESTO_version}}
     {% set presto_etc_dir = '/opt/presto/default/etc' %}
   {% endif -%}   {#  PRESTO_edition #}
     hostname: presto-1
@@ -3984,16 +3986,16 @@ services:
     {% for num in range(PRESTO_workers | default(1) ) %}
   presto-worker-{{loop.index}}:
   {% if (PRESTO_edition | lower) == 'starburstdata'  %}
-    image: starburstdata/presto
+    image: starburstdata/presto:{{__PRESTO_version}}
     {% set presto_etc_dir = '/usr/lib/presto/etc' %}
   {% elif (PRESTO_edition | lower) == 'prestosql' %}
-    image: prestosql/presto
+    image: prestosql/presto:{{__PRESTO_version}}
     {% set presto_etc_dir = '/usr/lib/presto/default/etc' %}
   {% elif (PRESTO_edition | lower) == 'prestodb' %}
-    image: trivadis/prestodb
+    image: trivadis/prestodb:{{__PRESTO_version}}
     {% set presto_etc_dir = '/opt/presto/default/etc' %}
   {% elif (PRESTO_edition | lower) == 'ahana' %}
-    image: ahanaio/prestodb
+    image: ahanaio/prestodb:{{__PRESTO_version}}
     {% set presto_etc_dir = '/opt/presto/default/etc' %}
   {% endif -%}   {#  PRESTO_edition #}
     hostname: presto-worker-{{loop.index}}
@@ -4020,16 +4022,17 @@ services:
     {% endfor %}
   {% endif -%}   {#  PRESTO_install #}
 
+  {% if PRESTO_CLI_enable | default(false) %}
   presto-cli:
   {% if (PRESTO_edition | lower) == 'starburstdata'  %}
-    image: starburstdata/presto-cli
+    image: starburstdata/presto-cli:{{__PRESTO_CLI_version}}
   {% elif (PRESTO_edition | lower) == 'prestosql' %}
-    image: starburstdata/prestosql-cli
+    image: starburstdata/prestosql-cli:{{__PRESTO_CLI_version}}
   {% elif (PRESTO_edition | lower) == 'prestodb' %}
-    image: ahanaio/prestodb-cli
+    image: ahanaio/prestodb-cli:{{__PRESTO_CLI_version}}
     {% set presto_etc_dir = '/opt/presto/default/etc' %}
   {% elif (PRESTO_edition | lower) == 'ahana' %}
-    image: ahanaio/prestodb-cli
+    image: ahanaio/prestodb-cli:{{__PRESTO_CLI_version}}
     {% set presto_etc_dir = '/opt/presto/default/etc' %}
   {% endif -%}   {#  PRESTO_edition #}
     hostname: presto-1
@@ -4045,6 +4048,7 @@ services:
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
     restart: {{container_restart_policy}}
+  {% endif %}   {#  PRESTO_CLI_enable #}
 
 {% endif %}   {#  PRESTO_enable #}
 
