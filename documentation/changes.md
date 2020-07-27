@@ -15,6 +15,7 @@ The Modern Data Platform version 1.6.0 contains the following new services and e
 * StreamSheets
 * Confluent Replicator
 * Presto CLI
+* Apache Ranger (preview)
 
 ### Enhancements / Changes
 
