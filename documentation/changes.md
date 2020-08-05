@@ -6,6 +6,7 @@ The Modern Data Platform version 1.6.0 contains the following new services and e
 
 ### New Services
 
+* Quix Database UI (Notebook-style)
 * Penthao Webspoon
 * Hawtio
 * RabbitMQ

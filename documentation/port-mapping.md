@@ -1,4 +1,4 @@
-# `modern-data-platform` - Port Mappings - 1.6.0
+# `modern-data-platform` - Port Mappings - 1.7.0
 
 This table reserves the external ports for the various services. Not all services have to be used in the platform at a given time. But by reserving, we can assure that there are no conflicts if a service is added at a later time.
 
@@ -245,6 +245,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28156 | 8080 | swagger-editor |
 28157 | 8080 | swagger-ui |
 28158 | 8081 | streamsheets |
+28159 | 8081 | quix-backend |
+28160 | 8081 | quix-frontend |
 28500 - 28510 | 28500 - 28510 | streamsets-1 (additional ports) |
 
 
