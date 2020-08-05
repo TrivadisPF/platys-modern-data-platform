@@ -1,3 +1,7 @@
+---
+technoglogies:      presto,minio
+---
+
 # Querying data in Minio (S3) from Presto
 
 This tutorial will show how to query Minio with Hive and Presto. 
