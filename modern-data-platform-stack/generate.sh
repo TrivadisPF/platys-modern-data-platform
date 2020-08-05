@@ -20,10 +20,14 @@ then
    echo "Generating using the following custom stack-config.yml:"
    cat /tmp/config.yml
    echo "======================================================================"
+
+   docker-compose-templer -v -f /opt/mdps-gen/stack-config.yml
+   echo "======================================================================"
+else
+   docker-compose-templer -f /opt/mdps-gen/stack-config.yml 
 fi
 
 # we asume that the output volume is mapped to /opt/mdps-gen/destination
-docker-compose-templer -v -f /opt/mdps-gen/stack-config.yml
 
 if [ ${DEL_EMPTY_LINES:-0} -eq 1 ]
 then

@@ -1,4 +1,4 @@
-# `modern-data-platform` - Port Mappings - 1.5.2
+# `modern-data-platform` - Port Mappings - 1.6.0
 
 This table reserves the external ports for the various services. Not all services have to be used in the platform at a given time. But by reserving, we can assure that there are no conflicts if a service is added at a later time.
 
@@ -50,6 +50,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 5434 | 5432 | marquez-db |
 5601 | 5601 | kibana |
 5672 | 5672 | activemq |
+5673 | 5672 | rabbitmq (amqp) |
 5800 | 5800 | filezilla |  
 5900 | 5900 | filezilla |  
 6060 | 6060 | zeppelin |
@@ -57,6 +58,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 6080 | 6080 | ranger-admin |
 6379 | 6379 | redis |
 7000 | 7000 | yb-master |
+7050 | 7050 | kudu-tserver-1 |
+7051 | 7051 | kudo-master-1 |
 7077 | 7077 | spark-master |
 7199 | 7199 | cassandra-1 |
 7200 | 7199 | cassandra-2 |
@@ -69,6 +72,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 7689 | 7687 | neo4j-3 |
 8024 | 8024 | axon-server |
 8047 | 8047 | drill |
+8050 | 8050 | kudu-tserver-1 |
+8051 | 8051 | kudo-master-1 |
 8080 | 8080 | spark-master |
 8081 | 8081 | schema-registry-1     |
 8082 | 8081 | schema-registry-2     |
@@ -83,6 +88,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 8161 | 8161 | activemq |
 8200 | 8200 | vault |
 8888 | 8888 | hue |
+8978 | 8978 | cloudbeaver |
 8983 | 8983 | solr |
 8998 | 8998 | livy |
 9001 | 9001 | mosquitto-1 |
@@ -126,6 +132,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 10000 | 10000 | hive-server |
 10002 | 10002 | hive-server |
 15433 | 5433| yb-tserver-1 |
+15672 | 15672 | rabbitmq (ui) |
 16379 | 6379| yb-tserver-1 |
 17474 | 7474 | amundsen-neo4j |
 17687 | 7687 | amundsen-neo4j |
@@ -134,6 +141,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 18080 | 18080 | nifi-1 |
 18088 | 8088 | resourcemanager |
 18042 | 8042 | nodemanager |
+18083 | 8083 | replicator-1 |
 18086 | 8086 | kafka-rest-1 |
 18087 | 8086 | kafka-rest-2 |
 18088 | 8086 | kafka-rest-3 |
@@ -232,6 +240,11 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28151 | 8088 | superset |
 28152 | 8080 | superset |
 28153 | 8888 | oracle-rest-1 |
+28154 | 8080 | penthao |
+28155 | 8080 | hawtio |
+28156 | 8080 | swagger-editor |
+28157 | 8080 | swagger-ui |
+28158 | 8081 | streamsheets |
 28500 - 28510 | 28500 - 28510 | streamsets-1 (additional ports) |
 
 
