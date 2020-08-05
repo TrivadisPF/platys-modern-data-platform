@@ -130,6 +130,7 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
 {% set __SQLSERVER_version = SQLSERVER_version | default('latest') -%}
 {% set __ADMINER_version = ADMINER_version | default('latest') -%}
 {% set __CLOUDBEAVER_version = CLOUDBEAVER_version | default('latest') -%}
+{% set __QUIX_version = QUIX_version | default('latest') -%}
 
 {% set __AXON_version = AXON_version | default('latest') -%}
 
@@ -3906,6 +3907,83 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {#  CLOUDBEAVER_enable #}
 
+{% if QUIX_enable | default(false) %}
+  #  ================================== Cloudbeaver ========================================== #}
+  quix-backend:
+    image: wixquix/quix-backend:{{__QUIX_version}}
+    container_name: quix-backend
+    hostname: quix-backend
+    labels:
+      com.mdps.service.restapi.name: "Quix REST API"
+      com.mdps.service.restapi.url: "http://${PUBLIC_IP}:28159"
+    ports:
+      - "28159:8081"
+    environment:
+      MODULES: presto
+      MODULES_PRESTO_ENGINE: presto
+      MODULES_PRESTO_API: http://presto-1:8080/v1
+      MODULES_PRESTO_CATALOG: system
+      MODULES_PRESTO_SCHEMA: runtime
+      MODULES_PRESTO_SOURCE: quix
+      MODULES_PRESTO_DB_EMPTY_TIMEOUT: 60000
+      MODULES_PRESTO_DB_REQUEST_TIMEOUT: 10000
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+
+  quix-frontend:
+    image: wixquix/quix-frontend:{{__QUIX_version}}
+    container_name: quix-frontend
+    hostname: quix-frontend
+    labels:
+      com.mdps.service.webui.name: "Quix UI"
+      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28160"
+    ports:
+      - "28160:3000"
+    environment:
+      BACKEND_INTERNAL_URL: http://quick-backend:8081
+      BACKEND_PUBLIC_URL: http://${PUBLIC_IP}:28159
+      DB_NAME: quix
+      DB_USER: root
+      DB_HOST: quix-db
+      DB_PORT: 3306
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+
+  quix-db:
+    image: "mysql:5.7"
+    container_name: quix-db
+    hostname: quix-db
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: "'yes'"
+      MYSQL_DATABASE: "quix"
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  QUIX_enable #}
+
 {% if AXON_enable | default(false) %}
   #  ================================== Axon Server ========================================== #}
   axon-server:
@@ -4026,9 +4104,9 @@ services:
   {% if PRESTO_CLI_enable | default(false) %}
   presto-cli:
   {% if (PRESTO_edition | lower) == 'starburstdata'  %}
-    image: starburstdata/presto-cli:{{__PRESTO_CLI_version}}
+    image: trivadis/prestosql-cli:{{__PRESTO_CLI_version}}
   {% elif (PRESTO_edition | lower) == 'prestosql' %}
-    image: starburstdata/prestosql-cli:{{__PRESTO_CLI_version}}
+    image: trivadis/prestosql-cli:{{__PRESTO_CLI_version}}
   {% elif (PRESTO_edition | lower) == 'prestodb' %}
     image: ahanaio/prestodb-cli:{{__PRESTO_CLI_version}}
     {% set presto_etc_dir = '/opt/presto/default/etc' %}
@@ -4048,6 +4126,7 @@ services:
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
+    tty: true
     restart: {{container_restart_policy}}
   {% endif %}   {#  PRESTO_CLI_enable #}
 
