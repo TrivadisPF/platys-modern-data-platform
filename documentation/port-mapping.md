@@ -9,6 +9,9 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 21 | 21 | ftp |
 1433 | 1433 | sqlserver |
 1521 | 1521 | oracledb |
+1095 | 1095 | ksqldb-server-1 (jmx) |
+1096 | 1096 | ksqldb-server-2 (jmx) |
+1097 | 1097 | ksqldb-server-3 (jmx) |
 1880 | 1880 | nodered-1 |
 1882 | 1882 | kafka-mqtt-1 |
 1883 | 1883 | mosquitto-1 |
@@ -125,10 +128,10 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 9869 | 9864 | datanode-6 |
 9992 | 9992 | kafka-1 (jmx) |
 9993 | 9993 | kafka-2 (jmx) |
-9992 | 9994 | kafka-3 (jmx) |
-9992 | 9995 | kafka-4 (jmx) |
-9992 | 9996 | kafka-5 (jmx) |
-9992 | 9997 | kafka-6 (jmx) |
+9994 | 9994 | kafka-3 (jmx) |
+9995 | 9995 | kafka-4 (jmx) |
+9996 | 9996 | kafka-5 (jmx) |
+9997 | 9997 | kafka-6 (jmx) |
 9999 | 9999 | influxdb2 |
 10000 | 10000 | hive-server |
 10002 | 10002 | hive-server |

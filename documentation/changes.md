@@ -11,6 +11,8 @@ The Modern Data Platform version 1.7.0 contains the following new services and e
 
 ### Enhancements / Changes
 
+* Added JMX monitoring to ksqldb-server-X services
+
 ## What's new in 1.6.0
 
 The Modern Data Platform version 1.6.0 contains the following new services and enhancements:
