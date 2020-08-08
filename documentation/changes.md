@@ -7,6 +7,7 @@ The Modern Data Platform version 1.7.0 contains the following new services and e
 ### New Services
 
 * Redash
+* Memcached
 
 ### Enhancements / Changes
 

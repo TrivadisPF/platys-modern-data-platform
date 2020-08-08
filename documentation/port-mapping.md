@@ -132,6 +132,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 9999 | 9999 | influxdb2 |
 10000 | 10000 | hive-server |
 10002 | 10002 | hive-server |
+11211 | 11211 | memcached |
 15433 | 5433| yb-tserver-1 |
 15672 | 15672 | rabbitmq (ui) |
 16379 | 6379| yb-tserver-1 |

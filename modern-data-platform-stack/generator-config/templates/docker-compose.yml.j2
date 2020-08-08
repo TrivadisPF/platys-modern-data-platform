@@ -95,6 +95,8 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
 {% set __SUPERSET_version = SUPERSET_version | default('latest') -%}
 {% set __REDASH_version = REDASH_version | default('latest') -%}
 
+{% set __MEMCACHED_version = MEMCACHED_version | default('latest') -%}
+
 {% set __REDIS_version = REDIS_version | default('latest') -%}
 {% set __REDIS_COMMANDER_version = REDIS_COMMANDER_version | default('latest') -%}
 
@@ -2791,6 +2793,27 @@ services:
     {% endif -%}   {#  use_timezone #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  REDASH_enable #}
+
+{% if MEMCACHED_enable | default(false) %}
+  #  ================================== Memcached ========================================== #}
+  memchached:
+    image: memcached:{{__MEMCACHED_version}}
+    hostname: memcached
+    container_name: memcached
+    ports:
+      - 11211:11211/tcp
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  MEMCACHED_enable #}
 
 {% if REDIS_enable | default(false) %}
   #  ================================== Redis ========================================== #}
