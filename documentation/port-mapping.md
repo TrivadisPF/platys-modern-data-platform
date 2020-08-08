@@ -57,6 +57,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 6066 | 6066 | spark-master |
 6080 | 6080 | ranger-admin |
 6379 | 6379 | redis |
+6380 | 6379 | redash-redis |
 7000 | 7000 | yb-master |
 7050 | 7050 | kudu-tserver-1 |
 7051 | 7051 | kudo-master-1 |
@@ -247,6 +248,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28158 | 8081 | streamsheets |
 28159 | 8081 | quix-backend |
 28160 | 8081 | quix-frontend |
+28161 | 5000 | redash-server |
 28500 - 28510 | 28500 - 28510 | streamsets-1 (additional ports) |
 
 

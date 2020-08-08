@@ -93,6 +93,7 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
 {% set __KIBANA_version = KIBANA_version | default('latest') -%}
 
 {% set __SUPERSET_version = SUPERSET_version | default('latest') -%}
+{% set __REDASH_version = REDASH_version | default('latest') -%}
 
 {% set __REDIS_version = REDIS_version | default('latest') -%}
 {% set __REDIS_COMMANDER_version = REDIS_COMMANDER_version | default('latest') -%}
@@ -214,6 +215,7 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
   {% set ZEPPELIN_enable = false -%}
   {% set JUPYTER_enable = false -%}
   {% set SUPERSET_enable = false -%}
+  {% set REDASH_enable = false -%}
   {% set MONGO_enable = false -%}
   {% set ELASTICSEARCH_enable = false -%}
   {% set DEJAVU_enable = false -%}
@@ -2665,12 +2667,137 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {#  GRAFANA_enable #}
 
+{% if REDASH_enable | default(false) %}
+  #  ================================== Redash ========================================== #}
+  redash-server:
+    image: redash/redash:{{__REDASH_version}}
+    hostname: redash-server
+    container_name: redash-server
+    labels:
+      com.mdps.service.webui.name: "Redash UI"
+      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28161"
+    ports:
+      - "28161:5000"
+    command: server
+    environment:
+      REDASH_REDIS_URL: "redis://redash-redis:6379/0"
+      REDASH_DATABASE_URL: "postgresql://postgres@redash-postgresql/postgres"
+      REDASH_PASSWORD_LOGIN_ENABLED: "true"
+      REDASH_RATELIMIT_ENABLED: "false"
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+
+  redash-scheduler:
+    image: redash/redash:{{__REDASH_version}}
+    hostname: redash-scheduler
+    container_name: redash-scheduler
+    command: scheduler
+    environment:
+      REDASH_LOG_LEVEL: "INFO"
+      REDASH_REDIS_URL: "redis://redash-redis:6379/0"
+      REDASH_DATABASE_URL: "postgresql://postgres@redash-postgresql/postgres"
+      REDASH_PASSWORD_LOGIN_ENABLED: "true"
+      REDASH_RATELIMIT_ENABLED: "false"
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+
+  redash-worker:
+    image: redash/redash:{{__REDASH_version}}
+    hostname: redash-worker
+    container_name: redash-worker
+    command: worker
+    environment:
+      REDASH_LOG_LEVEL: "INFO"
+      REDASH_REDIS_URL: "redis://redash-redis:6379/0"
+      REDASH_DATABASE_URL: "postgresql://postgres@redash-postgresql/postgres"
+      REDASH_PASSWORD_LOGIN_ENABLED: "true"
+      REDASH_RATELIMIT_ENABLED: "false"
+      PYTHONUNBUFFERED: 0
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+
+  redash-postgresql:
+    image: postgres:9.5-alpine
+    hostname: redash-postgresql
+    container_name: redash-postgresql
+    # The following turns the DB into less durable, but gains significant performance improvements for the tests run (x3
+    # improvement on my personal machine). We should consider moving this into a dedicated Docker Compose configuration for
+    # tests.
+    ports:
+      - "15432:5432"
+    command: "postgres -c fsync=off -c full_page_writes=off -c synchronous_commit=OFF"
+    environment:
+      POSTGRES_HOST_AUTH_METHOD: "trust"
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+
+  redash-db-setup:
+    image: redash/redash:{{__REDASH_version}}
+    hostname: redash-db-setup
+    container_name: redash-db-setup
+    command: create_db
+    depends_on:
+      - redash-postgresql
+    environment:
+      REDASH_DATABASE_URL: "postgresql://postgres@redash-postgresql/postgres"
+
+  redash-redis:
+    image: redis:{{__REDIS_version}}
+    hostname: redash-redis
+    container_name: redash-redis
+    ports:
+      - 6380:6379
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  REDASH_enable #}
+
 {% if REDIS_enable | default(false) %}
   #  ================================== Redis ========================================== #}
   redis:
+    image: redis:{{__REDIS_version}}
+    hostname: redis
     container_name: redis
-    hostname: redis:{{__REDIS_version}}
-    image: redis
     ports:
       - 6379:6379
     {%if use_timezone | default(false) %}
@@ -3910,7 +4037,7 @@ services:
 {% endif %}   {#  CLOUDBEAVER_enable #}
 
 {% if QUIX_enable | default(false) %}
-  #  ================================== Cloudbeaver ========================================== #}
+  #  ================================== Quix ========================================== #}
   quix-backend:
     image: wixquix/quix-backend:{{__QUIX_version}}
     container_name: quix-backend

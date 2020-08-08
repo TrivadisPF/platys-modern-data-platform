@@ -1,5 +1,15 @@
 # `modern-data-platform` - What's new?
 
+## What's new in 1.7.0
+
+The Modern Data Platform version 1.7.0 contains the following new services and enhancements:
+
+### New Services
+
+* Redash
+
+### Enhancements / Changes
+
 ## What's new in 1.6.0
 
 The Modern Data Platform version 1.6.0 contains the following new services and enhancements:
