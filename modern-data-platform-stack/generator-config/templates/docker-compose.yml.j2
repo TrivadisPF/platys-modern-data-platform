@@ -437,6 +437,42 @@ services:
   {% endfor %}
 {% endif %}   {# KAFKA_enable and KAFKA_SCHEMA_REGISTRY_enable #}
 
+{% if ( KAFKA_enable and APICURIO_REGISTRY_enable ) | default(false) %}
+  #  ================================== Schema Registry ========================================== #}
+  {% for num in range(APICURIO_REGISTRY_nodes | default(1) ) %}
+    {% set external_port = 9000 + loop.index - 1 %}
+    {% set port = 9000 + loop.index - 1 %}
+    {% set http_external_port = 28162 + loop.index - 1 %}
+    {% set http_port = 8080 + loop.index - 1 %}
+  apicurio-registry-{{loop.index}}:
+    image: apicurio/apicurio-registry-streams:{{__CONFLUENT_PLATFORM_version}}
+    hostname: apicurio-registry-{{loop.index}}
+    container_name: apicurio-registry-{{loop.index}}
+    labels:
+      com.mdps.service.restapi.url: "http://${PUBLIC_IP}:{{external_port}}"
+    depends_on:
+      - kafka-1
+    ports:
+      - "{{external_port}}:{{port}}"
+      - "{{http_external_port}}:{{htp_port}}"
+    environment:
+      QUARKUS_PROFILE: prod
+      KAFKA_BOOTSTRAP_SERVERS: 'kafka-1:19092'
+      APPLICATION_ID: registry_id
+      APPLICATION_SERVER: apicurio-registry-{{loop.index}}
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+  {% endfor %}
+{% endif %}   {# KAFKA_enable and APICURIO_REGISTRY_enable #}
+
 {% if ( KAFKA_enable and KAFKA_CONNECT_enable ) | default(false) %}
   #  ================================== Kafka Connect ========================================== #}
   {% for num in range(KAFKA_CONNECT_nodes | default(1) ) %}

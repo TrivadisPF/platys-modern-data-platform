@@ -253,6 +253,9 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28159 | 8081 | quix-backend |
 28160 | 8081 | quix-frontend |
 28161 | 5000 | redash-server |
+28162 | 8080 | apicurio-registry-1 |
+28163 | 8080 | apicurio-registry-2 |
+28164 | 8080 | apicurio-registry-3 |
 28500 - 28510 | 28500 - 28510 | streamsets-1 (additional ports) |
 
 
