@@ -1,0 +1,1 @@
+Contains the logs of NEO4J service, if flag NEO4J_volume_map_logs is set to true.

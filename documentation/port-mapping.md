@@ -54,7 +54,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 5601 | 5601 | kibana |
 5672 | 5672 | activemq |
 5673 | 5672 | rabbitmq (amqp) |
-5800 | 5800 | filezilla |  
+5800 | 5800 | filezilla | 
+5820 | 5820 | stardog-1 |
 5900 | 5900 | filezilla |  
 6060 | 6060 | zeppelin |
 6066 | 6066 | spark-master |
@@ -256,6 +257,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28162 | 8080 | apicurio-registry-1 |
 28163 | 8080 | apicurio-registry-2 |
 28164 | 8080 | apicurio-registry-3 |
+28170 | 80 | stardog-studio |
 28500 - 28510 | 28500 - 28510 | streamsets-1 (additional ports) |
 
 

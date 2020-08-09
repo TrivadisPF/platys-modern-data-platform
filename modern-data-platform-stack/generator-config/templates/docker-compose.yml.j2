@@ -109,6 +109,9 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
 
 {% set __NEO4J_version = NEO4J_version | default('latest') -%}
 
+{% set __STARDOG_version = STARTDOG_version | default('latest') -%}
+{% set __STARDOG_STUDIO_version = STARDOG_STUDIO_version | default('latest') -%}
+
 {% set __INFLUXDB_version = INFLUXDB_version | default('latest') -%}
 {% set __TELEGRAF_version = TELEGRAF_version | default('latest') -%}
 {% set __CHRONOGRAF_version = CHRONOGRAF_version | default('latest') -%}
@@ -228,6 +231,8 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
   {% set KIBANA_enable = false -%}
   {% set INFLUXDB2_enable = false -%}
   {% set NEO4J_enable = false -%}
+  {% set STARDOG_enable = false -%}
+  {% set STARDOG_STUDIO_enable = false -%}
   {% set TILE38_enable = false -%}
   {% set ORACLE_enable = false -%}
   {% set ORACLE_REST_DATA_SERVICE_enable = false -%}
@@ -440,7 +445,7 @@ services:
 {% endif %}   {# KAFKA_enable and KAFKA_SCHEMA_REGISTRY_enable #}
 
 {% if ( KAFKA_enable and APICURIO_REGISTRY_enable ) | default(false) %}
-  #  ================================== Schema Registry ========================================== #}
+  #  ================================== Apicurio Registry ========================================== #}
   {% for num in range(APICURIO_REGISTRY_nodes | default(1) ) %}
     {% set external_port = 9000 + loop.index - 1 %}
     {% set port = 9000 + loop.index - 1 %}
@@ -3311,6 +3316,61 @@ services:
     {% endif -%}   {#  use_timezone #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  NEO4J_enable #}
+
+{% if STARDOG_enable | default(false) %}
+  #  ================================== Stardog ========================================== #}
+  stardog-1:
+    image: stardog:stardog{{__STARDOG_version}}
+    hostname: stardog-1
+    container_name: stardog-1
+    labels:
+      com.mdps.service.webui.name: "Stardog UI"
+      com.mdps.service.webui.url: "http://${PUBLIC_IP}:7474"
+    ports:
+      - "5820:5820"
+    environment:
+      STARDOG_SERVER_JAVA_ARGS: "-Djava.io.tmpdir=/var/opt/tmp -Xms4g -Xmx4g -XX:MaxDirectMemorySize=8g"
+      STARDOG_EXT: "/var/opt/stardog-ext"
+    {%if use_timezone | default(false) %}
+      TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./license/stardog-license-key.bin:/var/opt/stardog/stardog-license-key.bin
+      - "./plugins/stardog/:/var/opt/stardog-ext"
+    {% if STARDOG_volume_map_data %}
+      - "./container-volume/stardog/data:/var/opt/stardog"
+      - "./container-volume/stardog/tmp:/var/opt/tmp"
+    {% endif %}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+
+  {% if STARDOG_STUDIO_enable | default(false) %}
+  stardog-studio:
+    image: stardog:stardog-studio:{{__STARDOG_STUDIO_version}}
+    hostname: stardog-studio
+    container_name: stardog-studio
+    labels:
+      com.mdps.service.webui.name: "Stardog Studio UI"
+      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28170"
+    ports:
+      - "28170:80"
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+  {% endif %}   {#  STARDOG_STUDIO_enable #}
+{% endif %}   {#  STARDOG_enable #}
 
 {% if INFLUXDB_enable | default(false) %}
   #  ================================== InfluxData InfluxDB ========================================== #}

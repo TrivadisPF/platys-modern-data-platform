@@ -9,6 +9,7 @@ The Modern Data Platform version 1.7.0 contains the following new services and e
 * Redash
 * Memcached
 * Apicurio Registry
+* Stardog & Stardog Studio
 
 ### Enhancements / Changes
 
