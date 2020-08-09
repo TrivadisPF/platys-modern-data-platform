@@ -13,6 +13,7 @@ The Modern Data Platform version 1.7.0 contains the following new services and e
 ### Enhancements / Changes
 
 * Added JMX monitoring to ksqldb-server-X services
+* Allow enabling basic authentication in Cluster Manager for Apache Kafka (CMAK) service
 
 ## What's new in 1.6.0
 
