@@ -176,6 +176,9 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28080 | 8080 | zeppelin |
 28081 | 8080 | presto |
 28888 | 8888 | jupyter |
+29000 | 9000 | apicurio-registry-1 |
+29001 | 9000 | apicurio-registry-2 |
+29002 | 9000 | apicurio-registry-3 |
 29042 | 9042 | cassandra-1 |
 29043 | 9042 | cassandra-1 |
 29044 | 9042 | cassandra-1 |
