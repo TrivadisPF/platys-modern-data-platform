@@ -9,6 +9,9 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 21 | 21 | ftp |
 1433 | 1433 | sqlserver |
 1521 | 1521 | oracledb |
+1095 | 1095 | ksqldb-server-1 (jmx) |
+1096 | 1096 | ksqldb-server-2 (jmx) |
+1097 | 1097 | ksqldb-server-3 (jmx) |
 1880 | 1880 | nodered-1 |
 1882 | 1882 | kafka-mqtt-1 |
 1883 | 1883 | mosquitto-1 |
@@ -51,12 +54,14 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 5601 | 5601 | kibana |
 5672 | 5672 | activemq |
 5673 | 5672 | rabbitmq (amqp) |
-5800 | 5800 | filezilla |  
+5800 | 5800 | filezilla | 
+5820 | 5820 | stardog-1 |
 5900 | 5900 | filezilla |  
 6060 | 6060 | zeppelin |
 6066 | 6066 | spark-master |
 6080 | 6080 | ranger-admin |
 6379 | 6379 | redis |
+6380 | 6379 | redash-redis |
 7000 | 7000 | yb-master |
 7050 | 7050 | kudu-tserver-1 |
 7051 | 7051 | kudo-master-1 |
@@ -124,13 +129,14 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 9869 | 9864 | datanode-6 |
 9992 | 9992 | kafka-1 (jmx) |
 9993 | 9993 | kafka-2 (jmx) |
-9992 | 9994 | kafka-3 (jmx) |
-9992 | 9995 | kafka-4 (jmx) |
-9992 | 9996 | kafka-5 (jmx) |
-9992 | 9997 | kafka-6 (jmx) |
+9994 | 9994 | kafka-3 (jmx) |
+9995 | 9995 | kafka-4 (jmx) |
+9996 | 9996 | kafka-5 (jmx) |
+9997 | 9997 | kafka-6 (jmx) |
 9999 | 9999 | influxdb2 |
 10000 | 10000 | hive-server |
 10002 | 10002 | hive-server |
+11211 | 11211 | memcached |
 15433 | 5433| yb-tserver-1 |
 15672 | 15672 | rabbitmq (ui) |
 16379 | 6379| yb-tserver-1 |
@@ -170,6 +176,9 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28080 | 8080 | zeppelin |
 28081 | 8080 | presto |
 28888 | 8888 | jupyter |
+29000 | 9000 | apicurio-registry-1 |
+29001 | 9000 | apicurio-registry-2 |
+29002 | 9000 | apicurio-registry-3 |
 29042 | 9042 | cassandra-1 |
 29043 | 9042 | cassandra-1 |
 29044 | 9042 | cassandra-1 |
@@ -247,6 +256,11 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28158 | 8081 | streamsheets |
 28159 | 8081 | quix-backend |
 28160 | 8081 | quix-frontend |
+28161 | 5000 | redash-server |
+28162 | 8080 | apicurio-registry-1 |
+28163 | 8080 | apicurio-registry-2 |
+28164 | 8080 | apicurio-registry-3 |
+28170 | 80 | stardog-studio |
 28500 - 28510 | 28500 - 28510 | streamsets-1 (additional ports) |
 
 

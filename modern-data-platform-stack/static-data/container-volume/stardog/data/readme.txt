@@ -1,0 +1,1 @@
+Contains the data of stardog service, if flag STARDOG_volume_map_data is set to true.

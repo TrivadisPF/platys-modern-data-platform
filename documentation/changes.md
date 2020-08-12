@@ -1,5 +1,23 @@
 # `modern-data-platform` - What's new?
 
+## What's new in 1.7.0
+
+**Note:** you have to install the latest version of [`platys`](http://github/trivadispf/platys) (> 2.3.0)  to use this new version of the platform stack. 
+
+The Modern Data Platform version 1.7.0 contains the following new services and enhancements:
+
+### New Services
+
+* Redash
+* Memcached
+* Stardog & Stardog Studio
+
+### Enhancements / Changes
+
+* Added JMX monitoring to ksqldb-server-X services
+* Allow enabling basic authentication in Cluster Manager for Apache Kafka (CMAK) service
+* refactored the platys properties (`platform-stack` and `platform-stack-version`) to match with [version 2.3.0](https://github.com/TrivadisPF/platys/blob/master/documentation/changes.md#whats-new-in-230) of `platys`.
+
 ## What's new in 1.6.0
 
 The Modern Data Platform version 1.6.0 contains the following new services and enhancements:

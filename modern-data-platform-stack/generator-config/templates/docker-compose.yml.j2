@@ -4,6 +4,7 @@
 version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
 
 {% set __CONFLUENT_PLATFORM_version = CONFLUENT_PLATFORM_version | default('latest') -%}
+{% set __APICURIO_REGISTRY_version = APICURIO_REGISTRY_version | default('latest') -%}
 {% set __ZOONAVIGATOR_version = ZOONAVIGATOR_version | default('latest') -%}
 {% set __ZOONAVIGATOR_API_version = ZOONAVIGATOR_API_version | default('latest') -%}
 {% set __KAFKA_KSQLDB_version = KAFKA_KSQLDB_version | default('latest') -%}
@@ -93,6 +94,9 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
 {% set __KIBANA_version = KIBANA_version | default('latest') -%}
 
 {% set __SUPERSET_version = SUPERSET_version | default('latest') -%}
+{% set __REDASH_version = REDASH_version | default('latest') -%}
+
+{% set __MEMCACHED_version = MEMCACHED_version | default('latest') -%}
 
 {% set __REDIS_version = REDIS_version | default('latest') -%}
 {% set __REDIS_COMMANDER_version = REDIS_COMMANDER_version | default('latest') -%}
@@ -104,6 +108,9 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
 {% set __SOLR_version = SOLR_version | default('latest') -%}
 
 {% set __NEO4J_version = NEO4J_version | default('latest') -%}
+
+{% set __STARDOG_version = STARTDOG_version | default('latest') -%}
+{% set __STARDOG_STUDIO_version = STARDOG_STUDIO_version | default('latest') -%}
 
 {% set __INFLUXDB_version = INFLUXDB_version | default('latest') -%}
 {% set __TELEGRAF_version = TELEGRAF_version | default('latest') -%}
@@ -194,6 +201,7 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
 # if we use stack type ARM, then disable some containers which do not support ARM
   {% set ZOOKEEPER_enable = false -%}
   {% set KAFKA_enable = false -%}
+  {% set APICURIO_REGISTRY_enable = false -%}
   {% set KAFKA_REPLICATOR_enable = false -%}
   {% set KAFKACAT_enable = false -%}
   {% set HADOOP_enable = false -%}
@@ -213,6 +221,8 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
   {% set AIRFLOW_enable = false -%}
   {% set ZEPPELIN_enable = false -%}
   {% set JUPYTER_enable = false -%}
+  {% set SUPERSET_enable = false -%}
+  {% set REDASH_enable = false -%}
   {% set MONGO_enable = false -%}
   {% set ELASTICSEARCH_enable = false -%}
   {% set DEJAVU_enable = false -%}
@@ -221,6 +231,8 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
   {% set KIBANA_enable = false -%}
   {% set INFLUXDB2_enable = false -%}
   {% set NEO4J_enable = false -%}
+  {% set STARDOG_enable = false -%}
+  {% set STARDOG_STUDIO_enable = false -%}
   {% set TILE38_enable = false -%}
   {% set ORACLE_enable = false -%}
   {% set ORACLE_REST_DATA_SERVICE_enable = false -%}
@@ -229,6 +241,7 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
   {% set TIMESCALEDB_enable = false -%}
   {% set ADMINER_enable = false -%}
   {% set CLOUDBEAVER_enable = false -%}
+  {% set QUIX_enable = false -%}
   {% set AXON_enable = false -%}
   {% set PRESTO_enable = false -%}
   {% set PRESTO_CLI_enable = false -%}
@@ -431,6 +444,41 @@ services:
   {% endfor %}
 {% endif %}   {# KAFKA_enable and KAFKA_SCHEMA_REGISTRY_enable #}
 
+{% if ( KAFKA_enable and APICURIO_REGISTRY_enable ) | default(false) %}
+  #  ================================== Apicurio Registry ========================================== #}
+  {% for num in range(APICURIO_REGISTRY_nodes | default(1) ) %}
+    {% set external_port = 29000 + loop.index - 1 %}
+    {% set http_external_port = 28162 + loop.index - 1 %}
+    {% set http_port = 8080 + loop.index - 1 %}
+  apicurio-registry-{{loop.index}}:
+    image: apicurio/apicurio-registry-streams:{{__APICURIO_REGISTRY_version}}
+    hostname: apicurio-registry-{{loop.index}}
+    container_name: apicurio-registry-{{loop.index}}
+    labels:
+      com.mdps.service.restapi.url: "http://${PUBLIC_IP}:{{external_port}}"
+    depends_on:
+      - kafka-1
+    ports:
+      - "{{external_port}}:9000"
+      - "{{http_external_port}}:{{http_port}}"
+    environment:
+      QUARKUS_PROFILE: prod
+      KAFKA_BOOTSTRAP_SERVERS: 'kafka-1:19092'
+      APPLICATION_ID: registry_id
+      APPLICATION_SERVER: apicurio-registry-{{loop.index}}
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+  {% endfor %}
+{% endif %}   {# KAFKA_enable and APICURIO_REGISTRY_enable #}
+
 {% if ( KAFKA_enable and KAFKA_CONNECT_enable ) | default(false) %}
   #  ================================== Kafka Connect ========================================== #}
   {% for num in range(KAFKA_CONNECT_nodes | default(1) ) %}
@@ -508,6 +556,8 @@ services:
   {% for num in range(KAFKA_KSQLDB_nodes | default(1) ) %}
     {% set external_port = 8088 + loop.index - 1 %}
     {% set port = 8088 %}
+    {% set jmx_external_port = 1095 + loop.index - 1 %}
+    {% set jmx_port = 1095 %}
   ksqldb-server-{{loop.index}} :
     image: confluentinc/ksqldb-server:{{__KAFKA_KSQLDB_version}}
     hostname: ksqldb-server-{{loop.index}}
@@ -516,20 +566,23 @@ services:
       com.mdps.service.restapi.url: "http://${PUBLIC_IP}:{{external_port}}"
     ports:
       - "{{external_port}}:{{port}}"
+      - "{{jmx_external_port}}:{{jmx_port}}"
     depends_on:
       - kafka-1
       - schema-registry-1
     environment:
       KSQL_CONFIG_DIR: "/etc/ksql"
       KSQL_LOG4J_OPTS: "-Dlog4j.configuration=file:/etc/ksql/log4j-rolling.properties"
-      KSQL_BOOTSTRAP_SERVERS: "kafka-1:19092"
       KSQL_HOST_NAME: ksqldb-server-{{loop.index}}
       KSQL_APPLICATION_ID: "kafka-demo"
+      KSQL_KSQL_SERVICE_ID: "kafka-demo"
       KSQL_LISTENERS: http://0.0.0.0:{{port}}
+      KSQL_BOOTSTRAP_SERVERS: "kafka-1:19092"
       KSQL_KSQL_SCHEMA_REGISTRY_URL: "http://schema-registry-1:8081"
       KSQL_KSQL_LOGGING_PROCESSING_STREAM_AUTO_CREATE: "true"
       KSQL_KSQL_LOGGING_PROCESSING_TOPIC_AUTO_CREATE: "true"
-      KSQL_KSQL_SERVICE_ID: "kafka-demo"
+      KSQL_KSQL_QUERY_PULL_METRICS_ENABLED: "true"
+      KSQL_JMX_OPTS: "-Djava.rmi.server.hostname=localhost -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port={{jmx_port}} -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.rmi.port={{jmx_port}}"
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -826,6 +879,9 @@ services:
     environment:
       ZK_HOSTS: 'zookeeper-1:2181'
       APPLICATION_SECRET: 'abc123!'
+      KAFKA_MANAGER_AUTH_ENABLED: {{KAFKA_CMAK_auth_enabled}}
+      KAFKA_MANAGER_USERNAME: {{KAFKA_CMAK_username}}
+      KAFKA_MANAGER_PASSWORD: {{KAFKA_CMAK_password}}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -2663,12 +2719,158 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {#  GRAFANA_enable #}
 
+{% if REDASH_enable | default(false) %}
+  #  ================================== Redash ========================================== #}
+  redash-server:
+    image: redash/redash:{{__REDASH_version}}
+    hostname: redash-server
+    container_name: redash-server
+    labels:
+      com.mdps.service.webui.name: "Redash UI"
+      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28161"
+    ports:
+      - "28161:5000"
+    command: server
+    environment:
+      REDASH_REDIS_URL: "redis://redash-redis:6379/0"
+      REDASH_DATABASE_URL: "postgresql://postgres@redash-postgresql/postgres"
+      REDASH_PASSWORD_LOGIN_ENABLED: "true"
+      REDASH_RATELIMIT_ENABLED: "false"
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+
+  redash-scheduler:
+    image: redash/redash:{{__REDASH_version}}
+    hostname: redash-scheduler
+    container_name: redash-scheduler
+    command: scheduler
+    environment:
+      REDASH_LOG_LEVEL: "INFO"
+      REDASH_REDIS_URL: "redis://redash-redis:6379/0"
+      REDASH_DATABASE_URL: "postgresql://postgres@redash-postgresql/postgres"
+      REDASH_PASSWORD_LOGIN_ENABLED: "true"
+      REDASH_RATELIMIT_ENABLED: "false"
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+
+  redash-worker:
+    image: redash/redash:{{__REDASH_version}}
+    hostname: redash-worker
+    container_name: redash-worker
+    command: worker
+    environment:
+      REDASH_LOG_LEVEL: "INFO"
+      REDASH_REDIS_URL: "redis://redash-redis:6379/0"
+      REDASH_DATABASE_URL: "postgresql://postgres@redash-postgresql/postgres"
+      REDASH_PASSWORD_LOGIN_ENABLED: "true"
+      REDASH_RATELIMIT_ENABLED: "false"
+      PYTHONUNBUFFERED: 0
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+
+  redash-postgresql:
+    image: postgres:9.5-alpine
+    hostname: redash-postgresql
+    container_name: redash-postgresql
+    # The following turns the DB into less durable, but gains significant performance improvements for the tests run (x3
+    # improvement on my personal machine). We should consider moving this into a dedicated Docker Compose configuration for
+    # tests.
+    ports:
+      - "15432:5432"
+    command: "postgres -c fsync=off -c full_page_writes=off -c synchronous_commit=OFF"
+    environment:
+      POSTGRES_HOST_AUTH_METHOD: "trust"
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+
+  redash-db-setup:
+    image: redash/redash:{{__REDASH_version}}
+    hostname: redash-db-setup
+    container_name: redash-db-setup
+    command: create_db
+    depends_on:
+      - redash-postgresql
+    environment:
+      REDASH_DATABASE_URL: "postgresql://postgres@redash-postgresql/postgres"
+
+  redash-redis:
+    image: redis:{{__REDIS_version}}
+    hostname: redash-redis
+    container_name: redash-redis
+    ports:
+      - 6380:6379
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  REDASH_enable #}
+
+{% if MEMCACHED_enable | default(false) %}
+  #  ================================== Memcached ========================================== #}
+  memchached:
+    image: memcached:{{__MEMCACHED_version}}
+    hostname: memcached
+    container_name: memcached
+    ports:
+      - 11211:11211/tcp
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  MEMCACHED_enable #}
+
 {% if REDIS_enable | default(false) %}
   #  ================================== Redis ========================================== #}
   redis:
+    image: redis:{{__REDIS_version}}
+    hostname: redis
     container_name: redis
-    hostname: redis:{{__REDIS_version}}
-    image: redis
     ports:
       - 6379:6379
     {%if use_timezone | default(false) %}
@@ -3113,6 +3315,61 @@ services:
     {% endif -%}   {#  use_timezone #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  NEO4J_enable #}
+
+{% if STARDOG_enable | default(false) %}
+  #  ================================== Stardog ========================================== #}
+  stardog-1:
+    image: stardog/stardog:{{__STARDOG_version}}
+    hostname: stardog-1
+    container_name: stardog-1
+    labels:
+      com.mdps.service.webui.name: "Stardog UI"
+      com.mdps.service.webui.url: "http://${PUBLIC_IP}:7474"
+    ports:
+      - "5820:5820"
+    environment:
+      STARDOG_SERVER_JAVA_ARGS: "-Djava.io.tmpdir=/var/opt/tmp -Xms4g -Xmx4g -XX:MaxDirectMemorySize=8g"
+      STARDOG_EXT: "/var/opt/stardog-ext"
+    {%if use_timezone | default(false) %}
+      TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./license/stardog-license-key.bin:/var/opt/stardog/stardog-license-key.bin
+      - "./plugins/stardog/:/var/opt/stardog-ext"
+    {% if STARDOG_volume_map_data %}
+      - "./container-volume/stardog/data:/var/opt/stardog"
+      - "./container-volume/stardog/tmp:/var/opt/tmp"
+    {% endif %}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+
+  {% if STARDOG_STUDIO_enable | default(false) %}
+  stardog-studio:
+    image: stardog/stardog-studio:{{__STARDOG_STUDIO_version}}
+    hostname: stardog-studio
+    container_name: stardog-studio
+    labels:
+      com.mdps.service.webui.name: "Stardog Studio UI"
+      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28170"
+    ports:
+      - "28170:80"
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+  {% endif %}   {#  STARDOG_STUDIO_enable #}
+{% endif %}   {#  STARDOG_enable #}
 
 {% if INFLUXDB_enable | default(false) %}
   #  ================================== InfluxData InfluxDB ========================================== #}
@@ -3908,7 +4165,7 @@ services:
 {% endif %}   {#  CLOUDBEAVER_enable #}
 
 {% if QUIX_enable | default(false) %}
-  #  ================================== Cloudbeaver ========================================== #}
+  #  ================================== Quix ========================================== #}
   quix-backend:
     image: wixquix/quix-backend:{{__QUIX_version}}
     container_name: quix-backend
