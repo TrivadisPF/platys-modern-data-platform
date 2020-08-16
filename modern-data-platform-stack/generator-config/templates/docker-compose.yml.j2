@@ -119,7 +119,7 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
 {% set __INFLUXDB2_version = INFLUXDB2_version | default('2.2.0-alpha') -%}
 {% set __INFLUXDB_UI_version = INFLUXDB_UI_version | default('latest') -%}
 
-{% set __KUDO_version = KUDO_version | default('latest') -%}
+{% set __KUDU_version = KUDU_version | default('latest') -%}
 
 {% set __DRUID_version = DRUID_version | default('latest') -%}
 
@@ -135,6 +135,8 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
 {% set __POSTGRES_version = POSTGRES_version | default('latest') -%}
 {% set __TIMESCALEDB_version = TIMESCALEDB_version | default('latest') -%}
 {% set __SQLSERVER_version = SQLSERVER_version | default('latest') -%}
+{% set __YUGABYTE_version = YUGABYTE_version | default('latest') -%}
+
 {% set __ADMINER_version = ADMINER_version | default('latest') -%}
 {% set __CLOUDBEAVER_version = CLOUDBEAVER_version | default('latest') -%}
 {% set __QUIX_version = QUIX_version | default('latest') -%}
@@ -1689,7 +1691,7 @@ services:
     restart: {{container_restart_policy}}
 
   elasticsearch-atlas:
-    image: elasticsearch:{{ELASTICSEARCH_version}}
+    image: elasticsearch:5.6.8
     container_name: elasticsearch-atlas
     hostname: elasticsearch-atlas
     ports:
@@ -1717,7 +1719,7 @@ services:
 {% if DATAHUB_enable  | default(false) %}
   #  ================================== Amundsen ========================================== #
   datahub-gms:
-    image: keremsahin/datahub-gms:latest
+    image: linkedin/datahub-gms:{{__DATAHUB_version}}
     hostname: datahub-gms
     container_name: datahub-gms
     depends_on:
@@ -1756,7 +1758,7 @@ services:
     restart: {{container_restart_policy}}
 
   datahub-frontend:
-    image: keremsahin/datahub-frontend:latest
+    image: linkedin/datahub-frontend:{{__DATAHUB_version}}
     hostname: datahub-frontend
     container_name: datahub-frontend
     labels:
@@ -1784,7 +1786,7 @@ services:
     restart: {{container_restart_policy}}
 
   datahub-mae-consumer:
-    image: keremsahin/datahub-mae-consumer:latest
+    image: linkedin/datahub-mae-consumer:{{__DATAHUB_version}}
     hostname: datahub-mae-consumer
     container_name: datahub-mae-consumer
     depends_on:
@@ -1816,7 +1818,7 @@ services:
     restart: {{container_restart_policy}}
 
   datahub-mce-consumer:
-    image: keremsahin/datahub-mce-consumer:latest
+    image: linkedin/datahub-mce-consumer:{{__DATAHUB_version}}
     hostname: datahub-mce-consumer
     container_name: datahub-mce-consumer
     depends_on:
@@ -1944,7 +1946,7 @@ services:
 
   # This "container" is a workaround to pre-create topics
   kafka-setup:
-    image: confluentinc/cp-kafka:5.4.0
+    image: confluentinc/cp-kafka:{{__CONFLUENT_PLATFORM_version}}
     hostname: kafka-setup
     container_name: kafka-setup
     depends_on:
@@ -3533,9 +3535,9 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {# INFLUXDB2_enable #}
 
-{% if KUDO_enable | default(false) %}
+{% if KUDU_enable | default(false) %}
   kudu-master-1:
-    image: apache/kudu:{{__KUDO_version}}
+    image: apache/kudu:{{__KUDU_version}}
     hostname: kudu-master-1
     container_name: kudu-master-1
     ports:
@@ -3546,7 +3548,7 @@ services:
       - KUDU_MASTERS=kudu-master-1,kudu-master-2,kudu-master-3
     restart: {{container_restart_policy}}
   kudu-master-2:
-    image: apache/kudu:{{__KUDO_version}}
+    image: apache/kudu:{{__KUDU_version}}
     hostname: kudu-master-2
     container_name: kudu-master-2
     ports:
@@ -3557,7 +3559,7 @@ services:
       - KUDU_MASTERS=kudu-master-1,kudu-master-2,kudu-master-3
     restart: {{container_restart_policy}}
   kudu-master-3:
-    image: apache/kudu:{{__KUDO_version}}
+    image: apache/kudu:{{__KUDU_version}}
     hostname: kudu-master-3
     container_name: kudu-master-3
     ports:
@@ -3581,7 +3583,7 @@ services:
     command: ["tserver"]
     environment:
       - KUDU_MASTERS=kudu-master-1,kudu-master-2,kudu-master-3
-{% endif %}   {# KUDO_enable #}
+{% endif %}   {# KUDU_enable #}
 
 {% if DRUID_enable | default(false) %}
   #  ================================== InfluxDB 2 ========================================== #}
@@ -3878,7 +3880,7 @@ services:
 {% if YUGABYTE_enable | default(false) %}
   #  ================================== Yugabyte ========================================== #}
   yb-master:
-    image: yugabytedb/yugabyte:latest
+    image: yugabytedb/yugabyte:{{__YUGABYTE_version}}
     container_name: yb-master
     hostname: yb-master
     command: [ "/home/yugabyte/bin/yb-master",
@@ -3904,7 +3906,7 @@ services:
     restart: {{container_restart_policy}}
 
   yb-tserver-1:
-    image: yugabytedb/yugabyte:latest
+    image: yugabytedb/yugabyte:{{__YUGABYTE_version}}
     container_name: yb-tserver-1
     hostname: yb-tserver-1
     depends_on:
