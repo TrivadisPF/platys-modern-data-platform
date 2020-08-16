@@ -1,5 +1,15 @@
 # `modern-data-platform` - What's new?
 
+## What's new in 1.8.0
+
+The Modern Data Platform version 1.7.0 contains the following new services and enhancements:
+
+### New Services
+
+* Apicurio Registry
+
+### Enhancements / Changes
+
 ## What's new in 1.7.0
 
 **Note:** you have to install the latest version of [`platys`](http://github/trivadispf/platys) (> 2.3.0)  to use this new version of the platform stack. 
