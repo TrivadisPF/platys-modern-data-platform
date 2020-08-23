@@ -9,7 +9,7 @@ The Modern Data Platform version 1.7.0 contains the following new services and e
 * Apicurio Registry
 
 ### Enhancements 
-* 
+* make Postgreqsql user, password and database configurable
 
 ### Breaking Changes
 
