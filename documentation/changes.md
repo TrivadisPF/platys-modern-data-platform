@@ -8,7 +8,12 @@ The Modern Data Platform version 1.7.0 contains the following new services and e
 
 * Apicurio Registry
 
-### Enhancements / Changes
+### Enhancements 
+* 
+
+### Breaking Changes
+
+* the default user for the Postgresql service has been changed to `demo` and the database to `demodb`.
 
 ## What's new in 1.7.0
 
