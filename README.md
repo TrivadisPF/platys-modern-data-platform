@@ -27,6 +27,8 @@ See [What's new?](./documentation/changes.md) for a detailed list of changes.
   * [ Getting Started with `platys` and `modern-data-platform` stack](./documentation/getting-started.md)
   * [Configuration](./documentation/configuration.md)
   * [Port Mapping](./documentation/port-mapping.md)
+  * [Frequently Asked Questions](./documentation/faq.md)
+  * [Troubleshooting](./documentation/troubleshooting.md)
 
 
 
