@@ -95,6 +95,7 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
 
 {% set __SUPERSET_version = SUPERSET_version | default('latest') -%}
 {% set __REDASH_version = REDASH_version | default('latest') -%}
+{% set __SMASHING_version = SMASHING_version | default('latest') -%}
 
 {% set __MEMCACHED_version = MEMCACHED_version | default('latest') -%}
 
@@ -225,6 +226,7 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
   {% set JUPYTER_enable = false -%}
   {% set SUPERSET_enable = false -%}
   {% set REDASH_enable = false -%}
+  {% set SMASHING_enable = false -%}
   {% set MONGO_enable = false -%}
   {% set ELASTICSEARCH_enable = false -%}
   {% set DEJAVU_enable = false -%}
@@ -2852,6 +2854,38 @@ services:
     {% endif -%}   {#  use_timezone #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  REDASH_enable #}
+
+{% if SMASHING_enable | default(false) %}
+  #  ================================== Smashing ========================================== #}
+  smashing:
+    image: trivadis/smashing:{{__SMASHING_version}}
+    hostname: smashing
+    container_name: smashing
+    ports:
+      - 28171:3030
+    environment:
+      WIDGETS: {{SMASHING_install_widgets}}
+      GEMS: {{SMASHING_install_gems}}
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {% if SMASHING_volume_map_dashboards %}
+      - ./scripts/smashing/dashboards:/dashboards
+    {% endif -%}   {#  SMASHING_volume_map_dashboards #}
+    {% if SMASHING_volume_map_jobs %}
+      - ./scripts/smashing/jobs:/jobs
+    {% endif -%}   {#  SMASHING_volume_map_jobs #}
+    {% if SMASHING_volume_map_widgets %}
+      - ./plugins/smashing/widgets:/widgets
+    {% endif -%}   {#  SMASHING_volume_map_widgets #}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  SMASHING_enable #}
 
 {% if MEMCACHED_enable | default(false) %}
   #  ================================== Memcached ========================================== #}

@@ -261,6 +261,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28163 | 8080 | apicurio-registry-2 |
 28164 | 8080 | apicurio-registry-3 |
 28170 | 80 | stardog-studio |
+28171 | 3030 | smashing |
 28500 - 28510 | 28500 - 28510 | streamsets-1 (additional ports) |
 
 
