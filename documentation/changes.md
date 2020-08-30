@@ -9,6 +9,7 @@ The Modern Data Platform version 1.8.0 contains the following new services and e
 * Apicurio Registry
 * Smashing Dashbaord
 * Tipboard Dashboard
+* Chartboard Dashboard
 
 ### Enhancements 
 * make Postgreqsql user, password and database configurable

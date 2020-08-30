@@ -97,6 +97,7 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
 {% set __REDASH_version = REDASH_version | default('latest') -%}
 {% set __SMASHING_version = SMASHING_version | default('latest') -%}
 {% set __TIPBOARD_version = TIPBOARD_version | default('latest') -%}
+{% set __CHARTBOARD_version = CHARTBOARD_version | default('latest') -%}
 
 {% set __MEMCACHED_version = MEMCACHED_version | default('latest') -%}
 
@@ -2931,6 +2932,30 @@ services:
     {% endif -%}   {#  use_timezone #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  TIPBOARD_enable #}
+
+{% if CHARTBOARD_enable | default(false) %}
+  #  ================================== Tiboard Dashboard ========================================== #}
+  chartboard:
+    image: trivadis/chartboard:{{__TIPBOARD_version}}
+    hostname: chartboard
+    container_name: chartboard
+    ports:
+      - 28173:8080
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {% if CHARTBOARD_volume_map_dashboards %}
+      - ./scripts/chartboard:/dashboards
+    {% endif -%}   {#  TIPBOARD_volume_map_dashboards #}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  CHARTBOARD_enable #}
 
 {% if MEMCACHED_enable | default(false) %}
   #  ================================== Memcached ========================================== #}
