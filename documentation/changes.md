@@ -2,7 +2,7 @@
 
 ## What's new in 1.8.0
 
-The Modern Data Platform version 1.7.0 contains the following new services and enhancements:
+The Modern Data Platform version 1.8.0 contains the following new services and enhancements:
 
 ### New Services
 
@@ -16,6 +16,7 @@ The Modern Data Platform version 1.7.0 contains the following new services and e
 ### Breaking Changes
 
 * the default user for the Postgresql service has been changed to `demo` and the database to `demodb`.
+* change service name of `redis` to `redis-1`
 
 ## What's new in 1.7.0
 

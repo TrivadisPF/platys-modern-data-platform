@@ -60,7 +60,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 6060 | 6060 | zeppelin |
 6066 | 6066 | spark-master |
 6080 | 6080 | ranger-admin |
-6379 | 6379 | redis |
+6379 | 6379 | redis-1 |
 6380 | 6379 | redash-redis |
 7000 | 7000 | yb-master |
 7050 | 7050 | kudu-tserver-1 |
