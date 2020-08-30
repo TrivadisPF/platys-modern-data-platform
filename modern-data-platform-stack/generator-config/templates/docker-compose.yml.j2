@@ -96,6 +96,7 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
 {% set __SUPERSET_version = SUPERSET_version | default('latest') -%}
 {% set __REDASH_version = REDASH_version | default('latest') -%}
 {% set __SMASHING_version = SMASHING_version | default('latest') -%}
+{% set __TIPBOARD_version = TIPBOARD_version | default('latest') -%}
 
 {% set __MEMCACHED_version = MEMCACHED_version | default('latest') -%}
 
@@ -200,6 +201,11 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
   {% set REDIS_enable = true -%}
 {% endif -%}   {# SUPERSET_enable #}
 
+{% if TIPBOARD_enable -%}
+# enforce some dependencies
+  {% set REDIS_enable = true -%}
+{% endif -%}   {# TIPBOARD_enable #}
+
 {% if (__hw_arch | upper) == 'ARM' -%}
 # if we use stack type ARM, then disable some containers which do not support ARM
   {% set ZOOKEEPER_enable = false -%}
@@ -227,6 +233,7 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
   {% set SUPERSET_enable = false -%}
   {% set REDASH_enable = false -%}
   {% set SMASHING_enable = false -%}
+  {% set TIPBOARD_enable = false -%}
   {% set MONGO_enable = false -%}
   {% set ELASTICSEARCH_enable = false -%}
   {% set DEJAVU_enable = false -%}
@@ -2886,6 +2893,44 @@ services:
     {% endif -%}   {#  use_timezone #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  SMASHING_enable #}
+
+{% if TIPBOARD_enable | default(false) %}
+  #  ================================== Tiboard Dashboard ========================================== #}
+  tipboard:
+    image: trivadis/tipboard:{{__TIPBOARD_version}}
+    hostname: tipboard
+    container_name: tipboard
+    ports:
+      - 28172:7272
+    environment:
+      TIPBOARD_redis_host: "'{{TIPBOARD_redis_host}}'"
+      TIPBOARD_redis_port: {{TIPBOARD_redis_port}}
+      TIPBOARD_redis_password: "{{TIPBOARD_redis_password}}"
+      TIPBOARD_redis_db: {{TIPBOARD_redis_db}}
+      TIPBOARD_debug: "'False'"
+      TIPBOARD_api_key: "'abc123!'"
+      TIPBOARD_host: "'localhost'"
+      TIPBOARD_port: {{TIPBOARD_port}}
+      TIPBOARD_project_name: "'{{TIPBOARD_project_name}}'"
+      TIPBOARD_flipboard_interval: {{TIPBOARD_flipboard_interval}}
+      {%if TIPBOARD_flipboard_sequence != '' %}
+      TIPBOARD_flipboard_sequence: "'[{{TIPBOARD_flipboard_sequence}}]'"
+      {% endif -%}   {#  TIPBOARD_flipboard_sqeuence #}
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {% if TIPBOARD_volume_map_dashboards %}
+      - ./scripts/tipboard:/dashboards
+    {% endif -%}   {#  TIPBOARD_volume_map_dashboards #}
+      - ./plugins/tipboard:/root/.tipboard/custom_tiles
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  TIPBOARD_enable #}
 
 {% if MEMCACHED_enable | default(false) %}
   #  ================================== Memcached ========================================== #}
