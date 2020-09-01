@@ -36,7 +36,7 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
 {% set __HIVE_METASTORE_DB_version = HIVE_METASTORE_DB_version | default('latest') -%}
 
 {% set __RANGER_version = RANGER_version | default('latest') -%}
-{% set __RANGER_POSTGRES_version = RANGER_POSTGRES_version | default('latest') -%}
+{% set __RANGER_postgresql_version = RANGER_postgresql_version | default('latest') -%}
 
 {% set __ATLAS_version = ATLAS_version | default('latest') -%}
 
@@ -1596,7 +1596,7 @@ services:
     restart: {{container_restart_policy}}
 
   ranger-postgresql:
-    image: postgres:{{__RANGER_POSTGRES_version}}
+    image: postgres:{{__RANGER_postgresql_version}}
     container_name: ranger-postgresql
     hostname: ranger-postgresql
     environment:
@@ -1610,7 +1610,7 @@ services:
     volumes:
       - ./data-transfer:/data-transfer
       - ./init/ranger/postgresql:/docker-entrypoint-initdb.d/
-    {% if RANGER_POSTRESQL_volume_map_data %}
+    {% if RANGER_postgresql_volume_map_data %}
       - ./container-volume/ranger/postgresql/data:/var/lib/postgresql/data:Z
     {% endif %}
     {%if use_timezone | default(false) %}

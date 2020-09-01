@@ -16,8 +16,9 @@ The Modern Data Platform version 1.8.0 contains the following new services and e
 
 ### Breaking Changes
 
-* the default user for the Postgresql service has been changed to `demo` and the database to `demodb`.
+* default user for the Postgresql service has been changed to `demo` and the database to `demodb`.
 * change service name of `redis` to `redis-1`
+* change property `RANGER_POSTGRESQL_volume_map_data ` to `RANGER_postgresql_volume_map_data` for the `RANGER` service
 
 ## What's new in 1.7.0
 
