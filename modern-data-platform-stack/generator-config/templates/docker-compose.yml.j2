@@ -1750,12 +1750,13 @@ services:
       - EBEAN_DATASOURCE_USERNAME=datahub
       - EBEAN_DATASOURCE_PASSWORD=datahub
       - EBEAN_DATASOURCE_HOST=datahub-mysql:3306
-      - EBEAN_DATASOURCE_URL=jdbc:mysql://datahub-mysql:3306/datahub?verifyServerCertificate=false&useSSL=true
+      - EBEAN_DATASOURCE_URL=jdbc:mysql://datahub-mysql:3306/datahub?verifyServerCertificate=false&useSSL=true&useUnicode=yes&characterEncoding=UTF-8
       - EBEAN_DATASOURCE_DRIVER=com.mysql.jdbc.Driver
       - KAFKA_BOOTSTRAP_SERVER=kafka-1:19092
       - KAFKA_SCHEMAREGISTRY_URL=http://schema-registry-1:8081
       - ELASTICSEARCH_HOST=datahub-elasticsearch
       - ELASTICSEARCH_PORT=9200
+      - NEO4J_HOST=datahub-neo4j:7474
       - NEO4J_URI=bolt://${PUBLIC_IP}:17688
       - NEO4J_USERNAME=neo4j
       - NEO4J_PASSWORD=abc123!
@@ -1768,9 +1769,6 @@ services:
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
-    command: "sh -c 'dockerize -wait tcp://datahub-mysql:3306 -wait tcp://kafka-1:19092 -wait http://datahub-elasticsearch:9200 \
-                                   -timeout 240s \
-                                   java -jar jetty-runner-9.4.20.v20190813.jar gms.war'"
     restart: {{container_restart_policy}}
 
   datahub-frontend:
@@ -1816,6 +1814,7 @@ services:
       - KAFKA_SCHEMAREGISTRY_URL=http://schema-registry-1:8081
       - ELASTICSEARCH_HOST=datahub-elasticsearch
       - ELASTICSEARCH_PORT=9200
+      - NEO4J_HOST=datahub-neo4j:7474
       - NEO4J_URI=bolt://${PUBLIC_IP}:17688
       - NEO4J_USERNAME=neo4j
       - NEO4J_PASSWORD=abc123!
@@ -1828,9 +1827,6 @@ services:
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
-    command: "sh -c 'while ping -c1 kafka-setup &>/dev/null; do echo waiting for kafka-setup... && sleep 1; done; \
-              echo kafka-setup done! && \
-              dockerize -wait http://datahub-neo4j:7474 -timeout 240s && java -jar mae-consumer-job.jar'"
     restart: {{container_restart_policy}}
 
   datahub-mce-consumer:
@@ -1856,8 +1852,6 @@ services:
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
-    command: "sh -c 'while ping -c1 kafka-setup &>/dev/null; do echo waiting for kafka-setup... && sleep 1; done; \
-                  echo kafka-setup done! && java -jar mce-consumer-job.jar'"
     restart: {{container_restart_policy}}
 
   datahub-mysql:
@@ -1935,7 +1929,7 @@ services:
 
   # This "container" is a workaround to pre-create search indices
   datahub-elasticsearch-setup:
-    image: jwilder/dockerize
+    image: docker.elastic.co/elasticsearch/elasticsearch:5.6.8
     hostname: datahub-elasticsearch-setup
     container_name: datahub-elasticsearch-setup
     depends_on:
@@ -1954,11 +1948,19 @@ services:
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
-    command: dockerize -wait datahub-elasticsearch:9200 \
-            -timeout 120s; \
-            curl -XPUT datahub-elasticsearch:9200/corpuserinfodocument --data @init/corpuser-index-config.json; \
-            curl -XPUT datahub-elasticsearch:9200/datasetdocument --data @init/dataset-index-config.json
-    restart: {{container_restart_policy}}
+    command:
+      - bash
+      - -c
+      - |
+        echo "Waiting for Elasticsearch to start ⏳"
+        while [ $$(curl -s -o /dev/null -w %{http_code} http://datahub-elasticsearch:9200/) -ne 200 ] ; do
+          echo -e $$(date) " Elasticsearch listener HTTP state: " $$(curl -s -o /dev/null -w %{http_code} http://datahub-elasticsearch:9200/) " (waiting for 200)"
+          sleep 5
+        done
+
+        curl -XPUT http://datahub-elasticsearch:9200/corpuserinfodocument --data @/init/corpuser-index-config.json
+        curl -XPUT http://datahub-elasticsearch:9200/dataprocessdocument --data @/init/dataprocess-index-config.json
+        curl -XPUT http://datahub-elasticsearch:9200/datasetdocument --data @/init/dataset-index-config.json
 
   # This "container" is a workaround to pre-create topics
   kafka-setup:
@@ -1984,10 +1986,9 @@ services:
     {% endif -%}   {#  use_timezone #}
     command: "bash -c 'echo Waiting for Kafka to be ready... && \
                        cub kafka-ready -b kafka-1:19092 1 60 && \
-                       kafka-topics --create --if-not-exists --zookeeper zookeeper-1:2181 --partitions 1 --replication-factor 1 --topic MetadataAuditEvent && \
-                       kafka-topics --create --if-not-exists --zookeeper zookeeper-1:2181 --partitions 1 --replication-factor 1 --topic MetadataChangeEvent && \
-                       kafka-topics --create --if-not-exists --zookeeper zookeeper-1:2181 --partitions 1 --replication-factor 1 --topic FailedMetadataChangeEvent'"
-    restart: {{container_restart_policy}}
+                       kafka-topics --create --if-not-exists --zookeeper zookeeper-1:2181 --partitions 1 --replication-factor 1 --topic MetadataAuditEvent_v4 && \
+                       kafka-topics --create --if-not-exists --zookeeper zookeeper-1:2181 --partitions 1 --replication-factor 1 --topic MetadataChangeEvent_v4 && \
+                       kafka-topics --create --if-not-exists --zookeeper zookeeper-1:2181 --partitions 1 --replication-factor 1 --topic FailedMetadataChangeEvent_v4'"
 {% endif %}   {#  DATALAB_enable #}
 
 {% if AMUNDSEN_enable  | default(false) %}
