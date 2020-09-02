@@ -8,6 +8,8 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
 {% set __ZOONAVIGATOR_version = ZOONAVIGATOR_version | default('latest') -%}
 {% set __ZOONAVIGATOR_API_version = ZOONAVIGATOR_API_version | default('latest') -%}
 {% set __KAFKA_KSQLDB_version = KAFKA_KSQLDB_version | default('latest') -%}
+{% set __AZKARRA_version = AZKARRA_version | default('latest') -%}
+
 {% set __SCHEMA_REGISTRY_UI_version = SCHEMA_REGISTRY_UI_version | default('latest') -%}
 
 {% set __KAFKACAT_version = KAFKACAT_version | default('1.5.0') -%}
@@ -634,6 +636,29 @@ services:
     entrypoint: /bin/sh
     tty: true
 {% endif %}   {# KAFKA_broker_enable and KAFKA_KSQLDB_enable #}
+
+{% if (AZKARRA_enable) | default(false) %}
+  #  ================================== Azkarra Streams ========================================== #}
+  azkarra-worker-1:
+    image: streamthoughts/azkarra-streams-worker:{{__AZKARRA_version}}
+    hostname: azkarra-worker-1
+    container_name: azkarra-worker-1
+    depends_on:
+      - kafka-1
+    ports:
+      - "28085:8080"
+    environment:
+      AZKARRA_CONTEXT_STREAMS_BOOTSTRAP_SERVERS: kakfa-1:19092
+      AZKARRA_CONTEXT_STREAMS_STATE_DIR: /var/lib/kafka-streams/
+      AZKARRA_CONTEXT_AUTO_CREATE_TOPICS_ENABLE: "true"
+      # /!\ Use this property with care and don't enable for production.
+      AZKARRA_CONTEXT_AUTO_DELETE_TOPICS_ENABLE: "true"
+      AZKARRA_CONTEXT_ENABLE_WAIT_FOR_TOPICS: "true"
+      AZKARRA_COMPONENT_PATHS: /usr/share/azkarra-components
+    volumes:
+      - /components/azkarra:/usr/share/azkarra-components
+      #- /tmp/azkarra/etc/azkarra.conf:/etc/azkarra/azkarra.conf
+{% endif %}   {# AZKARRA_enable #}
 
 {% if (KAFKA_enable and KAFKA_RESTPROXY_enable) | default(false) %}
   #  ================================== Confluent REST Proxy ========================================== #}
