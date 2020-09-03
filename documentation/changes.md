@@ -10,9 +10,15 @@ The Modern Data Platform version 1.8.0 contains the following new services and e
 * Smashing Dashbaord
 * Tipboard Dashboard
 * Chartboard Dashboard
+* Azkarra Streams
+
+### Version upgrades  
+* update `DataHub` to `0.5.0-beta`
+* update `StreemSheets` to `2.0-milestone`
 
 ### Enhancements 
 * make Postgreqsql user, password and database configurable
+* support configuration of `KAFKA_MQTTPROXY_topic_regex_list` on `KAFKA_MQTTPROXY`
 
 ### Breaking Changes
 
