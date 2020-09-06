@@ -598,16 +598,21 @@ services:
       - schema-registry-1
     environment:
       KSQL_CONFIG_DIR: "/etc/ksql"
-      KSQL_LOG4J_OPTS: "-Dlog4j.configuration=file:/etc/ksql/log4j-rolling.properties"
+      KSQL_KSQL_EXTENSION_DIR: '/etc/ksqldb/ext/'
+      KSQL_LOG4J_OPTS: "-Dlog4j.configuration=file:/etc/ksqldb/log4j.properties"
       KSQL_HOST_NAME: ksqldb-server-{{loop.index}}
       KSQL_APPLICATION_ID: "kafka-demo"
       KSQL_KSQL_SERVICE_ID: "kafka-demo"
       KSQL_LISTENERS: http://0.0.0.0:{{port}}
       KSQL_BOOTSTRAP_SERVERS: "kafka-1:19092"
       KSQL_KSQL_SCHEMA_REGISTRY_URL: "http://schema-registry-1:8081"
+      KSQL_LOG4J_PROCESSING_LOG_BROKERLIST: kafka-1:19092
+      KSQL_LOG4J_PROCESSING_LOG_TOPIC: demo_processing_log
+      KSQL_KSQL_LOGGING_PROCESSING_TOPIC_NAME: 'demo_processing_log'
       KSQL_KSQL_LOGGING_PROCESSING_STREAM_AUTO_CREATE: "true"
       KSQL_KSQL_LOGGING_PROCESSING_TOPIC_AUTO_CREATE: "true"
       KSQL_KSQL_QUERY_PULL_METRICS_ENABLED: "true"
+      KSQL_KSQL_HIDDEN_TOPICS: '^_.*'
       KSQL_JMX_OPTS: "-Djava.rmi.server.hostname=localhost -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port={{jmx_port}} -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.rmi.port={{jmx_port}}"
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
