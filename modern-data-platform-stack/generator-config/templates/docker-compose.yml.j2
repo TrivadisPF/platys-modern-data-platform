@@ -605,6 +605,9 @@ services:
       KSQL_KSQL_SERVICE_ID: "kafka-demo"
       KSQL_LISTENERS: http://0.0.0.0:{{port}}
       KSQL_BOOTSTRAP_SERVERS: "kafka-1:19092"
+    {% if ( KAFKA_CONNECT_enable ) | default(false) %}
+      KSQL_KSQL_CONNECT_URL: http://kafka-connect-1:8083
+    {% endif -%}   {#  KAFKA_CONNECT_enable #}
       KSQL_KSQL_SCHEMA_REGISTRY_URL: "http://schema-registry-1:8081"
       KSQL_LOG4J_PROCESSING_LOG_BROKERLIST: kafka-1:19092
       KSQL_LOG4J_PROCESSING_LOG_TOPIC: demo_processing_log
@@ -619,7 +622,7 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
-      - ./plugins/ksql:/etc/ksql/ext
+      - ./plugins/ksql:/etc/ksqldb/ext
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
