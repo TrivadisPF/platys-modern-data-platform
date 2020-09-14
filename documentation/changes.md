@@ -26,6 +26,9 @@ The Modern Data Platform version 1.8.0 contains the following new services and e
 * change service name of `redis` to `redis-1`
 * change property `RANGER_POSTGRESQL_volume_map_data ` to `RANGER_postgresql_volume_map_data` for the `RANGER` service
 
+### Bug Fixes 
+* support for the `hive` option in SPARK has been fixed so that Spark can use the Hive Metastore instead of the default, built-in metastore
+
 ## What's new in 1.7.0
 
 **Note:** you have to install the latest version of [`platys`](http://github/trivadispf/platys) (> 2.3.0)  to use this new version of the platform stack. 
