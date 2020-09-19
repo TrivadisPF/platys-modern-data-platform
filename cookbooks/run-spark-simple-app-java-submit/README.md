@@ -6,11 +6,16 @@ This recipe will show how to submit a Java Spark application against the Spark C
 
 ## Preparing the Java Spark Application
 
-The Spark application we are going to use is available in this [GitHub project](https://github.com/TrivadisPF/spark-simple-app). You can either build it on your own using `maven` or `sbt` or download a pre-built jar. 
+The Spark application we are going to use is available in this [GitHub project](https://github.com/TrivadisPF/spark-simple-app). 
 
-### 1) Download pre-build application
+You can 
 
-Download the pre-build jar into the `data-transfer/app` folder of the platys dataplatform. 
+2. download the pre-built jar form GitHub or
+1. build it on your own using `maven` or `sbt`
+
+### 1) Download pre-built application
+
+Download the pre-built jar into the `data-transfer/app` folder of the platys dataplatform. 
 
 ```bash
 wget https://github.com/TrivadisPF/spark-simple-app/releases/download/spark-2.4.7/spark-java-sample-1.0-SNAPSHOT.jar -O $DATAPLATFORM_HOME/data-transfer/app/spark-java-sample-1.0-SNAPSHOT.jar
