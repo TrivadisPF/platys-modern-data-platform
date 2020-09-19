@@ -3,7 +3,8 @@
 This recipe will show how to submit a Java Spark application against the Spark Cluster of the data platform using the `spark-submit` script.
 
 * Platform services needed: `SPARK,MINIO,AWSCLI`
-
+* `DATAPLATFORM_HOME` environment variable needs to be set to the folder where the dataplatform resides (the `docker-compose.yml`)
+* 
 ## Preparing the Java Spark Application
 
 The Spark application we are going to use is available in this [GitHub project](https://github.com/TrivadisPF/spark-simple-app). 
