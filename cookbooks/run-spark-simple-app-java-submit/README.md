@@ -106,10 +106,3 @@ Lines with a: 61, lines with b: 30
 20/09/19 12:43:01 INFO util.ShutdownHookManager: Deleting directory /tmp/spark-6dc66810-5f8f-4ab1-bc56-edc1aae2089d
 20/09/19 12:43:01 INFO util.ShutdownHookManager: Deleting directory /tmp/spark-96fdb1bb-87ed-43c0-92ec-0928951dd695
 ```
-
-## 
-
-
-```
-docker run -ti -e ENABLE_INIT_DAEMON=false -e CORE_CONF_fs_defaultFS=file:///tmp --network platys-cookbook_default trivadis/spark-simple-app-java
-```
