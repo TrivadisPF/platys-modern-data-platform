@@ -28,7 +28,7 @@ git clone https://github.com/TrivadisPF/spark-simple-app.git
 Navigate into the newly created folder
 
 ```
-cd spark-simple-app
+cd spark-simple-app/java
 ```
 
 and build the docker image using the following command (replace `<repository>` by your own):
