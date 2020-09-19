@@ -10,8 +10,8 @@ The Spark application we are going to use is available in this [GitHub project](
 
 You can 
 
-2. download the pre-built jar form GitHub or
-1. build it on your own using `maven` or `sbt`
+1. download the pre-built jar form GitHub or
+2. build it on your own using `maven` or `sbt`
 
 ### 1) Download pre-built application
 
