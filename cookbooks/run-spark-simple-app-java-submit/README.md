@@ -10,12 +10,12 @@ The Spark application we are going to use is available in this [GitHub project](
 
 You can 
 
-1. download the pre-built jar form GitHub or
+1. download the pre-built JAR from GitHub or
 2. build it on your own using `maven` or `sbt`
 
 ### 1) Download pre-built application
 
-Download the pre-built jar into the `data-transfer/app` folder of the platys dataplatform. 
+Download the pre-built JAR into the `data-transfer/app` folder of the platys dataplatform. 
 
 ```bash
 wget https://github.com/TrivadisPF/spark-simple-app/releases/download/spark-2.4.7/spark-java-sample-1.0-SNAPSHOT.jar -O $DATAPLATFORM_HOME/data-transfer/app/spark-java-sample-1.0-SNAPSHOT.jar
@@ -50,7 +50,7 @@ Create the `app-bucket`
 docker exec -ti awscli s3cmd mb s3://app-bucket
 ```
 
-and upload the Spark Application (jar) from the `data-transfer/app` folder to MinIO `app-bucket`:
+and upload the Spark Application (JAR) from the `data-transfer/app` folder to MinIO `app-bucket`:
 
 ```bash
 docker exec -ti -w /data-transfer/app/ awscli s3cmd put spark-java-sample-1.0-SNAPSHOT.jar s3://app-bucket/spark/ 
@@ -60,13 +60,13 @@ docker exec -ti -w /data-transfer/app/ awscli s3cmd put spark-java-sample-1.0-SN
 
 A Spark application can be submitted using the [`spark-submit`](https://spark.apache.org/docs/latest/submitting-applications.html) script. It is located in the Spark's `bin` directory and available in the `spark-master` container.   
 
-We can either submit using the local file in the `data-transfer/app` folder:
+We can either submit using the local JAR file inside the `data-transfer/app` folder:
 
 ```bash
 docker exec -ti spark-master spark-submit --master spark://spark-master:7077 --class com.trivadis.sample.spark.SimpleApp /data-transfer/app/spark-java-sample-1.0-SNAPSHOT.jar
 ```
 
-or using the jar we have uploaded to the MinIO S3 bucket:
+or using the JAR file we have uploaded to the MinIO S3 bucket:
 
 ```bash
 docker exec -ti spark-master spark-submit --master spark://spark-master:7077 --class com.trivadis.sample.spark.SimpleApp --conf spark.hadoop.fs.s3a.endpoint=http://minio:9000 --conf spark.hadoop.fs.s3a.access.key=V42FCGRVMK24JJ8DHUYG --conf spark.hadoop.fs.s3a.secret.key=bKhWxVF3kQoLY9kFmt91l+tDrEoZjqnWXzY9Eza --conf spark.hadoop.fs.s3a.path.style.access=true s3a://app-bucket/spark/spark-java-sample-1.0-SNAPSHOT.jar
