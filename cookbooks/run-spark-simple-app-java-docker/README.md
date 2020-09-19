@@ -19,29 +19,39 @@ ENV SPARK_MASTER_NAME spark-master
 ENV SPARK_MASTER_PORT 7077
 ```
 
-Clone the project from GitHub:
+For building a docker image locally, we first have to clone the project from GitHub:
 
 ```bash
 git clone https://github.com/TrivadisPF/spark-simple-app.git
 ```
 
-Build the docker image using the following command (replace `<repository>` by your own):
+Navigate into the newly created folder
+
+```
+cd spark-simple-app
+```
+
+and build the docker image using the following command (replace `<repository>` by your own):
 
 ```bash
 docker build -t <repository>/spark-simple-app-java .
 ```
 
-when finished, you should see the following output:
+When the build statement finishes, you should see the following output:
 
 ```
 Successfully built d6c75bb0796b
 Successfully tagged <repository>/spark-simple-app-java:latest
 ```
 
+You can also push the application to Docker Hub to make it available or use the Docker Hub automatic builds to build the Docker image automatically.
+
 ## Run the Spark Application
 
-You can now run the docker image using the following command (replace the `<network-name>` with the name of the network the dataplatform is running with. You can list the networks currently in use with `docker network list`. The network usually uses the name of the folder where the `docker-compose.yml` resides):
+With the Docker image in place, we can run the Spark application using the following command. 
 
 ```
 docker run -ti -e ENABLE_INIT_DAEMON=false -e CORE_CONF_fs_defaultFS=file:///tmp --network <network-name> trivadis/spark-simple-app-java
 ```
+
+Replace the `<network-name>` with the name of the network the dataplatform is running with. You can list the networks currently in use with `docker network list`. The network usually uses the name of the folder where the `docker-compose.yml` resides.
