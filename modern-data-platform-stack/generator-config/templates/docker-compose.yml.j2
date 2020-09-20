@@ -2672,12 +2672,14 @@ services:
     env_file:
       - ./conf/hadoop.env
     environment:
+    {%if HADOOP_enable | default(false) %}
+      CORE_CONF_fs_defaultFS: hdfs://namenode:9000
+    {% else %}
+      CORE_CONF_fs_defaultFS: file:///tmp
+    {% endif -%}   {#  HADOOP_enable #}      
     {%if MINIO_enable | default(false) %}
       CORE_CONF_fs_s3a_endpoint: 'http://minio:9000'
       CORE_CONF_fs_s3a_path_style_access: 'true'
-    {% endif %}
-    {%if HADOOP_enable | default(false) %}
-      CORE_CONF_fs_defaultFS: 'hdfs://namenode:9000'
     {% endif %}
       SPARK_DEFAULTS_CONF_spark_jars_repositories: {{SPARK_jars_repositories}}
       SPARK_DEFAULTS_CONF_spark_jars_packages: {{SPARK_jars_packages}}
