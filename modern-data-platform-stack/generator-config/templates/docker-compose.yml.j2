@@ -395,13 +395,18 @@ services:
       KAFKA_BROKER_ID: {{loop.index}}
       KAFKA_BROKER_RACK: 'r{{loop.index}}'
       KAFKA_ZOOKEEPER_CONNECT: 'zookeeper-1:2181'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'LISTENER_INTERNAL:PLAINTEXT,LISTENER_DOCKERHOST:PLAINTEXT,LISTENER_EXTERNAL:PLAINTEXT'
       KAFKA_LISTENERS: 'LISTENER_INTERNAL://kafka-{{loop.index}}:1{{port}},LISTENER_DOCKERHOST://kafka-{{loop.index}}:2{{port}},LISTENER_EXTERNAL://kafka-{{loop.index}}:{{port}}'
       KAFKA_ADVERTISED_LISTENERS: 'LISTENER_INTERNAL://kafka-{{loop.index}}:1{{port}},LISTENER_DOCKERHOST://localhost:2{{port}},LISTENER_EXTERNAL://${PUBLIC_IP:-127.0.0.1}:{{port}}'
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'LISTENER_INTERNAL:PLAINTEXT,LISTENER_DOCKERHOST:PLAINTEXT,LISTENER_EXTERNAL:PLAINTEXT'
       KAFKA_INTER_BROKER_LISTENER_NAME: LISTENER_INTERNAL
+      KAFKA_REPLICA_SELECTOR_CLASS: {{KAFKA_replica_selector_class | default('')}}
       {% if KAFKA_CCC_enable and (KAFKA_edition | lower) == 'enterprise' | default(false) %}
       KAFKA_METRIC_REPORTERS: io.confluent.metrics.reporter.ConfluentMetricsReporter
       KAFKA_CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: 'kafka-1:19092'
+      {% endif %}
+      {% if (KAFKA_edition | lower) == 'enterprise' | default(false) %}
+      KAFKA_CONFLUENT_LICENSE_TOPIC_REPLICATION_FACTOR: {{KAFKA_internal_replication_factor | default(1)}}
+      KAFKA_CONFLUENT_LOG_PLACEMENT_CONSTRAINTS: {{KAFKA_confluent_log_placement_constraints}}
       {% endif %}
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: {{KAFKA_internal_replication_factor | default(1)}}
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
@@ -2676,7 +2681,7 @@ services:
       CORE_CONF_fs_defaultFS: hdfs://namenode:9000
     {% else %}
       CORE_CONF_fs_defaultFS: file:///tmp
-    {% endif -%}   {#  HADOOP_enable #}      
+    {% endif -%}   {#  HADOOP_enable #}
     {%if MINIO_enable | default(false) %}
       CORE_CONF_fs_s3a_endpoint: 'http://minio:9000'
       CORE_CONF_fs_s3a_path_style_access: 'true'

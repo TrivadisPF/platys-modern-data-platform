@@ -21,6 +21,7 @@ The Modern Data Platform version 1.8.0 contains the following new services and e
 * make Postgreqsql user, password and database configurable
 * support configuration of `KAFKA_MQTTPROXY_topic_regex_list` on `KAFKA_MQTTPROXY`
 * automatically create the `default-bucket` in Minio if `MINIO_ENABLE` is `true`
+* support various additional Kafka broker properties such as `KAFKA_message_timestamp_type`, `KAFKA_replica_selector_class` and `KAFKA_confluent_log_placement_constraints `
 ### Breaking Changes
 
 * default user for the Postgresql service has been changed to `demo` and the database to `demodb`.
