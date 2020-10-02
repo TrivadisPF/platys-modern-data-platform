@@ -16,6 +16,8 @@ The Modern Data Platform version 1.8.0 contains the following new services and e
 * update `DataHub` to `0.5.0-beta`
 * update `StreemSheets` to `2.0-milestone`
 * update `StreamSets` to `3.18.1`
+* update `Confluent Platfrom` to `6.0.0`
+* update `ksqlDB` to `0.12.0`
 
 ### Enhancements 
 * make Postgreqsql user, password and database configurable
