@@ -373,13 +373,19 @@ services:
 
 {% endif %}   {# zookeeper_enable or KAFKA_enable or ATLAS_enable #}
 
+{% set ns = namespace(bootstrapServers="") %}
+
+{% if (KAFKA_bootstrap_servers != '') | default(false) %}
+    {% set ns.bootstrapServers = KAFKA_bootstrap_servers %}
+    {% set KAFKA_EXT_enable = true -%}
+{% endif %}   {# KAFKA_bootstrap_servers #}
+
 {% if (KAFKA_enable) | default(false) %}
   {# make sure that internal replication factor is not larger than the number of Kafka nodes #}
   {% if KAFKA_internal_replication_factor > KAFKA_broker_nodes -%}
     {% set KAFKA_internal_replication_factor = KAFKA_broker_nodes -%}
   {% endif -%}
   #  ================================== Kafka ========================================== #
-    {% set ns = namespace(bootstrapServers="") %}
     {% for num in range(KAFKA_datacenters | default(1) ) %}
       {% set dcName = "dc" ~ loop.index%}
       {% set basePort = 9091 + (loop.index-1) * KAFKA_broker_nodes%}
@@ -451,7 +457,7 @@ services:
 
 {% endif %} {# KAFKA_enable #}
 
-{% if ( KAFKA_enable and KAFKA_SCHEMA_REGISTRY_enable ) | default(false) %}
+{% if ( (KAFKA_enable or KAFKA_EXT_enable) and KAFKA_SCHEMA_REGISTRY_enable ) | default(false) %}
   #  ================================== Schema Registry ========================================== #
   {% for num in range(KAFKA_SCHEMA_REGISTRY_nodes | default(1) ) %}
     {% set external_port = 8081 + loop.index - 1 %}
@@ -462,9 +468,6 @@ services:
     container_name: schema-registry-{{loop.index}}
     labels:
       com.mdps.service.restapi.url: "http://${PUBLIC_IP}:{{external_port}}"
-    depends_on:
-      - zookeeper-1
-      - kafka-1
     ports:
       - "{{external_port}}:{{port}}"
     environment:
@@ -490,7 +493,7 @@ services:
   {% endfor %}
 {% endif %}   {# KAFKA_enable and KAFKA_SCHEMA_REGISTRY_enable #}
 
-{% if ( KAFKA_enable and APICURIO_REGISTRY_enable ) | default(false) %}
+{% if ( (KAFKA_enable or KAFKA_EXT_enable) and APICURIO_REGISTRY_enable ) | default(false) %}
   #  ================================== Apicurio Registry ========================================== #
   {% for num in range(APICURIO_REGISTRY_nodes | default(1) ) %}
     {% set external_port = 29000 + loop.index - 1 %}
@@ -525,7 +528,7 @@ services:
   {% endfor %}
 {% endif %}   {# KAFKA_enable and APICURIO_REGISTRY_enable #}
 
-{% if ( KAFKA_enable and KAFKA_CONNECT_enable ) | default(false) %}
+{% if ( (KAFKA_enable or KAFKA_EXT_enable) and KAFKA_CONNECT_enable ) | default(false) %}
   #  ================================== Kafka Connect ========================================== #
   {% for num in range(KAFKA_CONNECT_nodes | default(1) ) %}
     {% set external_port = 8083 + loop.index - 1 %}
@@ -536,8 +539,6 @@ services:
     labels:
       com.mdps.service.restapi.url: "http://${PUBLIC_IP}:{{external_port}}"
     depends_on:
-      - zookeeper-1
-      - kafka-1
       - schema-registry-1
     ports:
       - "{{external_port}}:{{port}}"
@@ -597,7 +598,7 @@ services:
   {% endfor %}
 {% endif %}   {# KAFKA_enable and KAFKA_CONNECT_enable  #}
 
-{% if (KAFKA_enable and KAFKA_KSQLDB_enable )| default(false) %}
+{% if ((KAFKA_enable or KAFKA_EXT_enable) and KAFKA_KSQLDB_enable )| default(false) %}
   #  ================================== ksqlDB ========================================== #
   {% for num in range(KAFKA_KSQLDB_nodes | default(1) ) %}
     {% set external_port = 8088 + loop.index - 1 %}
@@ -614,7 +615,6 @@ services:
       - "{{external_port}}:{{port}}"
       - "{{jmx_external_port}}:{{jmx_port}}"
     depends_on:
-      - kafka-1
       - schema-registry-1
     environment:
       KSQL_CONFIG_DIR: "/etc/ksql"
@@ -625,13 +625,19 @@ services:
       KSQL_KSQL_SERVICE_ID: "kafka-demo"
       KSQL_LISTENERS: http://0.0.0.0:{{port}}
       KSQL_BOOTSTRAP_SERVERS: '{{ns.bootstrapServers}}'
+      KSQL_SECURITY_PROTOCOL: SASL_SSL
+      KSQL_SASL_MECHANISM: PLAIN
+      KSQL_SASL_JAAS_CONFIG: org.apache.kafka.common.security.plain.PlainLoginModule required username="{{KAFKA_username}}" password="{{KAFKA_password}}";
     {% if ( KAFKA_CONNECT_enable ) | default(false) %}
       KSQL_KSQL_CONNECT_URL: http://kafka-connect-1:8083
     {% endif -%}   {#  KAFKA_CONNECT_enable #}
       KSQL_KSQL_SCHEMA_REGISTRY_URL: "http://schema-registry-1:8081"
-      KSQL_LOG4J_PROCESSING_LOG_BROKERLIST: kafka-1:19092
+      KSQL_LOG4J_PROCESSING_LOG_BROKERLIST: '{{ns.bootstrapServers}}'
       KSQL_LOG4J_PROCESSING_LOG_TOPIC: demo_processing_log
       KSQL_KSQL_LOGGING_PROCESSING_TOPIC_NAME: 'demo_processing_log'
+      KSQL_LOGGING_PROCESSING_TOPIC_REPLICATION_FACTOR: {{KAFKA_KSQLDB_internal_replication_factor | default(1)}}
+      KSQL_KSQL_INTERNAL_TOPIC_REPLICAS: {{KAFKA_KSQLDB_internal_replication_factor | default(1)}}
+      KSQL_KSQL_STREAMS_REPLICATION_FACTOR: {{KAFKA_KSQLDB_internal_replication_factor | default(1)}}
       KSQL_KSQL_LOGGING_PROCESSING_STREAM_AUTO_CREATE: "true"
       KSQL_KSQL_LOGGING_PROCESSING_TOPIC_AUTO_CREATE: "true"
       KSQL_KSQL_QUERY_PULL_METRICS_ENABLED: "true"
@@ -693,7 +699,7 @@ services:
       #- /tmp/azkarra/etc/azkarra.conf:/etc/azkarra/azkarra.conf
 {% endif %}   {# AZKARRA_enable #}
 
-{% if (KAFKA_enable and KAFKA_RESTPROXY_enable) | default(false) %}
+{% if ((KAFKA_enable or KAFKA_EXT_enable) and KAFKA_RESTPROXY_enable) | default(false) %}
   #  ================================== Confluent REST Proxy ========================================== #
   kafka-rest-1:
     image: confluentinc/cp-kafka-rest:{{__CONFLUENT_PLATFORM_version}}
@@ -723,7 +729,7 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {# KAFKA_enable and KAFKA_RESTPROXY_enable #}
 
-{% if (KAFKA_enable and KAFKA_MQTTPROXY_enable) | default(false) %}
+{% if ((KAFKA_enable or KAFKA_EXT_enable) and KAFKA_MQTTPROXY_enable) | default(false) %}
   #  ================================== Confluent MQTT Proxy ========================================== #
   kafka-mqtt-1:
     image: confluentinc/cp-kafka-mqtt:{{__CONFLUENT_PLATFORM_version}}
@@ -748,7 +754,7 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {# KAFKA_enable and KAFKA_MQTTPROXY_enable #}
 
-{% if (KAFKA_enable and (KAFKA_edition | lower) == 'enterprise' and KAFKA_CCC_enable) | default(false) %}
+{% if ((KAFKA_enable or KAFKA_EXT_enable) and (KAFKA_edition | lower) == 'enterprise' and KAFKA_CCC_enable) | default(false) %}
   #  ================================== Confluent Control Center ========================================== #
   control-center:
     image: confluentinc/cp-enterprise-control-center:{{__CONFLUENT_PLATFORM_version}}
@@ -789,7 +795,7 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {# KAFKA_enable and KAFKA_CCC_enable #}
 
-{% if (KAFKA_enable and (KAFKA_edition | lower) == 'enterprise' and KAFKA_REPLICATOR_enable) | default(false) %}
+{% if ((KAFKA_enable or KAFKA_EXT_enable) and (KAFKA_edition | lower) == 'enterprise' and KAFKA_REPLICATOR_enable) | default(false) %}
   replicator-1:
     image: confluentinc/cp-enterprise-replicator:{{__CONFLUENT_PLATFORM_version}}
     container_name: replicator-1
@@ -832,7 +838,7 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {# KAFKA_enable and KAFKA_REPLICATOR_enable #}
 
-{% if (KAFKA_enable and KAFKACAT_enable and KAFKACAT_enable) | default(false) %}
+{% if (KAFKACAT_enable) | default(false) %}
   #  ================================== Kafkacat  ========================================== #
   kafkacat:
     image: edenhill/kafkacat:{{__KAFKACAT_version}}
@@ -857,7 +863,7 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {# KAFKA_enable and KAFKACAT_enable #}
 
-{% if (KAFKA_enable and KAFKA_SCHEMA_REGISTRY_UI_enable) | default(false) %}
+{% if ((KAFKA_enable or KAFKA_EXT_enable) and KAFKA_SCHEMA_REGISTRY_UI_enable) | default(false) %}
   #  ================================== Schema Registry UI ========================================== #
   schema-registry-ui:
     image: landoop/schema-registry-ui:{{__SCHEMA_REGISTRY_UI_version}}
@@ -884,7 +890,7 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {# KAFKA_enable and KAFKA_SCHEMA_REGISTRY_UI_enable #}
 
-{% if (KAFKA_enable and KAFKA_TOPICS_UI_enable) | default(false) %}
+{% if ((KAFKA_enable or KAFKA_EXT_enable) and KAFKA_TOPICS_UI_enable) | default(false) %}
   #  ================================== Kafka Topics UI ========================================== #
   kafka-topics-ui:
     image: landoop/kafka-topics-ui:{{__KAFKA_TOPICS_UI_version}}
@@ -913,7 +919,7 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {# KAFKA_enable and KAFKA_SCHEMA_REGISTRY_UI_enable #}
 
-{% if (KAFKA_enable and KAFKA_CONNECT_enable and KAFKA_CONNECT_UI_enable) | default(false) %}
+{% if ((KAFKA_enable or KAFKA_EXT_enable) and KAFKA_CONNECT_enable and KAFKA_CONNECT_UI_enable) | default(false) %}
   #  ================================== Kafka Connect UI ========================================== #
   kafka-connect-ui:
     image: landoop/kafka-connect-ui:{{__KAFKA_CONNECT_UI_version}}
@@ -940,7 +946,7 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {# KAFKA_enable and KAFKA_CONNECT_UI_enable #}
 
-{% if (KAFKA_enable and KAFKA_CMAK_enable) | default(false) %}
+{% if ((KAFKA_enable or KAFKA_EXT_enable) and KAFKA_CMAK_enable) | default(false) %}
   #  ================================== Cluster Manager for Apache Kafka (CMAK) ========================================== #
   cmak:
     image: trivadis/cmak:{{__KAFKA_CMAK_version}}
@@ -972,7 +978,7 @@ services:
 {% endif %}   {#  KAFKA_enable and KAFKA_CMAK_enable #}
 
 
-{% if (KAFKA_enable and KAFKA_KAFDROP_enable) | default(false) %}
+{% if ((KAFKA_enable or KAFKA_EXT_enable) and KAFKA_KAFDROP_enable) | default(false) %}
   #  ================================== Kafdrop ========================================== #
   kafdrop:
     image: obsidiandynamics/kafdrop:{{__KAFKA_KAFDROP_version}}
@@ -999,7 +1005,7 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {#  KAFKA_enable and KAFKA_KAFDROP_enable #}
 
-{% if (KAFKA_enable and KAFKA_KADMIN_enable) | default(false) %}
+{% if ((KAFKA_enable or KAFKA_EXT_enable) and KAFKA_KADMIN_enable) | default(false) %}
   #  ================================== KAdmin ========================================== #
   kadmin:
     image: bettercloud/kadmin:{{__KAFKA_KADMIN_version}}
@@ -1030,7 +1036,7 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {#  KAFKA_enable and KAFKA_KADMIN_enable #}
 
-{% if (KAFKA_enable and KAFKA_AKHQ_enable) | default(false) %}
+{% if ((KAFKA_enable or KAFKA_EXT_enable) and KAFKA_AKHQ_enable) | default(false) %}
   #  ================================== Apache Kafka HQ (AKHQ) ========================================== #
   akhq:
     image: tchiotludo/akhq:{{__KAFKA_AKHQ_version}}
@@ -1065,7 +1071,7 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {#  KAFKA_enable and KAFKA_KAFKAHQ_enable #}
 
-{% if (KAFKA_enable and KAFKA_BURROW_enable) | default(false) %}
+{% if ((KAFKA_enable or KAFKA_EXT_enable) and KAFKA_BURROW_enable) | default(false) %}
   burrow:
     image: gschmutz/linkedin-burrow:{{__KAFKA_BURROW_version}}
     container_name: burrow
