@@ -30,3 +30,6 @@ Inhere we are documenting cookbooks on how to use the platform:
  
  * **Livy**
    * [Submit Spark Application over Livy](./doc/run-spark-simple-app-scala-livy)
+
+ * **StreamSets Data Collector**
+   * [Consume a binary file and send it as Kafka message](./doc/streamsets-binary-file-to-kafka) 

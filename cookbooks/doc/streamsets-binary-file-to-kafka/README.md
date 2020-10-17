@@ -1,6 +1,8 @@
-# Using StreamSets to consume a binary file and send it as Kafka message
+# Consume binary file and send it as Kafka message
 
-This recipe will show how to use StreamSets Data Collector to read a binary file and send it as binary (opaque) message to an Apache Kafka topic. We will use another StreamSets pipeline to test that the message can be read and written out as a file, which should be the same as the original one.
+Works with >1.8.0
+
+This recipe will show how to use StreamSets Data Collector to read a binary file (we use image files) and send it as binary (opaque) message to an Apache Kafka topic. We will use another StreamSets pipeline to test that the message can be read and written out as a file, which should be the same as the original one.
 
 * Platform services needed: `KAFKA,STREAMSETS,KAFKACAT`
 * add the `STREAMSETS_volume_map_security_policy` property and set it to `true`
@@ -8,11 +10,12 @@ This recipe will show how to use StreamSets Data Collector to read a binary file
 
 ## Create the input and output folders
 
-Create two folders inside the `data-transfer` folder holding the input and output data. 
+Create two folders inside the `data-transfer` folder holding the input and output data and make sure it is writeable by docker.
 
 ```
 mkdir -p $DATAPLATFORM_HOME/data-transfer/in
 mkdir -p $DATAPLATFORM_HOME/data-transfer/out
+chmod o+w $DATAPLATFORM_HOME/data-transfer/in/
 chmod o+w $DATAPLATFORM_HOME/data-transfer/out/
 ```
 
@@ -33,7 +36,7 @@ Create a new pipeline and name it `BinaryFile-to-Kafka`.
 Add a `Directory` origin and set the following properties:
 
 * `Files Directory` = `/data-transfer/in`
-* `File Name Pattern` = `**.pdf`
+* `File Name Pattern` = `**.png`
 * `Data Format` = `Whole File`
 
 Add a `Kafka Producer` destination and set the following properties:
@@ -147,8 +150,13 @@ Start the Streamsets pipeline and listen on the kafka topic using `kafkacat`:
 docker exec -ti kafkacat kafkacat -b kafka-1 -t binary-content
 ```
 
-Copy a binary file into the `$DATAPLATFORM_HOME/data-transfer/in` folder. 
+Copy a binary file (a png image) into the `$DATAPLATFORM_HOME/data-transfer/in` folder. 
 
+```
+docker exec -ti streamsets-1 wget https://raw.githubusercontent.com/TrivadisPF/platys-modern-data-platform/master/documentation/images/modern-data-platform-overview.png -O /data-transfer/in/1.png
+```
+
+Change the name of the output file (1.png) if you want the file to be processed again. 
 
 ## Create the 2nd StreamSets pipeline for testing
 
@@ -167,6 +175,7 @@ Add a `Kafka Consumer` origin and set the following properties:
 Add a `Local FS` destination and set the following properties:
 
 * `Directory Template` = `/data-transfer/out`
-* `Files Suffix` = `pdf`
+* `Files Suffix` = `png`
 * `Data Format` = `Binary`
 
+Run the pipeline and check for a file in `$DATAPLATFORM_HOME/data-transfer/out`. It should be a copy of the original image file.
