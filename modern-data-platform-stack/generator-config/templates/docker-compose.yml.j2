@@ -427,14 +427,33 @@ services:
       {% if (KAFKA_edition | lower) == 'enterprise' | default(false) %}
       KAFKA_CONFLUENT_LICENSE_TOPIC_REPLICATION_FACTOR: {{KAFKA_internal_replication_factor | default(1)}}
       KAFKA_CONFLUENT_LOG_PLACEMENT_CONSTRAINTS: '{{KAFKA_confluent_log_placement_constraints}}'
-      {% endif %}
+      {%if KAFKA_confluent_tier_enable | default(false) %}
+      KAFKA_CONFLUENT_TIER_ENABLE: '{{KAFKA_confluent_tier_enable | default(omit) }}'
+      KAFKA_CONFLUENT_TIER_FEATURE: '{{KAFKA_confluent_tier_feature | default(omit) }}'
+      KAFKA_CONFLUENT_TIER_BACKEND: {{KAFKA_confluent_tier_backend | default(omit) }}
+      KAFKA_CONFLUENT_TIER_S3_BUCKET: '{{KAFKA_confluent_tier_s3_bucket| default('kafka-logs') }}'
+      KAFKA_CONFLUENT_TIER_S3_PREFIX: '{{KAFKA_confluent_tier_s3_prefix| default(omit) }}'
+      KAFKA_CONFLUENT_TIER_S3_REGION: '{{KAFKA_confluent_tier_s3_region | default('us-east-1') }}'
+      KAFKA_CONFLUENT_TIER_S3_AWS_ENDPOINT_OVERRIDE: '{{KAFKA_confluent_tier_s3_aws_endpoint_override | default(omit) }}'
+      KAFKA_CONFLUENT_TIER_LOCAL_HOTSET_BYTES: {{KAFKA_confluent_tier_local_hotset_bytes | default(omit) }}
+      KAFKA_CONFLUENT_TIER_LOCAL_HOTSET_MS: {{KAFKA_confluent_tier_local_hotset_ms | default(omit) }}
+      KAFKA_CONFLUENT_TIER_ARCHIVER_NUM_THREADS: {{KAFKA_confluent_tier_archiver_num_threads | default(omit) }}
+      KAFKA_CONFLUENT_TIER_FETCHER_NUM_THREADS: {{KAFKA_confluent_tier_fetcher_num_threads | default(omit) }}
+      KAFKA_CONFLUENT_TIER_TOPIC_DELETE_CHECK_INTERVAL_MS: {{KAFKA_confluent_tier_topic_delete_check_interval_ms | default(omit) }}
+      KAFKA_CONFLUENT_TIER_METADATA_REPLICATION_FACTOR: {{KAFKA_confluent_tier_metadata_replication_factor | default(1) }}
+      AWS_ACCESS_KEY_ID: V42FCGRVMK24JJ8DHUYG
+      AWS_SECRET_ACCESS_KEY: bKhWxVF3kQoLY9kFmt91l+tDrEoZjqnWXzY9Eza
+      {% endif -%} {# KAFKA_confluent_tier_enable #}
+      {% endif -%} {# KAFKA_edition == ENTERPRISE #}
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: {{KAFKA_internal_replication_factor | default(1)}}
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: {{KAFKA_internal_replication_factor | default(1)}}
       KAFKA_MESSAGE_TIMESTAMP_TYPE: {{KAFKA_message_timestamp_type | default('CreateTime')}}
-      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 100
+      KAFKA_COMPRESSION_TYPE: '{{KAFKA_compression_type | default(omit) }}'
+      KAFKA_LOG_SEGMENT_BYTES: {{KAFKA_log_segment_bytes | default(omit) }}
       KAFKA_DELETE_TOPIC_ENABLE: '{{ KAFKA_delete_topic_enable | default(omit) }}'
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: '{{ KAFKA_auto_create_topics_enable | default(omit) }}'
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 100
       KAFKA_JMX_PORT: {{portJMX}}
       KAFKA_JMX_OPTS: '-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.rmi.port={{portJMX}}'
       KAFKA_JMX_HOSTNAME: '${PUBLIC_IP:-127.0.0.1}'
@@ -564,6 +583,9 @@ services:
       CONNECT_LOG4J_LOGGERS: "org.apache.kafka.connect.runtime.rest=WARN,org.reflections=ERROR"
       CONNECT_LOG4J_APPENDER_STDOUT_LAYOUT_CONVERSIONPATTERN: "[%d] %p %X{connector.context}%m (%c:%L)%n"
       CONNECT_PLUGIN_PATH: "/usr/share/java,/etc/kafka-connect/addl-plugins"
+      #CONNECT_SECURITY_PROTOCOL: SSL
+      #CONNECT_SASL_MECHANISM: PLAIN
+      #CONNECT_SASL_JAAS_CONFIG: org.apache.kafka.common.security.plain.PlainLoginModule required username="$CLUSTER_API_KEY" password="$CLUSTER_API_SECRET";
       CLASSPATH: /usr/share/java/monitoring-interceptors/monitoring-interceptors-4.0.0.jar
       AWS_ACCESS_KEY_ID: V42FCGRVMK24JJ8DHUYG
       AWS_SECRET_ACCESS_KEY: bKhWxVF3kQoLY9kFmt91l+tDrEoZjqnWXzY9Eza
