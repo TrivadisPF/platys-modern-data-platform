@@ -20,12 +20,12 @@ cd kafka-platform-example
 
 Now let's initialise the current directory to use the Modern Data Analytics Platform Stack. 
 
-We specify the platform stack name `trivadis/platys-modern-data-platform` to use as well as the stack version `1.7.0` (the current version of this platform stack). 
+We specify the platform stack name `trivadis/platys-modern-data-platform` to use as well as the stack version `1.8.0` (the current version of this platform stack). 
 
 With the `-n` option we give the platform a meaningful name. 
 
 ```
-platys init -n kafka-platform --stack trivadis/platys-modern-data-platform --stack-version 1.7.0 --structure flat
+platys init -n kafka-platform --stack trivadis/platys-modern-data-platform --stack-version 1.8.0 --structure flat
 ```
 
 This generates a `config.yml` file, if it does not exist already, with all the services which can be configured for the platform.
@@ -49,7 +49,7 @@ You can see the configuration options, available through this platform stack, si
       platys:
         platform-name: 'kafka-platform'
         platform-stack: 'trivadis/platys-modern-data-platform'
-        platform-stack-version: '1.7.0'
+        platform-stack-version: '1.8.0'
         structure: 'flat'
 
       # ===== Apache Zookeeper ========
@@ -81,10 +81,44 @@ For enabling Kafka and Zookeeper, all we have to do is set the `ZOOKEEPER_enable
       KAFKA_delete_topic_enable: false
       KAFKA_auto_create_topics_enable: false
 
-You only have to explicitly enable what you need, as each service is disabled by default. Other settings have meaningful defaults as well. So you can also remove the services you don't need. 
+You only have to explicitly enable what you need, as each service is disabled by default. Other settings have meaningful defaults as well. So you can also delete the values for all the services you don't need. 
 
-All configuration settings for the `platys-modern-data-platform` platform stack are documented [here](./../platform-stacks/modern-data-platform/documentation/Configuration.md).
+All configuration settings for the `platys-modern-data-platform` platform stack are documented [here](Configuration.md).
 
+
+A shortcut exists with the `--enable-services` flag, which directly generates a `config.yml` file with the services needed. So to only enable `ZOOKEEPER` and `KAFKA`, we can use
+
+```
+platys init --enable-services ZOOKEEPER,KAFKA --stack trivadis/platys-modern-data-platform --stack-version 1.8.0  
+```
+
+which produces the following `config.yml`
+
+```
+      # Default values for the generator
+      # this file can be used as a template for a custom configuration
+      # or to know about the different variables available for the generator
+      platys:
+          platform-name: 'default'
+          platform-stack: 'trivadis/platys-modern-data-platform'
+          platform-stack-version: '1.8.0'
+          structure: 'flat'
+      # ===== Global configuation, valid for all or a group of services ========
+      # Timezone, use a Linux string such as Europe/Zurich or America/New_York
+      use_timezone: ''
+      # the name of the repository to use for private images, which are not on docker hub (currently only Oracle images)
+      private_docker_repository_name: 'trivadis'
+      # ===== Apache Zookeeper ========
+      ZOOKEEPER_enable: true
+      # ===== Apache Kafka ========
+      KAFKA_enable: true
+```
+
+if you want to know the service names you can use with the `--enable-services` flag you can query for it using the `list_services` command.
+
+```
+platys list_services --stack trivadis/platys-modern-data-platform --stack-version 1.8.0
+```
 
 ## Step 3: Generate the platform
 

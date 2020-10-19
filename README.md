@@ -1,4 +1,4 @@
-# Platform Stack: `modern-data-platform` - v1.7.0
+# Platform Stack: `modern-data-platform` - v1.8.0
 
 This Platform Stack defines the set of services for a Modern Data Platform, such as
 
@@ -27,6 +27,8 @@ See [What's new?](./documentation/changes.md) for a detailed list of changes.
   * [ Getting Started with `platys` and `modern-data-platform` stack](./documentation/getting-started.md)
   * [Configuration](./documentation/configuration.md)
   * [Port Mapping](./documentation/port-mapping.md)
+  * [Frequently Asked Questions](./documentation/faq.md)
+  * [Troubleshooting](./documentation/troubleshooting.md)
 
 
 

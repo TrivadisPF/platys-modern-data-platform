@@ -1,4 +1,4 @@
-# `modern-data-platform` - Port Mappings - 1.7.0
+# `modern-data-platform` - Port Mappings - 1.8.0
 
 This table reserves the external ports for the various services. Not all services have to be used in the platform at a given time. But by reserving, we can assure that there are no conflicts if a service is added at a later time.
 
@@ -60,7 +60,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 6060 | 6060 | zeppelin |
 6066 | 6066 | spark-master |
 6080 | 6080 | ranger-admin |
-6379 | 6379 | redis |
+6379 | 6379 | redis-1 |
 6380 | 6379 | redash-redis |
 7000 | 7000 | yb-master |
 7050 | 7050 | kudu-tserver-1 |
@@ -175,6 +175,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 27019 | 27017 | mongodb-3 |
 28080 | 8080 | zeppelin |
 28081 | 8080 | presto |
+28085 | 8080 | azkarra-worker-1 |
 28888 | 8888 | jupyter |
 29000 | 9000 | apicurio-registry-1 |
 29001 | 9000 | apicurio-registry-2 |
@@ -261,6 +262,9 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28163 | 8080 | apicurio-registry-2 |
 28164 | 8080 | apicurio-registry-3 |
 28170 | 80 | stardog-studio |
+28171 | 3030 | smashing |
+28172 | 3030 | tipboard |
+28173 | 3030 | chartboard |
 28500 - 28510 | 28500 - 28510 | streamsets-1 (additional ports) |
 
 

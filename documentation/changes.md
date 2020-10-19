@@ -1,5 +1,41 @@
 # `modern-data-platform` - What's new?
 
+## What's new in 1.8.0
+
+The Modern Data Platform version 1.8.0 contains the following new services and enhancements:
+
+### New Services
+
+* Apicurio Registry
+* Smashing Dashbaord
+* Tipboard Dashboard
+* Chartboard Dashboard
+* Azkarra Streams
+
+### Version upgrades  
+* update `DataHub` to `0.5.0-beta`
+* update `StreemSheets` to `2.0-milestone`
+* update `StreamSets` to `3.18.1`
+* update `Confluent Platfrom` to `6.0.0`
+* update `ksqlDB` to `0.12.0`
+
+### Enhancements 
+* make Postgreqsql user, password and database configurable
+* support configuration of `KAFKA_MQTTPROXY_topic_regex_list` on `KAFKA_MQTTPROXY`
+* automatically create the `default-bucket` in Minio if `MINIO_ENABLE` is `true`
+* support various additional Kafka broker properties such as `KAFKA_message_timestamp_type`, `KAFKA_replica_selector_class`, `KAFKA_min_insync_replicas`, `KAFKA_log_segement_bytes`, `KAFKA_log_retention_ms`, `KAFKA_log_retention_hours`, `KAFKA_log_retention_bytes`, `KAFKA_compression_type` and `KAFKA_confluent_log_placement_constraints`
+* support Kafka Tiered Storage with `confluent.tier.xxxx` properties
+* support `STREAMSETS_volume_map_security_policy` property in `streamsets` service
+
+### Breaking Changes
+
+* default user for the Postgresql service has been changed to `demo` and the database to `demodb`.
+* change service name of `redis` to `redis-1`
+* change property `RANGER_POSTGRESQL_volume_map_data ` to `RANGER_postgresql_volume_map_data` for the `RANGER` service
+
+### Bug Fixes 
+* support for the `hive` option in SPARK has been fixed so that Spark can use the Hive Metastore instead of the default, built-in metastore
+
 ## What's new in 1.7.0
 
 **Note:** you have to install the latest version of [`platys`](http://github/trivadispf/platys) (> 2.3.0)  to use this new version of the platform stack. 
