@@ -23,7 +23,8 @@ The Modern Data Platform version 1.8.0 contains the following new services and e
 * make Postgreqsql user, password and database configurable
 * support configuration of `KAFKA_MQTTPROXY_topic_regex_list` on `KAFKA_MQTTPROXY`
 * automatically create the `default-bucket` in Minio if `MINIO_ENABLE` is `true`
-* support various additional Kafka broker properties such as `KAFKA_message_timestamp_type`, `KAFKA_replica_selector_class` and `KAFKA_confluent_log_placement_constraints `
+* support various additional Kafka broker properties such as `KAFKA_message_timestamp_type`, `KAFKA_replica_selector_class`, `KAFKA_min_insync_replicas`, `KAFKA_log_segement_bytes`, `KAFKA_log_retention_ms`, `KAFKA_log_retention_hours`, `KAFKA_log_retention_bytes`, `KAFKA_compression_type` and `KAFKA_confluent_log_placement_constraints`
+* support Kafka Tiered Storage with `confluent.tier.xxxx` properties
 * support `STREAMSETS_volume_map_security_policy` property in `streamsets` service
 
 ### Breaking Changes
