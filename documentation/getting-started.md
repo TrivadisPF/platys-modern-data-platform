@@ -20,12 +20,12 @@ cd kafka-platform-example
 
 Now let's initialise the current directory to use the Modern Data Analytics Platform Stack. 
 
-We specify the platform stack name `trivadis/platys-modern-data-platform` to use as well as the stack version `1.7.0` (the current version of this platform stack). 
+We specify the platform stack name `trivadis/platys-modern-data-platform` to use as well as the stack version `1.8.0` (the current version of this platform stack). 
 
 With the `-n` option we give the platform a meaningful name. 
 
 ```
-platys init -n kafka-platform --stack trivadis/platys-modern-data-platform --stack-version 1.7.0 --structure flat
+platys init -n kafka-platform --stack trivadis/platys-modern-data-platform --stack-version 1.8.0 --structure flat
 ```
 
 This generates a `config.yml` file, if it does not exist already, with all the services which can be configured for the platform.
@@ -49,7 +49,7 @@ You can see the configuration options, available through this platform stack, si
       platys:
         platform-name: 'kafka-platform'
         platform-stack: 'trivadis/platys-modern-data-platform'
-        platform-stack-version: '1.7.0'
+        platform-stack-version: '1.8.0'
         structure: 'flat'
 
       # ===== Apache Zookeeper ========
@@ -89,7 +89,7 @@ All configuration settings for the `platys-modern-data-platform` platform stack 
 A shortcut exists with the `--enable-services` flag, which directly generates a `config.yml` file with the services needed. So to only enable `ZOOKEEPER` and `KAFKA`, we can use
 
 ```
-platys init --enable-services ZOOKEEPER,KAFKA --stack trivadis/platys-modern-data-platform --stack-version 1.7.0  
+platys init --enable-services ZOOKEEPER,KAFKA --stack trivadis/platys-modern-data-platform --stack-version 1.8.0  
 ```
 
 which produces the following `config.yml`
@@ -101,7 +101,7 @@ which produces the following `config.yml`
       platys:
           platform-name: 'default'
           platform-stack: 'trivadis/platys-modern-data-platform'
-          platform-stack-version: '1.7.0'
+          platform-stack-version: '1.8.0'
           structure: 'flat'
       # ===== Global configuation, valid for all or a group of services ========
       # Timezone, use a Linux string such as Europe/Zurich or America/New_York
@@ -117,7 +117,7 @@ which produces the following `config.yml`
 if you want to know the service names you can use with the `--enable-services` flag you can query for it using the `list_services` command.
 
 ```
-platys list_services --stack trivadis/platys-modern-data-platform --stack-version 1.7.0
+platys list_services --stack trivadis/platys-modern-data-platform --stack-version 1.8.0
 ```
 
 ## Step 3: Generate the platform
