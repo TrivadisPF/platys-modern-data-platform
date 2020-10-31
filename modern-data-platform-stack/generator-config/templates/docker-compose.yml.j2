@@ -1099,10 +1099,14 @@ services:
             docker-kafka-server:
               properties:
                 bootstrap.servers: '{{ns.bootstrapServers}}'
+    {% if ( KAFKA_SCHEMA_REGISTRY_enable ) | default(false) %}
               schema-registry:
                 url: "http://schema-registry-1:8081"
+    {% endif -%}   {#  SCHEMA_REGISTRY_enable #}
+    {% if ( KAFKA_CONNECT_enable ) | default(false) %}
               connect:
                 url: "http://kafka-connect-1:8083"
+    {% endif -%}   {#  KAFKA_CONNECT_enable #}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -1908,7 +1912,7 @@ services:
       - EBEAN_DATASOURCE_HOST=datahub-mysql:3306
       - EBEAN_DATASOURCE_URL=jdbc:mysql://datahub-mysql:3306/datahub?verifyServerCertificate=false&useSSL=true&useUnicode=yes&characterEncoding=UTF-8
       - EBEAN_DATASOURCE_DRIVER=com.mysql.jdbc.Driver
-      - KAFKA_BOOTSTRAP_SERVER='{{ns.bootstrapServers}}'
+      - KAFKA_BOOTSTRAP_SERVER=kafka-1:19092
       - KAFKA_SCHEMAREGISTRY_URL=http://schema-registry-1:8081
       - ELASTICSEARCH_HOST=datahub-elasticsearch
       - ELASTICSEARCH_PORT=9200
@@ -1966,7 +1970,7 @@ services:
     ports:
         - "28144:9091"
     environment:
-      - KAFKA_BOOTSTRAP_SERVER='{{ns.bootstrapServers}}'
+      - KAFKA_BOOTSTRAP_SERVER=kafka-1:19092
       - KAFKA_SCHEMAREGISTRY_URL=http://schema-registry-1:8081
       - ELASTICSEARCH_HOST=datahub-elasticsearch
       - ELASTICSEARCH_PORT=9200
@@ -1995,7 +1999,7 @@ services:
     ports:
         - "28145:9090"
     environment:
-      - KAFKA_BOOTSTRAP_SERVER='{{ns.bootstrapServers}}'
+      - KAFKA_BOOTSTRAP_SERVER=kafka-1:19092
       - KAFKA_SCHEMAREGISTRY_URL=http://schema-registry-1:8081
       - GMS_HOST=datahub-gms
       - GMS_PORT=8080
@@ -2037,16 +2041,18 @@ services:
     restart: {{container_restart_policy}}
 
   datahub-neo4j:
-    image: neo4j:3.5.7
+    image: neo4j:4.0.6
     hostname: datahub-neo4j
     container_name: datahub-neo4j
     ports:
       - "17475:7474"
       - "17688:7687"
     environment:
-      NEO4J_AUTH: 'neo4j/abc123!'
+      - NEO4J_AUTH=neo4j/abc123!
+      - NEO4J_dbms_default__database=graph.db
+      - NEO4J_dbms_allow__upgrade=true
     {%if use_timezone | default(false) %}
-      TZ: {{use_timezone}}
+      - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
@@ -3184,6 +3190,7 @@ services:
       - REDIS_REPLICATION_MODE=slave
       - REDIS_MASTER_HOST=redis-1
       - REDIS_MASTER_PORT_NUMBER=6379
+      - REDIS_MASTER_PASSWORD={{REDIS_password | default(omit) }}
       - ALLOW_EMPTY_PASSWORD={{REDIS_allow_empty_password | default(omit) }}
       - DISABLE_COMMANDS={{REDIS_disable_commands | default(omit) }}
       - REDIS_PASSWORD={{REDIS_password | default(omit) }}
@@ -3237,7 +3244,10 @@ services:
     ports:
       - "28119:8081"
     environment:
-      - REDIS_HOSTS=local:redis-1:6379
+      - REDIS_HOST=redis-1
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD='abc123!'
+      - REDIS_DB=0
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
