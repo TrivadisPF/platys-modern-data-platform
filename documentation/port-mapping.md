@@ -61,7 +61,10 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 6066 | 6066 | spark-master |
 6080 | 6080 | ranger-admin |
 6379 | 6379 | redis-1 |
-6380 | 6379 | redash-redis |
+6380 | 6379 | redis-replica-1 |
+6381 | 6379 | redis-replica-1 |
+6382 | 6379 | redis-replica-1 |
+6385 | 6379 | redash-redis |
 7000 | 7000 | yb-master |
 7050 | 7050 | kudu-tserver-1 |
 7051 | 7051 | kudo-master-1 |
@@ -265,6 +268,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28171 | 3030 | smashing |
 28172 | 3030 | tipboard |
 28173 | 3030 | chartboard |
+28174 | 8001 | redis-insight |
 28500 - 28510 | 28500 - 28510 | streamsets-1 (additional ports) |
 
 
