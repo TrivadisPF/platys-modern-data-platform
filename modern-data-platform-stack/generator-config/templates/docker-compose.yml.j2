@@ -5235,7 +5235,7 @@ services:
 {% if PORTAINER_enable | default(false) %}
   #  ================================== Portainer ========================================== #
   portainer:
-    image: portainer/portainer:{{__PORTAINER_version}}
+    image: portainer/portainer-ce:{{__PORTAINER_version}}
     container_name: portainer
     hostname: portainer
     labels:
@@ -5243,9 +5243,6 @@ services:
       com.mdps.service.webui.url: "http://${PUBLIC_IP}:28137"
     ports:
       - 28137:9000
-#    environment:
-#      - VIRTUAL_HOST=monitor.bioatlas.se
-#      - VIRTUAL_PORT=9000
     {%if use_timezone | default(false) %}
     environment:
       TZ: {{use_timezone}}
@@ -5264,7 +5261,7 @@ services:
 {% if CADVISOR_enable | default(false) %}
   #  ================================== cAdvisor ========================================== #
   cadvisor:
-    image: google/cadvisor:{{__CADVISOR_version}}
+    image: gcr.io/cadvisor/cadvisor:{{__CADVISOR_version}}
     container_name: cadvisor
     hostname: cadvisor
     labels:
@@ -5279,13 +5276,17 @@ services:
     volumes:
       - ./data-transfer:/data-transfer
       - /:/rootfs:ro
-      - /var/run:/var/run:rw
+      - /var/run:/var/run:ro
       - /sys:/sys:ro
       - /var/lib/docker/:/var/lib/docker:ro
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
+    devices:
+      - "/dev/kmsg"
+    tty: true
+    privileged: true
     restart: {{container_restart_policy}}
 {% endif %}   {# CADVISOR_enable #}
 
