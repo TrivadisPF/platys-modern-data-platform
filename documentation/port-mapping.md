@@ -26,6 +26,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 2182 | 2181 | zookeeper-2 |
 2183 | 2181 | zookeeper-3 |
 3000 | 3000 | grafana |
+3001 | 3000 | wetty |
 3005 | 3000 | marquez-web |
 3306 | 3306 | mysql |
 3307 | 3306 | datahub-mysql |

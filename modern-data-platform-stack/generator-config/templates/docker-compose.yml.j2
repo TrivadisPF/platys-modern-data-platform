@@ -173,6 +173,7 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
 {% set __PORTAINER_version = PORTAINER_version | default('latest') -%}
 {% set __CADVISOR_version = CADVISOR_version | default('latest') -%}
 {% set __HAWTIO_version = HAWTIO_version | default('latest') -%}
+{% set __WETTY_version = WETTY_version | default('latest') -%}
 
 {% set __SWAGGER_EDITOR_version = SWAGGER_EDITOR_version | default('latest') -%}
 {% set __SWAGGER_UI_version = SWAGGER_UI_version | default('latest') -%}
@@ -284,6 +285,7 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
   {% set CODE_SERVER_enable = false -%}
   {% set CADVISOR_enable = false -%}
   {% set HAWTIO_enable = false -%}
+  {% set WETTY_enable = false -%}
   {% set SWAGGER_EDITOR_enable = false -%}
   {% set SWAGGER_UI_enable = false -%}
 {% endif %}   {# PLATFORM_ARM_enable #}
@@ -5310,6 +5312,31 @@ services:
     {% endif -%}   {#  use_timezone #}
     restart: {{container_restart_policy}}
 {% endif %}   {# HAWTIO_enable #}
+
+{% if WETTY_enable | default(false) %}
+  #  ================================== cAdvisor ========================================== #
+  wetty:
+    image: svenihoney/wetty:{{__WETTY_version}}
+    container_name: wetty
+    hostname: wetty
+    ports:
+      - "3001:3000"
+    environment:
+      - REMOTE_SSH_SERVER=${DOCKER_HOST_IP}
+      - REMOTE_SSH_PORT=22
+      - REMOTE_SSH_USER=
+      - WETTY_PORT=3000
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+{% endif %}   {# WETTY_enable #}
 
 {% if PYTHON_enable | default(false) %}
   #  ================================== python ========================================== #
