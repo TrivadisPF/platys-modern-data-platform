@@ -1,7 +1,11 @@
 # =====================================================
 # Platform: {{platys['platform-name']}}
 # =====================================================
-version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
+version: "{{ DOCKER_COMPOSE_VERSION |default(3.5) }}"
+
+networks:
+  default:
+    name: {{platys['platform-name']}}
 
 {% set __CONFLUENT_PLATFORM_version = CONFLUENT_PLATFORM_version | default('latest') -%}
 {% set __APICURIO_REGISTRY_version = APICURIO_REGISTRY_version | default('latest') -%}
@@ -1688,6 +1692,7 @@ services:
     environment:
   {%if HADOOP_enable | default(false) %}
       CORE_CONF_fs_defaultFS: hdfs://namenode:9000
+      HIVE_SITE_CONF_hive_metastore_dir: hdfs://namenode:9000/user/hive/warehouse
   {%elif MINIO_enable | default(false) %}
       CORE_CONF_fs_defaultFS: s3a://default-bucket
       CORE_CONF_fs_s3a_endpoint: 'http://minio:9000'
