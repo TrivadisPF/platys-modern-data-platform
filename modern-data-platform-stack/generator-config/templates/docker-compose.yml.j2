@@ -30,6 +30,7 @@ networks:
 
 {% set __KAFKACAT_version = KAFKACAT_version | default('latest') -%}
 
+{% set __HADOOP_image_version = HADOOP_image_version | default('latest') -%}
 {% set __HADOOP_version = HADOOP_version | default('latest') -%}
 {% set __SQOOP_version = SQOOP_version | default('latest') -%}
 
@@ -1203,7 +1204,7 @@ services:
 
   #  ================================== Apache Hadoop ========================================== #
   namenode:
-    image: bde2020/hadoop-namenode:{{__HADOOP_version}}
+    image: bde2020/hadoop-namenode:{{__HADOOP_image_version}}
     container_name: namenode
     hostname: namenode
     labels:
@@ -1232,7 +1233,7 @@ services:
     {% set external_port = 9864 + loop.index - 1 %}
 
   datanode-{{loop.index}}:
-    image: bde2020/hadoop-datanode:{{__HADOOP_version}}
+    image: bde2020/hadoop-datanode:{{__HADOOP_image_version}}
     container_name: datanode-{{loop.index}}
     labels:
       com.mdps.service.webui.name: "Hadoop DataNode-{{loop.index}} UI"
@@ -1258,7 +1259,7 @@ services:
   {% endfor %}
 
   resourcemanager:
-    image: bde2020/hadoop-resourcemanager:{{__HADOOP_version}}
+    image: bde2020/hadoop-resourcemanager:{{__HADOOP_image_version}}
     container_name: resourcemanager
     hostname: resourcemanager
     labels:
@@ -1275,8 +1276,11 @@ services:
       CORE_CONF_fs_defaultFS: hdfs://namenode:9000
       YARN_CONF_yarn_resourcemanager_webapp_address: '${PUBLIC_IP}:18088'
       YARN_CONF_yarn_nodemanager_webapp_address: '${PUBLIC_IP}:18042'
-      YARN_CONF_yarn_timeline___service_webapp_address: '${PUBLIC_IP}:28020'
-      YARN_CONF_yarn_log_server_url: '${PUBLIC_IP}:28020'
+      YARN_CONF_yarn_timeline___service_webapp_address: '${PUBLIC_IP}:18188'
+      YARN_CONF_yarn_log_server_url: '${PUBLIC_IP}:18188'
+      MAPRED_CONF_yarn_app_mapreduce_am_env: HADOOP_MAPRED_HOME=/opt/hadoop-{{__HADOOP_version}}/
+      MAPRED_CONF_mapreduce_map_env: HADOOP_MAPRED_HOME=/opt/hadoop-{{__HADOOP_version}}/
+      MAPRED_CONF_mapreduce_reduce_env: HADOOP_MAPRED_HOME=/opt/hadoop-{{__HADOOP_version}}/
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -1289,7 +1293,7 @@ services:
     restart: {{container_restart_policy}}
 
   nodemanager:
-    image: bde2020/hadoop-nodemanager:{{__HADOOP_version}}
+    image: bde2020/hadoop-nodemanager:{{__HADOOP_image_version}}
     container_name: nodemanager
     hostname: nodemanager
     labels:
@@ -1306,8 +1310,11 @@ services:
       CORE_CONF_fs_defaultFS: hdfs://namenode:9000
       YARN_CONF_yarn_resourcemanager_webapp_address: '${PUBLIC_IP}:18088'
       YARN_CONF_yarn_nodemanager_webapp_address: '${PUBLIC_IP}:18042'
-      YARN_CONF_yarn_timeline___service_webapp_address: '${PUBLIC_IP}:28020'
-      YARN_CONF_yarn_log_server_url: '${PUBLIC_IP}:28020'
+      YARN_CONF_yarn_timeline___service_webapp_address: '${PUBLIC_IP}:18188'
+      YARN_CONF_yarn_log_server_url: '${PUBLIC_IP}:18188'
+      MAPRED_CONF_yarn_app_mapreduce_am_env: HADOOP_MAPRED_HOME=/opt/hadoop-{{__HADOOP_version}}/
+      MAPRED_CONF_mapreduce_map_env: HADOOP_MAPRED_HOME=/opt/hadoop-{{__HADOOP_version}}/
+      MAPRED_CONF_mapreduce_reduce_env: HADOOP_MAPRED_HOME=/opt/hadoop-{{__HADOOP_version}}/
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -1320,7 +1327,7 @@ services:
     restart: {{container_restart_policy}}
 
   historyserver:
-    image: bde2020/hadoop-historyserver:{{__HADOOP_version}}
+    image: bde2020/hadoop-historyserver:{{__HADOOP_image_version}}
     container_name: historyserver
     hostname: historyserver
     labels:
@@ -1336,6 +1343,9 @@ services:
     environment:
       CORE_CONF_fs_defaultFS: hdfs://namenode:9000
       SERVICE_PRECONDITION: "namenode:9870 datanode-1:9864 resourcemanager:18088"
+      MAPRED_CONF_yarn_app_mapreduce_am_env: HADOOP_MAPRED_HOME=/opt/hadoop-{{__HADOOP_version}}/
+      MAPRED_CONF_mapreduce_map_env: HADOOP_MAPRED_HOME=/opt/hadoop-{{__HADOOP_version}}/
+      MAPRED_CONF_mapreduce_reduce_env: HADOOP_MAPRED_HOME=/opt/hadoop-{{__HADOOP_version}}/
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
