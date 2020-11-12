@@ -172,5 +172,5 @@ Add this service to the `docker-compose.override.yml` file.
    
 ## `platys` documentation
 
-* [Getting Started with `platys` and the `modern-data-platform` platform stack](../platform-stacks/modern-data-platform/documentation/getting-started.md)
-* [Explore the full list of Platys commands](overview-platys-command.md)
+* [Getting Started with `platys` and the `modern-data-platform` platform stack](getting-started.md)
+* [Explore the full list of Platys commands](https://github.com/TrivadisPF/platys/tree/master/documentation/overview-platys-command.md)
