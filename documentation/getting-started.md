@@ -203,5 +203,5 @@ At this point, you have seen the basics of how `platys` works using the `modern-
 
 ## Where to go next
 
-* [Explore the full list of Platys commands](overview-platys-command.md)
-* [Modern Data Platform Stack configuration file reference](../platform-stacks/modern-data-platform/documentation/configuration.md)
+* [Explore the full list of Platys commands](https://github.com/TrivadisPF/platys/tree/master/documentation/overview-platys-command.md)
+* [Modern Data Platform Stack configuration file reference](configuration.md)
