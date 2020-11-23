@@ -180,6 +180,8 @@ networks:
 {% set __HAWTIO_version = HAWTIO_version | default('latest') -%}
 {% set __WETTY_version = WETTY_version | default('latest') -%}
 
+{% set __MARKDOWN_VIEWER_VERSION = MARKDOWN_VIEWER_VERSION | default('latest') -%}
+
 {% set __SWAGGER_EDITOR_version = SWAGGER_EDITOR_version | default('latest') -%}
 {% set __SWAGGER_UI_version = SWAGGER_UI_version | default('latest') -%}
 
@@ -291,6 +293,7 @@ networks:
   {% set CADVISOR_enable = false -%}
   {% set HAWTIO_enable = false -%}
   {% set WETTY_enable = false -%}
+  {% set MARKDOWN_VIEWER_enable = false -%}
   {% set SWAGGER_EDITOR_enable = false -%}
   {% set SWAGGER_UI_enable = false -%}
 {% endif %}   {# PLATFORM_ARM_enable #}
@@ -338,8 +341,8 @@ services:
     container_name: zoonavigator
     hostname: zoonavigator
     labels:
-      - platys.webui.title: 'Zoonavigator UI'
-        platys.webui.url: http://${PUBLIC_IP}:28100
+      platys.webui.title: 'Zoonavigator UI'
+      platys.webui.url: http://${PUBLIC_IP}:28100
     ports:
      - "28100:8010"
     depends_on:
@@ -363,8 +366,8 @@ services:
     image: elkozmon/zoonavigator-api:{{__ZOONAVIGATOR_API_version}}
     container_name: zoonavigator-api
     labels:
-      - platys.restapi.title: 'Zoonavigator REST API'
-        platys.restapi.url: 'http://${PUBLIC_IP}:28101'
+      platys.restapi.title: 'Zoonavigator REST API'
+      platys.restapi.url: 'http://${PUBLIC_IP}:28101'
     ports:
      - "28101:9010"
     environment:
@@ -519,8 +522,8 @@ services:
     hostname: schema-registry-{{loop.index}}
     container_name: schema-registry-{{loop.index}}
     labels:
-      - platys.restapi.title: 'Schema Registry REST API'
-        platys.restapi.url: "http://${PUBLIC_IP}:{{external_port}}"
+      platys.restapi.title: 'Schema Registry REST API'
+      platys.restapi.url: "http://${PUBLIC_IP}:{{external_port}}"
     ports:
       - "{{external_port}}:{{port}}"
     environment:
@@ -557,8 +560,8 @@ services:
     hostname: apicurio-registry-{{loop.index}}
     container_name: apicurio-registry-{{loop.index}}
     labels:
-      - platys.restapi.title: 'Apicurio Registry REST API'
-        platys.restapi.url: "http://${PUBLIC_IP}:{{external_port}}"
+      platys.restapi.title: 'Apicurio Registry REST API'
+      platys.restapi.url: "http://${PUBLIC_IP}:{{external_port}}"
     depends_on:
       - kafka-1
     ports:
@@ -591,8 +594,8 @@ services:
     image: confluentinc/cp-kafka-connect:{{__CONFLUENT_PLATFORM_version}}
     container_name: kafka-connect-{{loop.index}}
     labels:
-      - platys.restapi.title: 'Kafka Connect REST API'
-        platys.restapi.url: "http://${PUBLIC_IP}:{{external_port}}"
+      platys.restapi.title: 'Kafka Connect REST API'
+      platys.restapi.url: "http://${PUBLIC_IP}:{{external_port}}"
     depends_on:
       - schema-registry-1
     ports:
@@ -675,8 +678,8 @@ services:
     hostname: ksqldb-server-{{loop.index}}
     container_name: ksqldb-server-{{loop.index}}
     labels:
-      - platys.restapi.title: 'ksqlDB Server REST API'
-        platys.restapi.url: "http://${PUBLIC_IP}:{{external_port}}"
+      platys.restapi.title: 'ksqlDB Server REST API'
+      platys.restapi.url: "http://${PUBLIC_IP}:{{external_port}}"
     ports:
       - "{{external_port}}:{{port}}"
       - "{{jmx_external_port}}:{{jmx_port}}"
@@ -772,8 +775,8 @@ services:
     container_name: kafka-rest-1
     hostname: kafka-rest-1
     labels:
-      - platys.restapi.title: 'Kafka REST Proxy'
-        platys.restapi.url: "http://${PUBLIC_IP}:18086"
+      platys.restapi.title: 'Kafka REST Proxy'
+      platys.restapi.url: "http://${PUBLIC_IP}:18086"
     depends_on:
       - kafka-1
       - schema-registry-1
@@ -828,8 +831,8 @@ services:
     hostname: control-center
     container_name: control-center
     labels:
-      - platys.webui.title: 'Control Center UI'
-        platys.webui.url: "http://${PUBLIC_IP}:9021"
+      platys.webui.title: 'Control Center UI'
+      platys.webui.url: "http://${PUBLIC_IP}:9021"
     depends_on:
       - zookeeper-1
       - kafka-1
@@ -938,8 +941,8 @@ services:
     container_name: schema-registry-ui
     hostname: schema-registry-ui
     labels:
-      - platys.webui.title: 'Confluent Schema Registry UI'
-        platys.webui.url: "http://${PUBLIC_IP}:28102"
+      platys.webui.title: 'Confluent Schema Registry UI'
+      platys.webui.url: "http://${PUBLIC_IP}:28102"
     depends_on:
       - kafka-1
       - schema-registry-1
@@ -966,8 +969,8 @@ services:
     container_name: kafka-topics-ui
     hostname: kafka-topics-ui
     labels:
-      - platys.webui.title: 'Kafka Topics UI'
-        platys.webui.url: "http://${PUBLIC_IP}:28141"
+      platys.webui.title: 'Kafka Topics UI'
+      platys.webui.url: "http://${PUBLIC_IP}:28141"
     depends_on:
       - kafka-1
       - kafka-rest-1
@@ -996,8 +999,8 @@ services:
     container_name: kafka-connect-ui
     hostname: kafka-connect-ui
     labels:
-      - platys.webui.title: 'Kafka Connect UI'
-        platys.webui.url: "http://${PUBLIC_IP}:28103"
+      platys.webui.title: 'Kafka Connect UI'
+      platys.webui.url: "http://${PUBLIC_IP}:28103"
     depends_on:
       - kafka-connect-1
     ports:
@@ -1024,8 +1027,8 @@ services:
     container_name: cmak
     hostname: cmak
     labels:
-      - platys.webui.title: 'Cluster Manager for Apache Kafka UI'
-        platys.webui.url: "http://${PUBLIC_IP}:28104"
+      platys.webui.title: 'Cluster Manager for Apache Kafka UI'
+      platys.webui.url: "http://${PUBLIC_IP}:28104"
     depends_on:
       - zookeeper-1
       - kafka-1
@@ -1057,8 +1060,8 @@ services:
     container_name: kafdrop
     hostname: kafdrop
     labels:
-      - platys.webui.title: 'Kafdrop UI'
-        platys.webui.url: "http://${PUBLIC_IP}:28105"
+      platys.webui.title: 'Kafdrop UI'
+      platys.webui.url: "http://${PUBLIC_IP}:28105"
     ports:
       - "28105:9020"
     environment:
@@ -1085,8 +1088,8 @@ services:
     container_name: kadmin
     hostname: kadmin
     labels:
-      - platys.webui.title: 'KAdmin UI'
-        platys.webui.url: "http://${PUBLIC_IP}:28106"
+      platys.webui.title: 'KAdmin UI'
+      platys.webui.url: "http://${PUBLIC_IP}:28106"
     ports:
       - "28106:8080"
     environment:
@@ -1117,8 +1120,8 @@ services:
     container_name: akhq
     hostname: akhq
     labels:
-      - platys.webui.title: 'Apache Kafka AQ UI'
-        platys.webui.url: "http://${PUBLIC_IP}:28107"
+      platys.webui.title: 'Apache Kafka AQ UI'
+      platys.webui.url: "http://${PUBLIC_IP}:28107"
     ports:
       - 28107:8080
     environment:
@@ -1156,8 +1159,8 @@ services:
     container_name: burrow
     hostname: burrow
     labels:
-      - platys.webui.title: 'Burrow UI'
-        platys.webui.url: "http://${PUBLIC_IP}:28110"
+      platys.webui.title: 'Burrow UI'
+      platys.webui.url: "http://${PUBLIC_IP}:28110"
     ports:
       - 28110:8000
     depends_on:
@@ -1182,8 +1185,8 @@ services:
     container_name: burrow-ui
     hostname: burrow-ui
     labels:
-      - platys.webui.title: 'Burrow UI'
-        platys.webui.url: "http://${PUBLIC_IP}:28108"
+      platys.webui.title: 'Burrow UI'
+      platys.webui.url: "http://${PUBLIC_IP}:28108"
     ports:
       - 28108:3000
     depends_on:
@@ -1263,8 +1266,8 @@ services:
     image: bde2020/hadoop-datanode:{{__HADOOP_image_version}}
     container_name: datanode-{{loop.index}}
     labels:
-      - platys.webui.title: 'Hadoop DataNode-{{loop.index}} UI'
-        platys.webui.url: "http://${PUBLIC_IP}:{{external_port}}"
+      platys.webui.title: 'Hadoop DataNode-{{loop.index}} UI'
+      platys.webui.url: "http://${PUBLIC_IP}:{{external_port}}"
     ports:
       - "{{external_port}}:9864"
     env_file:
@@ -1293,8 +1296,8 @@ services:
     container_name: resourcemanager
     hostname: resourcemanager
     labels:
-      - platys.webui.title: "YARN RessourceManager UI"
-        platys.webui.url: "http://${PUBLIC_IP}:18088"
+      platys.webui.title: "YARN RessourceManager UI"
+      platys.webui.url: "http://${PUBLIC_IP}:18088"
     ports:
       - "18088:8088"
     depends_on:
@@ -1327,8 +1330,8 @@ services:
     container_name: nodemanager
     hostname: nodemanager
     labels:
-      - platys.webui.title: "YARN NodeManager UI"
-        platys.webui.url: "http://${PUBLIC_IP}:18042"
+      platys.webui.title: "YARN NodeManager UI"
+      platys.webui.url: "http://${PUBLIC_IP}:18042"
     ports:
       - "18042:8042"
     depends_on:
@@ -1361,8 +1364,8 @@ services:
     container_name: historyserver
     hostname: historyserver
     labels:
-      - platys.webui.title: "YARN History Server"
-        platys.webui.url: "http://${PUBLIC_IP}:18188"
+      platys.webui.title: "YARN History Server"
+      platys.webui.url: "http://${PUBLIC_IP}:18188"
     ports:
       - "18188:8188"
     depends_on:
@@ -1543,10 +1546,10 @@ services:
     container_name: spark-history
     hostname: spark-history
     labels:
-      - platys.webui.title: "Spark History Server"
-        platys.webui.url: "http://${PUBLIC_IP}:28117"
-      - platys.restapi.title: "Spark History Server"
-        platys.restapi.url: "http://${PUBLIC_IP}:28117/api/v1"
+      platys.webui.title: "Spark History Server"
+      platys.webui.url: "http://${PUBLIC_IP}:28117"
+      platys.restapi.title: "Spark History Server"
+      platys.restapi.url: "http://${PUBLIC_IP}:28117/api/v1"
     expose:
       - 18080
     ports:
@@ -1638,10 +1641,10 @@ services:
     container_name: livy
     hostname: livy
     labels:
-      - platys.webui.title: "Livy Server UI"
-        platys.webui.url: "http://${PUBLIC_IP}:8998/ui#"
-      - platys.restapi.title: "Livy API"
-        platys.restapi.url: "http://${PUBLIC_IP}:8998/"
+      platys.webui.title: "Livy Server UI"
+      platys.webui.url: "http://${PUBLIC_IP}:8998/ui#"
+      platys.restapi.title: "Livy API"
+      platys.restapi.url: "http://${PUBLIC_IP}:8998/"
     env_file:
       - ./conf/hadoop.env
     environment:
@@ -1697,8 +1700,8 @@ services:
     container_name: hive-server
     hostname: hive-server
     labels:
-      - platys.webui.title: "Hive Server UI"
-        platys.webui.url: "http://${PUBLIC_IP}:10001"
+      platys.webui.title: "Hive Server UI"
+      platys.webui.url: "http://${PUBLIC_IP}:10001"
     ports:
       - "10000:10000"
       - "10001:10001"
@@ -1841,8 +1844,8 @@ services:
     container_name: atlas
     hostname: atlas
     labels:
-      - platys.webui.title: "Atlas UI"
-        platys.webui.url: "http://${PUBLIC_IP}:21000"
+      platys.webui.title: "Atlas UI"
+      platys.webui.url: "http://${PUBLIC_IP}:21000"
     depends_on:
       - zookeeper-1
       - kafka-1
@@ -1990,8 +1993,8 @@ services:
     hostname: datahub-frontend
     container_name: datahub-frontend
     labels:
-      - platys.webui.title: "DataHub UI"
-        platys.webui.url: "http://${PUBLIC_IP}:28143"
+      platys.webui.title: "DataHub UI"
+      platys.webui.url: "http://${PUBLIC_IP}:28143"
     depends_on:
       - datahub-gms
     ports:
@@ -2214,8 +2217,8 @@ services:
     container_name: amundsenfrontend
     hostname: amundsenfrontend
     labels:
-      - platys.webui.title: "Amundsen UI"
-        platys.webui.url: "http://${PUBLIC_IP}:5000"
+      platys.webui.title: "Amundsen UI"
+      platys.webui.url: "http://${PUBLIC_IP}:5000"
     depends_on:
       - amundsenmetadata
       - amundsensearch
@@ -2300,8 +2303,8 @@ services:
     container_name: amundsen-neo4j
     hostname: amundsen-neo4j
     labels:
-      - platys.webui.title: "Amundsen Neo4J UI"
-        platys.webui.url: "http://${PUBLIC_IP}:17474"
+      platys.webui.title: "Amundsen Neo4J UI"
+      platys.webui.url: "http://${PUBLIC_IP}:17474"
     ulimits:
       nofile:
         soft: 40000
@@ -2353,8 +2356,8 @@ services:
     container_name: marquez-web
     hostname: marquez-web
     labels:
-      - platys.webui.title: "Marquez UI"
-        platys.webui.url: "http://${PUBLIC_IP}:3005"
+      platys.webui.title: "Marquez UI"
+      platys.webui.url: "http://${PUBLIC_IP}:3005"
     depends_on:
       - marquez
     ports:
@@ -2378,10 +2381,10 @@ services:
     container_name: marquez
     hostname: marquez
     labels:
-      - platys.restapi.title: "Marquez REST API"
-        platys.restapi.url: "http://${PUBLIC_IP}:5010/api/v1"
-      - platys.webui.title: "Marquez UI"
-        platys.webui.url: "http://${PUBLIC_IP}:5011"
+      platys.restapi.title: "Marquez REST API"
+      platys.restapi.url: "http://${PUBLIC_IP}:5010/api/v1"
+      platys.webui.title: "Marquez UI"
+      platys.webui.url: "http://${PUBLIC_IP}:5011"
     depends_on:
       - marquez-db
     ports:
@@ -2517,10 +2520,10 @@ services:
     container_name: streamsets-1
     hostname: streamsets-1
     labels:
-      - platys.webui.title: "StreamSets Data Collector UI"
-        platys.webui.url: "http://${PUBLIC_IP}:18630"
-      - platys.restapi.title: "StreamSets Data Collector REST API"
-        platys.restapi.url: "http://${PUBLIC_IP}:18630/collector/restapi"
+      platys.webui.title: "StreamSets Data Collector UI"
+      platys.webui.url: "http://${PUBLIC_IP}:18630"
+      platys.restapi.title: "StreamSets Data Collector REST API"
+      platys.restapi.url: "http://${PUBLIC_IP}:18630/collector/restapi"
     ports:
       - "18630:18630"
     {%if STREAMSETS_activate_https | default(false) %}
@@ -2575,10 +2578,10 @@ services:
     container_name: streamsets-transformer-1
     hostname: streamsets-transformer-1
     labels:
-      - platys.webui.title: "StreamSets Transformer UI"
-        platys.webui.url: "http://${PUBLIC_IP}:19630"
-      - platys.restapi.title: "StreamSets Transformer REST API"
-        platys.restapi.url: "http://${PUBLIC_IP}:19630/collector/restapi"
+      platys.webui.title: "StreamSets Transformer UI"
+      platys.webui.url: "http://${PUBLIC_IP}:19630"
+      platys.restapi.title: "StreamSets Transformer REST API"
+      platys.restapi.url: "http://${PUBLIC_IP}:19630/collector/restapi"
     ports:
       - "19630:19630"
     {%if use_timezone | default(false) %}
@@ -2632,8 +2635,8 @@ services:
     container_name: nifi-1
     hostname: nifi-1
     labels:
-      - platys.webui.title: "Apache NiFi UI"
-        platys.webui.url: "http://${PUBLIC_IP}:18080/nifi"
+      platys.webui.title: "Apache NiFi UI"
+      platys.webui.url: "http://${PUBLIC_IP}:18080/nifi"
     ports:
       - "18080:8080"
     {%if use_timezone | default(false) %}
@@ -2657,10 +2660,10 @@ services:
     container_name: nodered-1
     hostname: nodered-1
     labels:
-      - platys.webui.title: "Node-RED UI"
-        platys.webui.url: "http://${PUBLIC_IP}:1880"
-      - platys.restapi.title: "Node-RED REST API"
-        platys.restapi.url: "http://${PUBLIC_IP}:1880"
+      platys.webui.title: "Node-RED UI"
+      platys.webui.url: "http://${PUBLIC_IP}:1880"
+      platys.restapi.title: "Node-RED REST API"
+      platys.restapi.url: "http://${PUBLIC_IP}:1880"
     ports:
       - "1880:1880"
     {%if use_timezone | default(false) %}
@@ -2688,8 +2691,8 @@ services:
     container_name: streamsheets
     hostname: streamsheets
     labels:
-      - platys.webui.title: 'Streamsheets UI'
-        platys.webui.url: "http://${PUBLIC_IP}:28107"
+      platys.webui.title: 'Streamsheets UI'
+      platys.webui.url: "http://${PUBLIC_IP}:28107"
     ports:
       - 28158:8081
     {%if use_timezone | default(false) %}
@@ -2712,10 +2715,10 @@ services:
     container_name: airflow
     hostname: airflow
     labels:
-      - platys.webui.title: "Airflow UI"
-        platys.webui.url: "http://${PUBLIC_IP}:28139"
-      - platys.restapi.title: "Airflow REST API"
-        platys.restapi.url: "http://${PUBLIC_IP}:28139/api/experimental/"
+      platys.webui.title: "Airflow UI"
+      platys.webui.url: "http://${PUBLIC_IP}:28139"
+      platys.restapi.title: "Airflow REST API"
+      platys.restapi.url: "http://${PUBLIC_IP}:28139/api/experimental/"
     ports:
       - "28139:8080"
     environment:
@@ -2801,8 +2804,8 @@ services:
     container_name: zeppelin
     hostname: zeppelin
     labels:
-      - platys.webui.title: "Apache Zeppelin UI"
-        platys.webui.url: "http://${PUBLIC_IP}:28080"
+      platys.webui.title: "Apache Zeppelin UI"
+      platys.webui.url: "http://${PUBLIC_IP}:28080"
     ports:
       - "28080:8080"
       - "6060:6060"
@@ -2888,8 +2891,8 @@ services:
     container_name: jupyter
     hostname: jupyter
     labels:
-      - platys.webui.title: "Jupyter UI"
-        platys.webui.url: "http://${PUBLIC_IP}:28888"
+      platys.webui.title: "Jupyter UI"
+      platys.webui.url: "http://${PUBLIC_IP}:28888"
     ports:
       - "28888:8888"
     environment:
@@ -2920,8 +2923,8 @@ services:
     hostname: grafana
     container_name: grafana
     labels:
-      - platys.webui.title: "Grafana UI"
-        platys.webui.url: "http://${PUBLIC_IP}:3000"
+      platys.webui.title: "Grafana UI"
+      platys.webui.url: "http://${PUBLIC_IP}:3000"
     expose:
       - 3000
     ports:
@@ -2949,8 +2952,8 @@ services:
     hostname: superset
     container_name: superset
     labels:
-      - platys.webui.title: "Superset UI"
-        platys.webui.url: "http://${PUBLIC_IP}:28151"
+      platys.webui.title: "Superset UI"
+      platys.webui.url: "http://${PUBLIC_IP}:28151"
     ports:
       - "28151:8088"
     environment:
@@ -2975,8 +2978,8 @@ services:
     hostname: redash-server
     container_name: redash-server
     labels:
-      - platys.webui.title: "Redash UI"
-        platys.webui.url: "http://${PUBLIC_IP}:28161"
+      platys.webui.title: "Redash UI"
+      platys.webui.url: "http://${PUBLIC_IP}:28161"
     ports:
       - "28161:5000"
     command: server
@@ -3274,8 +3277,8 @@ services:
     container_name: redis-insight
     hostname: redis-insight
     labels:
-      - platys.webui.title: "Redis Insight UI"
-        platys.webui.url: "http://${PUBLIC_IP}:28174"
+      platys.webui.title: "Redis Insight UI"
+      platys.webui.url: "http://${PUBLIC_IP}:28174"
     ports:
       - "28174:8001"
     {%if use_timezone | default(false) %}
@@ -3297,8 +3300,8 @@ services:
     container_name: redis-commander
     hostname: redis-commander
     labels:
-      - platys.webui.title: "Redis Commander UI"
-        platys.webui.url: "http://${PUBLIC_IP}:28119"
+      platys.webui.title: "Redis Commander UI"
+      platys.webui.url: "http://${PUBLIC_IP}:28119"
     ports:
       - "28119:8081"
     environment:
@@ -3350,8 +3353,8 @@ services:
     container_name: cassandra-web
     hostname: cassandra-web
     labels:
-      - platys.webui.title: "Cassandra Web UI"
-        platys.webui.url: "http://${PUBLIC_IP}:28120"
+      platys.webui.title: "Cassandra Web UI"
+      platys.webui.url: "http://${PUBLIC_IP}:28120"
     ports:
       - "28120:3000"
     environment:
@@ -3414,8 +3417,8 @@ services:
     container_name: dse-studio
     hostname: dse-studio
     labels:
-      - platys.webui.title: "DataStax Studio Web UI"
-        platys.webui.url: "http://${PUBLIC_IP}:28121"
+      platys.webui.title: "DataStax Studio Web UI"
+      platys.webui.url: "http://${PUBLIC_IP}:28121"
     ports:
       - "28121:9091" # Exposes port to be available externally
     environment:
@@ -3436,8 +3439,8 @@ services:
     container_name: dse-opscenter
     hostname: dse-opscenter
     labels:
-      - platys.webui.title: "DataStax OpsCenter Web UI"
-        platys.webui.url: "http://${PUBLIC_IP}:28122"
+      platys.webui.title: "DataStax OpsCenter Web UI"
+      platys.webui.url: "http://${PUBLIC_IP}:28122"
     ports:
       - 28122:8888
     environment:
@@ -3488,8 +3491,8 @@ services:
     container_name: mongo-express
     hostname: mongo-express
     labels:
-      - platys.webui.title: "Cassandra Web UI"
-        platys.webui.url: "http://${PUBLIC_IP}:28123"
+      platys.webui.title: "Cassandra Web UI"
+      platys.webui.url: "http://${PUBLIC_IP}:28123"
     ports:
       - 28123:8081
     environment:
@@ -3510,8 +3513,8 @@ services:
     container_name: admin-mongo
     hostname: admin-mongo
     labels:
-      - platys.webui.title: "Admin Mongo UI"
-        platys.webui.url: "http://${PUBLIC_IP}:28124"
+      platys.webui.title: "Admin Mongo UI"
+      platys.webui.url: "http://${PUBLIC_IP}:28124"
     ports:
       - 28124:1234
     {%if use_timezone | default(false) %}
@@ -3534,8 +3537,8 @@ services:
     container_name: solr
     hostname: solr
     labels:
-      - platys.webui.title: "SolR UI"
-        platys.webui.url: "http://${PUBLIC_IP}:8983"
+      platys.webui.title: "SolR UI"
+      platys.webui.url: "http://${PUBLIC_IP}:8983"
     ports:
       - "8983:8983"
     {%if use_timezone | default(false) %}
@@ -3588,8 +3591,8 @@ services:
     container_name: dejavu
     hostname: dejuvu
     labels:
-      - platys.webui.title: "Elasticsearch Dejavu UI"
-        platys.webui.url: "http://${PUBLIC_IP}:28125"
+      platys.webui.title: "Elasticsearch Dejavu UI"
+      platys.webui.url: "http://${PUBLIC_IP}:28125"
     ports:
       - "28125:1358"
     {%if use_timezone | default(false) %}
@@ -3611,8 +3614,8 @@ services:
     container_name: cerebro
     hostname: cerebro
     labels:
-      - platys.webui.title: "Elasticsearch Cerbero UI"
-        platys.webui.url: "http://${PUBLIC_IP}:28126"
+      platys.webui.title: "Elasticsearch Cerbero UI"
+      platys.webui.url: "http://${PUBLIC_IP}:28126"
     ports:
       - "28126:9000"
     {%if use_timezone | default(false) %}
@@ -3634,8 +3637,8 @@ services:
     container_name: elastichq
     hostname: elatichq
     labels:
-      - platys.webui.title: "ElasticHQ UI"
-        platys.webui.url: "http://${PUBLIC_IP}:28127"
+      platys.webui.title: "ElasticHQ UI"
+      platys.webui.url: "http://${PUBLIC_IP}:28127"
     ports:
       - "28127:5000"
     {%if use_timezone | default(false) %}
@@ -3658,8 +3661,8 @@ services:
     hostname: kibana
     container_name: kibana
     labels:
-      - platys.webui.title: "Kibana UI"
-        platys.webui.url: "http://${PUBLIC_IP}:5601"
+      platys.webui.title: "Kibana UI"
+      platys.webui.url: "http://${PUBLIC_IP}:5601"
     depends_on:
       - elasticsearch-1
     ports:
@@ -3697,8 +3700,8 @@ services:
     hostname: neo4j-1
     container_name: neo4j-1
     labels:
-      - platys.webui.title: "Neo4J UI"
-        platys.webui.url: "http://${PUBLIC_IP}:7474"
+      platys.webui.title: "Neo4J UI"
+      platys.webui.url: "http://${PUBLIC_IP}:7474"
     ports:
       - "7474:7474"
       - "7687:7687"
@@ -3734,8 +3737,8 @@ services:
     hostname: stardog-1
     container_name: stardog-1
     labels:
-      - platys.webui.title: "Stardog UI"
-        platys.webui.url: "http://${PUBLIC_IP}:7474"
+      platys.webui.title: "Stardog UI"
+      platys.webui.url: "http://${PUBLIC_IP}:7474"
     ports:
       - "5820:5820"
     environment:
@@ -3764,8 +3767,8 @@ services:
     hostname: stardog-studio
     container_name: stardog-studio
     labels:
-      - platys.webui.title: "Stardog Studio UI"
-        platys.webui.url: "http://${PUBLIC_IP}:28170"
+      platys.webui.title: "Stardog Studio UI"
+      platys.webui.url: "http://${PUBLIC_IP}:28170"
     ports:
       - "28170:80"
     {%if use_timezone | default(false) %}
@@ -3814,8 +3817,8 @@ services:
     container_name: influxdb-ui
     hostname: influxdb-ui
     labels:
-      - platys.webui.title: "InfluxDB UI"
-        platys.webui.url: "http://${PUBLIC_IP}:28128"
+      platys.webui.title: "InfluxDB UI"
+      platys.webui.url: "http://${PUBLIC_IP}:28128"
     ports:
       - "28128:80"
     {%if use_timezone | default(false) %}
@@ -3834,8 +3837,8 @@ services:
     hostname: chronograf
     container_name: chronograf
     labels:
-      - platys.webui.title: "Chronograf UI"
-        platys.webui.url: "http://${PUBLIC_IP}:28129"
+      platys.webui.title: "Chronograf UI"
+      platys.webui.url: "http://${PUBLIC_IP}:28129"
     depends_on:
       - influxdb
     ports:
@@ -3921,10 +3924,10 @@ services:
     hostname: influxdb2
     container_name: influxdb2
     labels:
-      - platys.webui.title: "InfluxDB 2.0 UI"
-        platys.webui.url: "http://${PUBLIC_IP}:9999"
-      - platys.restapi.title: "InfluxDB 2.0 Rest API"
-        platys.restapi.url: "http://${PUBLIC_IP}:9999/api/v2"
+      platys.webui.title: "InfluxDB 2.0 UI"
+      platys.webui.url: "http://${PUBLIC_IP}:9999"
+      platys.restapi.title: "InfluxDB 2.0 Rest API"
+      platys.restapi.url: "http://${PUBLIC_IP}:9999/api/v2"
     ports:
       - "9999:9999"
     {%if use_timezone | default(false) %}
@@ -4002,8 +4005,8 @@ services:
     hostname: druid-sandbox
     container_name: druid-sandbox
     labels:
-      - platys.webui.title: "Druid Console UI"
-        platys.webui.url: "http://${PUBLIC_IP}:28150"
+      platys.webui.title: "Druid Console UI"
+      platys.webui.url: "http://${PUBLIC_IP}:28150"
     ports:
       - "28150:8888"
     {%if use_timezone | default(false) %}
@@ -4134,8 +4137,8 @@ services:
     image: apache/incubator-druid:{{__DRUID_version}}
     container_name: druid-router
     labels:
-      - platys.webui.title: "Druid Console UI"
-        platys.webui.url: "http://${PUBLIC_IP}:28150/graph"
+      platys.webui.title: "Druid Console UI"
+      platys.webui.url: "http://${PUBLIC_IP}:28150/graph"
     depends_on:
       - zookeeper-1
       - druid-postgres
@@ -4187,10 +4190,10 @@ services:
     container_name: prometheus-1
     hostname: prometheus-1
     labels:
-      - platys.webui.title: "Prometheus UI"
-        platys.webui.url: "http://${PUBLIC_IP}:9090/graph"
-      - platys.restapi.title: "Prometheus Rest API"
-        platys.restapi.url: "http://${PUBLIC_IP}:9090/api/v1"
+      platys.webui.title: "Prometheus UI"
+      platys.webui.url: "http://${PUBLIC_IP}:9090/graph"
+      platys.restapi.title: "Prometheus Rest API"
+      platys.restapi.url: "http://${PUBLIC_IP}:9090/api/v1"
     command: "--config.file=/etc/prometheus/prometheus.yml --storage.tsdb.path=/prometheus"
     ports:
       - "9090:9090"
@@ -4244,8 +4247,8 @@ services:
     container_name: tile38
     hostname: tile38
     labels:
-      - platys.webui.title: "Tile38 UI"
-        platys.webui.url: "http://${PUBLIC_IP}:9851"
+      platys.webui.title: "Tile38 UI"
+      platys.webui.url: "http://${PUBLIC_IP}:9851"
     ports:
       - "9851:9851"
     {%if use_timezone | default(false) %}
@@ -4359,8 +4362,8 @@ services:
     container_name: oracledb
     hostname: oracledb
     labels:
-      - platys.webui.title: "Oracle UI"
-        platys.webui.url: "http://${PUBLIC_IP}:28152"
+      platys.webui.title: "Oracle UI"
+      platys.webui.url: "http://${PUBLIC_IP}:28152"
     ports:
       - "1521:1521"
       - "28152:8080"
@@ -4389,8 +4392,8 @@ services:
     container_name: oracledb
     hostname: oracledb
     labels:
-      - platys.webui.title: "Oracle UI"
-        platys.webui.url: "http://${PUBLIC_IP}:28152"
+      platys.webui.title: "Oracle UI"
+      platys.webui.url: "http://${PUBLIC_IP}:28152"
     ports:
       - "1521:1521"
       - "28152:8080"
@@ -4547,8 +4550,8 @@ services:
     container_name: adminer
     hostname: adminer
     labels:
-      - platys.webui.title: "Adminer UI"
-        platys.webui.url: "http://${PUBLIC_IP}:28131"
+      platys.webui.title: "Adminer UI"
+      platys.webui.url: "http://${PUBLIC_IP}:28131"
     ports:
       - 28131:8080
     {%if use_timezone | default(false) %}
@@ -4571,8 +4574,8 @@ services:
     container_name: cloudbeaver
     hostname: cloudbeaver
     labels:
-      - platys.webui.title: "Cloudbeaver UI"
-        platys.webui.url: "http://${PUBLIC_IP}:8978"
+      platys.webui.title: "Cloudbeaver UI"
+      platys.webui.url: "http://${PUBLIC_IP}:8978"
     ports:
       - "8978:8978"
     restart: {{container_restart_policy}}
@@ -4614,8 +4617,8 @@ services:
     container_name: quix-frontend
     hostname: quix-frontend
     labels:
-      - platys.webui.title: "Quix UI"
-        platys.webui.url: "http://${PUBLIC_IP}:28160"
+      platys.webui.title: "Quix UI"
+      platys.webui.url: "http://${PUBLIC_IP}:28160"
     ports:
       - "28160:3000"
     environment:
@@ -4662,8 +4665,8 @@ services:
     container_name: axon-server
     hostname: axon-server
     labels:
-      - platys.webui.title: "Axon UI"
-        platys.webui.url: "http://${PUBLIC_IP}:8024"
+      platys.webui.title: "Axon UI"
+      platys.webui.url: "http://${PUBLIC_IP}:8024"
     ports:
       - 8024:8024
       - 8124:8124
@@ -4704,8 +4707,8 @@ services:
     hostname: presto-1
     container_name: presto-1
     labels:
-      - platys.webui.title: "Presto UI"
-        platys.webui.url: "http://${PUBLIC_IP}:28081"
+      platys.webui.title: "Presto UI"
+      platys.webui.url: "http://${PUBLIC_IP}:28081"
     ports:
       - '28081:8080'
     {%if use_timezone | default(false) %}
@@ -4810,8 +4813,8 @@ services:
     container_name: dremio-1
     hostname: dremio-1
     labels:
-      - platys.webui.title: "Dremio UI"
-        platys.webui.url: "http://${PUBLIC_IP}:9047"
+      platys.webui.title: "Dremio UI"
+      platys.webui.url: "http://${PUBLIC_IP}:9047"
     ports:
       - '9047:9047'
       - '31010:31010'
@@ -4836,8 +4839,8 @@ services:
     container_name: drill-1
     hostname: drill-1
     labels:
-      - platys.webui.title: "Drill UI"
-        platys.webui.url: "http://${PUBLIC_IP}:8047"
+      platys.webui.title: "Drill UI"
+      platys.webui.url: "http://${PUBLIC_IP}:8047"
     ports:
       - '8047:8047'
     environment:
@@ -4864,8 +4867,8 @@ services:
     container_name: minio
     hostname: minio
     labels:
-      - platys.webui.title: "MinIO UI"
-        platys.webui.url: "http://${PUBLIC_IP}:9000"
+      platys.webui.title: "MinIO UI"
+      platys.webui.url: "http://${PUBLIC_IP}:9000"
     ports:
       - '9000:9000'
     environment:
@@ -5019,8 +5022,8 @@ services:
     container_name: mqtt-ui
     hostname: mqtt-ui
     labels:
-      - platys.webui.title: "HiveMQ UI"
-        platys.webui.url: "http://${PUBLIC_IP}:28136"
+      platys.webui.title: "HiveMQ UI"
+      platys.webui.url: "http://${PUBLIC_IP}:28136"
     ports:
       - '28136:80'
     {%if use_timezone | default(false) %}
@@ -5042,8 +5045,8 @@ services:
     image: rmohr/activemq:{{__ACTIVEMQ_version}}
     container_name: activemq
     labels:
-      - platys.webui.title: "ActiveMQ UI"
-        platys.webui.url: "http://${PUBLIC_IP}:8161"
+      platys.webui.title: "ActiveMQ UI"
+      platys.webui.url: "http://${PUBLIC_IP}:8161"
     ports:
       # mqtt
       - "1890:1883"
@@ -5080,8 +5083,8 @@ services:
     container_name: rabbitmq
     hostname: rabbitmq
     labels:
-      - platys.webui.title: "RabbitMQ UI"
-        platys.webui.url: "http://${PUBLIC_IP}:15672"
+      platys.webui.title: "RabbitMQ UI"
+      platys.webui.url: "http://${PUBLIC_IP}:15672"
     ports:
       - 5673:5672
       - 15672:15672
@@ -5136,8 +5139,8 @@ services:
     container_name: filezilla
     hostname: filezilla
     labels:
-      - platys.webui.title: "Filezilla UI"
-        platys.webui.url: "http://${PUBLIC_IP}:5800"
+      platys.webui.title: "Filezilla UI"
+      platys.webui.url: "http://${PUBLIC_IP}:5800"
     ports:
       - "5800:5800"
       - "5900:5900"
@@ -5186,8 +5189,8 @@ services:
     container_name: code-server
     hostname: code-server
     labels:
-      - platys.webui.title: "Code-Server UI"
-        platys.webui.url: "http://${PUBLIC_IP}:28140"
+      platys.webui.title: "Code-Server UI"
+      platys.webui.url: "http://${PUBLIC_IP}:28140"
     user: 0:0
     ports:
       - 28140:8080
@@ -5215,8 +5218,8 @@ services:
     container_name: vault
     hostname: vault
     labels:
-      - platys.webui.title: "Vault UI"
-        platys.webui.url: "http://${PUBLIC_IP}:8200"
+      platys.webui.title: "Vault UI"
+      platys.webui.url: "http://${PUBLIC_IP}:8200"
     ports:
       - 8200:8200
     environment:
@@ -5251,8 +5254,8 @@ services:
     container_name: swagger-editor
     hostname: swagger-editor
     labels:
-      - platys.webui.title: "Swagger Editor UI"
-        platys.webui.url: "http://${PUBLIC_IP}:28156"
+      platys.webui.title: "Swagger Editor UI"
+      platys.webui.url: "http://${PUBLIC_IP}:28156"
     ports:
       - 28156:8080
     {%if use_timezone | default(false) %}
@@ -5274,8 +5277,8 @@ services:
     container_name: swagger-ui
     hostname: swagger-ui
     labels:
-      - platys.webui.title: "Swagger UI"
-        platys.webui.url: "http://${PUBLIC_IP}:28157"
+      platys.webui.title: "Swagger UI"
+      platys.webui.url: "http://${PUBLIC_IP}:28157"
     ports:
       - 28157:8080
     {%if use_timezone | default(false) %}
@@ -5297,8 +5300,8 @@ services:
     container_name: portainer
     hostname: portainer
     labels:
-      - platys.webui.title: "Portainer UI"
-        platys.webui.url: "http://${PUBLIC_IP}:28137"
+      platys.webui.title: "Portainer UI"
+      platys.webui.url: "http://${PUBLIC_IP}:28137"
     ports:
       - 28137:9000
     {%if use_timezone | default(false) %}
@@ -5323,8 +5326,8 @@ services:
     container_name: cadvisor
     hostname: cadvisor
     labels:
-      - platys.webui.title: "cAdvisor UI"
-        platys.webui.url: "http://${PUBLIC_IP}:28138"
+      platys.webui.title: "cAdvisor UI"
+      platys.webui.url: "http://${PUBLIC_IP}:28138"
     ports:
       - 28138:8080
     {%if use_timezone | default(false) %}
@@ -5376,8 +5379,8 @@ services:
     container_name: wetty
     hostname: wetty
     labels:
-      - platys.webui.title: "WeTTY UI"
-        platys.webui.url: "http://${PUBLIC_IP}:3001"
+      platys.webui.title: "WeTTY UI"
+      platys.webui.url: "http://${PUBLIC_IP}:3001"
     ports:
       - "3001:3000"
     environment:
@@ -5421,6 +5424,38 @@ services:
     {% endif %}
     restart: {{container_restart_policy}}
 {% endif %}   {# PYTHON_enable #}
+
+
+{% if MARKDOWN_VIEWER_enable | default(false) %}
+  #  ================================== markdown-viewer ========================================== #
+  markdown-viewer:
+    image: minimum/markdown-web:{{__MARKDOWN_VIEWER_VERSION}}
+    container_name: markdown-viewer
+    hostname: markdown-viewer
+    labels:
+      platys.webui.title: "Markdown Viewer UI"
+      platys.webui.url: "http://${PUBLIC_IP}"
+    ports:
+      - "80:80"
+    volumes:
+      - ./documentation:/home/python/markdown
+      - ./data-transfer:/data-transfer
+    restart: {{container_restart_policy}}
+
+  markdown-generator:
+    image: trivadis/jinja2:latest
+    container_name: markdown-generator
+    hostname: markdown-generator
+    environment:
+      PUBLIC_IP: '${PUBLIC_IP}'
+    volumes:
+      - ./documentation/templates:/templates
+      - ./documentation/templates:/scripts
+      - .:/variables
+      - ./documentation:/output
+      - ./data-transfer:/data-transfer
+    restart: {{container_restart_policy}}
+{% endif %}   {# MARKDOWN_VIEWER_enable #}
 
 {% if PROVISIONING_DATA_enable | default(false) %}
   #  ================================== data-provisioning ========================================== #
