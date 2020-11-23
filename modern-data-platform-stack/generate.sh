@@ -8,7 +8,7 @@ then
      echo "======================================================================"
      echo "CONFIG_URL is set: downloading config.yml from ${CONFIG_URL}"
      echo "======================================================================"
-  fi     
+  fi
   wget ${CONFIG_URL} -O /tmp/config.yml
 fi
 
@@ -24,7 +24,7 @@ then
    docker-compose-templer -v -f /opt/mdps-gen/stack-config.yml
    echo "======================================================================"
 else
-   docker-compose-templer -f /opt/mdps-gen/stack-config.yml 
+   docker-compose-templer -f /opt/mdps-gen/stack-config.yml
 fi
 
 # we asume that the output volume is mapped to /opt/mdps-gen/destination
@@ -52,3 +52,5 @@ then
   echo "${TIMEZONE}" > /opt/mdps-gen/destination/etc/timezone
 fi
 
+# Currently not used
+#jinja2 /opt/mdps-gen/destination/documentation/templates/services.md.j2 /opt/mdps-gen/destination/docker-compose.yml --format=yaml --outfile /opt/mdps-gen/destination/documentation/services.md
