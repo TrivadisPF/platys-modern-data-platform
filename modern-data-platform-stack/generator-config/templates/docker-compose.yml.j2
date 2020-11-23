@@ -1137,7 +1137,11 @@ services:
     {% endif -%}   {#  SCHEMA_REGISTRY_enable #}
     {% if ( KAFKA_CONNECT_enable ) | default(false) %}
               connect:
-                url: "http://kafka-connect-1:8083"
+      {% for num in range(KAFKA_CONNECT_nodes | default(1) ) %}
+          {% set port = 8083 + loop.index - 1 %}
+                - name: "kafka-connect-{{loop.index}}"
+                  url: "http://kafka-connect-1:{{port}}"
+      {% endfor -%}
     {% endif -%}   {#  KAFKA_CONNECT_enable #}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
