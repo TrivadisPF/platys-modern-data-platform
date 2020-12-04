@@ -1,0 +1,1 @@
+Contains the logs folder of streamsets service, if flag STREAMSETS_volume_map_logs is set to true.
