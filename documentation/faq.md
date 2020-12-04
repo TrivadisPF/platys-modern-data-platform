@@ -17,7 +17,7 @@ If you have a service which is not supported by the Platform Stack you base on, 
 Just create a new file in the same folder as the `docker-compose.yml`, name it `docker-compose.override.yml` and add the a header similar to the one, where the version should be the same as the one as in the generated `docker-compose.yml` file (currently `3.0` by default).
 
 ```
-version: "3.0"
+version: "3.5"
 
 services:
   <add your service definitions here ...>
