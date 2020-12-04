@@ -75,6 +75,7 @@ networks:
 {% set __STREAMSETS_EDGE_version = STREAMSETS_EDGE_version | default('3.12.0') -%}
 
 {% set __NIFI_version = NIFI_version | default('latest') -%}
+{% set __NIFI_REGISTRY_version = NIFI_REGISTRY_version | default('latest') -%}
 
 {% set __NODERED_version = NODERED_version | default('latest') -%}
 
@@ -2666,6 +2667,29 @@ services:
     {% endif -%}   {#  use_timezone #}
     restart: {{container_restart_policy}}
 
+  {%if NIFI_REGISTRY_enable | default(false) %}
+  nifi-registry:
+    image: apache/nifi-registry:{{__NIFI_REGISTRY_version}}
+    container_name: nifi-registry
+    hostname: nifi-registry
+    labels:
+      com.platys.webui.title: "NiFi Registry UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:18085"
+    ports:
+      - 18085:18085
+    environment:
+      NIFI_REGISTRY_WEB_HTTP_PORT: 19090
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+  {% endif %}   {#  NIFI_enable  #}
 {% endif %}   {#  NIFI_enable  #}
 
 {%if NODERED_enable | default(false) %}
