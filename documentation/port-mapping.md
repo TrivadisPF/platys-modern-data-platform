@@ -1,4 +1,4 @@
-# `modern-data-platform` - Port Mappings - 1.8.0
+# `modern-data-platform` - Port Mappings - 1.9.0
 
 This table reserves the external ports for the various services. Not all services have to be used in the platform at a given time. But by reserving, we can assure that there are no conflicts if a service is added at a later time.
 
@@ -166,7 +166,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 18633 | 18633 | streamsets-edge-1 |
 19000 | 9000 | yb-tserver-1 |
 19042 | 9042 | cassandra-atlas |
-19043 | 9042 | cassandra-atlas |
+19043 | 9042 | cassandra-atlas | 
+19090 | 19090 | nifi-registry |
 19160 | 9160 | cassandra-atlas |
 19200 | 9200 | elasticsearch-atlas |
 19201 | 9200 | amundsen-elasticsearch |
