@@ -7,7 +7,7 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.5) }}"
 
 networks:
   default:
-    name: {{platys['platform-name']}}
+    name: {{platys['platform-name']}} {{platys.platform-name}}
 
 {% set __CONFLUENT_PLATFORM_version = CONFLUENT_PLATFORM_version | default('latest') -%}
 {% set __APICURIO_REGISTRY_version = APICURIO_REGISTRY_version | default('latest') -%}
@@ -339,7 +339,7 @@ services:
     restart: {{container_restart_policy}}
   {% endfor %}
 
-  {% if ZOOKEEPER_navigator_enable | default(false) %}
+  {% if ZOOKEEPER_NAVIGATOR_enable | default(false) %}
   zoonavigator:
     image: elkozmon/zoonavigator-web:{{__ZOONAVIGATOR_version}}
     container_name: zoonavigator
@@ -386,7 +386,7 @@ services:
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
     restart: {{container_restart_policy}}
-  {% endif %}   {# ZOOKEEPER_navigator_enable #}
+  {% endif %}   {# ZOOKEEPER_NAVIGATOR_enable #}
 
 {% endif %}   {# zookeeper_enable or KAFKA_enable or ATLAS_enable #}
 
@@ -1448,6 +1448,9 @@ services:
   {%if MINIO_enable | default(false) %}
       CORE_CONF_fs_s3a_endpoint: 'http://minio:9000'
       CORE_CONF_fs_s3a_path_style_access: 'true'
+      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
+      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_endpoint: http://minio:9000
+      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_path_style_access: 'true'
   {% endif %}
       SPARK_PUBLIC_DNS: ${PUBLIC_IP}
       INIT_DAEMON_STEP: setup_spark
@@ -1456,9 +1459,6 @@ services:
       SPARK_DEFAULTS_CONF_spark_jars_excludes: {{SPARK_jars_excludes}}
       SPARK_DEFAULTS_CONF_spark_jars: {{SPARK_jars}}
       SPARK_DEFAULTS_CONF_spark_jars_ivySettings: {{SPARK_jars_ivySettings}}
-      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
-      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_endpoint: http://minio:9000
-      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_path_style_access: 'true'
   {%if (SPARK_catalog | lower) == 'in-memory' | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalogImplementation: in-memory
   {% else %}
@@ -1515,15 +1515,15 @@ services:
   {%if MINIO_enable | default(false) %}
       CORE_CONF_fs_s3a_endpoint: 'http://minio:9000'
       CORE_CONF_fs_s3a_path_style_access: 'true'
+      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
+      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_endpoint: http://minio:9000
+      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_path_style_access: 'true'
   {% endif %}
       SPARK_DEFAULTS_CONF_spark_jars_repositories: {{SPARK_jars_repositories}}
       SPARK_DEFAULTS_CONF_spark_jars_packages: {{SPARK_jars_packages}}
       SPARK_DEFAULTS_CONF_spark_jars_excludes: {{SPARK_jars_excludes}}
       SPARK_DEFAULTS_CONF_spark_jars: {{SPARK_jars}}
       SPARK_DEFAULTS_CONF_spark_jars_ivySettings: {{SPARK_jars_ivySettings}}
-      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
-      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_endpoint: http://minio:9000
-      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_path_style_access: 'true'
   {%if (SPARK_catalog | lower) == 'in-memory' | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalogImplementation: in-memory
   {% else %}
@@ -2863,15 +2863,15 @@ services:
     {%if MINIO_enable | default(false) %}
       CORE_CONF_fs_s3a_endpoint: 'http://minio:9000'
       CORE_CONF_fs_s3a_path_style_access: 'true'
+      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_endpoint: http://minio:9000
+      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_path_style_access: 'true'
+      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
     {% endif %}
       SPARK_DEFAULTS_CONF_spark_jars_repositories: {{SPARK_jars_repositories}}
       SPARK_DEFAULTS_CONF_spark_jars_packages: {{SPARK_jars_packages}}
       SPARK_DEFAULTS_CONF_spark_jars_excludes: {{SPARK_jars_excludes}}
       SPARK_DEFAULTS_CONF_spark_jars: {{SPARK_jars}}
       SPARK_DEFAULTS_CONF_spark_jars_ivySettings: {{SPARK_jars_ivySettings}}
-      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
-      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_endpoint: http://minio:9000
-      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_path_style_access: 'true'
   {%if (SPARK_catalog | lower) == 'in-memory' | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalogImplementation: in-memory
   {% else %}
