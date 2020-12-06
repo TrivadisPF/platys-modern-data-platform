@@ -1,5 +1,77 @@
 # `modern-data-platform` - What's new?
 
+See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/platys/blob/master/documentation/upgrade-platform-stack.md) for how to upgrade to newer version.
+
+## What's new in 1.9.0
+
+The Modern Data Platform version 1.9.0 contains the following new services and enhancements:
+
+### New Services
+
+* Redis Insight
+* WebTTY
+* Markdown Viewer (enabled by default, rendering documentation about the platform)
+* NiFi Registry
+
+### Version upgrades  
+
+* Change `Redis` to bitnami image
+* Update `DataHub` to `0.6.1`
+* Update `Portainer` to `2.0.0`
+* Update `CAdvisor` to `v0.36.0`
+* Update `Marquez` to `0.11.3` and Marquez UI to `0.7.0`
+* Update `Apache NiFi` to `1.12.1`
+* Update `StreamSets Data Collector` to `3.19.0`
+* Update `ksqlDB` to `0.13.0`
+* Update `Hue` to `4.8.0`
+* Update `Amundsen-Frontend` to `3.0.0`
+* Update `Amundsen-Metadata` to `3.0.0`
+* Update `Amundsen-Search` to `2.4.1`
+* Update `Presto` to `344-e`
+* Update `Dremio` to `4.9`
+* Update `MongoDB` to `4.4.2`
+* Update `MongoDB` to `4.2.0`
+* Update `InfluxDB 2.0` to `v2.0.2`
+* Update `Druid` to `0.20.0`
+* Update `Memcached` to `1.6.9`
+* Update `Kudu` to `1.13`
+* Update `Prometheus` to `v2.23.0` and `Prometheus-Pushgateway` to `v1.3.0`
+* Update `Tile38` to `1.22.5`
+* Update `Grafana` to `7.3.4`
+* Update `Stardog` to `7.4.4-java11-preview` and `Stardog Studio` to `1.29.1`
+* Update `Yugabyte` to `2.5.0.0-b2`
+* Update `Axon` to `4.4.5`
+* Update `Presto` to `346-e`
+* Update `Dremio` to `11.0`
+* Update `HiveMQ3` to `3.4.7` and `HiveMQ4` to `4.4.3`
+* Update `Vault` to `1.6.0`
+* Update `Airflow` to `1.10.13`
+* Update `Atlas` to `2.1.0`
+* Update `Ranger` to `2.1.0`
+* Update `Mosquitto` to `2.0`
+* Update `Streamsheets` to `2.1-milestone`
+
+### Enhancements 
+
+* support Master/Slave Redis setup
+* automatically set the name of the docker network to the value of the `platform-name` property from the `config.yml`
+* Allow adding `ConfigProvider` classes to the `kafka-connect` service supporting the use of variables in connector configurations that are dynamically resolved when the connector is (re)started.
+* Rendering markdown files with information on the generated platform
+* Add configuration property to `ksqldb-server` to enable new suppress functionality and to use a query file
+* support external `Kafka` cluster (was in preview in 1.8) and `S3` object storage with the new `external` section
+* support setting access key and secret key to be used for `minio` in the `config.yml` using the same default values as before
+* support volume mapping for data and logs folder of `nifi` service
+
+### Breaking Changes
+
+* Update docker-compose version to `3.5` (requiring Docker Engine version 17.12.0 and higher)
+* Volume mapped `data` folder in Streamsets (`STREAMSETS_volume_map_data=true`) is now mapped to `container-volume/streamsets-1/data` and no longer to `container-volume/streamsets-1`
+* No longer use the `KAFKA_bootstrap_servers` to configure external kafka, but `external['KAFKA_enable']` property in `config.yml`
+
+### Bug Fixes 
+
+* Fix for the error when using the `STREAMSETS_volume_map_data` feature
+
 ## What's new in 1.8.0
 
 The Modern Data Platform version 1.8.0 contains the following new services and enhancements:
