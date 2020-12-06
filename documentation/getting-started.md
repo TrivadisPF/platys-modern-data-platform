@@ -14,21 +14,48 @@ Make sure that you have already installed the [Docker Engine](https://docs.docke
 First create a directory, which will hold the `platys` configuration as well as the generated artefacts:
 
 ```
-mkdir kafka-platform-example
-cd kafka-platform-example
+mkdir platys-demo-platform
+cd platys-demo-platform
 ```
 
 Now let's initialise the current directory to use the Modern Data Analytics Platform Stack. 
 
-We specify the platform stack name `trivadis/platys-modern-data-platform` to use as well as the stack version `1.8.0` (the current version of this platform stack). 
+We specify the platform stack name `trivadis/platys-modern-data-platform` to use as well as the stack version `1.9.0` (the current version of this platform stack). 
 
-With the `-n` option we give the platform a meaningful name. 
+With the `-n` option we give the platform a meaningful name. It will be used as the name of the docker network, so it is important that it is unique, if you use multiple platforms on the same machine.
 
 ```
-platys init -n kafka-platform --stack trivadis/platys-modern-data-platform --stack-version 1.8.0 --structure flat
+platys init -n demo-platform --stack trivadis/platys-modern-data-platform --stack-version 1.9.0 --structure flat
 ```
 
 This generates a `config.yml` file, if it does not exist already, with all the services which can be configured for the platform.
+
+```
+Running using config file [config.yml]
+{"status":"Pulling from trivadis/platys-modern-data-platform","id":"1.9.0-preview2"}
+{"status":"Digest: sha256:4b3278aba39bcdeb43a1aefe1b17fe2edd6facf2843df64db104f6d850392dbe"}
+{"status":"Status: Image is up to date for trivadis/platys-modern-data-platform:1.9.0-preview2"}
+  ______     _                 ___
+ /_  __/____(_)   ______ _____/ (_)____
+  / / / ___/ / | / / __ `/ __  / / ___/
+ / / / /  / /| |/ / /_/ / /_/ / (__  )
+/_/ /_/  /_/ |___/\__,_/\__,_/_/____/
+    __  ___          __                   ____        __           ____  __      __  ____
+   /  |/  /___  ____/ /__  _________     / __ \____ _/ /_____ _   / __ \/ /___ _/ /_/ __/___  _________ ___
+  / /|_/ / __ \/ __  / _ \/ ___/ __ \   / / / / __ `/ __/ __ `/  / /_/ / / __ `/ __/ /_/ __ \/ ___/ __ `__ \
+ / /  / / /_/ / /_/ /  __/ /  / / / /  / /_/ / /_/ / /_/ /_/ /  / ____/ / /_/ / /_/ __/ /_/ / /  / / / / / /
+/_/  /_/\____/\__,_/\___/_/  /_/ /_/  /_____/\__,_/\__/\__,_/  /_/   /_/\__,_/\__/_/  \____/_/  /_/ /_/ /_/
+
+Congratulations! Your new Platform has been initialized in %path%
+
+Just a few more steps and you're ready to go:
+
+1. Edit the config.yml and enable the services you want to use.
+2. Some services also allow for properties to be controlled. Use them if needed.
+3. Generate the stack according to the settings done in step 1 by running "platys gen".
+
+Visit https://github.com/trivadispf/modern-data-platform-stack/blob/master/documentation/getting-started.md for quickstart guide and full documentation.%!(EXTRA string=config.yml)
+```
 
 ## Step 2: Configure the platform
 
@@ -40,56 +67,110 @@ In an editor (i.e. `nano`) open this configuration file.
 nano config.yml
 ```
 
-You can see the configuration options, available through this platform stack, similar to this (only showing the first few lines)
+You can see the configuration options, available through this platform stack, similar to this (only showing the first few lines):
 
 ```
- # Default values for the generator
- # this file can be used as a template for a custom configuration
- # or to know about the different variables available for the generator
+      # Default values for the generator
+      # this file can be used as a template for a custom configuration
+      # or to know about the different variables available for the generator
       platys:
-        platform-name: 'kafka-platform'
-        platform-stack: 'trivadis/platys-modern-data-platform'
-        platform-stack-version: '1.8.0'
-        structure: 'flat'
-
+          platform-name: 'demo-platform'
+          platform-stack: 'trivadis/platys-modern-data-platform'
+          platform-stack-version: '1.9.0'
+          structure: 'flat'
+      # ========================================================================
+      # Global configuration, valid for all or a group of services 
+      # ========================================================================
+      # Timezone, use a Linux string such as Europe/Zurich or America/New_York
+      use_timezone: ''
+      # the name of the repository to use for private images, which are not on docker hub (currently only Oracle images)
+      private_docker_repository_name: 'trivadis'
+      # the UID to use when using the "user" property in a service to override the user inside the container
+      uid: '1000'
+      # ========================================================================
+      # External Services
+      # ========================================================================
+      external:
+          KAFKA_enable: false
+          KAFKA_bootstrap_servers:
+          KAFKA_username:
+          KAFKA_password:
+          SCHEMA_REGISTRY_enable: false
+          SCHEMA_REGISTRY_url:
+          S3_enable: false
+          S3_endpoint:
+          S3_path_style_access: false
+          S3_access_key:
+      # ========================================================================
+      # Platys Services
+      # ========================================================================
+      PROVISIONING_DATA_enable: false
+      #
       # ===== Apache Zookeeper ========
-      KAFKA_enable: true
+      #
+      ZOOKEEPER_enable: false
+      ZOOKEEPER_volume_map_data: false
+      ZOOKEEPER_nodes: 1 # either 1 or 3
+      #
+      # ===== Apache Zookeeper Navigator ========
+      #
+      ZOOKEEPER_NAVIGATOR_enable: false
+      #
+      # ===== Apache Kafka ========
+      #
+      KAFKA_enable: false
       # one of enterprise, community
       KAFKA_edition: 'community'
       KAFKA_volume_map_data: false
+      KAFKA_datacenters: 1
       KAFKA_broker_nodes: 3
+      KAFKA_internal_replication_factor: 3
       KAFKA_delete_topic_enable: false
       KAFKA_auto_create_topics_enable: false
+      KAFKA_message_timestamp_type: CreateTime
 
       ...
 ```
 
-You can now enable the options for the services you want the platform to support by changing `false` to `true`.
+You can now enable the options for the services you want the platform to support by changing the values of the Platys Services from `false` to `true`. The services available are named `XXXX_enable` by convention, where XXXX is the name of the service.
 
-For enabling Kafka and Zookeeper, all we have to do is set the `ZOOKEEPER_enable` and `KAFKA_enable` flag to `true`
+For this sample, we want to create a platform running Kafka and AKHQ. So all we have to do is set the `KAFKA_enable` flag to `true`
 
-      #zookeeper
-      ZOOKEEPER_enable: true
+```
+      #
+      # ===== Apache Zookeeper ========
+      #
+      ZOOKEEPER_enable: false
       ZOOKEEPER_volume_map_data: false
       ZOOKEEPER_nodes: 1            # either 1 or 3
 
-      #kafka
+      #
+      # ===== Apache Kafka ========
+      #
       KAFKA_enable: true
       KAFKA_entreprise_enable: false
       KAFKA_volume_map_data: false
       KAFKA_broker_nodes: 3
       KAFKA_delete_topic_enable: false
       KAFKA_auto_create_topics_enable: false
+      
+      ...
+      
+      #
+      # ===== Apache Kafka HQ ========
+      #
+      KAFKA_AKHQ_enable: false      
+```
 
 You only have to explicitly enable what you need, as each service is disabled by default. Other settings have meaningful defaults as well. So you can also delete the values for all the services you don't need. 
 
 All configuration settings for the `platys-modern-data-platform` platform stack are documented [here](Configuration.md).
 
 
-A shortcut exists with the `--enable-services` flag, which directly generates a `config.yml` file with the services needed. So to only enable `ZOOKEEPER` and `KAFKA`, we can use
+A shortcut exists with the `--enable-services` flag, which directly generates a `config.yml` file with the services needed. So to enable `KAFKA` and `AKHQ` directly from the `init`, we can use
 
 ```
-platys init --enable-services ZOOKEEPER,KAFKA --stack trivadis/platys-modern-data-platform --stack-version 1.8.0  
+platys init -n demo-platform --enable-services KAFKA,KAFKA_AKHQ --stack trivadis/platys-modern-data-platform --stack-version 1.9.0  
 ```
 
 which produces the following `config.yml`
@@ -99,30 +180,36 @@ which produces the following `config.yml`
       # this file can be used as a template for a custom configuration
       # or to know about the different variables available for the generator
       platys:
-          platform-name: 'default'
+          platform-name: 'demo-platform'
           platform-stack: 'trivadis/platys-modern-data-platform'
-          platform-stack-version: '1.8.0'
+          platform-stack-version: '1.9.0'
           structure: 'flat'
-      # ===== Global configuation, valid for all or a group of services ========
+      # ========================================================================
+      # Global configuration, valid for all or a group of services 
+      # ========================================================================
       # Timezone, use a Linux string such as Europe/Zurich or America/New_York
       use_timezone: ''
       # the name of the repository to use for private images, which are not on docker hub (currently only Oracle images)
       private_docker_repository_name: 'trivadis'
-      # ===== Apache Zookeeper ========
-      ZOOKEEPER_enable: true
+      #
       # ===== Apache Kafka ========
+      #
       KAFKA_enable: true
+      #
+      # ===== Apache Kafka HQ ========
+      #
+      KAFKA_AKHQ_enable: true
 ```
 
 if you want to know the service names you can use with the `--enable-services` flag you can query for it using the `list_services` command.
 
 ```
-platys list_services --stack trivadis/platys-modern-data-platform --stack-version 1.8.0
+platys list_services --stack trivadis/platys-modern-data-platform --stack-version 1.9.0
 ```
 
 ## Step 3: Generate the platform
 
-Now we are ready to generate the platform. In the `kafka-plaform-example` folder, run the following command:
+Now we are ready to generate the platform. In the `platys-demo-platform` folder, run the following command:
 
 ```
 platys gen
@@ -131,34 +218,65 @@ platys gen
 and you should see an output similar to this
 
 ```
-Running the Modern Data Platform Stack Generator ....
-Destination = /home/bigdata/mdps-stack-test
+docker@ubuntu:~/platys-demo1.9$ platys gen
+2020/12/06 23:08:06 using configuration file [config.yml] with values:  platform-name: [demo-platform], platform-stack: [trivadis/platys-modern-data-platform] platform-stack-version: [1.9.0], structure [flat]
+{"status":"Pulling from trivadis/platys-modern-data-platform","id":"1.9.0"}
+{"status":"Digest: sha256:4b3278aba39bcdeb43a1aefe1b17fe2edd6facf2843df64db104f6d850392dbe"}
+{"status":"Status: Image is up to date for trivadis/platys-modern-data-platform:1.9.0-preview2"}
+======================================================================
+generating using the following custom stack-config.yml:
+      # Default values for the generator
+      # this file can be used as a template for a custom configuration
+      # or to know about the different variables available for the generator
+      platys:
+          platform-name: 'demo-platform'
+          platform-stack: 'trivadis/platys-modern-data-platform'
+          platform-stack-version: '1.9.0'
+          structure: 'flat'
+      # ========================================================================
+      # Global configuration, valid for all or a group of services 
+      # ========================================================================
+      # Timezone, use a Linux string such as Europe/Zurich or America/New_York
+      use_timezone: ''
+      # the name of the repository to use for private images, which are not on docker hub (currently only Oracle images)
+      private_docker_repository_name: 'trivadis'
+      #
+      # ===== Apache Kafka ========
+      #
+      KAFKA_enable: true
+      #
+      # ===== Apache Kafka HQ ========
+      #
+      KAFKA_AKHQ_enable: true
+      
+======================================================================
 
 Process Definition: '/opt/mdps-gen/stack-config.yml'
 Loading file '/opt/mdps-gen/stack-config.yml'...
 Parsing YAML...
-Loading file '/opt/mdps-gen/vars/default-values.yml'...
+Loading file '/opt/mdps-gen/vars/config.yml'...
 Parsing YAML...
-Loading file '/tmp/custom-stack-config.yml'...
-Parsing YAML...
-Return cached file '/opt/mdps-gen/vars/default-values.yml'...
-Parsing YAML...
-Return cached file '/tmp/custom-stack-config.yml'...
+Loading file '/tmp/config.yml'...
 Parsing YAML...
 Render template: 'templates/docker-compose.yml.j2' --> 'destination/docker-compose.yml'
 Loading file '/opt/mdps-gen/templates/docker-compose.yml.j2'...
 Parsing YAML...
 Dumping YAML...
 Writing file '/opt/mdps-gen/destination/docker-compose.yml'...
-Render template: 'templates/mdps-services.yml.j2' --> 'destination/mdps-services.yml'
-Loading file '/opt/mdps-gen/templates/mdps-services.yml.j2'...
-Parsing YAML...
-Dumping YAML...
-Writing file '/opt/mdps-gen/destination/mdps-services.yml'...
-Modern Data Platform Stack generated successfully to /home/docker/Desktop/kafka-plaform-example
+======================================================================
+======================================================================
+Using timezone = 
+======================================================================
+grep: /opt/mdps-gen/destination/.gitignore: No such file or directory
 ```
 
 You now find a fully configured `docker-compose.yml` file (with the services enabled in the `config.yml`) as well as some static configuration files, necessary for the services.
+
+You can look at the `docker-compose.yml` to see all the service definitions which have been generated. We can see that besides the `kafka-1`, `kafka-2`, `kafka-3` and `akhq` there is also `zookeeper-1`, `markdown-viewer` and `markdown-renderer`.  
+
+The generator knows about dependencies between services, and because Kafka needs a running Zookeeper environment, Zookeeper has been automatically enabled. 
+
+The other two services, `markdown-viewer` and `markdown-renderer` is enabled by default in the `config.yml`. It will generate a web page on the information of the platform, once it is running. You can disable it by setting the `MARKDOWN_VIEWER_enable` to `false`. 
 
 ## Step 4: Run the platform 
 
@@ -168,29 +286,56 @@ Now the Platform is ready to be started. Before doing that, you have to create s
 * `PUBLIC_IP` - the IP address of the public network interface of the Docker Host (different to `DOCKER_HOST_IP` if in a public cloud environment
 
 You can set these environment variables persistently on the machine (`/etc/environment`) or user (`~/.pam_environment` or `~/.profile`) level. 
+
 Another option is to use the `.env` file in the folder where the `docker-compose.yml` file is located. All environment variables set in there are used when the docker compose environment is started. 
 
-Now let's start the platform. In a terminal window, execute
+Now let's start the platform. In a terminal window, execute 
 
 ```
 docker-compose up -d
 ```
 
-Docker will start downloading the necessary container images and then start the platform. 
+to start the docker compose platform stack in the background (`-d` option). 
 
-To see the logs of all the services, perform
+Docker will first download all the necessary container images (if not yet available in the local registry) and then start the platform. You should see the following output once the platform is up and running:
+
+```
+Creating markdown-viewer   ... done
+Creating markdown-renderer ... done
+Creating zookeeper-1       ... done
+Creating kafka-2           ... done
+Creating kafka-1           ... done
+Creating kafka-3           ... done
+Creating akhq              ... done
+```
+
+In a web browser, navigate to <http://${DOCKER_HOST_IP}> and you should see platform info page, which has been generated when starting the platform
+
+![Alt Image Text](./images/service-info.png "Service Info ")
+
+Click on the link of *All available services are listed here* and you will see a list of the services and the Web UIs and REST APIs the expose:
+
+![Alt Image Text](./images/service-list.png "Service List ")
+
+### View the Logs
+
+If there is something wrong, you might want to consult the log of the platform stack. 
+
+You can display the active log entries for the whole platform using
 
 ```
 docker-compose logs -f
 ```
 
-You can list a number of service to only see a log for them
+To only see the log of selected services, you can list them after the `docker-compose logs -f`
 
 ```
 docker-compose logs -f <service-name> <service-name>
 ```
 
-To stop and remove the running stack, perform
+## Step 5: Stopping the Platform
+
+To stop and remove the running platform stack, perform
 
 ```
 docker-compose down
@@ -203,5 +348,5 @@ At this point, you have seen the basics of how `platys` works using the `modern-
 
 ## Where to go next
 
-* [Explore the full list of Platys commands](overview-platys-command.md)
-* [Modern Data Platform Stack configuration file reference](../platform-stacks/modern-data-platform/documentation/configuration.md)
+* [Explore the full list of Platys commands](https://github.com/TrivadisPF/platys/tree/master/documentation/overview-platys-command.md)
+* [Modern Data Platform Stack configuration file reference](configuration.md)

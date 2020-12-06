@@ -1,4 +1,4 @@
-# `modern-data-platform` - Port Mappings - 1.8.0
+# `modern-data-platform` - Port Mappings - 1.9.0
 
 This table reserves the external ports for the various services. Not all services have to be used in the platform at a given time. But by reserving, we can assure that there are no conflicts if a service is added at a later time.
 
@@ -26,6 +26,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 2182 | 2181 | zookeeper-2 |
 2183 | 2181 | zookeeper-3 |
 3000 | 3000 | grafana |
+3001 | 3000 | wetty |
 3005 | 3000 | marquez-web |
 3306 | 3306 | mysql |
 3307 | 3306 | datahub-mysql |
@@ -61,7 +62,10 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 6066 | 6066 | spark-master |
 6080 | 6080 | ranger-admin |
 6379 | 6379 | redis-1 |
-6380 | 6379 | redash-redis |
+6380 | 6379 | redis-replica-1 |
+6381 | 6379 | redis-replica-1 |
+6382 | 6379 | redis-replica-1 |
+6385 | 6379 | redash-redis |
 7000 | 7000 | yb-master |
 7050 | 7050 | kudu-tserver-1 |
 7051 | 7051 | kudo-master-1 |
@@ -135,7 +139,9 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 9997 | 9997 | kafka-6 (jmx) |
 9999 | 9999 | influxdb2 |
 10000 | 10000 | hive-server |
+10001 | 10001 | hive-server |
 10002 | 10002 | hive-server |
+10005 | 10000 | nifi |
 11211 | 11211 | memcached |
 15433 | 5433| yb-tserver-1 |
 15672 | 15672 | rabbitmq (ui) |
@@ -161,7 +167,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 18633 | 18633 | streamsets-edge-1 |
 19000 | 9000 | yb-tserver-1 |
 19042 | 9042 | cassandra-atlas |
-19043 | 9042 | cassandra-atlas |
+19043 | 9042 | cassandra-atlas | 
+19090 | 19090 | nifi-registry |
 19160 | 9160 | cassandra-atlas |
 19200 | 9200 | elasticsearch-atlas |
 19201 | 9200 | amundsen-elasticsearch |
@@ -265,6 +272,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28171 | 3030 | smashing |
 28172 | 3030 | tipboard |
 28173 | 3030 | chartboard |
+28174 | 8001 | redis-insight |
+28175 | 8088 | cedalo-management-center |
 28500 - 28510 | 28500 - 28510 | streamsets-1 (additional ports) |
 
 

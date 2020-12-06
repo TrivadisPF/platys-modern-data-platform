@@ -29,6 +29,5 @@ See [What's new?](./documentation/changes.md) for a detailed list of changes.
   * [Port Mapping](./documentation/port-mapping.md)
   * [Frequently Asked Questions](./documentation/faq.md)
   * [Troubleshooting](./documentation/troubleshooting.md)
-
-
-
+  * [Adding additional services not supported by a platform stack](https://github.com/TrivadisPF/platys/blob/master/documentation/docker-compose-override.md)
+  * [Upgrade to a new platform stack version](https://github.com/TrivadisPF/platys/blob/master/documentation/upgrade-platform-stack.md)

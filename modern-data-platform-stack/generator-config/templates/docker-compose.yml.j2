@@ -1,7 +1,13 @@
-# =====================================================
-# Platform: {{platys['platform-name']}}
-# =====================================================
-version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
+# =======================================================================
+# Platform Name            {{platys['platform-name']}}
+# Platform Stack:          {{platys['platform-stack']}}
+# Platform Stack Version:  {{platys['platform-stack-version']}}
+# =======================================================================
+version: "{{ DOCKER_COMPOSE_VERSION |default(3.5) }}"
+
+networks:
+  default:
+    name: {{platys['platform-name']}}
 
 {% set __CONFLUENT_PLATFORM_version = CONFLUENT_PLATFORM_version | default('latest') -%}
 {% set __APICURIO_REGISTRY_version = APICURIO_REGISTRY_version | default('latest') -%}
@@ -26,6 +32,7 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
 
 {% set __KAFKACAT_version = KAFKACAT_version | default('latest') -%}
 
+{% set __HADOOP_image_version = HADOOP_image_version | default('latest') -%}
 {% set __HADOOP_version = HADOOP_version | default('latest') -%}
 {% set __SQOOP_version = SQOOP_version | default('latest') -%}
 
@@ -68,6 +75,7 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
 {% set __STREAMSETS_EDGE_version = STREAMSETS_EDGE_version | default('3.12.0') -%}
 
 {% set __NIFI_version = NIFI_version | default('latest') -%}
+{% set __NIFI_REGISTRY_version = NIFI_REGISTRY_version | default('latest') -%}
 
 {% set __NODERED_version = NODERED_version | default('latest') -%}
 
@@ -104,6 +112,7 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
 {% set __MEMCACHED_version = MEMCACHED_version | default('latest') -%}
 
 {% set __REDIS_version = REDIS_version | default('latest') -%}
+{% set __REDIS_INSIGHT_version = REDIS_INSIGHT_version | default('latest') -%}
 {% set __REDIS_COMMANDER_version = REDIS_COMMANDER_version | default('latest') -%}
 
 {% set __MONGO_version = MONGO_version | default('latest') -%}
@@ -114,7 +123,7 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
 
 {% set __NEO4J_version = NEO4J_version | default('latest') -%}
 
-{% set __STARDOG_version = STARTDOG_version | default('latest') -%}
+{% set __STARDOG_version = STARDOG_version | default('latest') -%}
 {% set __STARDOG_STUDIO_version = STARDOG_STUDIO_version | default('latest') -%}
 
 {% set __INFLUXDB_version = INFLUXDB_version | default('latest') -%}
@@ -157,6 +166,8 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
 {% set __HIVEMQ3_version = HIVEMQ3_version | default('latest') -%}
 {% set __HIVEMQ4_version = HIVEMQ4_version | default('latest') -%}
 {% set __HIVEMQ_MQTT_WEB_CLIENT_version = HIVEMQ_MQTT_WEB_CLIENT_version | default('latest') -%}
+{% set __CEDALO_MANAGEMENT_CENTER_version = CEDALO_MANAGEMENT_CENTER_version | default('latest') -%}
+
 {% set __ACTIVEMQ_version = ACTIVEMQ_version | default('latest') -%}
 {% set __RABBITMQ_version = RABBITMQ_version | default('latest') -%}
 
@@ -172,6 +183,9 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
 {% set __PORTAINER_version = PORTAINER_version | default('latest') -%}
 {% set __CADVISOR_version = CADVISOR_version | default('latest') -%}
 {% set __HAWTIO_version = HAWTIO_version | default('latest') -%}
+{% set __WETTY_version = WETTY_version | default('latest') -%}
+
+{% set __MARKDOWN_VIEWER_VERSION = MARKDOWN_VIEWER_VERSION | default('latest') -%}
 
 {% set __SWAGGER_EDITOR_version = SWAGGER_EDITOR_version | default('latest') -%}
 {% set __SWAGGER_UI_version = SWAGGER_UI_version | default('latest') -%}
@@ -190,7 +204,7 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
   {% set KAFKA_enable = true -%}
 {% endif -%}   {# DATAHUB_enable  #}
 
-{% if KAFKA_enable or ATLAS_enable -%}
+{% if KAFKA_enable or ATLAS_enable or DRILL_enable -%}
 # enforce some dependencies
   {% set ZOOKEEPER_enable = true -%}
 {% endif -%}   {# KAFKA_enable or ATLAS_enable or DATAHUB_enable #}
@@ -240,6 +254,7 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
   {% set STREAMSETS_enable = false -%}
   {% set STREAMSETS_TRANSFORMER_enable = false -%}
   {% set NIFI_enable = false -%}
+  {% set NIFI_REGISTRY_enable = false -%}
   {% set STREAMSHEETS_enable = false -%}
   {% set AIRFLOW_enable = false -%}
   {% set ZEPPELIN_enable = false -%}
@@ -248,6 +263,8 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
   {% set REDASH_enable = false -%}
   {% set SMASHING_enable = false -%}
   {% set TIPBOARD_enable = false -%}
+  {% set REDIS_INSIGHT_enable = false -%}
+  {% set REDIS_COMMANDER_enable = false -%}
   {% set MONGO_enable = false -%}
   {% set ELASTICSEARCH_enable = false -%}
   {% set DEJAVU_enable = false -%}
@@ -283,9 +300,53 @@ version: "{{ DOCKER_COMPOSE_VERSION |default(3.0) }}"
   {% set CODE_SERVER_enable = false -%}
   {% set CADVISOR_enable = false -%}
   {% set HAWTIO_enable = false -%}
+  {% set WETTY_enable = false -%}
+  {% set MARKDOWN_VIEWER_enable = false -%}
   {% set SWAGGER_EDITOR_enable = false -%}
   {% set SWAGGER_UI_enable = false -%}
 {% endif %}   {# PLATFORM_ARM_enable #}
+
+{#  ================================== Handling external services ========================================== #}
+
+{% set ns = namespace(bootstrapServers='') %}
+{% if (external['KAFKA_enable']) | default(false) %}
+    {% set ns.bootstrapServers = external['KAFKA_bootstrap_servers'] %}
+{% else %}
+    {% for num in range(KAFKA_datacenters | default(1) ) %}
+      {% set dcName = "dc" ~ loop.index%}
+      {% set basePort = 9091 + (loop.index-1) * KAFKA_broker_nodes %}
+      {% if loop.length > 1 %}
+        {% set serviceBaseName = "kafka-" ~ dcName ~ "-" %}
+      {% else %}
+        {% set serviceBaseName = "kafka-" %}
+      {% endif -%}
+      {% for num in range(KAFKA_broker_nodes | default(1) ) %}
+        {% set port = basePort + loop.index %}
+        {% set serviceName = serviceBaseName ~ loop.index %}
+        {% if loop.first %}
+           {% set ns.bootstrapServers = serviceName ~ ":1" ~ port %}
+        {% else %}
+           {% set ns.bootstrapServers = ns.bootstrapServers ~ ',' ~ serviceName ~ ":1" ~ port %}
+        {% endif %}
+      {% endfor %}
+    {% endfor %}
+{% endif %}   {# external['KAFKA_enable'] #}
+
+{% if (external['S3_enable']) | default(false) %}
+  {% if (external['S3_endpoint'] != None) | default(false) %}
+    {% set s3Endpoint = external['S3_endpoint'] %}
+  {% endif %}
+    {% set s3PathStyleAccess = external['S3_path_style_access'] %}
+    {% set s3AccessKey = external['S3_access_key'] %}
+    {% set s3SecretAccessKey = '${PLATYS_AWS_SECRET_ACCESS_KEY:?PLAYS_AWS_SECRET_ACCESS_KEY must be set either in .env or as an environment variable}' %}
+{% else %}
+    {% set s3Endpoint = 'http://minio:9000' %}
+    {% set s3PathStyleAccess = 'true' %}
+    {% set s3AccessKey = MINIO_access_key %}
+    {% set s3SecretAccessKey = MINIO_secret_key %}
+{% endif %}   {# external['s3Endpoint'] #}
+
+{#  ================================== Services ========================================== #}
 
 services:
 
@@ -324,13 +385,14 @@ services:
     restart: {{container_restart_policy}}
   {% endfor %}
 
-  {% if ZOOKEEPER_navigator_enable | default(false) %}
+  {% if ZOOKEEPER_NAVIGATOR_enable | default(false) %}
   zoonavigator:
     image: elkozmon/zoonavigator-web:{{__ZOONAVIGATOR_version}}
     container_name: zoonavigator
     hostname: zoonavigator
     labels:
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28100"
+      com.platys.webui.title: 'Zoonavigator UI'
+      com.platys.webui.url: http://${PUBLIC_IP}:28100
     ports:
      - "28100:8010"
     depends_on:
@@ -354,7 +416,8 @@ services:
     image: elkozmon/zoonavigator-api:{{__ZOONAVIGATOR_API_version}}
     container_name: zoonavigator-api
     labels:
-      com.mdps.service.restapi.url: "http://${PUBLIC_IP}:28101"
+      com.platys.restapi.title: 'Zoonavigator REST API'
+      com.platys.restapi.url: 'http://${PUBLIC_IP}:28101'
     ports:
      - "28101:9010"
     environment:
@@ -369,36 +432,9 @@ services:
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
     restart: {{container_restart_policy}}
-  {% endif %}   {# ZOOKEEPER_navigator_enable #}
+  {% endif %}   {# ZOOKEEPER_NAVIGATOR_enable #}
 
 {% endif %}   {# zookeeper_enable or KAFKA_enable or ATLAS_enable #}
-
-{% set ns = namespace(bootstrapServers='') %}
-
-{% if (KAFKA_bootstrap_servers != None) | default(false) %}
-    {% set ns.bootstrapServers = KAFKA_bootstrap_servers %}
-    {% set KAFKA_EXT_enable = true -%}
-{% else %}
-    {% set KAFKA_EXT_enable = false -%}
-    {% for num in range(KAFKA_datacenters | default(1) ) %}
-      {% set dcName = "dc" ~ loop.index%}
-      {% set basePort = 9091 + (loop.index-1) * KAFKA_broker_nodes %}
-      {% if loop.length > 1 %}
-        {% set serviceBaseName = "kafka-" ~ dcName ~ "-" %}
-      {% else %}
-        {% set serviceBaseName = "kafka-" %}
-      {% endif -%}
-      {% for num in range(KAFKA_broker_nodes | default(1) ) %}
-        {% set port = basePort + loop.index %}
-        {% set serviceName = serviceBaseName ~ loop.index %}
-        {% if loop.first %}
-           {% set ns.bootstrapServers = serviceName ~ ":1" ~ port %}
-        {% else %}
-           {% set ns.bootstrapServers = ns.bootstrapServers ~ ',' ~ serviceName ~ ":1" ~ port %}
-        {% endif %}
-      {% endfor %}
-    {% endfor %}
-{% endif %}   {# KAFKA_bootstrap_servers #}
 
 {% if (KAFKA_enable) | default(false) %}
   {# make sure that internal replication factor is not larger than the number of Kafka nodes #}
@@ -460,8 +496,8 @@ services:
       KAFKA_CONFLUENT_TIER_FETCHER_NUM_THREADS: {{KAFKA_confluent_tier_fetcher_num_threads | default(omit) }}
       KAFKA_CONFLUENT_TIER_TOPIC_DELETE_CHECK_INTERVAL_MS: {{KAFKA_confluent_tier_topic_delete_check_interval_ms | default(omit) }}
       KAFKA_CONFLUENT_TIER_METADATA_REPLICATION_FACTOR: {{KAFKA_confluent_tier_metadata_replication_factor | default(1) }}
-      AWS_ACCESS_KEY_ID: V42FCGRVMK24JJ8DHUYG
-      AWS_SECRET_ACCESS_KEY: bKhWxVF3kQoLY9kFmt91l+tDrEoZjqnWXzY9Eza
+      AWS_ACCESS_KEY_ID: {{s3AccessKey | mandatory('s3AccessKey must be defined, use the S3_access_key property in the config.yml') }}
+      AWS_SECRET_ACCESS_KEY: {{s3SecretAccessKey}}
       {% endif -%} {# KAFKA_confluent_tier_enable #}
       {% endif -%} {# KAFKA_edition == ENTERPRISE #}
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: {{KAFKA_internal_replication_factor | default(1)}}
@@ -499,7 +535,7 @@ services:
 
 {% endif %} {# KAFKA_enable #}
 
-{% if ( (KAFKA_enable or KAFKA_EXT_enable) and KAFKA_SCHEMA_REGISTRY_enable ) | default(false) %}
+{% if ( (KAFKA_enable or external['KAFKA_enable']) and KAFKA_SCHEMA_REGISTRY_enable ) | default(false) %}
   #  ================================== Schema Registry ========================================== #
   {% for num in range(KAFKA_SCHEMA_REGISTRY_nodes | default(1) ) %}
     {% set external_port = 8081 + loop.index - 1 %}
@@ -509,7 +545,8 @@ services:
     hostname: schema-registry-{{loop.index}}
     container_name: schema-registry-{{loop.index}}
     labels:
-      com.mdps.service.restapi.url: "http://${PUBLIC_IP}:{{external_port}}"
+      com.platys.restapi.title: 'Schema Registry REST API'
+      com.platys.restapi.url: "http://${PUBLIC_IP}:{{external_port}}"
     ports:
       - "{{external_port}}:{{port}}"
     environment:
@@ -535,7 +572,7 @@ services:
   {% endfor %}
 {% endif %}   {# KAFKA_enable and KAFKA_SCHEMA_REGISTRY_enable #}
 
-{% if ( (KAFKA_enable or KAFKA_EXT_enable) and APICURIO_REGISTRY_enable ) | default(false) %}
+{% if ( (KAFKA_enable or external['KAFKA_enable']) and APICURIO_REGISTRY_enable ) | default(false) %}
   #  ================================== Apicurio Registry ========================================== #
   {% for num in range(APICURIO_REGISTRY_nodes | default(1) ) %}
     {% set external_port = 29000 + loop.index - 1 %}
@@ -546,7 +583,8 @@ services:
     hostname: apicurio-registry-{{loop.index}}
     container_name: apicurio-registry-{{loop.index}}
     labels:
-      com.mdps.service.restapi.url: "http://${PUBLIC_IP}:{{external_port}}"
+      com.platys.restapi.title: 'Apicurio Registry REST API'
+      com.platys.restapi.url: "http://${PUBLIC_IP}:{{external_port}}"
     depends_on:
       - kafka-1
     ports:
@@ -570,7 +608,7 @@ services:
   {% endfor %}
 {% endif %}   {# KAFKA_enable and APICURIO_REGISTRY_enable #}
 
-{% if ( (KAFKA_enable or KAFKA_EXT_enable) and KAFKA_CONNECT_enable ) | default(false) %}
+{% if ( (KAFKA_enable or external['KAFKA_enable']) and KAFKA_CONNECT_enable ) | default(false) %}
   #  ================================== Kafka Connect ========================================== #
   {% for num in range(KAFKA_CONNECT_nodes | default(1) ) %}
     {% set external_port = 8083 + loop.index - 1 %}
@@ -579,9 +617,8 @@ services:
     image: confluentinc/cp-kafka-connect:{{__CONFLUENT_PLATFORM_version}}
     container_name: kafka-connect-{{loop.index}}
     labels:
-      com.mdps.service.restapi.url: "http://${PUBLIC_IP}:{{external_port}}"
-    depends_on:
-      - schema-registry-1
+      com.platys.restapi.title: 'Kafka Connect REST API'
+      com.platys.restapi.url: "http://${PUBLIC_IP}:{{external_port}}"
     ports:
       - "{{external_port}}:{{port}}"
     environment:
@@ -596,28 +633,40 @@ services:
       CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: {{KAFKA_internal_replication_factor | default(1)}}
       CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: {{KAFKA_internal_replication_factor | default(1)}}
       CONNECT_OFFSET_FLUSH_INTERVAL_MS: 10000
+   {%if KAFKA_SCHEMA_REGISTRY_enable | default(false) %}
       CONNECT_KEY_CONVERTER: io.confluent.connect.avro.AvroConverter
       CONNECT_KEY_CONVERTER_SCHEMA_REGISTRY_URL: 'http://schema-registry-1:8081'
       CONNECT_VALUE_CONVERTER: io.confluent.connect.avro.AvroConverter
       CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL: 'http://schema-registry-1:8081'
+   {% else %}
+      CONNECT_KEY_CONVERTER: org.apache.kafka.connect.storage.StringConverter
+      CONNECT_VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+   {% endif -%}   {#  KAFKA_SCHEMA_REGISTRY_enable #}
       CONNECT_INTERNAL_KEY_CONVERTER: org.apache.kafka.connect.json.JsonConverter
       CONNECT_INTERNAL_VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
       CONNECT_LOG4J_ROOT_LOGLEVEL: "INFO"
       CONNECT_LOG4J_LOGGERS: "org.apache.kafka.connect.runtime.rest=WARN,org.reflections=ERROR"
       CONNECT_LOG4J_APPENDER_STDOUT_LAYOUT_CONVERSIONPATTERN: "[%d] %p %X{connector.context}%m (%c:%L)%n"
       CONNECT_PLUGIN_PATH: "/usr/share/java,/etc/kafka-connect/addl-plugins"
-      #CONNECT_SECURITY_PROTOCOL: SSL
-      #CONNECT_SASL_MECHANISM: PLAIN
-      #CONNECT_SASL_JAAS_CONFIG: org.apache.kafka.common.security.plain.PlainLoginModule required username="$CLUSTER_API_KEY" password="$CLUSTER_API_SECRET";
+      # CONNECT_SECURITY_PROTOCOL: SSL
+      # CONNECT_SASL_MECHANISM: PLAIN
+      # CONNECT_SASL_JAAS_CONFIG: org.apache.kafka.common.security.plain.PlainLoginModule required username="$CLUSTER_API_KEY" password="$CLUSTER_API_SECRET";
       CLASSPATH: /usr/share/java/monitoring-interceptors/monitoring-interceptors-4.0.0.jar
-      AWS_ACCESS_KEY_ID: V42FCGRVMK24JJ8DHUYG
-      AWS_SECRET_ACCESS_KEY: bKhWxVF3kQoLY9kFmt91l+tDrEoZjqnWXzY9Eza
+      AWS_ACCESS_KEY_ID: {{s3AccessKey | mandatory('s3AccessKey must be defined, use the S3_access_key property in the config.yml') }}
+      AWS_SECRET_ACCESS_KEY: {{s3SecretAccessKey}}
+      # External secrets config
+      # See https://docs.confluent.io/current/connect/security.html#externalizing-secrets
+      CONNECT_CONFIG_PROVIDERS: '{{KAFKA_CONNECT_config_providers}}'
+      CONNECT_CONFIG_PROVIDERS_{{KAFKA_CONNECT_config_providers | upper }}_CLASS: '{{KAFKA_CONNECT_config_providers_classes}}'
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
       - ./plugins/kafka-connect:/etc/kafka-connect/addl-plugins
+    {%if KAFKA_CONNECT_map_settings_file | default(false) %}
+      - ./conf.override/kafka-connect/settings.properties:/data/settings.properties
+    {% endif -%}   {#  KAFKA_CONNECT_map_credentials_file #}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -643,7 +692,7 @@ services:
   {% endfor %}
 {% endif %}   {# KAFKA_enable and KAFKA_CONNECT_enable  #}
 
-{% if ((KAFKA_enable or KAFKA_EXT_enable) and KAFKA_KSQLDB_enable )| default(false) %}
+{% if ((KAFKA_enable or external['KAFKA_enable']) and KAFKA_KSQLDB_enable )| default(false) %}
   #  ================================== ksqlDB ========================================== #
   {% for num in range(KAFKA_KSQLDB_nodes | default(1) ) %}
     {% set external_port = 8088 + loop.index - 1 %}
@@ -655,7 +704,8 @@ services:
     hostname: ksqldb-server-{{loop.index}}
     container_name: ksqldb-server-{{loop.index}}
     labels:
-      com.mdps.service.restapi.url: "http://${PUBLIC_IP}:{{external_port}}"
+      com.platys.restapi.title: 'ksqlDB Server REST API'
+      com.platys.restapi.url: "http://${PUBLIC_IP}:{{external_port}}"
     ports:
       - "{{external_port}}:{{port}}"
       - "{{jmx_external_port}}:{{jmx_port}}"
@@ -672,7 +722,7 @@ services:
       KSQL_BOOTSTRAP_SERVERS: '{{ns.bootstrapServers}}'
       #KSQL_SECURITY_PROTOCOL: SASL_SSL
       #KSQL_SASL_MECHANISM: PLAIN
-      #KSQL_SASL_JAAS_CONFIG: org.apache.kafka.common.security.plain.PlainLoginModule required username="{{KAFKA_username}}" password="{{KAFKA_password}}";
+      #KSQL_SASL_JAAS_CONFIG: org.apache.kafka.common.security.plain.PlainLoginModule required username="{{external['KAFKA_username']}}" password="{{external['KAFKA_password']}}";
     {% if ( KAFKA_CONNECT_enable ) | default(false) %}
       KSQL_KSQL_CONNECT_URL: http://kafka-connect-1:8083
     {% endif -%}   {#  KAFKA_CONNECT_enable #}
@@ -687,6 +737,11 @@ services:
       KSQL_KSQL_LOGGING_PROCESSING_TOPIC_AUTO_CREATE: "true"
       KSQL_KSQL_QUERY_PULL_METRICS_ENABLED: "true"
       KSQL_KSQL_HIDDEN_TOPICS: '^_.*'
+      KSQL_KSQL_SUPPRESS_ENABLED: "{{KAFKA_KSQLDB_suppress_enabled | default(omit)}}"
+      KSQL_KSQL_SUPPRESS_BUFFER_SIZE_BYTES: "{{KAFKA_KSQLDB_suppress_buffer_size_bytes | default(-1)}}"
+    {% if KAFKA_KSQLDB_queries_file is defined and KAFKA_KSQLDB_queries_file|length %}
+      KSQL_KSQL_QUERIES_FILE: "{{KAFKA_KSQLDB_queries_file}}"
+    {% endif -%}   {#  KAFKA_KSQLDB_queries_file #}
       KSQL_JMX_OPTS: "-Djava.rmi.server.hostname=localhost -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port={{jmx_port}} -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.rmi.port={{jmx_port}}"
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
@@ -735,7 +790,6 @@ services:
       AZKARRA_CONTEXT_STREAMS_BOOTSTRAP_SERVERS: '{{ns.bootstrapServers}}'
       AZKARRA_CONTEXT_STREAMS_STATE_DIR: /var/lib/kafka-streams/
       AZKARRA_CONTEXT_AUTO_CREATE_TOPICS_ENABLE: "true"
-      # /!\ Use this property with care and don't enable for production.
       AZKARRA_CONTEXT_AUTO_DELETE_TOPICS_ENABLE: "true"
       AZKARRA_CONTEXT_ENABLE_WAIT_FOR_TOPICS: "true"
       AZKARRA_COMPONENT_PATHS: /usr/share/azkarra-components
@@ -744,14 +798,15 @@ services:
       #- /tmp/azkarra/etc/azkarra.conf:/etc/azkarra/azkarra.conf
 {% endif %}   {# AZKARRA_enable #}
 
-{% if ((KAFKA_enable or KAFKA_EXT_enable) and KAFKA_RESTPROXY_enable) | default(false) %}
+{% if ((KAFKA_enable or external['KAFKA_enable']) and KAFKA_RESTPROXY_enable) | default(false) %}
   #  ================================== Confluent REST Proxy ========================================== #
   kafka-rest-1:
     image: confluentinc/cp-kafka-rest:{{__CONFLUENT_PLATFORM_version}}
     container_name: kafka-rest-1
     hostname: kafka-rest-1
     labels:
-      com.mdps.service.restapi.url: "http://${PUBLIC_IP}:18086"
+      com.platys.restapi.title: 'Kafka REST Proxy'
+      com.platys.restapi.url: "http://${PUBLIC_IP}:18086"
     depends_on:
       - kafka-1
       - schema-registry-1
@@ -774,7 +829,7 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {# KAFKA_enable and KAFKA_RESTPROXY_enable #}
 
-{% if ((KAFKA_enable or KAFKA_EXT_enable) and KAFKA_MQTTPROXY_enable) | default(false) %}
+{% if ((KAFKA_enable or external['KAFKA_enable']) and KAFKA_MQTTPROXY_enable) | default(false) %}
   #  ================================== Confluent MQTT Proxy ========================================== #
   kafka-mqtt-1:
     image: confluentinc/cp-kafka-mqtt:{{__CONFLUENT_PLATFORM_version}}
@@ -799,14 +854,15 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {# KAFKA_enable and KAFKA_MQTTPROXY_enable #}
 
-{% if ((KAFKA_enable or KAFKA_EXT_enable) and (KAFKA_edition | lower) == 'enterprise' and KAFKA_CCC_enable) | default(false) %}
+{% if ((KAFKA_enable or external['KAFKA_enable']) and (KAFKA_edition | lower) == 'enterprise' and KAFKA_CCC_enable) | default(false) %}
   #  ================================== Confluent Control Center ========================================== #
   control-center:
     image: confluentinc/cp-enterprise-control-center:{{__CONFLUENT_PLATFORM_version}}
     hostname: control-center
     container_name: control-center
     labels:
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:9021"
+      com.platys.webui.title: 'Control Center UI'
+      com.platys.webui.url: "http://${PUBLIC_IP}:9021"
     depends_on:
       - zookeeper-1
       - kafka-1
@@ -840,7 +896,7 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {# KAFKA_enable and KAFKA_CCC_enable #}
 
-{% if ((KAFKA_enable or KAFKA_EXT_enable) and (KAFKA_edition | lower) == 'enterprise' and KAFKA_REPLICATOR_enable) | default(false) %}
+{% if ((KAFKA_enable or external['KAFKA_enable']) and (KAFKA_edition | lower) == 'enterprise' and KAFKA_REPLICATOR_enable) | default(false) %}
   replicator-1:
     image: confluentinc/cp-enterprise-replicator:{{__CONFLUENT_PLATFORM_version}}
     container_name: replicator-1
@@ -908,14 +964,15 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {# KAFKA_enable and KAFKACAT_enable #}
 
-{% if ((KAFKA_enable or KAFKA_EXT_enable) and KAFKA_SCHEMA_REGISTRY_UI_enable) | default(false) %}
+{% if ((KAFKA_enable or external['KAFKA_enable']) and KAFKA_SCHEMA_REGISTRY_UI_enable) | default(false) %}
   #  ================================== Schema Registry UI ========================================== #
   schema-registry-ui:
     image: landoop/schema-registry-ui:{{__SCHEMA_REGISTRY_UI_version}}
     container_name: schema-registry-ui
     hostname: schema-registry-ui
     labels:
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28102"
+      com.platys.webui.title: 'Confluent Schema Registry UI'
+      com.platys.webui.url: "http://${PUBLIC_IP}:28102"
     depends_on:
       - kafka-1
       - schema-registry-1
@@ -935,14 +992,15 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {# KAFKA_enable and KAFKA_SCHEMA_REGISTRY_UI_enable #}
 
-{% if ((KAFKA_enable or KAFKA_EXT_enable) and KAFKA_TOPICS_UI_enable) | default(false) %}
+{% if ((KAFKA_enable or external['KAFKA_enable']) and KAFKA_TOPICS_UI_enable) | default(false) %}
   #  ================================== Kafka Topics UI ========================================== #
   kafka-topics-ui:
     image: landoop/kafka-topics-ui:{{__KAFKA_TOPICS_UI_version}}
     container_name: kafka-topics-ui
     hostname: kafka-topics-ui
     labels:
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28141"
+      com.platys.webui.title: 'Kafka Topics UI'
+      com.platys.webui.url: "http://${PUBLIC_IP}:28141"
     depends_on:
       - kafka-1
       - kafka-rest-1
@@ -964,14 +1022,15 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {# KAFKA_enable and KAFKA_SCHEMA_REGISTRY_UI_enable #}
 
-{% if ((KAFKA_enable or KAFKA_EXT_enable) and KAFKA_CONNECT_enable and KAFKA_CONNECT_UI_enable) | default(false) %}
+{% if ((KAFKA_enable or external['KAFKA_enable']) and KAFKA_CONNECT_enable and KAFKA_CONNECT_UI_enable) | default(false) %}
   #  ================================== Kafka Connect UI ========================================== #
   kafka-connect-ui:
     image: landoop/kafka-connect-ui:{{__KAFKA_CONNECT_UI_version}}
     container_name: kafka-connect-ui
     hostname: kafka-connect-ui
     labels:
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28103"
+      com.platys.webui.title: 'Kafka Connect UI'
+      com.platys.webui.url: "http://${PUBLIC_IP}:28103"
     depends_on:
       - kafka-connect-1
     ports:
@@ -991,14 +1050,15 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {# KAFKA_enable and KAFKA_CONNECT_UI_enable #}
 
-{% if ((KAFKA_enable or KAFKA_EXT_enable) and KAFKA_CMAK_enable) | default(false) %}
+{% if ((KAFKA_enable or external['KAFKA_enable']) and KAFKA_CMAK_enable) | default(false) %}
   #  ================================== Cluster Manager for Apache Kafka (CMAK) ========================================== #
   cmak:
     image: trivadis/cmak:{{__KAFKA_CMAK_version}}
     container_name: cmak
     hostname: cmak
     labels:
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28104"
+      com.platys.webui.title: 'Cluster Manager for Apache Kafka UI'
+      com.platys.webui.url: "http://${PUBLIC_IP}:28104"
     depends_on:
       - zookeeper-1
       - kafka-1
@@ -1023,14 +1083,15 @@ services:
 {% endif %}   {#  KAFKA_enable and KAFKA_CMAK_enable #}
 
 
-{% if ((KAFKA_enable or KAFKA_EXT_enable) and KAFKA_KAFDROP_enable) | default(false) %}
+{% if ((KAFKA_enable or external['KAFKA_enable']) and KAFKA_KAFDROP_enable) | default(false) %}
   #  ================================== Kafdrop ========================================== #
   kafdrop:
     image: obsidiandynamics/kafdrop:{{__KAFKA_KAFDROP_version}}
     container_name: kafdrop
     hostname: kafdrop
     labels:
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28105"
+      com.platys.webui.title: 'Kafdrop UI'
+      com.platys.webui.url: "http://${PUBLIC_IP}:28105"
     ports:
       - "28105:9020"
     environment:
@@ -1050,14 +1111,15 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {#  KAFKA_enable and KAFKA_KAFDROP_enable #}
 
-{% if ((KAFKA_enable or KAFKA_EXT_enable) and KAFKA_KADMIN_enable) | default(false) %}
+{% if ((KAFKA_enable or external['KAFKA_enable']) and KAFKA_KADMIN_enable) | default(false) %}
   #  ================================== KAdmin ========================================== #
   kadmin:
     image: bettercloud/kadmin:{{__KAFKA_KADMIN_version}}
     container_name: kadmin
     hostname: kadmin
     labels:
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28106"
+      com.platys.webui.title: 'KAdmin UI'
+      com.platys.webui.url: "http://${PUBLIC_IP}:28106"
     ports:
       - "28106:8080"
     environment:
@@ -1081,14 +1143,15 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {#  KAFKA_enable and KAFKA_KADMIN_enable #}
 
-{% if ((KAFKA_enable or KAFKA_EXT_enable) and KAFKA_AKHQ_enable) | default(false) %}
+{% if ((KAFKA_enable or external['KAFKA_enable']) and KAFKA_AKHQ_enable) | default(false) %}
   #  ================================== Apache Kafka HQ (AKHQ) ========================================== #
   akhq:
     image: tchiotludo/akhq:{{__KAFKA_AKHQ_version}}
     container_name: akhq
     hostname: akhq
     labels:
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28107"
+      com.platys.webui.title: 'Apache Kafka AQ UI'
+      com.platys.webui.url: "http://${PUBLIC_IP}:28107"
     ports:
       - 28107:8080
     environment:
@@ -1098,10 +1161,18 @@ services:
             docker-kafka-server:
               properties:
                 bootstrap.servers: '{{ns.bootstrapServers}}'
+    {% if ( KAFKA_SCHEMA_REGISTRY_enable ) | default(false) %}
               schema-registry:
                 url: "http://schema-registry-1:8081"
+    {% endif -%}   {#  SCHEMA_REGISTRY_enable #}
+    {% if ( KAFKA_CONNECT_enable ) | default(false) %}
               connect:
-                url: "http://kafka-connect-1:8083"
+      {% for num in range(KAFKA_CONNECT_nodes | default(1) ) %}
+          {% set port = 8083 + loop.index - 1 %}
+                - name: "kafka-connect-{{loop.index}}"
+                  url: "http://kafka-connect-1:{{port}}"
+      {% endfor -%}
+    {% endif -%}   {#  KAFKA_CONNECT_enable #}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -1116,13 +1187,14 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {#  KAFKA_enable and KAFKA_KAFKAHQ_enable #}
 
-{% if ((KAFKA_enable or KAFKA_EXT_enable) and KAFKA_BURROW_enable) | default(false) %}
+{% if ((KAFKA_enable or external['KAFKA_enable']) and KAFKA_BURROW_enable) | default(false) %}
   burrow:
     image: gschmutz/linkedin-burrow:{{__KAFKA_BURROW_version}}
     container_name: burrow
     hostname: burrow
     labels:
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28110"
+      com.platys.webui.title: 'Burrow UI'
+      com.platys.webui.url: "http://${PUBLIC_IP}:28110"
     ports:
       - 28110:8000
     depends_on:
@@ -1147,7 +1219,8 @@ services:
     container_name: burrow-ui
     hostname: burrow-ui
     labels:
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28108"
+      com.platys.webui.title: 'Burrow UI'
+      com.platys.webui.url: "http://${PUBLIC_IP}:28108"
     ports:
       - 28108:3000
     depends_on:
@@ -1192,12 +1265,12 @@ services:
 
   #  ================================== Apache Hadoop ========================================== #
   namenode:
-    image: bde2020/hadoop-namenode:{{__HADOOP_version}}
+    image: bde2020/hadoop-namenode:{{__HADOOP_image_version}}
     container_name: namenode
     hostname: namenode
     labels:
       com.mdps.service.webui.name: "Hadoop NameNode UI"
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:9870"
+      com.platys.webui.url: "http://${PUBLIC_IP}:9870"
     ports:
       - "9870:9870"
     env_file:
@@ -1205,6 +1278,9 @@ services:
     environment:
       CLUSTER_NAME: 'test'
       CORE_CONF_fs_defaultFS: hdfs://namenode:9000
+      MAPRED_CONF_yarn_app_mapreduce_am_env: HADOOP_MAPRED_HOME=/opt/hadoop-{{__HADOOP_version}}/
+      MAPRED_CONF_mapreduce_map_env: HADOOP_MAPRED_HOME=/opt/hadoop-{{__HADOOP_version}}/
+      MAPRED_CONF_mapreduce_reduce_env: HADOOP_MAPRED_HOME=/opt/hadoop-{{__HADOOP_version}}/
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -1221,11 +1297,11 @@ services:
     {% set external_port = 9864 + loop.index - 1 %}
 
   datanode-{{loop.index}}:
-    image: bde2020/hadoop-datanode:{{__HADOOP_version}}
+    image: bde2020/hadoop-datanode:{{__HADOOP_image_version}}
     container_name: datanode-{{loop.index}}
     labels:
-      com.mdps.service.webui.name: "Hadoop DataNode-{{loop.index}} UI"
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:{{external_port}}"
+      com.platys.webui.title: 'Hadoop DataNode-{{loop.index}} UI'
+      com.platys.webui.url: "http://${PUBLIC_IP}:{{external_port}}"
     ports:
       - "{{external_port}}:9864"
     env_file:
@@ -1233,6 +1309,9 @@ services:
     environment:
       CORE_CONF_fs_defaultFS: hdfs://namenode:9000
       SERVICE_PRECONDITION: "namenode:9870"
+      MAPRED_CONF_yarn_app_mapreduce_am_env: HADOOP_MAPRED_HOME=/opt/hadoop-{{__HADOOP_version}}/
+      MAPRED_CONF_mapreduce_map_env: HADOOP_MAPRED_HOME=/opt/hadoop-{{__HADOOP_version}}/
+      MAPRED_CONF_mapreduce_reduce_env: HADOOP_MAPRED_HOME=/opt/hadoop-{{__HADOOP_version}}/
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -1247,12 +1326,12 @@ services:
   {% endfor %}
 
   resourcemanager:
-    image: bde2020/hadoop-resourcemanager:{{__HADOOP_version}}
+    image: bde2020/hadoop-resourcemanager:{{__HADOOP_image_version}}
     container_name: resourcemanager
     hostname: resourcemanager
     labels:
-      com.mdps.service.webui.name: "YARN RessourceManager UI"
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:18088"
+      com.platys.webui.title: "YARN RessourceManager UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:18088"
     ports:
       - "18088:8088"
     depends_on:
@@ -1262,10 +1341,13 @@ services:
       - ./conf/hadoop.env
     environment:
       CORE_CONF_fs_defaultFS: hdfs://namenode:9000
-      YARN_CONF_yarn_resourcemanager_webapp_address: '${PUBLIC_IP}:18088'
-      YARN_CONF_yarn_nodemanager_webapp_address: '${PUBLIC_IP}:18042'
-      YARN_CONF_yarn_timeline___service_webapp_address: '${PUBLIC_IP}:28020'
-      YARN_CONF_yarn_log_server_url: '${PUBLIC_IP}:28020'
+      YARN_CONF_yarn_resourcemanager_webapp_address: 'resourcemanager:8088'
+      YARN_CONF_yarn_nodemanager_webapp_address: 'nodemanager:8042'
+      YARN_CONF_yarn_timeline___service_webapp_address: '${PUBLIC_IP}:18188'
+      YARN_CONF_yarn_log_server_url: '${PUBLIC_IP}:18188'
+      MAPRED_CONF_yarn_app_mapreduce_am_env: HADOOP_MAPRED_HOME=/opt/hadoop-{{__HADOOP_version}}/
+      MAPRED_CONF_mapreduce_map_env: HADOOP_MAPRED_HOME=/opt/hadoop-{{__HADOOP_version}}/
+      MAPRED_CONF_mapreduce_reduce_env: HADOOP_MAPRED_HOME=/opt/hadoop-{{__HADOOP_version}}/
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -1278,12 +1360,12 @@ services:
     restart: {{container_restart_policy}}
 
   nodemanager:
-    image: bde2020/hadoop-nodemanager:{{__HADOOP_version}}
+    image: bde2020/hadoop-nodemanager:{{__HADOOP_image_version}}
     container_name: nodemanager
     hostname: nodemanager
     labels:
-      com.mdps.service.webui.name: "YARN NodeManager UI"
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:18042"
+      com.platys.webui.title: "YARN NodeManager UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:18042"
     ports:
       - "18042:8042"
     depends_on:
@@ -1293,10 +1375,13 @@ services:
       - ./conf/hadoop.env
     environment:
       CORE_CONF_fs_defaultFS: hdfs://namenode:9000
-      YARN_CONF_yarn_resourcemanager_webapp_address: '${PUBLIC_IP}:18088'
-      YARN_CONF_yarn_nodemanager_webapp_address: '${PUBLIC_IP}:18042'
-      YARN_CONF_yarn_timeline___service_webapp_address: '${PUBLIC_IP}:28020'
-      YARN_CONF_yarn_log_server_url: '${PUBLIC_IP}:28020'
+      YARN_CONF_yarn_resourcemanager_webapp_address: 'resourcemanager:8088'
+      YARN_CONF_yarn_nodemanager_webapp_address: 'nodemanager:8042'
+      YARN_CONF_yarn_timeline___service_webapp_address: '${PUBLIC_IP}:18188'
+      YARN_CONF_yarn_log_server_url: '${PUBLIC_IP}:18188'
+      MAPRED_CONF_yarn_app_mapreduce_am_env: HADOOP_MAPRED_HOME=/opt/hadoop-{{__HADOOP_version}}/
+      MAPRED_CONF_mapreduce_map_env: HADOOP_MAPRED_HOME=/opt/hadoop-{{__HADOOP_version}}/
+      MAPRED_CONF_mapreduce_reduce_env: HADOOP_MAPRED_HOME=/opt/hadoop-{{__HADOOP_version}}/
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -1309,12 +1394,12 @@ services:
     restart: {{container_restart_policy}}
 
   historyserver:
-    image: bde2020/hadoop-historyserver:{{__HADOOP_version}}
+    image: bde2020/hadoop-historyserver:{{__HADOOP_image_version}}
     container_name: historyserver
     hostname: historyserver
     labels:
-      com.mdps.service.webui.name: "YARN History Server"
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:18188"
+      com.platys.webui.title: "YARN History Server"
+      com.platys.webui.url: "http://${PUBLIC_IP}:18188"
     ports:
       - "18188:8188"
     depends_on:
@@ -1325,6 +1410,9 @@ services:
     environment:
       CORE_CONF_fs_defaultFS: hdfs://namenode:9000
       SERVICE_PRECONDITION: "namenode:9870 datanode-1:9864 resourcemanager:18088"
+      MAPRED_CONF_yarn_app_mapreduce_am_env: HADOOP_MAPRED_HOME=/opt/hadoop-{{__HADOOP_version}}/
+      MAPRED_CONF_mapreduce_map_env: HADOOP_MAPRED_HOME=/opt/hadoop-{{__HADOOP_version}}/
+      MAPRED_CONF_mapreduce_reduce_env: HADOOP_MAPRED_HOME=/opt/hadoop-{{__HADOOP_version}}/
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -1343,8 +1431,15 @@ services:
     hostname: sqoop
     env_file:
       - ./conf/hadoop.env
-    {%if use_timezone | default(false) %}
     environment:
+    {%if MINIO_enable or external['S3_enable'] | default(false) %}
+      HIVE_SITE_CONF_fs_s3a_endpoint: {{s3Endpoint | default(omit) }}
+      HIVE_SITE_CONF_fs_s3a_access_key: {{s3AccessKey | mandatory('s3AccessKey must be defined, use the S3_access_key property in the config.yml') }}
+      HIVE_SITE_CONF_fs_s3a_secret_key: {{s3SecretAccessKey}}
+      HIVE_SITE_CONF_fs_s3a_path_style_access: '{{s3PathStyleAccess}}'
+      HIVE_SITE_CONF_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
+    {% endif %}
+    {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
@@ -1378,9 +1473,17 @@ services:
   {% else %}
       CORE_CONF_fs_defaultFS: file:///tmp
   {% endif -%}   {#  HADOOP_enable #}
-  {%if MINIO_enable | default(false) %}
-      CORE_CONF_fs_s3a_endpoint: 'http://minio:9000'
-      CORE_CONF_fs_s3a_path_style_access: 'true'
+  {%if MINIO_enable or external['S3_enable'] | default(false) %}
+      CORE_CONF_fs_s3a_endpoint: '{{s3Endpoint | default(omit) }}'
+      CORE_CONF_fs_s3a_path_style_access: '{{s3PathStyleAccess}}'
+      HIVE_SITE_CONF_fs_s3a_endpoint: '{{s3Endpoint | default(omit) }}'
+      HIVE_SITE_CONF_fs_s3a_access_key: {{s3AccessKey | mandatory('s3AccessKey must be defined, use the S3_access_key property in the config.yml') }}
+      HIVE_SITE_CONF_fs_s3a_secret_key: {{s3SecretAccessKey}}
+      HIVE_SITE_CONF_fs_s3a_path_style_access: '{{s3PathStyleAccess}}'
+      HIVE_SITE_CONF_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
+      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
+      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_endpoint: '{{s3Endpoint | default(omit) }}'
+      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_path_style_access: '{{s3PathStyleAccess}}'
   {% endif %}
       SPARK_PUBLIC_DNS: ${PUBLIC_IP}
       INIT_DAEMON_STEP: setup_spark
@@ -1389,9 +1492,6 @@ services:
       SPARK_DEFAULTS_CONF_spark_jars_excludes: {{SPARK_jars_excludes}}
       SPARK_DEFAULTS_CONF_spark_jars: {{SPARK_jars}}
       SPARK_DEFAULTS_CONF_spark_jars_ivySettings: {{SPARK_jars_ivySettings}}
-      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
-      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_endpoint: http://minio:9000
-      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_path_style_access: 'true'
   {%if (SPARK_catalog | lower) == 'in-memory' | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalogImplementation: in-memory
   {% else %}
@@ -1446,17 +1546,22 @@ services:
       SPARK_WORKER_OPTS: "-Dspark.worker.cleanup.enabled=true -Dspark.worker.cleanup.appDataTtl=604800"
       SPARK_PUBLIC_DNS: ${PUBLIC_IP}
   {%if MINIO_enable | default(false) %}
-      CORE_CONF_fs_s3a_endpoint: 'http://minio:9000'
-      CORE_CONF_fs_s3a_path_style_access: 'true'
-  {% endif %}
+      CORE_CONF_fs_s3a_endpoint: '{{s3Endpoint | default(omit) }}'
+      CORE_CONF_fs_s3a_path_style_access: '{{s3PathStyleAccess}}'
+      HIVE_SITE_CONF_fs_s3a_endpoint: {{s3Endpoint | default(omit) }}
+      HIVE_SITE_CONF_fs_s3a_access_key: {{s3AccessKey | mandatory('s3AccessKey must be defined, use the S3_access_key property in the config.yml') }}
+      HIVE_SITE_CONF_fs_s3a_secret_key: {{s3SecretAccessKey}}
+      HIVE_SITE_CONF_fs_s3a_path_style_access: '{{s3PathStyleAccess}}'
+      HIVE_SITE_CONF_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
+      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
+      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_endpoint: {{s3Endpoint | default(omit) }}
+      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_path_style_access: '{{s3PathStyleAccess}}'
+  {% endif -%}    {#  MINIO_enable #}
       SPARK_DEFAULTS_CONF_spark_jars_repositories: {{SPARK_jars_repositories}}
       SPARK_DEFAULTS_CONF_spark_jars_packages: {{SPARK_jars_packages}}
       SPARK_DEFAULTS_CONF_spark_jars_excludes: {{SPARK_jars_excludes}}
       SPARK_DEFAULTS_CONF_spark_jars: {{SPARK_jars}}
       SPARK_DEFAULTS_CONF_spark_jars_ivySettings: {{SPARK_jars_ivySettings}}
-      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
-      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_endpoint: http://minio:9000
-      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_path_style_access: 'true'
   {%if (SPARK_catalog | lower) == 'in-memory' | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalogImplementation: in-memory
   {% else %}
@@ -1492,10 +1597,10 @@ services:
     container_name: spark-history
     hostname: spark-history
     labels:
-      com.mdps.service.webui.name: "Spark History Server"
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28117"
-      com.mdps.service.restapi.name: "Spark History Server"
-      com.mdps.service.restapi.url: "http://${PUBLIC_IP}:28117/api/v1"
+      com.platys.webui.title: "Spark History Server"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28117"
+      com.platys.restapi.title: "Spark History Server"
+      com.platys.restapi.url: "http://${PUBLIC_IP}:28117/api/v1"
     expose:
       - 18080
     ports:
@@ -1505,9 +1610,11 @@ services:
       SPARK_DEFAULTS_CONF_spark_jars_packages: {{SPARK_jars_packages}}
       SPARK_DEFAULTS_CONF_spark_jars_excludes: {{SPARK_jars_excludes}}
       SPARK_DEFAULTS_CONF_spark_jars_ivySettings: {{SPARK_jars_ivySettings}}
+  {%if MINIO_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
-      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_endpoint: http://minio:9000
-      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_path_style_access: 'true'
+      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_endpoint: {{s3Endpoint | default(omit) }}
+      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_path_style_access: '{{s3PathStyleAccess}}'
+  {% endif -%}    {#  MINIO_enable #}
   {%if (SPARK_catalog | lower) == 'in-memory' | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalogImplementation: in-memory
   {% else %}
@@ -1544,14 +1651,23 @@ services:
     env_file:
       - ./conf/hadoop.env
     environment:
+  {%if MINIO_enable | default(false) %}
+      CORE_CONF_fs_s3a_endpoint: '{{s3Endpoint | default(omit) }}'
+      CORE_CONF_fs_s3a_path_style_access: '{{s3PathStyleAccess}}'
+      HIVE_SITE_CONF_fs_s3a_endpoint: {{s3Endpoint | default(omit) }}
+      HIVE_SITE_CONF_fs_s3a_access_key: {{s3AccessKey | mandatory('s3AccessKey must be defined, use the S3_access_key property in the config.yml') }}
+      HIVE_SITE_CONF_fs_s3a_secret_key: {{s3SecretAccessKey}}
+      HIVE_SITE_CONF_fs_s3a_path_style_access: '{{s3PathStyleAccess}}'
+      HIVE_SITE_CONF_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
+      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
+      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_endpoint: {{s3Endpoint | default(omit) }}
+      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_path_style_access: '{{s3PathStyleAccess}}'
+  {% endif -%}    {#  MINIO_enable #}
       SPARK_DEFAULTS_CONF_spark_jars_repositories: {{SPARK_jars_repositories}}
       SPARK_DEFAULTS_CONF_spark_jars_packages: {{SPARK_jars_packages}}
       SPARK_DEFAULTS_CONF_spark_jars_excludes: {{SPARK_jars_excludes}}
       SPARK_DEFAULTS_CONF_spark_jars: {{SPARK_jars}}
       SPARK_DEFAULTS_CONF_spark_jars_ivySettings: {{SPARK_jars_ivySettings}}
-      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
-      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_endpoint: http://minio:9000
-      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_path_style_access: 'true'
   {%if (SPARK_catalog | lower) == 'in-memory' | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalogImplementation: in-memory
   {% else %}
@@ -1587,10 +1703,10 @@ services:
     container_name: livy
     hostname: livy
     labels:
-      com.mdps.service.webui.name: "Livy Server UI"
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:8998/ui#"
-      com.mdps.service.restapi.name: "Livy API"
-      com.mdps.service.restapi.url: "http://${PUBLIC_IP}:8998/"
+      com.platys.webui.title: "Livy Server UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:8998/ui#"
+      com.platys.restapi.title: "Livy API"
+      com.platys.restapi.url: "http://${PUBLIC_IP}:8998/"
     env_file:
       - ./conf/hadoop.env
     environment:
@@ -1601,15 +1717,24 @@ services:
       SPARK_MASTER: spark://spark-master:7077
       CORE_CONF_fs_defaultFS: file:///tmp
   {% endif -%}   {#  HADOOP_enable #}
+  {%if MINIO_enable | default(false) %}
+      CORE_CONF_fs_s3a_endpoint: 'http://minio:9000'
+      CORE_CONF_fs_s3a_path_style_access: 'true'
+      HIVE_SITE_CONF_fs_s3a_endpoint: http://minio:9000
+      HIVE_SITE_CONF_fs_s3a_access_key: V42FCGRVMK24JJ8DHUYG
+      HIVE_SITE_CONF_fs_s3a_secret_key: bKhWxVF3kQoLY9kFmt91l+tDrEoZjqnWXzY9Eza
+      HIVE_SITE_CONF_fs_s3a_path_style_access: 'true'
+      HIVE_SITE_CONF_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
+      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
+      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_endpoint: http://minio:9000
+      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_path_style_access: 'true'
+  {% endif -%}    {#  MINIO_enable #}
       DEPLOY_MODE: client
       SPARK_DEFAULTS_CONF_spark_jars_repositories: {{SPARK_jars_repositories}}
       SPARK_DEFAULTS_CONF_spark_jars_packages: {{SPARK_jars_packages}}
       SPARK_DEFAULTS_CONF_spark_jars_excludes: {{SPARK_jars_excludes}}
       SPARK_DEFAULTS_CONF_spark_jars: {{SPARK_jars}}
       SPARK_DEFAULTS_CONF_spark_jars_ivySettings: {{SPARK_jars_ivySettings}}
-      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
-      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_endpoint: http://minio:9000
-      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_path_style_access: 'true'
   {%if (SPARK_catalog | lower) == 'in-memory' | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalogImplementation: in-memory
   {% else %}
@@ -1639,23 +1764,37 @@ services:
     restart: always
 {% endif %}   {#  SPARK_livy_enable #}
 
-{% if HIVE_SERVER_enable and HAOOP_enable | default(false) %}
+{% if HIVE_SERVER_enable and HADOOP_enable | default(false) %}
   #  ================================== Apache Hive Server ========================================== #
   hive-server:
     image: trivadis/apache-hive:{{__HIVE_version}}-{{__HIVE_version_suffix}}
     container_name: hive-server
     hostname: hive-server
+    labels:
+      com.platys.webui.title: "Hive Server UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:10001"
     ports:
       - "10000:10000"
+      - "10001:10001"
       - "10002:10002"
     env_file:
       - ./conf/hadoop.env
     environment:
       CORE_CONF_fs_defaultFS: "hdfs://namenode:9000"
       HIVE_SITE_CONF_javax_jdo_option_ConnectionURL: "jdbc:postgresql://hive-metastore/metastore"
-      SERVICE_PRECONDITION=hive-metastore: "9083"
-#      - HDFS_CONF_fs_s3a_access_key: ${MINIO_ACCESS_KEY}
-#      - HDFS_CONF_fs_s3a_secret_key: ${MINIO_SECRET_KEY}
+      SERVICE_PRECONDITION: "hive-metastore:9083"
+      MAPRED_CONF_yarn_app_mapreduce_am_env: HADOOP_MAPRED_HOME=/opt/hadoop-{{__HADOOP_version}}/
+      MAPRED_CONF_mapreduce_map_env: HADOOP_MAPRED_HOME=/opt/hadoop-{{__HADOOP_version}}/
+      MAPRED_CONF_mapreduce_reduce_env: HADOOP_MAPRED_HOME=/opt/hadoop-{{__HADOOP_version}}/
+  {%if MINIO_enable | default(false) %}
+      CORE_CONF_fs_s3a_endpoint: '{{s3Endpoint | default(omit) }}'
+      CORE_CONF_fs_s3a_path_style_access: '{{s3PathStyleAccess}}'
+      HIVE_SITE_CONF_fs_s3a_endpoint: {{s3Endpoint | default(omit) }}
+      HIVE_SITE_CONF_fs_s3a_access_key: {{s3AccessKey | mandatory('s3AccessKey must be defined, use the S3_access_key property in the config.yml') }}
+      HIVE_SITE_CONF_fs_s3a_secret_key: {{s3SecretAccessKey}}
+      HIVE_SITE_CONF_fs_s3a_path_style_access: '{{s3PathStyleAccess}}'
+      HIVE_SITE_CONF_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
+  {% endif -%}    {#  MINIO_enable #}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -1666,7 +1805,7 @@ services:
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
     restart: {{container_restart_policy}}
-{% endif %}   {#  HIVE_SERVER_enable #}
+{% endif %}   {#  HIVE_SERVER_enable and HADOOP_enable #}
 
 {% if HIVE_METASTORE_enable | default(false) %}
   #  ================================== Apache Hive Metastore ========================================== #
@@ -1681,10 +1820,15 @@ services:
     environment:
   {%if HADOOP_enable | default(false) %}
       CORE_CONF_fs_defaultFS: hdfs://namenode:9000
+      HIVE_SITE_CONF_hive_metastore_dir: hdfs://namenode:9000/user/hive/warehouse
   {%elif MINIO_enable | default(false) %}
-      CORE_CONF_fs_defaultFS: s3a://default-bucket
-      CORE_CONF_fs_s3a_endpoint: 'http://minio:9000'
-      CORE_CONF_fs_s3a_path_style_access: 'true'
+      CORE_CONF_fs_s3a_endpoint: '{{s3Endpoint | default(omit) }}'
+      CORE_CONF_fs_s3a_path_style_access: '{{s3PathStyleAccess}}'
+      HIVE_SITE_CONF_fs_s3a_endpoint: {{s3Endpoint | default(omit) }}
+      HIVE_SITE_CONF_fs_s3a_access_key: {{s3AccessKey | mandatory('s3AccessKey must be defined, use the S3_access_key property in the config.yml') }}
+      HIVE_SITE_CONF_fs_s3a_secret_key: {{s3SecretAccessKey}}
+      HIVE_SITE_CONF_fs_s3a_path_style_access: '{{s3PathStyleAccess}}'
+      HIVE_SITE_CONF_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
   {% else %}
       CORE_CONF_fs_defaultFS: file:///tmp
   {% endif -%}   {#  HADOOP_enable or MINIO_enable #}
@@ -1782,8 +1926,8 @@ services:
     container_name: atlas
     hostname: atlas
     labels:
-      com.mdps.service.webui.name: "Atlas UI"
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:21000"
+      com.platys.webui.title: "Atlas UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:21000"
     depends_on:
       - zookeeper-1
       - kafka-1
@@ -1907,7 +2051,7 @@ services:
       - EBEAN_DATASOURCE_HOST=datahub-mysql:3306
       - EBEAN_DATASOURCE_URL=jdbc:mysql://datahub-mysql:3306/datahub?verifyServerCertificate=false&useSSL=true&useUnicode=yes&characterEncoding=UTF-8
       - EBEAN_DATASOURCE_DRIVER=com.mysql.jdbc.Driver
-      - KAFKA_BOOTSTRAP_SERVER='{{ns.bootstrapServers}}'
+      - KAFKA_BOOTSTRAP_SERVER=kafka-1:19092
       - KAFKA_SCHEMAREGISTRY_URL=http://schema-registry-1:8081
       - ELASTICSEARCH_HOST=datahub-elasticsearch
       - ELASTICSEARCH_PORT=9200
@@ -1931,8 +2075,8 @@ services:
     hostname: datahub-frontend
     container_name: datahub-frontend
     labels:
-      com.mdps.service.webui.name: "DataHub UI"
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28143"
+      com.platys.webui.title: "DataHub UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28143"
     depends_on:
       - datahub-gms
     ports:
@@ -1965,7 +2109,7 @@ services:
     ports:
         - "28144:9091"
     environment:
-      - KAFKA_BOOTSTRAP_SERVER='{{ns.bootstrapServers}}'
+      - KAFKA_BOOTSTRAP_SERVER=kafka-1:19092
       - KAFKA_SCHEMAREGISTRY_URL=http://schema-registry-1:8081
       - ELASTICSEARCH_HOST=datahub-elasticsearch
       - ELASTICSEARCH_PORT=9200
@@ -1994,7 +2138,7 @@ services:
     ports:
         - "28145:9090"
     environment:
-      - KAFKA_BOOTSTRAP_SERVER='{{ns.bootstrapServers}}'
+      - KAFKA_BOOTSTRAP_SERVER=kafka-1:19092
       - KAFKA_SCHEMAREGISTRY_URL=http://schema-registry-1:8081
       - GMS_HOST=datahub-gms
       - GMS_PORT=8080
@@ -2036,16 +2180,18 @@ services:
     restart: {{container_restart_policy}}
 
   datahub-neo4j:
-    image: neo4j:3.5.7
+    image: neo4j:4.0.6
     hostname: datahub-neo4j
     container_name: datahub-neo4j
     ports:
       - "17475:7474"
       - "17688:7687"
     environment:
-      NEO4J_AUTH: 'neo4j/abc123!'
+      - NEO4J_AUTH=neo4j/abc123!
+      - NEO4J_dbms_default__database=graph.db
+      - NEO4J_dbms_allow__upgrade=true
     {%if use_timezone | default(false) %}
-      TZ: {{use_timezone}}
+      - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
@@ -2153,8 +2299,8 @@ services:
     container_name: amundsenfrontend
     hostname: amundsenfrontend
     labels:
-      com.mdps.service.webui.name: "Amundsen UI"
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:5000"
+      com.platys.webui.title: "Amundsen UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:5000"
     depends_on:
       - amundsenmetadata
       - amundsensearch
@@ -2178,8 +2324,8 @@ services:
     image: amundsendev/amundsen-search:{{__AMUNDSEN_SEARCH_version}}
     container_name: amundsensearch
     labels:
-      com.mdps.service.restapi.name: "Amundsensearch REST API"
-      com.mdps.service.restapi.url: "http://${PUBLIC_IP}:5001"
+      com.platys.restapi.title: "Amundsensearch REST API"
+      com.platys.restapi.url: "http://${PUBLIC_IP}:5001"
     ports:
       - 5001:5000
     environment:
@@ -2207,8 +2353,8 @@ services:
     container_name: amundsenmetadata
     hostname: amundsenmetadata
     labels:
-      com.mdps.service.restapi.name: "Amundsensearch REST API"
-      com.mdps.service.restapi.url: "http://${PUBLIC_IP}:5002"
+      com.platys.restapi.title: "Amundsensearch REST API"
+      com.platys.restapi.url: "http://${PUBLIC_IP}:5002"
     ports:
       - 5002:5000
     environment:
@@ -2239,8 +2385,8 @@ services:
     container_name: amundsen-neo4j
     hostname: amundsen-neo4j
     labels:
-      com.mdps.service.webui.name: "Amundsen Neo4J UI"
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:17474"
+      com.platys.webui.title: "Amundsen Neo4J UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:17474"
     ulimits:
       nofile:
         soft: 40000
@@ -2267,8 +2413,8 @@ services:
     container_name: amundsen-elasticsearch
     hostname: amundsen-elasticsearch
     labels:
-      com.mdps.service.restapi.name: "Amundsen ElasticSearch REST API"
-      com.mdps.service.restapi.url: "http://${PUBLIC_IP}:19201"
+      com.platys.restapi.title: "Amundsen ElasticSearch REST API"
+      com.platys.restapi.url: "http://${PUBLIC_IP}:19201"
     ports:
       - 19201:9200
     {%if use_timezone | default(false) %}
@@ -2292,8 +2438,8 @@ services:
     container_name: marquez-web
     hostname: marquez-web
     labels:
-      com.mdps.service.webui.name: "Marquez UI"
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:3005"
+      com.platys.webui.title: "Marquez UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:3005"
     depends_on:
       - marquez
     ports:
@@ -2317,10 +2463,10 @@ services:
     container_name: marquez
     hostname: marquez
     labels:
-      com.mdps.service.restapi.name: "Marquez REST API"
-      com.mdps.service.restapi.url: "http://${PUBLIC_IP}:5010/api/v1"
-      com.mdps.service.webui.name: "Marquez UI"
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:5011"
+      com.platys.restapi.title: "Marquez REST API"
+      com.platys.restapi.url: "http://${PUBLIC_IP}:5010/api/v1"
+      com.platys.webui.title: "Marquez UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:5011"
     depends_on:
       - marquez-db
     ports:
@@ -2456,10 +2602,10 @@ services:
     container_name: streamsets-1
     hostname: streamsets-1
     labels:
-      com.mdps.service.webui.name: "StreamSets Data Collector UI"
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:18630"
-      com.mdps.service.restapi.name: "StreamSets Data Collector REST API"
-      com.mdps.service.restapi.url: "http://${PUBLIC_IP}:18630/collector/restapi"
+      com.platys.webui.title: "StreamSets Data Collector UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:18630"
+      com.platys.restapi.title: "StreamSets Data Collector REST API"
+      com.platys.restapi.url: "http://${PUBLIC_IP}:18630/collector/restapi"
     ports:
       - "18630:18630"
     {%if STREAMSETS_activate_https | default(false) %}
@@ -2476,6 +2622,9 @@ services:
       SDC_JAVA8_OPTS: "-XX:+UseG1GC"
       SDC_CONF_MONITOR_MEMORY: "true"
       SDC_CONF_PIPELINE_MAX_RUNNERS_COUNT: 50
+    {% if STREAMSETS_http_authentication is defined and STREAMSETS_http_authentication|length %}
+      SDC_CONF_http_authentication: "{{STREAMSETS_http_authentication}}"
+    {% endif %}
     {%if STREAMSETS_activate_https | default(false) %}
       SDC_CONF_HTTPS_PORT: 18629
     {% endif %}
@@ -2485,7 +2634,10 @@ services:
     volumes:
       - ./data-transfer:/data-transfer
     {% if STREAMSETS_volume_map_data %}
-      - ./container-volume/streamsets-1:/data:Z
+      - ./container-volume/streamsets-1/data:/data:Z
+    {% endif %}
+    {% if STREAMSETS_volume_map_logs %}
+      - ./container-volume/streamsets-1/logs:/logs:Z
     {% endif %}
     {% if STREAMSETS_volume_map_security_policy %}
       - ./conf.override/streamsets/sdc-security.policy:/etc/sdc/sdc-security.policy:Z
@@ -2501,6 +2653,7 @@ services:
       nofile:
         soft: 32768
         hard: 32768
+    user: "{{uid | default(1000)}}"
     restart: {{container_restart_policy}}
 {% endif %}   {#  STREAMSETS_enable  #}
 
@@ -2511,10 +2664,10 @@ services:
     container_name: streamsets-transformer-1
     hostname: streamsets-transformer-1
     labels:
-      com.mdps.service.webui.name: "StreamSets Transformer UI"
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:19630"
-      com.mdps.service.restapi.name: "StreamSets Transformer REST API"
-      com.mdps.service.restapi.url: "http://${PUBLIC_IP}:19630/collector/restapi"
+      com.platys.webui.title: "StreamSets Transformer UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:19630"
+      com.platys.restapi.title: "StreamSets Transformer REST API"
+      com.platys.restapi.url: "http://${PUBLIC_IP}:19630/collector/restapi"
     ports:
       - "19630:19630"
     {%if use_timezone | default(false) %}
@@ -2544,8 +2697,8 @@ services:
     container_name: streamsets-edge-1
     hostname: streamsets-edge-1
     labels:
-      com.mdps.service.restapi.name: "StreamSets Data Collector Edge REST API"
-      com.mdps.service.restapi.url: "http://${PUBLIC_IP}:18633"
+      com.platys.restapi.title: "StreamSets Data Collector Edge REST API"
+      com.platys.restapi.url: "http://${PUBLIC_IP}:18633"
     ports:
       - "18633:18633"
     {%if use_timezone | default(false) %}
@@ -2568,12 +2721,49 @@ services:
     container_name: nifi-1
     hostname: nifi-1
     labels:
-      com.mdps.service.webui.name: "Apache NiFi UI"
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:18080/nifi"
+      com.platys.webui.title: "Apache NiFi UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:18080/nifi"
     ports:
+      # HTTP
       - "18080:8080"
+      # Remote Input Socket
+      - 10005:10000/tcp
     {%if use_timezone | default(false) %}
     environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {% if NIFI_volume_map_data %}
+      - ./container-volume/nifi/database_repository:/opt/nifi/nifi-current/database_repository
+      - ./container-volume/nifi/flowfile_repository:/opt/nifi/nifi-current/flowfile_repository
+      - ./container-volume/nifi/content_repository:/opt/nifi/nifi-current/content_repository
+      - ./container-volume/nifi/provenance_repository:/opt/nifi/nifi-current/provenance_repository
+      - ./container-volume/nifi/state:/opt/nifi/nifi-current/state
+    {% endif %}
+    {% if NIFI_volume_map_logs %}
+      - ./container-volume/nifi/logs:/opt/nifi/nifi-current/logs
+    {% endif %}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+
+  {%if NIFI_REGISTRY_enable | default(false) %}
+  #  ================================== NiFi Registry ========================================== #
+  nifi-registry:
+    image: apache/nifi-registry:{{__NIFI_REGISTRY_version}}
+    container_name: nifi-registry
+    hostname: nifi-registry
+    labels:
+      com.platys.webui.title: "NiFi Registry UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:19090/nifi-registry"
+    ports:
+      - 19090:19090
+    environment:
+      NIFI_REGISTRY_WEB_HTTP_PORT: 19090
+    {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
@@ -2583,7 +2773,7 @@ services:
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
     restart: {{container_restart_policy}}
-
+  {% endif %}   {#  NIFI_REGISTRY_enable  #}
 {% endif %}   {#  NIFI_enable  #}
 
 {%if NODERED_enable | default(false) %}
@@ -2593,10 +2783,10 @@ services:
     container_name: nodered-1
     hostname: nodered-1
     labels:
-      com.mdps.service.webui.name: "Node-RED UI"
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:1880"
-      com.mdps.service.restapi.name: "Node-RED REST API"
-      com.mdps.service.restapi.url: "http://${PUBLIC_IP}:1880"
+      com.platys.webui.title: "Node-RED UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:1880"
+      com.platys.restapi.title: "Node-RED REST API"
+      com.platys.restapi.url: "http://${PUBLIC_IP}:1880"
     ports:
       - "1880:1880"
     {%if use_timezone | default(false) %}
@@ -2624,7 +2814,8 @@ services:
     container_name: streamsheets
     hostname: streamsheets
     labels:
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28107"
+      com.platys.webui.title: 'Streamsheets UI'
+      com.platys.webui.url: "http://${PUBLIC_IP}:28107"
     ports:
       - 28158:8081
     {%if use_timezone | default(false) %}
@@ -2647,10 +2838,10 @@ services:
     container_name: airflow
     hostname: airflow
     labels:
-      com.mdps.service.webui.name: "Airflow UI"
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28139"
-      com.mdps.service.restapi.name: "Airflow REST API"
-      com.mdps.service.restapi.url: "http://${PUBLIC_IP}:28139/api/experimental/"
+      com.platys.webui.title: "Airflow UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28139"
+      com.platys.restapi.title: "Airflow REST API"
+      com.platys.restapi.url: "http://${PUBLIC_IP}:28139/api/experimental/"
     ports:
       - "28139:8080"
     environment:
@@ -2736,8 +2927,8 @@ services:
     container_name: zeppelin
     hostname: zeppelin
     labels:
-      com.mdps.service.webui.name: "Apache Zeppelin UI"
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28080"
+      com.platys.webui.title: "Apache Zeppelin UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28080"
     ports:
       - "28080:8080"
       - "6060:6060"
@@ -2752,17 +2943,24 @@ services:
       CORE_CONF_fs_defaultFS: file:///tmp
     {% endif -%}   {#  HADOOP_enable #}
     {%if MINIO_enable | default(false) %}
-      CORE_CONF_fs_s3a_endpoint: 'http://minio:9000'
-      CORE_CONF_fs_s3a_path_style_access: 'true'
+      CORE_CONF_fs_s3a_endpoint: '{{s3Endpoint | default(omit) }}'
+      CORE_CONF_fs_s3a_path_style_access: '{{s3PathStyleAccess}}'
+      HIVE_SITE_CONF_fs_s3a_endpoint: {{s3Endpoint | default(omit) }}
+      HIVE_SITE_CONF_fs_s3a_access_key: {{s3AccessKey | mandatory('s3AccessKey must be defined, use the S3_access_key property in the config.yml') }}
+      HIVE_SITE_CONF_fs_s3a_secret_key: {{s3SecretAccessKey}}
+      HIVE_SITE_CONF_fs_s3a_path_style_access: '{{s3PathStyleAccess}}'
+      HIVE_SITE_CONF_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
+      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
+      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_endpoint: {{s3Endpoint | default(omit) }}
+      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_path_style_access: '{{s3PathStyleAccess}}'
+      SPARK_HADOOP_FS_S3A_ACCESS_KEY: {{s3AccessKey | mandatory('s3AccessKey must be defined, use the S3_access_key property in the config.yml') }}
+      SPARK_HADOOP_FS_S3A_SECRET_KEY: {{s3SecretAccessKey}}
     {% endif %}
       SPARK_DEFAULTS_CONF_spark_jars_repositories: {{SPARK_jars_repositories}}
       SPARK_DEFAULTS_CONF_spark_jars_packages: {{SPARK_jars_packages}}
       SPARK_DEFAULTS_CONF_spark_jars_excludes: {{SPARK_jars_excludes}}
       SPARK_DEFAULTS_CONF_spark_jars: {{SPARK_jars}}
       SPARK_DEFAULTS_CONF_spark_jars_ivySettings: {{SPARK_jars_ivySettings}}
-      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
-      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_endpoint: http://minio:9000
-      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_path_style_access: 'true'
   {%if (SPARK_catalog | lower) == 'in-memory' | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalogImplementation: in-memory
   {% else %}
@@ -2792,8 +2990,6 @@ services:
       SPARK_BLOCKMANGER_PORT: 6060
       SPARK_DRIVER_EXTRAJAVAOPTIONS: {{SPARK_driver_extraJavaOptions}}
       SPARK_EXECUTOR_EXTRAJAVAOPTIONS: {{SPARK_executor_extraJavaOptions}}
-      SPARK_HADOOP_FS_S3A_ACCESS_KEY: V42FCGRVMK24JJ8DHUYG
-      SPARK_HADOOP_FS_S3A_SECRET_KEY: bKhWxVF3kQoLY9kFmt91l+tDrEoZjqnWXzY9Eza
       PYSPARK_PYTHON: "python3"
       SPARK_SUBMIT_OPTIONS: "--conf spark.driver.extraJavaOptions=-Dcom.amazonaws.services.s3.enableV4 --conf spark.executor.extraJavaOptions=-Dcom.amazonaws.services.s3.enableV4"
     {%if use_timezone | default(false) %}
@@ -2823,8 +3019,8 @@ services:
     container_name: jupyter
     hostname: jupyter
     labels:
-      com.mdps.service.webui.name: "Jupyter UI"
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28888"
+      com.platys.webui.title: "Jupyter UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28888"
     ports:
       - "28888:8888"
     environment:
@@ -2855,8 +3051,8 @@ services:
     hostname: grafana
     container_name: grafana
     labels:
-      com.mdps.service.webui.name: "Grafana UI"
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:3000"
+      com.platys.webui.title: "Grafana UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:3000"
     expose:
       - 3000
     ports:
@@ -2884,8 +3080,8 @@ services:
     hostname: superset
     container_name: superset
     labels:
-      com.mdps.service.webui.name: "Superset UI"
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28151"
+      com.platys.webui.title: "Superset UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28151"
     ports:
       - "28151:8088"
     environment:
@@ -2910,8 +3106,8 @@ services:
     hostname: redash-server
     container_name: redash-server
     labels:
-      com.mdps.service.webui.name: "Redash UI"
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28161"
+      com.platys.webui.title: "Redash UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28161"
     ports:
       - "28161:5000"
     command: server
@@ -3014,7 +3210,7 @@ services:
     hostname: redash-redis
     container_name: redash-redis
     ports:
-      - 6380:6379
+      - 6385:6379
     {%if use_timezone | default(false) %}
     environment:
       TZ: {{use_timezone}}
@@ -3146,14 +3342,76 @@ services:
 {% if REDIS_enable | default(false) %}
   #  ================================== Redis ========================================== #
   redis-1:
-    image: redis:{{__REDIS_version}}
+    image: bitnami/redis:{{__REDIS_version}}
     hostname: redis-1
     container_name: redis-1
     ports:
       - 6379:6379
+    environment:
+      - REDIS_REPLICATION_MODE=master
+      - ALLOW_EMPTY_PASSWORD={{REDIS_allow_empty_password | default(omit) }}
+      - DISABLE_COMMANDS={{REDIS_disable_commands | default(omit) }}
+      - REDIS_PASSWORD={{REDIS_password | default(omit) }}
+      - REDIS_AOF_ENABLED={{REDIS_aof_enabled | default(omit) }}
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {% if REDIS_volume_map_data %}
+      - "./container-volume/redis/data:/bitnami/redis/data"
+    {% endif %}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+
+  {% for num in range(REDIS_replicasets| default(0) ) %}
+    {% set external_port = 6380 + loop.index - 1 %}
+  redis-replica-{{loop.index}}:
+    image: bitnami/redis:{{__REDIS_version}}
+    hostname: redis-replica-{{loop.index}}
+    container_name: redis-replica-{{loop.index}}
+    ports:
+      - {{external_port}}:6379
+    environment:
+      - REDIS_REPLICATION_MODE=slave
+      - REDIS_MASTER_HOST=redis-1
+      - REDIS_MASTER_PORT_NUMBER=6379
+      - REDIS_MASTER_PASSWORD={{REDIS_password | default(omit) }}
+      - ALLOW_EMPTY_PASSWORD={{REDIS_allow_empty_password | default(omit) }}
+      - DISABLE_COMMANDS={{REDIS_disable_commands | default(omit) }}
+      - REDIS_PASSWORD={{REDIS_password | default(omit) }}
+      - REDIS_AOF_ENABLED={{REDIS_aof_enabled | default(omit) }}
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {% if REDIS_volume_map_data %}
+      - "./container-volume/redis/data/redis-replica-{{loop.index}}:/bitnami/redis/data"
+    {% endif %}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+  {% endfor %}
+
+  {% if REDIS_INSIGHT_enable | default(false) %}
+  redis-insight:
+    image: redislabs/redisinsight:{{__REDIS_INSIGHT_version}}
+    container_name: redis-insight
+    hostname: redis-insight
+    labels:
+      com.platys.webui.title: "Redis Insight UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28174"
+    ports:
+      - "28174:8001"
     {%if use_timezone | default(false) %}
     environment:
-      TZ: {{use_timezone}}
+      - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
@@ -3162,18 +3420,23 @@ services:
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
     restart: {{container_restart_policy}}
+  {% endif %}   {#  REDIS_INSIGHT_enable #}
 
+  {% if REDIS_COMMANDER_enable | default(false) %}
   redis-commander:
     image: rediscommander/redis-commander:{{__REDIS_COMMANDER_version}}
     container_name: redis-commander
     hostname: redis-commander
     labels:
-      com.mdps.service.webui.name: "Redis Commander UI"
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28119"
+      com.platys.webui.title: "Redis Commander UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28119"
     ports:
       - "28119:8081"
     environment:
-      - REDIS_HOSTS=local:redis-1:6379
+      - REDIS_HOST=redis-1
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD='abc123!'
+      - REDIS_DB=0
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -3184,6 +3447,7 @@ services:
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
     restart: {{container_restart_policy}}
+  {% endif %}   {#  REDIS_COMMANDER_enable #}
 {% endif %}   {#  REDIS_enable #}
 
 {% if CASSANDRA_enable | default(false) %}
@@ -3217,8 +3481,8 @@ services:
     container_name: cassandra-web
     hostname: cassandra-web
     labels:
-      com.mdps.service.webui.name: "Cassandra Web UI"
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28120"
+      com.platys.webui.title: "Cassandra Web UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28120"
     ports:
       - "28120:3000"
     environment:
@@ -3281,8 +3545,8 @@ services:
     container_name: dse-studio
     hostname: dse-studio
     labels:
-      com.mdps.service.webui.name: "DataStax Studio Web UI"
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28121"
+      com.platys.webui.title: "DataStax Studio Web UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28121"
     ports:
       - "28121:9091" # Exposes port to be available externally
     environment:
@@ -3303,8 +3567,8 @@ services:
     container_name: dse-opscenter
     hostname: dse-opscenter
     labels:
-      com.mdps.service.webui.name: "DataStax OpsCenter Web UI"
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28122"
+      com.platys.webui.title: "DataStax OpsCenter Web UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28122"
     ports:
       - 28122:8888
     environment:
@@ -3355,8 +3619,8 @@ services:
     container_name: mongo-express
     hostname: mongo-express
     labels:
-      com.mdps.service.webui.name: "Cassandra Web UI"
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28123"
+      com.platys.webui.title: "Cassandra Web UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28123"
     ports:
       - 28123:8081
     environment:
@@ -3377,8 +3641,8 @@ services:
     container_name: admin-mongo
     hostname: admin-mongo
     labels:
-      com.mdps.service.webui.name: "Admin Mongo UI"
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28124"
+      com.platys.webui.title: "Admin Mongo UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28124"
     ports:
       - 28124:1234
     {%if use_timezone | default(false) %}
@@ -3401,8 +3665,8 @@ services:
     container_name: solr
     hostname: solr
     labels:
-      com.mdps.service.webui.name: "SolR UI"
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:8983"
+      com.platys.webui.title: "SolR UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:8983"
     ports:
       - "8983:8983"
     {%if use_timezone | default(false) %}
@@ -3425,8 +3689,9 @@ services:
     hostname: elasticsearch-1
     container_name: elasticsearch-1
     labels:
-      com.mdps.service.restapi.name: "Elasticsearch REST API"
-      com.mdps.service.restapi.url: "http://${PUBLIC_IP}:9200"
+      com.platys.restapi.title: "Elasticsearch REST API"
+      com.platys.restapi.url: "http://${PUBLIC_IP}:9200"
+      com.platys.manual.step.msgs: "sudo sysctl -w vm.max_map_count=262144"
     ports:
       - "9200:9200"
       - "9300:9300"
@@ -3455,8 +3720,8 @@ services:
     container_name: dejavu
     hostname: dejuvu
     labels:
-      com.mdps.service.webui.name: "Elasticsearch Dejavu UI"
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28125"
+      com.platys.webui.title: "Elasticsearch Dejavu UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28125"
     ports:
       - "28125:1358"
     {%if use_timezone | default(false) %}
@@ -3478,8 +3743,8 @@ services:
     container_name: cerebro
     hostname: cerebro
     labels:
-      com.mdps.service.webui.name: "Elasticsearch Cerbero UI"
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28126"
+      com.platys.webui.title: "Elasticsearch Cerbero UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28126"
     ports:
       - "28126:9000"
     {%if use_timezone | default(false) %}
@@ -3501,8 +3766,8 @@ services:
     container_name: elastichq
     hostname: elatichq
     labels:
-      com.mdps.service.webui.name: "ElasticHQ UI"
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28127"
+      com.platys.webui.title: "ElasticHQ UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28127"
     ports:
       - "28127:5000"
     {%if use_timezone | default(false) %}
@@ -3525,19 +3790,16 @@ services:
     hostname: kibana
     container_name: kibana
     labels:
-      com.mdps.service.webui.name: "Kibana UI"
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:5601"
+      com.platys.webui.title: "Kibana UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:5601"
     depends_on:
       - elasticsearch-1
     ports:
       - "5601:5601"
     environment:
-      xpack.monitoring.enabled: "false"
       discovery.type: "single-node"
       ELASTICSEARCH_URL: http://elasticsearch-1:9200
-      server.host: "0.0.0.0"
       SERVER_HOST: "0.0.0.0"
-      server.name: "kibana"
       SERVER_NAME: "kibana"
       XPACK_GRAPH_enabled: "false"
       XPACK_MONITORING_enabled: "false"
@@ -3564,8 +3826,8 @@ services:
     hostname: neo4j-1
     container_name: neo4j-1
     labels:
-      com.mdps.service.webui.name: "Neo4J UI"
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:7474"
+      com.platys.webui.title: "Neo4J UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:7474"
     ports:
       - "7474:7474"
       - "7687:7687"
@@ -3601,8 +3863,8 @@ services:
     hostname: stardog-1
     container_name: stardog-1
     labels:
-      com.mdps.service.webui.name: "Stardog UI"
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:7474"
+      com.platys.webui.title: "Stardog UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:7474"
     ports:
       - "5820:5820"
     environment:
@@ -3631,8 +3893,8 @@ services:
     hostname: stardog-studio
     container_name: stardog-studio
     labels:
-      com.mdps.service.webui.name: "Stardog Studio UI"
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28170"
+      com.platys.webui.title: "Stardog Studio UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28170"
     ports:
       - "28170:80"
     {%if use_timezone | default(false) %}
@@ -3656,8 +3918,8 @@ services:
     container_name: influxdb
     hostname: influxdb
     labels:
-      com.mdps.service.restapi.name: "InfluxDB Rest API"
-      com.mdps.service.restapi.url: "http://${PUBLIC_IP}:8086"
+      com.platys.restapi.title: "InfluxDB Rest API"
+      com.platys.restapi.url: "http://${PUBLIC_IP}:8086"
     ports:
       - "8086:8086"
     {%if use_timezone | default(false) %}
@@ -3681,8 +3943,8 @@ services:
     container_name: influxdb-ui
     hostname: influxdb-ui
     labels:
-      com.mdps.service.webui.name: "InfluxDB UI"
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28128"
+      com.platys.webui.title: "InfluxDB UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28128"
     ports:
       - "28128:80"
     {%if use_timezone | default(false) %}
@@ -3701,8 +3963,8 @@ services:
     hostname: chronograf
     container_name: chronograf
     labels:
-      com.mdps.service.webui.name: "Chronograf UI"
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28129"
+      com.platys.webui.title: "Chronograf UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28129"
     depends_on:
       - influxdb
     ports:
@@ -3734,8 +3996,8 @@ services:
     hostname: kapacitor
     container_name: kapacitor
     labels:
-      com.mdps.service.restapi.name: "Kapacitor REST API"
-      com.mdps.service.restapi.url: "http://${PUBLIC_IP}:28130/kapacitor/v1"
+      com.platys.restapi.title: "Kapacitor REST API"
+      com.platys.restapi.url: "http://${PUBLIC_IP}:28130/kapacitor/v1"
     ports:
       - "28130:9092"
     environment:
@@ -3788,10 +4050,10 @@ services:
     hostname: influxdb2
     container_name: influxdb2
     labels:
-      com.mdps.service.webui.name: "InfluxDB 2.0 UI"
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:9999"
-      com.mdps.service.restapi.name: "InfluxDB 2.0 Rest API"
-      com.mdps.service.restapi.url: "http://${PUBLIC_IP}:9999/api/v2"
+      com.platys.webui.title: "InfluxDB 2.0 UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:9999"
+      com.platys.restapi.title: "InfluxDB 2.0 Rest API"
+      com.platys.restapi.url: "http://${PUBLIC_IP}:9999/api/v2"
     ports:
       - "9999:9999"
     {%if use_timezone | default(false) %}
@@ -3869,8 +4131,8 @@ services:
     hostname: druid-sandbox
     container_name: druid-sandbox
     labels:
-      com.mdps.service.webui.name: "Druid Console UI"
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28150"
+      com.platys.webui.title: "Druid Console UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28150"
     ports:
       - "28150:8888"
     {%if use_timezone | default(false) %}
@@ -3888,7 +4150,7 @@ services:
 
   {% if (DRUID_edition| lower) == 'oss-cluster' | default(false) %}
   druid-coordinator:
-    image: apache/incubator-druid:{{__DRUID_version}}
+    image: apache/druid:{{__DRUID_version}}
     hostname: druid-coordinator
     container_name: druid-coordinator
     depends_on:
@@ -3915,7 +4177,7 @@ services:
     restart: {{container_restart_policy}}
 
   druid-broker-1:
-    image: apache/incubator-druid:{{__DRUID_version}}
+    image: apache/druid:{{__DRUID_version}}
     hostname: druid-broker-1
     container_name: druid-broker-1
     depends_on:
@@ -3941,7 +4203,7 @@ services:
     restart: {{container_restart_policy}}
 
   druid-historical-1:
-    image: apache/incubator-druid:{{__DRUID_version}}
+    image: apache/druid:{{__DRUID_version}}
     hostname: druid-historical-1
     container_name: druid-historical-1
     volumes:
@@ -3970,7 +4232,7 @@ services:
     restart: {{container_restart_policy}}
 
   druid-middlemanager:
-    image: apache/incubator-druid:{{__DRUID_version}}
+    image: apache/druid:{{__DRUID_version}}
     container_name: druid-middlemanager
     volumes:
       - ./container-volume/druid/storage:/opt/data
@@ -3998,11 +4260,11 @@ services:
     restart: {{container_restart_policy}}
 
   druid-router:
-    image: apache/incubator-druid:{{__DRUID_version}}
+    image: apache/druid:{{__DRUID_version}}
     container_name: druid-router
     labels:
-      com.mdps.service.webui.name: "Druid Console UI"
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28150/graph"
+      com.platys.webui.title: "Druid Console UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28150/graph"
     depends_on:
       - zookeeper-1
       - druid-postgres
@@ -4054,10 +4316,10 @@ services:
     container_name: prometheus-1
     hostname: prometheus-1
     labels:
-      com.mdps.service.webui.name: "Prometheus UI"
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:9090/graph"
-      com.mdps.service.restapi.name: "Prometheus Rest API"
-      com.mdps.service.restapi.url: "http://${PUBLIC_IP}:9090/api/v1"
+      com.platys.webui.title: "Prometheus UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:9090/graph"
+      com.platys.restapi.title: "Prometheus Rest API"
+      com.platys.restapi.url: "http://${PUBLIC_IP}:9090/api/v1"
     command: "--config.file=/etc/prometheus/prometheus.yml --storage.tsdb.path=/prometheus"
     ports:
       - "9090:9090"
@@ -4083,8 +4345,8 @@ services:
     container_name: prometheus-pushgateway
     hostname: prometheus-pushgateway
     labels:
-      com.mdps.service.restapi.name: "Pushgateway API"
-      com.mdps.service.restapi.url: "http://${PUBLIC_IP}:9091"
+      com.platys.restapi.title: "Pushgateway API"
+      com.platys.restapi.url: "http://${PUBLIC_IP}:9091"
     expose:
       - 9091
     ports:
@@ -4111,8 +4373,8 @@ services:
     container_name: tile38
     hostname: tile38
     labels:
-      com.mdps.service.webui.name: "Tile38 UI"
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:9851"
+      com.platys.webui.title: "Tile38 UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:9851"
     ports:
       - "9851:9851"
     {%if use_timezone | default(false) %}
@@ -4226,8 +4488,8 @@ services:
     container_name: oracledb
     hostname: oracledb
     labels:
-      com.mdps.service.webui.name: "Oracle UI"
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28152"
+      com.platys.webui.title: "Oracle UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28152"
     ports:
       - "1521:1521"
       - "28152:8080"
@@ -4256,8 +4518,8 @@ services:
     container_name: oracledb
     hostname: oracledb
     labels:
-      com.mdps.service.webui.name: "Oracle UI"
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28152"
+      com.platys.webui.title: "Oracle UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28152"
     ports:
       - "1521:1521"
       - "28152:8080"
@@ -4290,6 +4552,9 @@ services:
     image: {{private_docker_repository_name}}/restdataservices:{{__ORACLE_REST_DATA_SERVICE_version}}
     container_name: oracle-rest-1
     hostname: oracle-rest-1
+    labels:
+      com.platys.restapi.title: "ORDS Rest API"
+      com.platys.restapi.url: "http://${PUBLIC_IP}:28153"
     ports:
       - "28153:8888"
     environment:
@@ -4414,8 +4679,8 @@ services:
     container_name: adminer
     hostname: adminer
     labels:
-      com.mdps.service.webui.name: "Adminer UI"
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28131"
+      com.platys.webui.title: "Adminer UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28131"
     ports:
       - 28131:8080
     {%if use_timezone | default(false) %}
@@ -4438,8 +4703,8 @@ services:
     container_name: cloudbeaver
     hostname: cloudbeaver
     labels:
-      com.mdps.service.webui.name: "Cloudbeaver UI"
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:8978"
+      com.platys.webui.title: "Cloudbeaver UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:8978"
     ports:
       - "8978:8978"
     restart: {{container_restart_policy}}
@@ -4452,8 +4717,8 @@ services:
     container_name: quix-backend
     hostname: quix-backend
     labels:
-      com.mdps.service.restapi.name: "Quix REST API"
-      com.mdps.service.restapi.url: "http://${PUBLIC_IP}:28159"
+      com.platys.restapi.title: "Quix REST API"
+      com.platys.restapi.url: "http://${PUBLIC_IP}:28159"
     ports:
       - "28159:8081"
     environment:
@@ -4481,8 +4746,8 @@ services:
     container_name: quix-frontend
     hostname: quix-frontend
     labels:
-      com.mdps.service.webui.name: "Quix UI"
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28160"
+      com.platys.webui.title: "Quix UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28160"
     ports:
       - "28160:3000"
     environment:
@@ -4529,8 +4794,8 @@ services:
     container_name: axon-server
     hostname: axon-server
     labels:
-      com.mdps.service.webui.name: "Axon UI"
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:8024"
+      com.platys.webui.title: "Axon UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:8024"
     ports:
       - 8024:8024
       - 8124:8124
@@ -4571,8 +4836,8 @@ services:
     hostname: presto-1
     container_name: presto-1
     labels:
-      com.mdps.service.webui.name: "Presto UI"
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28081"
+      com.platys.webui.title: "Presto UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28081"
     ports:
       - '28081:8080'
     {%if use_timezone | default(false) %}
@@ -4677,8 +4942,8 @@ services:
     container_name: dremio-1
     hostname: dremio-1
     labels:
-      com.mdps.service.webui.name: "Dremio UI"
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:9047"
+      com.platys.webui.title: "Dremio UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:9047"
     ports:
       - '9047:9047'
       - '31010:31010'
@@ -4703,8 +4968,8 @@ services:
     container_name: drill-1
     hostname: drill-1
     labels:
-      com.mdps.service.webui.name: "Drill UI"
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:8047"
+      com.platys.webui.title: "Drill UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:8047"
     ports:
       - '8047:8047'
     environment:
@@ -4731,13 +4996,13 @@ services:
     container_name: minio
     hostname: minio
     labels:
-      com.mdps.service.webui.name: "MinIO UI"
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:9000"
+      com.platys.webui.title: "MinIO UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:9000"
     ports:
       - '9000:9000'
     environment:
-      MINIO_ACCESS_KEY: V42FCGRVMK24JJ8DHUYG
-      MINIO_SECRET_KEY: bKhWxVF3kQoLY9kFmt91l+tDrEoZjqnWXzY9Eza
+      MINIO_ACCESS_KEY: {{MINIO_access_key}}
+      MINIO_SECRET_KEY: {{MINIO_secret_key}}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -4760,8 +5025,8 @@ services:
     depends_on:
       - minio
     environment:
-      AWS_ACCESS_KEY_ID: V42FCGRVMK24JJ8DHUYG
-      AWS_SECRET_ACCESS_KEY: bKhWxVF3kQoLY9kFmt91l+tDrEoZjqnWXzY9Eza
+      AWS_ACCESS_KEY_ID: {{MINIO_access_key}}
+      AWS_SECRET_ACCESS_KEY: {{MINIO_secret_key}}
     volumes:
       - './conf/s3cfg:/root/.s3cfg'
     command:
@@ -4788,8 +5053,8 @@ services:
     container_name: awscli
     hostname: awscli
     environment:
-      AWS_ACCESS_KEY_ID: V42FCGRVMK24JJ8DHUYG
-      AWS_SECRET_ACCESS_KEY: bKhWxVF3kQoLY9kFmt91l+tDrEoZjqnWXzY9Eza
+      AWS_ACCESS_KEY_ID: {{s3AccessKey | mandatory('s3AccessKey must be defined, use the S3_access_key property in the config.yml') }}
+      AWS_SECRET_ACCESS_KEY: ${PLATYS_AWS_SECRET_ACCESS_KEY:-{{MINIO_secret_key}}}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -4886,8 +5151,8 @@ services:
     container_name: mqtt-ui
     hostname: mqtt-ui
     labels:
-      com.mdps.service.webui.name: "HiveMQ UI"
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28136"
+      com.platys.webui.title: "HiveMQ UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28136"
     ports:
       - '28136:80'
     {%if use_timezone | default(false) %}
@@ -4903,14 +5168,43 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {#  MQTT_UI_enable #}
 
+{% if CEDALO_MANAGEMENT_CENTER_enable | default(false) %}
+  cedalo-management-center:
+    image: cedalo/management-center:{{__CEDALO_MANAGEMENT_CENTER_version}}
+    container_name: cedalo-management-center
+    hostname: cedala-management-center
+    labels:
+      com.platys.webui.title: "Cedalo Management Center UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28175"
+    expose:
+      - 8088
+    ports:
+      - 28175:8088
+    environment:
+      CEDALO_MC_BROKER_ID: mosquitto-2.0
+      CEDALO_MC_BROKER_NAME: Mosquitto 2.0
+      CEDALO_MC_BROKER_URL: mqtt://mosquitto-1:1883
+      CEDALO_MC_BROKER_USERNAME: cedalo
+      CEDALO_MC_BROKER_PASSWORD: eAkX29UnAs
+      CEDALO_MC_PROXY_CONFIG_DIR: /management-center/config/config.json
+    volumes:
+#     - ./config:/management-center/backend/config
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  CEDALO_MANAGEMENT_CENTER_enable #}
+
 {% if ACTIVEMQ_enable | default(false) %}
   #  ================================== Active MQ ========================================== #
   activemq:
     image: rmohr/activemq:{{__ACTIVEMQ_version}}
     container_name: activemq
     labels:
-      com.mdps.service.webui.name: "ActiveMQ UI"
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:8161"
+      com.platys.webui.title: "ActiveMQ UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:8161"
     ports:
       # mqtt
       - "1890:1883"
@@ -4947,8 +5241,8 @@ services:
     container_name: rabbitmq
     hostname: rabbitmq
     labels:
-      com.mdps.service.webui.name: "RabbitMQ UI"
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:15672"
+      com.platys.webui.title: "RabbitMQ UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:15672"
     ports:
       - 5673:5672
       - 15672:15672
@@ -5003,8 +5297,8 @@ services:
     container_name: filezilla
     hostname: filezilla
     labels:
-      com.mdps.service.webui.name: "Filezilla UI"
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:5800"
+      com.platys.webui.title: "Filezilla UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:5800"
     ports:
       - "5800:5800"
       - "5900:5900"
@@ -5053,8 +5347,8 @@ services:
     container_name: code-server
     hostname: code-server
     labels:
-      com.mdps.service.webui.name: "Code-Server UI"
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28140"
+      com.platys.webui.title: "Code-Server UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28140"
     user: 0:0
     ports:
       - 28140:8080
@@ -5082,8 +5376,8 @@ services:
     container_name: vault
     hostname: vault
     labels:
-      com.mdps.service.webui.name: "Vault UI"
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:8200"
+      com.platys.webui.title: "Vault UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:8200"
     ports:
       - 8200:8200
     environment:
@@ -5118,8 +5412,8 @@ services:
     container_name: swagger-editor
     hostname: swagger-editor
     labels:
-      com.mdps.service.webui.name: "Swagger Editor UI"
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28156"
+      com.platys.webui.title: "Swagger Editor UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28156"
     ports:
       - 28156:8080
     {%if use_timezone | default(false) %}
@@ -5141,8 +5435,8 @@ services:
     container_name: swagger-ui
     hostname: swagger-ui
     labels:
-      com.mdps.service.webui.name: "Swagger UI"
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28157"
+      com.platys.webui.title: "Swagger UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28157"
     ports:
       - 28157:8080
     {%if use_timezone | default(false) %}
@@ -5160,17 +5454,14 @@ services:
 {% if PORTAINER_enable | default(false) %}
   #  ================================== Portainer ========================================== #
   portainer:
-    image: portainer/portainer:{{__PORTAINER_version}}
+    image: portainer/portainer-ce:{{__PORTAINER_version}}
     container_name: portainer
     hostname: portainer
     labels:
-      com.mdps.service.webui.name: "Portainer UI"
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28137"
+      com.platys.webui.title: "Portainer UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28137"
     ports:
       - 28137:9000
-#    environment:
-#      - VIRTUAL_HOST=monitor.bioatlas.se
-#      - VIRTUAL_PORT=9000
     {%if use_timezone | default(false) %}
     environment:
       TZ: {{use_timezone}}
@@ -5189,12 +5480,12 @@ services:
 {% if CADVISOR_enable | default(false) %}
   #  ================================== cAdvisor ========================================== #
   cadvisor:
-    image: google/cadvisor:{{__CADVISOR_version}}
+    image: gcr.io/cadvisor/cadvisor:{{__CADVISOR_version}}
     container_name: cadvisor
     hostname: cadvisor
     labels:
-      com.mdps.service.webui.name: "cAdvisor UI"
-      com.mdps.service.webui.url: "http://${PUBLIC_IP}:28138"
+      com.platys.webui.title: "cAdvisor UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28138"
     ports:
       - 28138:8080
     {%if use_timezone | default(false) %}
@@ -5204,13 +5495,17 @@ services:
     volumes:
       - ./data-transfer:/data-transfer
       - /:/rootfs:ro
-      - /var/run:/var/run:rw
+      - /var/run:/var/run:ro
       - /sys:/sys:ro
       - /var/lib/docker/:/var/lib/docker:ro
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
+    devices:
+      - "/dev/kmsg"
+    tty: true
+    privileged: true
     restart: {{container_restart_policy}}
 {% endif %}   {# CADVISOR_enable #}
 
@@ -5234,6 +5529,34 @@ services:
     {% endif -%}   {#  use_timezone #}
     restart: {{container_restart_policy}}
 {% endif %}   {# HAWTIO_enable #}
+
+{% if WETTY_enable | default(false) %}
+  #  ================================== cAdvisor ========================================== #
+  wetty:
+    image: svenihoney/wetty:{{__WETTY_version}}
+    container_name: wetty
+    hostname: wetty
+    labels:
+      com.platys.webui.title: "WeTTY UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:3001"
+    ports:
+      - "3001:3000"
+    environment:
+      - REMOTE_SSH_SERVER=${DOCKER_HOST_IP}
+      - REMOTE_SSH_PORT=22
+      - REMOTE_SSH_USER=
+      - WETTY_PORT=3000
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+{% endif %}   {# WETTY_enable #}
 
 {% if PYTHON_enable | default(false) %}
   #  ================================== python ========================================== #
@@ -5259,6 +5582,39 @@ services:
     {% endif %}
     restart: {{container_restart_policy}}
 {% endif %}   {# PYTHON_enable #}
+
+
+{% if MARKDOWN_VIEWER_enable | default(false) %}
+  #  ================================== markdown-viewer ========================================== #
+  markdown-viewer:
+    image: minimum/markdown-web:{{__MARKDOWN_VIEWER_VERSION}}
+    container_name: markdown-viewer
+    hostname: markdown-viewer
+    labels:
+      com.platys.webui.title: "Markdown Viewer UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}"
+    ports:
+      - "80:80"
+    volumes:
+      - ./documentation:/home/python/markdown
+      - ./data-transfer:/data-transfer
+    restart: {{container_restart_policy}}
+
+  markdown-renderer:
+    image: trivadis/jinja2-renderer:latest
+    container_name: markdown-renderer
+    hostname: markdown-renderer
+    environment:
+      PUBLIC_IP: '${PUBLIC_IP}'
+      DOCKER_HOST_IP: '${DOCKER_HOST_IP}'
+      DATAPLATFORM_HOME: '${DATAPLATFORM_HOME}'
+    volumes:
+      - ./documentation/templates:/templates
+      - ./documentation/templates:/scripts
+      - .:/variables
+      - ./documentation:/output
+      - ./data-transfer:/data-transfer
+{% endif %}   {# MARKDOWN_VIEWER_enable #}
 
 {% if PROVISIONING_DATA_enable | default(false) %}
   #  ================================== data-provisioning ========================================== #
