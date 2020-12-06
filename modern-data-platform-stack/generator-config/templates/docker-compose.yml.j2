@@ -2721,13 +2721,26 @@ services:
       com.platys.webui.title: "Apache NiFi UI"
       com.platys.webui.url: "http://${PUBLIC_IP}:18080/nifi"
     ports:
+      # HTTP
       - "18080:8080"
+      # Remote Input Socket
+      - 10005:10000/tcp
     {%if use_timezone | default(false) %}
     environment:
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
+    {% if NIFI_volume_map_data %}
+      - ./container-volume/nifi/database_repository:/opt/nifi/nifi-current/database_repository
+      - ./container-volume/nifi/flowfile_repository:/opt/nifi/nifi-current/flowfile_repository
+      - ./container-volume/nifi/content_repository:/opt/nifi/nifi-current/content_repository
+      - ./container-volume/nifi/provenance_repository:/opt/nifi/nifi-current/provenance_repository
+      - ./container-volume/nifi/state:/opt/nifi/nifi-current/state
+    {% endif %}
+    {% if NIFI_volume_map_logs %}
+      - ./container-volume/nifi/logs:/opt/nifi/nifi-current/logs
+    {% endif %}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"

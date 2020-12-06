@@ -141,6 +141,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 10000 | 10000 | hive-server |
 10001 | 10001 | hive-server |
 10002 | 10002 | hive-server |
+10005 | 10000 | nifi |
 11211 | 11211 | memcached |
 15433 | 5433| yb-tserver-1 |
 15672 | 15672 | rabbitmq (ui) |
