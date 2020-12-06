@@ -261,6 +261,8 @@ networks:
   {% set REDASH_enable = false -%}
   {% set SMASHING_enable = false -%}
   {% set TIPBOARD_enable = false -%}
+  {% set REDIS_INSIGHT_enable = false -%}
+  {% set REDIS_COMMANDER_enable = false -%}
   {% set MONGO_enable = false -%}
   {% set ELASTICSEARCH_enable = false -%}
   {% set DEJAVU_enable = false -%}
@@ -301,6 +303,46 @@ networks:
   {% set SWAGGER_EDITOR_enable = false -%}
   {% set SWAGGER_UI_enable = false -%}
 {% endif %}   {# PLATFORM_ARM_enable #}
+
+{#  ================================== Handling external services ========================================== #}
+
+{% set ns = namespace(bootstrapServers='') %}
+{% if (external['KAFKA_enable']) | default(false) %}
+    {% set ns.bootstrapServers = external['KAFKA_bootstrap_servers'] %}
+{% else %}
+    {% for num in range(KAFKA_datacenters | default(1) ) %}
+      {% set dcName = "dc" ~ loop.index%}
+      {% set basePort = 9091 + (loop.index-1) * KAFKA_broker_nodes %}
+      {% if loop.length > 1 %}
+        {% set serviceBaseName = "kafka-" ~ dcName ~ "-" %}
+      {% else %}
+        {% set serviceBaseName = "kafka-" %}
+      {% endif -%}
+      {% for num in range(KAFKA_broker_nodes | default(1) ) %}
+        {% set port = basePort + loop.index %}
+        {% set serviceName = serviceBaseName ~ loop.index %}
+        {% if loop.first %}
+           {% set ns.bootstrapServers = serviceName ~ ":1" ~ port %}
+        {% else %}
+           {% set ns.bootstrapServers = ns.bootstrapServers ~ ',' ~ serviceName ~ ":1" ~ port %}
+        {% endif %}
+      {% endfor %}
+    {% endfor %}
+{% endif %}   {# external['KAFKA_enable'] #}
+
+{% if (external['S3_enable']) | default(false) %}
+  {% if (external['S3_endpoint'] != None) | default(false) %}
+    {% set s3Endpoint = external['S3_endpoint'] %}
+  {% endif %}
+    {% set s3PathStyleAccess = external['S3_path_style_access'] %}
+    {% set s3AccessKey = external['S3_access_key'] %}
+{% else %}
+    {% set s3Endpoint = 'http://minio:9000' %}
+    {% set s3PathStyleAccess = external['S3_path_style_access'] %}
+    {% set s3AccessKey = MINIO_access_key %}
+{% endif %}   {# external['s3Endpoint'] #}
+
+{#  ================================== Services ========================================== #}
 
 services:
 
@@ -389,31 +431,6 @@ services:
   {% endif %}   {# ZOOKEEPER_NAVIGATOR_enable #}
 
 {% endif %}   {# zookeeper_enable or KAFKA_enable or ATLAS_enable #}
-
-{% set ns = namespace(bootstrapServers='') %}
-
-{% if (external['KAFKA_enable']) | default(false) %}
-    {% set ns.bootstrapServers = external['KAFKA_bootstrap_servers'] %}
-{% else %}
-    {% for num in range(KAFKA_datacenters | default(1) ) %}
-      {% set dcName = "dc" ~ loop.index%}
-      {% set basePort = 9091 + (loop.index-1) * KAFKA_broker_nodes %}
-      {% if loop.length > 1 %}
-        {% set serviceBaseName = "kafka-" ~ dcName ~ "-" %}
-      {% else %}
-        {% set serviceBaseName = "kafka-" %}
-      {% endif -%}
-      {% for num in range(KAFKA_broker_nodes | default(1) ) %}
-        {% set port = basePort + loop.index %}
-        {% set serviceName = serviceBaseName ~ loop.index %}
-        {% if loop.first %}
-           {% set ns.bootstrapServers = serviceName ~ ":1" ~ port %}
-        {% else %}
-           {% set ns.bootstrapServers = ns.bootstrapServers ~ ',' ~ serviceName ~ ":1" ~ port %}
-        {% endif %}
-      {% endfor %}
-    {% endfor %}
-{% endif %}   {# KAFKA_bootstrap_servers #}
 
 {% if (KAFKA_enable) | default(false) %}
   {# make sure that internal replication factor is not larger than the number of Kafka nodes #}
@@ -1409,11 +1426,11 @@ services:
     env_file:
       - ./conf/hadoop.env
     environment:
-    {%if MINIO_enable | default(false) %}
-      HIVE_SITE_CONF_fs_s3a_endpoint: http://minio:9000
-      HIVE_SITE_CONF_fs_s3a_access_key: V42FCGRVMK24JJ8DHUYG
-      HIVE_SITE_CONF_fs_s3a_secret_key: bKhWxVF3kQoLY9kFmt91l+tDrEoZjqnWXzY9Eza
-      HIVE_SITE_CONF_fs_s3a_path_style_access: 'true'
+    {%if MINIO_enable or external['S3_enable'] | default(false) %}
+      HIVE_SITE_CONF_fs_s3a_endpoint: {{s3Endpoint | default(omit) }}
+      HIVE_SITE_CONF_fs_s3a_access_key: {{s3AccessKey | mandatory('s3AccessKey must be defined, use the S3_access_key property in the config.yml') }}
+      HIVE_SITE_CONF_fs_s3a_secret_key: ${PLATYS_S3_SECRET_KEY}
+      HIVE_SITE_CONF_fs_s3a_path_style_access: '{{s3PathStyleAccess}}'
       HIVE_SITE_CONF_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
     {% endif %}
     {%if use_timezone | default(false) %}
@@ -1450,17 +1467,17 @@ services:
   {% else %}
       CORE_CONF_fs_defaultFS: file:///tmp
   {% endif -%}   {#  HADOOP_enable #}
-  {%if MINIO_enable | default(false) %}
-      CORE_CONF_fs_s3a_endpoint: 'http://minio:9000'
-      CORE_CONF_fs_s3a_path_style_access: 'true'
-      HIVE_SITE_CONF_fs_s3a_endpoint: http://minio:9000
-      HIVE_SITE_CONF_fs_s3a_access_key: V42FCGRVMK24JJ8DHUYG
-      HIVE_SITE_CONF_fs_s3a_secret_key: bKhWxVF3kQoLY9kFmt91l+tDrEoZjqnWXzY9Eza
-      HIVE_SITE_CONF_fs_s3a_path_style_access: 'true'
+  {%if MINIO_enable or external['S3_enable'] | default(false) %}
+      CORE_CONF_fs_s3a_endpoint: '{{s3Endpoint | default(omit) }}'
+      CORE_CONF_fs_s3a_path_style_access: '{{s3PathStyleAccess}}'
+      HIVE_SITE_CONF_fs_s3a_endpoint: '{{s3Endpoint | default(omit) }}'
+      HIVE_SITE_CONF_fs_s3a_access_key: {{s3AccessKey | mandatory('s3AccessKey must be defined, use the S3_access_key property in the config.yml') }}
+      HIVE_SITE_CONF_fs_s3a_secret_key: ${PLATYS_S3_SECRET_KEY}
+      HIVE_SITE_CONF_fs_s3a_path_style_access: '{{s3PathStyleAccess}}'
       HIVE_SITE_CONF_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
-      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_endpoint: http://minio:9000
-      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_path_style_access: 'true'
+      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_endpoint: '{{s3Endpoint | default(omit) }}'
+      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_path_style_access: '{{s3PathStyleAccess}}'
   {% endif %}
       SPARK_PUBLIC_DNS: ${PUBLIC_IP}
       INIT_DAEMON_STEP: setup_spark
@@ -1523,16 +1540,16 @@ services:
       SPARK_WORKER_OPTS: "-Dspark.worker.cleanup.enabled=true -Dspark.worker.cleanup.appDataTtl=604800"
       SPARK_PUBLIC_DNS: ${PUBLIC_IP}
   {%if MINIO_enable | default(false) %}
-      CORE_CONF_fs_s3a_endpoint: 'http://minio:9000'
-      CORE_CONF_fs_s3a_path_style_access: 'true'
-      HIVE_SITE_CONF_fs_s3a_endpoint: http://minio:9000
-      HIVE_SITE_CONF_fs_s3a_access_key: V42FCGRVMK24JJ8DHUYG
-      HIVE_SITE_CONF_fs_s3a_secret_key: bKhWxVF3kQoLY9kFmt91l+tDrEoZjqnWXzY9Eza
-      HIVE_SITE_CONF_fs_s3a_path_style_access: 'true'
+      CORE_CONF_fs_s3a_endpoint: '{{s3Endpoint | default(omit) }}'
+      CORE_CONF_fs_s3a_path_style_access: '{{s3PathStyleAccess}}'
+      HIVE_SITE_CONF_fs_s3a_endpoint: {{s3Endpoint | default(omit) }}
+      HIVE_SITE_CONF_fs_s3a_access_key: {{s3AccessKey | mandatory('s3AccessKey must be defined, use the S3_access_key property in the config.yml') }}
+      HIVE_SITE_CONF_fs_s3a_secret_key: ${PLATYS_S3_SECRET_KEY}
+      HIVE_SITE_CONF_fs_s3a_path_style_access: '{{s3PathStyleAccess}}'
       HIVE_SITE_CONF_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
-      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_endpoint: http://minio:9000
-      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_path_style_access: 'true'
+      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_endpoint: {{s3Endpoint | default(omit) }}
+      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_path_style_access: '{{s3PathStyleAccess}}'
   {% endif -%}    {#  MINIO_enable #}
       SPARK_DEFAULTS_CONF_spark_jars_repositories: {{SPARK_jars_repositories}}
       SPARK_DEFAULTS_CONF_spark_jars_packages: {{SPARK_jars_packages}}
@@ -1589,8 +1606,8 @@ services:
       SPARK_DEFAULTS_CONF_spark_jars_ivySettings: {{SPARK_jars_ivySettings}}
   {%if MINIO_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
-      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_endpoint: http://minio:9000
-      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_path_style_access: 'true'
+      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_endpoint: {{s3Endpoint | default(omit) }}
+      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_path_style_access: '{{s3PathStyleAccess}}'
   {% endif -%}    {#  MINIO_enable #}
   {%if (SPARK_catalog | lower) == 'in-memory' | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalogImplementation: in-memory
@@ -1629,16 +1646,16 @@ services:
       - ./conf/hadoop.env
     environment:
   {%if MINIO_enable | default(false) %}
-      CORE_CONF_fs_s3a_endpoint: 'http://minio:9000'
-      CORE_CONF_fs_s3a_path_style_access: 'true'
-      HIVE_SITE_CONF_fs_s3a_endpoint: http://minio:9000
-      HIVE_SITE_CONF_fs_s3a_access_key: V42FCGRVMK24JJ8DHUYG
-      HIVE_SITE_CONF_fs_s3a_secret_key: bKhWxVF3kQoLY9kFmt91l+tDrEoZjqnWXzY9Eza
-      HIVE_SITE_CONF_fs_s3a_path_style_access: 'true'
+      CORE_CONF_fs_s3a_endpoint: '{{s3Endpoint | default(omit) }}'
+      CORE_CONF_fs_s3a_path_style_access: '{{s3PathStyleAccess}}'
+      HIVE_SITE_CONF_fs_s3a_endpoint: {{s3Endpoint | default(omit) }}
+      HIVE_SITE_CONF_fs_s3a_access_key: {{s3AccessKey | mandatory('s3AccessKey must be defined, use the S3_access_key property in the config.yml') }}
+      HIVE_SITE_CONF_fs_s3a_secret_key: ${PLATYS_S3_SECRET_KEY}
+      HIVE_SITE_CONF_fs_s3a_path_style_access: '{{s3PathStyleAccess}}'
       HIVE_SITE_CONF_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
-      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_endpoint: http://minio:9000
-      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_path_style_access: 'true'
+      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_endpoint: {{s3Endpoint | default(omit) }}
+      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_path_style_access: '{{s3PathStyleAccess}}'
   {% endif -%}    {#  MINIO_enable #}
       SPARK_DEFAULTS_CONF_spark_jars_repositories: {{SPARK_jars_repositories}}
       SPARK_DEFAULTS_CONF_spark_jars_packages: {{SPARK_jars_packages}}
@@ -1764,12 +1781,12 @@ services:
       MAPRED_CONF_mapreduce_map_env: HADOOP_MAPRED_HOME=/opt/hadoop-{{__HADOOP_version}}/
       MAPRED_CONF_mapreduce_reduce_env: HADOOP_MAPRED_HOME=/opt/hadoop-{{__HADOOP_version}}/
   {%if MINIO_enable | default(false) %}
-      CORE_CONF_fs_s3a_endpoint: 'http://minio:9000'
-      CORE_CONF_fs_s3a_path_style_access: 'true'
-      HIVE_SITE_CONF_fs_s3a_endpoint: http://minio:9000
-      HIVE_SITE_CONF_fs_s3a_access_key: V42FCGRVMK24JJ8DHUYG
-      HIVE_SITE_CONF_fs_s3a_secret_key: bKhWxVF3kQoLY9kFmt91l+tDrEoZjqnWXzY9Eza
-      HIVE_SITE_CONF_fs_s3a_path_style_access: 'true'
+      CORE_CONF_fs_s3a_endpoint: '{{s3Endpoint | default(omit) }}'
+      CORE_CONF_fs_s3a_path_style_access: '{{s3PathStyleAccess}}'
+      HIVE_SITE_CONF_fs_s3a_endpoint: {{s3Endpoint | default(omit) }}
+      HIVE_SITE_CONF_fs_s3a_access_key: {{s3AccessKey | mandatory('s3AccessKey must be defined, use the S3_access_key property in the config.yml') }}
+      HIVE_SITE_CONF_fs_s3a_secret_key: ${PLATYS_S3_SECRET_KEY}
+      HIVE_SITE_CONF_fs_s3a_path_style_access: '{{s3PathStyleAccess}}'
       HIVE_SITE_CONF_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
   {% endif -%}    {#  MINIO_enable #}
 #      - HDFS_CONF_fs_s3a_access_key: ${MINIO_ACCESS_KEY}
@@ -1801,13 +1818,12 @@ services:
       CORE_CONF_fs_defaultFS: hdfs://namenode:9000
       HIVE_SITE_CONF_hive_metastore_dir: hdfs://namenode:9000/user/hive/warehouse
   {%elif MINIO_enable | default(false) %}
-      CORE_CONF_fs_defaultFS: s3a://default-bucket
-      CORE_CONF_fs_s3a_endpoint: 'http://minio:9000'
-      CORE_CONF_fs_s3a_path_style_access: 'true'
-      HIVE_SITE_CONF_fs_s3a_endpoint: http://minio:9000
-      HIVE_SITE_CONF_fs_s3a_access_key: V42FCGRVMK24JJ8DHUYG
-      HIVE_SITE_CONF_fs_s3a_secret_key: bKhWxVF3kQoLY9kFmt91l+tDrEoZjqnWXzY9Eza
-      HIVE_SITE_CONF_fs_s3a_path_style_access: 'true'
+      CORE_CONF_fs_s3a_endpoint: '{{s3Endpoint | default(omit) }}'
+      CORE_CONF_fs_s3a_path_style_access: '{{s3PathStyleAccess}}'
+      HIVE_SITE_CONF_fs_s3a_endpoint: {{s3Endpoint | default(omit) }}
+      HIVE_SITE_CONF_fs_s3a_access_key: {{s3AccessKey | mandatory('s3AccessKey must be defined, use the S3_access_key property in the config.yml') }}
+      HIVE_SITE_CONF_fs_s3a_secret_key: ${PLATYS_S3_SECRET_KEY}
+      HIVE_SITE_CONF_fs_s3a_path_style_access: '{{s3PathStyleAccess}}'
       HIVE_SITE_CONF_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
   {% else %}
       CORE_CONF_fs_defaultFS: file:///tmp
@@ -2910,16 +2926,18 @@ services:
       CORE_CONF_fs_defaultFS: file:///tmp
     {% endif -%}   {#  HADOOP_enable #}
     {%if MINIO_enable | default(false) %}
-      CORE_CONF_fs_s3a_endpoint: 'http://minio:9000'
-      CORE_CONF_fs_s3a_path_style_access: 'true'
-      HIVE_SITE_CONF_fs_s3a_endpoint: http://minio:9000
-      HIVE_SITE_CONF_fs_s3a_access_key: V42FCGRVMK24JJ8DHUYG
-      HIVE_SITE_CONF_fs_s3a_secret_key: bKhWxVF3kQoLY9kFmt91l+tDrEoZjqnWXzY9Eza
-      HIVE_SITE_CONF_fs_s3a_path_style_access: 'true'
+      CORE_CONF_fs_s3a_endpoint: '{{s3Endpoint | default(omit) }}'
+      CORE_CONF_fs_s3a_path_style_access: '{{s3PathStyleAccess}}'
+      HIVE_SITE_CONF_fs_s3a_endpoint: {{s3Endpoint | default(omit) }}
+      HIVE_SITE_CONF_fs_s3a_access_key: {{s3AccessKey | mandatory('s3AccessKey must be defined, use the S3_access_key property in the config.yml') }}
+      HIVE_SITE_CONF_fs_s3a_secret_key: ${PLATYS_S3_SECRET_KEY}
+      HIVE_SITE_CONF_fs_s3a_path_style_access: '{{s3PathStyleAccess}}'
       HIVE_SITE_CONF_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
-      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_endpoint: http://minio:9000
-      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_path_style_access: 'true'
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
+      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_endpoint: {{s3Endpoint | default(omit) }}
+      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_path_style_access: '{{s3PathStyleAccess}}'
+      SPARK_HADOOP_FS_S3A_ACCESS_KEY: {{s3AccessKey | mandatory('s3AccessKey must be defined, use the S3_access_key property in the config.yml') }}
+      SPARK_HADOOP_FS_S3A_SECRET_KEY: ${PLATYS_S3_SECRET_KEY}
     {% endif %}
       SPARK_DEFAULTS_CONF_spark_jars_repositories: {{SPARK_jars_repositories}}
       SPARK_DEFAULTS_CONF_spark_jars_packages: {{SPARK_jars_packages}}
@@ -2955,8 +2973,6 @@ services:
       SPARK_BLOCKMANGER_PORT: 6060
       SPARK_DRIVER_EXTRAJAVAOPTIONS: {{SPARK_driver_extraJavaOptions}}
       SPARK_EXECUTOR_EXTRAJAVAOPTIONS: {{SPARK_executor_extraJavaOptions}}
-      SPARK_HADOOP_FS_S3A_ACCESS_KEY: V42FCGRVMK24JJ8DHUYG
-      SPARK_HADOOP_FS_S3A_SECRET_KEY: bKhWxVF3kQoLY9kFmt91l+tDrEoZjqnWXzY9Eza
       PYSPARK_PYTHON: "python3"
       SPARK_SUBMIT_OPTIONS: "--conf spark.driver.extraJavaOptions=-Dcom.amazonaws.services.s3.enableV4 --conf spark.executor.extraJavaOptions=-Dcom.amazonaws.services.s3.enableV4"
     {%if use_timezone | default(false) %}
@@ -4967,8 +4983,8 @@ services:
     ports:
       - '9000:9000'
     environment:
-      MINIO_ACCESS_KEY: V42FCGRVMK24JJ8DHUYG
-      MINIO_SECRET_KEY: bKhWxVF3kQoLY9kFmt91l+tDrEoZjqnWXzY9Eza
+      MINIO_ACCESS_KEY: {{MINIO_access_key}}
+      MINIO_SECRET_KEY: {{MINIO_secret_key}}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
