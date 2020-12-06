@@ -54,3 +54,6 @@ fi
 
 # Currently not used
 #jinja2 /opt/mdps-gen/destination/documentation/templates/services.md.j2 /opt/mdps-gen/destination/docker-compose.yml --format=yaml --outfile /opt/mdps-gen/destination/documentation/services.md
+
+# Create a .gitignore and the .env to it if it does not yet exists
+grep -qxF '.env' /opt/mdps-gen/destination/.gitignore || echo '.env' >> /opt/mdps-gen/destination/.gitignore
