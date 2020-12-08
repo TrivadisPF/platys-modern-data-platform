@@ -134,7 +134,7 @@ You can see the configuration options, available through this platform stack, si
 
 You can now enable the options for the services you want the platform to support by changing the values of the Platys Services from `false` to `true`. The services available are named `XXXX_enable` by convention, where XXXX is the name of the service.
 
-For this sample, we want to create a platform running Kafka and AKHQ. So all we have to do is set the `KAFKA_enable` flag to `true`
+For this sample, we want to create a platform running Kafka and the AKHQ Management UI. So all we have to do is set the `KAFKA_enable` and the `KAFKA_AKHQ_enable` flag to `true`
 
 ```
       #
@@ -159,7 +159,7 @@ For this sample, we want to create a platform running Kafka and AKHQ. So all we 
       #
       # ===== Apache Kafka HQ ========
       #
-      KAFKA_AKHQ_enable: false      
+      KAFKA_AKHQ_enable: true      
 ```
 
 You only have to explicitly enable what you need, as each service is disabled by default. Other settings have meaningful defaults as well. So you can also delete the values for all the services you don't need. 
@@ -201,7 +201,7 @@ which produces the following `config.yml`
       KAFKA_AKHQ_enable: true
 ```
 
-if you want to know the service names you can use with the `--enable-services` flag you can query for it using the `list_services` command.
+If you want to know the service names you can use with the `--enable-services` flag you can query for it using the `list_services` command.
 
 ```
 platys list_services --stack trivadis/platys-modern-data-platform --stack-version 1.9.0
@@ -309,7 +309,7 @@ Creating kafka-3           ... done
 Creating akhq              ... done
 ```
 
-In a web browser, navigate to <http://${DOCKER_HOST_IP}> and you should see platform info page, which has been generated when starting the platform
+In a web browser, navigate to <http://${PUBLIC_IP}> and you should see platform info page, which has been generated when starting the platform
 
 ![Alt Image Text](./images/service-info.png "Service Info ")
 
