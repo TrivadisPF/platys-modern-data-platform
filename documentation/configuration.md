@@ -12,7 +12,24 @@ There are some overall settings which will control the behaviour for all or a gr
 | `private_docker_repository_name`                             	| `trivadis` 	| 1.5.0 | Docker images not available on public Docker Hub will be retrieved using this private repository. By default it points to `trivadis` and you have to login first, before you can use the generated stack, if you have selected a private image. Use this config to point to your own private docker registry if needed. |  
 | `uid`                             	| `1000` 	| 1.9.0 | The UID to use when using the "user" property in a service to override the user inside the container. |  
 
-## Service Specific
+## External Services
+
+There are some overall settings which will control the behaviour for all or a group of services. These are listed in the table below.
+
+| Config                                         	| Default 	| Since 	| Description                                                                                                                                                                        	                    	|
+|------------------------------------------------	|:-------:	|-------	|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------	|
+| `KAFKA_enable`                             	| `false` | 1.9.0 | Use external Kafka service, such as Confluent Cloud. Specify the cluster through the `KAFKA_bootstrap_servers` property.  |  
+| `KAFKA_bootstrap_servers`                             	| `` 	| 1.9.0 | A comma-separated list of host and port pairs that addresses the external Kafka brokers |  
+| `KAFKA_username`                             	| `` 	| 1.9.0 | Username to authenticate against the external Kafka cluster |  
+| `KAFKA_password`                             	| `` 	| 1.9.0 | Password to authenticate against the external Kafka cluster |  
+| `SCHEMA_REGISTRY_enable`                             	| `false` 	| 1.9.0 |  Use an external schema registry |  
+| `SCHEMA_REGISTRY_url`                             	| `` 	| 1.9.0 | The URL of the external schema registry |  
+| `S3_enable`                             	| `false` | 1.9.0 | Use external S3 service, such as AWS S3 cloud service or an on-premises S3 appliance. |  
+| `S3_endpoint`                             	| `` | 1.9.0 | The endpoint address of the S3 external service |  
+| `S3_path_style_access`                             	| `false` | 1.9.0 | Use Path Style Access if set to `true`, otherwise the default of virtual hosted-style access is used. | 
+
+
+## Platform Service
 
 The configuration settings for enabling/disabling a given service are named `XXXXX_enable` where XXXXX is the name of the service (he used to be named `XXXXX_enabled` in version 1.0.0).
 For each service there might be some other settings, such as controlling the number of nodes to start the service with, whether the service should map a data volume into the container or controlling some other proprietary configuration properties of the service itself.
