@@ -30,10 +30,11 @@ Before we can generated the platform, we need to extend the `config.yml` with th
 
         S3_enable: true
         S3_endpoint: 
+        S3_default_region: eu-central-1        
         S3_path_style_access: false
 ```
 
-Set the `S3_enable` property to `true` and leave the other settings as is.
+Set the `S3_enable` property to `true` and the `S3_default_region` property to your preferred location, leave the other settings as is.
 
 Before we can start the platform, we have to specify the AWS credentials for S3 with the two environment variables `PLATYS_AWS_ACCESS_KEY` and `PLATYS_AWS_SECRET_ACCESS_KEY`. The simples way is to create an `.env` file with this content:
 
