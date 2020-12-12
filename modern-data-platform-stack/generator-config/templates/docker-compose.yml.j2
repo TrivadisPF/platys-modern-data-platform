@@ -336,6 +336,7 @@ networks:
   {% if (external['S3_endpoint'] != None) | default(false) %}
     {% set s3Endpoint = external['S3_endpoint'] %}
   {% endif %}
+    {% set s3Endpoint = 's3.amazonaws.com' %}
     {% set s3PathStyleAccess = external['S3_path_style_access'] %}
     {% set s3AccessKey = '${PLATYS_AWS_ACCESS_KEY:?PLATYS_AWS_ACCESS_KEY must be set either in .env or as an environment variable}' %}
     {% set s3SecretAccessKey = '${PLATYS_AWS_SECRET_ACCESS_KEY:?PLATYS_AWS_SECRET_ACCESS_KEY must be set either in .env or as an environment variable}' %}
@@ -5060,20 +5061,20 @@ services:
 {% if AWSCLI_enable | default(false) %}
   #  ================================== Awscli ========================================== #
   awscli:
-    image: xueshanf/awscli:{{__AWSCLI_version}}
+    image: trivadis/awscli-s3cmd:{{__AWSCLI_version}}
     container_name: awscli
     hostname: awscli
     environment:
       AWS_ACCESS_KEY_ID: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
       AWS_SECRET_ACCESS_KEY: ${PLATYS_AWS_SECRET_ACCESS_KEY:-{{MINIO_secret_key}}}
+      AWS_ENDPOINT: {{s3Endpoint if s3Endpoint is defined and s3Endpoint else omit}}
       AWS_DEFAULT_REGION: {{s3DefaultRegion if s3DefaultRegion is defined and s3DefaultRegion else omit}}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
-      - './conf/s3cfg:/root/.s3cfg'
-#      - './minio/config:/root/.minio'
+      - './conf/s3cfg:/root/.s3cfg.template'
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
