@@ -65,7 +65,7 @@ docker exec -ti awscli s3cmd mb s3://gschmutz-flight-bucket
 And then load the data (provisioned by the data container enabled with the `PROVISIONING_DATA_enable` flag). Again replace the `gschmutz` prefix before executing it:
 
 ```
-docker exec -ti awscli s3cmd put /data-transfer/flight-data/airports.csv s3://gschmutz-flight-bucket/raw/airports
+docker exec -ti awscli s3cmd put /data-transfer/flight-data/airports.csv s3://gschmutz-flight-bucket/raw/airports/airports.csv
 ```
 
 ## Work with data from external S3 with Spark
