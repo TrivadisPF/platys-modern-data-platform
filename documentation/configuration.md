@@ -24,7 +24,7 @@ There are some overall settings which will control the behaviour for all or a gr
 | `KAFKA_password`                             	| `` 	| 1.9.0 | Password to authenticate against the external Kafka cluster |  
 | `SCHEMA_REGISTRY_enable`                             	| `false` 	| 1.9.0 |  Use an external schema registry |  
 | `SCHEMA_REGISTRY_url`                             	| `` 	| 1.9.0 | The URL of the external schema registry |  
-| `S3_enable`                             	| `false` | 1.9.0 | Use external S3 service, such as AWS S3 cloud service or an on-premises S3 appliance. |  
+| `S3_enable`                             	| `false` | 1.9.0 | Use external S3 service, such as AWS S3 cloud service or an on-premises S3 appliance. You have to configure two environment variables, `PLATYS_AWS_ACCESS_KEY` with the access key and `PLATYS_AWS_SECRET_ACCESS_KEY` with the access secret. This can be done on the on the docker host or in the `.env` file in the platform home (same folder where the `docker-compose.yml` is located). |  
 | `S3_endpoint`                             	| `` | 1.9.0 | The endpoint address of the S3 external service |  
 | `S3_path_style_access`                             	| `false` | 1.9.0 | Use Path Style Access if set to `true`, otherwise the default of virtual hosted-style access is used. | 
 
