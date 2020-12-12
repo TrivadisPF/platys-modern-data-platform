@@ -60,13 +60,13 @@ Let's upload some data into S3. You can either use the official [AWS S3 console]
 First create a new bucket. Because you are using the public S3 service, you have to use a globally unique name for the bucket. So in order for it to work you have to replace the prefix `gschmutz` by a prefix "unique to you":
 
 ```
-docker exec -ti awscli s3cmd mb s3://gschmutz-flight-bucket
+docker exec -ti awscli aws s3 mb s3://gschmutz-flight-bucket
 ```
 
 And then load the data (provisioned by the data container enabled with the `PROVISIONING_DATA_enable` flag). Again replace the `gschmutz` prefix before executing it:
 
 ```
-docker exec -ti awscli s3cmd put /data-transfer/flight-data/airports.csv s3://gschmutz-flight-bucket/raw/airports/airports.csv
+docker exec -ti awscli aws s3 cp /data-transfer/flight-data/airports.csv s3://gschmutz-flight-bucket/raw/airports/airports.csv
 ```
 
 ## Work with data from external S3 with Spark
