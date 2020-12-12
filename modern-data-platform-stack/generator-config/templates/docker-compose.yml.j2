@@ -336,14 +336,17 @@ networks:
   {% if (external['S3_endpoint'] != None) | default(false) %}
     {% set s3Endpoint = external['S3_endpoint'] %}
   {% endif %}
+    {% set s3Endpoint = 's3.amazonaws.com' %}
     {% set s3PathStyleAccess = external['S3_path_style_access'] %}
     {% set s3AccessKey = '${PLATYS_AWS_ACCESS_KEY:?PLATYS_AWS_ACCESS_KEY must be set either in .env or as an environment variable}' %}
     {% set s3SecretAccessKey = '${PLATYS_AWS_SECRET_ACCESS_KEY:?PLATYS_AWS_SECRET_ACCESS_KEY must be set either in .env or as an environment variable}' %}
+    {% set s3DefaultRegion = external['S3_default_region'] %}
 {% else %}
     {% set s3Endpoint = 'http://minio:9000' %}
     {% set s3PathStyleAccess = 'true' %}
     {% set s3AccessKey = MINIO_access_key %}
     {% set s3SecretAccessKey = MINIO_secret_key %}
+    {% set s3DefaultRegion = 'us-east-1' %}
 {% endif %}   {# external['s3Endpoint'] #}
 
 {#  ================================== Services ========================================== #}
@@ -1460,6 +1463,9 @@ services:
     image: trivadis/apache-spark-master:{{__SPARK_version}}
     container_name: spark-master
     hostname: spark-master
+    labels:
+      com.platys.webui.title: 'Spark UI'
+      com.platys.webui.url: "http://${PUBLIC_IP}:8080"
     ports:
       - 6066:6066
       - 7077:7077
@@ -1935,7 +1941,7 @@ services:
       - atlas-kafka-setup
       - cassandra-atlas
     ports:
-      - 21000:21000     # don't change the port without also changing in the properties file as well as in the ATLAS_PROVISION_EXAMPLES script
+      - 21000:21000     # dont change the port without also changing in the properties file as well as in the ATLAS_PROVISION_EXAMPLES script
     environment:
       NONE: "not_used_just_for_syntax"
   {% if ATLAS_provision_atlas_sample_data  | default(false) %}
@@ -2959,6 +2965,11 @@ services:
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_path_style_access: '{{s3PathStyleAccess}}'
       SPARK_HADOOP_FS_S3A_ACCESS_KEY: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
       SPARK_HADOOP_FS_S3A_SECRET_KEY: {{s3SecretAccessKey}}
+      # for awscli & s3cmd
+      AWS_ACCESS_KEY_ID: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
+      AWS_SECRET_ACCESS_KEY: ${PLATYS_AWS_SECRET_ACCESS_KEY:-{{MINIO_secret_key}}}
+      AWS_ENDPOINT: {{s3Endpoint if s3Endpoint is defined and s3Endpoint else omit}}
+      AWS_DEFAULT_REGION: {{s3DefaultRegion if s3DefaultRegion is defined and s3DefaultRegion else omit}}
     {% endif %}
       SPARK_DEFAULTS_CONF_spark_jars_repositories: {{SPARK_jars_repositories}}
       SPARK_DEFAULTS_CONF_spark_jars_packages: {{SPARK_jars_packages}}
@@ -3003,7 +3014,7 @@ services:
       - ./data-transfer:/data-transfer
       - ./plugins/spark/jars:/extra-jars
       - ./container-volume/spark/logs/:/var/log/spark/logs
-      - './conf/s3cfg:/root/.s3cfg'
+      - './conf/s3cfg:/root/.s3cfg.template'
       - ./conf/zeppelin/shiro.ini:/opt/zeppelin/conf/shiro.ini
       - ./conf/zeppelin/interpreter.json:/opt/zeppelin/conf/interpreter.json
       - ./conf/zeppelin/interpreter-setting.json:/opt/zeppelin/interpreter/spark/interpreter-setting.json
@@ -5007,6 +5018,7 @@ services:
     environment:
       MINIO_ACCESS_KEY: {{MINIO_access_key}}
       MINIO_SECRET_KEY: {{MINIO_secret_key}}
+      MINIO_REGION_NAME: {{s3DefaultRegion if s3DefaultRegion is defined and s3DefaultRegion else omit}}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -5031,6 +5043,7 @@ services:
     environment:
       AWS_ACCESS_KEY_ID: {{MINIO_access_key}}
       AWS_SECRET_ACCESS_KEY: {{MINIO_secret_key}}
+      AWS_DEFAULT_REGION: {{s3DefaultRegion if s3DefaultRegion is defined and s3DefaultRegion else omit}}
     volumes:
       - './conf/s3cfg:/root/.s3cfg'
     command:
@@ -5053,19 +5066,20 @@ services:
 {% if AWSCLI_enable | default(false) %}
   #  ================================== Awscli ========================================== #
   awscli:
-    image: xueshanf/awscli:{{__AWSCLI_version}}
+    image: trivadis/awscli-s3cmd:{{__AWSCLI_version}}
     container_name: awscli
     hostname: awscli
     environment:
       AWS_ACCESS_KEY_ID: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
       AWS_SECRET_ACCESS_KEY: ${PLATYS_AWS_SECRET_ACCESS_KEY:-{{MINIO_secret_key}}}
+      AWS_ENDPOINT: {{s3Endpoint if s3Endpoint is defined and s3Endpoint else omit}}
+      AWS_DEFAULT_REGION: {{s3DefaultRegion if s3DefaultRegion is defined and s3DefaultRegion else omit}}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
-      - './conf/s3cfg:/root/.s3cfg'
-#      - './minio/config:/root/.minio'
+      - './conf/s3cfg:/root/.s3cfg.template'
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"

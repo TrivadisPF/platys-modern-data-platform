@@ -30,10 +30,11 @@ Before we can generated the platform, we need to extend the `config.yml` with th
 
         S3_enable: true
         S3_endpoint: 
+        S3_default_region: eu-central-1        
         S3_path_style_access: false
 ```
 
-Set the `S3_enable` property to `true` and leave the other settings as is.
+Set the `S3_enable` property to `true` and the `S3_default_region` property to your preferred location, leave the other settings as is.
 
 Before we can start the platform, we have to specify the AWS credentials for S3 with the two environment variables `PLATYS_AWS_ACCESS_KEY` and `PLATYS_AWS_SECRET_ACCESS_KEY`. The simples way is to create an `.env` file with this content:
 
@@ -59,13 +60,13 @@ Let's upload some data into S3. You can either use the official [AWS S3 console]
 First create a new bucket. Because you are using the public S3 service, you have to use a globally unique name for the bucket. So in order for it to work you have to replace the prefix `gschmutz` by a prefix "unique to you":
 
 ```
-docker exec -ti awscli s3cmd mb s3://gschmutz-flight-bucket
+docker exec -ti awscli aws s3 mb s3://gschmutz-flight-bucket
 ```
 
 And then load the data (provisioned by the data container enabled with the `PROVISIONING_DATA_enable` flag). Again replace the `gschmutz` prefix before executing it:
 
 ```
-docker exec -ti awscli s3cmd put /data-transfer/flight-data/airports.csv s3://gschmutz-flight-bucket/raw/airports
+docker exec -ti awscli aws s3 cp /data-transfer/flight-data/airports.csv s3://gschmutz-flight-bucket/raw/airports/airports.csv
 ```
 
 ## Work with data from external S3 with Spark
