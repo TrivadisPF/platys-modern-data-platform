@@ -27,7 +27,7 @@ The Modern Data Platform version 1.9.0 contains the following new services and e
 * Update `Amundsen-Frontend` to `3.0.0`
 * Update `Amundsen-Metadata` to `3.0.0`
 * Update `Amundsen-Search` to `2.4.1`
-* Update `Presto` to `344-e`
+* Update `Presto` to `347-e`
 * Update `Dremio` to `4.9`
 * Update `MongoDB` to `4.4.2`
 * Update `MongoDB` to `4.2.0`
