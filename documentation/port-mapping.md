@@ -79,6 +79,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 7687 | 7687 | neo4j-1 |
 7688 | 7687 | neo4j-2 |
 7689 | 7687 | neo4j-3 |
+8000 | 80 | markdown-viewer |
 8024 | 8024 | axon-server |
 8047 | 8047 | drill |
 8050 | 8050 | kudu-tserver-1 |
