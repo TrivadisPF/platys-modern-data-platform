@@ -365,6 +365,7 @@ For each service there might be some other settings, such as controlling the num
 | **_Markdown Viewer_** &nbsp;&nbsp;&nbsp;&nbsp;![x86-64](./images/x86-64.png)                   	|         	|       	|                                                                                                                                                                                     	|             	
 | `MARKDOWN_VIEWER_enable` | `true` 	| 1.9.0 	| Generate a web page with the details on the data platform. |
 | `MARKDOWN_VIEWER_port` | `80` 	| 1.9.0 	| Expose Markdown Viewer on this port. |
+| `MARKDOWN_VIEWER_use_public_ip` | `true` 	| 1.9.1 	| When rendering markdown pages, use the public IP address for links to services. If set to `false`, the docker host IP is used instead. |
 | **_Python_** &nbsp;&nbsp;&nbsp;&nbsp;![x86-64](./images/x86-64.png)  ![arm](./images/arm.png)                    	|           	|                                                                                                                                                                                 
 | `PYTHON_enable` | `false` 	| 1.2.0 	| Generate Python 3 container |
 | `PYTHON_script_folder` |  			| 1.2.0  | path to the folder on host machine that will mapped to /tmp on container and from where the python script will be executed |
