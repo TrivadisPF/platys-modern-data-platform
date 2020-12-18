@@ -342,7 +342,7 @@ networks:
     {% set s3SecretAccessKey = '${PLATYS_AWS_SECRET_ACCESS_KEY:?PLATYS_AWS_SECRET_ACCESS_KEY must be set either in .env or as an environment variable}' %}
     {% set s3DefaultRegion = external['S3_default_region'] %}
 {% else %}
-    {% set s3Endpoint = 'minio:9000' %}
+    {% set s3Endpoint = 'http://minio:9000' %}
     {% set s3PathStyleAccess = 'true' %}
     {% set s3AccessKey = MINIO_access_key %}
     {% set s3SecretAccessKey = MINIO_secret_key %}
@@ -5045,7 +5045,7 @@ services:
     environment:
       AWS_ACCESS_KEY_ID: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
       AWS_SECRET_ACCESS_KEY: ${PLATYS_AWS_SECRET_ACCESS_KEY:-{{MINIO_secret_key}}}
-      AWS_ENDPOINT: {{s3Endpoint if s3Endpoint is defined and s3Endpoint else omit}}
+      AWS_ENDPOINT: {{ (s3Endpoint | replace('http://','')) if s3Endpoint is defined and s3Endpoint else omit}}
       AWS_DEFAULT_REGION: {{s3DefaultRegion if s3DefaultRegion is defined and s3DefaultRegion else omit}}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
