@@ -23,6 +23,7 @@ Inhere we are documenting cookbooks on how to use the platform:
    * [Run Python Spark Application using `spark-submit`](./doc/run-spark-simple-app-python-submit)
    * [Run Python Spark Application using Docker](./doc/run-spark-simple-app-python-docker)   
    * [Spark and Hive Metastore](./doc/spark-and-hive-metastore/)
+   * [Spark with internal S3 (using on minIO)](./doc/spark-with-internal-s3)
    * [Spark with external S3](./doc/spark-with-external-s3)
 
  * **Hadoop HDFS**
