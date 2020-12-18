@@ -1,4 +1,4 @@
-# `modern-data-platform` - Configuration v1.9.0
+# `modern-data-platform` - Configuration v1.9.1
 
 This is the documentation of the configuration settings which can be overwritten using a custom YAML file. All the defaults are defined in [`generator-config/vars/default-values.yml`](generator-config/vars/config.yml).
 
@@ -343,7 +343,9 @@ For each service there might be some other settings, such as controlling the num
 | `MINIO_enable`                                 	| `false` 	| 1.0.0 	| Generate Minio service                                                                                                                                                              	|      
 | `MINIO_volume_map_data`                        	| `false` 	| 1.1.0 	| Volume map data folder into the Minio service                                                                                                                                       	|  
 | `MINIO_access_key`                        	| `V42FCGRVMK24JJ8DHUYG` 	| 1.9.0 	| The access key to be used for MinIO.                                                                                                                                        	|                  	
-| `MINIO_secret_key`                        	| `bKhWxVF3kQoLY9kFmt91l+tDrEoZjqnWXzY9Eza` 	| 1.9.0 	| The secret key to be used for MinIO.                                                                                                                                        	|                  	
+| `MINIO_secret_key`                        	| `bKhWxVF3kQoLY9kFmt91l+tDrEoZjqnWXzY9Eza` 	| 1.9.0 	| The secret key to be used for MinIO.                                                                                                                                        	| 
+| `MINIO_default_buckets`                        	| `default-bucket` 	| 1.9.1 	| A comma separated list of buckets to create upon start.                                                                                                                                        	|    
+| `MINIO_browser_enable`                        	| `true` 	| 1.9.1 	| To disable web browser access, set this value to `false`.                                                                                                                                        	|                     	
 | **_AWS CLI_**   &nbsp;&nbsp;&nbsp;&nbsp;![x86-64](./images/x86-64.png)                        	|         	| 
 | `AWSCLI_enable`                                	| `false` 	| 1.0.0 	| Generate AWSCli service                                                                                                                                                             	|             	|                                	|
 | **_Code-Server_**   &nbsp;&nbsp;&nbsp;&nbsp;![x86-64](./images/x86-64.png)                     	|         	|       	|                                                                                                                                                                                     	|             	|                                	|

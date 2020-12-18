@@ -342,7 +342,7 @@ networks:
     {% set s3SecretAccessKey = '${PLATYS_AWS_SECRET_ACCESS_KEY:?PLATYS_AWS_SECRET_ACCESS_KEY must be set either in .env or as an environment variable}' %}
     {% set s3DefaultRegion = external['S3_default_region'] %}
 {% else %}
-    {% set s3Endpoint = 'http://minio:9000' %}
+    {% set s3Endpoint = 'minio:9000' %}
     {% set s3PathStyleAccess = 'true' %}
     {% set s3AccessKey = MINIO_access_key %}
     {% set s3SecretAccessKey = MINIO_secret_key %}
@@ -5007,7 +5007,7 @@ services:
 {% if MINIO_enable | default(false) %}
   #  ================================== Minio ========================================== #
   minio:
-    image: minio/minio:{{__MINIO_version}}
+    image: bitnami/minio:{{__MINIO_version}}
     container_name: minio
     hostname: minio
     labels:
@@ -5019,6 +5019,8 @@ services:
       MINIO_ACCESS_KEY: {{MINIO_access_key}}
       MINIO_SECRET_KEY: {{MINIO_secret_key}}
       MINIO_REGION_NAME: {{s3DefaultRegion if s3DefaultRegion is defined and s3DefaultRegion else omit}}
+      MINIO_BROWSER: "{{MINIO_browser_enable | default(true) }}"
+      MINIO_DEFAULT_BUCKETS: '{{MINIO_default_buckets}}'
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -5031,36 +5033,7 @@ services:
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
-    command: server /data
     restart: {{container_restart_policy}}
-
-  minio-setup-default-bucket:
-    image: xueshanf/awscli:{{__AWSCLI_version}}
-    container_name: minio-setup-default-bucket
-    hostname: minio-setup-default-bucket
-    depends_on:
-      - minio
-    environment:
-      AWS_ACCESS_KEY_ID: {{MINIO_access_key}}
-      AWS_SECRET_ACCESS_KEY: {{MINIO_secret_key}}
-      AWS_DEFAULT_REGION: {{s3DefaultRegion if s3DefaultRegion is defined and s3DefaultRegion else omit}}
-    volumes:
-      - './conf/s3cfg:/root/.s3cfg'
-    command:
-      - bash
-      - -c
-      - |
-        echo "Waiting for MinIO to start listening on connect..."
-        while [ $$(curl -s -o /dev/null -w %{http_code} http://minio:9000/minio/health/ready) -ne 200 ] ; do
-          echo -e $$(date) " MinIO UI state: " $$(curl -s -o /dev/null -w %{http_code} http://minio:9000/minio/health/ready) " (waiting for 200)"
-          sleep 5
-        done
-        nc -vz minio 9000
-        echo -e "\n--\n+> Creating MinIO default bucket"
-
-        s3cmd mb s3://default-bucket
-
-        sleep infinity
 {% endif %}   {#  MINIO_enable #}
 
 {% if AWSCLI_enable | default(false) %}
