@@ -1492,6 +1492,7 @@ services:
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_path_style_access: '{{s3PathStyleAccess}}'
   {% endif %}
       SPARK_PUBLIC_DNS: ${PUBLIC_IP}
+      SPARK_MASTER_OPTS: '{{SPARK_master_opts if SPARK_master_opts is defined and SPARK_master_opts else omit }}'
       INIT_DAEMON_STEP: setup_spark
       SPARK_DEFAULTS_CONF_spark_jars_repositories: {{SPARK_jars_repositories}}
       SPARK_DEFAULTS_CONF_spark_jars_packages: {{SPARK_jars_packages}}
@@ -1546,10 +1547,10 @@ services:
       SPARK_MASTER: spark://spark-master:7077
       CORE_CONF_fs_defaultFS: file:///tmp
   {% endif -%}   {#  HADOOP_enable #}
-#      SPARK_WORKER_CORES: 2
-#      SPARK_WORKER_MEMORY: 1g
       SPARK_WORKER_WEBUI_PORT: "{{webui_port}}"
-      SPARK_WORKER_OPTS: "-Dspark.worker.cleanup.enabled=true -Dspark.worker.cleanup.appDataTtl=604800"
+      SPARK_WORKER_CORES: '{{SPARK_worker_cores if SPARK_worker_cores is defined and SPARK_worker_cores else omit }}'
+      SPARK_WORKER_MEMORY: '{{SPARK_worker_memory if SPARK_worker_memory is defined and SPARK_worker_memory else omit }}'
+      SPARK_WORKER_OPTS: '{{SPARK_worker_opts if SPARK_worker_opts is defined and SPARK_worker_opts else omit }}'
       SPARK_PUBLIC_DNS: ${PUBLIC_IP}
   {%if MINIO_enable or external['S3_enable'] | default(false) %}
       CORE_CONF_fs_s3a_endpoint: '{{s3Endpoint | default(omit) }}'
@@ -2994,10 +2995,11 @@ services:
       ZEPPELIN_PORT: "8080"
       ZEPPELIN_INTERPRETER_CONNECT_TIMEOUT: 120000
       ZEPPELIN_INTERPRETER_DEP_MVNREPO: 'https://repo.maven.apache.org/maven2'
-#      SPARK_MASTER: "spark://spark-master:7077"
 
       # set spark-master for Zeppelin interpreter
       MASTER: "spark://spark-master:7077"
+      SPARK_CORES_MAX: {{ZEPPELIN_spark_cores_max if ZEPPELIN_spark_cores_max is defined and ZEPPELIN_spark_cores_max else omit }}
+      SPARK_EXECUTOR_MEMORY: {{ZEPPELIN_spark_executor_memory if ZEPPELIN_spark_executor_memory is defined and ZEPPELIN_spark_executor_memory else omit }}
       SPARK_DRIVER_HOST: ${DOCKER_HOST_IP}
       SPARK_DRIVER_BINDADDRESS: "0.0.0.0"
       SPARK_UI_PORT: 4050
