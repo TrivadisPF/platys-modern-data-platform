@@ -41,9 +41,9 @@ networks:
   {% set __LIVY_version = LIVY_version ~ "-spark" ~ SPARK2_version  -%}
   {% set __ZEPPELIN_version = ZEPPELIN_version ~ "-spark" ~ SPARK2_version ~ "-hadoop2.10" -%}
 {% elif (SPARK_major_version | lower) == '3'  %}
-  {% set __SPARK_version = SPARK3_version ~ "-hadoop2.10" -%}
+  {% set __SPARK_version = SPARK3_version ~ "-hadoop3.2" -%}
   {% set __LIVY_version = LIVY_version ~ "-spark" ~ SPARK3_version  -%}
-  {% set __ZEPPELIN_version = ZEPPELIN_version ~ "-spark" ~ SPARK3_version ~ "-hadoop2.10" -%}
+  {% set __ZEPPELIN_version = ZEPPELIN_version ~ "-spark" ~ SPARK3_version ~ "-hadoop3.2" -%}
 {% else -%}
   {% set __SPARK_version = SPARK2_version ~ "-hadoop2.10" -%}
   {% set __LIVY_version = LIVY_version ~ "-spark" ~ SPARK2_version  -%}
@@ -990,7 +990,11 @@ services:
     ports:
       - "28102:8000"
     environment:
+    {%if KAFKA_SCHEMA_REGISTRY_use_public_ip | default(true) %}
       SCHEMAREGISTRY_URL: 'http://${PUBLIC_IP}:8081'
+    {% else %}
+      SCHEMAREGISTRY_URL: 'http://${DOCKER_HOST_IP}:8081'
+    {% endif -%}   {#  KAFKA_SCHEMA_REGISTRY_use_public_ip #}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
