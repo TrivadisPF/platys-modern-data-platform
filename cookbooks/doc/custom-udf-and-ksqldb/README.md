@@ -1,4 +1,4 @@
-# UDF and ksqlDB
+# Custom UDF and ksqlDB
 
 This recipe will show how to use a custom UDF with ksqlDB. 
 
