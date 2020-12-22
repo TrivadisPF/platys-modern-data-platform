@@ -35,13 +35,19 @@ Create a plain node
 CREATE (n)
 ```
 
+Select all nodes (the one created before) and return them
+
 ```
 MATCH (n) RETURN n
 ```
 
+Create a node labeled `Person`
+
 ```
 CREATE (p:Person)
 ```
+
+Only return nodes with the label `Person`
 
 ```
 MATCH (p:Person) RETRUN p

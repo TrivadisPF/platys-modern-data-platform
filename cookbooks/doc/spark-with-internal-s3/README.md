@@ -51,4 +51,7 @@ airportsRawDF = spark.read.csv("s3a://gschmutz-flight-bucket/raw/airports",
 airportsRawDF.show(5)
 ```
 
-
+```scala
+val airportsRawDF = spark.read.csv("s3a://gschmutz-flight-bucket/raw/airports")
+airportsRawDF.show(5)
+````
