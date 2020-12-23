@@ -1,6 +1,6 @@
 # Custom UDF and ksqlDB
 
-This recipe will show how to use a custom UDF with ksqlDB. 
+This recipe will show how to use a custom UDF with ksqlDB. We will see a "normal" UDF in action, which is a stateless function working on scalar value. Besides the UDFs, you can also create stateful aggregate functions (UDAFs) and table functions (UDTFs). Find more information on these 3 types of user-defined functions in the [ksqlDB documentation](https://docs.ksqldb.io/en/latest/concepts/functions/). 
 
 ## Initialise data platform
 
