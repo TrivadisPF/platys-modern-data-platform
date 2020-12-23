@@ -37,5 +37,5 @@ Inhere we are documenting cookbooks on how to use the platform:
    * [Consume a binary file and send it as Kafka message](./recipes/streamsets-binary-file-to-kafka) 
 
  * **ksqlDB**
-   * [./recipes(./recipes/connecting-through-ksqldb-cli)    
+   * [Connecting through ksqlDB CLI](./recipes/connecting-through-ksqldb-cli)    
    * [Custom UDF and ksqlDB](./recipes/custom-udf-and-ksqldb)    
