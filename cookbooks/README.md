@@ -24,7 +24,7 @@ Inhere we are documenting cookbooks on how to use the platform:
    * [Run Python Spark Application using Docker](./doc/run-spark-simple-app-python-docker)   
    * [Spark and Hive Metastore](./doc/spark-and-hive-metastore/)
    * [Spark with internal S3 (using on minIO)](./doc/spark-with-internal-s3)
-   * [Spark with external S3](./doc/spark-with-external-s3)
+   * [Spark with external S3](./doc/spark-with-extern-s3)
 
  * **Hadoop HDFS**
    * [Querying HDFS data using Presto](./doc/querying-hdfs-with-presto/)
@@ -35,3 +35,7 @@ Inhere we are documenting cookbooks on how to use the platform:
 
  * **StreamSets Data Collector**
    * [Consume a binary file and send it as Kafka message](./doc/streamsets-binary-file-to-kafka) 
+
+ * **ksqlDB**
+   * [Connecting through ksqlDB CLI](./doc/connecting-through-ksqldb-cli)    
+   * [Custom UDF and ksqlDB](./doc/custom-udf-and-ksqldb)    
