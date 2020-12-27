@@ -91,6 +91,9 @@ networks:
 
 {% set __STREAMSHEETS_version = STREAMSHEETS_version | default('latest') -%}
 
+{% set __SPRING_DATAFLOW_version = SPRING_DATAFLOW_version | default('latest') -%}
+{% set __SPRING_SKIPPER_version = SPRING_SKIPPER_version | default('latest') -%}
+
 {% set __AIRFLOW_version = AIRFLOW_version | default('latest') -%}
 
 {%if (JUPYTER_edition | lower) == 'minimal' | default(false) %}
@@ -264,6 +267,7 @@ networks:
   {% set NIFI_enable = false -%}
   {% set NIFI_REGISTRY_enable = false -%}
   {% set STREAMSHEETS_enable = false -%}
+  {% set SPRING_DATAFLOW_enable = false -%}
   {% set AIRFLOW_enable = false -%}
   {% set ZEPPELIN_enable = false -%}
   {% set JUPYTER_enable = false -%}
@@ -2839,7 +2843,7 @@ services:
 {% endif %}   {#  NODERED_enable  #}
 
 {% if (STREAMSHEETS_enable) | default(false) %}
-  #  ================================== Streamsheet ========================================== #
+  #  ================================== Streamsheets ========================================== #
   streamsheets:
     image: cedalo/streamsheets:{{__STREAMSHEETS_version}}
     container_name: streamsheets
@@ -2862,8 +2866,95 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {#  STREAMSHEETS_enable #}
 
+
+{%if SPRING_DATAFLOW_enable | default(false) %}
+  #  ================================== Spring Cloud Data Flow ========================================== #
+
+  spring-dataflow-server:
+    image: springcloud/spring-cloud-dataflow-server:{{__SPRING_DATAFLOW_version}}
+    container_name: spring-dataflow-server
+    hostname: spring-dataflow-server
+    labels:
+      com.platys.webui.title: "Spring Cloud Data Flow Server Dashboard"
+      com.platys.webui.url: "http://${PUBLIC_IP}:9393/dashboard"
+      com.platys.restapi.title: "Spring Cloud Data Flow Server REST API"
+      com.platys.restapi.url: "http://${PUBLIC_IP}:9393"
+    ports:
+      - "9393:9393"
+    environment:
+      - SPRING_CLOUD_DATAFLOW_APPLICATIONPROPERTIES_STREAM_SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS=PLAINTEXT://kafka-1:19092
+      - SPRING_CLOUD_DATAFLOW_APPLICATIONPROPERTIES_STREAM_SPRING_CLOUD_STREAM_KAFKA_STREAMS_BINDER_BROKERS=PLAINTEXT://kafka-1:19092
+      - SPRING_CLOUD_DATAFLOW_APPLICATIONPROPERTIES_STREAM_SPRING_CLOUD_STREAM_KAFKA_BINDER_ZKNODES=zookeeper-1:2181
+      - SPRING_CLOUD_DATAFLOW_APPLICATIONPROPERTIES_STREAM_SPRING_CLOUD_STREAM_KAFKA_STREAMS_BINDER_ZKNODES=zookeeper-1:2181
+
+      - SPRING_CLOUD_DATAFLOW_APPLICATIONPROPERTIES_STREAM_SPRING_KAFKA_STREAMS_PROPERTIES_METRICS_RECORDING_LEVEL=DEBUG
+
+      - SPRING_CLOUD_SKIPPER_CLIENT_SERVER_URI=http://spring-skipper-server:7577/api
+
+      - SPRING_DATASOURCE_URL=jdbc:mysql://spring-dataflow-mysql:3306/dataflow
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=rootpw
+      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.mariadb.jdbc.Driver
+      # (Optionally) authenticate the default Docker Hub access for the App Metadata access.
+      #- SPRING_CLOUD_DATAFLOW_CONTAINER_REGISTRY_CONFIGURATIONS_DEFAULT_USER=${METADATA_DEFAULT_DOCKERHUB_USER}
+      #- SPRING_CLOUD_DATAFLOW_CONTAINER_REGISTRY_CONFIGURATIONS_DEFAULT_SECRET=${METADATA_DEFAULT_DOCKERHUB_PASSWORD}
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    depends_on:
+      - kafka-1
+    entrypoint: "./wait-for-it.sh -t 180 spring-skipper-server:7577 -- java -jar /maven/spring-cloud-dataflow-server.jar"
+    volumes:
+      - ./data-transfer:/data-transfer
+#      - ${HOST_MOUNT_PATH:-.}:${DOCKER_MOUNT_PATH:-/root/scdf}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+
+  spring-skipper-server:
+    image: springcloud/spring-cloud-skipper-server:{{__SPRING_SKIPPER_version}}
+    container_name: spring-skipper-server
+    hostname: spring-skipper-server
+    labels:
+      com.platys.restapi.title: "Spring Cloud Skipper Server REST API"
+      com.platys.restapi.url: "http://${PUBLIC_IP}:7577/api"
+    ports:
+      - "7577:7577"
+#      - ${APPS_PORT_RANGE:-20000-20105:20000-20105}
+    environment:
+      - SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_LOCAL_ACCOUNTS_DEFAULT_PORTRANGE_LOW=20000
+      - SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_LOCAL_ACCOUNTS_DEFAULT_PORTRANGE_HIGH=20100
+      - SPRING_DATASOURCE_URL=jdbc:mysql://spring-dataflow-mysql:3306/dataflow
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=rootpw
+      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.mariadb.jdbc.Driver
+      - LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_CLOUD_SKIPPER_SERVER_DEPLOYER=ERROR
+    entrypoint: "./wait-for-it.sh spring-dataflow-mysql:3306 -- java -jar /maven/spring-cloud-skipper-server.jar"
+    volumes:
+      - ./data-transfer:/data-transfer
+#      - ${HOST_MOUNT_PATH:-.}:${DOCKER_MOUNT_PATH:-/root/scdf}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+
+  spring-dataflow-mysql:
+    image: mysql:5.7.25
+    container_name: spring-dataflow-mysql
+    hostname: spring-dataflow-mysql
+    environment:
+      MYSQL_DATABASE: dataflow
+      MYSQL_USER: root
+      MYSQL_ROOT_PASSWORD: rootpw
+    expose:
+      - 3306
+{% endif %}   {#  SPRING_DATAFLOW_enable #}
+
 {%if AIRFLOW_enable | default(false) %}
-  #  ================================== Node-RED ========================================== #
+  #  ================================== Airflow ========================================== #
   airflow:
     image: bitnami/airflow:{{__AIRFLOW_version}}
     container_name: airflow
