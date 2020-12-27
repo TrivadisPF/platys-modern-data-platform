@@ -1524,6 +1524,8 @@ services:
       SPARK_DEFAULTS_CONF_spark_yarn_dist_files: '/spark/conf/hive-site.xml'
       SPARK_DEFAULTS_CONF_spark_driver_extraJavaOptions: {{SPARK_driver_extraJavaOptions}}
       SPARK_DEFAULTS_CONF_spark_executor_extraJavaOptions: {{SPARK_executor_extraJavaOptions}}
+      SPARK_DEFAULTS_CONF_spark_cores_max: {{SPARK_cores_max if SPARK_cores_max is defined and SPARK_cores_max else omit }}
+      SPARK_DEFAULTS_CONF_spark_executor_memory: {{SPARK_executor_memory if SPARK_executor_memory is defined and SPARK_executor_memory else omit }}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -1594,6 +1596,8 @@ services:
       SPARK_DEFAULTS_CONF_spark_yarn_dist_files: '/spark/conf/hive-site.xml'
       SPARK_DEFAULTS_CONF_spark_driver_extraJavaOptions: {{SPARK_driver_extraJavaOptions}}
       SPARK_DEFAULTS_CONF_spark_executor_extraJavaOptions: {{SPARK_executor_extraJavaOptions}}
+      SPARK_DEFAULTS_CONF_spark_cores_max: {{SPARK_cores_max if SPARK_cores_max is defined and SPARK_cores_max else omit }}
+      SPARK_DEFAULTS_CONF_spark_executor_memory: {{SPARK_executor_memory if SPARK_executor_memory is defined and SPARK_executor_memory else omit }}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -1647,6 +1651,8 @@ services:
       SPARK_DEFAULTS_CONF_spark_yarn_dist_files: '/spark/conf/hive-site.xml'
       SPARK_DEFAULTS_CONF_spark_driver_extraJavaOptions: {{SPARK_driver_extraJavaOptions}}
       SPARK_DEFAULTS_CONF_spark_executor_extraJavaOptions: {{SPARK_executor_extraJavaOptions}}
+      SPARK_DEFAULTS_CONF_spark_cores_max: {{SPARK_cores_max if SPARK_cores_max is defined and SPARK_cores_max else omit }}
+      SPARK_DEFAULTS_CONF_spark_executor_memory: {{SPARK_executor_memory if SPARK_executor_memory is defined and SPARK_executor_memory else omit }}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -1767,6 +1773,8 @@ services:
       SPARK_DEFAULTS_CONF_spark_yarn_dist_files: '/spark/conf/hive-site.xml'
       SPARK_DEFAULTS_CONF_spark_driver_extraJavaOptions: {{SPARK_driver_extraJavaOptions}}
       SPARK_DEFAULTS_CONF_spark_executor_extraJavaOptions: {{SPARK_executor_extraJavaOptions}}
+      SPARK_DEFAULTS_CONF_spark_cores_max: {{SPARK_cores_max if SPARK_cores_max is defined and SPARK_cores_max else omit }}
+      SPARK_DEFAULTS_CONF_spark_executor_memory: {{SPARK_executor_memory if SPARK_executor_memory is defined and SPARK_executor_memory else omit }}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -2984,6 +2992,8 @@ services:
       AWS_ENDPOINT: {{s3Endpoint if s3Endpoint is defined and s3Endpoint else omit}}
       AWS_DEFAULT_REGION: {{s3DefaultRegion if s3DefaultRegion is defined and s3DefaultRegion else omit}}
     {% endif %}
+      SPARK_DEFAULTS_CONF_spark_cores_max: {{ZEPPELIN_spark_cores_max if ZEPPELIN_spark_cores_max is defined and ZEPPELIN_spark_cores_max else omit }}
+      SPARK_DEFAULTS_CONF_spark_executor_memory: {{ZEPPELIN_spark_executor_memory if ZEPPELIN_spark_executor_memory is defined and ZEPPELIN_spark_executor_memory else omit }}
       SPARK_DEFAULTS_CONF_spark_jars_repositories: {{SPARK_jars_repositories}}
       SPARK_DEFAULTS_CONF_spark_jars_packages: {{SPARK_jars_packages}}
       SPARK_DEFAULTS_CONF_spark_jars_excludes: {{SPARK_jars_excludes}}
@@ -3005,33 +3015,27 @@ services:
 
       ZEPPELIN_ADDR: "0.0.0.0"
       ZEPPELIN_PORT: "8080"
+      ZEPPELIN_MEM: '-Xms1024m -Xmx1024m -XX:MaxMetaspaceSize=512m'
       ZEPPELIN_INTERPRETER_CONNECT_TIMEOUT: 120000
       ZEPPELIN_INTERPRETER_DEP_MVNREPO: 'https://repo.maven.apache.org/maven2'
-
+      ZEPPELIN_ADMIN_USERNAME: {{ZEPPELIN_admin_username}}
+      ZEPPELIN_ADMIN_PASSWORD: {{ZEPPELIN_admin_password}}
+      ZEPPELIN_USER_USERNAME: {{ZEPPELIN_user_username}}
+      ZEPPELIN_USER_PASSWORD: {{ZEPPELIN_user_password}}
       # set spark-master for Zeppelin interpreter
-      MASTER: "spark://spark-master:7077"
-      SPARK_CORES_MAX: {{ZEPPELIN_spark_cores_max if ZEPPELIN_spark_cores_max is defined and ZEPPELIN_spark_cores_max else omit }}
-      SPARK_EXECUTOR_MEMORY: {{ZEPPELIN_spark_executor_memory if ZEPPELIN_spark_executor_memory is defined and ZEPPELIN_spark_executor_memory else omit }}
-      SPARK_DRIVER_HOST: ${DOCKER_HOST_IP}
-      SPARK_DRIVER_BINDADDRESS: "0.0.0.0"
-      SPARK_UI_PORT: 4050
-      SPARK_DRIVER_PORT: 5050
-      SPARK_BLOCKMANGER_PORT: 6060
-      SPARK_DRIVER_EXTRAJAVAOPTIONS: {{SPARK_driver_extraJavaOptions}}
-      SPARK_EXECUTOR_EXTRAJAVAOPTIONS: {{SPARK_executor_extraJavaOptions}}
+      ZEPPELIN_SPARK_MASTER: "spark://spark-master:7077"
       PYSPARK_PYTHON: "python3"
-      SPARK_SUBMIT_OPTIONS: "--conf spark.driver.extraJavaOptions=-Dcom.amazonaws.services.s3.enableV4 --conf spark.executor.extraJavaOptions=-Dcom.amazonaws.services.s3.enableV4"
+      SPARK_SUBMIT_OPTIONS: "--conf spark.ui.port=4050 --conf spark.driver.host=${DOCKER_HOST_IP} --conf spark.driver.port=5050 --conf spark.driver.bindAddress=0.0.0.0 --conf spark.blockManager.port=6060 --conf spark.driver.extraJavaOptions=-Dcom.amazonaws.services.s3.enableV4 --conf spark.executor.extraJavaOptions=-Dcom.amazonaws.services.s3.enableV4"
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
       - ./plugins/spark/jars:/extra-jars
-      - ./container-volume/spark/logs/:/var/log/spark/logs
+    {% if ZEPPELIN_volume_map_data %}
+      - ./container-volume/spark/notebooks:/zeppelin/notebooks
+    {% endif -%}   {#  ZEPPELIN_volume_map_data #}
       - './conf/s3cfg:/root/.s3cfg.template'
-      - ./conf/zeppelin/shiro.ini:/opt/zeppelin/conf/shiro.ini
-      - ./conf/zeppelin/interpreter.json:/opt/zeppelin/conf/interpreter.json
-      - ./conf/zeppelin/interpreter-setting.json:/opt/zeppelin/interpreter/spark/interpreter-setting.json
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -3039,8 +3043,6 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {#  ZEPPELIN_enable  #}
 
-{# #}
-{# #}
 {%if JUPYTER_enable | default(false) %}
   #  ================================== Jupyter ========================================== #
   jupyter:
