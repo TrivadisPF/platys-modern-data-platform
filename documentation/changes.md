@@ -2,6 +2,39 @@
 
 See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/platys/blob/master/documentation/upgrade-platform-stack.md) for how to upgrade to newer version.
 
+## What's new in 1.10.0
+
+The Modern Data Platform version 1.10.0 contains the following new services and enhancements:
+
+
+### New Services
+ * Spring Cloud Data Flow
+
+### Version upgrades  
+
+* Update `ksqlDB` to `0.14.0`
+* Update `Streamsheets` to `2.2`
+* Update `Zeppelin` to `0.9.0?
+
+### Enhancements 
+
+* add the option to change the port of the markdown viewer to `8000`, with the default still being port `80`. 
+* add an option to use the content of the `DOCKER_HOST_IP` variable instead of the `PUBLIC_IP` variable for the web links to services.
+* change `minio` image to the one from `bitnami`, which allows for creating buckets upon start of the service
+* allow configuration of `spark.max.cores` and `spark.executor.memory` in Zeppelin
+* allow configuration of `SPARK_MASTER_OPTS` and `SPARK_WORKER_OPTS`, `SPARK_WORKER_CORES`, `SPARK_WORKER_MEMORY` for Spark
+* support for switching between Spark 2 and Spark 3 added
+* change default of `KAFKA_delete_topic_enable` to `true`
+* add `KAFKA_SCHEMA_REGISTRY_UI_use_public_ip` to change between public and docker host IP Address for Schema Registry UI
+* make admin user and "normal" user configurable in Zeppelin
+* configuration files for Zeppelin are no longer mapped from the `conf` folder into the container, it is now "prebuild" into the new zeppelin docker image.
+* support for Spark 3.0 added
+
+### Bug fix
+
+* fix bug with internal S3 (minIO) introduced in `1.9.0`
+
+
 ## What's new in 1.9.0
 
 The Modern Data Platform version 1.9.0 contains the following new services and enhancements:
