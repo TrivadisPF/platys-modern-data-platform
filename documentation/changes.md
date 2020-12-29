@@ -14,7 +14,7 @@ The Modern Data Platform version 1.10.0 contains the following new services and 
 
 * Update `ksqlDB` to `0.14.0`
 * Update `Streamsheets` to `2.2`
-* Update `Zeppelin` to `0.9.0?
+* Update `Zeppelin` to `0.9.0`
 
 ### Enhancements 
 
@@ -29,6 +29,7 @@ The Modern Data Platform version 1.10.0 contains the following new services and 
 * make admin user and "normal" user configurable in Zeppelin
 * configuration files for Zeppelin are no longer mapped from the `conf` folder into the container, it is now "prebuild" into the new zeppelin docker image.
 * support for Spark 3.0 added
+* add support for enabling Zeppelin cron scheduler on each notebook
 
 ### Bug fix
 
