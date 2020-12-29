@@ -76,10 +76,45 @@ Recreating kafka-connect-1 ... done
 Starting markdown-renderer ... done
 ```
 
-Once the connector is up and running, we can use the **S3 Sink** connector. 
+Once `kafka-connect-1` is up and running, we can use the **S3 Sink** connector. 
+
+Connectors used from Confluent Hub are installed into the folder `etc/kafka-connect/addl-plugins`, which is mapped to the local folder `$DATAPLATFORM_HOME/plugins/kafka-connect`.
+
+So even after removing the setting in `KAFKA_CONNECT_connectors` a connector would still be available. You also have to remove it manually from the `$DATAPLATFORM_HOME/plugins/kafka-connect` folder.  
 
 ## Manually Downloading Kafka Connect connectors
 
-t.b.d
+Not all Kafka Connect connectors available on the internet are available over Confluent Hub. Some connectors are just a GitHub project and can be downloaded from there as an archive. A very interesting source for various connectors is the [Stream Reactor](https://github.com/lensesio/stream-reactor) project. Here you can various Source and Sink connectors such as **Hive**, **Kudu**, **MQTT** and many others. Find them listed with the link to the documentation [here](https://github.com/lensesio/stream-reactor).
 
+For this cookbook recipe, let's install the MQTT connector available on [Stream Reactor](https://github.com/lensesio/stream-reactor). Navigate to the Releases page <https://github.com/lensesio/stream-reactor/releases> and find the latest version of the MQTT connector, which currently is `kafka-connect-mqtt-2.1.3-2.5.0-all.tar.gz`. 
+
+Download and unpack it into the `$DATAPLATFORM_HOME/plugins/kafka-connect` folder. Make sure to adapt the version if you like:
+
+```
+export MQTT_CONNECTOR_VERSION=2.1.3-2.5.0
+
+cd $DATAPLATFORM_HOME/plugins/kafka-connect
+
+wget https://github.com/lensesio/stream-reactor/releases/download/2.1.3/kafka-connect-mqtt-$MQTT_CONNECTOR_VERSION-all.tar.gz
+mkdir kafka-connect-mqtt-$MQTT_CONNECTOR_VERSION-all 
+tar xvf kafka-connect-mqtt-$MQTT_CONNECTOR_VERSION-all.tar.gz -C kafka-connect-mqtt-$MQTT_CONNECTOR_VERSION-all 
+rm kafka-connect-mqtt-$MQTT_CONNECTOR_VERSION-all.tar.gz
+```
+
+An `ls` should now show the new folder with the MQTT connector artefacts
+
+```
+docker@ubuntu:~/platys-cookbook/plugins/kafka-connect$ ls
+kafka-connect-mqtt-2.1.3-2.5.0-all  readme.txt
+```
+
+With this new connector available, let's restart the Kafka Connect cluster
+
+```
+cd $DATAPLATFORM_HOME
+
+docker-compose restart kafka-connect-1 kafka-connect-2
+```
+
+Once the Kafka Connect cluster is up and running, we can use the MQTT connector.
 
