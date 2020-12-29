@@ -39,3 +39,6 @@ Inhere we are documenting cookbooks on how to use the platform:
  * **ksqlDB**
    * [Connecting through ksqlDB CLI](./recipes/connecting-through-ksqldb-cli)    
    * [Custom UDF and ksqlDB](./recipes/custom-udf-and-ksqldb)    
+
+ * **Kafka Connect**
+   * [Using additional Kafka Connect Connector](./recipes/using-additional-kafka-connect-connector)    
