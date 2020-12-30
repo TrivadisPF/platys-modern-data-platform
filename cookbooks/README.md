@@ -13,7 +13,7 @@ Inhere we are documenting cookbooks on how to use the platform:
    * Joining data between RDBMS and MinIO
 
  * **MQTT**
-   * Confluent MQTT Proxy 
+   * [Using Confluent MQTT Proxy](./recipes/using-mqtt-proxy/)
 
  * **Spark**
    * [Run Java Spark Application using `spark-submit`](./recipes/run-spark-simple-app-java-submit)
