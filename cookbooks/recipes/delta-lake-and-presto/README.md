@@ -1,4 +1,4 @@
-# Presto, Spark and Delta Lake (Spark 2.4.6 & Delta Lake 0.6.0)
+# Presto, Spark and Delta Lake (Spark 2.4.6 & Delta Lake 0.6.1)
 
 This recipe will show how to access a [Delta Lake](http://delta.io) table with Presto.
 
@@ -6,13 +6,35 @@ This recipe will show how to access a [Delta Lake](http://delta.io) table with P
 
 First [initialise a platys-supported data platform](../documentation/getting-started.md) with the following services enabled
 
-```
-platys init --enable-services SPARK,HIVE_METASTORE,MINIO,AWSCLI,PRESTO,PROVISIONING_DATA -s trivadis/platys-modern-data-platform -w 1.8.0
+```bash
+platys init --enable-services SPARK,HIVE_METASTORE,MINIO,AWSCLI,PRESTO,PROVISIONING_DATA -s trivadis/platys-modern-data-platform -w 1.10.0
 ```
 
 Now generate and start the data platform. 
 
+```bash
+platys gen
+
+docker-compose up -d
 ```
+
+## Configure additional Spark packages
+
+Before we can Spark with Delta Lake, we have to add the dependencies to the delta-core and spark-avro packages.
+
+In the `config.yml` add the `SPARK_jars_packages` property:
+
+```yaml
+      #
+      # ===== Apache Spark ========
+      #
+      SPARK_enable: true
+      SPARK_jars_packages: 'io.delta:delta-core_2.11:0.6.1,org.apache.spark:spark-avro_2.11:2.4.7'
+```
+
+Regenerate and restart the platform
+
+```bash
 platys gen
 
 docker-compose up -d
@@ -43,13 +65,17 @@ Now let's create a Delta Lake table from the data loaded above using Spark.
 
 Open a spark-shell
 
+```bash
+docker exec -it spark-master spark-shell  --conf spark.sql.extensions="io.delta.sql.DeltaSparkSessionExtension" --conf spark.sql.catalog.spark_catalog="org.apache.spark.sql.delta.catalog.DeltaCatalog"
 ```
-docker exec -it spark-master spark-shell  --conf spark.sql.extensions="io.delta.sql.DeltaSparkSessionExtension" --conf spark.sql.catalog.spark_catalog="org.apache.spark.sql.delta.catalog.DeltaCatalog" --conf spark.hadoop.fs.s3a.endpoint=http://minio:9000 --conf spark.hadoop.fs.s3a.access.key=V42FCGRVMK24JJ8DHUYG --conf spark.hadoop.fs.s3a.secret.key=bKhWxVF3kQoLY9kFmt91l+tDrEoZjqnWXzY9Eza --conf spark.hadoop.fs.s3a.path.style.access=true --conf spark.hadoop.fs.s3a.impl=org.apache.hadoop.fs.s3a.S3AFileSystem --packages io.delta:delta-core_2.11:0.6.0,org.apache.spark:spark-avro_2.11:2.4.6
+
+```bash
+docker exec -it spark-master spark-shell  --conf spark.sql.extensions="io.delta.sql.DeltaSparkSessionExtension" --conf spark.sql.catalog.spark_catalog="org.apache.spark.sql.delta.catalog.DeltaCatalog" --conf spark.hadoop.fs.s3a.endpoint=http://minio:9000 --conf spark.hadoop.fs.s3a.access.key=V42FCGRVMK24JJ8DHUYG --conf spark.hadoop.fs.s3a.secret.key=bKhWxVF3kQoLY9kFmt91l+tDrEoZjqnWXzY9Eza --conf spark.hadoop.fs.s3a.path.style.access=true --conf spark.hadoop.fs.s3a.impl=org.apache.hadoop.fs.s3a.S3AFileSystem
 ```
 
 Define the schema (the data we load is in CSV format)
 
-```
+```scala
 import org.apache.spark.sql.types._
 
 val flightsSchema = StructType(Array(
@@ -88,17 +114,13 @@ val flightsSchema = StructType(Array(
 
 Load the data from MinIO S3 into a Spark DataFrame using the `flightsSchema` defined above
 
-```
-val flightsDf = spark.read.format("csv")
-  .option("delimiter",",")
-  .option("header", "false")
-  .schema(flightsSchema)
-  .load("s3a://flight-bucket/raw/flights/flights_2008_5_1.csv")
+```scala
+val flightsDf = spark.read.format("csv").option("delimiter",",").option("header", "false").schema(flightsSchema).load("s3a://flight-bucket/raw/flights/flights_2008_5_1.csv")
 ```
 
 Write the DataFrame to a delta table in MinIO S3
 
-```
+```scala
 flightsDf.write.format("delta").mode("append").partitionBy("year","month").save("s3a://flight-bucket/refined/delta-presto/flights")
 ```
 
@@ -106,26 +128,24 @@ flightsDf.write.format("delta").mode("append").partitionBy("year","month").save(
 
 To use the delta table from Presto, a [manifest file has to be generated](https://docs.delta.io/latest/presto-integration.html):
 
-```
+```scala
 import io.delta.tables._
 
 val deltaTable = DeltaTable.forPath(spark,"s3a://flight-bucket/refined/delta-presto/flights")
 deltaTable.generate("symlink_format_manifest")
 ```
 
-alternatively, since Delta Lake 0.7.0 this can also be done using the `GENERATE` SparkSQL command
-
-```
-spark.sql("GENERATE symlink_format_manifest FOR TABLE delta.`s3a://flight-bucket/refined/delta-presto/flights`")
-```
-
 ## Create the Hive table in Meta Store
 
-```
+Start the `hive` CLI
+
+```bash
 docker exec -ti hive-metastore hive
 ```
 
-```
+create a database and the table wrapping the delta table created before
+
+```sql
 CREATE DATABASE flight_data;
 USE flight_data;
 
@@ -153,34 +173,45 @@ STORED AS INPUTFORMAT 'org.apache.hadoop.hive.ql.io.SymlinkTextInputFormat'
 OUTPUTFORMAT 'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat'
 LOCATION 's3a://flight-bucket/refined/delta-presto/flights/_symlink_format_manifest/'
 TBLPROPERTIES ("parquet.compression"="SNAPPY");
+```
 
+As the delta table is partitioned, we need to run `MSCK REPAIR TABLE` to force the metastore (connected to Presto) to discover the partitions
+
+```sql
 MSCK REPAIR TABLE flights_t;
 ```
 
-
 ## Query from Presto
 
+Start the presto CLI
 
-```
+```bash
 docker exec -ti presto-cli presto --server presto-1:8080 --catalog minio
 ```
 
+and switch to the `flight_data` database inside the `minio` catalog.
 
-```
+```sql
 use minio.flight_data;
+```
 
+Let's show the tables
+
+```sql
 show tables;
 ```
 
-```
+and perform various SELECTs on the `flights_t` table
+
+```sql
 SELECT * FROM flights_t;
 ```
 
-```
+```sql
 SELECT count(*) FROM flights_t;
 ```
 
-```
+```sql
 SELECT origin, dest, count(*) 
 FROM flights_t
 GROUP BY origin, dest;
