@@ -1,4 +1,4 @@
-# Presto, Spark and Delta Lake (Spark 2.4.6 & Delta Lake 0.6.1)
+# Presto, Spark and Delta Lake (Spark 2.4.7 & Delta Lake 0.6.1)
 
 This recipe will show how to access a [Delta Lake](http://delta.io) table with Presto.
 
