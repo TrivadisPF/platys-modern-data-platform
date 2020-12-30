@@ -10,11 +10,19 @@ The Modern Data Platform version 1.10.0 contains the following new services and 
 ### New Services
  * Spring Cloud Data Flow
 
+### New Cookbook Recipes
+ * [Using additional Kafka Connect Connector](../cookbooks/recipes/using-additional-kafka-connect-connector) 
+ * [Custom UDF and ksqlDB](../cookbooks/recipes/custom-udf-and-ksqldb) 
+ * [Using Confluent MQTT Proxy](../cookbooks/recipes/using-mqtt-proxy/)
+ * [Spark with internal S3 (using on minIO)](..cookbooks//recipes/spark-with-internal-s3)
+ * [Spark with external S3](../cookbooks/recipes/spark-with-extern-s3)
+
 ### Version upgrades  
 
 * Update `ksqlDB` to `0.14.0`
 * Update `Streamsheets` to `2.2`
 * Update `Zeppelin` to `0.9.0`
+* Update `Confluent` to `6.0.1`
 
 ### Enhancements 
 
