@@ -1490,11 +1490,6 @@ services:
     env_file:
       - ./conf/hadoop.env
     environment:
-  {%if HADOOP_enable | default(false) %}
-      CORE_CONF_fs_defaultFS: hdfs://namenode:9000
-  {% else %}
-      CORE_CONF_fs_defaultFS: file:///tmp
-  {% endif -%}   {#  HADOOP_enable #}
   {%if MINIO_enable or external['S3_enable'] | default(false) %}
       CORE_CONF_fs_s3a_endpoint: '{{s3Endpoint | default(omit) }}'
       CORE_CONF_fs_s3a_path_style_access: '{{s3PathStyleAccess}}'
@@ -1522,9 +1517,14 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalogImplementation: hive
   {% endif -%}   {#  SPARK_catalog #}
   {%if HADOOP_enable | default(false) %}
+      CORE_CONF_fs_defaultFS: hdfs://namenode:9000
       SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: hdfs://namenode:9000/user/hive/warehouse
+  {%elif MINIO_enable or external['S3_enable'] | default(false) %}
+      CORE_CONF_fs_defaultFS: s3a://admin-bucket
+      SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: s3a://admin-bucket/hive/warehouse
   {% else %}
-      SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: s3a://hive-bucket/warehouse
+      CORE_CONF_fs_defaultFS: file:///tmp
+      SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: file:///hive/warehouse
   {% endif -%}   {#  HADOOP_enable #}
       SPARK_DEFAULTS_CONF_spark_yarn_dist_files: '/spark/conf/hive-site.xml'
       SPARK_DEFAULTS_CONF_spark_driver_extraJavaOptions: {{SPARK_driver_extraJavaOptions}}
@@ -1559,13 +1559,7 @@ services:
     env_file:
       - ./conf/hadoop.env
     environment:
-  {%if HADOOP_enable | default(false) %}
       SPARK_MASTER: spark://spark-master:7077
-      CORE_CONF_fs_defaultFS: hdfs://namenode:9000
-  {% else %}
-      SPARK_MASTER: spark://spark-master:7077
-      CORE_CONF_fs_defaultFS: file:///tmp
-  {% endif -%}   {#  HADOOP_enable #}
       SPARK_WORKER_WEBUI_PORT: "{{webui_port}}"
       SPARK_WORKER_CORES: '{{SPARK_worker_cores if SPARK_worker_cores is defined and SPARK_worker_cores else omit }}'
       SPARK_WORKER_MEMORY: '{{SPARK_worker_memory if SPARK_worker_memory is defined and SPARK_worker_memory else omit }}'
@@ -1594,9 +1588,14 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalogImplementation: hive
   {% endif -%}   {#  SPARK_catalog #}
   {%if HADOOP_enable | default(false) %}
+      CORE_CONF_fs_defaultFS: hdfs://namenode:9000
       SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: hdfs://namenode:9000/user/hive/warehouse
+  {%elif MINIO_enable or external['S3_enable'] | default(false) %}
+      CORE_CONF_fs_defaultFS: s3a://admin-bucket
+      SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: s3a://admin-bucket/hive/warehouse
   {% else %}
-      SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: s3a://hive-bucket/warehouse
+      CORE_CONF_fs_defaultFS: file:///tmp
+      SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: file:///hive/warehouse
   {% endif -%}   {#  HADOOP_enable #}
       SPARK_DEFAULTS_CONF_spark_yarn_dist_files: '/spark/conf/hive-site.xml'
       SPARK_DEFAULTS_CONF_spark_driver_extraJavaOptions: {{SPARK_driver_extraJavaOptions}}
@@ -1649,9 +1648,14 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalogImplementation: hive
   {% endif -%}   {#  SPARK_catalog #}
   {%if HADOOP_enable | default(false) %}
+      CORE_CONF_fs_defaultFS: hdfs://namenode:9000
       SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: hdfs://namenode:9000/user/hive/warehouse
+  {%elif MINIO_enable or external['S3_enable'] | default(false) %}
+      CORE_CONF_fs_defaultFS: s3a://admin-bucket
+      SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: s3a://admin-bucket/hive/warehouse
   {% else %}
-      SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: s3a://hive-bucket/warehouse
+      CORE_CONF_fs_defaultFS: file:///tmp
+      SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: file:///hive/warehouse
   {% endif -%}   {#  HADOOP_enable #}
       SPARK_DEFAULTS_CONF_spark_yarn_dist_files: '/spark/conf/hive-site.xml'
       SPARK_DEFAULTS_CONF_spark_driver_extraJavaOptions: {{SPARK_driver_extraJavaOptions}}
@@ -1704,9 +1708,14 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalogImplementation: hive
   {% endif -%}   {#  SPARK_catalog #}
   {%if HADOOP_enable | default(false) %}
+      CORE_CONF_fs_defaultFS: hdfs://namenode:9000
       SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: hdfs://namenode:9000/user/hive/warehouse
+  {%elif MINIO_enable or external['S3_enable'] | default(false) %}
+      CORE_CONF_fs_defaultFS: s3a://admin-bucket
+      SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: s3a://admin-bucket/hive/warehouse
   {% else %}
-      SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: s3a://hive-bucket/warehouse
+      CORE_CONF_fs_defaultFS: file:///tmp
+      SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: file:///hive/warehouse
   {% endif -%}   {#  HADOOP_enable #}
       SPARK_DEFAULTS_CONF_spark_yarn_dist_files: '/spark/conf/hive-site.xml'
       SPARK_DEFAULTS_CONF_spark_driver_extraJavaOptions: {{SPARK_driver_extraJavaOptions}}
@@ -1740,13 +1749,7 @@ services:
     env_file:
       - ./conf/hadoop.env
     environment:
-  {%if HADOOP_enable | default(false) %}
       SPARK_MASTER: spark://spark-master:7077
-      CORE_CONF_fs_defaultFS: hdfs://namenode:9000
-  {% else %}
-      SPARK_MASTER: spark://spark-master:7077
-      CORE_CONF_fs_defaultFS: file:///tmp
-  {% endif -%}   {#  HADOOP_enable #}
   {%if MINIO_enable or external['S3_enable'] | default(false) %}
       CORE_CONF_fs_s3a_endpoint: 'http://minio:9000'
       CORE_CONF_fs_s3a_path_style_access: 'true'
@@ -1771,9 +1774,14 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalogImplementation: hive
   {% endif -%}   {#  SPARK_catalog #}
   {%if HADOOP_enable | default(false) %}
+      CORE_CONF_fs_defaultFS: hdfs://namenode:9000
       SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: hdfs://namenode:9000/user/hive/warehouse
+  {%elif MINIO_enable or external['S3_enable'] | default(false) %}
+      CORE_CONF_fs_defaultFS: s3a://admin-bucket
+      SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: s3a://admin-bucket/hive/warehouse
   {% else %}
-      SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: s3a://hive-bucket/warehouse
+      CORE_CONF_fs_defaultFS: file:///tmp
+      SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: file:///hive/warehouse
   {% endif -%}   {#  HADOOP_enable #}
       SPARK_DEFAULTS_CONF_spark_yarn_dist_files: '/spark/conf/hive-site.xml'
       SPARK_DEFAULTS_CONF_spark_driver_extraJavaOptions: {{SPARK_driver_extraJavaOptions}}
@@ -1854,7 +1862,7 @@ services:
       CORE_CONF_fs_defaultFS: hdfs://namenode:9000
       HIVE_SITE_CONF_hive_metastore_dir: hdfs://namenode:9000/user/hive/warehouse
   {%elif MINIO_enable or external['S3_enable'] | default(false) %}
-      CORE_CONF_fs_defaultFS: file:///tmp
+      CORE_CONF_fs_defaultFS: s3a://admin-bucket
       CORE_CONF_fs_s3a_endpoint: '{{s3Endpoint | default(omit) }}'
       CORE_CONF_fs_s3a_path_style_access: '{{s3PathStyleAccess}}'
       HIVE_SITE_CONF_fs_s3a_endpoint: {{s3Endpoint | default(omit) }}
@@ -3060,11 +3068,6 @@ services:
     env_file:
       - ./conf/hadoop.env
     environment:
-    {%if HADOOP_enable | default(false) %}
-      CORE_CONF_fs_defaultFS: hdfs://namenode:9000
-    {% else %}
-      CORE_CONF_fs_defaultFS: file:///tmp
-    {% endif -%}   {#  HADOOP_enable #}
     {%if MINIO_enable or external['S3_enable'] | default(false) %}
       CORE_CONF_fs_s3a_endpoint: '{{s3Endpoint | default(omit) }}'
       CORE_CONF_fs_s3a_path_style_access: '{{s3PathStyleAccess}}'
@@ -3097,9 +3100,14 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalogImplementation: hive
   {% endif -%}   {#  SPARK_catalog #}
   {%if HADOOP_enable | default(false) %}
+      CORE_CONF_fs_defaultFS: hdfs://namenode:9000
       SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: hdfs://namenode:9000/user/hive/warehouse
+  {%elif MINIO_enable or external['S3_enable'] | default(false) %}
+      CORE_CONF_fs_defaultFS: s3a://admin-bucket
+      SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: s3a://admin-bucket/hive/warehouse
   {% else %}
-      SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: s3a://hive-bucket/warehouse
+      CORE_CONF_fs_defaultFS: file:///tmp
+      SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: file:///hive/warehouse
   {% endif -%}   {#  HADOOP_enable #}
       SPARK_DEFAULTS_CONF_spark_yarn_dist_files: '/spark/conf/hive-site.xml'
       SPARK_DEFAULTS_CONF_spark_driver_extraJavaOptions: {{SPARK_driver_extraJavaOptions}}
@@ -5130,7 +5138,7 @@ services:
       MINIO_SECRET_KEY: {{MINIO_secret_key}}
       MINIO_REGION_NAME: {{s3DefaultRegion if s3DefaultRegion is defined and s3DefaultRegion else omit}}
       MINIO_BROWSER: "{{MINIO_browser_enable | default(true) }}"
-      MINIO_DEFAULT_BUCKETS: '{{MINIO_default_buckets}}'
+      MINIO_DEFAULT_BUCKETS: 'admin-bucket,{{MINIO_default_buckets}}'
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
