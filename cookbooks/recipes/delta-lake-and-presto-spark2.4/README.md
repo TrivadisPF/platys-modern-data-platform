@@ -69,10 +69,6 @@ Open a spark-shell
 docker exec -it spark-master spark-shell  --conf spark.sql.extensions="io.delta.sql.DeltaSparkSessionExtension" --conf spark.sql.catalog.spark_catalog="org.apache.spark.sql.delta.catalog.DeltaCatalog"
 ```
 
-```bash
-docker exec -it spark-master spark-shell  --conf spark.sql.extensions="io.delta.sql.DeltaSparkSessionExtension" --conf spark.sql.catalog.spark_catalog="org.apache.spark.sql.delta.catalog.DeltaCatalog" --conf spark.hadoop.fs.s3a.endpoint=http://minio:9000 --conf spark.hadoop.fs.s3a.access.key=V42FCGRVMK24JJ8DHUYG --conf spark.hadoop.fs.s3a.secret.key=bKhWxVF3kQoLY9kFmt91l+tDrEoZjqnWXzY9Eza --conf spark.hadoop.fs.s3a.path.style.access=true --conf spark.hadoop.fs.s3a.impl=org.apache.hadoop.fs.s3a.S3AFileSystem
-```
-
 Define the schema (the data we load is in CSV format)
 
 ```scala
