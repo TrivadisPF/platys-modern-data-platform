@@ -22,14 +22,13 @@ platys gen
 docker-compose up -d
 ```
 
-
 ## Configure the MQTT Proxy
 
 Before we can use the MQTT Proxy, we have to add a mapping from the MQTT topic hierarchy to a single Kafka Topic. 
 
 In the `config.yml` add the `KAFKA_MQTTPROXY_topic_regex_list` property:
 
-```
+```yaml
       # ===== Confluent MQTT Proxy ========
       #
       KAFKA_MQTTPROXY_enable: true
@@ -40,7 +39,7 @@ Here we specify, that every MQTT topic ending with `position` should be mapped t
 
 Regenerate and restart the platform
 
-```
+```bash
 platys gen
 
 docker-compose up -d
@@ -50,19 +49,19 @@ docker-compose up -d
 
 Before we can use the MQTT Proxy, we have to create the Kafka Topic
 
-```
+```bash
 docker exec -ti kafka-1 kafka-topics --create --zookeeper zookeeper-1:2181 --topic vehicle_position --replication-factor 3 --partitions 8
 ```
 
 Let's start a consumer on the topic using [`kafkacat`](https://github.com/edenhill/kafkacat)
 
-```
+```bash
 docker exec -ti kafkacat kafkacat -t vehicle_position -b kafka-1:19092
 ```
 
 Now let's use the proxy by staring the `iot-truck-simulator` program
 
-```
+```bash
 docker run trivadis/iot-truck-simulator '-s' 'MQTT' '-h' $DOCKER_HOST_IP '-p' '1882' '-f' 'JSON'
 ```
 
