@@ -24,6 +24,7 @@ The Modern Data Platform version 1.10.0 contains the following new services and 
 * Update `Zeppelin` to `0.9.0`
 * Update `Confluent` to `6.0.1`
 * Update `Presto` to `348-e`
+* 
 ### Enhancements 
 
 * add the option to change the port of the markdown viewer to `8000`, with the default still being port `80`. 
@@ -296,3 +297,4 @@ The Modern Analytical Data Platform Stack version 1.2.0 contains the following n
 * Upgrade to Confluent Platform 5.4.0
 * Add [concept of edition](service-design.md) for Kafka and Jupyter services
 
+	
