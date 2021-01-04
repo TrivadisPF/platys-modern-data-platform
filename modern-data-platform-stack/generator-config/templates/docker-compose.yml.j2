@@ -36,9 +36,19 @@ networks:
 {% set __HADOOP_version = HADOOP_version | default('latest') -%}
 {% set __SQOOP_version = SQOOP_version | default('latest') -%}
 
-{% set __SPARK_version = SPARK_version | default('latest') -%}
-
-{% set __LIVY_version = LIVY_version | default('latest') -%}
+{% if (SPARK_major_version | lower) == '2'  %}
+  {% set __SPARK_version = SPARK2_version ~ "-hadoop2.8"  -%}
+  {% set __LIVY_version = LIVY_version ~ "-spark" ~ "2.4"  -%}
+  {% set __ZEPPELIN_version = ZEPPELIN_version ~ "-spark" ~ "2.4" ~ "-hadoop2.8" -%}
+{% elif (SPARK_major_version | lower) == '3'  %}
+  {% set __SPARK_version = SPARK3_version ~ "-hadoop3.2" -%}
+  {% set __LIVY_version = LIVY_version ~ "-spark" ~ "3.0"  -%}
+  {% set __ZEPPELIN_version = ZEPPELIN_version ~ "-spark" ~ "3.0" ~ "-hadoop3.2" -%}
+{% else -%}
+  {% set __SPARK_version = SPARK2_version ~ "-hadoop2.8" -%}
+  {% set __LIVY_version = LIVY_version ~ "-spark" ~ "2.4"  -%}
+  {% set __ZEPPELIN_version = ZEPPELIN_version ~ "-spark" ~ "2.4" ~ "-hadoop2.8" -%}
+{% endif -%}
 
 {% set __HIVE_version = HIVE_version | default('latest') -%}
 {% set __HIVE_version_suffix = HIVE_version_suffix | default('postgresql-metastore-s3') -%}
@@ -81,9 +91,10 @@ networks:
 
 {% set __STREAMSHEETS_version = STREAMSHEETS_version | default('latest') -%}
 
-{% set __AIRFLOW_version = AIRFLOW_version | default('latest') -%}
+{% set __SPRING_DATAFLOW_version = SPRING_DATAFLOW_version | default('latest') -%}
+{% set __SPRING_SKIPPER_version = SPRING_SKIPPER_version | default('latest') -%}
 
-{% set __ZEPPELIN_version = ZEPPELIN_version | default('latest') -%}
+{% set __AIRFLOW_version = AIRFLOW_version | default('latest') -%}
 
 {%if (JUPYTER_edition | lower) == 'minimal' | default(false) %}
   {% set __JUPYTER_version = JUPYTER_MINIMAL_version | default('latest') -%}
@@ -256,6 +267,7 @@ networks:
   {% set NIFI_enable = false -%}
   {% set NIFI_REGISTRY_enable = false -%}
   {% set STREAMSHEETS_enable = false -%}
+  {% set SPRING_DATAFLOW_enable = false -%}
   {% set AIRFLOW_enable = false -%}
   {% set ZEPPELIN_enable = false -%}
   {% set JUPYTER_enable = false -%}
@@ -837,14 +849,14 @@ services:
   kafka-mqtt-1:
     image: confluentinc/cp-kafka-mqtt:{{__CONFLUENT_PLATFORM_version}}
     container_name: kafka-mqtt-1
-    hostname: mqtt-proxy
+    hostname: kafka-mqtt-1
     ports:
       - "1882:1882"
     environment:
       KAFKA_MQTT_TOPIC_REGEX_LIST: {{KAFKA_MQTTPROXY_topic_regex_list}}
       KAFKA_MQTT_LISTENERS: 0.0.0.0:1882
       KAFKA_MQTT_BOOTSTRAP_SERVERS: '{{ns.bootstrapServers}}'
-      KAFKA_MQTT_CONFLUENT_TOPIC_REPLICATIN_FACTOR: {{KAFKA_internal_replication_factor | default(1)}}
+      KAFKA_MQTT_CONFLUENT_TOPIC_REPLICATION_FACTOR: {{KAFKA_internal_replication_factor | default(1)}}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -982,7 +994,11 @@ services:
     ports:
       - "28102:8000"
     environment:
+    {%if KAFKA_SCHEMA_REGISTRY_UI_use_public_ip | default(true) %}
       SCHEMAREGISTRY_URL: 'http://${PUBLIC_IP}:8081'
+    {% else %}
+      SCHEMAREGISTRY_URL: 'http://${DOCKER_HOST_IP}:8081'
+    {% endif -%}   {#  KAFKA_SCHEMA_REGISTRY_use_public_ip #}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -1474,11 +1490,6 @@ services:
     env_file:
       - ./conf/hadoop.env
     environment:
-  {%if HADOOP_enable | default(false) %}
-      CORE_CONF_fs_defaultFS: hdfs://namenode:9000
-  {% else %}
-      CORE_CONF_fs_defaultFS: file:///tmp
-  {% endif -%}   {#  HADOOP_enable #}
   {%if MINIO_enable or external['S3_enable'] | default(false) %}
       CORE_CONF_fs_s3a_endpoint: '{{s3Endpoint | default(omit) }}'
       CORE_CONF_fs_s3a_path_style_access: '{{s3PathStyleAccess}}'
@@ -1492,7 +1503,9 @@ services:
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_path_style_access: '{{s3PathStyleAccess}}'
   {% endif %}
       SPARK_PUBLIC_DNS: ${PUBLIC_IP}
+      SPARK_MASTER_OPTS: '{{SPARK_master_opts if SPARK_master_opts is defined and SPARK_master_opts else omit }}'
       INIT_DAEMON_STEP: setup_spark
+      MASTER: spark://spark-master:7077
       SPARK_DEFAULTS_CONF_spark_jars_repositories: {{SPARK_jars_repositories}}
       SPARK_DEFAULTS_CONF_spark_jars_packages: {{SPARK_jars_packages}}
       SPARK_DEFAULTS_CONF_spark_jars_excludes: {{SPARK_jars_excludes}}
@@ -1504,13 +1517,20 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalogImplementation: hive
   {% endif -%}   {#  SPARK_catalog #}
   {%if HADOOP_enable | default(false) %}
+      CORE_CONF_fs_defaultFS: hdfs://namenode:9000
       SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: hdfs://namenode:9000/user/hive/warehouse
+  {%elif MINIO_enable or external['S3_enable'] | default(false) %}
+      CORE_CONF_fs_defaultFS: s3a://admin-bucket
+      SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: s3a://admin-bucket/hive/warehouse
   {% else %}
-      SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: s3a://hive-bucket/warehouse
+      CORE_CONF_fs_defaultFS: file:///tmp
+      SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: file:///hive/warehouse
   {% endif -%}   {#  HADOOP_enable #}
       SPARK_DEFAULTS_CONF_spark_yarn_dist_files: '/spark/conf/hive-site.xml'
       SPARK_DEFAULTS_CONF_spark_driver_extraJavaOptions: {{SPARK_driver_extraJavaOptions}}
       SPARK_DEFAULTS_CONF_spark_executor_extraJavaOptions: {{SPARK_executor_extraJavaOptions}}
+      SPARK_DEFAULTS_CONF_spark_cores_max: {{SPARK_cores_max if SPARK_cores_max is defined and SPARK_cores_max else omit }}
+      SPARK_DEFAULTS_CONF_spark_executor_memory: {{SPARK_executor_memory if SPARK_executor_memory is defined and SPARK_executor_memory else omit }}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -1539,17 +1559,11 @@ services:
     env_file:
       - ./conf/hadoop.env
     environment:
-  {%if HADOOP_enable | default(false) %}
       SPARK_MASTER: spark://spark-master:7077
-      CORE_CONF_fs_defaultFS: hdfs://namenode:9000
-  {% else %}
-      SPARK_MASTER: spark://spark-master:7077
-      CORE_CONF_fs_defaultFS: file:///tmp
-  {% endif -%}   {#  HADOOP_enable #}
-#      SPARK_WORKER_CORES: 2
-#      SPARK_WORKER_MEMORY: 1g
       SPARK_WORKER_WEBUI_PORT: "{{webui_port}}"
-      SPARK_WORKER_OPTS: "-Dspark.worker.cleanup.enabled=true -Dspark.worker.cleanup.appDataTtl=604800"
+      SPARK_WORKER_CORES: '{{SPARK_worker_cores if SPARK_worker_cores is defined and SPARK_worker_cores else omit }}'
+      SPARK_WORKER_MEMORY: '{{SPARK_worker_memory if SPARK_worker_memory is defined and SPARK_worker_memory else omit }}'
+      SPARK_WORKER_OPTS: '{{SPARK_worker_opts if SPARK_worker_opts is defined and SPARK_worker_opts else omit }}'
       SPARK_PUBLIC_DNS: ${PUBLIC_IP}
   {%if MINIO_enable or external['S3_enable'] | default(false) %}
       CORE_CONF_fs_s3a_endpoint: '{{s3Endpoint | default(omit) }}'
@@ -1574,13 +1588,20 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalogImplementation: hive
   {% endif -%}   {#  SPARK_catalog #}
   {%if HADOOP_enable | default(false) %}
+      CORE_CONF_fs_defaultFS: hdfs://namenode:9000
       SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: hdfs://namenode:9000/user/hive/warehouse
+  {%elif MINIO_enable or external['S3_enable'] | default(false) %}
+      CORE_CONF_fs_defaultFS: s3a://admin-bucket
+      SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: s3a://admin-bucket/hive/warehouse
   {% else %}
-      SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: s3a://hive-bucket/warehouse
+      CORE_CONF_fs_defaultFS: file:///tmp
+      SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: file:///hive/warehouse
   {% endif -%}   {#  HADOOP_enable #}
       SPARK_DEFAULTS_CONF_spark_yarn_dist_files: '/spark/conf/hive-site.xml'
       SPARK_DEFAULTS_CONF_spark_driver_extraJavaOptions: {{SPARK_driver_extraJavaOptions}}
       SPARK_DEFAULTS_CONF_spark_executor_extraJavaOptions: {{SPARK_executor_extraJavaOptions}}
+      SPARK_DEFAULTS_CONF_spark_cores_max: {{SPARK_cores_max if SPARK_cores_max is defined and SPARK_cores_max else omit }}
+      SPARK_DEFAULTS_CONF_spark_executor_memory: {{SPARK_executor_memory if SPARK_executor_memory is defined and SPARK_executor_memory else omit }}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -1627,13 +1648,20 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalogImplementation: hive
   {% endif -%}   {#  SPARK_catalog #}
   {%if HADOOP_enable | default(false) %}
+      CORE_CONF_fs_defaultFS: hdfs://namenode:9000
       SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: hdfs://namenode:9000/user/hive/warehouse
+  {%elif MINIO_enable or external['S3_enable'] | default(false) %}
+      CORE_CONF_fs_defaultFS: s3a://admin-bucket
+      SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: s3a://admin-bucket/hive/warehouse
   {% else %}
-      SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: s3a://hive-bucket/warehouse
+      CORE_CONF_fs_defaultFS: file:///tmp
+      SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: file:///hive/warehouse
   {% endif -%}   {#  HADOOP_enable #}
       SPARK_DEFAULTS_CONF_spark_yarn_dist_files: '/spark/conf/hive-site.xml'
       SPARK_DEFAULTS_CONF_spark_driver_extraJavaOptions: {{SPARK_driver_extraJavaOptions}}
       SPARK_DEFAULTS_CONF_spark_executor_extraJavaOptions: {{SPARK_executor_extraJavaOptions}}
+      SPARK_DEFAULTS_CONF_spark_cores_max: {{SPARK_cores_max if SPARK_cores_max is defined and SPARK_cores_max else omit }}
+      SPARK_DEFAULTS_CONF_spark_executor_memory: {{SPARK_executor_memory if SPARK_executor_memory is defined and SPARK_executor_memory else omit }}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -1680,9 +1708,14 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalogImplementation: hive
   {% endif -%}   {#  SPARK_catalog #}
   {%if HADOOP_enable | default(false) %}
+      CORE_CONF_fs_defaultFS: hdfs://namenode:9000
       SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: hdfs://namenode:9000/user/hive/warehouse
+  {%elif MINIO_enable or external['S3_enable'] | default(false) %}
+      CORE_CONF_fs_defaultFS: s3a://admin-bucket
+      SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: s3a://admin-bucket/hive/warehouse
   {% else %}
-      SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: s3a://hive-bucket/warehouse
+      CORE_CONF_fs_defaultFS: file:///tmp
+      SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: file:///hive/warehouse
   {% endif -%}   {#  HADOOP_enable #}
       SPARK_DEFAULTS_CONF_spark_yarn_dist_files: '/spark/conf/hive-site.xml'
       SPARK_DEFAULTS_CONF_spark_driver_extraJavaOptions: {{SPARK_driver_extraJavaOptions}}
@@ -1705,7 +1738,7 @@ services:
 {% if SPARK_enable and LIVY_enable | default(false) %}
   #  ================================== Apache Livy ========================================== #
   livy:
-    image: trivadis/apache-livy:{{LIVY_version}}
+    image: trivadis/apache-livy:{{__LIVY_version}}
     container_name: livy
     hostname: livy
     labels:
@@ -1716,13 +1749,7 @@ services:
     env_file:
       - ./conf/hadoop.env
     environment:
-  {%if HADOOP_enable | default(false) %}
       SPARK_MASTER: spark://spark-master:7077
-      CORE_CONF_fs_defaultFS: hdfs://namenode:9000
-  {% else %}
-      SPARK_MASTER: spark://spark-master:7077
-      CORE_CONF_fs_defaultFS: file:///tmp
-  {% endif -%}   {#  HADOOP_enable #}
   {%if MINIO_enable or external['S3_enable'] | default(false) %}
       CORE_CONF_fs_s3a_endpoint: 'http://minio:9000'
       CORE_CONF_fs_s3a_path_style_access: 'true'
@@ -1747,13 +1774,20 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalogImplementation: hive
   {% endif -%}   {#  SPARK_catalog #}
   {%if HADOOP_enable | default(false) %}
+      CORE_CONF_fs_defaultFS: hdfs://namenode:9000
       SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: hdfs://namenode:9000/user/hive/warehouse
+  {%elif MINIO_enable or external['S3_enable'] | default(false) %}
+      CORE_CONF_fs_defaultFS: s3a://admin-bucket
+      SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: s3a://admin-bucket/hive/warehouse
   {% else %}
-      SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: s3a://hive-bucket/warehouse
+      CORE_CONF_fs_defaultFS: file:///tmp
+      SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: file:///hive/warehouse
   {% endif -%}   {#  HADOOP_enable #}
       SPARK_DEFAULTS_CONF_spark_yarn_dist_files: '/spark/conf/hive-site.xml'
       SPARK_DEFAULTS_CONF_spark_driver_extraJavaOptions: {{SPARK_driver_extraJavaOptions}}
       SPARK_DEFAULTS_CONF_spark_executor_extraJavaOptions: {{SPARK_executor_extraJavaOptions}}
+      SPARK_DEFAULTS_CONF_spark_cores_max: {{SPARK_cores_max if SPARK_cores_max is defined and SPARK_cores_max else omit }}
+      SPARK_DEFAULTS_CONF_spark_executor_memory: {{SPARK_executor_memory if SPARK_executor_memory is defined and SPARK_executor_memory else omit }}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -1828,7 +1862,7 @@ services:
       CORE_CONF_fs_defaultFS: hdfs://namenode:9000
       HIVE_SITE_CONF_hive_metastore_dir: hdfs://namenode:9000/user/hive/warehouse
   {%elif MINIO_enable or external['S3_enable'] | default(false) %}
-      CORE_CONF_fs_defaultFS: file:///tmp
+      CORE_CONF_fs_defaultFS: s3a://admin-bucket
       CORE_CONF_fs_s3a_endpoint: '{{s3Endpoint | default(omit) }}'
       CORE_CONF_fs_s3a_path_style_access: '{{s3PathStyleAccess}}'
       HIVE_SITE_CONF_fs_s3a_endpoint: {{s3Endpoint | default(omit) }}
@@ -2629,7 +2663,7 @@ services:
       SDC_JAVA8_OPTS: "-XX:+UseG1GC"
       SDC_CONF_MONITOR_MEMORY: "true"
       SDC_CONF_PIPELINE_MAX_RUNNERS_COUNT: 50
-    {% if STREAMSETS_http_authentication is defined and STREAMSETS_http_authentication|length %}
+    {% if STREAMSETS_http_authentication is defined and STREAMSETS_http_authentication %}
       SDC_CONF_http_authentication: "{{STREAMSETS_http_authentication}}"
     {% endif %}
     {%if STREAMSETS_activate_https | default(false) %}
@@ -2651,7 +2685,7 @@ services:
     {% endif %}
 #      - ./streamsets-extras/streamsets-libs-extras/streamsets-datacollector-jdbc-lib/postgresql-42.2.6.jar:/opt/streamsets-datacollector-{{__STREAMSETS_version}}/streamsets-libs-extras/streamsets-datacollector-jdbc-lib/lib/postgresql-42.2.6.jar:Z
 #      - ./streamsets-extras/libs-common-lib:/opt/streamsets-datacollector-{{__STREAMSETS_version}}/libs-common-lib:Z
-#      - ./streamsets-extras/user-libs:/opt/streamsets-datacollector-user-libs:Z
+      - ./plugins/streamsets/user-libs:/opt/streamsets-datacollector-user-libs:Z
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -2818,7 +2852,7 @@ services:
 {% endif %}   {#  NODERED_enable  #}
 
 {% if (STREAMSHEETS_enable) | default(false) %}
-  #  ================================== Streamsheet ========================================== #
+  #  ================================== Streamsheets ========================================== #
   streamsheets:
     image: cedalo/streamsheets:{{__STREAMSHEETS_version}}
     container_name: streamsheets
@@ -2841,8 +2875,95 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {#  STREAMSHEETS_enable #}
 
+
+{%if SPRING_DATAFLOW_enable | default(false) %}
+  #  ================================== Spring Cloud Data Flow ========================================== #
+
+  spring-dataflow-server:
+    image: springcloud/spring-cloud-dataflow-server:{{__SPRING_DATAFLOW_version}}
+    container_name: spring-dataflow-server
+    hostname: spring-dataflow-server
+    labels:
+      com.platys.webui.title: "Spring Cloud Data Flow Server Dashboard"
+      com.platys.webui.url: "http://${PUBLIC_IP}:9393/dashboard"
+      com.platys.restapi.title: "Spring Cloud Data Flow Server REST API"
+      com.platys.restapi.url: "http://${PUBLIC_IP}:9393"
+    ports:
+      - "9393:9393"
+    environment:
+      - SPRING_CLOUD_DATAFLOW_APPLICATIONPROPERTIES_STREAM_SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS=PLAINTEXT://kafka-1:19092
+      - SPRING_CLOUD_DATAFLOW_APPLICATIONPROPERTIES_STREAM_SPRING_CLOUD_STREAM_KAFKA_STREAMS_BINDER_BROKERS=PLAINTEXT://kafka-1:19092
+      - SPRING_CLOUD_DATAFLOW_APPLICATIONPROPERTIES_STREAM_SPRING_CLOUD_STREAM_KAFKA_BINDER_ZKNODES=zookeeper-1:2181
+      - SPRING_CLOUD_DATAFLOW_APPLICATIONPROPERTIES_STREAM_SPRING_CLOUD_STREAM_KAFKA_STREAMS_BINDER_ZKNODES=zookeeper-1:2181
+
+      - SPRING_CLOUD_DATAFLOW_APPLICATIONPROPERTIES_STREAM_SPRING_KAFKA_STREAMS_PROPERTIES_METRICS_RECORDING_LEVEL=DEBUG
+
+      - SPRING_CLOUD_SKIPPER_CLIENT_SERVER_URI=http://spring-skipper-server:7577/api
+
+      - SPRING_DATASOURCE_URL=jdbc:mysql://spring-dataflow-mysql:3306/dataflow
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=rootpw
+      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.mariadb.jdbc.Driver
+      # (Optionally) authenticate the default Docker Hub access for the App Metadata access.
+      #- SPRING_CLOUD_DATAFLOW_CONTAINER_REGISTRY_CONFIGURATIONS_DEFAULT_USER=${METADATA_DEFAULT_DOCKERHUB_USER}
+      #- SPRING_CLOUD_DATAFLOW_CONTAINER_REGISTRY_CONFIGURATIONS_DEFAULT_SECRET=${METADATA_DEFAULT_DOCKERHUB_PASSWORD}
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    depends_on:
+      - kafka-1
+    entrypoint: "./wait-for-it.sh -t 180 spring-skipper-server:7577 -- java -jar /maven/spring-cloud-dataflow-server.jar"
+    volumes:
+      - ./data-transfer:/data-transfer
+#      - ${HOST_MOUNT_PATH:-.}:${DOCKER_MOUNT_PATH:-/root/scdf}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+
+  spring-skipper-server:
+    image: springcloud/spring-cloud-skipper-server:{{__SPRING_SKIPPER_version}}
+    container_name: spring-skipper-server
+    hostname: spring-skipper-server
+    labels:
+      com.platys.restapi.title: "Spring Cloud Skipper Server REST API"
+      com.platys.restapi.url: "http://${PUBLIC_IP}:7577/api"
+    ports:
+      - "7577:7577"
+#      - ${APPS_PORT_RANGE:-20000-20105:20000-20105}
+    environment:
+      - SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_LOCAL_ACCOUNTS_DEFAULT_PORTRANGE_LOW=20000
+      - SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_LOCAL_ACCOUNTS_DEFAULT_PORTRANGE_HIGH=20100
+      - SPRING_DATASOURCE_URL=jdbc:mysql://spring-dataflow-mysql:3306/dataflow
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=rootpw
+      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.mariadb.jdbc.Driver
+      - LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_CLOUD_SKIPPER_SERVER_DEPLOYER=ERROR
+    entrypoint: "./wait-for-it.sh spring-dataflow-mysql:3306 -- java -jar /maven/spring-cloud-skipper-server.jar"
+    volumes:
+      - ./data-transfer:/data-transfer
+#      - ${HOST_MOUNT_PATH:-.}:${DOCKER_MOUNT_PATH:-/root/scdf}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+
+  spring-dataflow-mysql:
+    image: mysql:5.7.25
+    container_name: spring-dataflow-mysql
+    hostname: spring-dataflow-mysql
+    environment:
+      MYSQL_DATABASE: dataflow
+      MYSQL_USER: root
+      MYSQL_ROOT_PASSWORD: rootpw
+    expose:
+      - 3306
+{% endif %}   {#  SPRING_DATAFLOW_enable #}
+
 {%if AIRFLOW_enable | default(false) %}
-  #  ================================== Node-RED ========================================== #
+  #  ================================== Airflow ========================================== #
   airflow:
     image: bitnami/airflow:{{__AIRFLOW_version}}
     container_name: airflow
@@ -2947,11 +3068,6 @@ services:
     env_file:
       - ./conf/hadoop.env
     environment:
-    {%if HADOOP_enable | default(false) %}
-      CORE_CONF_fs_defaultFS: hdfs://namenode:9000
-    {% else %}
-      CORE_CONF_fs_defaultFS: file:///tmp
-    {% endif -%}   {#  HADOOP_enable #}
     {%if MINIO_enable or external['S3_enable'] | default(false) %}
       CORE_CONF_fs_s3a_endpoint: '{{s3Endpoint | default(omit) }}'
       CORE_CONF_fs_s3a_path_style_access: '{{s3PathStyleAccess}}'
@@ -2971,6 +3087,8 @@ services:
       AWS_ENDPOINT: {{s3Endpoint if s3Endpoint is defined and s3Endpoint else omit}}
       AWS_DEFAULT_REGION: {{s3DefaultRegion if s3DefaultRegion is defined and s3DefaultRegion else omit}}
     {% endif %}
+      SPARK_DEFAULTS_CONF_spark_cores_max: {{ZEPPELIN_spark_cores_max if ZEPPELIN_spark_cores_max is defined and ZEPPELIN_spark_cores_max else omit }}
+      SPARK_DEFAULTS_CONF_spark_executor_memory: {{ZEPPELIN_spark_executor_memory if ZEPPELIN_spark_executor_memory is defined and ZEPPELIN_spark_executor_memory else omit }}
       SPARK_DEFAULTS_CONF_spark_jars_repositories: {{SPARK_jars_repositories}}
       SPARK_DEFAULTS_CONF_spark_jars_packages: {{SPARK_jars_packages}}
       SPARK_DEFAULTS_CONF_spark_jars_excludes: {{SPARK_jars_excludes}}
@@ -2982,9 +3100,14 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalogImplementation: hive
   {% endif -%}   {#  SPARK_catalog #}
   {%if HADOOP_enable | default(false) %}
+      CORE_CONF_fs_defaultFS: hdfs://namenode:9000
       SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: hdfs://namenode:9000/user/hive/warehouse
+  {%elif MINIO_enable or external['S3_enable'] | default(false) %}
+      CORE_CONF_fs_defaultFS: s3a://admin-bucket
+      SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: s3a://admin-bucket/hive/warehouse
   {% else %}
-      SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: s3a://hive-bucket/warehouse
+      CORE_CONF_fs_defaultFS: file:///tmp
+      SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: file:///hive/warehouse
   {% endif -%}   {#  HADOOP_enable #}
       SPARK_DEFAULTS_CONF_spark_yarn_dist_files: '/spark/conf/hive-site.xml'
       SPARK_DEFAULTS_CONF_spark_driver_extraJavaOptions: {{SPARK_driver_extraJavaOptions}}
@@ -2992,21 +3115,18 @@ services:
 
       ZEPPELIN_ADDR: "0.0.0.0"
       ZEPPELIN_PORT: "8080"
+      ZEPPELIN_MEM: '-Xms1024m -Xmx1024m -XX:MaxMetaspaceSize=512m'
       ZEPPELIN_INTERPRETER_CONNECT_TIMEOUT: 120000
       ZEPPELIN_INTERPRETER_DEP_MVNREPO: 'https://repo.maven.apache.org/maven2'
-#      SPARK_MASTER: "spark://spark-master:7077"
-
+      ZEPPELIN_ADMIN_USERNAME: {{ZEPPELIN_admin_username}}
+      ZEPPELIN_ADMIN_PASSWORD: {{ZEPPELIN_admin_password}}
+      ZEPPELIN_USER_USERNAME: {{ZEPPELIN_user_username}}
+      ZEPPELIN_USER_PASSWORD: {{ZEPPELIN_user_password}}
       # set spark-master for Zeppelin interpreter
-      MASTER: "spark://spark-master:7077"
-      SPARK_DRIVER_HOST: ${DOCKER_HOST_IP}
-      SPARK_DRIVER_BINDADDRESS: "0.0.0.0"
-      SPARK_UI_PORT: 4050
-      SPARK_DRIVER_PORT: 5050
-      SPARK_BLOCKMANGER_PORT: 6060
-      SPARK_DRIVER_EXTRAJAVAOPTIONS: {{SPARK_driver_extraJavaOptions}}
-      SPARK_EXECUTOR_EXTRAJAVAOPTIONS: {{SPARK_executor_extraJavaOptions}}
+      ZEPPELIN_SPARK_MASTER: "spark://spark-master:7077"
+      ZEPPELIN_NOTEBOOK_CRON_ENABLE: '{{ZEPPELIN_notebook_cron_enable}}'
       PYSPARK_PYTHON: "python3"
-      SPARK_SUBMIT_OPTIONS: "--conf spark.driver.extraJavaOptions=-Dcom.amazonaws.services.s3.enableV4 --conf spark.executor.extraJavaOptions=-Dcom.amazonaws.services.s3.enableV4"
+      SPARK_SUBMIT_OPTIONS: "--conf spark.ui.port=4050 --conf spark.driver.host=${DOCKER_HOST_IP} --conf spark.driver.port=5050 --conf spark.driver.bindAddress=0.0.0.0 --conf spark.blockManager.port=6060 --conf spark.driver.extraJavaOptions=-Dcom.amazonaws.services.s3.enableV4 --conf spark.executor.extraJavaOptions=-Dcom.amazonaws.services.s3.enableV4"
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -3014,10 +3134,10 @@ services:
       - ./data-transfer:/data-transfer
       - ./plugins/spark/jars:/extra-jars
       - ./container-volume/spark/logs/:/var/log/spark/logs
+    {% if ZEPPELIN_volume_map_data %}
+      - ./container-volume/spark/notebooks:/zeppelin/notebooks
+    {% endif -%}   {#  ZEPPELIN_volume_map_data #}
       - './conf/s3cfg:/root/.s3cfg.template'
-      - ./conf/zeppelin/shiro.ini:/opt/zeppelin/conf/shiro.ini
-      - ./conf/zeppelin/interpreter.json:/opt/zeppelin/conf/interpreter.json
-      - ./conf/zeppelin/interpreter-setting.json:/opt/zeppelin/interpreter/spark/interpreter-setting.json
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -3025,8 +3145,6 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {#  ZEPPELIN_enable  #}
 
-{# #}
-{# #}
 {%if JUPYTER_enable | default(false) %}
   #  ================================== Jupyter ========================================== #
   jupyter:
@@ -5007,7 +5125,7 @@ services:
 {% if MINIO_enable | default(false) %}
   #  ================================== Minio ========================================== #
   minio:
-    image: minio/minio:{{__MINIO_version}}
+    image: bitnami/minio:{{__MINIO_version}}
     container_name: minio
     hostname: minio
     labels:
@@ -5019,6 +5137,8 @@ services:
       MINIO_ACCESS_KEY: {{MINIO_access_key}}
       MINIO_SECRET_KEY: {{MINIO_secret_key}}
       MINIO_REGION_NAME: {{s3DefaultRegion if s3DefaultRegion is defined and s3DefaultRegion else omit}}
+      MINIO_BROWSER: "{{MINIO_browser_enable | default(true) }}"
+      MINIO_DEFAULT_BUCKETS: 'admin-bucket,{{MINIO_default_buckets}}'
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -5031,36 +5151,10 @@ services:
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
-    command: server /data
+    {% if MINIO_volume_map_data %}
+    user: "{{uid | default(1000)}}"
+    {% endif %}
     restart: {{container_restart_policy}}
-
-  minio-setup-default-bucket:
-    image: xueshanf/awscli:{{__AWSCLI_version}}
-    container_name: minio-setup-default-bucket
-    hostname: minio-setup-default-bucket
-    depends_on:
-      - minio
-    environment:
-      AWS_ACCESS_KEY_ID: {{MINIO_access_key}}
-      AWS_SECRET_ACCESS_KEY: {{MINIO_secret_key}}
-      AWS_DEFAULT_REGION: {{s3DefaultRegion if s3DefaultRegion is defined and s3DefaultRegion else omit}}
-    volumes:
-      - './conf/s3cfg:/root/.s3cfg'
-    command:
-      - bash
-      - -c
-      - |
-        echo "Waiting for MinIO to start listening on connect..."
-        while [ $$(curl -s -o /dev/null -w %{http_code} http://minio:9000/minio/health/ready) -ne 200 ] ; do
-          echo -e $$(date) " MinIO UI state: " $$(curl -s -o /dev/null -w %{http_code} http://minio:9000/minio/health/ready) " (waiting for 200)"
-          sleep 5
-        done
-        nc -vz minio 9000
-        echo -e "\n--\n+> Creating MinIO default bucket"
-
-        s3cmd mb s3://default-bucket
-
-        sleep infinity
 {% endif %}   {#  MINIO_enable #}
 
 {% if AWSCLI_enable | default(false) %}
@@ -5072,7 +5166,7 @@ services:
     environment:
       AWS_ACCESS_KEY_ID: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
       AWS_SECRET_ACCESS_KEY: ${PLATYS_AWS_SECRET_ACCESS_KEY:-{{MINIO_secret_key}}}
-      AWS_ENDPOINT: {{s3Endpoint if s3Endpoint is defined and s3Endpoint else omit}}
+      AWS_ENDPOINT: {{ (s3Endpoint | replace('http://','')) if s3Endpoint is defined and s3Endpoint else omit}}
       AWS_DEFAULT_REGION: {{s3DefaultRegion if s3DefaultRegion is defined and s3DefaultRegion else omit}}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
@@ -5610,9 +5704,9 @@ services:
     hostname: markdown-viewer
     labels:
       com.platys.webui.title: "Markdown Viewer UI"
-      com.platys.webui.url: "http://${PUBLIC_IP}"
+      com.platys.webui.url: "http://${PUBLIC_IP}:{{80 if (MARKDOWN_VIEWER_use_port_80 | default(true) )  else 8000 }}"
     ports:
-      - "80:80"
+      - "{{80 if (MARKDOWN_VIEWER_use_port_80 | default(true) )  else 8000 }}:80"
     volumes:
       - ./documentation:/home/python/markdown
       - ./data-transfer:/data-transfer
@@ -5623,6 +5717,7 @@ services:
     container_name: markdown-renderer
     hostname: markdown-renderer
     environment:
+      USE_PUBLIC_IP: "{{MARKDOWN_VIEWER_use_public_ip | default(true) }}"
       PUBLIC_IP: '${PUBLIC_IP}'
       DOCKER_HOST_IP: '${DOCKER_HOST_IP}'
       DATAPLATFORM_HOME: '${DATAPLATFORM_HOME}'

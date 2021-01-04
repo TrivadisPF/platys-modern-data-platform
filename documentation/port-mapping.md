@@ -1,4 +1,4 @@
-# `modern-data-platform` - Port Mappings - 1.9.0
+# `modern-data-platform` - Port Mappings - 1.10.0
 
 This table reserves the external ports for the various services. Not all services have to be used in the platform at a given time. But by reserving, we can assure that there are no conflicts if a service is added at a later time.
 
@@ -76,9 +76,11 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 7474 | 7474 | neo4j-1 |
 7475 | 7474 | neo4j-2 |
 7476 | 7474 | neo4j-3 |
+7577 | 7577 | spring-skipper-server |
 7687 | 7687 | neo4j-1 |
 7688 | 7687 | neo4j-2 |
 7689 | 7687 | neo4j-3 |
+8000 | 80 | markdown-viewer |
 8024 | 8024 | axon-server |
 8047 | 8047 | drill |
 8050 | 8050 | kudu-tserver-1 |
@@ -123,6 +125,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 9095 | 9095 | kafka-4     |
 9096 | 9096 | kafka-5     |
 9097 | 9097 | kafka-6     |
+9393 | 9393 | spring-dataflow-server |
 9851 | 9851 | tile38 |
 9870 | 9870 | namenode |
 9864 | 9864 | datanode-1 |
