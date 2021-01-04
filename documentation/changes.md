@@ -24,7 +24,8 @@ The Modern Data Platform version 1.10.0 contains the following new services and 
 * Update `Zeppelin` to `0.9.0`
 * Update `Confluent` to `6.0.1`
 * Update `Presto` to `348-e`
-* 
+* Update `Stardog` to `7.4.5-java11-preview` and `Stardog Studio` to `1.30.0`
+ 
 ### Enhancements 
 
 * add the option to change the port of the markdown viewer to `8000`, with the default still being port `80`. 
