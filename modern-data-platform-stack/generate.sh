@@ -36,7 +36,7 @@ then
 fi
 
 # Setting Timezone, if needed
-TIMEZONE=`yq r /tmp/config.yml use_timezone`
+TIMEZONE=`yq e '.use_timezone' /tmp/config.yml`
 
 if [ ${VERBOSE:-0} -eq 1 ]
 then
