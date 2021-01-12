@@ -2,6 +2,27 @@
 
 See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/platys/blob/master/documentation/upgrade-platform-stack.md) for how to upgrade to newer version.
 
+## What's new in 1.11.0
+
+The Modern Data Platform version 1.11.0 contains the following new services and enhancements:
+
+
+### New Services
+ * 
+ 
+### New Cookbook Recipes
+ *
+ 
+### Version upgrades  
+
+* Update `Elasticsearch` to `7.10.1`
+* Update `Kibana` to `7.10.1`
+* 
+ 
+### Enhancements 
+
+### Bug fix
+
 ## What's new in 1.10.0
 
 The Modern Data Platform version 1.10.0 contains the following new services and enhancements:
