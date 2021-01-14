@@ -198,6 +198,8 @@ networks:
 
 {% set __MARKDOWN_VIEWER_VERSION = MARKDOWN_VIEWER_VERSION | default('latest') -%}
 
+{% set __WATCHTOWER_VERSION = WATCHTOWER_VERSION | default('latest') -%}
+
 {% set __SWAGGER_EDITOR_version = SWAGGER_EDITOR_version | default('latest') -%}
 {% set __SWAGGER_UI_version = SWAGGER_UI_version | default('latest') -%}
 
@@ -5696,7 +5698,6 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {# PYTHON_enable #}
 
-
 {% if MARKDOWN_VIEWER_enable | default(false) %}
   #  ================================== markdown-viewer ========================================== #
   markdown-viewer:
@@ -5729,6 +5730,20 @@ services:
       - ./documentation:/output
       - ./data-transfer:/data-transfer
 {% endif %}   {# MARKDOWN_VIEWER_enable #}
+
+{% if WATCHTOWER_enable | default(false) %}
+  #  ================================== watchtower ========================================== #
+  watchtower:
+    image: containrrr/watchtower:{{__WATCHTOWER_VERSION}}
+    container_name: watchtower
+    hostname: watchtower
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ${HOME}/.docker/config.json:/config.json
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: --cleanup --label-enable --interval 60 --trace --debug
+    restart: {{container_restart_policy}}
+{% endif %}   {# WATCHTOWER_enable #}
 
 {% if PROVISIONING_DATA_enable | default(false) %}
   #  ================================== data-provisioning ========================================== #

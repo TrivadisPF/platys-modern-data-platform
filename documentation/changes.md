@@ -8,7 +8,7 @@ The Modern Data Platform version 1.11.0 contains the following new services and 
 
 
 ### New Services
- * 
+ * Watchtower added
  
 ### New Cookbook Recipes
  *
@@ -17,7 +17,7 @@ The Modern Data Platform version 1.11.0 contains the following new services and 
 
 * Update `Elasticsearch` to `7.10.1`
 * Update `Kibana` to `7.10.1`
-* 
+* Update `HiveMQ4`to `4.5.0`
  
 ### Enhancements 
 
