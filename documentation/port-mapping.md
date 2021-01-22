@@ -277,6 +277,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28173 | 3030 | chartboard |
 28174 | 8001 | redis-insight |
 28175 | 8088 | cedalo-management-center |
+28176 | 8080 | s3manager |
 28500 - 28510 | 28500 - 28510 | streamsets-1 (additional ports) |
 
 

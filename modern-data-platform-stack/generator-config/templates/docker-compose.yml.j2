@@ -188,6 +188,7 @@ networks:
 {% set __PENTHAO_version = PENTHAO_version | default('latest') -%}
 
 {% set __MINIO_version = MINIO_version | default('latest') -%}
+{% set __S3MANAGER_version = S3MANAGER_version | default('latest') -%}
 {% set __AWSCLI_version = AWSCLI_version | default('latest') -%}
 {% set __CODE_SERVER_version = CODE_SERVER_version | default('latest') -%}
 {% set __VAULT_version = VAULT_version | default('latest') -%}
@@ -5159,6 +5160,34 @@ services:
     {% endif %}
     restart: {{container_restart_policy}}
 {% endif %}   {#  MINIO_enable #}
+
+{% if S3MANAGER_enable | default(false) %}
+  #  ================================== S3 Manager ========================================== #
+  s3manager:
+    image: mastertinner/s3manager:{{__S3MANAGER_version}}
+    container_name: s3manager
+    hostname: s3manager
+    labels:
+      com.platys.webui.title: "S3 Manager UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28176"
+    ports:
+      28176:8080
+    environment:
+      ENDPOINT: {{ (s3Endpoint | replace('http://','')) if s3Endpoint is defined and s3Endpoint else omit}}
+      ACCESS_KEY_ID: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
+      SECRET_ACCESS_KEY: ${PLATYS_AWS_SECRET_ACCESS_KEY:-{{MINIO_secret_key}}}
+      USE_SSL: false
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  S3MANAGER_enable #}
 
 {% if AWSCLI_enable | default(false) %}
   #  ================================== Awscli ========================================== #
