@@ -134,6 +134,8 @@ networks:
 
 {% set __NEO4J_version = NEO4J_version | default('latest') -%}
 
+{% set __DGRAPH_version = DGRAPH_version | default('latest') -%}
+
 {% set __STARDOG_version = STARDOG_version | default('latest') -%}
 {% set __STARDOG_STUDIO_version = STARDOG_STUDIO_version | default('latest') -%}
 
@@ -295,6 +297,7 @@ networks:
   {% set KIBANA_enable = false -%}
   {% set INFLUXDB2_enable = false -%}
   {% set NEO4J_enable = false -%}
+  {% set DGRAPH_enable = false -%}
   {% set STARDOG_enable = false -%}
   {% set STARDOG_STUDIO_enable = false -%}
   {% set TILE38_enable = false -%}
@@ -4002,6 +4005,32 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {#  NEO4J_enable #}
 
+{% if DGRAPH_enable | default(false) %}
+  #  ================================== Dgraph ========================================== #
+  dgraph-1:
+    image: dgraph/standalone:{{__DGRAPH_version}}
+    hostname: dgraph-1
+    container_name: dgraph-1
+    labels:
+      com.platys.webui.title: "Dgraph Ratel UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28182"
+    ports:
+      - "28180:8080"
+      - "28181:9080"
+      - "28182:8000"
+    {%if use_timezone | default(false) %}
+    environment:
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  DGRAPH_enable #}
+
 {% if STARDOG_enable | default(false) %}
   #  ================================== Stardog ========================================== #
   stardog-1:
@@ -5136,7 +5165,7 @@ services:
 {% endif %}   {#  DREMIO_enable #}
 
 {% if HASURA_enable | default(false) %}
-  #  ================================== Presto ========================================== #
+  #  ================================== Hasura ========================================== #
   hasura:
     image: hasura/graphql-engine:{{__HASURA_version}}
     container_name: hasura
@@ -5147,7 +5176,7 @@ services:
     ports:
       - '28177:8080'
     environment:
-      HASURA_GRAPHQL_DATABASE_URL: postgres://postgres:postgrespassword@postgres:5432/postgres
+      HASURA_GRAPHQL_DATABASE_URL: postgres://demo:abc123!@postgresql:5432/demodb
       HASURA_GRAPHQL_ENABLE_CONSOLE: "true" # set to "false" to disable console
       HASURA_GRAPHQL_DEV_MODE: "true"
       HASURA_GRAPHQL_ENABLED_LOG_TYPES: startup, http-log, webhook-log, websocket-log, query-log

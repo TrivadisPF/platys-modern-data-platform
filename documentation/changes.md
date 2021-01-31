@@ -10,6 +10,7 @@ The Modern Data Platform version 1.11.0 contains the following new services and 
 ### New Services
  * Watchtower added
  * Hasura added
+ * Dgraph added
  
 ### New Cookbook Recipes
  *
