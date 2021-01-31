@@ -173,6 +173,8 @@ networks:
 {% set __DREMIO_version = DREMIO_version | default('latest') -%}
 {% set __DRILL_version = DRILL_version | default('latest') -%}
 
+{% set __HASURA_version = HASURA_version | default('latest') -%}
+
 {% set __MOSQUITTO_version = MOSQUITTO_version | default('latest') -%}
 {% set __HIVEMQ3_version = HIVEMQ3_version | default('latest') -%}
 {% set __HIVEMQ4_version = HIVEMQ4_version | default('latest') -%}
@@ -248,6 +250,11 @@ networks:
   {% set REDIS_enable = true -%}
 {% endif -%}   {# TIPBOARD_enable #}
 
+{% if HASURA_enable -%}
+# enforce some dependencies
+  {% set POSTGRESQL_enable = true -%}
+{% endif -%}   {# HASURA_enable #}
+
 {% if (__hw_arch | upper) == 'ARM' -%}
 # if we use stack type ARM, then disable some containers which do not support ARM
   {% set ZOOKEEPER_enable = false -%}
@@ -304,6 +311,7 @@ networks:
   {% set PRESTO_CLI_enable = false -%}
   {% set DREMIO_enable = false -%}
   {% set DRILL_enable = false -%}
+  {% set HASURA_enable = false -%}
   {% set HIVEMQ3_enable = false -%}
   {% set HIVEMQ4_enable = false -%}
   {% set MQTT_UI_enable = false -%}
@@ -5126,6 +5134,36 @@ services:
     {% endif -%}   {#  use_timezone #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  DREMIO_enable #}
+
+{% if HASURA_enable | default(false) %}
+  #  ================================== Presto ========================================== #
+  hasura:
+    image: hasura/graphql-engine:{{__HASURA_version}}
+    container_name: hasura
+    hostname: hasura
+    labels:
+      com.platys.webui.title: "Hasura UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28177"
+    ports:
+      - '28177:8080'
+    environment:
+      HASURA_GRAPHQL_DATABASE_URL: postgres://postgres:postgrespassword@postgres:5432/postgres
+      HASURA_GRAPHQL_ENABLE_CONSOLE: "true" # set to "false" to disable console
+      HASURA_GRAPHQL_DEV_MODE: "true"
+      HASURA_GRAPHQL_ENABLED_LOG_TYPES: startup, http-log, webhook-log, websocket-log, query-log
+      ## uncomment next line to set an admin secret
+      # HASURA_GRAPHQL_ADMIN_SECRET: myadminsecretkey
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  HASURA_enable #}
 
 {% if MINIO_enable | default(false) %}
   #  ================================== Minio ========================================== #
