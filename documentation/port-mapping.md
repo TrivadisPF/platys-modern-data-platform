@@ -279,6 +279,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28175 | 8088 | cedalo-management-center |
 28176 | 8080 | s3manager |
 28177 | 8080 | hasura |
+28178 | 80 | filebrowser |
 28180 | 8080 | dgraph-1 |
 28181 | 9080 | dgraph-1 |
 28182 | 8000 | dgraph-1 |
