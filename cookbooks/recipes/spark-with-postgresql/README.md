@@ -26,18 +26,6 @@ platys gen
 docker-compose up -d
 ```
 
-Download the PostgreSQL driver into `plugins/spark` folder on the dataplatform.
-
-```bash
-cd ./plugins/spark/jars
-```
-
-and get the jar from maven repository
-
-```bash
-wget https://repo1.maven.org/maven2/org/postgresql/postgresql/42.2.18/postgresql-42.2.18.jar
-```
-
 ## Create Table in Postgresql
 
 ```bash
