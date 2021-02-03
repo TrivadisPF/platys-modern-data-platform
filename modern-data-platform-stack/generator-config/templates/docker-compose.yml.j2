@@ -192,6 +192,7 @@ networks:
 {% set __PENTHAO_version = PENTHAO_version | default('latest') -%}
 
 {% set __MINIO_version = MINIO_version | default('latest') -%}
+{% set __MINIO_MC_version = MINIO_MC_version | default('latest') -%}
 {% set __S3MANAGER_version = S3MANAGER_version | default('latest') -%}
 {% set __AWSCLI_version = AWSCLI_version | default('latest') -%}
 {% set __CODE_SERVER_version = CODE_SERVER_version | default('latest') -%}
@@ -323,6 +324,7 @@ networks:
   {% set FTP_enable = false -%}
   {% set PENTHAO_enable = false -%}
   {% set MINIO_enable = false -%}
+  {% set MINIO_MC_enable = false -%}
   {% set AWSCLI_enable = false -%}
   {% set CODE_SERVER_enable = false -%}
   {% set FILE_BROWSER_enable = false -%}
@@ -983,6 +985,7 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
+      - ./conf/minio/config.json:/root/.mc/config.json
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -991,7 +994,6 @@ services:
       - /bin/sh
       - -c
       - |
-        apk add jq;
         while [ 1 -eq 1 ];do sleep 60;done
     restart: {{container_restart_policy}}
 {% endif %}   {# KAFKA_enable and KAFKACAT_enable #}
@@ -5230,6 +5232,30 @@ services:
     {% endif %}
     restart: {{container_restart_policy}}
 {% endif %}   {#  MINIO_enable #}
+
+{% if MINIO_MC_enable | default(false) %}
+  #  ================================== Minio MC ========================================== #
+  minio-mc:
+    image: minio/mc:{{__MINIO_MC_version}}
+    container_name: minio-mc
+    hostname: minio-mc
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    entrypoint: >
+        /bin/sh -c "
+        /usr/bin/mc config host add --quiet --api s3v4 msql http://minio:9000 {{MINIO_access_key}} {{MINIO_secret_key}};
+        while [ 1 -eq 1 ];do sleep 60;done
+        "
+    restart: {{container_restart_policy}}
+{% endif %}   {#  MINIO_MC_enable #}
 
 {% if S3MANAGER_enable | default(false) %}
   #  ================================== S3 Manager ========================================== #
