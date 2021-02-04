@@ -285,6 +285,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28181 | 9080 | dgraph-1 |
 28182 | 8000 | dgraph-1 |
 28190 | 80 | adminio_ui |
+28191 | 8080 | adminio_api |
+28192 | 8334 | filestash |
 28500 - 28510 | 28500 - 28510 | streamsets-1 (additional ports) |
 
 

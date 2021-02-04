@@ -197,6 +197,7 @@ networks:
 {% set __ADMINIO_UI_version = ADMINIO_UI_version | default('latest') -%}
 {% set __ADMINIO_API_version = ADMINIO_API_version | default('latest') -%}
 {% set __S3MANAGER_version = S3MANAGER_version | default('latest') -%}
+{% set __FILESTASH_version = FILESTASH_version | default('latest') -%}
 {% set __AWSCLI_version = AWSCLI_version | default('latest') -%}
 {% set __CODE_SERVER_version = CODE_SERVER_version | default('latest') -%}
 {% set __FILE_BROWSER_version = FILE_BROWSER_version | default('latest') -%}
@@ -330,6 +331,7 @@ networks:
   {% set MINIO_MC_enable = false -%}
   {% set ADMINIO_UI_enable = false -%}
   {% set ADMINIO_API_enable = false -%}
+  {% set FILESTASH_enable = false -%}
   {% set AWSCLI_enable = false -%}
   {% set CODE_SERVER_enable = false -%}
   {% set FILE_BROWSER_enable = false -%}
@@ -5351,6 +5353,31 @@ services:
     {% endif -%}   {#  use_timezone #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  ADMINIO_UI_enable #}
+
+
+{% if FILESTASH_enable | default(false) %}
+  #  ================================== Filestash ========================================== #
+  filestash:
+    image: machines/filestash:{{__FILESTASH_version}}
+    container_name: filestash
+    hostname: filestash
+    labels:
+      com.platys.webui.title: "Filestash UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28193"
+    ports:
+      - 28193:8334
+    environment:
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  FILESTASH_enable #}
 
 {% if S3MANAGER_enable | default(false) %}
   #  ================================== S3 Manager ========================================== #

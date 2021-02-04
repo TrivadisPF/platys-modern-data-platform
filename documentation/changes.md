@@ -16,6 +16,7 @@ The Modern Data Platform version 1.11.0 contains the following new services and 
  * Kafka UI added
  * Adminio UI added
  * S3 Manager added
+ * Filestash added
  
 ### New Cookbook Recipes
 

@@ -374,6 +374,8 @@ For each service there might be some other settings, such as controlling the num
 | `MINIO_browser_enable`                        	| `true` 	| 1.10.0 	| To disable web browser access, set this value to `false`.                                                                                                                                        	|                     	   
 | **_Adminio UI_**   &nbsp;&nbsp;&nbsp;&nbsp;![x86-64](./images/x86-64.png)                        	|         	| 
 | `ADMINIO_UI_enable`                                	| `false` 	| 1.11.0 	| Generate Adminio UI service                                                                                                                                                             	|             	|                                	|
+| **_Filestash_**   &nbsp;&nbsp;&nbsp;&nbsp;![x86-64](./images/x86-64.png)                        	|         	| 
+| `FILESTASH_enable`                                	| `false` 	| 1.11.0 	| Generate Filestash service                                                                                                                                                             	|             	|                                	|
 | **_S3 Manager_**   &nbsp;&nbsp;&nbsp;&nbsp;![x86-64](./images/x86-64.png)                        	|         	| 
 | `S3MANGER_enable`                                	| `false` 	| 1.11.0 	| Generate S3Manager service                                                                                                                                                             	|             	|                                	|
 | **_AWS CLI_**   &nbsp;&nbsp;&nbsp;&nbsp;![x86-64](./images/x86-64.png)                        	|         	| 
