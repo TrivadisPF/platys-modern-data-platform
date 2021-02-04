@@ -14,6 +14,8 @@ The Modern Data Platform version 1.11.0 contains the following new services and 
  * File Browser added
  * MinIO MC CLI added
  * Kafka UI added
+ * Adminio UI added
+ * S3 Manager added
  
 ### New Cookbook Recipes
 

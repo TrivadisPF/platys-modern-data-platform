@@ -284,6 +284,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28180 | 8080 | dgraph-1 |
 28181 | 9080 | dgraph-1 |
 28182 | 8000 | dgraph-1 |
+28190 | 80 | adminio_ui |
 28500 - 28510 | 28500 - 28510 | streamsets-1 (additional ports) |
 
 

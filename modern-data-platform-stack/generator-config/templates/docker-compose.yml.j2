@@ -194,6 +194,8 @@ networks:
 
 {% set __MINIO_version = MINIO_version | default('latest') -%}
 {% set __MINIO_MC_version = MINIO_MC_version | default('latest') -%}
+{% set __ADMINIO_UI_version = ADMINIO_UI_version | default('latest') -%}
+{% set __ADMINIO_API_version = ADMINIO_API_version | default('latest') -%}
 {% set __S3MANAGER_version = S3MANAGER_version | default('latest') -%}
 {% set __AWSCLI_version = AWSCLI_version | default('latest') -%}
 {% set __CODE_SERVER_version = CODE_SERVER_version | default('latest') -%}
@@ -326,6 +328,8 @@ networks:
   {% set PENTHAO_enable = false -%}
   {% set MINIO_enable = false -%}
   {% set MINIO_MC_enable = false -%}
+  {% set ADMINIO_UI_enable = false -%}
+  {% set ADMINIO_API_enable = false -%}
   {% set AWSCLI_enable = false -%}
   {% set CODE_SERVER_enable = false -%}
   {% set FILE_BROWSER_enable = false -%}
@@ -5293,6 +5297,55 @@ services:
         while [ 1 -eq 1 ];do sleep 60;done
     restart: {{container_restart_policy}}
 {% endif %}   {#  MINIO_enable #}
+
+{% if ADMINIO_UI_enable | default(false) %}
+  #  ================================== Adminio UI ========================================== #
+  adminio-ui:
+    image: rzrbld/adminio-ui:{{__ADMINIO_UI_version}}
+    container_name: adminio-ui
+    hostname: adminio-ui
+    labels:
+      com.platys.webui.title: "MinIO UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:9000"
+    ports:
+      - "28190:80"
+    environment:
+      API_BASE_URL: "http://localhost:8080"
+      ADMINIO_MULTI_BACKEND: "false"
+      ADMINIO_BACKENDS: '[{"name":"myminio","url":"http://localhost:8080"},{"name":"localhost","url":"http://localhost:8081"},{"name":"error","url":"http://localhost:8082"}]'
+      NGX_ROOT_PATH: "/"
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+
+  adminio-api:
+    image: rzrbld/adminio-api:{{__ADMINIO_API_version}}
+    container_name: adminio-api
+    hostname: adminio-api
+    environment:
+      MINIO_ACCESS: {{MINIO_access_key}}
+      MINIO_SECRET: {{MINIO_secret_key}}
+      MINIO_HOST_PORT: minio-1:9000
+      #MINIO_SSE_MASTER_KEY: 1:da2f4cfa32bed76507dcd44b42872328a8e14f25cd2a1ec0fb85d299a192a447
+      ADMINIO_HOST_PORT: 8080
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  ADMINIO_UI_enable #}
 
 {% if S3MANAGER_enable | default(false) %}
   #  ================================== S3 Manager ========================================== #
