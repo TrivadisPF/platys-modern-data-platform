@@ -13,6 +13,7 @@ The Modern Data Platform version 1.11.0 contains the following new services and 
  * Dgraph added
  * File Browser added
  * MinIO MC CLI added
+ * Kafka UI added
  
 ### New Cookbook Recipes
 

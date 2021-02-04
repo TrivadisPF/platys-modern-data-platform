@@ -280,6 +280,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28176 | 8080 | s3manager |
 28177 | 8080 | hasura |
 28178 | 80 | filebrowser |
+28179 | 8080 | kafka-ui |
 28180 | 8080 | dgraph-1 |
 28181 | 9080 | dgraph-1 |
 28182 | 8000 | dgraph-1 |

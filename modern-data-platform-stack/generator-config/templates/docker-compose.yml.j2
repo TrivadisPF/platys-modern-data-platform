@@ -26,6 +26,7 @@ networks:
 {% set __KAFKA_KAFDROP_version = KAFKA_KAFDROP_version | default('latest') -%}
 {% set __KAFKA_KADMIN_version = KAFKA_KADMIN_version | default('latest') -%}
 {% set __KAFKA_AKHQ_version = KAFKA_AKHQ_version | default('latest') -%}
+{% set __KAFKA_UI_version = KAFKA_UI_version | default('latest') -%}
 {% set __KAFKA_BURROW_version = KAFKA_BURROW_version | default('latest') -%}
 {% set __KAFKA_BURROW_UI_version = KAFKA_BURROW_UI_version | default('latest') -%}
 {% set __KAFKA_BURROW_DASHBOARD_version = KAFKA_BURROW_DASHBOARD_version | default('latest') -%}
@@ -1224,6 +1225,32 @@ services:
     {% endif -%}   {#  use_timezone #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  KAFKA_enable and KAFKA_KAFKAHQ_enable #}
+
+{% if ((KAFKA_enable or external['KAFKA_enable']) and KAFKA_UI_enable) | default(false) %}
+  #  ================================== Apache Kafka UI ========================================== #
+  kafka-ui:
+    image: provectuslabs/kafka-ui:{{__KAFKA_UI_version}}
+    container_name: kafka-ui
+    hostname: kafka-ui
+    labels:
+      com.platys.webui.title: 'Apache Kafka UI'
+      com.platys.webui.url: "http://${PUBLIC_IP}:28179"
+    ports:
+      - 28179:8080
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: '{{ns.bootstrapServers}}'
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  KAFKA_enable and KAFKA_UI_enable #}
 
 {% if ((KAFKA_enable or external['KAFKA_enable']) and KAFKA_BURROW_enable) | default(false) %}
   burrow:
