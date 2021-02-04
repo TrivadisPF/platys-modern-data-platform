@@ -986,7 +986,6 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
-      - ./conf/minio/config.json:/root/.mc/config.json
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -5227,15 +5226,18 @@ services:
 
 {% if MINIO_enable | default(false) %}
   #  ================================== Minio ========================================== #
-  minio:
+  {% for num in range(MINIO_nodes | default(1) ) %}
+    {% set port = 9000 + loop.index - 1 %}
+    {% set serviceName = "minio-" ~ loop.index %}
+  {{serviceName}}:
     image: bitnami/minio:{{__MINIO_version}}
-    container_name: minio
-    hostname: minio
+    container_name: {{serviceName}}
+    hostname: {{serviceName}}
     labels:
       com.platys.webui.title: "MinIO UI"
       com.platys.webui.url: "http://${PUBLIC_IP}:9000"
     ports:
-      - '9000:9000'
+      - '{{port}}:9000'
     environment:
       MINIO_ACCESS_KEY: {{MINIO_access_key}}
       MINIO_SECRET_KEY: {{MINIO_secret_key}}
@@ -5258,6 +5260,7 @@ services:
     user: "{{uid | default(1000)}}"
     {% endif %}
     restart: {{container_restart_policy}}
+  {% endfor %}
 {% endif %}   {#  MINIO_enable #}
 
 {% if MINIO_MC_enable | default(false) %}
@@ -5272,15 +5275,16 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
+      - ./conf/minio/config.json:/root/.mc/config.json
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
-    entrypoint: >
-        /bin/sh -c "
-        /usr/bin/mc config host add --quiet --api s3v4 msql http://minio:9000 {{MINIO_access_key}} {{MINIO_secret_key}};
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
         while [ 1 -eq 1 ];do sleep 60;done
-        "
     restart: {{container_restart_policy}}
 {% endif %}   {#  MINIO_MC_enable #}
 
