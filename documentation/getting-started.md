@@ -7,7 +7,7 @@ The platform we will create here, uses Kafka and Zookeeper, but the process shou
 
 ## Prerequisites
 
-Make sure that you have already installed the [Docker Engine](https://docs.docker.com/install/), [Docker Compose](https://docs.docker.com/compose/install/) and the [`platys`](../../../documentation/install.md) toolset. 
+Make sure that you have already installed the [Docker Engine](https://docs.docker.com/install/), [Docker Compose](https://docs.docker.com/compose/install/) and the [`platys`](https://github.com/TrivadisPF/platys/blob/master/documentation/install.md) toolset. 
 
 ## Step 1: Initialise the environment
 
