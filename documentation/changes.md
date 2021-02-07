@@ -29,6 +29,7 @@ The Modern Data Platform version 1.11.0 contains the following new services and 
 * Update `HiveMQ4`to `4.5.0`
 * Update `Streamsets DataCollector` to `3.21.0`
 * Update `Streamsets Transformer` to `3.17.0`
+* Update `Axon Server` to `4.4.5`
  
 ### Enhancements 
 
