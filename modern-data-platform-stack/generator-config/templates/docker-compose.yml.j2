@@ -2691,7 +2691,7 @@ services:
 {%if STREAMSETS_enable | default(false) %}
   #  ================================== StreamSets DataCollector ========================================== #
   streamsets-1:
-    image: trivadis/streamsets-kafka-hadoop-aws:{{__STREAMSETS_version}}
+    image: streamsets/datacollector:{{__STREAMSETS_version}}
     container_name: streamsets-1
     hostname: streamsets-1
     labels:
@@ -2711,12 +2711,15 @@ services:
   {% endfor %}
     environment:
       SDC_OFFSET_DIRECTORY: /data/custom-offset-el
+      SDC_INSTALL_STAGES: "{{STREAMSETS_stage_libs}}"
+      SDC_INSTALL_ENTERPRISE_STAGES: "{{STREAMSETS_enterprise_stage_libs}}"
+      SDC_INSTALL_PIPELINES_FROM: '/tmp/pipelines'
       SDC_JAVA_OPTS: "-Xmx2g -Xms2g"
       SDC_JAVA8_OPTS: "-XX:+UseG1GC"
       SDC_CONF_MONITOR_MEMORY: "true"
       SDC_CONF_PIPELINE_MAX_RUNNERS_COUNT: 50
     {% if STREAMSETS_http_authentication is defined and STREAMSETS_http_authentication %}
-      SDC_CONF_http_authentication: "{{STREAMSETS_http_authentication}}"
+      SDC_CONF_http_authentication: "{{STREAMSETS_stage_libs}}"
     {% endif %}
     {%if STREAMSETS_activate_https | default(false) %}
       SDC_CONF_HTTPS_PORT: 18629
@@ -2735,6 +2738,8 @@ services:
     {% if STREAMSETS_volume_map_security_policy %}
       - ./conf.override/streamsets/sdc-security.policy:/etc/sdc/sdc-security.policy:Z
     {% endif %}
+       - ./scripts/streamsets/pipelines:/tmp/pipelines
+       - ./conf/streamsets/pre-docker-entrypoint.sh:/pre-docker-entrypoint.sh
 #      - ./streamsets-extras/streamsets-libs-extras/streamsets-datacollector-jdbc-lib/postgresql-42.2.6.jar:/opt/streamsets-datacollector-{{__STREAMSETS_version}}/streamsets-libs-extras/streamsets-datacollector-jdbc-lib/lib/postgresql-42.2.6.jar:Z
 #      - ./streamsets-extras/libs-common-lib:/opt/streamsets-datacollector-{{__STREAMSETS_version}}/libs-common-lib:Z
       - ./plugins/streamsets/user-libs:/opt/streamsets-datacollector-user-libs:Z
@@ -2747,6 +2752,11 @@ services:
         soft: 32768
         hard: 32768
     user: "{{uid | default(1000)}}"
+    command:
+      - "dc"
+      - "-exec"
+    entrypoint:
+      - "/pre-docker-entrypoint.sh"
     restart: {{container_restart_policy}}
 {% endif %}   {#  STREAMSETS_enable  #}
 
