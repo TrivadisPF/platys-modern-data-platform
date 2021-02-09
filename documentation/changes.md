@@ -27,11 +27,13 @@ The Modern Data Platform version 1.11.0 contains the following new services and 
 * Update `Elasticsearch` to `7.10.1`
 * Update `Kibana` to `7.10.1`
 * Update `HiveMQ4`to `4.5.0`
-* Update `Streamsets DataCollector` to `3.21.0`
 * Update `Streamsets Transformer` to `3.17.0`
 * Update `Axon Server` to `4.4.5`
+* Switch to official `Streamsets DataCollector` of `3.21.0`
  
 ### Enhancements 
+* Allow configuring the additional StreamSets stage libraries to be installed upon starting StreamSets (we no longer use the Trivadis docker images)
+* Support automatically installing StreamSets pipelines upon starting StreamSets
 
 ### Bug fix
 
