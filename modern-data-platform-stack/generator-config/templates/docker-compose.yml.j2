@@ -754,14 +754,28 @@ services:
     depends_on:
       - schema-registry-1
     environment:
-      KSQL_CONFIG_DIR: "/etc/ksql"
-      KSQL_KSQL_EXTENSION_DIR: '/etc/ksqldb/ext/'
+      KSQL_LOG4J_ROOT_LOGLEVEL: INFO
       KSQL_LOG4J_OPTS: "-Dlog4j.configuration=file:/etc/ksqldb/log4j.properties"
-      KSQL_HOST_NAME: ksqldb-server-{{loop.index}}
+      KSQL_LOG4J_PROCESSING_LOG_BROKERLIST: '{{ns.bootstrapServers}}'
+      KSQL_LOG4J_PROCESSING_LOG_TOPIC: demo_processing_log
+
+      KSQL_KSQL_LOGGING_PROCESSING_TOPIC_NAME: 'demo_processing_log'
+      KSQL_KSQL_LOGGING_PROCESSING_TOPIC_REPLICATION_FACTOR: {{KAFKA_KSQLDB_internal_replication_factor | default(1)}}
+      KSQL_KSQL_LOGGING_PROCESSING_TOPIC_AUTO_CREATE: 'true'
+      KSQL_KSQL_LOGGING_PROCESSING_STREAM_AUTO_CREATE: 'true'
+
+      # For Demo purposes: improve resource utilization and avoid timeouts
+      KSQL_KSQL_STREAMS_NUM_STREAM_THREADS: 1
+
+      KSQL_PRODUCER_ENABLE_IDEMPOTENCE: 'true'
+
       KSQL_APPLICATION_ID: "kafka-demo"
       KSQL_KSQL_SERVICE_ID: "kafka-demo"
+      KSQL_HOST_NAME: ksqldb-server-{{loop.index}}
       KSQL_LISTENERS: http://0.0.0.0:{{port}}
       KSQL_BOOTSTRAP_SERVERS: '{{ns.bootstrapServers}}'
+      KSQL_CACHE_MAX_BYTES_BUFFERING: 0
+
       #KSQL_SECURITY_PROTOCOL: SASL_SSL
       #KSQL_SASL_MECHANISM: PLAIN
       #KSQL_SASL_JAAS_CONFIG: org.apache.kafka.common.security.plain.PlainLoginModule required username="{{external['KAFKA_username']}}" password="{{external['KAFKA_password']}}";
@@ -769,18 +783,21 @@ services:
       KSQL_KSQL_CONNECT_URL: http://kafka-connect-1:8083
     {% endif -%}   {#  KAFKA_CONNECT_enable #}
       KSQL_KSQL_SCHEMA_REGISTRY_URL: "http://schema-registry-1:8081"
-      KSQL_LOG4J_PROCESSING_LOG_BROKERLIST: '{{ns.bootstrapServers}}'
-      KSQL_LOG4J_PROCESSING_LOG_TOPIC: demo_processing_log
-      KSQL_KSQL_LOGGING_PROCESSING_TOPIC_NAME: 'demo_processing_log'
-      KSQL_LOGGING_PROCESSING_TOPIC_REPLICATION_FACTOR: {{KAFKA_KSQLDB_internal_replication_factor | default(1)}}
+
+
       KSQL_KSQL_INTERNAL_TOPIC_REPLICAS: {{KAFKA_KSQLDB_internal_replication_factor | default(1)}}
       KSQL_KSQL_STREAMS_REPLICATION_FACTOR: {{KAFKA_KSQLDB_internal_replication_factor | default(1)}}
-      KSQL_KSQL_LOGGING_PROCESSING_STREAM_AUTO_CREATE: "true"
-      KSQL_KSQL_LOGGING_PROCESSING_TOPIC_AUTO_CREATE: "true"
       KSQL_KSQL_QUERY_PULL_METRICS_ENABLED: "true"
-      KSQL_KSQL_HIDDEN_TOPICS: '^_.*'
+      KSQL_KSQL_HIDDEN_TOPICS: '^_.*,default_ksql_processing_log'
+
+      KSQL_PRODUCER_INTERCEPTOR_CLASSES: "io.confluent.monitoring.clients.interceptor.MonitoringProducerInterceptor"
+      KSQL_CONSUMER_INTERCEPTOR_CLASSES: "io.confluent.monitoring.clients.interceptor.MonitoringConsumerInterceptor"
+
       KSQL_KSQL_SUPPRESS_ENABLED: "{{KAFKA_KSQLDB_suppress_enabled | default(omit)}}"
       KSQL_KSQL_SUPPRESS_BUFFER_SIZE_BYTES: "{{KAFKA_KSQLDB_suppress_buffer_size_bytes | default(-1)}}"
+
+      KSQL_CONFIG_DIR: "/etc/ksql"
+      KSQL_KSQL_EXTENSION_DIR: '/etc/ksqldb/ext/'
     {% if KAFKA_KSQLDB_queries_file is defined and KAFKA_KSQLDB_queries_file|length %}
       KSQL_KSQL_QUERIES_FILE: "{{KAFKA_KSQLDB_queries_file}}"
     {% endif -%}   {#  KAFKA_KSQLDB_queries_file #}
