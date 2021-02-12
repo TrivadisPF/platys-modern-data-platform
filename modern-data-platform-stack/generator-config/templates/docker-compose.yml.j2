@@ -167,6 +167,7 @@ networks:
 
 {% set __ADMINER_version = ADMINER_version | default('latest') -%}
 {% set __CLOUDBEAVER_version = CLOUDBEAVER_version | default('latest') -%}
+{% set __SQLPAD_version = SQLPAD_version | default('latest') -%}
 {% set __QUIX_version = QUIX_version | default('latest') -%}
 
 {% set __AXON_version = AXON_version | default('latest') -%}
@@ -316,6 +317,7 @@ networks:
   {% set TIMESCALEDB_enable = false -%}
   {% set ADMINER_enable = false -%}
   {% set CLOUDBEAVER_enable = false -%}
+  {% set SQLPAD_enable = false -%}
   {% set QUIX_enable = false -%}
   {% set AXON_enable = false -%}
   {% set PRESTO_enable = false -%}
@@ -5107,8 +5109,55 @@ services:
       com.platys.webui.url: "http://${PUBLIC_IP}:8978"
     ports:
       - "8978:8978"
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  CLOUDBEAVER_enable #}
+
+{% if SQLPAD_enable | default(false) %}
+  #  ================================== SQLPad ========================================== #
+  sqlpad:
+    image: sqlpad/sqlpad:{{__SQLPAD_version}}
+    container_name: sqlpad
+    hostname: sqlpad
+    labels:
+      com.platys.webui.title: "SQLPad UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28194"
+    ports:
+      - "28194:3000"
+    environment:
+      SQLPAD_ADMIN: 'admin@sqlpad.com'
+      SQLPAD_ADMIN_PASSWORD: 'admin'
+      SQLPAD_APP_LOG_LEVEL: debug
+      SQLPAD_WEB_LOG_LEVEL: warn
+      SQLPAD_SEED_DATA_PATH: /etc/sqlpad/seed-data
+      SQLPAD_CONNECTIONS__pgdemo__name: Postgres demo
+      SQLPAD_CONNECTIONS__pgdemo__driver: postgres
+      SQLPAD_CONNECTIONS__pgdemo__host: postgres
+      SQLPAD_CONNECTIONS__pgdemo__database: demodb
+      SQLPAD_CONNECTIONS__pgdemo__username: demo
+      SQLPAD_CONNECTIONS__pgdemo__password: abc123!
+      SQLPAD_CONNECTIONS__pgdemo__multiStatementTransactionEnabled: 'true'
+      SQLPAD_CONNECTIONS__pgdemo__idleTimeoutSeconds: 86400
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  SQLPAD_enable #}
 
 {% if QUIX_enable | default(false) %}
   #  ================================== Quix ========================================== #

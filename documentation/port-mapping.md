@@ -288,6 +288,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28191 | 8080 | adminio_api |
 28192 | 8334 | filestash |
 28193 | 9090 | minio-console |
+28194 | 3000 | sqlpad |
 28500 - 28510 | 28500 - 28510 | streamsets-1 (additional ports) |
 
 

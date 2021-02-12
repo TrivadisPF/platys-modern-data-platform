@@ -18,6 +18,7 @@ The Modern Data Platform version 1.11.0 contains the following new services and 
  * MinIO Console added
  * S3 Manager added
  * Filestash added
+ * SQLPad added
  
 ### New Cookbook Recipes
 
