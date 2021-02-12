@@ -19,6 +19,7 @@ The Modern Data Platform version 1.11.0 contains the following new services and 
  * S3 Manager added
  * Filestash added
  * SQLPad added
+ * GraphQL Mesh added
  
 ### New Cookbook Recipes
 

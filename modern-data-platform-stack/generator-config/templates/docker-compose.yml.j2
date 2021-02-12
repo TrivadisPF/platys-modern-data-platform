@@ -178,6 +178,7 @@ networks:
 {% set __DRILL_version = DRILL_version | default('latest') -%}
 
 {% set __HASURA_version = HASURA_version | default('latest') -%}
+{% set __GRAPHQL_MESH_version = GRAPHQL_MESH_version | default('latest') -%}
 
 {% set __MOSQUITTO_version = MOSQUITTO_version | default('latest') -%}
 {% set __HIVEMQ3_version = HIVEMQ3_version | default('latest') -%}
@@ -325,6 +326,7 @@ networks:
   {% set DREMIO_enable = false -%}
   {% set DRILL_enable = false -%}
   {% set HASURA_enable = false -%}
+  {% set GRAPHQL_MESH_enable = false -%}
   {% set HIVEMQ3_enable = false -%}
   {% set HIVEMQ4_enable = false -%}
   {% set MQTT_UI_enable = false -%}
@@ -5431,6 +5433,30 @@ services:
     {% endif -%}   {#  use_timezone #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  HASURA_enable #}
+
+{% if GRAPHQL_MESH_enable | default(false) %}
+  #  ================================== GraphQL Mesh ========================================== #
+  graphql-mesh:
+    image: hiroyukiosaki/graphql-mesh:{{__GRAPHQL_MESH_version}}
+    container_name: graphql-mesh
+    hostname: graphql-mesh
+    labels:
+      com.platys.webui.title: "GraphQL Mesh UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:4000"
+    ports:
+      - '4000:4000'
+    environment:
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  GRAPHQL_MESH_enable #}
 
 {% if MINIO_enable | default(false) %}
   #  ================================== Minio ========================================== #
