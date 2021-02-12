@@ -3369,7 +3369,7 @@ services:
 
   superset-node:
     image: node:12
-    hostname: superset_node
+    hostname: superset-node
     container_name: superset-node
     labels:
       com.platys.webui.title: "Superset UI"
@@ -3405,41 +3405,7 @@ services:
     restart: {{container_restart_policy}}
 
   superset-worker:
-    image: node:12
-    hostname: superset-worker
-    container_name: superset-worker
-    user: "root"
-    environment:
-      - DATABASE_DB=superset
-      - DATABASE_PASSWORD=superset
-      - DATABASE_USER=superset
-      - DATABASE_PORT=5432
-      - DATABASE_DIALECT=postgresql
-      - POSTGRES_DB=superset
-      - POSTGRES_USER=superset
-      - POSTGRES_PASSWORD=superset
-      - PYTHONPATH=/app/pythonpath:/app/docker/pythonpath_dev
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - FLASK_ENV=development
-      - SUPERSET_ENV=development
-      - SUPERSET_LOAD_EXAMPLES=yes
-      - CYPRESS_CONFIG=false
-    {%if use_timezone | default(false) %}
-      - TZ={{use_timezone}}
-    {% endif -%}   {#  use_timezone #}
-    volumes:
-      - ./data-transfer:/data-transfer
-      - ./conf/superset:/app/docker
-    {%if use_timezone | default(false) %}
-      - "./etc/timezone:/etc/timezone:ro"
-      - "./etc/localtime:/etc/localtime:ro"
-    {% endif -%}   {#  use_timezone #}
-    command: ["/app/docker/docker-bootstrap.sh", "worker"]
-    restart: {{container_restart_policy}}
-
-  superset-worker:
-    image: node:12
+    image: apache/superset:{{__SUPERSET_version}}
     hostname: superset-worker
     container_name: superset-worker
     user: "root"
