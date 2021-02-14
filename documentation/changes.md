@@ -35,6 +35,7 @@ The Modern Data Platform version 1.11.0 contains the following new services and 
 * Switch to official `Streamsets DataCollector` of `3.21.0`
 * Update `Marquez` to `0.12.0`
 * Update `Cedalo Management Center` to `2.1` 
+* Update `Confluent Platform` to `6.1.0`
  
 ### Enhancements 
 * Allow configuring the additional StreamSets stage libraries to be installed upon starting StreamSets (we no longer use the Trivadis docker images)
