@@ -25,6 +25,7 @@ The Modern Data Platform version 1.10.0 contains the following new services and 
 * Update `Confluent` to `6.0.1`
 * Update `Presto` to `348-e`
 * Update `Stardog` to `7.4.5-java11-preview` and `Stardog Studio` to `1.30.0`
+* Update `Confluent Platform` to `6.1.0`
  
 ### Enhancements 
 
