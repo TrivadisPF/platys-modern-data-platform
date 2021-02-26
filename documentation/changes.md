@@ -20,6 +20,7 @@ The Modern Data Platform version 1.11.0 contains the following new services and 
  * Filestash added
  * SQLPad added
  * GraphQL Mesh added
+ * Streams Explorer added
  
 ### New Cookbook Recipes
 
