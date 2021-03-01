@@ -21,6 +21,7 @@ The Modern Data Platform version 1.11.0 contains the following new services and 
  * SQLPad added
  * GraphQL Mesh added
  * Streams Explorer added
+ * Thingsboard Community added
  
 ### New Cookbook Recipes
 

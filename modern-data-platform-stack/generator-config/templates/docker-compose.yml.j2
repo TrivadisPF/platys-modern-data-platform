@@ -187,6 +187,8 @@ networks:
 {% set __HIVEMQ_MQTT_WEB_CLIENT_version = HIVEMQ_MQTT_WEB_CLIENT_version | default('latest') -%}
 {% set __CEDALO_MANAGEMENT_CENTER_version = CEDALO_MANAGEMENT_CENTER_version | default('latest') -%}
 
+{% set __THINGSBOARD_version = THINGSBOARD_version | default('latest') -%}
+
 {% set __ACTIVEMQ_version = ACTIVEMQ_version | default('latest') -%}
 {% set __RABBITMQ_version = RABBITMQ_version | default('latest') -%}
 
@@ -331,6 +333,7 @@ networks:
   {% set HIVEMQ3_enable = false -%}
   {% set HIVEMQ4_enable = false -%}
   {% set MQTT_UI_enable = false -%}
+  {% set THINGSBOARD_enable = false -%}
   {% set ACTIVEMQ_enable = false -%}
   {% set FTP_enable = false -%}
   {% set PENTHAO_enable = false -%}
@@ -5815,6 +5818,7 @@ services:
 {% endif %}   {#  MQTT_UI_enable #}
 
 {% if CEDALO_MANAGEMENT_CENTER_enable | default(false) %}
+  #  ================================== Cedalo Management Center ========================================== #
   cedalo-management-center:
     image: cedalo/management-center:{{__CEDALO_MANAGEMENT_CENTER_version}}
     container_name: cedalo-management-center
@@ -5833,6 +5837,9 @@ services:
       CEDALO_MC_BROKER_USERNAME: default
       CEDALO_MC_BROKER_PASSWORD: ""
       CEDALO_MC_PROXY_CONFIG_DIR: /management-center/config/config.json
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
     volumes:
 #     - ./config:/management-center/backend/config
       - ./data-transfer:/data-transfer
@@ -5842,6 +5849,40 @@ services:
     {% endif -%}   {#  use_timezone #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  CEDALO_MANAGEMENT_CENTER_enable #}
+
+{% if THINGSBOARD_enable | default(false) %}
+  #  ================================== Cedalo Management Center ========================================== #
+  thingsbaord:
+    image: cedalo/management-center:{{__THINGSBOARD_version}}
+    container_name: thingsbaord
+    hostname: thingsbaord
+    labels:
+      com.platys.webui.title: "Thingsboard UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28200"
+    ports:
+      - "28200:9090"
+      - "28201:1883"
+      - "28202:5683/udp"
+    environment:
+      TB_QUEUE_TYPE: kafka
+      TB_KAFKA_SERVERS: kafka:9092
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {% if THINGSBOARD_volume_map_data %}
+      - ./container-volume/thingsboard/data:/data
+    {% endif -%}   {#  THINGSBOARD_volume_map_data #}    
+    {% if THINGSBOARD_volume_map_log %}
+      - ./container-volume/thingsboard/log:/var/log/thingsboard
+    {% endif -%}   {#  THINGSBOARD_volume_map_log #}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  THINGSBOARD_enable #}
 
 {% if ACTIVEMQ_enable | default(false) %}
   #  ================================== Active MQ ========================================== #

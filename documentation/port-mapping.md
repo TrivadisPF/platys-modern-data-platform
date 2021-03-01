@@ -291,6 +291,9 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28193 | 9090 | minio-console |
 28194 | 3000 | sqlpad |
 28195 | 80 | streams-explorer |
+28200 | 9090 | thingsbaord (http) |
+28201 | 1883 | thingsbaord (mqtt) |
+28202 | 5683 | thingsbaord (coap) |
 28500 - 28510 | 28500 - 28510 | streamsets-1 (additional ports) |
 
 
