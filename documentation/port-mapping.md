@@ -28,6 +28,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 3000 | 3000 | grafana |
 3001 | 3000 | wetty |
 3005 | 3000 | marquez-web |
+3010 | 3000 | postman |
 3306 | 3306 | mysql |
 3307 | 3306 | datahub-mysql |
 4000 | 4000 | graphql-mesh |
@@ -294,6 +295,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28200 | 9090 | thingsbaord (http) |
 28201 | 1883 | thingsbaord (mqtt) |
 28202 | 5683 | thingsbaord (coap) |
+28203 | 8080 | microcks |
+28204 | 8080 | keyclock |
 28500 - 28510 | 28500 - 28510 | streamsets-1 (additional ports) |
 
 
