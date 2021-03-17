@@ -3352,7 +3352,7 @@ services:
       - "28151:8088"
     user: "root"
     environment:
-      - DATABASE_DB=superset
+      - DATABASE_DB=superset-db
       - DATABASE_PASSWORD=superset
       - DATABASE_USER=superset
       - DATABASE_PORT=5432
@@ -3361,12 +3361,13 @@ services:
       - POSTGRES_USER=superset
       - POSTGRES_PASSWORD=superset
       - PYTHONPATH=/app/pythonpath:/app/docker/pythonpath_dev
-      - REDIS_HOST=redis
+      - REDIS_HOST=redis-1
       - REDIS_PORT=6379
       - FLASK_ENV=development
       - SUPERSET_ENV=development
       - SUPERSET_LOAD_EXAMPLES=yes
       - CYPRESS_CONFIG=false
+      - SUPERSET_PORT=8088
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -3386,7 +3387,7 @@ services:
     container_name: superset-init
     user: "root"
     environment:
-      - DATABASE_DB=superset
+      - DATABASE_DB=superset-db
       - DATABASE_PASSWORD=superset
       - DATABASE_USER=superset
       - DATABASE_PORT=5432
@@ -3395,12 +3396,13 @@ services:
       - POSTGRES_USER=superset
       - POSTGRES_PASSWORD=superset
       - PYTHONPATH=/app/pythonpath:/app/docker/pythonpath_dev
-      - REDIS_HOST=redis
+      - REDIS_HOST=redis-1
       - REDIS_PORT=6379
       - FLASK_ENV=development
       - SUPERSET_ENV=development
       - SUPERSET_LOAD_EXAMPLES=yes
       - CYPRESS_CONFIG=false
+      - SUPERSET_PORT=8088
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -3420,7 +3422,7 @@ services:
     container_name: superset-node
     user: "root"
     environment:
-      - DATABASE_DB=superset
+      - DATABASE_DB=superset-db
       - DATABASE_PASSWORD=superset
       - DATABASE_USER=superset
       - DATABASE_PORT=5432
@@ -3429,12 +3431,13 @@ services:
       - POSTGRES_USER=superset
       - POSTGRES_PASSWORD=superset
       - PYTHONPATH=/app/pythonpath:/app/docker/pythonpath_dev
-      - REDIS_HOST=redis
+      - REDIS_HOST=redis-1
       - REDIS_PORT=6379
       - FLASK_ENV=development
       - SUPERSET_ENV=development
       - SUPERSET_LOAD_EXAMPLES=yes
       - CYPRESS_CONFIG=false
+      - SUPERSET_PORT=8088
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -3454,7 +3457,7 @@ services:
     container_name: superset-worker
     user: "root"
     environment:
-      - DATABASE_DB=superset
+      - DATABASE_DB=superset-db
       - DATABASE_PASSWORD=superset
       - DATABASE_USER=superset
       - DATABASE_PORT=5432
@@ -3463,12 +3466,13 @@ services:
       - POSTGRES_USER=superset
       - POSTGRES_PASSWORD=superset
       - PYTHONPATH=/app/pythonpath:/app/docker/pythonpath_dev
-      - REDIS_HOST=redis
+      - REDIS_HOST=redis-1
       - REDIS_PORT=6379
       - FLASK_ENV=development
       - SUPERSET_ENV=development
       - SUPERSET_LOAD_EXAMPLES=yes
       - CYPRESS_CONFIG=false
+      - SUPERSET_PORT=8088
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -3482,6 +3486,72 @@ services:
     command: ["/app/docker/docker-bootstrap.sh", "worker"]
     restart: {{container_restart_policy}}
 
+  superset-worker-beat:
+    image: apache/superset:{{__SUPERSET_version}}
+    hostname: superset-worker
+    container_name: superset-worker
+    user: "root"
+    environment:
+      - DATABASE_DB=superset-db
+      - DATABASE_PASSWORD=superset
+      - DATABASE_USER=superset
+      - DATABASE_PORT=5432
+      - DATABASE_DIALECT=postgresql
+      - POSTGRES_DB=superset
+      - POSTGRES_USER=superset
+      - POSTGRES_PASSWORD=superset
+      - PYTHONPATH=/app/pythonpath:/app/docker/pythonpath_dev
+      - REDIS_HOST=redis-1
+      - REDIS_PORT=6379
+      - FLASK_ENV=development
+      - SUPERSET_ENV=development
+      - SUPERSET_LOAD_EXAMPLES=yes
+      - CYPRESS_CONFIG=false
+      - SUPERSET_PORT=8088
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./conf/superset:/app/docker
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    command: ["/app/docker/docker-bootstrap.sh", "beat"]
+    restart: {{container_restart_policy}}
+
+  superset-db:
+    image: postgres:10
+    hostname: superset-db
+    container_name: superset-db
+    environment:
+      - DATABASE_DB=superset-db
+      - DATABASE_PASSWORD=superset
+      - DATABASE_USER=superset
+      - DATABASE_PORT=5432
+      - DATABASE_DIALECT=postgresql
+      - POSTGRES_DB=superset
+      - POSTGRES_USER=superset
+      - POSTGRES_PASSWORD=superset
+      - PYTHONPATH=/app/pythonpath:/app/docker/pythonpath_dev
+      - REDIS_HOST=redis-1
+      - REDIS_PORT=6379
+      - FLASK_ENV=development
+      - SUPERSET_ENV=development
+      - SUPERSET_LOAD_EXAMPLES=yes
+      - CYPRESS_CONFIG=false
+      - SUPERSET_PORT=8088
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
 {% endif %}   {#  SUPERSET_enable #}
 
 {% if REDASH_enable | default(false) %}
