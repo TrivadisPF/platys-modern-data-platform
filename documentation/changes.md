@@ -25,6 +25,7 @@ The Modern Data Platform version 1.11.0 contains the following new services and 
  * Postman added
  * Keyclock added
  * Minrocks added
+ * Dataiku Data Science Studio added
  
 ### New Cookbook Recipes
 

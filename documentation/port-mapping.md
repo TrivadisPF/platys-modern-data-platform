@@ -297,6 +297,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28202 | 5683 | thingsbaord (coap) |
 28203 | 8080 | microcks |
 28204 | 8080 | keyclock |
+28205 | 10000 | dataiku-dss |
 28500 - 28510 | 28500 - 28510 | streamsets-1 (additional ports) |
 
 
