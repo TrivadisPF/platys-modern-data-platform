@@ -3361,7 +3361,7 @@ services:
       - POSTGRES_USER=superset
       - POSTGRES_PASSWORD=superset
       - PYTHONPATH=/app/pythonpath:/app/docker/pythonpath_dev
-      - REDIS_HOST=redis-1
+      - REDIS_HOST=superset-redis
       - REDIS_PORT=6379
       - FLASK_ENV=development
       - SUPERSET_ENV=development
@@ -3396,7 +3396,7 @@ services:
       - POSTGRES_USER=superset
       - POSTGRES_PASSWORD=superset
       - PYTHONPATH=/app/pythonpath:/app/docker/pythonpath_dev
-      - REDIS_HOST=redis-1
+      - REDIS_HOST=superset-redis
       - REDIS_PORT=6379
       - FLASK_ENV=development
       - SUPERSET_ENV=development
@@ -3431,7 +3431,7 @@ services:
       - POSTGRES_USER=superset
       - POSTGRES_PASSWORD=superset
       - PYTHONPATH=/app/pythonpath:/app/docker/pythonpath_dev
-      - REDIS_HOST=redis-1
+      - REDIS_HOST=superset-redis
       - REDIS_PORT=6379
       - FLASK_ENV=development
       - SUPERSET_ENV=development
@@ -3466,7 +3466,7 @@ services:
       - POSTGRES_USER=superset
       - POSTGRES_PASSWORD=superset
       - PYTHONPATH=/app/pythonpath:/app/docker/pythonpath_dev
-      - REDIS_HOST=redis-1
+      - REDIS_HOST=superset-redis
       - REDIS_PORT=6379
       - FLASK_ENV=development
       - SUPERSET_ENV=development
@@ -3501,7 +3501,7 @@ services:
       - POSTGRES_USER=superset
       - POSTGRES_PASSWORD=superset
       - PYTHONPATH=/app/pythonpath:/app/docker/pythonpath_dev
-      - REDIS_HOST=redis-1
+      - REDIS_HOST=superset-redis
       - REDIS_PORT=6379
       - FLASK_ENV=development
       - SUPERSET_ENV=development
@@ -3535,7 +3535,7 @@ services:
       - POSTGRES_USER=superset
       - POSTGRES_PASSWORD=superset
       - PYTHONPATH=/app/pythonpath:/app/docker/pythonpath_dev
-      - REDIS_HOST=redis-1
+      - REDIS_HOST=superset-redis
       - REDIS_PORT=6379
       - FLASK_ENV=development
       - SUPERSET_ENV=development
@@ -3552,6 +3552,23 @@ services:
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
     restart: {{container_restart_policy}}
+
+  superset-redis:
+    image: redis:3.2
+    hostname: superset-redis
+    container_name: superset-redis
+    {%if use_timezone | default(false) %}
+    environment:
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+
 {% endif %}   {#  SUPERSET_enable #}
 
 {% if REDASH_enable | default(false) %}
