@@ -46,7 +46,7 @@ The Modern Data Platform version 1.11.0 contains the following new services and 
 * Update `Confluent Platform` to `6.1.0`
 * Update `ksqlDB` to `0.15.0`
 * Update `APICurio Registry` to `1.3.2`
-* Update `Starburstdata Presto` to `350-e.8`
+* Update `Starburstdata Presto` to `350-e.5`
 * Update `Ahana PrestoDB` to `0.249`
 * Update `PrestoDB` to `0.249`
  
