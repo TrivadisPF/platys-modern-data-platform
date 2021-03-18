@@ -187,7 +187,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 27018 | 27017 | mongodb-2 |
 27019 | 27017 | mongodb-3 |
 28080 | 8080 | zeppelin |
-28081 | 8080 | presto |
+28081 | 8080 | presto-1 |
+28082 | 8080 | trino-1 |
 28085 | 8080 | azkarra-worker-1 |
 28888 | 8888 | jupyter |
 29000 | 9000 | apicurio-registry-1 |

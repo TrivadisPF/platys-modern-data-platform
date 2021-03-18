@@ -176,7 +176,10 @@ networks:
 
 {% set __AXON_version = AXON_version | default('latest') -%}
 
+{% set __TRINO_version = TRINO_version | default('latest') -%}
+{% set __STARBURSTDATA_version = STARBURSTDATA_version | default('latest') -%}
 {% set __PRESTO_version = PRESTO_version | default('latest') -%}
+{% set __AHANA_version = AHANA_version | default('latest') -%}
 {% set __PRESTO_CLI_version = PRESTO_CLI_version | default('latest') -%}
 {% set __DREMIO_version = DREMIO_version | default('latest') -%}
 {% set __DRILL_version = DRILL_version | default('latest') -%}
@@ -335,6 +338,8 @@ networks:
   {% set SQLPAD_enable = false -%}
   {% set QUIX_enable = false -%}
   {% set AXON_enable = false -%}
+  {% set TRINO_enable = false -%}
+  {% set TRINO_CLI_enable = false -%}
   {% set PRESTO_enable = false -%}
   {% set PRESTO_CLI_enable = false -%}
   {% set DREMIO_enable = false -%}
@@ -5385,20 +5390,113 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {#  AXON_enable #}
 
+{% if TRINO_enable | default(false) %}
+  #  ================================== Trino ========================================== #
+  trino-1:
+  {% if (TRINO_edition | lower) == 'starburstdata'  %}
+    image: starburstdata/presto:{{__STARBURSTDATA_version}}
+    {% set trino_etc_dir = '/usr/lib/trino/etc' %}
+  {% elif (TRINO_edition | lower) == 'oss' %}
+    image: trinodb/trino:{{__TRINO_version}}
+    {% set trino_etc_dir = '/usr/lib/presto/default/etc' %}
+  {% endif -%}   {#  TRINO_edition #}
+    hostname: trino-1
+    container_name: trino-1
+    labels:
+      com.platys.webui.title: "Trino UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28082"
+    ports:
+      - '28082:8080'
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+  {% if (TRINO_install | lower) == 'cluster'  %}
+      - ./conf/trino/cluster/coordinator.config.properties:{{trino_etc_dir}}/config.properties
+  {% else %}
+      - ./conf/trino/single/config.properties:{{trino_etc_dir}}/config.properties
+  {% endif %}
+      - ./conf/trino/cluster/node.properties:{{trino_etc_dir}}/node.properties
+  {%if MINIO_enable or external['S3_enable'] | default(false) %}
+      - './conf/trino/catalog/minio.properties:{{trino_etc_dir}}/catalog/minio.properties'
+  {% endif %}
+  {% if POSTGRESQL_enable | default(false) %}
+      - './conf/trino/catalog/postgresql.properties:/usr/lib/trino/etc/catalog/postgresql.properties'
+  {% endif %}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+
+  {% if (TRINO_install | lower) == 'cluster'  %}
+    {% for num in range(TRINO_workers | default(1) ) %}
+  trino-worker-{{loop.index}}:
+  {% if (TRINO_edition | lower) == 'starburstdata'  %}
+    image: starburstdata/presto:{{__STARBURSTDATA_version}}
+    {% set trino_etc_dir = '/usr/lib/presto/etc' %}
+  {% elif (TRINO_edition | lower) == 'oss' %}
+    image: trinodb/trino:{{__TRINO_version}}
+    {% set trino_etc_dir = '/usr/lib/trino/default/etc' %}
+  {% endif -%}   {#  TRINO_edition #}
+    hostname: trino-worker-{{loop.index}}
+    container_name: trino-worker-{{loop.index}}
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./conf/trino/cluster/worker.config.properties:{{trino_etc_dir}}/config.properties
+      - ./conf/trino/cluster/node.properties:{{trino_etc_dir}}/node.properties
+  {%if MINIO_enable or external['S3_enable'] | default(false) %}
+      - './conf/trino/catalog/minio.properties:{{trino_etc_dir}}/catalog/minio.properties'
+  {% endif %}
+  {% if POSTGRESQL_enable | default(false) %}
+      - './conf/trino/catalog/postgresql.properties:{{trino_etc_dir}}/catalog/postgresql.properties'
+  {% endif %}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+    {% endfor %}
+  {% endif -%}   {#  TRINO_install #}
+
+  {% if TRINO_CLI_enable | default(false) %}
+  trino-cli:
+  {% if (TRINO_edition | lower) == 'starburstdata'  %}
+    image: trivadis/trino-cli:{{__TRINO_CLI_version}}
+  {% elif (TRINO_edition | lower) == 'oss' %}
+    image: trivadis/trino-cli:{{__TRINO_CLI_version}}
+  {% endif -%}   {#  TRINO_edition #}
+    hostname: trino-cli
+    container_name: trino-cli
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    tty: true
+    restart: {{container_restart_policy}}
+  {% endif %}   {#  TRINO_CLI_enable #}
+{% endif %}   {#  TRINO_enable #}
+
 {% if PRESTO_enable | default(false) %}
   #  ================================== Presto ========================================== #
   presto-1:
-  {% if (PRESTO_edition | lower) == 'starburstdata'  %}
-    image: starburstdata/presto:{{__PRESTO_version}}
-    {% set presto_etc_dir = '/usr/lib/presto/etc' %}
-  {% elif (PRESTO_edition | lower) == 'prestosql' %}
-    image: prestosql/presto:{{__PRESTO_version}}
-    {% set presto_etc_dir = '/usr/lib/presto/default/etc' %}
-  {% elif (PRESTO_edition | lower) == 'prestodb' %}
+  {% if (PRESTO_edition | lower) == 'prestodb' %}
     image: trivadis/prestodb:{{__PRESTO_version}}
     {% set presto_etc_dir = '/opt/presto/default/etc' %}
   {% elif (PRESTO_edition | lower) == 'ahana' %}
-    image: ahanaio/prestodb:{{__PRESTO_version}}
+    image: ahanaio/prestodb:{{__AHANA_version}}
     {% set presto_etc_dir = '/opt/presto/default/etc' %}
   {% endif -%}   {#  PRESTO_edition #}
     hostname: presto-1
@@ -5435,17 +5533,11 @@ services:
   {% if (PRESTO_install | lower) == 'cluster'  %}
     {% for num in range(PRESTO_workers | default(1) ) %}
   presto-worker-{{loop.index}}:
-  {% if (PRESTO_edition | lower) == 'starburstdata'  %}
-    image: starburstdata/presto:{{__PRESTO_version}}
-    {% set presto_etc_dir = '/usr/lib/presto/etc' %}
-  {% elif (PRESTO_edition | lower) == 'prestosql' %}
-    image: prestosql/presto:{{__PRESTO_version}}
-    {% set presto_etc_dir = '/usr/lib/presto/default/etc' %}
-  {% elif (PRESTO_edition | lower) == 'prestodb' %}
+  {% if (PRESTO_edition | lower) == 'prestodb' %}
     image: trivadis/prestodb:{{__PRESTO_version}}
     {% set presto_etc_dir = '/opt/presto/default/etc' %}
   {% elif (PRESTO_edition | lower) == 'ahana' %}
-    image: ahanaio/prestodb:{{__PRESTO_version}}
+    image: ahanaio/prestodb:{{__AHANA_version}}
     {% set presto_etc_dir = '/opt/presto/default/etc' %}
   {% endif -%}   {#  PRESTO_edition #}
     hostname: presto-worker-{{loop.index}}
@@ -5474,11 +5566,7 @@ services:
 
   {% if PRESTO_CLI_enable | default(false) %}
   presto-cli:
-  {% if (PRESTO_edition | lower) == 'starburstdata'  %}
-    image: trivadis/prestosql-cli:{{__PRESTO_CLI_version}}
-  {% elif (PRESTO_edition | lower) == 'prestosql' %}
-    image: trivadis/prestosql-cli:{{__PRESTO_CLI_version}}
-  {% elif (PRESTO_edition | lower) == 'prestodb' %}
+  {% if (PRESTO_edition | lower) == 'prestodb' %}
     image: ahanaio/prestodb-cli:{{__PRESTO_CLI_version}}
     {% set presto_etc_dir = '/opt/presto/default/etc' %}
   {% elif (PRESTO_edition | lower) == 'ahana' %}

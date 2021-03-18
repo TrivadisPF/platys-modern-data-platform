@@ -27,6 +27,7 @@ The Modern Data Platform version 1.11.0 contains the following new services and 
  * Microcks added
  * Dataiku Data Science Studio added
  * Kafka Eagle added
+ * Trino added
  
 ### New Cookbook Recipes
 
@@ -49,8 +50,7 @@ The Modern Data Platform version 1.11.0 contains the following new services and 
 ### Enhancements 
 * Allow configuring the additional StreamSets stage libraries to be installed upon starting StreamSets (we no longer use the Trivadis docker images)
 * Support automatically installing StreamSets pipelines upon starting StreamSets
-
-### Bug fix
+* Support for Trino added (renamed PrestoSQL project)
 
 ## What's new in 1.10.0
 
