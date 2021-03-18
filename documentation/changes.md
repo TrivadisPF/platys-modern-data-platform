@@ -26,6 +26,7 @@ The Modern Data Platform version 1.11.0 contains the following new services and 
  * Keyclock added
  * Microcks added
  * Dataiku Data Science Studio added
+ * Kafka Eagle added
  
 ### New Cookbook Recipes
 
