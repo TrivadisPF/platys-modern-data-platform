@@ -5439,7 +5439,7 @@ services:
   trino-1:
   {% if (TRINO_edition | lower) == 'starburstdata'  %}
     image: starburstdata/presto:{{__STARBURSTDATA_version}}
-    {% set trino_etc_dir = '/usr/lib/trino/etc' %}
+    {% set trino_etc_dir = '/usr/lib/presto/etc' %}
   {% elif (TRINO_edition | lower) == 'oss' %}
     image: trinodb/trino:{{__TRINO_version}}
     {% set trino_etc_dir = '/etc/trino' %}
@@ -5471,7 +5471,7 @@ services:
       - './conf/trino/catalog/minio.properties:{{trino_etc_dir}}/catalog/minio.properties'
   {% endif %}
   {% if POSTGRESQL_enable | default(false) %}
-      - './conf/trino/catalog/postgresql.properties:/usr/lib/trino/etc/catalog/postgresql.properties'
+      - './conf/trino/catalog/postgresql.properties:{{trino_etc_dir}}/catalog/postgresql.properties'
   {% endif %}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
@@ -5487,7 +5487,7 @@ services:
     {% set trino_etc_dir = '/usr/lib/presto/etc' %}
   {% elif (TRINO_edition | lower) == 'oss' %}
     image: trinodb/trino:{{__TRINO_version}}
-    {% set trino_etc_dir = '/usr/lib/trino/default/etc' %}
+    {% set trino_etc_dir = '/etc/trino' %}
   {% endif -%}   {#  TRINO_edition #}
     hostname: trino-worker-{{loop.index}}
     container_name: trino-worker-{{loop.index}}
