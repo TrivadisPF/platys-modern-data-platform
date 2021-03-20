@@ -5,12 +5,13 @@ Inhere we are documenting cookbooks on how to use the platform:
  * **Airflow**
    * Schedule and Run Simple Scala Spark Application
 
- * **Presto**
-   * [Presto, Spark and Delta Lake (Spark 2.4.7 & Delta Lake 0.6.1)](./recipes/delta-lake-and-presto-spark2.4/)
-   * [Presto, Spark and Delta Lake (Spark 3.0.1 & Delta Lake 0.7.0)](./recipes/delta-lake-and-presto-spark3.0/)
-   * [Querying HDFS data using Presto](./recipes/querying-hdfs-with-presto/)
-   * Querying S3 data (MinIO) using Presto
-   * Querying data in RDBMS
+ * **Trino (Formerly Presto SQL)**
+   * [Trino, Spark and Delta Lake (Spark 2.4.7 & Delta Lake 0.6.1)](./recipes/delta-lake-and-trino-spark2.4/) - `1.11.0`
+   * [Trino, Spark and Delta Lake (Spark 3.0.1 & Delta Lake 0.7.0)](./recipes/delta-lake-and-trino-spark3.0/) - `1.11.0`
+   * [Querying S3 data (MinIO) using MinIO](./recipes/querying-minio-with-trino/) - `1.11.0`
+   * [Querying PostgreSQL data (MinIO) using MinIO](./recipes/querying-postgresql-with-trino/) - `1.11.0`
+   * [Querying Kafka data using Trino](./recipes/querying-kafka-with-trino/)
+   * [Querying HDFS data using Trino](./recipes/querying-hdfs-with-presto/) - `1.11.0`
    * Joining data between RDBMS and MinIO
 
  * **MQTT**
