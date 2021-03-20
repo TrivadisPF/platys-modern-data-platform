@@ -5440,9 +5440,11 @@ services:
   {% if (TRINO_edition | lower) == 'starburstdata'  %}
     image: starburstdata/presto:{{__STARBURSTDATA_version}}
     {% set trino_etc_dir = '/usr/lib/presto/etc' %}
+    {% set conf_dir = 'starburstdata' %}
   {% elif (TRINO_edition | lower) == 'oss' %}
     image: trinodb/trino:{{__TRINO_version}}
     {% set trino_etc_dir = '/etc/trino' %}
+    {% set conf_dir = 'trino' %}
   {% endif -%}   {#  TRINO_edition #}
     hostname: trino-1
     container_name: trino-1
@@ -5463,16 +5465,16 @@ services:
     volumes:
       - ./data-transfer:/data-transfer
   {% if (TRINO_install | lower) == 'cluster'  %}
-      - ./conf/trino/cluster/coordinator.config.properties:{{trino_etc_dir}}/config.properties
+      - ./conf/{{conf_dir}}/cluster/coordinator.config.properties:{{trino_etc_dir}}/config.properties
   {% else %}
-      - ./conf/trino/single/config.properties:{{trino_etc_dir}}/config.properties
+      - ./conf/{{conf_dir}}/single/config.properties:{{trino_etc_dir}}/config.properties
   {% endif %}
-      - ./conf/trino/cluster/node.properties:{{trino_etc_dir}}/node.properties
+      - ./conf/{{conf_dir}}/cluster/node.properties:{{trino_etc_dir}}/node.properties
   {%if MINIO_enable or external['S3_enable'] | default(false) %}
-      - './conf/trino/catalog/minio.properties:{{trino_etc_dir}}/catalog/minio.properties'
+      - './conf/{{conf_dir}}/catalog/minio.properties:{{trino_etc_dir}}/catalog/minio.properties'
   {% endif %}
   {% if POSTGRESQL_enable | default(false) %}
-      - './conf/trino/catalog/postgresql.properties:{{trino_etc_dir}}/catalog/postgresql.properties'
+      - './conf/{{conf_dir}}/catalog/postgresql.properties:{{trino_etc_dir}}/catalog/postgresql.properties'
   {% endif %}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
@@ -5486,9 +5488,11 @@ services:
   {% if (TRINO_edition | lower) == 'starburstdata'  %}
     image: starburstdata/presto:{{__STARBURSTDATA_version}}
     {% set trino_etc_dir = '/usr/lib/presto/etc' %}
+    {% set conf_dir = 'starburstdata' %}    
   {% elif (TRINO_edition | lower) == 'oss' %}
     image: trinodb/trino:{{__TRINO_version}}
     {% set trino_etc_dir = '/etc/trino' %}
+    {% set conf_dir = 'trino' %}
   {% endif -%}   {#  TRINO_edition #}
     hostname: trino-worker-{{loop.index}}
     container_name: trino-worker-{{loop.index}}
@@ -5503,13 +5507,13 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
-      - ./conf/trino/cluster/worker.config.properties:{{trino_etc_dir}}/config.properties
-      - ./conf/trino/cluster/node.properties:{{trino_etc_dir}}/node.properties
+      - ./conf/{{conf_dir}}/cluster/worker.config.properties:{{trino_etc_dir}}/config.properties
+      - ./conf/{{conf_dir}}/cluster/node.properties:{{trino_etc_dir}}/node.properties
   {%if MINIO_enable or external['S3_enable'] | default(false) %}
-      - './conf/trino/catalog/minio.properties:{{trino_etc_dir}}/catalog/minio.properties'
+      - './conf/{{conf_dir}}/catalog/minio.properties:{{trino_etc_dir}}/catalog/minio.properties'
   {% endif %}
   {% if POSTGRESQL_enable | default(false) %}
-      - './conf/trino/catalog/postgresql.properties:{{trino_etc_dir}}/catalog/postgresql.properties'
+      - './conf/{{conf_dir}}/catalog/postgresql.properties:{{trino_etc_dir}}/catalog/postgresql.properties'
   {% endif %}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
