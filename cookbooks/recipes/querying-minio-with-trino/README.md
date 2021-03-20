@@ -1,41 +1,44 @@
 ---
-technoglogies:      presto,minio
+technoglogies:      trino,minio
+version:				1.11.0
+validated-at:			20.3.2021
 ---
 
-# Querying data in Minio (S3) from Presto
+# Querying data in Minio (S3) from Trino (formerly PrestoSQL)
 
-This tutorial will show how to query Minio with Hive and Presto. 
+This tutorial will show how to query Minio with Hive and Trino. 
 
 ## Initialise a platform
 
-First [initialise a platys-supported data platform](../../getting-started.md) with the following services enabled in the `config.yml`
+First [initialise a platys-supported data platform](../../getting-started.md) with the following services enabled 
 
 ```
-      HIVE_METASTORE_enable: true
-      MINIO_enable: true
-      AWSCLI_enable: true
-      PRESTO_enable: true
-      HUE_enable: true
+platys init --enable-services TRINO,HIVE_METASTORE,MINIO,AWSCLI,PROVISIONING_DATA -s trivadis/platys-modern-data-platform -w 1.11.0
+```
+
+add the follwing property to `config.yml`
+
+```
+TRINO_edition: 'oss'
 ```
 
 Now generate and start the data platform. 
 
-```
-cd data-transfer
-mkdir -p flight-data
-cd flight-data
-wget https://gschmutz-datasets.s3.eu-central-1.amazonaws.com/datasets/flight-data.zip
-unzip -o flight-data.zip
-rm flight-data.zip
-rm -R __MACOSX/
-```
+```bash
+platys gen
 
+docker-compose up -d
+```
 
 ## Create Data in Minio
+
+create the bucket
 
 ```
 docker exec -ti awscli s3cmd mb s3://flight-bucket
 ```
+
+and upload some data
 
 ```
 docker exec -ti awscli s3cmd put /data-transfer/flight-data/airports.json s3://flight-bucket/landing/airports/airports.json
@@ -70,15 +73,15 @@ LOCATION 's3a://flight-bucket/landing/plane';
 ```
 
 
-## Query Table from Presto
+## Query Table from Trino
 
-Next let's query the data from Presto. Connect to the Presto CLI using
+Next let's query the data from Trino. Connect to the Trino CLI using
 
 ```
-docker exec -it presto presto-cli
+docker exec -it trino-cli trino --server trino-1:8080
 ```
 
-Now on the Presto command prompt, switch to the right database. 
+Now on the Trino command prompt, switch to the right database. 
 
 ```
 use minio.flight_db;

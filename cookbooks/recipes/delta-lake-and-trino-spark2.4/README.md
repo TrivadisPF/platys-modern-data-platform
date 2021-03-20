@@ -1,13 +1,25 @@
-# Presto, Spark and Delta Lake (Spark 2.4.7 & Delta Lake 0.6.1)
+---
+technoglogies:      trino,minio,spark,delta-lake
+version:				1.11.0
+validated-at:			20.3.2021
+---
 
-This recipe will show how to access a [Delta Lake](http://delta.io) table with Presto.
+# Trino (formerly PrestoSQL), Spark and Delta Lake (Spark 2.4.7 & Delta Lake 0.6.1)
+
+This recipe will show how to access a [Delta Lake](http://delta.io) table with Trino.
 
 ## Initialise data platform
 
 First [initialise a platys-supported data platform](../documentation/getting-started.md) with the following services enabled
 
 ```bash
-platys init --enable-services SPARK,HIVE_METASTORE,MINIO,AWSCLI,PRESTO,PROVISIONING_DATA -s trivadis/platys-modern-data-platform -w 1.10.0
+platys init --enable-services SPARK,HIVE_METASTORE,MINIO,AWSCLI,TRINO,PROVISIONING_DATA -s trivadis/platys-modern-data-platform -w 1.11.0
+```
+
+add the follwing property to `config.yml`
+
+```
+TRINO_edition: 'oss'
 ```
 
 Now generate and start the data platform. 
@@ -117,17 +129,17 @@ val flightsDf = spark.read.format("csv").option("delimiter",",").option("header"
 Write the DataFrame to a delta table in MinIO S3
 
 ```scala
-flightsDf.write.format("delta").mode("append").partitionBy("year","month").save("s3a://flight-bucket/refined/delta-presto/flights")
+flightsDf.write.format("delta").mode("append").partitionBy("year","month").save("s3a://flight-bucket/refined/delta-trino/flights")
 ```
 
-## Create a Manifest for Presto
+## Create a Manifest for Trino
 
-To use the delta table from Presto, a [manifest file has to be generated](https://docs.delta.io/latest/presto-integration.html):
+To use the delta table from Trino, a [manifest file has to be generated](https://docs.delta.io/latest/presto-integration.html):
 
 ```scala
 import io.delta.tables._
 
-val deltaTable = DeltaTable.forPath(spark,"s3a://flight-bucket/refined/delta-presto/flights")
+val deltaTable = DeltaTable.forPath(spark,"s3a://flight-bucket/refined/delta-trino/flights")
 deltaTable.generate("symlink_format_manifest")
 ```
 
@@ -167,22 +179,22 @@ PARTITIONED BY (year integer, month integer)
 ROW FORMAT SERDE 'org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe'                       
 STORED AS INPUTFORMAT 'org.apache.hadoop.hive.ql.io.SymlinkTextInputFormat'
 OUTPUTFORMAT 'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat'
-LOCATION 's3a://flight-bucket/refined/delta-presto/flights/_symlink_format_manifest/'
+LOCATION 's3a://flight-bucket/refined/delta-trino/flights/_symlink_format_manifest/'
 TBLPROPERTIES ("parquet.compression"="SNAPPY");
 ```
 
-As the delta table is partitioned, we need to run `MSCK REPAIR TABLE` to force the metastore (connected to Presto) to discover the partitions
+As the delta table is partitioned, we need to run `MSCK REPAIR TABLE` to force the metastore (connected to trino) to discover the partitions
 
 ```sql
 MSCK REPAIR TABLE flights_t;
 ```
 
-## Query from Presto
+## Query from Trino
 
-Start the presto CLI
+Start the Trino CLI
 
 ```bash
-docker exec -ti presto-cli presto --server presto-1:8080 --catalog minio
+docker exec -ti trino-cli trino --server trino-1:8080 --catalog minio
 ```
 
 and switch to the `flight_data` database inside the `minio` catalog.

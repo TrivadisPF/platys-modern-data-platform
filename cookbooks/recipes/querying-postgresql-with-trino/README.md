@@ -1,25 +1,42 @@
-# Querying data in Postgresql from Presto
+---
+technoglogies:      trino,postgresql
+version:				1.11.0
+validated-at:			20.3.2021
+---
 
-This tutorial will show how to query Minio with Hive and Presto. 
+# Querying data in Postgresql from Trino (formerly PrestoSQL)
+
+This tutorial will show how to query Postgresql table from Trino. 
 
 ## Initialise a platform
 
-First [initialise a platys-supported data platform](../../getting-started.md) with the following services enabled in the `condfig.yml`
+First [initialise a platys-supported data platform](../../getting-started.md) with the following services enabled 
 
 ```
-      POSTGRESQL_enable: true
-      PRESTO_enable: true
-      HUE_enable: true
+platys init --enable-services TRINO,POSTGRESQL,ADMINER,PROVISIONING_DATA -s trivadis/platys-modern-data-platform -w 1.11.0
 ```
 
-Now generate and start the data platform. 
+add the follwing property to `config.yml`
+
+```
+TRINO_edition: 'oss'
+```
+
+Now set an environment variable to the home folder of the dataplatform and generate and then start the data platform. 
+
+```bash
+export DATAPLATFORM_HOME=${PWD}
+
+platys gen
+
+docker-compose up -d
+```
 
 ## Create Table in Postgresql
 
 ```
-docker exec -ti postgresql psql -d sample -U sample
+docker exec -ti postgresql psql -d demodb -U demo
 ```
-
 
 ```
 CREATE SCHEMA flight_data;
@@ -44,12 +61,16 @@ COPY flight_data.airport_t(iata,airport,city,state,country,lat,long)
 FROM '/data-transfer/flight-data/airports.csv' DELIMITER ',' CSV HEADER;
 ```
 
-## Query Table from Presto
+```
+SELECT * FROM flight_data.airport_t LIMIT 20;
+```
 
-Next let's query the data from Presto. Connect to the Presto CLI using
+## Query Table from Trino
+
+Next let's query the data from Trino. Connect to the Trino CLI using
 
 ```
-docker exec -it presto-1 presto-cli
+docker exec -it trino-cli trino --server trino-1:8080
 ```
 
 Now on the Presto command prompt, switch to the right database. 
@@ -78,19 +99,8 @@ presto:default> show tables;
 SELECT * FROM airport_t;
 ```
 
-
 ```
 SELECT country, count(*)
 FROM airport_t
 GROUP BY country;
-```
-
-
-```
-SELECT ao.airport, ao.city, ad.airport, ad.city, f.*
-FROM minio.flight_data.flights_t  AS f
-LEFT JOIN postgresql.flight_data.airport_t AS ao
-ON (f.origin = ao.iata)
-LEFT JOIN postgresql.flight_data.airport_t AS ad
-ON (f.dest = ad.iata);
 ```
