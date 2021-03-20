@@ -5442,7 +5442,7 @@ services:
     {% set trino_etc_dir = '/usr/lib/trino/etc' %}
   {% elif (TRINO_edition | lower) == 'oss' %}
     image: trinodb/trino:{{__TRINO_version}}
-    {% set trino_etc_dir = '/usr/lib/presto/default/etc' %}
+    {% set trino_etc_dir = '/etc/trino' %}
   {% endif -%}   {#  TRINO_edition #}
     hostname: trino-1
     container_name: trino-1
@@ -5451,8 +5451,12 @@ services:
       com.platys.webui.url: "http://${PUBLIC_IP}:28082"
     ports:
       - '28082:8080'
-    {%if use_timezone | default(false) %}
     environment:
+      S3_AWS_ACCESS_KEY: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
+      S3_AWS_SECRET_KEY: {{s3SecretAccessKey}}
+      POSTGRESQL_USER: {{POSTGRESQL_user | default('demo') }}
+      POSTGRESQL_PASSWORD: {{POSTGRESQL_password | default('abc123!') }}
+    {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
@@ -5487,8 +5491,12 @@ services:
   {% endif -%}   {#  TRINO_edition #}
     hostname: trino-worker-{{loop.index}}
     container_name: trino-worker-{{loop.index}}
-    {%if use_timezone | default(false) %}
     environment:
+      S3_AWS_ACCESS_KEY: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
+      S3_AWS_SECRET_KEY: {{s3SecretAccessKey}}
+      POSTGRESQL_USER: {{POSTGRESQL_user | default('demo') }}
+      POSTGRESQL_PASSWORD: {{POSTGRESQL_password | default('abc123!') }}
+    {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
