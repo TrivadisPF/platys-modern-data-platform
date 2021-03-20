@@ -152,6 +152,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 15433 | 5433| yb-tserver-1 |
 15672 | 15672 | rabbitmq (ui) |
 16379 | 6379| yb-tserver-1 |
+17200 | 7200 | graphdb-1 |
 17474 | 7474 | amundsen-neo4j |
 17687 | 7687 | amundsen-neo4j |
 17475 | 7474 | datahub-neo4j |

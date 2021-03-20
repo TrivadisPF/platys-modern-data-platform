@@ -144,6 +144,8 @@ networks:
 {% set __STARDOG_version = STARDOG_version | default('latest') -%}
 {% set __STARDOG_STUDIO_version = STARDOG_STUDIO_version | default('latest') -%}
 
+{% set __GRAPHDB_version = GRAPHDB_version | default('latest') -%}
+
 {% set __INFLUXDB_version = INFLUXDB_version | default('latest') -%}
 {% set __TELEGRAF_version = TELEGRAF_version | default('latest') -%}
 {% set __CHRONOGRAF_version = CHRONOGRAF_version | default('latest') -%}
@@ -328,6 +330,7 @@ networks:
   {% set DGRAPH_enable = false -%}
   {% set STARDOG_enable = false -%}
   {% set STARDOG_STUDIO_enable = false -%}
+  {% set GRAPHDB_enable = false -%}
   {% set TILE38_enable = false -%}
   {% set ORACLE_enable = false -%}
   {% set ORACLE_REST_DATA_SERVICE_enable = false -%}
@@ -4437,6 +4440,46 @@ services:
     restart: {{container_restart_policy}}
   {% endif %}   {#  STARDOG_STUDIO_enable #}
 {% endif %}   {#  STARDOG_enable #}
+
+{% if GRAPHDB_enable | default(false) %}
+  #  ================================== GraphDB ========================================== #
+  graphdb-1:
+    image: khaller/graphdb-free:{{__GRAPHDB_version}}
+    hostname: graphdb-1
+    container_name: graphdb-1
+    labels:
+      com.platys.webui.title: "GraphDBs UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:17200"
+    ports:
+      - "17200:7200"
+    environment:
+      GDB_HEAP_SIZE: "{{GRAPHDB_heap_size}}"
+      GDB_JAVA_OPTS: >-
+        -Xmx2g -Xms2g
+        -Dgraphdb.home=/opt/graphdb
+        -Dgraphdb.workbench.importDirectory=/opt/graphdb/home/graphdb-import
+        -Dgraphdb.workbench.cors.enable=true
+        -Denable-context-index=true
+        -Dentity-pool-implementation=transactional
+        -Dhealth.max.query.time.seconds=60
+        -Dgraphdb.append.request.id.headers=true
+        -Dreuse.vars.in.subselects=true
+    {%if use_timezone | default(false) %}
+      TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./init/graphdb:/repository.init/
+    {% if GRAPHDB_volume_map_data %}
+      - "./container-volume/graphdb/data:/opt/graphdb/data"
+    {% endif %}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+
+{% endif %}   {#  GRAPHDB_enable #}
 
 {% if INFLUXDB_enable | default(false) %}
   #  ================================== InfluxData InfluxDB ========================================== #
