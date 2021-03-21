@@ -7,6 +7,8 @@
 FROM alpine:latest
 
 COPY flight-data /data/flight-data
+COPY graphdb-news /data/graphdb-news
+COPY wordcount /data/wordcount
 
 # copy the generator script and make it executable
 COPY run.sh /usr/local/bin/
