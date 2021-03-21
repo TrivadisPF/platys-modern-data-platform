@@ -10,7 +10,7 @@ Inhere we are documenting cookbooks on how to use the platform:
    * [Trino, Spark and Delta Lake (Spark 3.0.1 & Delta Lake 0.7.0)](./recipes/delta-lake-and-trino-spark3.0/) - `1.11.0`
    * [Querying S3 data (MinIO) using MinIO](./recipes/querying-minio-with-trino/) - `1.11.0`
    * [Querying PostgreSQL data (MinIO) using MinIO](./recipes/querying-postgresql-with-trino/) - `1.11.0`
-   * [Querying Kafka data using Trino](./recipes/querying-kafka-with-trino/)
+   * [Querying Kafka data using Trino](./recipes/querying-kafka-with-trino/) - `1.11.0` 
    * [Querying HDFS data using Trino](./recipes/querying-hdfs-with-presto/) - `1.11.0`
    * Joining data between RDBMS and MinIO
 
