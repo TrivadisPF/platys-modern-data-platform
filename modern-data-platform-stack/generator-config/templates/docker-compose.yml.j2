@@ -167,6 +167,7 @@ networks:
 {% set __ORACLE_REST_DATA_SERVICE_version = ORACLE_REST_DATA_SERVICE_version | default('latest') -%}
 {% set __MYSQL_version = MYSQL_version | default('latest') -%}
 {% set __POSTGRESQL_version = POSTGRESQL_version | default('latest') -%}
+{% set __POSTGREST_version = POSTGREST_version | default('latest') -%}
 {% set __TIMESCALEDB_version = TIMESCALEDB_version | default('latest') -%}
 {% set __SQLSERVER_version = SQLSERVER_version | default('latest') -%}
 {% set __YUGABYTE_version = YUGABYTE_version | default('latest') -%}
@@ -332,6 +333,7 @@ networks:
   {% set STARDOG_STUDIO_enable = false -%}
   {% set GRAPHDB_enable = false -%}
   {% set TILE38_enable = false -%}
+  {% set POSTGREST_enable = false -%}
   {% set ORACLE_enable = false -%}
   {% set ORACLE_REST_DATA_SERVICE_enable = false -%}
   {% set MYSQL_enable = false -%}
@@ -5272,6 +5274,10 @@ services:
       - POSTGRES_USER={{POSTGRESQL_user | default('demo') }}
       - POSTGRES_DB={{POSTGRESQL_database | default('demodb') }}
       - PGDATA=/var/lib/postgresql/data/pgdata
+      - DB_SCHEMA={{POSTGRESQL_schema | default('demo') }}
+    {% if POSTGRESQL_anon_role is defined and POSTGRESQL_anon_role | length %}
+      - DB_ANON_ROLE={{POSTGRESQL_anon_role | default('demo') }}
+    {% endif -%}   {#  POSTGRESQL_anon_role #}
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -5286,6 +5292,44 @@ services:
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
     restart: {{container_restart_policy}}
+
+
+  {% if POSTGRESQL_enable and POSTGREST_enable| default(false) %}
+  #  ================================== PostgREST ========================================== #
+  postgrest:
+    image: postgrest/postgrest:{{__POSTGREST_version}}
+    container_name: postgrest
+    hostname: postgrest
+    labels:
+      com.platys.restapi.title: "PostgREST API"
+      com.platys.restapi.url: "http://${PUBLIC_IP}:28206"
+    ports:
+      - "28206:3000"
+    environment:
+      # The standard connection URI format, documented at
+      # https://www.postgresql.org/docs/current/static/libpq-connect.html#LIBPQ-CONNSTRING
+      - PGRST_DB_URI=postgres://{{POSTGRESQL_user}}:{{POSTGRESQL_password}}@postgrestsql:5432/{{POSTGRESQL_database}}
+      # The name of which database schema to expose to REST clients
+      - PGRST_DB_SCHEMA={{POSTGRESQL_schema}}
+      # The database role to use when no client authentication is provided
+    {% if POSTGRESQL_anon_role is defined and POSTGRESQL_anon_role | length %}
+      - PGRST_DB_ANON_ROLE={{POSTGRESQL_anon_role}}
+    {% endif -%}   {#  POSTGRESQL_anon_role #}
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./init/postgresql:/docker-entrypoint-initdb.d/
+    {% if POSTGRESQL_volume_map_data %}
+      - ./container-volume/postgresql/data:/var/lib/postgresql/data/pgdata:Z
+    {% endif %}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+  {% endif %}   {#  POSTGRESQL_enable #}
 {% endif %}   {#  POSTGRESQL_enable #}
 
 {% if TIMESCALEDB_enable | default(false) %}

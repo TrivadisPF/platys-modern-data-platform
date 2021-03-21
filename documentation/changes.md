@@ -29,9 +29,11 @@ The Modern Data Platform version 1.11.0 contains the following new services and 
  * Kafka Eagle added
  * Trino added
  * GraphDB added
+ * PostgREST added
  
 ### New Cookbook Recipes
 
+ * [Spark with PostgreSQL](../cookbooks/recipes/spark-with-postgresql) 
  * [Spark with PostgreSQL](../cookbooks/recipes/spark-with-postgresql) 
  
 ### Version upgrades  
