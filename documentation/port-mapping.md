@@ -257,9 +257,10 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28140 | 8080 | code-server |
 28141 | 8000 | kafka-topics-ui |
 28142 | 8080 | datahub-gms |
-28143 | 9001 | datahub-frontend |
-28144 | 9091 | datahub-mae-consumer | 
-28145 | 9092 | datahub-mce-consumer |
+28143 | 9001 | datahub-frontend-ember |
+28144 | 9002 | datahub-frontend |
+28145 | 9091 | datahub-mae-consumer | 
+28146 | 9092 | datahub-mce-consumer |
 28150 | 8888 | druid-router |
 28150 | 8888 | druid-sandbox |
 28151 | 8088 | superset |

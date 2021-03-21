@@ -2242,6 +2242,7 @@ services:
     ports:
       - "28142:8080"
     environment:
+      - DATASET_ENABLE_SCSI=false
       - EBEAN_DATASOURCE_USERNAME=datahub
       - EBEAN_DATASOURCE_PASSWORD=datahub
       - EBEAN_DATASOURCE_HOST=datahub-mysql:3306
@@ -2266,7 +2267,7 @@ services:
     {% endif -%}   {#  use_timezone #}
     restart: {{container_restart_policy}}
 
-  datahub-frontend:
+  datahub-frontend-ember:
     image: linkedin/datahub-frontend:{{__DATAHUB_version}}
     hostname: datahub-frontend
     container_name: datahub-frontend
@@ -2294,16 +2295,47 @@ services:
     {% endif -%}   {#  use_timezone #}
     restart: {{container_restart_policy}}
 
+  datahub-frontend-react:
+    image: linkedin/datahub-frontend-react:{{__DATAHUB_version}}
+    hostname: datahub-frontend
+    container_name: datahub-frontend
+    labels:
+      com.platys.webui.title: "DataHub UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28143"
+    depends_on:
+      - datahub-gms
+    ports:
+      - "28144:9002"
+    environment:
+      - DATAHUB_GMS_HOST=datahub-gms
+      - DATAHUB_GMS_PORT=8080
+      - DATAHUB_SECRET=abc123!
+      - DATAHUB_APP_VERSION=1.0
+      - DATAHUB_PLAY_MEM_BUFFER_SIZE=10MB
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+
   datahub-mae-consumer:
     image: linkedin/datahub-mae-consumer:{{__DATAHUB_version}}
     hostname: datahub-mae-consumer
     container_name: datahub-mae-consumer
+    labels:
+      com.platys.restapi.title: "DataHub MAE Consumer"
+      com.platys.restapi.url: "http://${PUBLIC_IP}:28145"
     depends_on:
       - kafka-setup
       - datahub-elasticsearch
       - datahub-neo4j
     ports:
-        - "28144:9091"
+        - "28145:9091"
     environment:
       - KAFKA_BOOTSTRAP_SERVER=kafka-1:19092
       - KAFKA_SCHEMAREGISTRY_URL=http://schema-registry-1:8081
@@ -2328,16 +2360,44 @@ services:
     image: linkedin/datahub-mce-consumer:{{__DATAHUB_version}}
     hostname: datahub-mce-consumer
     container_name: datahub-mce-consumer
+    labels:
+      com.platys.restapi.title: "DataHub MCE Consumer"
+      com.platys.restapi.url: "http://${PUBLIC_IP}:28146"
     depends_on:
       - kafka-setup
       - datahub-gms
     ports:
-        - "28145:9090"
+        - "28146:9090"
     environment:
       - KAFKA_BOOTSTRAP_SERVER=kafka-1:19092
       - KAFKA_SCHEMAREGISTRY_URL=http://schema-registry-1:8081
       - GMS_HOST=datahub-gms
       - GMS_PORT=8080
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+
+  datahub-gms-graphql-service:
+    image: linkedin/datahub-gms-graphql-service:{{__DATAHUB_version}}
+    hostname: datahub-gms-graphql-service
+    container_name: datahub-gms-graphql-service
+    labels:
+      com.platys.restapi.title: "DataHub GraphQL Service"
+      com.platys.restapi.url: "http://${PUBLIC_IP}:28147"
+    depends_on:
+      - datahub-gms
+    ports:
+        - "28147:8091"
+    environment:
+      - DATAHUB_GMS_HOST=datahub-gms
+      - DATAHUB_GMS_PORT=8080
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
