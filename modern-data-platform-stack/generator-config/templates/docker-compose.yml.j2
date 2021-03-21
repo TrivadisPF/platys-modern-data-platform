@@ -2533,6 +2533,25 @@ services:
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
+
+  # This "container" is a workaround to pre-create topics
+  datahub-ingestion:
+    image: linkedin/datahub-ingestion:{{__DATAHUB_version}}
+    hostname: datahub-ingestion
+    container_name: datahub-ingestion
+    command: "ingest -c /sample_recipe.yml"
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./scripts/dathub/sample_recipe.yml:/sample_recipe.yml:ro
+      - ./scripts/dathub/bootstrap_mce.json:/bootstrap_mce.json:ro
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
 {% endif %}   {#  DATALAB_enable #}
 
 {% if AMUNDSEN_enable  | default(false) %}
