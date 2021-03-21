@@ -1,0 +1,209 @@
+# all news documents
+
+PREFIX pub: <http://ontology.ontotext.com/taxonomy/>
+PREFIX publishing: <http://ontology.ontotext.com/publishing#>
+SELECT ?x WHERE {
+    ?x a publishing:Document .
+}
+
+# all people with their names
+
+PREFIX pub: <http://ontology.ontotext.com/taxonomy/>
+PREFIX publishing: <http://ontology.ontotext.com/publishing#>
+SELECT ?x ?label WHERE {
+    ?x a pub:Person .
+    ?x pub:preferredLabel ?label .
+}
+
+# count people in all documents
+
+PREFIX pub: <http://ontology.ontotext.com/taxonomy/>
+PREFIX publishing: <http://ontology.ontotext.com/publishing#>
+SELECT ?doc (count(?x) as ?count) WHERE {
+    ?x a pub:Person .
+    ?doc publishing:containsMention / publishing:hasInstance ?x .
+} GROUP by ?doc order by desc (?count)
+
+# all different predicates
+
+SELECT DISTINCT ?predicate WHERE {
+    ?s ?predicate ?object .
+}
+
+# all people mentioned in the documents
+
+PREFIX pub: <http://ontology.ontotext.com/taxonomy/>
+PREFIX publishing: <http://ontology.ontotext.com/publishing#>
+SELECT DISTINCT ?Person ?doc WHERE {
+    ?x a pub:Person .
+    ?x pub:preferredLabel ?Person .
+    ?doc publishing:containsMention / publishing:hasInstance ?x .
+}
+
+# all other mentions in the document with Marlon Brando
+
+PREFIX pub: <http://ontology.ontotext.com/taxonomy/>
+PREFIX publishing: <http://ontology.ontotext.com/publishing#>
+SELECT DISTINCT ?Mentions WHERE {
+    <http://www.reuters.com/article/2014/10/06/us-art-auction-idUSKCN0HV21B20141006> publishing:containsMention / publishing:hasInstance ?x .
+    ?x pub:preferredLabel ?Mentions .
+}
+
+# all about Marlon Brando
+
+PREFIX pub: <http://ontology.ontotext.com/taxonomy/>
+PREFIX publishing: <http://ontology.ontotext.com/publishing#>
+SELECT DISTINCT ?p ?objectLabel WHERE {
+    <http://ontology.ontotext.com/resource/tsk78dfdet4w> ?p ?o .
+    {
+        ?o pub:hasValue ?value .
+        ?value pub:preferredLabel ?objectLabel .
+    } UNION {
+        ?o pub:hasValue ?objectLabel .
+        filter (isLiteral(?objectLabel)) .
+     }
+}
+
+
+# all people mentioned in news with their political party
+
+PREFIX publishing: <http://ontology.ontotext.com/publishing#>
+PREFIX pub: <http://ontology.ontotext.com/taxonomy/>
+SELECT DISTINCT ?personLabel ?partyLabel WHERE {
+    ?document publishing:containsMention ?mention .
+    ?mention publishing:hasInstance ?person .
+    ?person pub:preferredLabel ?personLabel .
+    ?person pub:memberOfPoliticalParty ?party .
+    ?party pub:hasValue ?value .
+    ?value pub:preferredLabel ?partyLabel .
+}
+
+# parties ordered by number of their members mentioned in news
+
+PREFIX publishing: <http://ontology.ontotext.com/publishing#>
+PREFIX pub: <http://ontology.ontotext.com/taxonomy/>
+SELECT DISTINCT  ?partyLabel (count(distinct ?person) as ?count) WHERE {
+    ?document publishing:containsMention ?mention .
+    ?mention publishing:hasInstance ?person .
+    ?person pub:preferredLabel ?personLabel .
+    ?person pub:memberOfPoliticalParty ?party .
+    ?party pub:hasValue ?value .
+    ?value pub:preferredLabel ?partyLabel .
+} GROUP by ?partyLabel order by desc (?count)
+
+# all members of the democratic party mentioned in news 
+
+PREFIX publishing: <http://ontology.ontotext.com/publishing#>
+PREFIX pub: <http://ontology.ontotext.com/taxonomy/>
+SELECT DISTINCT ?personLabel WHERE {
+    ?document publishing:containsMention ?mention .
+    ?mention publishing:hasInstance ?person .
+    ?person pub:preferredLabel ?personLabel .
+    ?person pub:memberOfPoliticalParty ?party .
+    ?party pub:hasValue ?value .
+    ?value pub:preferredLabel "Democratic Party"@en .
+}
+
+# all people’s occupations in the database
+
+PREFIX pub: <http://ontology.ontotext.com/taxonomy/>
+SELECT DISTINCT ?occupation WHERE {
+    ?person pub:occupation ?o .
+    {
+        ?o pub:hasValue ?value .
+        ?value pub:preferredLabel ?occupation .
+    } UNION {
+        ?o pub:hasValue ?occupation .
+        filter (isLiteral(?occupation)) .
+     }
+}
+
+# all people with their occupations
+
+PREFIX pub: <http://ontology.ontotext.com/taxonomy/>
+SELECT ?person ?occupation WHERE {
+    ?x pub:occupation ?o .
+    ?x a pub:Person .
+    ?x pub:preferredLabel ?person .
+    {
+        ?o pub:hasValue ?value .
+        ?value pub:preferredLabel ?occupation .
+    } UNION {
+        ?o pub:hasValue ?occupation .
+        filter (isLiteral(?occupation)) .
+     }
+}
+
+# CEOs of various companies in the database
+
+PREFIX pub: <http://ontology.ontotext.com/taxonomy/>
+SELECT DISTINCT ?xLabel ?ceoLabel WHERE {
+    ?x pub:CEO ?ceo .
+    ?x pub:preferredLabel ?xLabel .
+    ?ceo pub:hasValue / pub:preferredLabel ?ceoLabel .
+}
+
+# Founders 
+
+PREFIX pub: <http://ontology.ontotext.com/taxonomy/>
+SELECT DISTINCT ?x ?Organisation ?ceo ?Founder WHERE {
+    ?x pub:founder ?ceo .
+    ?x pub:preferredLabel ?Organisation .
+    ?ceo pub:hasValue / pub:preferredLabel ?Founder .
+}
+
+# all birthplaces of people mentioned in the news
+
+PREFIX pub: <http://ontology.ontotext.com/taxonomy/>
+SELECT DISTINCT ?Person ?placeOfBirth WHERE {
+    ?x pub:placeOfBirth ?y .
+    ?x pub:preferredLabel ?Person .
+    ?y pub:hasValue / pub:preferredLabel ?placeOfBirth .
+}
+
+# people born in New York City
+
+PREFIX pub: <http://ontology.ontotext.com/taxonomy/>
+SELECT DISTINCT ?x ?Person WHERE {
+    ?x pub:placeOfBirth ?y .
+    ?x pub:preferredLabel ?Person .
+    ?y pub:hasValue / pub:preferredLabel "New York City"@en .
+}
+
+# all places of death of people mentioned in the news
+
+PREFIX pub: <http://ontology.ontotext.com/taxonomy/>
+SELECT DISTINCT ?x ?xLabel ?placeOfDeathLabel WHERE {
+    ?x pub:placeOfDeath ?placeOfDeath .
+    ?x pub:preferredLabel ?xLabel .
+    ?placeOfDeath pub:hasValue / pub:preferredLabel ?placeOfDeathLabel .
+}
+
+# all people with their religions
+
+PREFIX pub: <http://ontology.ontotext.com/taxonomy/>
+SELECT DISTINCT ?x ?Person ?Religion WHERE {
+    ?x pub:religion ?y .
+    ?x a pub:Person .
+    ?x pub:preferredLabel ?Person .
+    ?y pub:hasValue / pub:preferredLabel ?Religion .
+}
+
+# all people with occupation actor and film director
+
+
+PREFIX pub: <http://ontology.ontotext.com/taxonomy/>
+SELECT DISTINCT ?x ?person WHERE {
+    VALUES ?occupation {"actor"@en "film director"@en} 
+    ?x pub:occupation ?o .
+    ?x a pub:Person .
+    ?x pub:preferredLabel ?person .
+    {
+        ?o pub:hasValue ?value .
+        ?value pub:preferredLabel  ?occupation .
+    } UNION {
+        ?o pub:hasValue  ?occupation .
+      
+     }
+}
+
