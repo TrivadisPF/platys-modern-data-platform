@@ -28,6 +28,7 @@ The Modern Data Platform version 1.11.0 contains the following new services and 
  * Dataiku Data Science Studio added
  * Kafka Eagle added
  * Trino added
+ * GraphDB added
  
 ### New Cookbook Recipes
 
@@ -41,7 +42,7 @@ The Modern Data Platform version 1.11.0 contains the following new services and 
 * Update `Streamsets Transformer` to `3.17.0`
 * Update `Axon Server` to `4.4.5`
 * Switch to official `Streamsets DataCollector` of `3.21.0`
-* Update `Marquez` to `0.12.0`
+* Update `Marquez` to `0.12.2`
 * Update `Cedalo Management Center` to `2.1` 
 * Update `Confluent Platform` to `6.1.0`
 * Update `ksqlDB` to `0.15.0`
@@ -49,6 +50,7 @@ The Modern Data Platform version 1.11.0 contains the following new services and 
 * Update `Starburstdata Presto` to `350-e.5`
 * Update `Ahana PrestoDB` to `0.249`
 * Update `PrestoDB` to `0.249`
+* Update `DataHub` to `0.7.0`
  
 ### Enhancements 
 * Allow configuring the additional StreamSets stage libraries to be installed upon starting StreamSets (we no longer use the Trivadis docker images)
