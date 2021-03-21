@@ -2439,7 +2439,7 @@ services:
     restart: {{container_restart_policy}}
 
   datahub-elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:5.6.8
+    image: elasticsearch:7.9.3
     container_name: datahub-elasticsearch
     hostname: datahub-elasticsearch
     labels:
@@ -2465,44 +2465,55 @@ services:
     {% endif -%}   {#  use_timezone #}
     restart: {{container_restart_policy}}
 
-  # This "container" is a workaround to pre-create search indices
-  datahub-elasticsearch-setup:
-    image: docker.elastic.co/elasticsearch/elasticsearch:5.6.8
-    hostname: datahub-elasticsearch-setup
-    container_name: datahub-elasticsearch-setup
-    depends_on:
-      - datahub-elasticsearch
-    {%if use_timezone | default(false) %}
+  datahub-kibana:
+    image: kibana:7.9.3
+    container_name: datahub-kibana
+    hostname: datahub-kibana
+    labels:
+      com.platys.webui.title: "DataHub Kibana UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:5602"
+    ports:
+      - "5602:5601"
     environment:
-      TZ: {{use_timezone}}
+      - SERVER_HOST=0.0.0.0
+      - ELASTICSEARCH_URL=http://datahub-elasticsearch:9200
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
-      - ./init/datahub/elasticsearch:/init
     {% if DATAHUB_volume_map_data %}
-      - ./container-volume/mysql:/var/lib/mysql
+#      - ./container-volume/datahub/elasticsearch:/usr/share/elasticsearch/data
     {% endif %}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
-    command:
-      - bash
-      - -c
-      - |
-        echo "Waiting for Elasticsearch to start ⏳"
-        while [ $$(curl -s -o /dev/null -w %{http_code} http://datahub-elasticsearch:9200/) -ne 200 ] ; do
-          echo -e $$(date) " Elasticsearch listener HTTP state: " $$(curl -s -o /dev/null -w %{http_code} http://datahub-elasticsearch:9200/) " (waiting for 200)"
-          sleep 5
-        done
+    restart: {{container_restart_policy}}
 
-        curl -XPUT http://datahub-elasticsearch:9200/corpuserinfodocument --data @/init/corpuser-index-config.json
-        curl -XPUT http://datahub-elasticsearch:9200/dataprocessdocument --data @/init/dataprocess-index-config.json
-        curl -XPUT http://datahub-elasticsearch:9200/datasetdocument --data @/init/dataset-index-config.json
+  # This "container" is a workaround to pre-create search indices
+  datahub-elasticsearch-setup:
+    image: linkedin/datahub-elasticsearch-setup:{{__DATAHUB_version}}
+    hostname: datahub-elasticsearch-setup
+    container_name: datahub-elasticsearch-setup
+    depends_on:
+      - datahub-elasticsearch
+    environment:
+      ELASTICSEARCH_HOST: datahub-elasticsearch
+      ELASTICSEARCH_PORT: 9200
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
 
   # This "container" is a workaround to pre-create topics
   kafka-setup:
-    image: confluentinc/cp-kafka:{{__CONFLUENT_PLATFORM_version}}
+    image: linkedin/datahub-kafka-setup:{{__DATAHUB_version}}
     hostname: kafka-setup
     container_name: kafka-setup
     depends_on:
@@ -2511,8 +2522,8 @@ services:
     environment:
       # The following settings are listed here only to satisfy the image's requirements.
       # We override the image's `command` anyways, hence this container will not start a broker.
-      KAFKA_BROKER_ID: ignored
-      KAFKA_ZOOKEEPER_CONNECT: ignored
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper-1:2181
+      KAFKA_BOOTSTRAP_SERVER: kafka-1:19092
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -2522,11 +2533,6 @@ services:
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
-    command: "bash -c 'echo Waiting for Kafka to be ready... && \
-                       cub kafka-ready -b kafka-1:19092 1 60 && \
-                       kafka-topics --create --if-not-exists --zookeeper zookeeper-1:2181 --partitions 1 --replication-factor 1 --topic MetadataAuditEvent_v4 && \
-                       kafka-topics --create --if-not-exists --zookeeper zookeeper-1:2181 --partitions 1 --replication-factor 1 --topic MetadataChangeEvent_v4 && \
-                       kafka-topics --create --if-not-exists --zookeeper zookeeper-1:2181 --partitions 1 --replication-factor 1 --topic FailedMetadataChangeEvent_v4'"
 {% endif %}   {#  DATALAB_enable #}
 
 {% if AMUNDSEN_enable  | default(false) %}

@@ -55,6 +55,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 5433 | 5432 | timescaledb |
 5434 | 5432 | marquez-db |
 5601 | 5601 | kibana |
+5602 | 5601 | datahub-kibana |
 5672 | 5672 | activemq |
 5673 | 5672 | rabbitmq (amqp) |
 5800 | 5800 | filezilla | 
