@@ -224,9 +224,11 @@ networks:
 {% set __HAWTIO_version = HAWTIO_version | default('latest') -%}
 {% set __WETTY_version = WETTY_version | default('latest') -%}
 
-{% set __MARKDOWN_VIEWER_VERSION = MARKDOWN_VIEWER_VERSION | default('latest') -%}
+{% set __MARKDOWN_VIEWER_version = MARKDOWN_VIEWER_version | default('latest') -%}
 
-{% set __WATCHTOWER_VERSION = WATCHTOWER_VERSION | default('latest') -%}
+{% set __LOG4BRAINS_version = LOG4BRAINS_VIEWER_version | default('latest') -%}
+
+{% set __WATCHTOWER_version = WATCHTOWER_version | default('latest') -%}
 
 {% set __POSTMAN_version = POSTMAN_version | default('latest') -%}
 
@@ -6802,7 +6804,7 @@ services:
 {% if MARKDOWN_VIEWER_enable | default(false) %}
   #  ================================== markdown-viewer ========================================== #
   markdown-viewer:
-    image: minimum/markdown-web:{{__MARKDOWN_VIEWER_VERSION}}
+    image: minimum/markdown-web:{{__MARKDOWN_VIEWER_version}}
     container_name: markdown-viewer
     hostname: markdown-viewer
     labels:
@@ -6832,10 +6834,28 @@ services:
       - ./data-transfer:/data-transfer
 {% endif %}   {# MARKDOWN_VIEWER_enable #}
 
+{% if LOG4BRAINS_enable | default(false) %}
+  #  ================================== markdown-viewer ========================================== #
+  log4brains:
+    image: {{LOG4BRAINS_repository_name}}/log4brains:{{__LOG4BRAINS_version}}
+    container_name: log4brains
+    hostname: log4brains
+    labels:
+      com.platys.webui.title: "log4brains UI (ADR Viewer)"
+      com.platys.webui.url: "http://${PUBLIC_IP}:4004"
+    ports:
+      - "4004:4004"
+    volumes:
+      - {{LOG4BRAINS_adr_source_dir}}:/opt/adr
+      - ./data-transfer:/data-transfer
+    commnd: ["log4brains", "{{LOG4BRAINS_command}}"]
+    restart: {{container_restart_policy}}
+{% endif %}   {# LOG4BRAINS_enable #}
+
 {% if WATCHTOWER_enable | default(false) %}
   #  ================================== watchtower ========================================== #
   watchtower:
-    image: containrrr/watchtower:{{__WATCHTOWER_VERSION}}
+    image: containrrr/watchtower:{{__WATCHTOWER_version}}
     container_name: watchtower
     hostname: watchtower
     volumes:

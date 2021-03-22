@@ -32,6 +32,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 3306 | 3306 | mysql |
 3307 | 3306 | datahub-mysql |
 4000 | 4000 | graphql-mesh |
+4004 | 4004 | log4brains |
 4040 | 4040 | spark-master (ui) |
 4041 | 4041 | spark-master (ui) |
 4042 | 4042 | spark-master (ui) |
