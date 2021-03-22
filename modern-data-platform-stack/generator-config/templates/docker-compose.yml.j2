@@ -823,20 +823,23 @@ services:
     {% endif -%}   {#  KAFKA_CONNECT_enable #}
       KSQL_KSQL_SCHEMA_REGISTRY_URL: "http://schema-registry-1:8081"
 
-
       KSQL_KSQL_INTERNAL_TOPIC_REPLICAS: {{KAFKA_KSQLDB_internal_replication_factor | default(1)}}
       KSQL_KSQL_STREAMS_REPLICATION_FACTOR: {{KAFKA_KSQLDB_internal_replication_factor | default(1)}}
       KSQL_KSQL_QUERY_PULL_METRICS_ENABLED: "true"
       KSQL_KSQL_HIDDEN_TOPICS: '^_.*,default_ksql_processing_log'
 
-      KSQL_PRODUCER_INTERCEPTOR_CLASSES: "io.confluent.monitoring.clients.interceptor.MonitoringProducerInterceptor"
-      KSQL_CONSUMER_INTERCEPTOR_CLASSES: "io.confluent.monitoring.clients.interceptor.MonitoringConsumerInterceptor"
+#      KSQL_PRODUCER_INTERCEPTOR_CLASSES: "io.confluent.monitoring.clients.interceptor.MonitoringProducerInterceptor"
+#      KSQL_CONSUMER_INTERCEPTOR_CLASSES: "io.confluent.monitoring.clients.interceptor.MonitoringConsumerInterceptor"
 
       KSQL_KSQL_SUPPRESS_ENABLED: "{{KAFKA_KSQLDB_suppress_enabled | default(omit)}}"
       KSQL_KSQL_SUPPRESS_BUFFER_SIZE_BYTES: "{{KAFKA_KSQLDB_suppress_buffer_size_bytes | default(-1)}}"
 
+      KSQL_KSQL_LOGGING_PROCESSING_STREAM_AUTO_CREATE: "true"
+      KSQL_KSQL_LOGGING_PROCESSING_TOPIC_AUTO_CREATE: "true"
+
       KSQL_CONFIG_DIR: "/etc/ksql"
       KSQL_KSQL_EXTENSION_DIR: '/etc/ksqldb/ext/'
+
     {% if KAFKA_KSQLDB_queries_file is defined and KAFKA_KSQLDB_queries_file|length %}
       KSQL_KSQL_QUERIES_FILE: "{{KAFKA_KSQLDB_queries_file}}"
     {% endif -%}   {#  KAFKA_KSQLDB_queries_file #}
@@ -854,6 +857,8 @@ services:
     restart: {{container_restart_policy}}
   {% endfor %}
 
+  # Access the cli by running:
+  # > docker exec -it ksqldb-cli ksql http://ksqldb-server-1:8088
   ksqldb-cli:
     image: confluentinc/ksqldb-cli:{{__KAFKA_KSQLDB_version}}
     container_name: ksqldb-cli
