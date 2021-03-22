@@ -27,7 +27,7 @@ Inhere we are documenting cookbooks on how to use the platform:
    * [Spark and Hive Metastore](./recipes/spark-and-hive-metastore/)
    * [Spark with internal S3 (using on minIO)](./recipes/spark-with-internal-s3)
    * [Spark with external S3](./recipes/spark-with-extern-s3)
-   * [Spark with PostgreSQL](./recipes/spark-with-postgresql)
+   * [Spark with PostgreSQL](./recipes/spark-with-postgresql) - `1.11.0`
 
  * **Hadoop HDFS**
    * [Querying HDFS data using Presto](./recipes/querying-hdfs-with-presto/)
