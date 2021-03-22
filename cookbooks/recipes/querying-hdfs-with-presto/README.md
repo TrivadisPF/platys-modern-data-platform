@@ -1,3 +1,9 @@
+---
+technoglogies:      trino,hdfs
+version:				1.11.0
+validated-at:			20.3.2021
+---
+
 # Querying HDFS data using Presto
 
 This recipe will show how to upload data to HDFS.
@@ -7,7 +13,13 @@ This recipe will show how to upload data to HDFS.
 First [initialise a platys-supported data platform](../documentation/getting-started.md) with the following services enabled
 
 ```
-platys init --enable-services HADOOP,HIVE_METASTORE,PRESTO,PROVISIONING_DATA -s trivadis/platys-modern-data-platform -w 1.8.0
+platys init --enable-services HADOOP,HIVE_METASTORE,TRINO,PROVISIONING_DATA -s trivadis/platys-modern-data-platform -w 1.11.0
+```
+
+add the follwing property to `config.yml`
+
+```
+TRINO_edition: 'oss'
 ```
 
 Now generate and start the data platform. 
@@ -112,11 +124,11 @@ You can perform a simple select without any other clauses (aggregation, where) u
 SELECT * FROM flights_t;
 ```
 
-## Query from Presto
+## Query from Trino
 
 
 ```
-docker exec -ti presto-cli presto --server presto-1:8080 --catalog hdfs
+docker exec -ti trino-cli trino --server trino-1:8080 --catalog hdfs
 ```
 
 ```

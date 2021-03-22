@@ -24,125 +24,53 @@ docker-compose up -d
 
 You can find the complete Java project in the subfolder [ksql-udf-string](./ksql-udf-string).
 
-Create a Java Maven Project using the following POM
+Add the following to the `~/.m2/settings.xml`:
 
 ```xml
-<?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+<settings>
+   <profiles>
+      <profile>
+         <id>myprofile</id>
+         <repositories>
+            <!-- Confluent releases -->  
+            <repository>
+               <id>confluent</id>
+               <url>https://packages.confluent.io/maven/</url>
+            </repository>
 
-    <groupId>com.trivadis.ksqldb.udf.demo</groupId>
-    <artifactId>ksql-udf-string</artifactId>
-    <version>1.0</version>
+            <!-- further repository entries here -->
+         </repositories>   
+      </profile>
+    </profiles> 
 
-    <licenses>
-        <license>
-            <name>Apache License 2.0</name>
-            <url>http://www.apache.org/licenses/LICENSE-2.0.html</url>
-            <distribution>repo</distribution>
-        </license>
-    </licenses>
+   <activeProfiles>
+      <activeProfile>myprofile</activeProfile>
+   </activeProfiles>
+</settings>
+```
 
-    <repositories>
-        <repository>
-            <id>confluent</id>
-            <url>https://packages.confluent.io/maven/</url>
-        </repository>
-    </repositories>
+Run the following command to create a new Maven project:
 
-    <properties>
-        <assertj.version>3.11.1</assertj.version>
-        <confluent.version>6.0.0</confluent.version>
-        <exec.mainClass>com.gschmutz.ksql.udf.geohash.ThisIsIgnored</exec.mainClass>
-        <java.version>1.8</java.version>
-        <junit.version>4.12</junit.version>
-        <kafka.version>2.6.0</kafka.version>
-        <kafka.scala.version>2.11</kafka.scala.version>
-        <maven.assembly.plugin.version>3.1.1</maven.assembly.plugin.version>
-        <maven.compiler.plugin.version>3.8.1</maven.compiler.plugin.version>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <scala.version>${kafka.scala.version}.8</scala.version>
-    </properties>
+```bash
+mvn archetype:generate -X \
+    -DarchetypeGroupId=io.confluent.ksql \
+    -DarchetypeArtifactId=ksqldb-udf-quickstart \
+    -DarchetypeVersion=6.0.0
+```
 
-    <dependencies>
-        <dependency>
-            <groupId>io.confluent.ksql</groupId>
-            <artifactId>ksqldb-udf</artifactId>
-            <version>${confluent.version}</version>
-        </dependency>
+Fill out the arguments being prompted for.
 
+Add the following dependency to the POM:
+
+```xml
+	<dependencies>
+	
         <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
             <version>3.11</version>
         </dependency>
-
-        <!-- Test dependencies -->
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>${junit.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.assertj</groupId>
-            <artifactId>assertj-core</artifactId>
-            <version>${assertj.version}</version>
-            <scope>test</scope>
-        </dependency>
-    </dependencies>
-
-    <build>
-
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>${maven.compiler.plugin.version}</version>
-                <configuration>
-                    <source>${java.version}</source>
-                    <target>${java.version}</target>
-                    <compilerArgs>
-                        <arg>-Xlint:all</arg>
-                        <arg>-Werror</arg>
-                    </compilerArgs>
-                </configuration>
-            </plugin>
-
-            <!-- Package all dependencies as one jar -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <version>${maven.assembly.plugin.version}</version>
-                <configuration>
-                    <descriptorRefs>
-                        <descriptorRef>jar-with-dependencies</descriptorRef>
-                    </descriptorRefs>
-                    <archive>
-                        <manifest>
-                            <addClasspath>true</addClasspath>
-                            <mainClass>${exec.mainClass}</mainClass>
-                        </manifest>
-                    </archive>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>assemble-all</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-
-    </build>
-
-</project>
 ```
 
 Create a Java package `com.trivadis.ksql.demo` and in it create the following Java class:

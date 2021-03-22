@@ -1,0 +1,1 @@
+Contains the data of graphed service, if flag GRAPHDB_volume_map_data is set to true.

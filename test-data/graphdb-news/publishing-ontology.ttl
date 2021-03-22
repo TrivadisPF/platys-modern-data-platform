@@ -1,0 +1,333 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix dc-term: <http://purl.org/dc/terms/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix pub-old: <http://ontology.ontotext.com/publishing#> .
+
+<http://ontology.ontotext.com/publishing> a owl:Ontology ;
+    dc:title "Dynamic Semantic Publishing"@en ;
+    rdfs:label "Dynamic Semantic Publishing Ontology"@en ;
+    dc:subject "Semantic authoring and publishing"@en ;
+    dc:creator "Ontotext (Anton Atanassov)"@en ;
+    dc:rights ""@en ;
+    owl:versionInfo "0.3"@en .
+
+###########################################
+########## Classes definitions
+###########################################
+
+# Remove this when the whole taxonomy is migrated to pub-ontology.ttl
+<http://ontology.ontotext.com/taxonomy/Thing> rdfs:subClassOf owl:Thing .
+
+pub-old:Feature rdf:type owl:Class ;
+  rdfs:label "Feature"@en ;
+  rdfs:comment "A miscellaneous feature of an asset."@en ;
+  rdfs:subClassOf owl:Thing .
+
+pub-old:DocumentTopic rdf:type owl:Class ;
+  rdfs:label "Document Topic"@en ;
+  rdfs:subClassOf owl:Thing .
+
+pub-old:Category rdf:type owl:Class ;
+  rdfs:label "Category"@en ;
+  rdfs:comment "Category of a document or document cluster (e.g. Science and Technology)."@en ;
+  rdfs:subClassOf owl:Thing .
+
+pub-old:Mention rdf:type owl:Class ;
+  rdfs:label "Mention"@en ;
+  rdfs:comment "A mention of an entity in an asset."@en ;
+  rdfs:subClassOf owl:Thing .
+
+pub-old:TextMention rdf:type owl:Class ;
+  rdfs:label "Text Mention"@en ;
+  rdfs:comment "A mention of an entity in a textual document. The mention has start and end offsets."@en ;
+  rdfs:subClassOf pub-old:Mention .
+
+pub-old:EntitySource rdf:type owl:Class ;
+  rdfs:label "Entity Source"@en ;
+  rdfs:comment "The source of an entity or from where it was added to the knowledge base."@en ;
+  rdfs:subClassOf owl:Thing .
+
+pub-old:LinkedDatasetSource rdf:type owl:Class ;
+  rdfs:label "Linked Dataset Source"@en ;
+  rdfs:comment "The source of an entity is a linked dataset."@en ;
+  rdfs:subClassOf pub-old:EntitySource .
+
+pub-old:NamedEntityRecognitionSource rdf:type owl:Class ;
+  rdfs:label "Named Entity Recognition Source"@en ;
+  rdfs:comment "The entity was created and added to the knowledge base via automatic named entity recognition and semantic indexing."@en ;
+  rdfs:subClassOf pub-old:EntitySource .
+
+pub-old:Asset rdf:type owl:Class ;
+  rdfs:label "Asset"@en ;
+  rdfs:comment "A publishing asset e.g. - document, image, video etc."@en ;
+  rdfs:subClassOf owl:Thing .
+
+pub-old:Image rdf:type owl:Class ;
+  rdfs:label "Image"@en ;
+  rdfs:subClassOf pub-old:Asset .
+
+pub-old:Video rdf:type owl:Class ;
+  rdfs:label "Video"@en ;
+  rdfs:subClassOf pub-old:Asset .
+
+pub-old:Document rdf:type owl:Class ;
+  rdfs:label "Document"@en ;
+  rdfs:comment "News article/blogpost etc."@en ;
+  rdfs:subClassOf pub-old:Asset .
+
+pub-old:PresentableDocument rdf:type owl:Class ;
+  rdfs:label "Presentable Asset"@en ;
+  rdfs:comment "an asset that can be presented in the publishing UI"@en ;
+  rdfs:subClassOf pub-old:Document .
+
+pub-old:DocumentCluster rdf:type owl:Class ;
+  rdfs:label "Cluster of articles"@en ;
+  rdfs:comment "Different articles that are about the same thing are grouped in clusters."@en ;
+  rdfs:subClassOf pub-old:PresentableDocument .
+
+pub-old:ProfileInformation rdf:type owl:Class ;
+  rdfs:label "Profile Information"@en ;
+  rdfs:comment "The infromation associated with an user."@en ;
+  rdfs:subClassOf owl:Thing .
+
+pub-old:Channel rdf:type owl:Class ;
+  rdfs:label "Channel"@en ;
+  rdfs:comment "Channel configuration - the channel constraint its show order etc."@en ;
+  rdfs:subClassOf owl:Thing .
+
+###########################################
+########## Feature class properties
+###########################################
+
+pub-old:featureName rdf:type owl:DatatypeProperty ;
+  rdf:type owl:FunctionalProperty ;
+  rdfs:domain pub-old:Feature ;
+  rdfs:range xsd:string ;
+  rdfs:label "Feature name"@en .
+
+pub-old:featureValue rdf:type owl:ObjectProperty ;
+  rdf:type owl:FunctionalProperty ;
+  rdfs:domain pub-old:Feature ;
+  rdfs:label "Feature value"@en .
+
+###########################################
+########## Mention class properties
+###########################################
+
+pub-old:hasInstance rdf:type owl:ObjectProperty ;
+  rdf:type owl:FunctionalProperty ;
+  rdfs:domain pub-old:Mention ;
+  rdfs:range owl:Thing ;
+  rdfs:label "The URI of the mentioned concept"@en .
+
+pub-old:hasClass rdf:type owl:ObjectProperty ;
+  rdf:type owl:FunctionalProperty ;
+  rdfs:domain pub-old:Mention ;
+  rdfs:range owl:Class ;
+  rdfs:label "The rdf type of the mentioned concept"@en .
+
+pub-old:annotationType rdf:type owl:DatatypeProperty ;
+  rdf:type owl:FunctionalProperty ;
+  rdfs:domain pub-old:Mention ;
+  rdfs:range xsd:string ;
+  rdfs:label "Annotation type"@en .
+
+pub-old:annotationString rdf:type owl:DatatypeProperty ;
+  rdf:type owl:FunctionalProperty ;
+  rdfs:domain pub-old:Mention ;
+  rdfs:range xsd:string ;
+  rdfs:label "Annotation string"@en .
+
+pub-old:mentionScore rdf:type owl:DatatypeProperty ;
+  rdf:type owl:FunctionalProperty ;
+  rdfs:domain pub-old:Mention ;
+  rdfs:range xsd:double ;
+  rdfs:comment "the score of a mention relative to the document it occurs in."@en ;
+  rdfs:label "Mention score"@en .
+
+###########################################
+########## TextMention class properties
+###########################################
+
+pub-old:startOffset rdf:type owl:DatatypeProperty ;
+  rdf:type owl:FunctionalProperty ;
+  rdfs:domain pub-old:TextMention ;
+  rdfs:range xsd:long ;
+  rdfs:label "Mention start offset"@en .
+
+pub-old:endOffset rdf:type owl:DatatypeProperty ;
+  rdf:type owl:FunctionalProperty ;
+  rdfs:domain pub-old:TextMention ;
+  rdfs:range xsd:long ;
+  rdfs:label "Mention end offset"@en .
+
+###########################################
+########## Asset class properties
+###########################################
+
+pub-old:title rdf:type owl:DatatypeProperty ;
+  rdf:type owl:FunctionalProperty ;
+  rdfs:domain pub-old:Asset ;
+  rdfs:range xsd:string ;
+  rdfs:comment "title of the asset"@en ;
+  rdfs:label "Title"@en .
+
+pub-old:author rdf:type owl:DatatypeProperty ;
+  rdf:type owl:FunctionalProperty ;
+  rdfs:domain pub-old:Asset ;
+  rdfs:range xsd:string ;
+  rdfs:label "Author"@en .
+
+pub-old:source rdf:type owl:DatatypeProperty ;
+  rdf:type owl:FunctionalProperty ;
+  rdfs:domain pub-old:Asset ;
+  rdfs:range xsd:string ;
+  rdfs:label "Source"@en .
+
+pub-old:creationDate rdf:type owl:DatatypeProperty ;
+  rdf:type owl:FunctionalProperty ;
+  rdfs:domain pub-old:Asset ;
+  rdfs:range xsd:dateTime ;
+  rdfs:label "Creation date"@en .
+
+pub-old:content rdf:type owl:DatatypeProperty ;
+  rdf:type owl:FunctionalProperty ;
+  rdfs:domain pub-old:Asset ;
+  rdfs:label "Content"@en .
+
+pub-old:customFeature rdf:type owl:ObjectProperty ;
+  rdfs:domain pub-old:Asset ;
+  rdfs:range pub-old:Feature ;
+  rdfs:label "Custom feature"@en ;
+  rdfs:comment "Custom miscellaneous features of the asset."@en .
+
+###########################################
+########## Document class properties
+###########################################
+
+pub-old:summary rdf:type owl:DatatypeProperty ;
+  rdf:type owl:FunctionalProperty ;
+  rdfs:domain pub-old:Document ;
+  rdfs:range xsd:string ;
+  rdfs:label "Summary"@en ;
+  rdfs:comment "The summary of the textual document."@en .
+
+pub-old:containsMention rdf:type owl:ObjectProperty ;
+  rdfs:domain pub-old:Document ;
+  rdfs:range pub-old:TextMention ;
+  rdfs:label "Contains mention"@en ;
+  rdfs:comment "Mentioned conceptual entities (named entity, concrete concept, topic etc.) in the document content."@en .
+
+pub-old:originalUrl rdf:type owl:DatatypeProperty ;
+  rdf:type owl:FunctionalProperty ;
+  rdfs:domain pub-old:Document ;
+  rdfs:range xsd:string ;
+  rdfs:label "Original URL"@en ;
+  rdfs:comment "The orignial URL of an article imported into the system from somewhere on the web."@en .
+
+pub-old:hasCategory rdf:type owl:ObjectProperty ;
+  rdfs:domain pub-old:Document ;
+  rdfs:range pub-old:Category ;
+  rdfs:label "Date of publishing"@en .
+
+###########################################
+########## Presentable Document class properties
+###########################################
+
+pub-old:hasImage rdf:type owl:ObjectProperty ;
+  rdfs:domain pub-old:PresentableDocument ;
+  rdfs:range pub-old:Image ;
+  rdfs:label "Image"@en ;
+  rdfs:comment "Image associated with the visualizable asset."@en .
+
+pub-old:hasVideo rdf:type owl:ObjectProperty ;
+  rdfs:domain pub-old:PresentableDocument ;
+  rdfs:range pub-old:Video ;
+  rdfs:label "Video"@en ;
+  rdfs:comment "Video associated with the document"@en .
+
+###########################################
+########## DocumentCluster class properties
+###########################################
+
+pub-old:hasDocument rdf:type owl:ObjectProperty ;
+  rdfs:domain pub-old:DocumentCluster ;
+  rdfs:range pub-old:Document ;
+  rdfs:label "Has document"@en ;
+  rdfs:comment "The document cluster contains many documents."@en .
+
+pub-old:mostRepresentativeDocument rdf:type owl:ObjectProperty ;
+  rdf:type owl:FunctionalProperty ;
+  rdfs:domain pub-old:DocumentCluster ;
+  rdfs:range pub-old:Document ;
+  rdfs:label "Most representative document"@en ;
+  rdfs:comment "Most representative document for the article cluster"@en .
+
+pub-old:articlesCount rdf:type owl:DatatypeProperty ;
+  rdf:type owl:FunctionalProperty ;
+  rdfs:domain pub-old:DocumentCluster ;
+  rdfs:range xsd:integer ;
+  rdfs:label "Articles count"@en ;
+  rdfs:comment "The count of articles this cluster contains"@en .
+
+pub-old:clusterStartDate rdf:type owl:DatatypeProperty ;
+  rdf:type owl:FunctionalProperty ;
+  rdfs:domain pub-old:DocumentCluster ;
+  rdfs:range xsd:dateTime ;
+  rdfs:label "Start date of the cluster"@en ;
+  rdfs:comment "The clustering of articles is temporal and is relevant for a given period of time"@en .
+
+pub-old:clusterEndDate rdf:type owl:DatatypeProperty ;
+  rdf:type owl:FunctionalProperty ;
+  rdfs:domain pub-old:DocumentCluster ;
+  rdfs:range xsd:dateTime ;
+  rdfs:label "End date of the cluster"@en ;
+  rdfs:comment "The clustering of articles is temporal and is relevant for a given period of time"@en .
+
+###########################################
+########## ProfileInformation class properties
+###########################################
+
+pub-old:hasChannel rdf:type owl:ObjectProperty ;
+  rdfs:domain pub-old:ProfileInformation ;
+  rdfs:range pub-old:Channel ;
+  rdfs:label "Has channel"@en ;
+  rdfs:comment ""@en .
+
+pub-old:hasUser rdf:type owl:ObjectProperty ;
+  rdfs:domain pub-old:ProfileInformation ;
+  rdfs:range xsd:string ;
+  rdfs:label "Has user"@en ;
+  rdfs:comment ""@en .
+
+###########################################
+########## Channel class properties
+###########################################
+
+pub-old:hasConstraint rdf:type owl:ObjectProperty ;
+  rdf:type owl:FunctionalProperty ;
+  rdfs:domain pub-old:Channel ;
+  rdfs:range owl:Thing ;
+  rdfs:label "Has constraint"@en ;
+  rdfs:comment ""@en .
+
+pub-old:channelIndex rdf:type owl:DatatypeProperty ;
+  rdf:type owl:FunctionalProperty ;
+  rdfs:domain pub-old:Channel ;
+  rdfs:range xsd:integer ;
+  rdfs:label "Index"@en ;
+  rdfs:comment ""@en .
+
+###########################################
+########## Other properties
+###########################################
+
+pub-old:hasEntitySource rdf:type owl:ObjectProperty ;
+  rdf:type owl:FunctionalProperty ;
+  rdfs:domain owl:Thing ;
+  rdfs:range pub-old:EntitySource ;
+  rdfs:label "Has entity source"@en ;
+  rdfs:comment "The source of an entity"@en .

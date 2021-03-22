@@ -2,6 +2,65 @@
 
 See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/platys/blob/master/documentation/upgrade-platform-stack.md) for how to upgrade to newer version.
 
+## What's new in 1.11.0
+
+The Modern Data Platform version 1.11.0 contains the following new services and enhancements:
+
+### New Services
+
+ * Watchtower added
+ * Hasura added
+ * Dgraph added
+ * File Browser added
+ * MinIO MC CLI added
+ * Kafka UI added
+ * Adminio UI added
+ * MinIO Console added
+ * S3 Manager added
+ * Filestash added
+ * SQLPad added
+ * GraphQL Mesh added
+ * Streams Explorer added
+ * Thingsboard Community added
+ * Postman added
+ * Keyclock added
+ * Microcks added
+ * Dataiku Data Science Studio added
+ * Kafka Eagle added
+ * Trino added
+ * GraphDB added
+ * PostgREST added
+ * Log4brains added
+ 
+### New Cookbook Recipes
+
+ * [Spark with PostgreSQL](../cookbooks/recipes/spark-with-postgresql) 
+ * [Querying S3 data (MinIO) using MinIO](../cookbooks/recipes/querying-minio-with-trino/)
+ * [Querying Kafka data using Trino](../cookbooks/recipes/querying-kafka-with-trino/)
+ 
+### Version upgrades  
+
+* Update `Elasticsearch` to `7.10.1`
+* Update `Kibana` to `7.10.1`
+* Update `HiveMQ4`to `4.5.0`
+* Update `Streamsets Transformer` to `3.17.0`
+* Update `Axon Server` to `4.4.5`
+* Switch to official `Streamsets DataCollector` of `3.21.0`
+* Update `Marquez` to `0.12.2`
+* Update `Cedalo Management Center` to `2.1` 
+* Update `Confluent Platform` to `6.1.0`
+* Update `ksqlDB` to `0.15.0`
+* Update `APICurio Registry` to `1.3.2`
+* Update `Starburstdata Presto` to `350-e.5`
+* Update `Ahana PrestoDB` to `0.249`
+* Update `PrestoDB` to `0.249`
+* Update `DataHub` to `0.7.0`
+ 
+### Enhancements 
+* Allow configuring the additional StreamSets stage libraries to be installed upon starting StreamSets (we no longer use the Trivadis docker images)
+* Support automatically installing StreamSets pipelines upon starting StreamSets
+* Support for Trino added (renamed PrestoSQL project) in parallel to PrestoDB (the other fork of Presto)
+
 ## What's new in 1.10.0
 
 The Modern Data Platform version 1.10.0 contains the following new services and enhancements:
@@ -130,7 +189,7 @@ The Modern Data Platform version 1.8.0 contains the following new services and e
 
 ### Version upgrades  
 * update `DataHub` to `0.5.0-beta`
-* update `StreemSheets` to `2.0-milestone`
+* update `StreamSheets` to `2.0-milestone`
 * update `StreamSets` to `3.18.1`
 * update `Confluent Platfrom` to `6.0.0`
 * update `ksqlDB` to `0.12.0`

@@ -28,8 +28,11 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 3000 | 3000 | grafana |
 3001 | 3000 | wetty |
 3005 | 3000 | marquez-web |
+3010 | 3000 | postman |
 3306 | 3306 | mysql |
 3307 | 3306 | datahub-mysql |
+4000 | 4000 | graphql-mesh |
+4004 | 4004 | log4brains |
 4040 | 4040 | spark-master (ui) |
 4041 | 4041 | spark-master (ui) |
 4042 | 4042 | spark-master (ui) |
@@ -53,6 +56,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 5433 | 5432 | timescaledb |
 5434 | 5432 | marquez-db |
 5601 | 5601 | kibana |
+5602 | 5601 | datahub-kibana |
 5672 | 5672 | activemq |
 5673 | 5672 | rabbitmq (amqp) |
 5800 | 5800 | filezilla | 
@@ -83,6 +87,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 8000 | 80 | markdown-viewer |
 8024 | 8024 | axon-server |
 8047 | 8047 | drill |
+8048 | 8048 | kafka-eagle |
 8050 | 8050 | kudu-tserver-1 |
 8051 | 8051 | kudo-master-1 |
 8080 | 8080 | spark-master |
@@ -149,6 +154,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 15433 | 5433| yb-tserver-1 |
 15672 | 15672 | rabbitmq (ui) |
 16379 | 6379| yb-tserver-1 |
+17200 | 7200 | graphdb-1 |
 17474 | 7474 | amundsen-neo4j |
 17687 | 7687 | amundsen-neo4j |
 17475 | 7474 | datahub-neo4j |
@@ -184,7 +190,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 27018 | 27017 | mongodb-2 |
 27019 | 27017 | mongodb-3 |
 28080 | 8080 | zeppelin |
-28081 | 8080 | presto |
+28081 | 8080 | presto-1 |
+28082 | 8080 | trino-1 |
 28085 | 8080 | azkarra-worker-1 |
 28888 | 8888 | jupyter |
 29000 | 9000 | apicurio-registry-1 |
@@ -252,9 +259,10 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28140 | 8080 | code-server |
 28141 | 8000 | kafka-topics-ui |
 28142 | 8080 | datahub-gms |
-28143 | 9001 | datahub-frontend |
-28144 | 9091 | datahub-mae-consumer | 
-28145 | 9092 | datahub-mce-consumer |
+28143 | 9001 | datahub-frontend-ember |
+28144 | 9002 | datahub-frontend |
+28145 | 9091 | datahub-mae-consumer | 
+28146 | 9092 | datahub-mce-consumer |
 28150 | 8888 | druid-router |
 28150 | 8888 | druid-sandbox |
 28151 | 8088 | superset |
@@ -278,6 +286,25 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28174 | 8001 | redis-insight |
 28175 | 8088 | cedalo-management-center |
 28176 | 8080 | s3manager |
+28177 | 8080 | hasura |
+28178 | 80 | filebrowser |
+28179 | 8080 | kafka-ui |
+28180 | 8080 | dgraph-1 |
+28181 | 9080 | dgraph-1 |
+28182 | 8000 | dgraph-1 |
+28190 | 80 | adminio_ui |
+28191 | 8080 | adminio_api |
+28192 | 8334 | filestash |
+28193 | 9090 | minio-console |
+28194 | 3000 | sqlpad |
+28195 | 80 | streams-explorer |
+28200 | 9090 | thingsbaord (http) |
+28201 | 1883 | thingsbaord (mqtt) |
+28202 | 5683 | thingsbaord (coap) |
+28203 | 8080 | microcks |
+28204 | 8080 | keyclock |
+28205 | 10000 | dataiku-dss |
+28206 | 3000 | postgrest |
 28500 - 28510 | 28500 - 28510 | streamsets-1 (additional ports) |
 
 An overview of the URL for the various web-based UIs can be found [here](./environment/README.md).

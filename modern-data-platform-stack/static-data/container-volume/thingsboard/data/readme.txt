@@ -1,0 +1,1 @@
+Contains the data of thingsboard service, if flag THINGSBOARD_volume_map_data is set to true.
