@@ -1,3 +1,9 @@
+---
+technoglogies:      spark,postgresql
+version:				1.11.0
+validated-at:			21.3.2021
+---
+
 # Spark with PostgreSQL
 
 This recipe will show how to use a Spark cluster in the platform and connect it to a PostgreSQL relational database. 
