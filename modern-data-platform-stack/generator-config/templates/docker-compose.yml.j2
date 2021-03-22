@@ -378,6 +378,7 @@ networks:
   {% set HAWTIO_enable = false -%}
   {% set WETTY_enable = false -%}
   {% set MARKDOWN_VIEWER_enable = false -%}
+  {% set LOG4BRAINS_enable = false -%}
   {% set SWAGGER_EDITOR_enable = false -%}
   {% set SWAGGER_UI_enable = false -%}
 {% endif %}   {# PLATFORM_ARM_enable #}
@@ -6837,7 +6838,7 @@ services:
 {% if LOG4BRAINS_enable | default(false) %}
   #  ================================== markdown-viewer ========================================== #
   log4brains:
-    image: {{LOG4BRAINS_repository_name}}/log4brains:{{__LOG4BRAINS_version}}
+    image: {{LOG4BRAINS_repository_name | default(trivadis) }}/{{LOG4BRAINS_image_name | default(log4brains) }}:{{__LOG4BRAINS_version}}
     container_name: log4brains
     hostname: log4brains
     labels:
@@ -6846,10 +6847,11 @@ services:
     ports:
       - "4004:4004"
     volumes:
+    {% if LOG4BRAINS_adr_source_dir is defined and LOG4BRAINS_adr_source_dir | length %}
       - {{LOG4BRAINS_adr_source_dir}}:/opt/adr
+    {% endif %}   {# LOG4BRAINS_adr_source_dir is defined #}
       - ./data-transfer:/data-transfer
     command: ["log4brains", "{{LOG4BRAINS_command}}"]
-    restart: {{container_restart_policy}}
 {% endif %}   {# LOG4BRAINS_enable #}
 
 {% if WATCHTOWER_enable | default(false) %}
