@@ -34,7 +34,8 @@ The Modern Data Platform version 1.11.0 contains the following new services and 
 ### New Cookbook Recipes
 
  * [Spark with PostgreSQL](../cookbooks/recipes/spark-with-postgresql) 
- * [Spark with PostgreSQL](../cookbooks/recipes/spark-with-postgresql) 
+ * [Querying S3 data (MinIO) using MinIO](../cookbooks/recipes/querying-minio-with-trino/)
+ * [Querying Kafka data using Trino](../cookbooks/recipes/querying-kafka-with-trino/)
  
 ### Version upgrades  
 
@@ -57,7 +58,7 @@ The Modern Data Platform version 1.11.0 contains the following new services and 
 ### Enhancements 
 * Allow configuring the additional StreamSets stage libraries to be installed upon starting StreamSets (we no longer use the Trivadis docker images)
 * Support automatically installing StreamSets pipelines upon starting StreamSets
-* Support for Trino added (renamed PrestoSQL project)
+* Support for Trino added (renamed PrestoSQL project) in parallel to PrestoDB (the other fork of Presto)
 
 ## What's new in 1.10.0
 
