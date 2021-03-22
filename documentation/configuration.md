@@ -445,6 +445,12 @@ For each service there might be some other settings, such as controlling the num
 | `MARKDOWN_VIEWER_enable` | `true` 	| 1.9.0 	| Generate a web page with the details on the data platform. |
 | `MARKDOWN_VIEWER_use_port_80` | `true` 	| 1.10.0 	| Use Port `80` for the markdown viewer? If set to `false`, port `8000` is used. |
 | `MARKDOWN_VIEWER_use_public_ip` | `true` 	| 1.10.0 	| When rendering markdown pages, use the public IP address for links to services. If set to `false`, the docker host IP is used instead. |
+| **_log4brains_** &nbsp;&nbsp;&nbsp;&nbsp;![x86-64](./images/x86-64.png)                   	|         	|       	|                                                                                                                                                                                     	|             	
+| `LOG4BRAINS_enable` | `true` 	| 1.11.0 	| Generate log4brains service. |
+| `LOG4BRAINS_repository_name` | `trivadis` 	| 1.11.0 	| The repository name part of the log4brains docker image which should be used  |
+| `LOG4BRAINS_image_name` | `log4brains` 	| 1.11.0 	| The image name part of the log4brains docker image which should be used |
+| `LOG4BRAINS_adr_source_dir` | `true` 	| 1.11.0 	| The folder holding the ADR sources. |
+| `LOG4BRAINS_command` | `preview` 	| 1.11.0 	| The log4brains command to run |
 | **Watchtower** &nbsp;&nbsp;&nbsp;&nbsp;![x86-64](./images/x86-64.png)  ![arm](./images/arm.png)                    	|         	|       	            	
 | `WATCHTOWER_enable` | `false` 	| 1.11.0 	| Generates the watchtower service, a container-based solution for automating Docker container base image updates. |
 | **_Python_** &nbsp;&nbsp;&nbsp;&nbsp;![x86-64](./images/x86-64.png)  ![arm](./images/arm.png)                    	|           	|                                                                                                                                                                                 

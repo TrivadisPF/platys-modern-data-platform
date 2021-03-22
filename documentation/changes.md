@@ -30,6 +30,7 @@ The Modern Data Platform version 1.11.0 contains the following new services and 
  * Trino added
  * GraphDB added
  * PostgREST added
+ * Log4brains added
  
 ### New Cookbook Recipes
 
