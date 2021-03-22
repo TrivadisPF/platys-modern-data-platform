@@ -307,5 +307,4 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28206 | 3000 | postgrest |
 28500 - 28510 | 28500 - 28510 | streamsets-1 (additional ports) |
 
-
 An overview of the URL for the various web-based UIs can be found [here](./environment/README.md).
