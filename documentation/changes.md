@@ -2,6 +2,20 @@
 
 See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/platys/blob/master/documentation/upgrade-platform-stack.md) for how to upgrade to newer version.
 
+## What's new in 1.12.0
+
+The Modern Data Platform version 1.12.0 contains the following new services and enhancements:
+
+### New Services
+
+### New Cookbook Recipes
+
+ 
+### Version upgrades  
+
+ * Update `Azkarra` to `0.9.1`
+ * Update `Hasura` to `v2.0.0-alpha.6`
+ 
 ## What's new in 1.11.0
 
 The Modern Data Platform version 1.11.0 contains the following new services and enhancements:
