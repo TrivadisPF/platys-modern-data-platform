@@ -54,6 +54,7 @@ airportsRawDF.show(5)
 You can do the same using the Spark Scala API, replace again the `gschmutz` prefix in the bucket name:
 
 ```scala
-val airportsRawDF = spark.read.csv("s3a://gschmutz-flight-bucket/raw/airports")
+val airportsRawDF = spark.read.options(Map("inferSchema"->"true", "delimiter"->",", "header"->"true"))
+						.csv("s3a://gschmutz-flight-bucket/raw/airports")
 airportsRawDF.show(5)
 ````
