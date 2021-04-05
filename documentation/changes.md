@@ -15,7 +15,8 @@ The Modern Data Platform version 1.12.0 contains the following new services and 
 
  * Update `Azkarra` to `0.9.1`
  * Update `Hasura` to `v2.0.0-alpha.6`
- 
+ * Update `Marquez` to `0.13.1` 
+ * 
 ## What's new in 1.11.0
 
 The Modern Data Platform version 1.11.0 contains the following new services and enhancements:
