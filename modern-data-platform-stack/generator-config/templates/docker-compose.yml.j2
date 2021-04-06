@@ -159,6 +159,7 @@ networks:
 
 {% set __PROMETHEUS_version = PROMETHEUS_version | default('latest') -%}
 {% set __PROMETHEUS_PUSHGATEWAY_version = PROMETHEUS_PUSHGATEWAY_version | default('latest') -%}
+{% set __PROMETHEUS_NODEEXPORTER_version = PROMETHEUS_NODEEXPORTER_version | default('latest') -%}
 
 {% set __TILE38_version = TILE38_version | default('latest') -%}
 
@@ -449,6 +450,7 @@ services:
     {% if ZOOKEEPER_nodes == 3 %}
       ZOOKEEPER_SERVERS: zookeeper-1:22888:23888;zookeeper-2:32888:33888;zookeeper-3:42888:43888
     {% endif %}
+      EXTRA_ARGS: -javaagent:/usr/share/jmx-exporter/jmx_prometheus_javaagent-0.12.0.jar=1234:/usr/share/jmx-exporter/zookeeper.yml
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -458,6 +460,7 @@ services:
       - "./container-volume/zookeeper-{{loop.index}}/data:/var/lib/zookeeper/data"
       - "./container-volume/zookeeper-{{loop.index}}/log:/var/lib/zookeeper/log"
     {% endif %}
+      - ./scripts/kafka/jmx-exporter/:/usr/share/jmx-exporter
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -597,6 +600,7 @@ services:
       KAFKA_JMX_PORT: {{portJMX}}
       KAFKA_JMX_OPTS: '-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.rmi.port={{portJMX}}'
       KAFKA_JMX_HOSTNAME: '${PUBLIC_IP:-127.0.0.1}'
+      EXTRA_ARGS: -javaagent:/usr/share/jmx-exporter/jmx_prometheus_javaagent-0.12.0.jar=1234:/usr/share/jmx-exporter/kafka_broker.yml
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -605,6 +609,7 @@ services:
     {% if KAFKA_volume_map_data %}
       - "./container-volume/kafka-{{loop.index}}:/var/lib/kafka/data"
     {% endif %}
+      - ./scripts/kafka/jmx-exporter/:/usr/share/jmx-exporter
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -640,11 +645,13 @@ services:
       SCHEMA_REGISTRY_KAFKASTORE_TOPIC_REPLICATION_FACTOR: {{KAFKA_SCHEMA_REGISTRY_replication_factor}}
       SCHEMA_REGISTRY_ACCESS_CONTROL_ALLOW_ORIGIN: '*'
       SCHEMA_REGISTRY_ACCESS_CONTROL_ALLOW_METHODS: 'GET,POST,PUT,OPTIONS'
+      EXTRA_ARGS: -javaagent:/usr/share/jmx-exporter/jmx_prometheus_javaagent-0.12.0.jar=1234:/usr/share/jmx-exporter/confluent_schemaregistry.yml
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
+      - ./scripts/kafka/jmx-exporter/:/usr/share/jmx-exporter
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -739,6 +746,7 @@ services:
       # See https://docs.confluent.io/current/connect/security.html#externalizing-secrets
       CONNECT_CONFIG_PROVIDERS: '{{KAFKA_CONNECT_config_providers}}'
       CONNECT_CONFIG_PROVIDERS_{{KAFKA_CONNECT_config_providers | upper }}_CLASS: '{{KAFKA_CONNECT_config_providers_classes}}'
+      EXTRA_ARGS: -javaagent:/usr/share/jmx-exporter/jmx_prometheus_javaagent-0.12.0.jar=1234:/usr/share/jmx-exporter/kafka_connect.yml
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -748,6 +756,7 @@ services:
     {%if KAFKA_CONNECT_map_settings_file | default(false) %}
       - ./conf.override/kafka-connect/settings.properties:/data/settings.properties
     {% endif -%}   {#  KAFKA_CONNECT_map_credentials_file #}
+      - ./scripts/kafka/jmx-exporter/:/usr/share/jmx-exporter
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -842,12 +851,14 @@ services:
       KSQL_KSQL_QUERIES_FILE: "{{KAFKA_KSQLDB_queries_file}}"
     {% endif -%}   {#  KAFKA_KSQLDB_queries_file #}
       KSQL_JMX_OPTS: "-Djava.rmi.server.hostname=localhost -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port={{jmx_port}} -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.rmi.port={{jmx_port}}"
+      KSQL_OPTS: -javaagent:/usr/share/jmx-exporter/jmx_prometheus_javaagent-0.12.0.jar=1234:/usr/share/jmx-exporter/confluent_ksql.yml
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
       - ./plugins/ksql:/etc/ksqldb/ext
+      - ./scripts/kafka/jmx-exporter/:/usr/share/jmx-exporter
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -921,11 +932,13 @@ services:
       KAFKA_REST_LISTENERS: 'http://0.0.0.0:8086'
       KAFKA_REST_SCHEMA_REGISTRY_URL: 'http://schema-registry-1:8081'
       KAFKA_REST_HOST_NAME: 'kafka-rest-1'
+      KAFKAREST_OPTS: -javaagent:/usr/share/jmx-exporter/jmx_prometheus_javaagent-0.12.0.jar=1234:/usr/share/jmx-exporter/confluent_rest.yml
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
+      - ./scripts/kafka/jmx-exporter/:/usr/share/jmx-exporter
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -3465,8 +3478,10 @@ services:
     ports:
       - "3000:3000"
     environment:
+      - GF_INSTALL_PLUGINS=grafana-piechart-panel
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD={{admin_password}}
+      - GF_USERS_ALLOW_SIGN_UP=false
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -5021,6 +5036,29 @@ services:
     restart: {{container_restart_policy}}
   {% endif %}   {#  PROMETHEUS_PUSHGATEWAY_enable #}
 
+  {% if PROMETHEUS_NODEEXPORTER_enable | default(false) %}
+  prometheus-nodeexporter:
+    image: prom/node-exporter:{{__PROMETHEUS_NODEEXPORTER_version}}
+    container_name: prometheus-nodeexporter
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./container-volume/prometheus/proc:/host/proc:ro
+      - ./container-volume/prometheus/sys:/host/sys:ro
+      - ./:/rootfs:ro
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    command:
+      - "--path.procfs=/host/proc"
+      - "--path.sysfs=/host/sys"
+      - "--collector.filesystem.ignored-mount-points"
+      - "^(aufs|proc|nsfs|shm|cgroup|tmpfs|binfmt_misc|debugfs|devpts|fusectl|hugetlbfs|fuse.lxcfs|mqueue|pstore|securityfs|sysfs|autofs|devtmpfs|configfs)"
+  {% endif %}   {#  PROMETHEUS_NODEEXPORTER_enable #}
 {% endif %}   {#  PROMETHEUS_enable #}
 
 {% if TILE38_enable | default(false) %}
