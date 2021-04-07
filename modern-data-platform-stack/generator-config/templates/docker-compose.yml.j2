@@ -181,6 +181,7 @@ networks:
 {% set __QUIX_version = QUIX_version | default('latest') -%}
 
 {% set __AXON_version = AXON_version | default('latest') -%}
+{% set __EVENTSTOREDB_version = EVENTSTOREDB_version | default('latest') -%}
 
 {% set __TRINO_version = TRINO_version | default('latest') -%}
 {% set __STARBURSTDATA_version = STARBURSTDATA_version | default('latest') -%}
@@ -356,6 +357,7 @@ networks:
   {% set SQLPAD_enable = false -%}
   {% set QUIX_enable = false -%}
   {% set AXON_enable = false -%}
+  {% set EVENTSTOREDB_enable = false -%}
   {% set TRINO_enable = false -%}
   {% set TRINO_CLI_enable = false -%}
   {% set PRESTO_enable = false -%}
@@ -5654,6 +5656,39 @@ services:
     {% endif -%}   {#  use_timezone #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  AXON_enable #}
+
+{% if EVENTSTOREDB_enable | default(false) %}
+  #  ================================== Axon Server ========================================== #
+  eventstore-db:
+    image: eventstore/eventstore:{{__EVENTSTOREDB_version}}
+    container_name: eventstore-db
+    hostname: eventstore-db
+    labels:
+      com.platys.webui.title: "Event Store UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:2113"
+    ports:
+      - "1113:1113"
+      - "2113:2113"
+    environment:
+      - EVENTSTORE_CLUSTER_SIZE=1
+      - EVENTSTORE_RUN_PROJECTIONS=All
+      - EVENTSTORE_START_STANDARD_PROJECTIONS=true
+      - EVENTSTORE_EXT_TCP_PORT=1113
+      - EVENTSTORE_EXT_HTTP_PORT=2113
+      - EVENTSTORE_INSECURE=true
+      - EVENTSTORE_ENABLE_EXTERNAL_TCP=true
+      - EVENTSTORE_ENABLE_ATOM_PUB_OVER_HTTP=true
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  EVENTSTOREDB_enable #}
 
 {% if TRINO_enable | default(false) %}
   #  ================================== Trino ========================================== #
