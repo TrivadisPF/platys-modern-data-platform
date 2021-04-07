@@ -29,6 +29,8 @@ networks:
 {% set __KAFKA_UI_version = KAFKA_UI_version | default('latest') -%}
 {% set __KAFKA_EAGLE_version = KAFKA_EAGLE_version | default('latest') -%}
 {% set __STREAMS_EXPLORER_version = STREAMS_EXPLORER_version | default('latest') -%}
+{% set __KAFKA_LAG_EXPORTER_version = KAFKA_LAG_EXPORTER_version | default('latest') -%}
+
 {% set __KAFKA_BURROW_version = KAFKA_BURROW_version | default('latest') -%}
 {% set __KAFKA_BURROW_UI_version = KAFKA_BURROW_UI_version | default('latest') -%}
 {% set __KAFKA_BURROW_DASHBOARD_version = KAFKA_BURROW_DASHBOARD_version | default('latest') -%}
@@ -257,6 +259,12 @@ networks:
   {% set ZOOKEEPER_enable = true -%}
 {% endif -%}   {# KAFKA_enable or ATLAS_enable or DATAHUB_enable #}
 
+{% if KAFKA_jmx_monitoring_prometheus_enable -%}
+# enforce some dependencies
+  {% set PROMETHEUS_enable = true -%}
+  {% set GRAFANA_enable = true -%}
+{% endif -%}   {# KAFKA_jmx_monitoring_prometheus_enable #}
+
 {% if KAFKA_TOPICS_UI_enable -%}
 # enforce some dependencies
   {% set KAFKA_RESTPROXY_enable = true -%}
@@ -297,6 +305,7 @@ networks:
   {% set KAFKACAT_enable = false -%}
   {% set KAFKA_UI_enable = false -%}
   {% set KAFKA_EAGLE_enable = false -%}
+  {% set KAFKA_LAG_EXPORTER_enable = false -%}
   {% set HADOOP_enable = false -%}
   {% set SPARK_enable = false -%}
   {% set HIVE_enable = false -%}
@@ -1385,7 +1394,28 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {#  KAFKA_enable and STREAMS_EXPLORER_enable #}
 
-{% if ((KAFKA_enable or external['KAFKA_enable']) and KAFKA_BURROW_enable) | default(false) %}
+{% if ((KAFKA_enable or external['KAFKA_enable']) and KAFKA_LAG_EXPORTER_enable) | default(false) %}
+  #  ================================== Kafka Lag Exporter ========================================== #
+  kafka-lag-exporter:
+    image: lightbend/kafka-lag-exporter:{{__KAFKA_LAG_EXPORTER_version}}
+    container_name: kafka-lag-exporter
+    hostname: kafka-lag-exporter
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./scripts/kafka-lag-exporter:/opt/docker/conf
+#      - $MONITORING_STACK/assets/prometheus/security:/etc/kafka/secrets
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  KAFKA_enable and KAFKA_LAG_EXPORTER_enable #}
+
+{% if ((KAFKA_enable or external['KAFKA_LAG_EXPORTER_enable']) and KAFKA_BURROW_enable) | default(false) %}
   burrow:
     image: gschmutz/linkedin-burrow:{{__KAFKA_BURROW_version}}
     container_name: burrow

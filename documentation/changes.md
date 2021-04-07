@@ -9,6 +9,7 @@ The Modern Data Platform version 1.12.0 contains the following new services and 
 ### New Services
 
  * Prometheus Nodeexporter
+ * Kafka Lag Exporter
  
 ### New Cookbook Recipes
 
