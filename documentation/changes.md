@@ -12,7 +12,8 @@ The Modern Data Platform version 1.12.0 contains the following new services and 
  * Kafka Lag Exporter
  
 ### New Cookbook Recipes
-
+ 
+ * 
  
 ### Version upgrades  
 
@@ -21,6 +22,10 @@ The Modern Data Platform version 1.12.0 contains the following new services and 
  * Update `Marquez` to `0.13.1` 
  * Update `Grafana` to `7.5.2`
  * Update `Axonserver` to `4.5`
+
+### Enhancements 
+  
+ * Added support for Kafka Monitoring using JMX and Prometheus/Grafana (with input from this [confluent github project](https://github.com/confluentinc/jmx-monitoring-stacks)
  
 ## What's new in 1.11.0
 
