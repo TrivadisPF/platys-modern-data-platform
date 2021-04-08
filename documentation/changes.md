@@ -23,6 +23,7 @@ The Modern Data Platform version 1.12.0 contains the following new services and 
  * Update `Marquez` to `0.13.1` 
  * Update `Grafana` to `7.5.2`
  * Update `Axonserver` to `4.5`
+ * Update `Streamsheets` to `2.3-milestone`
 
 ### Enhancements 
   
