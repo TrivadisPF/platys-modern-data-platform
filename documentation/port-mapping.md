@@ -12,6 +12,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 1095 | 1095 | ksqldb-server-1 (jmx) |
 1096 | 1096 | ksqldb-server-2 (jmx) |
 1097 | 1097 | ksqldb-server-3 (jmx) |
+1113 | 1113 | eventstore |
 1880 | 1880 | nodered-1 |
 1882 | 1882 | kafka-mqtt-1 |
 1883 | 1883 | mosquitto-1 |
@@ -22,6 +23,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 1888 | 1883 | hivemq4-1 |
 1889 | 1883 | hivemq4-2 |
 1890 | 1883 | activemq |
+2113 | 2113 | eventstore |
 2181 | 2181 | zookeeper-1 |
 2182 | 2181 | zookeeper-2 |
 2183 | 2181 | zookeeper-3 |
