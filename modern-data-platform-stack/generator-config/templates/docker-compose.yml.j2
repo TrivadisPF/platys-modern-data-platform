@@ -401,6 +401,10 @@ networks:
 {% if (external['KAFKA_enable']) | default(false) %}
     {% set ns.bootstrapServers = external['KAFKA_bootstrap_servers'] %}
     {% set ns.schemaRegistryUrl = external['SCHEMA_REGISTRY_url'] %}
+    {% set kafkaUsername = '${PLATYS_KAFKA_USERNAME:?PLATYS_KAFKA_USERNAME must be set either in .env or as an environment variable}' %}
+    {% set kafkaPassword = '${PLATYS_KAFKA_PASSWORD:?PLATYS_KAFKA_PASSWORD must be set either in .env or as an environment variable}' %}
+    {% set schemaRegistryUsername = '${PLATYS_SCHEMA_REGISTRY_USERNAME:?PLATYS_SCHEMA_REGISTRY_USERNAME must be set either in .env or as an environment variable}' %}
+    {% set schemaRegistryPassword = '${PLATYS_SCHEMA_REGISTRY_PASSWORD:?PLATYS_SCHEMA_REGISTRY_PASSWORD must be set either in .env or as an environment variable}' %}
 {% else %}
     {% for num in range(KAFKA_datacenters | default(1) ) %}
       {% set dcName = "dc" ~ loop.index%}
@@ -854,7 +858,7 @@ services:
     {% if external['KAFKA_enable'] | default(false) %}
       KSQL_SECURITY_PROTOCOL: SASL_SSL
       KSQL_SASL_MECHANISM: PLAIN
-      KSQL_SASL_JAAS_CONFIG: org.apache.kafka.common.security.plain.PlainLoginModule required username="{{external['KAFKA_username']}}" password="{{external['KAFKA_password']}}";
+      KSQL_SASL_JAAS_CONFIG: org.apache.kafka.common.security.plain.PlainLoginModule required username="{{kafkaUsername}}" password="{{kafkaPassword}}";
     {% endif -%}   {#  external['KAFKA_enable'] #}
 
     {% if ( KAFKA_CONNECT_enable ) | default(false) %}
@@ -862,7 +866,7 @@ services:
     {% endif -%}   {#  KAFKA_CONNECT_enable #}
       KSQL_KSQL_SCHEMA_REGISTRY_URL: '{{ns.schemaRegistryUrl}}'
       KSQL_KSQL_SCHEMA_REGISTRY_BASIC_AUTH_CREDENTIALS_SOURCE: "USER_INFO"
-      KSQL_KSQL_SCHEMA_REGISTRY_BASIC_AUTH_USER_INFO:  "XSXTNZYICXK2IVLH:NF9rz2F3Kd71mjBYJ2m3PBrg6ykG1hDf38LlTufXoRdbjrNtz9qmwEzFNfor4AA5"
+      KSQL_KSQL_SCHEMA_REGISTRY_BASIC_AUTH_USER_INFO:  "{{schemaRegistryUsername}}:{{schemaRegistryPassword}}"
 
       KSQL_KSQL_INTERNAL_TOPIC_REPLICAS: {{KAFKA_KSQLDB_internal_replication_factor | default(1)}}
       KSQL_KSQL_STREAMS_REPLICATION_FACTOR: {{KAFKA_KSQLDB_internal_replication_factor | default(1)}}
