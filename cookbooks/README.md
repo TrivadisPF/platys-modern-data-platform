@@ -45,3 +45,6 @@ Inhere we are documenting cookbooks on how to use the platform:
 
  * **Kafka Connect**
    * [Using additional Kafka Connect Connector](./recipes/using-additional-kafka-connect-connector)    
+
+ * **Architecture Decision Records (ADR)**
+   * [Creating and visualizing ADRs with log4brains](./recipes/creating-adr-with-log4brains) - `1.12.0`    
