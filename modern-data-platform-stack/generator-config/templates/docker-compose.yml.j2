@@ -849,10 +849,12 @@ services:
       KSQL_BOOTSTRAP_SERVERS: '{{ns.bootstrapServers}}'
       KSQL_CACHE_MAX_BYTES_BUFFERING: 0
       KSQL_RESPONSE_HTTP_HEADERS_CONFIG: '{{KAFKA_KSQLDB_response_http_headers_config}}'
+    {% if external['KAFKA_enable'] | default(false) %}
+      KSQL_SECURITY_PROTOCOL: SASL_SSL
+      KSQL_SASL_MECHANISM: PLAIN
+      KSQL_SASL_JAAS_CONFIG: org.apache.kafka.common.security.plain.PlainLoginModule required username="{{external['KAFKA_username']}}" password="{{external['KAFKA_password']}}";
+    {% endif -%}   {#  external['KAFKA_enable'] #}
 
-      #KSQL_SECURITY_PROTOCOL: SASL_SSL
-      #KSQL_SASL_MECHANISM: PLAIN
-      #KSQL_SASL_JAAS_CONFIG: org.apache.kafka.common.security.plain.PlainLoginModule required username="{{external['KAFKA_username']}}" password="{{external['KAFKA_password']}}";
     {% if ( KAFKA_CONNECT_enable ) | default(false) %}
       KSQL_KSQL_CONNECT_URL: http://kafka-connect-1:8083
     {% endif -%}   {#  KAFKA_CONNECT_enable #}
