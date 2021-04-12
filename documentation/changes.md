@@ -14,7 +14,7 @@ The Modern Data Platform version 1.12.0 contains the following new services and 
  
 ### New Cookbook Recipes
  
- * 
+ * Log4brains
  
 ### Version upgrades  
 
@@ -25,6 +25,8 @@ The Modern Data Platform version 1.12.0 contains the following new services and 
  * Update `Axonserver` to `4.5`
  * Update `Streamsheets` to `2.3-milestone`
  * Update `Streamsets` to `3.22.1`
+ * Update `Trino` to `355`
+ * Update `Starburstdata Presto` to `350-e.7`
 
 ### Enhancements 
   
