@@ -14,7 +14,7 @@ The Modern Data Platform version 1.12.0 contains the following new services and 
  
 ### New Cookbook Recipes
  
- * Log4brains
+ * [Creating and visualizing ADRs with log4brains](../cookbooks/recipes/creating-adr-with-log4brains)
  
 ### Version upgrades  
 

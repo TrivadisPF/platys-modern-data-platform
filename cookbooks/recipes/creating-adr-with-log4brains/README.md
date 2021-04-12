@@ -100,7 +100,7 @@ Now navigate to <http://dataplatform:4004> and you should see two ADRs being ren
 
 ## Create a new ADR
 
-Navigate to the `adr` folder created above
+Navigate to the `adr` folder created above and run the `adr new` command
 
 ```
 cd adr
@@ -137,3 +137,26 @@ Edit the file `docs/adr/20210412-this-is-my-first-adr.md` in the Editor of your 
 
 ![Alt Image Text](./log4brains-adr-edit.png "Log4brains adr edit")
 
+## Building a static website
+
+Navigate to the `adr` folder created above and run the `build` command
+
+```
+cd adr
+docker run -ti -v ${PWD}:/opt/adr trivadis/log4brains log4brains build
+```
+
+After a while you should see the following output
+
+```
+docker@ubuntu:~/platys-cookbook/adr$ docker run -ti -v ${PWD}:/opt/adr trivadis/log4brains log4brains build
+Building Log4brains...
+info  - Creating an optimized production build  
+info  - Collecting page data  
+info  - Finalizing page optimization  
+[====] Generating search index... Done
+
+ ✔  Your Log4brains static site was successfully generated to .log4brains/out with a total of 3 ADRs
+```
+
+The static website is available in `.log4brains/out`. Consult the [Log4brains GitHub](https://github.com/thomvaill/log4brains#-cicd-configuration-examples) to see examples on how deploy it to various static hoting services.
