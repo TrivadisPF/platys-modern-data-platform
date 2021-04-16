@@ -31,6 +31,7 @@ The Modern Data Platform version 1.12.0 contains the following new services and 
 ### Enhancements 
   
  * Added support for Kafka Monitoring using JMX and Prometheus/Grafana (with input from this [confluent github project](https://github.com/confluentinc/jmx-monitoring-stacks)
+ * use official Cloudbeaver docker image and no longer the trivadis one
  
 ## What's new in 1.11.0
 

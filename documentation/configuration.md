@@ -1,4 +1,4 @@
-# `modern-data-platform` - Configuration v1.11.0
+# `modern-data-platform` - Configuration v1.12.0
 
 This is the documentation of the configuration settings which can be overwritten using a custom YAML file. All the defaults are defined in [`generator-config/vars/default-values.yml`](generator-config/vars/config.yml).
 
@@ -350,6 +350,7 @@ For each service there might be some other settings, such as controlling the num
 | `ADMINER_enable`                               	| `false` 	| 1.0.0 	| Generate Adminer RDBMS Admin UI service                                                                                                                                             	|          	|                                	|
 | **_Cloudbeaver_**  &nbsp;&nbsp;&nbsp;&nbsp;![x86-64](./images/x86-64.png)                              	|         	|       	|                                                                                                                                                                                     	| 
 | `CLOUDBEAVER_enable`                               	| `false` 	| 1.6.0 	| Generate Cloudbeaver RDBMS Admin UI service                                                                                                                                             	|          	|                                	|
+| `CLOUDBEAVER_volume_map_workspace`                            	| `false` 	| 1.12.0 	| Volume map workspace folder into the Cloudbeaver service                                                                                                                                                          	|             	|                                	|
 | **_SQLPad_**  &nbsp;&nbsp;&nbsp;&nbsp;![x86-64](./images/x86-64.png)                              	|         	|       	|                                                                                                                                                                                     	| 
 | `SQLPAD_enable`                               	| `false` 	| 1.11.0 	| Generate SQLPad UI service                                                                                                                                             	|          	|                                	|
 | **_Quix_**  &nbsp;&nbsp;&nbsp;&nbsp;![x86-64](./images/x86-64.png)                              	|         	|       	|                                                                                                                                                                                     	| 
