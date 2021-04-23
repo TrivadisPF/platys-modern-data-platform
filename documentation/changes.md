@@ -27,6 +27,7 @@ The Modern Data Platform version 1.12.0 contains the following new services and 
  * Update `Streamsets` to `3.22.1`
  * Update `Trino` to `355`
  * Update `Starburstdata Presto` to `350-e.7`
+ * Update `DataHub` to `0.7.1`
 
 ### Enhancements 
   
