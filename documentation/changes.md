@@ -28,6 +28,9 @@ The Modern Data Platform version 1.12.0 contains the following new services and 
  * Update `Trino` to `355`
  * Update `Starburstdata Presto` to `350-e.7`
  * Update `DataHub` to `0.7.1`
+ * Update `InfluxDB2` to `2.0.4`
+ * Update `Telegraf` to `1.18`
+ * Update `MongoDB` to `
 
 ### Enhancements 
   
