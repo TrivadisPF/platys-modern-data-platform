@@ -307,6 +307,12 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28204 | 8080 | keyclock |
 28205 | 10000 | dataiku-dss |
 28206 | 3000 | postgrest |
+
+## Ports > 28500
+
+Container Port(s) | Internal Port(s)           | Service (alternatives) |
+--------------------|------------------|-----------------------|
 28500 - 28510 | 28500 - 28510 | streamsets-1 (additional ports) |
+28520 - 28600 | any | reserved for applications |
 
 An overview of the URL for the various web-based UIs can be found [here](./environment/README.md).
