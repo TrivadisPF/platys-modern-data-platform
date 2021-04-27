@@ -34,6 +34,7 @@ The Modern Data Platform version 1.12.0 contains the following new services and 
  * Update `Elasticsearch` to `7.12`
  * Update `Kibana` to `7.12`
  * Update `Neo4J` to `4.2.5`
+ * Update `ksqlDB` to `0.17.0`
 
 ### Enhancements 
   
