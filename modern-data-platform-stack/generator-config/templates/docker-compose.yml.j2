@@ -6605,6 +6605,7 @@ services:
     ports:
       - '26500:26500'
       - '9600:9600'
+      - '5701:5701'
     environment:
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
@@ -6617,6 +6618,7 @@ services:
       - ./container-volume/camunda/zebee/data:/usr/local/zeebe/data
     {% endif -%}   {#  ZEEBE_volume_map_data #}
       - ./conf/camunda/zeebe/application.yaml:/usr/local/zeebe/config/application.yaml
+      - ./plugins/camunda/zeebe/zeebe-hazelcast-exporter-0.10.0.jar:/usr/local/zeebe/exporters/zeebe-hazelcast-exporter-0.10.0.jar
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -6646,6 +6648,30 @@ services:
     {% endif -%}   {#  use_timezone #}
     restart: {{container_restart_policy}}
   {% endif %}   {#  CAMUNDA_OPERATE_enable #}
+
+  {% if CAMUNDA_ZEEQS_enable | default(false) %}
+  zeeqs:
+    image: camunda/zeeqs:{{__CAMUNDA_ZEEQS_version}}
+    container_name: zeeqs
+    hostname: zeeqs
+    labels:
+      com.platys.webui.title: "Camunda Zeeqs GraphQL UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28208"
+    ports:
+      - '28208:9000'
+    environment:
+      zeebe.client.worker.hazelcast.connection: 'zeebe-1:5701'
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+  {% endif %}   {#  CAMUNDA_ZEEQS_enable #}
 {% endif %}   {#  CAMUNDA_ZEEBE_enable #}
 
 {% if PENTHAO_enable | default(false) %}

@@ -11,6 +11,7 @@ The Modern Data Platform version 1.12.0 contains the following new services and 
  * Prometheus Nodeexporter
  * Kafka Lag Exporter
  * EventStore DB
+ * Camunda Zeebe + Operate + ZeeQs
  
 ### New Cookbook Recipes
  
