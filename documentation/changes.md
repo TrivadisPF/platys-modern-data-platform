@@ -31,8 +31,8 @@ The Modern Data Platform version 1.12.0 contains the following new services and 
  * Update `InfluxDB2` to `2.0.4`
  * Update `Telegraf` to `1.18`
  * Update `MongoDB` to `4.4`
- * Update `Elasticsearch` to `7.12`
- * Update `Kibana` to `7.12`
+ * Update `Elasticsearch` to `7.12.0`
+ * Update `Kibana` to `7.12.0`
  * Update `Neo4J` to `4.2.5`
  * Update `ksqlDB` to `0.17.0`
 
