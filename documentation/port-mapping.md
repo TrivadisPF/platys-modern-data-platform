@@ -61,7 +61,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 5602 | 5601 | datahub-kibana |
 5672 | 5672 | activemq |
 5673 | 5672 | rabbitmq (amqp) |
-5701 | 5701 | zeebe-1 | 
+5701 | 5701 | hazelcast	-1 | 
+5705 | 5701 | zeebe-1 | 
 5800 | 5800 | filezilla | 
 5820 | 5820 | stardog-1 |
 5900 | 5900 | filezilla |  
@@ -312,6 +313,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28206 | 3000 | postgrest |
 28207 | 8080 | operate |
 28208 | 9000 | zeeqs |
+28209 | 8080 | hazelcast-mc |
 
 ## Ports > 28500
 

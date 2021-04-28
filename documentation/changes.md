@@ -12,6 +12,7 @@ The Modern Data Platform version 1.12.0 contains the following new services and 
  * Kafka Lag Exporter
  * EventStore DB
  * Camunda Zeebe + Operate + ZeeQs
+ * Hazelcast IMDG + Managment Center
  
 ### New Cookbook Recipes
  

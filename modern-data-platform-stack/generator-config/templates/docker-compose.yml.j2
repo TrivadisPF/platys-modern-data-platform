@@ -183,6 +183,9 @@ networks:
 {% set __AXON_version = AXON_version | default('latest') -%}
 {% set __EVENTSTORE_version = EVENTSTORE_version | default('latest') -%}
 
+{% set __HAZELCAST_IMDG_version = HAZELCAST_IMDG_version | default('latest') -%}
+{% set __HAZELCAST_MC_version = HAZELCAST_MC_version | default('latest') -%}
+
 {% set __TRINO_version = TRINO_version | default('latest') -%}
 {% set __STARBURSTDATA_version = STARBURSTDATA_version | default('latest') -%}
 {% set __TRINO_CLI_version = TRINO_CLI_version | default('latest') -%}
@@ -5657,6 +5660,51 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {#  QUIX_enable #}
 
+{% if HAZELCAST_IMDG_enable | default(false) %}
+  #  ================================== Hazelcast IMDG ========================================== #
+  hazelcast-1:
+    image: hazelcast/hazelcast:{{__HAZELCAST_IMDG_version}}
+    container_name: hazelcast-1
+    hostname: hazelcast-1
+    ports:
+      - 5701:5701
+    environment:
+      - HZ_NETWORK_PUBLICADDRESS=${DOCKER_HOST_IP}:5701
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+
+  {% if HAZELCAST_MC_enable | default(false) %}
+  hazelcast-mc:
+    image: hazelcast/management-center:{{__HAZELCAST_MC_version}}
+    container_name: hazelcast-mc
+    hostname: hazelcast-mc
+    labels:
+      com.platys.webui.title: "Hazelcast Mangement Center UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28209"
+    ports:
+      - 28209:8080
+    {%if use_timezone | default(false) %}
+    environment:
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+  {% endif %}   {#  HAZELCAST_MC_enable #}
+{% endif %}   {#  HAZELCAST_IMDG_enable #}
+
 {% if AXON_enable | default(false) %}
   #  ================================== Axon Server ========================================== #
   axon-server:
@@ -6607,7 +6655,7 @@ services:
     ports:
       - '26500:26500'
       - '9600:9600'
-      - '5701:5701'
+      - '5705:5701'
     environment:
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
@@ -6662,7 +6710,7 @@ services:
     ports:
       - '28208:9000'
     environment:
-      zeebe.client.worker.hazelcast.connection: 'zeebe-1:5701'
+      zeebe.client.worker.hazelcast.connection: 'zeebe-1:5705'
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
