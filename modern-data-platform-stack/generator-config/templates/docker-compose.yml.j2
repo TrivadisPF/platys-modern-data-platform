@@ -209,6 +209,9 @@ networks:
 {% set __FTP_PUREFTPD_version = FTP_PUREFTPD_version | default('latest') -%}
 {% set __FTP_FILEZILLA_version = FTP_FILEZILLA_version | default('latest') -%}
 
+{% set __CAMUNDA_ZEEBE_version = CAMUNDA_ZEEBE_version | default('latest') -%}
+{% set __CAMUNDA_OPERATE_version = CAMUNDA_OPERATE_version | default('latest') -%}
+
 {% set __PENTHAO_version = PENTHAO_version | default('latest') -%}
 
 {% set __MINIO_version = MINIO_version | default('latest') -%}
@@ -291,6 +294,11 @@ networks:
   {% set POSTGRESQL_enable = true -%}
 {% endif -%}   {# HASURA_enable #}
 
+{% if CAMUNDA_enable -%}
+# enforce some dependencies
+  {% set ELASTICSEARCH_enable = true -%}
+{% endif -%}   {# CAMUNDA_enable #}
+
 {% if MICROCKS_enable -%}
 # enforce some dependencies
   {% set KEYCLOCK_enable = true -%}
@@ -372,6 +380,8 @@ networks:
   {% set THINGSBOARD_enable = false -%}
   {% set ACTIVEMQ_enable = false -%}
   {% set FTP_enable = false -%}
+  {% set CAMUNDA_ZEEBE_enable = false -%}
+  {% set CAMUNDA_OPERATE_enable = false -%}
   {% set PENTHAO_enable = false -%}
   {% set MINIO_enable = false -%}
   {% set MINIO_MC_enable = false -%}
@@ -878,7 +888,7 @@ services:
 
       KSQL_KSQL_SUPPRESS_ENABLED: "{{KAFKA_KSQLDB_suppress_enabled | default(omit)}}"
       KSQL_KSQL_SUPPRESS_BUFFER_SIZE_BYTES: "{{KAFKA_KSQLDB_suppress_buffer_size_bytes | default(-1)}}"
-      
+
       KSQL_KSQL_QUERY_PULL_TABLE_SCAN_ENABLED: "{{KAFKA_KSQLDB_query_pull_table_scan_enabled | default(omit)}}"
       KSQL_CONFIG_DIR: "/etc/ksql"
       KSQL_KSQL_EXTENSION_DIR: '/etc/ksqldb/ext/'
@@ -6585,6 +6595,58 @@ services:
     {% endif -%}   {#  use_timezone #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  FTP_enable #}
+
+{% if CAMUNDA_ZEEBE_enable | default(false) %}
+  #  ================================== Penthao Webspoon ========================================== #
+  zeebe-1:
+    image: camunda/zeebe:{{__ZEEBE_version}}
+    container_name: zeebe-1
+    hostname: zeebe-1
+    ports:
+      - '26500:26500'
+      - '9600:9600'
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+      ZEEBE_LOG_LEVEL: debug
+    volumes:
+      - ./data-transfer:/data-transfer
+    {% if ZEEBE_volume_map_data %}
+      - ./container-volume/camunda/zebee/data:/usr/local/zeebe/data
+    {% endif -%}   {#  ZEEBE_volume_map_data #}
+      - ./conf/camunda/zeebe/application.yaml:/usr/local/zeebe/config/application.yaml
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+
+  {% if CAMUNDA_OPERATE_enable | default(false) %}
+  operate:
+    image: camunda/operate:{{__CAMUNDA_OPERATE_version}}
+    container_name: operate
+    hostname: operate
+    labels:
+      com.platys.webui.title: "Camunda Operate UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28207"
+    ports:
+      - '28207:8080'
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+      ZEEBE_LOG_LEVEL: debug
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./conf/camunda/operate/application.yaml:/usr/local/operate/config/application.yml
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+  {% endif %}   {#  CAMUNDA_OPERATE_enable #}
+{% endif %}   {#  CAMUNDA_ZEEBE_enable #}
 
 {% if PENTHAO_enable | default(false) %}
   #  ================================== Penthao Webspoon ========================================== #

@@ -133,6 +133,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 9096 | 9096 | kafka-5     |
 9097 | 9097 | kafka-6     |
 9393 | 9393 | spring-dataflow-server |
+9600 | 9600 | zeebe-1 |
 9851 | 9851 | tile38 |
 9870 | 9870 | namenode |
 9864 | 9864 | datanode-1 |
@@ -188,6 +189,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 19631 | 19630 | streamsets-transformer-1 | 
 19632 | 19630 | streamsets-transformer-1 | 
 21000 | 21000 | atlas |
+26500 | 26500 | zeebe-1 |
 27017 | 27017 | mongodb-1 |
 27018 | 27017 | mongodb-2 |
 27019 | 27017 | mongodb-3 |
@@ -307,6 +309,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28204 | 8080 | keyclock |
 28205 | 10000 | dataiku-dss |
 28206 | 3000 | postgrest |
+28207 | 8080 | operate |
 
 ## Ports > 28500
 
