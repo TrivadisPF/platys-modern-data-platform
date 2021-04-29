@@ -5695,8 +5695,10 @@ services:
       com.platys.webui.url: "http://${PUBLIC_IP}:28209"
     ports:
       - 28209:8080
-    {%if use_timezone | default(false) %}
     environment:
+      - MC_CLUSTER1_NAME=my-cluster
+      - MC_CLUSTER1_ADDRESSLIST=hazelcast-1:5701
+    {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
@@ -5705,6 +5707,10 @@ services:
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
+    command: ["bash", "-c", "set -euo pipefail \
+            && ./mc-conf.sh cluster add --cluster-name=\"${MC_CLUSTER1_NAME}\" --member-addresses=\"${MC_CLUSTER1_ADDRESSLIST}\" \
+            && ./mc-start.sh \
+            "]
     restart: {{container_restart_policy}}
   {% endif %}   {#  HAZELCAST_MC_enable #}
 {% endif %}   {#  HAZELCAST_IMDG_enable #}
