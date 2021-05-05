@@ -37,6 +37,7 @@ The Modern Data Platform version 1.12.0 contains the following new services and 
  * Update `Kibana` to `7.12.0`
  * Update `Neo4J` to `4.2.5`
  * Update `ksqlDB` to `0.17.0`
+ * Update `Druid`to `0.21.0`
 
 ### Enhancements 
   
