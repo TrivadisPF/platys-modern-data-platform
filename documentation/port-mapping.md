@@ -317,6 +317,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28210 | 9000 | pinot-controller |
 28211 | 8099 | pinot-broker-1 |
 28212 | 8098 | pinot-server-1 |
+28220 | 8000 | lakefs |
+
 
 ## Ports > 28500
 

@@ -14,6 +14,7 @@ The Modern Data Platform version 1.12.0 contains the following new services and 
  * Camunda Zeebe + Operate + ZeeQs
  * Hazelcast IMDG + Managment Center
  * Pinot
+ * LakeFS
  
 ### New Cookbook Recipes
  
