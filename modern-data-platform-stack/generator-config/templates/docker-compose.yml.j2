@@ -159,6 +159,8 @@ networks:
 
 {% set __DRUID_version = DRUID_version | default('latest') -%}
 
+{% set __PINOT_version = PINOT_version | default('latest') -%}
+
 {% set __PROMETHEUS_version = PROMETHEUS_version | default('latest') -%}
 {% set __PROMETHEUS_PUSHGATEWAY_version = PROMETHEUS_PUSHGATEWAY_version | default('latest') -%}
 {% set __PROMETHEUS_NODEEXPORTER_version = PROMETHEUS_NODEEXPORTER_version | default('latest') -%}
@@ -257,12 +259,12 @@ networks:
   {% set KAFKA_SCHEMA_REGISTRY_enable = true -%}
 {% endif -%}   {# DATAHUB_enable  #}
 
-{% if AZKARRA_enable -%}
+{% if AZKARRA_enable or PINOT_enable -%}
 # enforce some dependencies
   {% set KAFKA_enable = true -%}
 {% endif -%}   {# DATAHUB_enable  #}
 
-{% if KAFKA_enable or ATLAS_enable or DRILL_enable -%}
+{% if KAFKA_enable or ATLAS_enable or DRILL_enable or PINOT_enable -%}
 # enforce some dependencies
   {% set ZOOKEEPER_enable = true -%}
 {% endif -%}   {# KAFKA_enable or ATLAS_enable or DATAHUB_enable #}
@@ -352,6 +354,8 @@ networks:
   {% set ELASTICHQ_enable = false -%}
   {% set KIBANA_enable = false -%}
   {% set INFLUXDB2_enable = false -%}
+  {% set DRUID_enable = false -%}
+  {% set PINOT_enable = false -%}
   {% set NEO4J_enable = false -%}
   {% set DGRAPH_enable = false -%}
   {% set STARDOG_enable = false -%}
@@ -4878,7 +4882,7 @@ services:
 {% endif %}   {# KUDU_enable #}
 
 {% if DRUID_enable | default(false) %}
-  #  ================================== InfluxDB 2 ========================================== #
+  #  ================================== Druid ========================================== #
   {% if (DRUID_edition| lower) == 'oss-sandbox' | default(false) %}
   druid-sandbox:
     image: fokkodriesprong/docker-druid:{{__DRUID_version}}
@@ -5062,6 +5066,75 @@ services:
     restart: {{container_restart_policy}}
   {% endif %}   {# DRUID_edition #}
 {% endif %}   {# DRUID_enable #}
+
+{% if PINOT_enable | default(false) %}
+  #  ================================== Pinot ========================================== #
+  pinot-controller:
+    image: apachepinot/pinot:{{__PINOT_version}}
+    hostname: pinot-controller
+    container_name: pinot-controller
+    labels:
+      com.platys.webui.title: "Pinot Console UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28210"
+    ports:
+      - "28210:9000"
+    volumes:
+      - ./data-transfer:/data-transfer
+    {% if PINOT_volume_map_data %}
+      - ./container-volume/pinot/controller:/tmp/data/controller
+    {% endif -%}   {#  PINOT_volume_map_data #}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    command: StartController -zkAddress zookeeper-1:2181
+    restart: {{container_restart_policy}}
+
+  pinot-broker-1:
+    image: apachepinot/pinot:{{__PINOT_version}}
+    hostname: pinot-broker-1
+    container_name: pinot-broker-1
+    depends_on:
+      - pinot-controller
+    ports:
+      - "28211:8099"
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    command: StartBroker -zkAddress zookeeper-1:2181
+    restart: {{container_restart_policy}}
+
+  pinot-server-1:
+    image: apachepinot/pinot:{{__PINOT_version}}
+    hostname: pinot-server-1
+    container_name: pinot-server-1
+    depends_on:
+      - pinot-controller
+    ports:
+      - "28212:8098"
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {% if PINOT_volume_map_data %}
+      - ./container-volume/pinot/server:/tmp/data/server
+    {% endif -%}   {#  PINOT_volume_map_data #}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    command: StartBroker -zkAddress zookeeper-1:2181
+    restart: {{container_restart_policy}}
+{% endif %}   {# PINOT_enable #}
 
 {% if PROMETHEUS_enable | default(false) %}
   #  ================================== Prometheus ========================================== #

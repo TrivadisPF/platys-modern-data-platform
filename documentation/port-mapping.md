@@ -111,6 +111,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 8978 | 8978 | cloudbeaver |
 8983 | 8983 | solr |
 8998 | 8998 | livy |
+9000 | 9000 | minio |
 9001 | 9001 | mosquitto-1 |
 9002 | 9002 | mosquitto-2 |
 9003 | 9003 | mosquitto-3 |
@@ -120,7 +121,6 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 9047 | 9047 | dremio |
 9200 | 9200 | elasticsearch-1 |
 9300 | 9300 | elasticsearch-1 |
-9000 | 9000 | minio |
 9160 | 9160 | cassandra-1 |
 9161 | 9160 | cassandra-2 |
 9162 | 9160 | cassandra-3 |
@@ -314,6 +314,9 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28207 | 8080 | operate |
 28208 | 9000 | zeeqs |
 28209 | 8080 | hazelcast-mc |
+28210 | 9000 | pinot-controller |
+28211 | 8099 | pinot-broker-1 |
+28212 | 8098 | pinot-server-1 |
 
 ## Ports > 28500
 
