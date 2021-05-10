@@ -46,5 +46,9 @@ Inhere we are documenting cookbooks on how to use the platform:
  * **Kafka Connect**
    * [Using additional Kafka Connect Connector](./recipes/using-additional-kafka-connect-connector)    
 
+ * **Oracle RDMBS**
+   * [Using public Oracle XE image](./recipes/using-public-oracle-xe-image) - `1.12.0`    
+    
+
  * **Architecture Decision Records (ADR)**
    * [Creating and visualizing ADRs with log4brains](./recipes/creating-adr-with-log4brains) - `1.12.0`    
