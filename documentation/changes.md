@@ -28,7 +28,7 @@ The Modern Data Platform version 1.12.0 contains the following new services and 
  * Update `Grafana` to `7.5.2`
  * Update `Axonserver` to `4.5`
  * Update `Streamsheets` to `2.3-milestone`
- * Update `Streamsets` to `3.22.1`
+ * Update `Streamsets` to `3.22.2`
  * Update `Trino` to `355`
  * Update `Starburstdata Presto` to `350-e.7`
  * Update `DataHub` to `0.7.1`

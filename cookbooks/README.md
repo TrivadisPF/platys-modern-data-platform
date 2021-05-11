@@ -38,6 +38,7 @@ Inhere we are documenting cookbooks on how to use the platform:
 
  * **StreamSets Data Collector**
    * [Consume a binary file and send it as Kafka message](./recipes/streamsets-binary-file-to-kafka) 
+   * [Using Dev Simulator Origin to simulate streaming data](./recipes/using-dev-simulator-origin) - `1.12.0` 
 
  * **ksqlDB**
    * [Connecting through ksqlDB CLI](./recipes/connecting-through-ksqldb-cli)    
