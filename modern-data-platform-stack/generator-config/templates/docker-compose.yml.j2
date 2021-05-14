@@ -5753,6 +5753,7 @@ services:
     ports:
       - "{{external_port}}:{{port}}"
     environment:
+      - LOGGING_LEVEL=INFO
       - HZ_NETWORK_PUBLICADDRESS=${DOCKER_HOST_IP}:{{external_port}}
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
@@ -5776,8 +5777,10 @@ services:
       com.platys.webui.url: "http://${PUBLIC_IP}:28209"
     ports:
       - 28209:8080
-    {%if use_timezone | default(false) %}
     environment:
+      - LOGGING_LEVEL=INFO
+#      - MC_INIT_CMD="/opt/hazelcast/management-center/bin/mc-conf.sh cluster add -cn='my-cluster' -ma='hazelcast-1'"
+    {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
@@ -5786,7 +5789,7 @@ services:
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
-    command: bash -c "set -euo pipefail && /opt/hazelcast/management-center/bin/mc-conf.sh cluster add --cluster-name='my-cluster' --member-addresses='hazelcast-1' && /opt/hazelcast/management-center/bin/mc-start.sh"
+#    command: bash -c "set -euo pipefail && /opt/hazelcast/management-center/bin/mc-conf.sh cluster add --cluster-name='my-cluster' --member-addresses='hazelcast-1' && /opt/hazelcast/management-center/bin/mc-start.sh"
     restart: {{container_restart_policy}}
   {% endif %}   {#  HAZELCAST_MC_enable #}
 {% endif %}   {#  HAZELCAST_IMDG_enable #}
