@@ -5383,21 +5383,22 @@ services:
       - "28152:8080"
       - "5500:5500"
     environment:
-      CONTAINER: 'TRUE'
+      CONTAINER: '{{ORACLE_container_enable}}'
       ORACLE_SID: ORCLCDB
       ORACLE_PDB: ORCLPDB1
-      ORACLE_PWD: abc123!
+      ORACLE_PWD: {{ORACLE_password}}
       ORACLE_CHARACTERSET: AL32UTF8
+      INSTANCE_INIT: '/u01/config'
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
     {% if ORACLE_volume_map_data %}
-      - ./container-volume/oracle/data:/opt/oracle/oradata:Z
+      - ./container-volume/oracle/data:/u01
     {% endif %}
-      - ./init/oracle/startup:/opt/oracle/scripts/startup
-      - ./init/oracle/setup:/opt/oracle/scripts/setup
+      - ./init/oracle/startup:/u01/config/startup
+      - ./init/oracle/setup:/u01/config/setup
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
