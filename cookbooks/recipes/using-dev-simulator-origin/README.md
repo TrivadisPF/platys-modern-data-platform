@@ -22,18 +22,34 @@ Edit the `config.yml` and add the following configuration settings.
       STREAMSETS_stage_libs: 'streamsets-datacollector-apache-kafka_2_7-lib'
 ```
 
-Now generate and start the data platform. 
+Now generate data platform and download the Streamsets Custom origin to the right folder. 
 
 ```
 platys gen
+```
 
+```
+cd plugins/streamsets/user-libs
+
+wget https://github.com/TrivadisPF/streamsets-dev-simulator/releases/download/0.6.0/dev-simulator-0.6.0.tar.gz 
+
+tar -xvzf dev-simulator-0.6.0.tar.gz 
+rm dev-simulator-0.6.0.tar.gz 
+
+cd ../..
+```
+
+Start the platform:
+
+```
 docker-compose up -d
 ```
 
 ## Using Relative from Anchor Time mode 
 
-### without header
+You can find the StreamSets pipeline in the folder `streamsets`.
 
+### without header
 
 `relative-anchor-without-header.csv`
 
