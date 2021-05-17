@@ -48,8 +48,9 @@ Inhere we are documenting cookbooks on how to use the platform:
    * [Using additional Kafka Connect Connector](./recipes/using-additional-kafka-connect-connector)    
 
  * **Oracle RDMBS**
+   * [Using private (Trivadis) Oracle XE image](./recipes/using-private-oracle-xe-image) - `1.12.0`    
+   * [Using private (Trivadis) Oracle EE image](./recipes/using-private-oracle-ee-image) - `1.12.0`    
    * [Using public Oracle XE image](./recipes/using-public-oracle-xe-image) - `1.12.0`    
-    
 
  * **Architecture Decision Records (ADR)**
    * [Creating and visualizing ADRs with log4brains](./recipes/creating-adr-with-log4brains) - `1.12.0`    
