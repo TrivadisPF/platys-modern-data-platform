@@ -20,6 +20,9 @@ The Modern Data Platform version 1.12.0 contains the following new services and 
  
  * [Creating and visualizing ADRs with log4brains](../cookbooks/recipes/creating-adr-with-log4brains)
  * [Using Dev Simulator Orgin to simulate streaming data](../cookbooks/recipes/using-dev-simulator-origin)
+ * [Using private (Trivadis) Oracle XE image](../cookbooks/recipes/using-private-oracle-xe-image)    
+ * [Using private (Trivadis) Oracle EE image](../cookbooks/recipes/using-private-oracle-ee-image)
+ * [Using public Oracle XE image](../cookbooks/recipes/using-public-oracle-xe-image)
  
 ### Version upgrades  
 
