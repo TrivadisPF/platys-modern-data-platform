@@ -254,10 +254,10 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28129 | 8888 | chronograf |
 28130 | 9092 | kapacitor |
 28131 | 8080 | adminer |
-28132 | 8080 | hivemq3_1 |
-28133 | 8080 | hivemq3_2 |
-28134 | 8080 | hivemq4_1 |
-28135 | 8080 | hivemq4_2 |
+28132 | 8080 | hivemq3-1 |
+28133 | 8000 | hivemq3-1 |
+28134 | 8080 | hivemq4-1 |
+28135 | 8000 | hivemq4-1 |
 28136 | 80 | mqtt-ui |
 28137 | 9000 | portainer |
 28138 | 8080 | cadvisor | 
