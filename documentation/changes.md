@@ -44,6 +44,7 @@ The Modern Data Platform version 1.12.0 contains the following new services and 
  * Update `Neo4J` to `4.2.5`
  * Update `ksqlDB` to `0.17.0`
  * Update `Druid`to `0.21.0`
+ * Update `HiveMQ 4` to `4.6.1`
 
 ### Enhancements 
   
