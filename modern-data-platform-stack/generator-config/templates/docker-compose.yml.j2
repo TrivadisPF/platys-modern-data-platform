@@ -155,6 +155,8 @@ networks:
 {% set __INFLUXDB2_version = INFLUXDB2_version | default('2.2.0-alpha') -%}
 {% set __INFLUXDB_UI_version = INFLUXDB_UI_version | default('latest') -%}
 
+{% set __QUESTDB_version = QUESTDB_version | default('latest') -%}
+
 {% set __KUDU_version = KUDU_version | default('latest') -%}
 
 {% set __DRUID_version = DRUID_version | default('latest') -%}
@@ -4838,6 +4840,37 @@ services:
     command: "--reporting-disabled"
     restart: {{container_restart_policy}}
 {% endif %}   {# INFLUXDB2_enable #}
+
+{% if QUESTDB_enable | default(false) %}
+  #  ================================== QuestDB Timeseries ========================================== #
+  questdb:
+    image: questdb/questdb:{{__QUESTDB_version}}
+    container_name: questdb
+    hostname: questdb
+    labels:
+      com.platys.webui.title: "QuestDB Web Console"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28226"
+      com.platys.restapi.title: "QuestDB Rest API"
+      com.platys.restapi.url: "http://${PUBLIC_IP}:28226"
+    ports:
+      - "28226:9000"
+      - "8812:8812"
+      - "9009:9009"
+    {%if use_timezone | default(false) %}
+    evironment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {% if QUESTDB_volume_map_data %}
+      - "./container-volume/questdb/data:/root/.questdb/db"
+    {% endif %}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  QUESTDB_enable #}
 
 {% if KUDU_enable | default(false) %}
   kudu-master-1:

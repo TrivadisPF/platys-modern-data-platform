@@ -108,6 +108,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 8124 | 8124 | axon-server |
 8161 | 8161 | activemq |
 8200 | 8200 | vault |
+8812 | 8812 | questdb |
 8888 | 8888 | hue |
 8978 | 8978 | cloudbeaver |
 8983 | 8983 | solr |
@@ -116,6 +117,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 9001 | 9001 | mosquitto-1 |
 9002 | 9002 | mosquitto-2 |
 9003 | 9003 | mosquitto-3 |
+9009 | 9009 | questdb |
 9042 | 9042 | dse-1 |
 9043 | 9042 | dse-2 |
 9044 | 9042 | dse-3 |
@@ -324,6 +326,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28223 | 8084 | emqx-1 |
 28224 | 8883 | emqx-1 |
 28225 | 18083 | emqx-1 |
+28226 | 9000 | questdb |
+
 
 
 ## Ports > 28500
