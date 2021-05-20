@@ -23,6 +23,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 1888 | 1883 | hivemq4-1 |
 1889 | 1883 | hivemq4-2 |
 1890 | 1883 | activemq |
+1891 | 1883 | emqx-1 |
 2113 | 2113 | eventstore |
 2181 | 2181 | zookeeper-1 |
 2182 | 2181 | zookeeper-2 |
@@ -318,6 +319,11 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28211 | 8099 | pinot-broker-1 |
 28212 | 8098 | pinot-server-1 |
 28220 | 8000 | lakefs |
+28221 | 8081 | emqx-1 |
+28222 | 8083 | emqx-1 |
+28223 | 8084 | emqx-1 |
+28224 | 8883 | emqx-1 |
+28225 | 18083 | emqx-1 |
 
 
 ## Ports > 28500

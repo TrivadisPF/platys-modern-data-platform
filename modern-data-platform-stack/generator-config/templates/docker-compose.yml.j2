@@ -6568,6 +6568,44 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {#  HIVEMQ4_enable #}
 
+{% if EMQX_enable | default(false) %}
+  #  ================================== EMQX ========================================== #
+  emqx-1:
+  {% if (EMQX_edition | lower) == 'oss' %}
+    image: {{ emqx/emqx:{{__EMQX_oss_version}}
+  {% else -%}   {#  EMQX_edition #}
+    image: {{ emqx/emqx-ee:{{__EMQX_enterprise_version}}
+  {% endif -%}   {#  EMQX_edition #}
+    hostname: emqx-1
+    container_name: emqx-1
+    labels:
+      com.platys.webui.title: "EMQX WebUI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28225"
+      com.platys.restapi.title: "EMQX REST API"
+      com.platys.restapi.url: "http://${PUBLIC_IP}:28225/api/v4/"
+    ports:
+      - "1891:1883"
+      - "28221:8081"
+      - "28222:8083"
+      - "28223:8084"
+      - "28224:8883"
+      - "28225:18083"
+    environment:
+      EMQX_NAME: emqx-1
+      EMQX_LOG__CONSOLE: console
+      EMQX_ALLOW_ANONYMOUS: true
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  EMQX_enable #}
+
 {% if MQTT_UI_enable | default(false) %}
   #  ================================== MQTT UI ========================================== #
   mqtt-ui:
