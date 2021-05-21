@@ -18,6 +18,7 @@ The Modern Data Platform version 1.12.0 contains the following new services and 
  * EMQ-X MQTT Broker
  * QuestDB Timeseries DB
  * Materialize
+ * Debezium UI
  
 ### New Cookbook Recipes
  

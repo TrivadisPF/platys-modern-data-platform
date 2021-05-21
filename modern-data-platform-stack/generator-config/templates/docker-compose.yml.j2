@@ -14,6 +14,7 @@ networks:
 {% set __ZOONAVIGATOR_version = ZOONAVIGATOR_version | default('latest') -%}
 {% set __ZOONAVIGATOR_API_version = ZOONAVIGATOR_API_version | default('latest') -%}
 {% set __KAFKA_KSQLDB_version = KAFKA_KSQLDB_version | default('latest') -%}
+{% set __MATERIALIZE_version = MATERIALIZE_version | default('latest') -%}
 {% set __AZKARRA_version = AZKARRA_version | default('latest') -%}
 
 {% set __SCHEMA_REGISTRY_UI_version = SCHEMA_REGISTRY_UI_version | default('latest') -%}
@@ -22,6 +23,7 @@ networks:
 
 {% set __KAFKA_TOPICS_UI_version = KAFKA_TOPICS_UI_version | default('latest') -%}
 {% set __KAFKA_CONNECT_UI_version = KAFKA_CONNECT_UI_version | default('latest') -%}
+{% set __DEBEZIUM_UI_version = DEBEZIUM_UI_version | default('latest') -%}
 {% set __KAFKA_CMAK_version = KAFKA_CMAK_version | default('latest') -%}
 {% set __KAFKA_KAFDROP_version = KAFKA_KAFDROP_version | default('latest') -%}
 {% set __KAFKA_KADMIN_version = KAFKA_KADMIN_version | default('latest') -%}
@@ -1263,6 +1265,31 @@ services:
     {% endif -%}   {#  use_timezone #}
     restart: {{container_restart_policy}}
 {% endif %}   {# KAFKA_enable and KAFKA_CONNECT_UI_enable #}
+
+{% if ((KAFKA_enable or external['KAFKA_enable']) and KAFKA_CONNECT_enable and DEBEZIUM_UI_enable) | default(false) %}
+  #  ================================== Kafka Connect UI ========================================== #
+  debezium-ui:
+    image: debezium/debezium-ui:{{__DEBEZIUM_UI_version}}
+    container_name: debezium-ui
+    hostname: debezium-ui
+    labels:
+      com.platys.webui.title: 'Debezium UI'
+      com.platys.webui.url: "http://${PUBLIC_IP}:28227"
+    ports:
+      - "28227:8080"
+    environment:
+      KAFKA_CONNECT_URI: "http://${PUBLIC_IP}:8083/,http://${PUBLIC_IP}:8084/"
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+{% endif %}   {# KAFKA_enable and DEBEZIUM_UI_enable #}
 
 {% if ((KAFKA_enable or external['KAFKA_enable']) and KAFKA_CMAK_enable) | default(false) %}
   #  ================================== Cluster Manager for Apache Kafka (CMAK) ========================================== #
