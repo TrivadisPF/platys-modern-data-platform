@@ -75,6 +75,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 6381 | 6379 | redis-replica-1 |
 6382 | 6379 | redis-replica-1 |
 6385 | 6379 | redash-redis |
+6875 | 6875 | materialize-1 |
 7000 | 7000 | yb-master |
 7050 | 7050 | kudu-tserver-1 |
 7051 | 7051 | kudo-master-1 |

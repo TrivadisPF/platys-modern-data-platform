@@ -897,7 +897,7 @@ services:
       KSQL_KSQL_SCHEMA_REGISTRY_BASIC_AUTH_CREDENTIALS_SOURCE: "USER_INFO"
     {% if schemaRegistryUsername is defined and schemaRegistryUsername|length %}
       KSQL_KSQL_SCHEMA_REGISTRY_BASIC_AUTH_USER_INFO:  "{{schemaRegistryUsername}}:{{schemaRegistryPassword}}"
-    {% endif %}  
+    {% endif %}
       KSQL_KSQL_INTERNAL_TOPIC_REPLICAS: {{KAFKA_KSQLDB_internal_replication_factor | default(1)}}
       KSQL_KSQL_STREAMS_REPLICATION_FACTOR: {{KAFKA_KSQLDB_internal_replication_factor | default(1)}}
       KSQL_KSQL_QUERY_PULL_METRICS_ENABLED: "true"
@@ -957,6 +957,26 @@ services:
     entrypoint: /bin/sh
     tty: true
 {% endif %}   {# KAFKA_broker_enable and KAFKA_KSQLDB_enable #}
+
+{% if (MATERIALIZE_enable) | default(false) %}
+  #  ================================== Azkarra Streams ========================================== #
+  materialize-1:
+    image: materialize/materialized:{{__MATERIALIZE_version}}
+    hostname: materialize-1
+    container_name: materialize-1
+    ports:
+      - "6875:6875"
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+{% endif %}   {# MATERIALIZE_enable #}
 
 {% if (AZKARRA_enable) | default(false) %}
   #  ================================== Azkarra Streams ========================================== #

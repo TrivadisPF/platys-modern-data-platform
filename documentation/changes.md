@@ -17,6 +17,7 @@ The Modern Data Platform version 1.12.0 contains the following new services and 
  * LakeFS
  * EMQ-X MQTT Broker
  * QuestDB Timeseries DB
+ * Materialize
  
 ### New Cookbook Recipes
  
