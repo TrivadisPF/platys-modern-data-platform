@@ -5200,15 +5200,14 @@ services:
     command: StartBroker -zkAddress zookeeper-1:2181
     restart: {{container_restart_policy}}
 
-  {% for num in range(PINOT_servers | default(1) ) %}
-  pinot-server-{{loop.index}}:
+  pinot-server-1:
     image: apachepinot/pinot:{{__PINOT_version}}
-    hostname: pinot-server-{{loop.index}}
-    container_name: pinot-server-{{loop.index}}
+    hostname: pinot-server-1
+    container_name: pinot-server-1
     depends_on:
       - pinot-controller
-#    ports:
-#      - "28212:8098"
+    ports:
+      - "28212:8098"
     {%if use_timezone | default(false) %}
     environment:
       TZ: {{use_timezone}}
@@ -5224,7 +5223,6 @@ services:
     {% endif -%}   {#  use_timezone #}
     command: StartServer -zkAddress zookeeper-1:2181
     restart: {{container_restart_policy}}
-  {% endfor %}
 {% endif %}   {# PINOT_enable #}
 
 {% if PROMETHEUS_enable | default(false) %}
