@@ -38,7 +38,7 @@ The Modern Data Platform version 1.12.0 contains the following new services and 
  * Update `Streamsheets` to `2.3-milestone`
  * Update `Streamsets` to `3.22.2`
  * Update `Trino` to `356`
- * Update `Starburstdata Presto` to `350-e.7`
+ * Update `Starburstdata Presto` to `350-e.8`
  * Update `DataHub` to `0.7.1`
  * Update `InfluxDB2` to `2.0.4`
  * Update `Telegraf` to `1.18`
