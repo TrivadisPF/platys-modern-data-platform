@@ -1,4 +1,4 @@
-# Platform Stack: `modern-data-platform` - v1.11.0
+# Platform Stack: `modern-data-platform` - v1.12.0
 
 This Platform Stack defines the set of services for a Modern Data Platform, such as
 
