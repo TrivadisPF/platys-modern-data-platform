@@ -37,7 +37,7 @@ The Modern Data Platform version 1.12.0 contains the following new services and 
  * Update `Axonserver` to `4.5`
  * Update `Streamsheets` to `2.3-milestone`
  * Update `Streamsets` to `3.22.2`
- * Update `Trino` to `355`
+ * Update `Trino` to `356`
  * Update `Starburstdata Presto` to `350-e.7`
  * Update `DataHub` to `0.7.1`
  * Update `InfluxDB2` to `2.0.4`
@@ -54,6 +54,7 @@ The Modern Data Platform version 1.12.0 contains the following new services and 
   
  * Added support for Kafka Monitoring using JMX and Prometheus/Grafana (with input from this [confluent github project](https://github.com/confluentinc/jmx-monitoring-stacks)
  * use official Cloudbeaver docker image and no longer the trivadis one
+ * [solution documentend](https://github.com/TrivadisPF/platys/blob/master/documentation/docker-compose-without-internet.md) on how to use a Platys-generated Platform without internet on the target infrastructure
  
 ## What's new in 1.11.0
 
