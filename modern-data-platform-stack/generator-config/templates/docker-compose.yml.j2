@@ -3380,14 +3380,16 @@ services:
     ports:
       - "28139:8080"
     environment:
-      - AIRFLOW_HOME=/opt/bitnami/airflow
-      - AIRFLOW_EXECUTOR=LocalExecutor
-      - AIRFLOW_FERNET_KEY=46BKJoQYlPPOexq0OhDZnIlNepKFf87WFwLbfzqDDho=
-      - AIRFLOW_DATABASE_HOST=airflow-db
       - AIRFLOW_DATABASE_NAME=bitnami_airflow
-      - AIRFLOW_DATABASE_PORT_NUMBER=5432
       - AIRFLOW_DATABASE_USERNAME=bn_airflow
       - AIRFLOW_DATABASE_PASSWORD=abc123!
+      - AIRFLOW_DATABASE_HOST=airflow-db
+      - AIRFLOW_DATABASE_PORT_NUMBER=5432
+      - REDIS_HOST=airflow-redis
+      - REDIS_HOST=6379
+      - AIRFLOW_EXECUTOR=LocalExecutor
+      - AIRFLOW_FERNET_KEY=46BKJoQYlPPOexq0OhDZnIlNepKFf87WFwLbfzqDDho=
+      - AIRFLOW_HOME=/opt/bitnami/airflow
       - AIRFLOW_LOAD_EXAMPLES={{ 'yes' if (AIRFLOW_provision_examples ) else 'no' }}
       - AIRFLOW_PASSWORD=abc123!
       - AIRFLOW_USERNAME=airflow
@@ -3398,6 +3400,7 @@ services:
       - ./data-transfer:/data-transfer
       - ./scripts/airflow/dags:/opt/bitnami/airflow/dags:Z
       - ./plugins/airflow/:/opt/bitnami/airflow/plugins:Z
+      - ./scripts/airflow/requirements.txt:bitnami/python/requirements.txt:Z
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -3409,17 +3412,20 @@ services:
     container_name: airflow-scheduler
     hostname: airflow-scheduler
     environment:
-      - AIRFLOW_HOME=/opt/bitnami/airflow
-      - AIRFLOW_EXECUTOR=LocalExecutor
-      - AIRFLOW_FERNET_KEY=46BKJoQYlPPOexq0OhDZnIlNepKFf87WFwLbfzqDDho=
-      - AIRFLOW_DATABASE_HOST=airflow-db
       - AIRFLOW_DATABASE_NAME=bitnami_airflow
-      - AIRFLOW_DATABASE_PORT_NUMBER=5432
       - AIRFLOW_DATABASE_USERNAME=bn_airflow
       - AIRFLOW_DATABASE_PASSWORD=abc123!
+      - AIRFLOW_DATABASE_HOST=airflow-db
+      - AIRFLOW_DATABASE_PORT_NUMBER=5432
+      - REDIS_HOST=airflow-redis
+      - REDIS_HOST=6379
+      - AIRFLOW_EXECUTOR=LocalExecutor
+      - AIRFLOW_WEBSERVER_HOST=airflow
       - AIRFLOW_LOAD_EXAMPLES={{ 'yes' if (AIRFLOW_provision_examples ) else 'no' }}
-      - AIRFLOW_PASSWORD=abc123!
-      - AIRFLOW_USERNAME=airflow
+      - AIRFLOW_HOME=/opt/bitnami/airflow
+      - AIRFLOW_FERNET_KEY=46BKJoQYlPPOexq0OhDZnIlNepKFf87WFwLbfzqDDho=
+      - AIRFLOW_DATABASE_HOST=airflow-db
+      - AIRFLOW_DATABASE_PORT_NUMBER=5432
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -3427,6 +3433,24 @@ services:
       - ./data-transfer:/data-transfer
       - ./scripts/airflow/dags:/opt/bitnami/airflow/dags:Z
       - ./plugins/airflow/:/opt/bitnami/airflow/plugins:Z
+      - ./scripts/airflow/requirements.txt:bitnami/python/requirements.txt:Z
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+
+  airflow-redis:
+    image: bitnami/redis:6.0
+    container_name: airflow-redis
+    hostname: airflow-redis
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
