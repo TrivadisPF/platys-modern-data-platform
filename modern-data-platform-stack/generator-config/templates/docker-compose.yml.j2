@@ -3367,6 +3367,13 @@ services:
 {% endif %}   {#  SPRING_DATAFLOW_enable #}
 
 {%if AIRFLOW_enable | default(false) %}
+  {% if (AIRFLOW_executor | lower) == 'celery'  %}
+     {% set airflow_executor = "CeleryExecutor" %}
+  {% elif (AIRFLOW_executor | lower) == 'sequential' %}
+     {% set airflow_executor = "SequentialExecutor" %}
+  {% elif (AIRFLOW_executor | lower) == 'local' %}
+     {% set airflow_executor = "LocalExecutor" %}
+  {% endif -%}
   #  ================================== Airflow ========================================== #
   airflow:
     image: bitnami/airflow:{{__AIRFLOW_version}}
@@ -3411,6 +3418,37 @@ services:
     image: bitnami/airflow-scheduler:{{__AIRFLOW_version}}
     container_name: airflow-scheduler
     hostname: airflow-scheduler
+    environment:
+      - AIRFLOW_DATABASE_NAME=bitnami_airflow
+      - AIRFLOW_DATABASE_USERNAME=bn_airflow
+      - AIRFLOW_DATABASE_PASSWORD=abc123!
+      - AIRFLOW_DATABASE_HOST=airflow-db
+      - AIRFLOW_DATABASE_PORT_NUMBER=5432
+      - REDIS_HOST=airflow-redis
+      - REDIS_HOST=6379
+      - AIRFLOW_EXECUTOR=LocalExecutor
+      - AIRFLOW_WEBSERVER_HOST=airflow
+      - AIRFLOW_LOAD_EXAMPLES={{ 'yes' if (AIRFLOW_provision_examples ) else 'no' }}
+      - AIRFLOW_HOME=/opt/bitnami/airflow
+      - AIRFLOW_FERNET_KEY=46BKJoQYlPPOexq0OhDZnIlNepKFf87WFwLbfzqDDho=
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./scripts/airflow/dags:/opt/bitnami/airflow/dags:Z
+      - ./plugins/airflow/:/opt/bitnami/airflow/plugins:Z
+      - ./scripts/airflow/python:/bitnami/python:Z
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+
+  airflow-worker-1:
+    image: bitnami/airflow-worker:{{__AIRFLOW_version}}
+    container_name: airflow-worker-1
+    hostname: airflow-worker-1
     environment:
       - AIRFLOW_DATABASE_NAME=bitnami_airflow
       - AIRFLOW_DATABASE_USERNAME=bn_airflow
