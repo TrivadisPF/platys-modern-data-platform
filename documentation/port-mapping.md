@@ -12,6 +12,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 1095 | 1095 | ksqldb-server-1 (jmx) |
 1096 | 1096 | ksqldb-server-2 (jmx) |
 1097 | 1097 | ksqldb-server-3 (jmx) |
+1113 | 1113 | eventstore |
 1880 | 1880 | nodered-1 |
 1882 | 1882 | kafka-mqtt-1 |
 1883 | 1883 | mosquitto-1 |
@@ -22,6 +23,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 1888 | 1883 | hivemq4-1 |
 1889 | 1883 | hivemq4-2 |
 1890 | 1883 | activemq |
+1891 | 1883 | emqx-1 |
+2113 | 2113 | eventstore |
 2181 | 2181 | zookeeper-1 |
 2182 | 2181 | zookeeper-2 |
 2183 | 2181 | zookeeper-3 |
@@ -59,6 +62,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 5602 | 5601 | datahub-kibana |
 5672 | 5672 | activemq |
 5673 | 5672 | rabbitmq (amqp) |
+5701 | 5701 | hazelcast	-1 | 
+5705 | 5701 | zeebe-1 | 
 5800 | 5800 | filezilla | 
 5820 | 5820 | stardog-1 |
 5900 | 5900 | filezilla |  
@@ -70,6 +75,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 6381 | 6379 | redis-replica-1 |
 6382 | 6379 | redis-replica-1 |
 6385 | 6379 | redash-redis |
+6875 | 6875 | materialize-1 |
 7000 | 7000 | yb-master |
 7050 | 7050 | kudu-tserver-1 |
 7051 | 7051 | kudo-master-1 |
@@ -103,20 +109,22 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 8124 | 8124 | axon-server |
 8161 | 8161 | activemq |
 8200 | 8200 | vault |
+8812 | 8812 | questdb |
 8888 | 8888 | hue |
 8978 | 8978 | cloudbeaver |
 8983 | 8983 | solr |
 8998 | 8998 | livy |
+9000 | 9000 | minio |
 9001 | 9001 | mosquitto-1 |
 9002 | 9002 | mosquitto-2 |
 9003 | 9003 | mosquitto-3 |
+9009 | 9009 | questdb |
 9042 | 9042 | dse-1 |
 9043 | 9042 | dse-2 |
 9044 | 9042 | dse-3 |
 9047 | 9047 | dremio |
 9200 | 9200 | elasticsearch-1 |
 9300 | 9300 | elasticsearch-1 |
-9000 | 9000 | minio |
 9160 | 9160 | cassandra-1 |
 9161 | 9160 | cassandra-2 |
 9162 | 9160 | cassandra-3 |
@@ -131,6 +139,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 9096 | 9096 | kafka-5     |
 9097 | 9097 | kafka-6     |
 9393 | 9393 | spring-dataflow-server |
+9600 | 9600 | zeebe-1 |
 9851 | 9851 | tile38 |
 9870 | 9870 | namenode |
 9864 | 9864 | datanode-1 |
@@ -186,6 +195,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 19631 | 19630 | streamsets-transformer-1 | 
 19632 | 19630 | streamsets-transformer-1 | 
 21000 | 21000 | atlas |
+26500 | 26500 | zeebe-1 |
 27017 | 27017 | mongodb-1 |
 27018 | 27017 | mongodb-2 |
 27019 | 27017 | mongodb-3 |
@@ -248,10 +258,10 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28129 | 8888 | chronograf |
 28130 | 9092 | kapacitor |
 28131 | 8080 | adminer |
-28132 | 8080 | hivemq3_1 |
-28133 | 8080 | hivemq3_2 |
-28134 | 8080 | hivemq4_1 |
-28135 | 8080 | hivemq4_2 |
+28132 | 8080 | hivemq3-1 |
+28133 | 8000 | hivemq3-1 |
+28134 | 8080 | hivemq4-1 |
+28135 | 8000 | hivemq4-1 |
 28136 | 80 | mqtt-ui |
 28137 | 9000 | portainer |
 28138 | 8080 | cadvisor | 
@@ -305,6 +315,26 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28204 | 8080 | keyclock |
 28205 | 10000 | dataiku-dss |
 28206 | 3000 | postgrest |
+28207 | 8080 | operate |
+28208 | 9000 | zeeqs |
+28209 | 8080 | hazelcast-mc |
+28210 | 9000 | pinot-controller |
+28211 | 8099 | pinot-broker-1 |
+28212 | 8098 | pinot-server-1 |
+28220 | 8000 | lakefs |
+28221 | 8081 | emqx-1 |
+28222 | 8083 | emqx-1 |
+28223 | 8084 | emqx-1 |
+28224 | 8883 | emqx-1 |
+28225 | 18083 | emqx-1 |
+28226 | 9000 | questdb |
+28227 | 8080 | debezium-ui |
+
+## Ports > 28500
+
+Container Port(s) | Internal Port(s)           | Service (alternatives) |
+--------------------|------------------|-----------------------|
 28500 - 28510 | 28500 - 28510 | streamsets-1 (additional ports) |
+28520 - 28600 | any | reserved for applications |
 
 An overview of the URL for the various web-based UIs can be found [here](./environment/README.md).

@@ -1,0 +1,1 @@
+Contains the server data folder of pinot service, if flag PINOT_volume_map_data is set to true.

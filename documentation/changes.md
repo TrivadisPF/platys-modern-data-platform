@@ -2,6 +2,63 @@
 
 See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/platys/blob/master/documentation/upgrade-platform-stack.md) for how to upgrade to newer version.
 
+## What's new in 1.12.0
+
+The Modern Data Platform version 1.12.0 contains the following new services and enhancements:
+
+### New Services
+
+ * Prometheus Nodeexporter
+ * Kafka Lag Exporter
+ * EventStore DB
+ * Camunda Zeebe + Operate + ZeeQs
+ * Hazelcast IMDG + Managment Center
+ * Apache Pinot
+ * LakeFS
+ * EMQ-X MQTT Broker
+ * QuestDB Timeseries DB
+ * Materialize
+ * Debezium UI
+ 
+### New Cookbook Recipes
+ 
+ * [Creating and visualizing ADRs with log4brains](../cookbooks/recipes/creating-adr-with-log4brains)
+ * [Using Dev Simulator Orgin to simulate streaming data](../cookbooks/recipes/using-dev-simulator-origin)
+ * [Using private (Trivadis) Oracle XE image](../cookbooks/recipes/using-private-oracle-xe-image)    
+ * [Using private (Trivadis) Oracle EE image](../cookbooks/recipes/using-private-oracle-ee-image)
+ * [Using public Oracle XE image](../cookbooks/recipes/using-public-oracle-xe-image)
+ 
+### Version upgrades  
+
+ * Update `Azkarra` to `0.9.1`
+ * Update `Hasura` to `v2.0.0-alpha.9`
+ * Update `Marquez` to `0.14.2` 
+ * Update `Grafana` to `7.5.2`
+ * Update `Axonserver` to `4.5`
+ * Update `Streamsheets` to `2.3-milestone`
+ * Update `Streamsets` to `3.22.2`
+ * Update `Trino` to `356`
+ * Update `Starburstdata Presto` to `356-e.1` (using new `starburst-enterprise` image)
+ * Update `PrestoDB` to `0.253`
+ * Update `Ahana` to `0.253`
+ * Update `DataHub` to `0.7.1`
+ * Update `InfluxDB2` to `2.0.4`
+ * Update `Telegraf` to `1.18`
+ * Update `MongoDB` to `4.4`
+ * Update `Elasticsearch` to `7.12.0`
+ * Update `Kibana` to `7.12.0`
+ * Update `Neo4J` to `4.2.5`
+ * Update `ksqlDB` to `0.17.0`
+ * Update `Druid`to `0.21.0`
+ * Update `HiveMQ 4` to `4.6.1`
+ * Update `Airflow` to `2`
+
+### Enhancements 
+  
+ * Added support for Kafka Monitoring using JMX and Prometheus/Grafana (with input from this [confluent github project](https://github.com/confluentinc/jmx-monitoring-stacks)
+ * use official Cloudbeaver docker image and no longer the trivadis one
+ * [solution documentend](https://github.com/TrivadisPF/platys/blob/master/documentation/docker-compose-without-internet.md) on how to use a Platys-generated Platform without internet on the target infrastructure
+ 
 ## What's new in 1.11.0
 
 The Modern Data Platform version 1.11.0 contains the following new services and enhancements:

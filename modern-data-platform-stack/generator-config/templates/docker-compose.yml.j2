@@ -14,6 +14,7 @@ networks:
 {% set __ZOONAVIGATOR_version = ZOONAVIGATOR_version | default('latest') -%}
 {% set __ZOONAVIGATOR_API_version = ZOONAVIGATOR_API_version | default('latest') -%}
 {% set __KAFKA_KSQLDB_version = KAFKA_KSQLDB_version | default('latest') -%}
+{% set __MATERIALIZE_version = MATERIALIZE_version | default('latest') -%}
 {% set __AZKARRA_version = AZKARRA_version | default('latest') -%}
 
 {% set __SCHEMA_REGISTRY_UI_version = SCHEMA_REGISTRY_UI_version | default('latest') -%}
@@ -22,6 +23,7 @@ networks:
 
 {% set __KAFKA_TOPICS_UI_version = KAFKA_TOPICS_UI_version | default('latest') -%}
 {% set __KAFKA_CONNECT_UI_version = KAFKA_CONNECT_UI_version | default('latest') -%}
+{% set __DEBEZIUM_UI_version = DEBEZIUM_UI_version | default('latest') -%}
 {% set __KAFKA_CMAK_version = KAFKA_CMAK_version | default('latest') -%}
 {% set __KAFKA_KAFDROP_version = KAFKA_KAFDROP_version | default('latest') -%}
 {% set __KAFKA_KADMIN_version = KAFKA_KADMIN_version | default('latest') -%}
@@ -29,6 +31,8 @@ networks:
 {% set __KAFKA_UI_version = KAFKA_UI_version | default('latest') -%}
 {% set __KAFKA_EAGLE_version = KAFKA_EAGLE_version | default('latest') -%}
 {% set __STREAMS_EXPLORER_version = STREAMS_EXPLORER_version | default('latest') -%}
+{% set __KAFKA_LAG_EXPORTER_version = KAFKA_LAG_EXPORTER_version | default('latest') -%}
+
 {% set __KAFKA_BURROW_version = KAFKA_BURROW_version | default('latest') -%}
 {% set __KAFKA_BURROW_UI_version = KAFKA_BURROW_UI_version | default('latest') -%}
 {% set __KAFKA_BURROW_DASHBOARD_version = KAFKA_BURROW_DASHBOARD_version | default('latest') -%}
@@ -153,12 +157,17 @@ networks:
 {% set __INFLUXDB2_version = INFLUXDB2_version | default('2.2.0-alpha') -%}
 {% set __INFLUXDB_UI_version = INFLUXDB_UI_version | default('latest') -%}
 
+{% set __QUESTDB_version = QUESTDB_version | default('latest') -%}
+
 {% set __KUDU_version = KUDU_version | default('latest') -%}
 
 {% set __DRUID_version = DRUID_version | default('latest') -%}
 
+{% set __PINOT_version = PINOT_version | default('latest') -%}
+
 {% set __PROMETHEUS_version = PROMETHEUS_version | default('latest') -%}
 {% set __PROMETHEUS_PUSHGATEWAY_version = PROMETHEUS_PUSHGATEWAY_version | default('latest') -%}
+{% set __PROMETHEUS_NODEEXPORTER_version = PROMETHEUS_NODEEXPORTER_version | default('latest') -%}
 
 {% set __TILE38_version = TILE38_version | default('latest') -%}
 
@@ -178,6 +187,10 @@ networks:
 {% set __QUIX_version = QUIX_version | default('latest') -%}
 
 {% set __AXON_version = AXON_version | default('latest') -%}
+{% set __EVENTSTORE_version = EVENTSTORE_version | default('latest') -%}
+
+{% set __HAZELCAST_IMDG_version = HAZELCAST_IMDG_version | default('latest') -%}
+{% set __HAZELCAST_MC_version = HAZELCAST_MC_version | default('latest') -%}
 
 {% set __TRINO_version = TRINO_version | default('latest') -%}
 {% set __STARBURSTDATA_version = STARBURSTDATA_version | default('latest') -%}
@@ -194,7 +207,10 @@ networks:
 {% set __MOSQUITTO_version = MOSQUITTO_version | default('latest') -%}
 {% set __HIVEMQ3_version = HIVEMQ3_version | default('latest') -%}
 {% set __HIVEMQ4_version = HIVEMQ4_version | default('latest') -%}
+{% set __EMQX_oss_version = EMQX_oss_version | default('latest') -%}
+{% set __EMQX_enterprise_version = EMQX_enterprise_version | default('latest') -%}
 {% set __HIVEMQ_MQTT_WEB_CLIENT_version = HIVEMQ_MQTT_WEB_CLIENT_version | default('latest') -%}
+
 {% set __CEDALO_MANAGEMENT_CENTER_version = CEDALO_MANAGEMENT_CENTER_version | default('latest') -%}
 
 {% set __THINGSBOARD_version = THINGSBOARD_version | default('latest') -%}
@@ -204,6 +220,10 @@ networks:
 
 {% set __FTP_PUREFTPD_version = FTP_PUREFTPD_version | default('latest') -%}
 {% set __FTP_FILEZILLA_version = FTP_FILEZILLA_version | default('latest') -%}
+
+{% set __CAMUNDA_ZEEBE_version = CAMUNDA_ZEEBE_version | default('latest') -%}
+{% set __CAMUNDA_OPERATE_version = CAMUNDA_OPERATE_version | default('latest') -%}
+{% set __CAMUNDA_ZEEQS_version = CAMUNDA_ZEEQS_version | default('latest') -%}
 
 {% set __PENTHAO_version = PENTHAO_version | default('latest') -%}
 
@@ -215,6 +235,9 @@ networks:
 {% set __S3MANAGER_version = S3MANAGER_version | default('latest') -%}
 {% set __FILESTASH_version = FILESTASH_version | default('latest') -%}
 {% set __AWSCLI_version = AWSCLI_version | default('latest') -%}
+
+{% set __LAKEFS_version = LAKEFS_version | default('latest') -%}
+
 {% set __CODE_SERVER_version = CODE_SERVER_version | default('latest') -%}
 {% set __FILE_BROWSER_version = FILE_BROWSER_version | default('latest') -%}
 {% set __VAULT_version = VAULT_version | default('latest') -%}
@@ -246,22 +269,28 @@ networks:
   {% set KAFKA_SCHEMA_REGISTRY_enable = true -%}
 {% endif -%}   {# DATAHUB_enable  #}
 
-{% if AZKARRA_enable -%}
+{% if AZKARRA_enable or PINOT_enable -%}
 # enforce some dependencies
   {% set KAFKA_enable = true -%}
 {% endif -%}   {# DATAHUB_enable  #}
 
-{% if KAFKA_enable or ATLAS_enable or DRILL_enable -%}
+{% if KAFKA_enable or ATLAS_enable or DRILL_enable or PINOT_enable -%}
 # enforce some dependencies
   {% set ZOOKEEPER_enable = true -%}
 {% endif -%}   {# KAFKA_enable or ATLAS_enable or DATAHUB_enable #}
+
+{% if KAFKA_jmx_monitoring_prometheus_enable -%}
+# enforce some dependencies
+  {% set PROMETHEUS_enable = true -%}
+  {% set GRAFANA_enable = true -%}
+{% endif -%}   {# KAFKA_jmx_monitoring_prometheus_enable #}
 
 {% if KAFKA_TOPICS_UI_enable -%}
 # enforce some dependencies
   {% set KAFKA_RESTPROXY_enable = true -%}
 {% endif -%}   {# KAFKA_TOPICS_UI_enable #}
 
-{% if KAFKA_KSQLDB_enable -%}
+{% if KAFKA_KSQLDB_enable and not external['SCHEMA_REGISTRY_url'] -%}
 # enforce some dependencies
   {% set KAFKA_SCHEMA_REGISTRY_enable = true -%}
 {% endif -%}   {# KAFKA_KSQLDB_enable #}
@@ -281,6 +310,11 @@ networks:
   {% set POSTGRESQL_enable = true -%}
 {% endif -%}   {# HASURA_enable #}
 
+{% if CAMUNDA_ZEEBE_enable -%}
+# enforce some dependencies
+  {% set ELASTICSEARCH_enable = true -%}
+{% endif -%}   {# CAMUNDA_ZEEBE_enable #}
+
 {% if MICROCKS_enable -%}
 # enforce some dependencies
   {% set KEYCLOCK_enable = true -%}
@@ -296,6 +330,7 @@ networks:
   {% set KAFKACAT_enable = false -%}
   {% set KAFKA_UI_enable = false -%}
   {% set KAFKA_EAGLE_enable = false -%}
+  {% set KAFKA_LAG_EXPORTER_enable = false -%}
   {% set HADOOP_enable = false -%}
   {% set SPARK_enable = false -%}
   {% set HIVE_enable = false -%}
@@ -329,6 +364,8 @@ networks:
   {% set ELASTICHQ_enable = false -%}
   {% set KIBANA_enable = false -%}
   {% set INFLUXDB2_enable = false -%}
+  {% set DRUID_enable = false -%}
+  {% set PINOT_enable = false -%}
   {% set NEO4J_enable = false -%}
   {% set DGRAPH_enable = false -%}
   {% set STARDOG_enable = false -%}
@@ -346,6 +383,7 @@ networks:
   {% set SQLPAD_enable = false -%}
   {% set QUIX_enable = false -%}
   {% set AXON_enable = false -%}
+  {% set EVENTSTORE_enable = false -%}
   {% set TRINO_enable = false -%}
   {% set TRINO_CLI_enable = false -%}
   {% set PRESTO_enable = false -%}
@@ -356,14 +394,19 @@ networks:
   {% set GRAPHQL_MESH_enable = false -%}
   {% set HIVEMQ3_enable = false -%}
   {% set HIVEMQ4_enable = false -%}
+  {% set EMQX_enable = false -%}
   {% set MQTT_UI_enable = false -%}
   {% set THINGSBOARD_enable = false -%}
   {% set ACTIVEMQ_enable = false -%}
   {% set FTP_enable = false -%}
+  {% set CAMUNDA_ZEEBE_enable = false -%}
+  {% set CAMUNDA_OPERATE_enable = false -%}
+  {% set CAMUNDA_ZEEQS_enable = false -%}
   {% set PENTHAO_enable = false -%}
   {% set MINIO_enable = false -%}
   {% set MINIO_MC_enable = false -%}
   {% set MINIO_CONSOLE_enable = false -%}
+  {% set LAKEFS_enable = false -%}
   {% set ADMINIO_UI_enable = false -%}
   {% set ADMINIO_API_enable = false -%}
   {% set FILESTASH_enable = false -%}
@@ -388,6 +431,11 @@ networks:
 {% set ns = namespace(bootstrapServers='') %}
 {% if (external['KAFKA_enable']) | default(false) %}
     {% set ns.bootstrapServers = external['KAFKA_bootstrap_servers'] %}
+    {% set ns.schemaRegistryUrl = external['SCHEMA_REGISTRY_url'] %}
+    {% set kafkaUsername = '${PLATYS_KAFKA_USERNAME:?PLATYS_KAFKA_USERNAME must be set either in .env or as an environment variable}' %}
+    {% set kafkaPassword = '${PLATYS_KAFKA_PASSWORD:?PLATYS_KAFKA_PASSWORD must be set either in .env or as an environment variable}' %}
+    {% set schemaRegistryUsername = '${PLATYS_SCHEMA_REGISTRY_USERNAME:?PLATYS_SCHEMA_REGISTRY_USERNAME must be set either in .env or as an environment variable}' %}
+    {% set schemaRegistryPassword = '${PLATYS_SCHEMA_REGISTRY_PASSWORD:?PLATYS_SCHEMA_REGISTRY_PASSWORD must be set either in .env or as an environment variable}' %}
 {% else %}
     {% for num in range(KAFKA_datacenters | default(1) ) %}
       {% set dcName = "dc" ~ loop.index%}
@@ -407,6 +455,7 @@ networks:
         {% endif %}
       {% endfor %}
     {% endfor %}
+    {% set ns.schemaRegistryUrl = 'http://schema-registry-1:8081' %}
 {% endif %}   {# external['KAFKA_enable'] #}
 
 {% if (external['S3_enable']) | default(false) %}
@@ -449,6 +498,9 @@ services:
     {% if ZOOKEEPER_nodes == 3 %}
       ZOOKEEPER_SERVERS: zookeeper-1:22888:23888;zookeeper-2:32888:33888;zookeeper-3:42888:43888
     {% endif %}
+    {% if KAFKA_jmx_monitoring_prometheus_enable %}
+      EXTRA_ARGS: -javaagent:/usr/share/jmx-exporter/jmx_prometheus_javaagent-0.12.0.jar=1234:/usr/share/jmx-exporter/zookeeper.yml
+    {% endif -%}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -458,6 +510,9 @@ services:
       - "./container-volume/zookeeper-{{loop.index}}/data:/var/lib/zookeeper/data"
       - "./container-volume/zookeeper-{{loop.index}}/log:/var/lib/zookeeper/log"
     {% endif %}
+    {% if KAFKA_jmx_monitoring_prometheus_enable %}
+      - ./scripts/kafka/jmx-exporter/:/usr/share/jmx-exporter
+    {% endif -%}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -597,6 +652,9 @@ services:
       KAFKA_JMX_PORT: {{portJMX}}
       KAFKA_JMX_OPTS: '-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.rmi.port={{portJMX}}'
       KAFKA_JMX_HOSTNAME: '${PUBLIC_IP:-127.0.0.1}'
+    {% if KAFKA_jmx_monitoring_prometheus_enable %}
+      EXTRA_ARGS: -javaagent:/usr/share/jmx-exporter/jmx_prometheus_javaagent-0.12.0.jar=1234:/usr/share/jmx-exporter/kafka_broker.yml
+    {% endif -%}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -605,6 +663,9 @@ services:
     {% if KAFKA_volume_map_data %}
       - "./container-volume/kafka-{{loop.index}}:/var/lib/kafka/data"
     {% endif %}
+    {% if KAFKA_jmx_monitoring_prometheus_enable %}
+      - ./scripts/kafka/jmx-exporter/:/usr/share/jmx-exporter
+    {% endif -%}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -640,11 +701,17 @@ services:
       SCHEMA_REGISTRY_KAFKASTORE_TOPIC_REPLICATION_FACTOR: {{KAFKA_SCHEMA_REGISTRY_replication_factor}}
       SCHEMA_REGISTRY_ACCESS_CONTROL_ALLOW_ORIGIN: '*'
       SCHEMA_REGISTRY_ACCESS_CONTROL_ALLOW_METHODS: 'GET,POST,PUT,OPTIONS'
+    {% if KAFKA_jmx_monitoring_prometheus_enable %}
+      EXTRA_ARGS: -javaagent:/usr/share/jmx-exporter/jmx_prometheus_javaagent-0.12.0.jar=1234:/usr/share/jmx-exporter/confluent_schemaregistry.yml
+    {% endif -%}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
+    {% if KAFKA_jmx_monitoring_prometheus_enable %}
+      - ./scripts/kafka/jmx-exporter/:/usr/share/jmx-exporter
+    {% endif -%}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -716,9 +783,9 @@ services:
       CONNECT_OFFSET_FLUSH_INTERVAL_MS: 10000
    {%if KAFKA_SCHEMA_REGISTRY_enable | default(false) %}
       CONNECT_KEY_CONVERTER: io.confluent.connect.avro.AvroConverter
-      CONNECT_KEY_CONVERTER_SCHEMA_REGISTRY_URL: 'http://schema-registry-1:8081'
+      CONNECT_KEY_CONVERTER_SCHEMA_REGISTRY_URL: '{{ns.schemaRegistryUrl}}'
       CONNECT_VALUE_CONVERTER: io.confluent.connect.avro.AvroConverter
-      CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL: 'http://schema-registry-1:8081'
+      CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL: '{{ns.schemaRegistryUrl}}'
    {% else %}
       CONNECT_KEY_CONVERTER: org.apache.kafka.connect.storage.StringConverter
       CONNECT_VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
@@ -739,6 +806,9 @@ services:
       # See https://docs.confluent.io/current/connect/security.html#externalizing-secrets
       CONNECT_CONFIG_PROVIDERS: '{{KAFKA_CONNECT_config_providers}}'
       CONNECT_CONFIG_PROVIDERS_{{KAFKA_CONNECT_config_providers | upper }}_CLASS: '{{KAFKA_CONNECT_config_providers_classes}}'
+    {% if KAFKA_jmx_monitoring_prometheus_enable %}
+      EXTRA_ARGS: -javaagent:/usr/share/jmx-exporter/jmx_prometheus_javaagent-0.12.0.jar=1234:/usr/share/jmx-exporter/kafka_connect.yml
+    {% endif -%}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -748,6 +818,9 @@ services:
     {%if KAFKA_CONNECT_map_settings_file | default(false) %}
       - ./conf.override/kafka-connect/settings.properties:/data/settings.properties
     {% endif -%}   {#  KAFKA_CONNECT_map_credentials_file #}
+    {% if KAFKA_jmx_monitoring_prometheus_enable %}
+      - ./scripts/kafka/jmx-exporter/:/usr/share/jmx-exporter
+    {% endif -%}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -790,8 +863,6 @@ services:
     ports:
       - "{{external_port}}:{{port}}"
       - "{{jmx_external_port}}:{{jmx_port}}"
-    depends_on:
-      - schema-registry-1
     environment:
       KSQL_LOG4J_ROOT_LOGLEVEL: INFO
       KSQL_LOG4J_OPTS: "-Dlog4j.configuration=file:/etc/ksqldb/log4j.properties"
@@ -814,15 +885,21 @@ services:
       KSQL_LISTENERS: http://0.0.0.0:{{port}}
       KSQL_BOOTSTRAP_SERVERS: '{{ns.bootstrapServers}}'
       KSQL_CACHE_MAX_BYTES_BUFFERING: 0
+      KSQL_RESPONSE_HTTP_HEADERS_CONFIG: '{{KAFKA_KSQLDB_response_http_headers_config}}'
+    {% if external['KAFKA_enable'] | default(false) %}
+      KSQL_SECURITY_PROTOCOL: SASL_SSL
+      KSQL_SASL_MECHANISM: PLAIN
+      KSQL_SASL_JAAS_CONFIG: org.apache.kafka.common.security.plain.PlainLoginModule required username="{{kafkaUsername}}" password="{{kafkaPassword}}";
+    {% endif -%}   {#  external['KAFKA_enable'] #}
 
-      #KSQL_SECURITY_PROTOCOL: SASL_SSL
-      #KSQL_SASL_MECHANISM: PLAIN
-      #KSQL_SASL_JAAS_CONFIG: org.apache.kafka.common.security.plain.PlainLoginModule required username="{{external['KAFKA_username']}}" password="{{external['KAFKA_password']}}";
     {% if ( KAFKA_CONNECT_enable ) | default(false) %}
       KSQL_KSQL_CONNECT_URL: http://kafka-connect-1:8083
     {% endif -%}   {#  KAFKA_CONNECT_enable #}
-      KSQL_KSQL_SCHEMA_REGISTRY_URL: "http://schema-registry-1:8081"
-
+      KSQL_KSQL_SCHEMA_REGISTRY_URL: '{{ns.schemaRegistryUrl}}'
+      KSQL_KSQL_SCHEMA_REGISTRY_BASIC_AUTH_CREDENTIALS_SOURCE: "USER_INFO"
+    {% if schemaRegistryUsername is defined and schemaRegistryUsername|length %}
+      KSQL_KSQL_SCHEMA_REGISTRY_BASIC_AUTH_USER_INFO:  "{{schemaRegistryUsername}}:{{schemaRegistryPassword}}"
+    {% endif %}
       KSQL_KSQL_INTERNAL_TOPIC_REPLICAS: {{KAFKA_KSQLDB_internal_replication_factor | default(1)}}
       KSQL_KSQL_STREAMS_REPLICATION_FACTOR: {{KAFKA_KSQLDB_internal_replication_factor | default(1)}}
       KSQL_KSQL_QUERY_PULL_METRICS_ENABLED: "true"
@@ -834,6 +911,7 @@ services:
       KSQL_KSQL_SUPPRESS_ENABLED: "{{KAFKA_KSQLDB_suppress_enabled | default(omit)}}"
       KSQL_KSQL_SUPPRESS_BUFFER_SIZE_BYTES: "{{KAFKA_KSQLDB_suppress_buffer_size_bytes | default(-1)}}"
 
+      KSQL_KSQL_QUERY_PULL_TABLE_SCAN_ENABLED: "{{KAFKA_KSQLDB_query_pull_table_scan_enabled | default(omit)}}"
       KSQL_CONFIG_DIR: "/etc/ksql"
       KSQL_KSQL_EXTENSION_DIR: '/etc/ksqldb/ext/'
 
@@ -841,12 +919,18 @@ services:
       KSQL_KSQL_QUERIES_FILE: "{{KAFKA_KSQLDB_queries_file}}"
     {% endif -%}   {#  KAFKA_KSQLDB_queries_file #}
       KSQL_JMX_OPTS: "-Djava.rmi.server.hostname=localhost -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port={{jmx_port}} -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.rmi.port={{jmx_port}}"
+    {% if KAFKA_jmx_monitoring_prometheus_enable %}
+      KSQL_OPTS: -javaagent:/usr/share/jmx-exporter/jmx_prometheus_javaagent-0.12.0.jar=1234:/usr/share/jmx-exporter/confluent_ksql.yml
+    {% endif -%}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
       - ./plugins/ksql:/etc/ksqldb/ext
+    {% if KAFKA_jmx_monitoring_prometheus_enable %}
+      - ./scripts/kafka/jmx-exporter/:/usr/share/jmx-exporter
+    {% endif -%}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -876,12 +960,35 @@ services:
     tty: true
 {% endif %}   {# KAFKA_broker_enable and KAFKA_KSQLDB_enable #}
 
+{% if (MATERIALIZE_enable) | default(false) %}
+  #  ================================== Azkarra Streams ========================================== #
+  materialize-1:
+    image: materialize/materialized:{{__MATERIALIZE_version}}
+    hostname: materialize-1
+    container_name: materialize-1
+    ports:
+      - "6875:6875"
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+{% endif %}   {# MATERIALIZE_enable #}
+
 {% if (AZKARRA_enable) | default(false) %}
   #  ================================== Azkarra Streams ========================================== #
   azkarra-worker-1:
     image: streamthoughts/azkarra-streams-worker:{{__AZKARRA_version}}
     hostname: azkarra-worker-1
     container_name: azkarra-worker-1
+    labels:
+      com.platys.restapi.title: 'Kafka REST Proxy'
+      com.platys.restapi.url: "http://${PUBLIC_IP}:28085"
     depends_on:
       - kafka-1
     ports:
@@ -915,13 +1022,19 @@ services:
     environment:
       KAFKA_REST_BOOTSTRAP_SERVERS: '{{ns.bootstrapServers}}'
       KAFKA_REST_LISTENERS: 'http://0.0.0.0:8086'
-      KAFKA_REST_SCHEMA_REGISTRY_URL: 'http://schema-registry-1:8081'
+      KAFKA_REST_SCHEMA_REGISTRY_URL: '{{ns.schemaRegistryUrl}}'
       KAFKA_REST_HOST_NAME: 'kafka-rest-1'
+    {% if KAFKA_jmx_monitoring_prometheus_enable %}
+      KAFKAREST_OPTS: -javaagent:/usr/share/jmx-exporter/jmx_prometheus_javaagent-0.12.0.jar=1234:/usr/share/jmx-exporter/confluent_rest.yml
+    {% endif -%}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
+    {% if KAFKA_jmx_monitoring_prometheus_enable %}
+      - ./scripts/kafka/jmx-exporter/:/usr/share/jmx-exporter
+    {% endif -%}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -978,7 +1091,7 @@ services:
       CONTROL_CENTER_KSQL_DEMO_URL: "http://ksql-server-1:8088"
       CONTROL_CENTER_KSQL_DEMO_ADVERTISED_URL: "http://${PUBLIC_IP}:8088"
   {% endif %}
-      CONTROL_CENTER_SCHEMA_REGISTRY_URL: "http://schema-registry-1:8081"
+      CONTROL_CENTER_SCHEMA_REGISTRY_URL: '{{ns.schemaRegistryUrl}}'
       CONTROL_CENTER_REPLICATION_FACTOR: {{KAFKA_internal_replication_factor | default(1)}}
       CONTROL_CENTER_INTERNAL_TOPICS_PARTITIONS: {{KAFKA_internal_replication_factor | default(1)}}
       CONTROL_CENTER_MONITORING_INTERCEPTOR_TOPIC_PARTITIONS: {{KAFKA_internal_replication_factor | default(1)}}
@@ -1015,9 +1128,9 @@ services:
       CONNECT_OFFSET_STORAGE_TOPIC: _replicator-offsets
       CONNECT_STATUS_STORAGE_TOPIC: _replicator-status
       CONNECT_KEY_CONVERTER: io.confluent.connect.avro.AvroConverter
-      CONNECT_KEY_CONVERTER_SCHEMA_REGISTRY_URL: 'http://schema-registry-1:8081'
+      CONNECT_KEY_CONVERTER_SCHEMA_REGISTRY_URL: '{{ns.schemaRegistryUrl}}'
       CONNECT_VALUE_CONVERTER: io.confluent.connect.avro.AvroConverter
-      CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL: 'http://schema-registry-1:8081'
+      CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL: '{{ns.schemaRegistryUrl}}'
       CONNECT_INTERNAL_KEY_CONVERTER: 'org.apache.kafka.connect.json.JsonConverter'
       CONNECT_INTERNAL_VALUE_CONVERTER: 'org.apache.kafka.connect.json.JsonConverter'
       CONNECT_LOG4J_ROOT_LOGLEVEL: 'INFO'
@@ -1068,7 +1181,7 @@ services:
   schema-registry-ui:
     image: landoop/schema-registry-ui:{{__SCHEMA_REGISTRY_UI_version}}
     container_name: schema-registry-ui
-    hostname: schema-registry-ui
+    hostname: sc  hema-registry-ui
     labels:
       com.platys.webui.title: 'Confluent Schema Registry UI'
       com.platys.webui.url: "http://${PUBLIC_IP}:28102"
@@ -1152,6 +1265,31 @@ services:
     {% endif -%}   {#  use_timezone #}
     restart: {{container_restart_policy}}
 {% endif %}   {# KAFKA_enable and KAFKA_CONNECT_UI_enable #}
+
+{% if ((KAFKA_enable or external['KAFKA_enable']) and KAFKA_CONNECT_enable and DEBEZIUM_UI_enable) | default(false) %}
+  #  ================================== Kafka Connect UI ========================================== #
+  debezium-ui:
+    image: debezium/debezium-ui:{{__DEBEZIUM_UI_version}}
+    container_name: debezium-ui
+    hostname: debezium-ui
+    labels:
+      com.platys.webui.title: 'Debezium UI'
+      com.platys.webui.url: "http://${PUBLIC_IP}:28227"
+    ports:
+      - "28227:8080"
+    environment:
+      KAFKA_CONNECT_URI: "http://${PUBLIC_IP}:8083/,http://${PUBLIC_IP}:8084/"
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+{% endif %}   {# KAFKA_enable and DEBEZIUM_UI_enable #}
 
 {% if ((KAFKA_enable or external['KAFKA_enable']) and KAFKA_CMAK_enable) | default(false) %}
   #  ================================== Cluster Manager for Apache Kafka (CMAK) ========================================== #
@@ -1367,6 +1505,27 @@ services:
     {% endif -%}   {#  use_timezone #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  KAFKA_enable and STREAMS_EXPLORER_enable #}
+
+{% if ((KAFKA_enable or external['KAFKA_enable']) and KAFKA_LAG_EXPORTER_enable) | default(false) %}
+  #  ================================== Kafka Lag Exporter ========================================== #
+  kafka-lag-exporter:
+    image: lightbend/kafka-lag-exporter:{{__KAFKA_LAG_EXPORTER_version}}
+    container_name: kafka-lag-exporter
+    hostname: kafka-lag-exporter
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./scripts/kafka/kafka-lag-exporter:/opt/docker/conf
+#      - $MONITORING_STACK/assets/prometheus/security:/etc/kafka/secrets
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  KAFKA_enable and KAFKA_LAG_EXPORTER_enable #}
 
 {% if ((KAFKA_enable or external['KAFKA_enable']) and KAFKA_BURROW_enable) | default(false) %}
   burrow:
@@ -2890,10 +3049,12 @@ services:
   {% endfor %}
     environment:
       SDC_OFFSET_DIRECTORY: /data/custom-offset-el
+    {%if __STREAMSETS_version >= '3.19.1' %}
       SDC_INSTALL_STAGES: "{{STREAMSETS_stage_libs}}"
       SDC_INSTALL_ENTERPRISE_STAGES: "{{STREAMSETS_enterprise_stage_libs}}"
-    {%if STREAMSETS_install_pipelines is defined and STREAMSETS_install_pipelines | default(false) %}
+      {%if STREAMSETS_install_pipelines is defined and STREAMSETS_install_pipelines | default(false) %}
       SDC_INSTALL_PIPELINES_FROM: '/tmp/pipelines'
+      {% endif %}
     {% endif %}
       SDC_JAVA_OPTS: "-Xmx2g -Xms2g"
       SDC_JAVA8_OPTS: "-XX:+UseG1GC"
@@ -3206,6 +3367,13 @@ services:
 {% endif %}   {#  SPRING_DATAFLOW_enable #}
 
 {%if AIRFLOW_enable | default(false) %}
+  {% if (AIRFLOW_executor | lower) == 'celery'  %}
+     {% set airflow_executor = "CeleryExecutor" %}
+  {% elif (AIRFLOW_executor | lower) == 'sequential' %}
+     {% set airflow_executor = "SequentialExecutor" %}
+  {% else %}
+     {% set airflow_executor = "LocalExecutor" %}
+  {% endif -%}
   #  ================================== Airflow ========================================== #
   airflow:
     image: bitnami/airflow:{{__AIRFLOW_version}}
@@ -3219,17 +3387,20 @@ services:
     ports:
       - "28139:8080"
     environment:
-      - AIRFLOW_HOME=/opt/bitnami/airflow
-      - AIRFLOW_EXECUTOR=LocalExecutor
-      - AIRFLOW_FERNET_KEY=46BKJoQYlPPOexq0OhDZnIlNepKFf87WFwLbfzqDDho=
-      - AIRFLOW_DATABASE_HOST=airflow-db
       - AIRFLOW_DATABASE_NAME=bitnami_airflow
-      - AIRFLOW_DATABASE_PORT_NUMBER=5432
       - AIRFLOW_DATABASE_USERNAME=bn_airflow
       - AIRFLOW_DATABASE_PASSWORD=abc123!
+      - AIRFLOW_DATABASE_HOST=airflow-db
+      - AIRFLOW_DATABASE_PORT_NUMBER=5432
+      - REDIS_HOST=airflow-redis
+      - REDIS_PORT_NUMBER=6379
+      - AIRFLOW_EXECUTOR={{airflow_executor}}
+      - AIRFLOW_FERNET_KEY=46BKJoQYlPPOexq0OhDZnIlNepKFf87WFwLbfzqDDho=
+      - AIRFLOW_HOME=/opt/bitnami/airflow
       - AIRFLOW_LOAD_EXAMPLES={{ 'yes' if (AIRFLOW_provision_examples ) else 'no' }}
       - AIRFLOW_PASSWORD=abc123!
       - AIRFLOW_USERNAME=airflow
+      - PYTHONPATH=/bitnami/python
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -3237,6 +3408,10 @@ services:
       - ./data-transfer:/data-transfer
       - ./scripts/airflow/dags:/opt/bitnami/airflow/dags:Z
       - ./plugins/airflow/:/opt/bitnami/airflow/plugins:Z
+    {%if AIRFLOW_volume_map_python | default(false) %}
+      - ./scripts/airflow/python-requirements:/bitnami/python-requirements:Z
+      - ./scripts/airflow/python:/bitnami/python:Z
+    {% endif -%}   {#  AIRFLOW_volume_map_python #}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -3248,17 +3423,20 @@ services:
     container_name: airflow-scheduler
     hostname: airflow-scheduler
     environment:
-      - AIRFLOW_HOME=/opt/bitnami/airflow
-      - AIRFLOW_EXECUTOR=LocalExecutor
-      - AIRFLOW_FERNET_KEY=46BKJoQYlPPOexq0OhDZnIlNepKFf87WFwLbfzqDDho=
-      - AIRFLOW_DATABASE_HOST=airflow-db
       - AIRFLOW_DATABASE_NAME=bitnami_airflow
-      - AIRFLOW_DATABASE_PORT_NUMBER=5432
       - AIRFLOW_DATABASE_USERNAME=bn_airflow
       - AIRFLOW_DATABASE_PASSWORD=abc123!
+      - AIRFLOW_DATABASE_HOST=airflow-db
+      - AIRFLOW_DATABASE_PORT_NUMBER=5432
+      - REDIS_HOST=airflow-redis
+      - REDIS_PORT_NUMBER=6379
+      - AIRFLOW_EXECUTOR={{airflow_executor}}
+      - AIRFLOW_WEBSERVER_HOST=airflow
+      - AIRFLOW_WEBSERVER_PORT_NUMBER=8080
       - AIRFLOW_LOAD_EXAMPLES={{ 'yes' if (AIRFLOW_provision_examples ) else 'no' }}
-      - AIRFLOW_PASSWORD=abc123!
-      - AIRFLOW_USERNAME=airflow
+      - AIRFLOW_HOME=/opt/bitnami/airflow
+      - AIRFLOW_FERNET_KEY=46BKJoQYlPPOexq0OhDZnIlNepKFf87WFwLbfzqDDho=
+      - PYTHONPATH=/bitnami/python
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -3266,11 +3444,70 @@ services:
       - ./data-transfer:/data-transfer
       - ./scripts/airflow/dags:/opt/bitnami/airflow/dags:Z
       - ./plugins/airflow/:/opt/bitnami/airflow/plugins:Z
+    {%if AIRFLOW_volume_map_python | default(false) %}
+      - ./scripts/airflow/python-requirements:/bitnami/python-requirements:Z
+      - ./scripts/airflow/python:/bitnami/python:Z
+    {% endif -%}   {#  AIRFLOW_volume_map_python #}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
     restart: {{container_restart_policy}}
+
+  {% if (AIRFLOW_executor | lower) == 'celery'  %}
+  airflow-worker-1:
+    image: bitnami/airflow-worker:{{__AIRFLOW_version}}
+    container_name: airflow-worker-1
+    hostname: airflow-worker-1
+    environment:
+      - AIRFLOW_DATABASE_NAME=bitnami_airflow
+      - AIRFLOW_DATABASE_USERNAME=bn_airflow
+      - AIRFLOW_DATABASE_PASSWORD=abc123!
+      - AIRFLOW_DATABASE_HOST=airflow-db
+      - AIRFLOW_DATABASE_PORT_NUMBER=5432
+      - REDIS_HOST=airflow-redis
+      - REDIS_PORT_NUMBER=6379
+      - AIRFLOW_EXECUTOR={{airflow_executor}}
+      - AIRFLOW_WEBSERVER_HOST=airflow
+      - AIRFLOW_WEBSERVER_PORT_NUMBER=8080
+      - AIRFLOW_LOAD_EXAMPLES={{ 'yes' if (AIRFLOW_provision_examples ) else 'no' }}
+      - AIRFLOW_HOME=/opt/bitnami/airflow
+      - AIRFLOW_FERNET_KEY=46BKJoQYlPPOexq0OhDZnIlNepKFf87WFwLbfzqDDho=
+      - PYTHONPATH=/bitnami/python
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./scripts/airflow/dags:/opt/bitnami/airflow/dags:Z
+      - ./plugins/airflow/:/opt/bitnami/airflow/plugins:Z
+    {%if AIRFLOW_volume_map_python | default(false) %}
+      - ./scripts/airflow/python-requirements:/bitnami/python-requirements:Z
+      - ./scripts/airflow/python:/bitnami/python:Z
+    {% endif -%}   {#  AIRFLOW_volume_map_python #}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+
+  airflow-redis:
+    image: bitnami/redis:6.0
+    container_name: airflow-redis
+    hostname: airflow-redis
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+  {% endif %}  {#  AIRFLOW_executor  #}
 
   airflow-db:
     image: 'bitnami/postgresql:10'
@@ -3369,7 +3606,7 @@ services:
       ZEPPELIN_SPARK_MASTER: "spark://spark-master:7077"
       ZEPPELIN_NOTEBOOK_CRON_ENABLE: '{{ZEPPELIN_notebook_cron_enable}}'
       PYSPARK_PYTHON: "python3"
-      SPARK_SUBMIT_OPTIONS: "--conf spark.ui.port=4050 --conf spark.driver.host=${DOCKER_HOST_IP} --conf spark.driver.port=5050 --conf spark.driver.bindAddress=0.0.0.0 --conf spark.blockManager.port=6060 --conf spark.driver.extraJavaOptions=-Dcom.amazonaws.services.s3.enableV4 --conf spark.executor.extraJavaOptions=-Dcom.amazonaws.services.s3.enableV4"
+      SPARK_SUBMIT_OPTIONS: "{{ZEPPELIN_spark_submit_options}} --conf spark.ui.port=4050 --conf spark.driver.host=${DOCKER_HOST_IP} --conf spark.driver.port=5050 --conf spark.driver.bindAddress=0.0.0.0 --conf spark.blockManager.port=6060 --conf spark.driver.extraJavaOptions=-Dcom.amazonaws.services.s3.enableV4 --conf spark.executor.extraJavaOptions=-Dcom.amazonaws.services.s3.enableV4"
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -3461,8 +3698,10 @@ services:
     ports:
       - "3000:3000"
     environment:
+      - GF_INSTALL_PLUGINS=grafana-piechart-panel
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD={{admin_password}}
+      - GF_USERS_ALLOW_SIGN_UP=false
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -4726,6 +4965,37 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {# INFLUXDB2_enable #}
 
+{% if QUESTDB_enable | default(false) %}
+  #  ================================== QuestDB Timeseries ========================================== #
+  questdb:
+    image: questdb/questdb:{{__QUESTDB_version}}
+    container_name: questdb
+    hostname: questdb
+    labels:
+      com.platys.webui.title: "QuestDB Web Console"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28226"
+      com.platys.restapi.title: "QuestDB Rest API"
+      com.platys.restapi.url: "http://${PUBLIC_IP}:28226"
+    ports:
+      - "28226:9000"
+      - "8812:8812"
+      - "9009:9009"
+    {%if use_timezone | default(false) %}
+    evironment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {% if QUESTDB_volume_map_data %}
+      - "./container-volume/questdb/data:/root/.questdb/db"
+    {% endif %}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  QUESTDB_enable #}
+
 {% if KUDU_enable | default(false) %}
   kudu-master-1:
     image: apache/kudu:{{__KUDU_version}}
@@ -4777,7 +5047,7 @@ services:
 {% endif %}   {# KUDU_enable #}
 
 {% if DRUID_enable | default(false) %}
-  #  ================================== InfluxDB 2 ========================================== #
+  #  ================================== Druid ========================================== #
   {% if (DRUID_edition| lower) == 'oss-sandbox' | default(false) %}
   druid-sandbox:
     image: fokkodriesprong/docker-druid:{{__DRUID_version}}
@@ -4962,6 +5232,77 @@ services:
   {% endif %}   {# DRUID_edition #}
 {% endif %}   {# DRUID_enable #}
 
+{% if PINOT_enable | default(false) %}
+  #  ================================== Pinot ========================================== #
+  pinot-controller:
+    image: apachepinot/pinot:{{__PINOT_version}}
+    hostname: pinot-controller
+    container_name: pinot-controller
+    labels:
+      com.platys.webui.title: "Pinot Console UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28210"
+    ports:
+      - "28210:9000"
+    volumes:
+      - ./data-transfer:/data-transfer
+    {% if PINOT_volume_map_data %}
+      - ./container-volume/pinot/controller:/tmp/data/controller
+    {% endif -%}   {#  PINOT_volume_map_data #}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    command: StartController -zkAddress zookeeper-1:2181
+    restart: {{container_restart_policy}}
+
+  pinot-broker-1:
+    image: apachepinot/pinot:{{__PINOT_version}}
+    hostname: pinot-broker-1
+    container_name: pinot-broker-1
+    depends_on:
+      - pinot-controller
+    ports:
+      - "28211:8099"
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    command: StartBroker -zkAddress zookeeper-1:2181
+    restart: {{container_restart_policy}}
+
+  {% for num in range(PINOT_servers | default(1) ) %}
+  pinot-server-{{loop.index}}:
+    image: apachepinot/pinot:{{__PINOT_version}}
+    hostname: pinot-server-{{loop.index}}
+    container_name: pinot-server-{{loop.index}}
+    depends_on:
+      - pinot-controller
+#    ports:
+#      - "28212:8098"
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {% if PINOT_volume_map_data %}
+      - ./container-volume/pinot/server:/tmp/data/server
+    {% endif -%}   {#  PINOT_volume_map_data #}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    command: StartServer -zkAddress zookeeper-1:2181
+    restart: {{container_restart_policy}}
+  {% endfor %}
+{% endif %}   {# PINOT_enable #}
+
 {% if PROMETHEUS_enable | default(false) %}
   #  ================================== Prometheus ========================================== #
   prometheus-1:
@@ -5017,6 +5358,29 @@ services:
     restart: {{container_restart_policy}}
   {% endif %}   {#  PROMETHEUS_PUSHGATEWAY_enable #}
 
+  {% if PROMETHEUS_NODEEXPORTER_enable | default(false) %}
+  prometheus-nodeexporter:
+    image: prom/node-exporter:{{__PROMETHEUS_NODEEXPORTER_version}}
+    container_name: prometheus-nodeexporter
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./container-volume/prometheus/proc:/host/proc:ro
+      - ./container-volume/prometheus/sys:/host/sys:ro
+      - ./:/rootfs:ro
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    command:
+      - "--path.procfs=/host/proc"
+      - "--path.sysfs=/host/sys"
+      - "--collector.filesystem.ignored-mount-points"
+      - "^(aufs|proc|nsfs|shm|cgroup|tmpfs|binfmt_misc|debugfs|devpts|fusectl|hugetlbfs|fuse.lxcfs|mqueue|pstore|securityfs|sysfs|autofs|devtmpfs|configfs)"
+  {% endif %}   {#  PROMETHEUS_NODEEXPORTER_enable #}
 {% endif %}   {#  PROMETHEUS_enable #}
 
 {% if TILE38_enable | default(false) %}
@@ -5137,18 +5501,22 @@ services:
   #  ================================== Oracle ========================================== #
   {% if (ORACLE_edition | lower) == 'xe' | default(true) %}
   oracledb:
+{% if ORACLE_xe_docker_image is defined and ORACLE_xe_docker_image | length %}
+    image: {{ORACLE_xe_docker_image}}:{{__ORACLE_XE_version}}
+{% else %}
     image: {{private_docker_repository_name}}/ora_db:{{__ORACLE_XE_version}}
+{% endif %}
     container_name: oracledb
     hostname: oracledb
     labels:
       com.platys.webui.title: "Oracle UI"
-      com.platys.webui.url: "http://${PUBLIC_IP}:28152"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28152/ords"
     ports:
       - "1521:1521"
       - "28152:8080"
       - "5500:5500"
     environment:
-      ORACLE_PWD: abc123!
+      ORACLE_PWD: {{ORACLE_password}}
       ORACLE_CHARACTERSET: AL32UTF8
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
@@ -5156,7 +5524,7 @@ services:
     volumes:
       - ./data-transfer:/data-transfer
     {% if ORACLE_volume_map_data %}
-      - ./container-volume/oracle/data:/opt/oracle/oradata:Z
+      - ./container-volume/oracle/data:/opt/oracle/oradata
     {% endif %}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
@@ -5172,27 +5540,28 @@ services:
     hostname: oracledb
     labels:
       com.platys.webui.title: "Oracle UI"
-      com.platys.webui.url: "http://${PUBLIC_IP}:28152"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28152/ords"
     ports:
       - "1521:1521"
       - "28152:8080"
       - "5500:5500"
     environment:
-      CONTAINER: 'TRUE'
+      CONTAINER: '{{ORACLE_container_enable}}'
       ORACLE_SID: ORCLCDB
       ORACLE_PDB: ORCLPDB1
-      ORACLE_PWD: abc123!
+      ORACLE_PWD: {{ORACLE_password}}
       ORACLE_CHARACTERSET: AL32UTF8
+      INSTANCE_INIT: '/u01/config'
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
     {% if ORACLE_volume_map_data %}
-      - ./container-volume/oracle/data:/opt/oracle/oradata:Z
+      - ./container-volume/oracle/data:/u01
     {% endif %}
-      - ./init/oracle/startup:/opt/oracle/scripts/startup
-      - ./init/oracle/setup:/opt/oracle/scripts/setup
+      - ./init/oracle/startup:/u01/config/startup
+      - ./init/oracle/setup:/u01/config/setup
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -5207,7 +5576,7 @@ services:
     hostname: oracle-rest-1
     labels:
       com.platys.restapi.title: "ORDS Rest API"
-      com.platys.restapi.url: "http://${PUBLIC_IP}:28153"
+      com.platys.restapi.url: "http://${PUBLIC_IP}:28153/ords"
     ports:
       - "28153:8888"
     environment:
@@ -5394,7 +5763,7 @@ services:
 {% if CLOUDBEAVER_enable | default(false) %}
   #  ================================== Cloudbeaver ========================================== #
   cloudbeaver:
-    image: trivadis/cloudbeaver:{{__CLOUDBEAVER_version}}
+    image: dbeaver/cloudbeaver:{{__CLOUDBEAVER_version}}
     container_name: cloudbeaver
     hostname: cloudbeaver
     labels:
@@ -5408,6 +5777,9 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
+    {% if CLOUDBEAVER_volume_map_workspace %}
+      - "./container-volume/cloudbeaver/workspace:/opt/cloudbeaver/workspace"
+    {% endif %}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -5466,7 +5838,11 @@ services:
     environment:
       MODULES: presto
       MODULES_PRESTO_ENGINE: presto
+    {% if TRINO_enable | default(false) %}
+      MODULES_PRESTO_API: http://trino-1:8080/v1
+    {% else -%}   {#  TRINO_enable #}
       MODULES_PRESTO_API: http://presto-1:8080/v1
+    {% endif -%}   {#  TRINO_enable #}
       MODULES_PRESTO_CATALOG: system
       MODULES_PRESTO_SCHEMA: runtime
       MODULES_PRESTO_SOURCE: quix
@@ -5529,6 +5905,59 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {#  QUIX_enable #}
 
+{% if HAZELCAST_IMDG_enable | default(false) %}
+  #  ================================== Hazelcast IMDG ========================================== #
+  {% for num in range(HAZELCAST_IMDG_nodes | default(1) ) %}
+    {% set port = 5701 %}
+    {% set external_port = 5701 + loop.index - 1 %}
+  hazelcast-{{loop.index}}:
+    image: hazelcast/hazelcast:{{__HAZELCAST_IMDG_version}}
+    container_name: hazelcast-{{loop.index}}
+    hostname: hazelcast-{{loop.index}}
+    ports:
+      - "{{external_port}}:{{port}}"
+    environment:
+      - LOGGING_LEVEL=INFO
+      - HZ_NETWORK_PUBLICADDRESS=${DOCKER_HOST_IP}:{{external_port}}
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+  {% endfor %}
+
+  {% if HAZELCAST_MC_enable | default(false) %}
+  hazelcast-mc:
+    image: hazelcast/management-center:{{__HAZELCAST_MC_version}}
+    container_name: hazelcast-mc
+    hostname: hazelcast-mc
+    labels:
+      com.platys.webui.title: "Hazelcast Mangement Center UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28209"
+    ports:
+      - 28209:8080
+    environment:
+      - LOGGING_LEVEL=INFO
+#      - MC_INIT_CMD="/opt/hazelcast/management-center/bin/mc-conf.sh cluster add -cn='my-cluster' -ma='hazelcast-1'"
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+#    command: bash -c "set -euo pipefail && /opt/hazelcast/management-center/bin/mc-conf.sh cluster add --cluster-name='my-cluster' --member-addresses='hazelcast-1' && /opt/hazelcast/management-center/bin/mc-start.sh"
+    restart: {{container_restart_policy}}
+  {% endif %}   {#  HAZELCAST_MC_enable #}
+{% endif %}   {#  HAZELCAST_IMDG_enable #}
+
 {% if AXON_enable | default(false) %}
   #  ================================== Axon Server ========================================== #
   axon-server:
@@ -5559,11 +5988,44 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {#  AXON_enable #}
 
+{% if EVENTSTORE_enable | default(false) %}
+  #  ================================== Axon Server ========================================== #
+  eventstore:
+    image: eventstore/eventstore:{{__EVENTSTORE_version}}
+    container_name: eventstore
+    hostname: eventstore
+    labels:
+      com.platys.webui.title: "EventStore UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:2113"
+    ports:
+      - "1113:1113"
+      - "2113:2113"
+    environment:
+      - EVENTSTORE_CLUSTER_SIZE=1
+      - EVENTSTORE_RUN_PROJECTIONS=All
+      - EVENTSTORE_START_STANDARD_PROJECTIONS=true
+      - EVENTSTORE_EXT_TCP_PORT=1113
+      - EVENTSTORE_EXT_HTTP_PORT=2113
+      - EVENTSTORE_INSECURE=true
+      - EVENTSTORE_ENABLE_EXTERNAL_TCP=true
+      - EVENTSTORE_ENABLE_ATOM_PUB_OVER_HTTP=true
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  enable #}
+
 {% if TRINO_enable | default(false) %}
   #  ================================== Trino ========================================== #
   trino-1:
   {% if (TRINO_edition | lower) == 'starburstdata'  %}
-    image: starburstdata/presto:{{__STARBURSTDATA_version}}
+    image: starburstdata/starburst-enterprise:{{__STARBURSTDATA_version}}
     {% set trino_etc_dir = '/usr/lib/presto/etc' %}
     {% set conf_dir = 'starburstdata' %}
   {% elif (TRINO_edition | lower) == 'oss' %}
@@ -5585,13 +6047,15 @@ services:
       S3_AWS_SECRET_KEY: {{s3SecretAccessKey}}
       S3_PATH_STYLE_ACCESS: '{{s3PathStyleAccess}}'
   {% endif %}
-  {% if (KAFKA_enable or external['KAFKA_enable']) | default(false) %}
+  {% if TRINO_kafka_table_names is defined and TRINO_kafka_table_names|length and (KAFKA_enable or external['KAFKA_enable']) | default(false)  %}
       KAFKA_TABLE_NAMES: {{TRINO_kafka_table_names}}
   {% endif %}
   {% if POSTGRESQL_enable | default(false) %}
       POSTGRESQL_USER: {{POSTGRESQL_user | default('demo') }}
       POSTGRESQL_PASSWORD: {{POSTGRESQL_password | default('abc123!') }}
   {% endif %}
+      # this is only generated to keep the structure valid if no other env variables are present
+      IGNORE: ignore
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -5606,7 +6070,7 @@ services:
   {%if MINIO_enable or external['S3_enable'] | default(false) %}
       - './conf/{{conf_dir}}/catalog/minio.properties:{{trino_etc_dir}}/catalog/minio.properties'
   {% endif %}
-  {%if KAFKA_enable or external['KAFKA_enable'] | default(false) %}
+  {% if TRINO_kafka_table_names is defined and TRINO_kafka_table_names|length and (KAFKA_enable or external['KAFKA_enable']) | default(false)  %}
       - './conf/{{conf_dir}}/catalog/kafka.properties:{{trino_etc_dir}}/catalog/kafka.properties'
       - './conf/{{conf_dir}}/kafka/:{{trino_etc_dir}}/kafka/'
   {% endif %}
@@ -6149,6 +6613,42 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {#  AWSCLI_enable #}
 
+
+{% if LAKEFS_enable | default(false) %}
+  #  ================================== LakeFS ========================================== #
+  lakefs:
+    image: treeverse/lakefs:{{__LAKEFS_version}}
+    container_name: lakefs
+    hostname: lakefs
+    ports:
+      - 28220:8000
+    environment:
+      LAKEFS_AUTH_ENCRYPT_SECRET_KEY: ${LAKEFS_AUTH_ENCRYPT_SECRET_KEY:-some random secret string}
+      LAKEFS_DATABASE_CONNECTION_STRING: ${LAKEFS_DATABASE_CONNECTION_STRING:-postgres://lakefs:lakefs@postgres/postgres?sslmode=disable}
+      LAKEFS_BLOCKSTORE_TYPE: ${LAKEFS_BLOCKSTORE_TYPE:-local}
+      LAKEFS_BLOCKSTORE_LOCAL_PATH: ${LAKEFS_BLOCKSTORE_LOCAL_PATH:-/home/lakefs}
+      LAKEFS_GATEWAYS_S3_DOMAIN_NAME: ${LAKEFS_GATEWAYS_S3_DOMAIN_NAME:-s3.local.lakefs.io:8000}
+      LAKEFS_BLOCKSTORE_S3_CREDENTIALS_ACCESS_KEY_ID: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
+      LAKEFS_BLOCKSTORE_S3_CREDENTIALS_ACCESS_SECRET_KEY: ${PLATYS_AWS_SECRET_ACCESS_KEY:-{{MINIO_secret_key}}}
+      LAKEFS_LOGGING_LEVEL: ${LAKEFS_LOGGING_LEVEL:-INFO}
+      LAKEFS_STATS_ENABLED: 'true'
+      LAKEFS_BLOCKSTORE_S3_ENDPOINT: {{ (s3Endpoint | replace('http://','')) if s3Endpoint is defined and s3Endpoint else omit}}
+      LAKEFS_BLOCKSTORE_S3_REGION: {{s3DefaultRegion if s3DefaultRegion is defined and s3DefaultRegion else omit}}
+      LAKEFS_BLOCKSTORE_S3_FORCE_PATH_STYLE: '{{s3PathStyleAccess}}'
+      LAKEFS_COMMITTED_LOCAL_CACHE_DIR: ${LAKEFS_COMMITTED_LOCAL_CACHE_DIR:-/home/lakefs/.local_tier}
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    entrypoint: ["/app/wait-for", "postgres-1:5432", "--", "/app/lakefs", "run"]
+    restart: {{container_restart_policy}}
+{% endif %}   {#  LAKEFS_enable #}
+
 {% if MOSQUITTO_enable | default(false) %}
   #  ================================== Mosquitto ========================================== #
     {% for num in range(MOSQUITTO_nodes | default(1) ) %}
@@ -6185,9 +6685,13 @@ services:
     image: hivemq/hivemq3:{{__HIVEMQ3_version}}
     hostname: hivemq3-1
     container_name: hivemq3-1
+    labels:
+      com.platys.webui.title: "HiveMQ 3 WebUI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28132"
     ports:
       - "1886:1883"
       - "28132:8080"
+      - "28133:8000"
     {%if use_timezone | default(false) %}
     environment:
       TZ: {{use_timezone}}
@@ -6207,11 +6711,17 @@ services:
     image: hivemq/hivemq4:{{__HIVEMQ4_version}}
     hostname: hivemq4-1
     container_name: hivemq4-1
+    labels:
+      com.platys.webui.title: "HiveMQ 4 WebUI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28134"
     ports:
       - "1888:1883"
       - "28134:8080"
-    {%if use_timezone | default(false) %}
+      - "28135:8000"
     environment:
+#      HIVEMQ_LICENSE:
+      HIVEMQ_LOG_LEVEL: INFO
+    {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
@@ -6222,6 +6732,44 @@ services:
     {% endif -%}   {#  use_timezone #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  HIVEMQ4_enable #}
+
+{% if EMQX_enable | default(false) %}
+  #  ================================== EMQX ========================================== #
+  emqx-1:
+  {% if (EMQX_edition | lower) == 'oss' %}
+    image: emqx/emqx:{{__EMQX_oss_version}}
+  {% else -%}   {#  EMQX_edition #}
+    image: emqx/emqx-ee:{{__EMQX_enterprise_version}}
+  {% endif -%}   {#  EMQX_edition #}
+    hostname: emqx-1
+    container_name: emqx-1
+    labels:
+      com.platys.webui.title: "EMQX WebUI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28225"
+      com.platys.restapi.title: "EMQX REST API"
+      com.platys.restapi.url: "http://${PUBLIC_IP}:28225/api/v4/"
+    ports:
+      - "1891:1883"
+      - "28221:8081"
+      - "28222:8083"
+      - "28223:8084"
+      - "28224:8883"
+      - "28225:18083"
+    environment:
+      EMQX_NAME: emqx-1
+      EMQX_LOG__CONSOLE: console
+      EMQX_ALLOW_ANONYMOUS: 'true'
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  EMQX_enable #}
 
 {% if MQTT_UI_enable | default(false) %}
   #  ================================== MQTT UI ========================================== #
@@ -6436,6 +6984,85 @@ services:
     {% endif -%}   {#  use_timezone #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  FTP_enable #}
+
+{% if CAMUNDA_ZEEBE_enable | default(false) %}
+  #  ================================== Penthao Webspoon ========================================== #
+  zeebe-1:
+    image: camunda/zeebe:{{__CAMUNDA_ZEEBE_version}}
+    container_name: zeebe-1
+    hostname: zeebe-1
+    ports:
+      - '26500:26500'
+      - '9600:9600'
+      - '5705:5705'
+    environment:
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+      ZEEBE_LOG_LEVEL: debug
+      ZEEBE_INSECURE_CONNECTION: "true"
+      ZEEBE_HAZELCAST_PORT: 5705
+    volumes:
+      - ./data-transfer:/data-transfer
+    {% if CAMUNDA_ZEEBE_volume_map_data %}
+      - ./container-volume/camunda/zebee/data:/usr/local/zeebe/data
+    {% endif -%}   {#  ZEEBE_volume_map_data #}
+      - ./conf/camunda/zeebe/application.yaml:/usr/local/zeebe/config/application.yaml
+      - ./plugins/camunda/zeebe/zeebe-hazelcast-exporter-0.10.0.jar:/usr/local/zeebe/exporters/zeebe-hazelcast-exporter.jar
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+
+  {% if CAMUNDA_OPERATE_enable | default(false) %}
+  operate:
+    image: camunda/operate:{{__CAMUNDA_OPERATE_version}}
+    container_name: operate
+    hostname: operate
+    labels:
+      com.platys.webui.title: "Camunda Operate UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28207"
+    ports:
+      - '28207:8080'
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./conf/camunda/operate/application.yaml:/usr/local/operate/config/application.yml
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+  {% endif %}   {#  CAMUNDA_OPERATE_enable #}
+
+  {% if CAMUNDA_ZEEQS_enable | default(false) %}
+  zeeqs:
+    image: camunda/zeeqs:{{__CAMUNDA_ZEEQS_version}}
+    container_name: zeeqs
+    hostname: zeeqs
+    labels:
+      com.platys.webui.title: "Camunda Zeeqs GraphQL UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28208/graphiql"
+    ports:
+      - '28208:9000'
+    environment:
+      zeebe.client.worker.hazelcast.connection: 'zeebe-1:5705'
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+  {% endif %}   {#  CAMUNDA_ZEEQS_enable #}
+{% endif %}   {#  CAMUNDA_ZEEBE_enable #}
 
 {% if PENTHAO_enable | default(false) %}
   #  ================================== Penthao Webspoon ========================================== #
@@ -6851,7 +7478,7 @@ services:
     volumes:
     {% if LOG4BRAINS_adr_source_dir is defined and LOG4BRAINS_adr_source_dir | length %}
       - {{LOG4BRAINS_adr_source_dir}}:/opt/adr
-    {% endif %}   {# LOG4BRAINS_adr_source_dir is defined #}
+    {% endif -%}   {# LOG4BRAINS_adr_source_dir is defined #}
       - ./data-transfer:/data-transfer
     command: ["log4brains", "{{LOG4BRAINS_command}}"]
 {% endif %}   {# LOG4BRAINS_enable #}

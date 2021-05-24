@@ -6,7 +6,7 @@ validated-at:			21.3.2021
 
 # Querying data in Kafka from Trino (formerly PrestoSQL)
 
-This tutorial will show how to query data from a Kakfa topic using Trino. It is an adapted version of the tutorial in the [Trino documentation](https://trino.io/docs/current/connector/kafka-tutorial.html).
+This recipe will show how to query data from a Kakfa topic using Trino. It is an adapted version of the tutorial in the [Trino documentation](https://trino.io/docs/current/connector/kafka-tutorial.html).
 
 ## Initialise a platform
 

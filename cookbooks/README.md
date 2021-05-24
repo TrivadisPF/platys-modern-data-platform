@@ -38,6 +38,7 @@ Inhere we are documenting cookbooks on how to use the platform:
 
  * **StreamSets Data Collector**
    * [Consume a binary file and send it as Kafka message](./recipes/streamsets-binary-file-to-kafka) 
+   * [Using Dev Simulator Origin to simulate streaming data](./recipes/using-dev-simulator-origin) - `1.12.0` 
 
  * **ksqlDB**
    * [Connecting through ksqlDB CLI](./recipes/connecting-through-ksqldb-cli)    
@@ -45,3 +46,11 @@ Inhere we are documenting cookbooks on how to use the platform:
 
  * **Kafka Connect**
    * [Using additional Kafka Connect Connector](./recipes/using-additional-kafka-connect-connector)    
+
+ * **Oracle RDMBS**
+   * [Using private (Trivadis) Oracle XE image](./recipes/using-private-oracle-xe-image) - `1.12.0`    
+   * [Using private (Trivadis) Oracle EE image](./recipes/using-private-oracle-ee-image) - `1.12.0`    
+   * [Using public Oracle XE image](./recipes/using-public-oracle-xe-image) - `1.12.0`    
+
+ * **Architecture Decision Records (ADR)**
+   * [Creating and visualizing ADRs with log4brains](./recipes/creating-adr-with-log4brains) - `1.12.0`    

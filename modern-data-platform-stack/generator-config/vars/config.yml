@@ -4,7 +4,7 @@
       platys:
         platform-name: 'platys-platform'
         platform-stack: 'trivadis/platys-modern-data-platform'
-        platform-stack-version: '1.11.0'
+        platform-stack-version: '1.12.0-preview'
         structure: 'flat'
 
       # ========================================================================
@@ -67,6 +67,7 @@
       KAFKA_delete_topic_enable: true
       KAFKA_auto_create_topics_enable: false
       KAFKA_message_timestamp_type: CreateTime
+      KAFKA_jmx_monitoring_prometheus_enable: false
       # KAFKA_log_segment_bytes:
       # KAFKA_log_retention_ms:
       # KAFKA_log_retention_hours:
@@ -121,8 +122,16 @@
       KAFKA_KSQLDB_internal_replication_factor: 1
       KAFKA_KSQLDB_suppress_enabled: false
       KAFKA_KSQLDB_suppress_buffer_size_bytes: -1
+      KAFKA_KSQLDB_query_pull_table_scan_enabled: false
       KAFKA_KSQLDB_queries_file: ''
+      KAFKA_KSQLDB_response_http_headers_config: ''
 
+
+      #
+      # ===== Materialize ========
+      #
+      MATERIALIZE_enable: false
+      
       #
       # ===== Azkarra Streams ========
       #
@@ -163,6 +172,11 @@
       KAFKA_CONNECT_UI_enable: false
 
       #
+      # ===== Debezium UI ========
+      #      
+      DEBEZIUM_UI_enable: false
+
+      #
       # ===== Cluster Manager for Apache Kafka ========
       #
       KAFKA_CMAK_enable: false
@@ -199,6 +213,11 @@
       # ===== Streams Explorer UI ========
       #
       STREAMS_EXPLORER_enable: false
+
+      #
+      # ===== Kafka Lag Exporter ========
+      #
+      KAFKA_LAG_EXPORTER_enable: false
 
       #
       # ===== Linkedin Burrow ========
@@ -310,7 +329,10 @@
       STREAMSETS_google_support: false
       STREAMSETS_azure_support: false
       STREAMSETS_nosql_support: false
-      STREAMSETS_stage_libs: ''
+
+      # some values for stage libs:  'streamsets-datacollector-apache-kafka_2_6-lib,streamsets-datacollector-aws-lib,streamsets-datacollector-azure-lib,streamsets-datacollector-groovy_2_4-lib,streamsets-datacollector-jdbc-lib'
+      # https://streamsets.com/documentation/datacollector/latest/help/datacollector/UserGuide/Installation/AddtionalStageLibs.html
+      STREAMSETS_stage_libs: 'streamsets-datacollector-apache-kafka_2_6-lib'
       STREAMSETS_enterprise_stage_libs: ''
       STREAMSETS_install_pipelines: false
       # one of 'none', 'basic', 'digest', or 'form'
@@ -367,6 +389,9 @@
       # ===== Apache Airflow  ========
       #
       AIRFLOW_enable: false
+      # "celery" or "sequential" or "local"
+      AIRFLOW_executor: local
+      AIRFLOW_volume_map_python: false
       AIRFLOW_provision_examples: false
 
       #
@@ -381,6 +406,7 @@
       ZEPPELIN_spark_cores_max:
       ZEPPELIN_spark_executor_memory:
       ZEPPELIN_notebook_cron_enable: true
+      ZEPPELIN_spark_submit_options:
 
       #
       # ===== Jupyter ========
@@ -555,6 +581,12 @@
       INFLUXDB2_volume_map_data: false
 
       #
+      # ===== QuestDB ========
+      #
+      QUESTDB_enable: false
+      QUESTDB_volume_map_data: false
+
+      #
       # ===== Kudo ========
       #
       KUDO_enable: false
@@ -568,11 +600,19 @@
       DRUID_volume_map_data: false
 
       #
+      # ===== Pinot ========
+      #
+      PINOT_enable: false
+      PINOT_servers: 1
+      PINOT_volume_map_data: false
+
+      #
       # ===== NoSQL - Prometeus ========
       #
       PROMETHEUS_enable: false
       PROMETHEUS_volume_map_data: false
       PROMETHEUS_PUSHGATEWAY_enable: false
+      PROMETHEUS_NODEEXPORTER_enable: false
 
       #
       # ===== NoSQL - Tile38 ========
@@ -590,6 +630,9 @@
       ORACLE_enable: false
       ORACLE_edition: 'ee'
       ORACLE_volume_map_data: false
+      ORACLE_container_enable: false
+      ORACLE_password: 'EAo4KsTfRR'
+      ORACLE_xe_docker_image: ''
 
       #
       # ===== Oracle REST Data Service ========
@@ -637,6 +680,7 @@
       # ===== Cloudbeaver DB UI ========
       #
       CLOUDBEAVER_enable: false
+      CLOUDBEAVER_volume_map_workspace: false
 
       #
       # ===== SQLPad UI ========
@@ -649,9 +693,21 @@
       QUIX_enable: false
 
       #
-      # ===== Event Store ========
+      # ===== Hazelcast IMDG ========
+      #
+      HAZELCAST_IMDG_enable: false
+      HAZELCAST_IMDG_nodes: 1
+      HAZELCAST_MC_enable: true
+
+      #
+      # ===== Axon Event Store ========
       #
       AXON_enable: false
+
+      #
+      # ===== Event Store ========
+      #
+      EVENTSTORE_enable: false
 
       #
       # ===== Trino ========
@@ -701,13 +757,28 @@
       GRAPHQL_MESH_enable: false
 
       #
-      # ===== MQTT ========
+      # ===== MQTT Mosquitto ========
       #
       MOSQUITTO_enable: false
       MOSQUITTO_nodes: 1
       MOSQUITTO_volume_map_data: false
+
+      #
+      # ===== MQTT HiveMQ ========
+      #
       HIVEMQ3_enable: false
       HIVEMQ4_enable: false
+
+      #
+      # ===== MQTT EMQ ========
+      #
+      EMQX_enable: false
+      # either "oss" or "enterpirse"
+      EMQX_edition: oss
+
+      #
+      # ===== MQTT UIs ========
+      #
       MQTT_UI_enable: false
       CEDALO_MANAGEMENT_CENTER_enable: false
 
@@ -756,9 +827,24 @@
       AWSCLI_enable: false
 
       #
+      #===== LakeFS ========
+      #
+      LAKEFS_enable: false
+
+      #
       # ===== FTP ========
       #
       FTP_enable: false
+
+      #
+      # ===== Camunda ========
+      #
+      CAMUNDA_ZEEBE_enable: false
+      CAMUNDA_ZEEBE_volume_map_data: false
+
+      CAMUNDA_OPERATE_enable: false
+
+      CAMUNDA_ZEEQS_enable: false
 
       #
       # ===== Penthao Webspoon ========
