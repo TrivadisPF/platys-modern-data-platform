@@ -28,6 +28,8 @@ Now generate data platform and download the Streamsets Custom origin to the righ
 platys gen
 ```
 
+Download and unpack the Dev Simulator custom origin
+
 ```
 cd plugins/streamsets/user-libs
 
@@ -36,7 +38,17 @@ wget https://github.com/TrivadisPF/streamsets-dev-simulator/releases/download/0.
 tar -xvzf dev-simulator-0.6.0.tar.gz 
 rm dev-simulator-0.6.0.tar.gz 
 
-cd ../..
+cd ../../..
+```
+
+Download the data and unpack into `data-transfer` folder
+
+```
+cd data-transfer
+wget https://github.com/TrivadisPF/platys-modern-data-platform/raw/master/cookbooks/recipes/using-dev-simulator-origin/data.tar.gz
+
+tar -xvzf data.tar.gz
+rm data.tar.gz
 ```
 
 Start the platform:
@@ -66,7 +78,7 @@ Streamsets: `RelativeAnchorTimeWithoutHeader`
 Dev Simulator Properties (only the ones which have to change from the defaults):
 
 * **Files**
-  * **Files Directory:** `/data-transfer`
+  * **Files Directory:** `/data-transfer/data`
   * **File Name Pattern:** `relative-anchor-without-header.csv`
   * **Different Record Types?:** `false`
 * **Event Time**
@@ -96,7 +108,7 @@ Streamsets: `RelativeAnchorTimeWithHeader`
 Dev Simulator Properties (only the ones which have to change from the defaults):
 
 * **Files**
-  * **Files Directory:** `/data-transfer`
+  * **Files Directory:** `/data-transfer/data`
   * **File Name Pattern:** `relative-anchor-with-header.csv`
   * **Different Record Types?:** `false` 
 * **Event Time**
@@ -127,7 +139,7 @@ Streamsets: `RelativePrevEventTimeWithHeader`
 Dev Simulator Properties (only the ones which have to change from the defaults):
 
 * **Files**
-  * **Files Directory:** `/data-transfer`
+  * **Files Directory:** `/data-transfer/data`
   * **File Name Pattern:** `relative-previous-event-with-header.csv `
   * **Different Record Types?:** `false` 
 * **Event Time**
@@ -158,7 +170,7 @@ Streamsets: `RelativeAnchorTimeWithoutHeaderMultiTypeOneFile `
 Dev Simulator Properties (only the ones which have to change from the defaults):
 
 * **Files**
-  * **Files Directory:** `/data-transfer`
+  * **Files Directory:** `/data-transfer/data`
   * **File Name Pattern:** `relative-anchor-without-header-with-muliple-types-one-file.csv`
   * **Different Record Types?:** `true` 
 * **Event Time**
@@ -193,7 +205,7 @@ Streamsets: `RelativeAnchorTimeWithHeaderMultiTypeOneFile `
 Dev Simulator Properties (only the ones which have to change from the defaults):
 
 * **Files**
-  * **Files Directory:** `/data-transfer`
+  * **Files Directory:** `/data-transfer/data`
   * **File Name Pattern:** `relative-anchor-with-header-with-muliple-types-one-file.csv`
   * **Different Record Types?:** `true` 
 * **Event Time**
@@ -234,7 +246,7 @@ Streamsets: `RelativeAnchorTimeWithHeaderMultiTypeMultiFile`
 Dev Simulator Properties (only the ones which have to change from the defaults):
 
 * **Files**
-  * **Files Directory:** `/data-transfer`
+  * **Files Directory:** `/data-transfer/data`
   * **File Name Pattern:** `relative-anchor-with-header-with-muliple-types-file*.csv`
   * **Different Record Types?:** `true` 
 * **Event Time**
