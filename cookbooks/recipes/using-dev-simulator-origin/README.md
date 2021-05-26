@@ -223,7 +223,7 @@ Dev Simulator Properties (only the ones which have to change from the defaults):
 
 ## Using Relative from Anchor - with multiple record types in file per type
 
-* with header
+### with header
 
 `relative-anchor-with-header-with-muliple-types-fileA.csv`
 
