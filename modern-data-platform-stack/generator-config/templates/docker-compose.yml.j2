@@ -1998,9 +1998,10 @@ services:
   {% endif %}   {#  SPARK_HISTORY_enable #}
 
   {% if SPARK_THRIFT_enable | default(false) %}
-  spark-thrift-server:
-    image: trivadis/apache-spark-master:{{__SPARK_version}}
-    container_name: spark-thrift-server
+  spark-thriftserver:
+    image: trivadis/apache-spark-thriftserver:{{__SPARK_version}}
+    container_name: spark-thriftserver
+    hostname: spark-thriftserver
     ports:
       - "28118:10000"
     env_file:
@@ -2047,11 +2048,11 @@ services:
     volumes:
       - ./data-transfer:/data-transfer
       - ./plugins/spark/jars:/extra-jars
+      - ./container-volume/spark/logs/:/var/log/spark/logs
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
-    command: bash -c "sleep 2m && /spark/sbin/start-thriftserver.sh && tail -f /spark/logs/spark--org.apache.spark.sql.hive.thriftserver.HiveThriftServer2-*.out"
   {% endif %}   {#  SPARK_THRIFT_enable #}
 
 {% endif %}   {#  SPARK_enable #}
