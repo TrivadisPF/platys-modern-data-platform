@@ -2,6 +2,25 @@
 
 See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/platys/blob/master/documentation/upgrade-platform-stack.md) for how to upgrade to newer version.
 
+## What's new in 1.13.0
+
+The Modern Data Platform version 1.13.0 contains the following new services and enhancements:
+
+### New Services
+
+ * 
+ 
+### New Cookbook Recipes 
+
+### Version upgrades  
+
+ * Update `ksqlDb` to `0.18.0` 
+ * Update `Jupyter` to `spark-3.1.1`
+
+### Bug Fixes 
+ 
+ * Fix Thrift Server which did not work in previous release due to Spark images which are based on Alpine Linux
+
 ## What's new in 1.12.0
 
 The Modern Data Platform version 1.12.0 contains the following new services and enhancements:
