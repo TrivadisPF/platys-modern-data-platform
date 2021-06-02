@@ -2049,10 +2049,12 @@ services:
       - ./data-transfer:/data-transfer
       - ./plugins/spark/jars:/extra-jars
       - ./container-volume/spark/logs/:/var/log/spark/logs
+      - ./scripts/docker/wait-for-it.sh:/usr/src/app/wait-for-it.sh
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
+    entrypoint: ["./wait-for-it.sh", "hive-metastore:9083", "--", "entrypoint.sh"]
     restart: {{container_restart_policy}}
   {% endif %}   {#  SPARK_THRIFT_enable #}
 
