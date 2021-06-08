@@ -8,6 +8,8 @@ The Modern Data Platform version 1.12.1 contains the following bug fixes and enh
 
 ### Version upgrades  
 
+ * Update `NiFi` to `1.13.2` 
+ * Update `DataHub` to `v0.8.0` 
  * Update `ksqlDb` to `0.18.0` 
  * Update `Jupyter` to `spark-3.1.1`
 
