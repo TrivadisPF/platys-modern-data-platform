@@ -1,4 +1,4 @@
-# `modern-data-platform` - Port Mappings - 1.11.0
+# `modern-data-platform` - Port Mappings - 1.12.1
 
 This table reserves the external ports for the various services. Not all services have to be used in the platform at a given time. But by reserving, we can assure that there are no conflicts if a service is added at a later time.
 
@@ -244,7 +244,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28115 | 28115 | spark-worker-5 |
 28116 | 28116 | spark-worker-6 |
 28117 | 18080 | spark-history |
-28118 | 10000 | spark-thrift-server |
+28118 | 10000 | spark-thriftserver |
 28119 | 8081 | redis-commander |
 28120 | 3000 | cassandra-web |
 28121 | 9091 | dse-studio |
