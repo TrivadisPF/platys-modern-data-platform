@@ -2,6 +2,20 @@
 
 See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/platys/blob/master/documentation/upgrade-platform-stack.md) for how to upgrade to newer version.
 
+## What's new in 1.13.0
+
+The Modern Data Platform version 1.13.0 contains the following bug fixes and enhancements:
+
+### New Services
+
+### New Cookbook Recipes
+
+### Version upgrades  
+
+### Enhancements 
+
+### Bug Fixes 
+
 ## What's new in 1.12.1
 
 The Modern Data Platform version 1.12.1 contains the following bug fixes and enhancements:
