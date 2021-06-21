@@ -17,6 +17,8 @@ The Modern Data Platform version 1.13.0 contains the following bug fixes and enh
 
 ### Enhancements 
 
+ * Support Zookeeper-Less Kafka Setup in KRaft mode (`KAFKA_use_kraft_mode`)
+
 ### Bug Fixes 
 
 ## What's new in 1.12.1

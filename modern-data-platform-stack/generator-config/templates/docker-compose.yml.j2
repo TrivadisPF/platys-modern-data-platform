@@ -274,7 +274,7 @@ networks:
   {% set KAFKA_enable = true -%}
 {% endif -%}   {# DATAHUB_enable  #}
 
-{% if (KAFKA_enable and not KAFKA_use_kraft) or ATLAS_enable or DRILL_enable or PINOT_enable -%}
+{% if (KAFKA_enable and not KAFKA_use_kraft_mode) or ATLAS_enable or DRILL_enable or PINOT_enable -%}
 # enforce some dependencies
   {% set ZOOKEEPER_enable = true -%}
 {% endif -%}   {# KAFKA_enable or ATLAS_enable or DATAHUB_enable #}
@@ -599,7 +599,7 @@ services:
     image: confluentinc/{{ 'cp-enterprise-kafka' if (KAFKA_edition | lower) == 'enterprise' else 'cp-kafka' }}:{{__CONFLUENT_PLATFORM_version}}
     container_name: {{serviceName}}
     hostname: {{serviceName}}
-    {% if not KAFKA_use_kraft | default(false) %}
+    {% if not KAFKA_use_kraft_mode | default(false) %}
     depends_on:
       - zookeeper-1
     {% endif %}
@@ -612,7 +612,7 @@ services:
       KAFKA_BROKER_ID: {{loop.index}}
       KAFKA_BROKER_RACK: '{{dcName}}'
       KAFKA_INTER_BROKER_LISTENER_NAME: LISTENER_INTERNAL
-      {% if KAFKA_use_kraft | default(false) %}
+      {% if KAFKA_use_kraft_mode | default(false) %}
       KAFKA_CONTROLLER_LISTENER_NAMES: LISTENER_CONTROLLER
       KAFKA_CONTROLLER_QUORUM_VOTERS: '{{ns.controllerQuorumVoters}}'
       KAFKA_PROCESS_ROLES: 'broker,controller'
@@ -679,7 +679,7 @@ services:
     {% if KAFKA_volume_map_data %}
       - "./container-volume/kafka-{{loop.index}}:/var/lib/kafka/data"
     {% endif %}
-    {% if KAFKA_use_kraft %}
+    {% if KAFKA_use_kraft_mode %}
       - "./scripts/kafka/kraft/update_run.sh:/tmp/update_run.sh"
     {% endif %}
     {% if KAFKA_jmx_monitoring_prometheus_enable %}
@@ -689,7 +689,7 @@ services:
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
-    {% if KAFKA_use_kraft %}
+    {% if KAFKA_use_kraft_mode %}
     command: "bash -c 'if [ ! -f /tmp/update_run.sh ]; then echo \"ERROR: Did you forget the update_run.sh file that came with this docker-compose.yml file?\" && exit 1 ; else /tmp/update_run.sh && /etc/confluent/docker/run ; fi'"
     {% endif %}
     restart: {{container_restart_policy}}
