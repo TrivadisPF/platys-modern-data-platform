@@ -1274,7 +1274,11 @@ services:
     ports:
       - "28103:8000"
     environment:
+    {%if KAFKA_CONNECT_UI_use_public_ip | default(true) %}
       CONNECT_URL: "http://${PUBLIC_IP}:8083/,http://${PUBLIC_IP}:8084/"
+    {% else %}
+      CONNECT_URL: 'http://${DOCKER_HOST_IP}:8083,http://${DOCKER_HOST_IP}:8084/'
+    {% endif -%}   {#  KAFKA_CONNECT_UI_use_public_ip #}
       PROXY: "true"
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
