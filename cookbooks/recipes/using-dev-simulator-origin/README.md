@@ -33,10 +33,10 @@ Download and unpack the Dev Simulator custom origin
 ```
 cd plugins/streamsets/user-libs
 
-wget https://github.com/TrivadisPF/streamsets-dev-simulator/releases/download/0.6.0/dev-simulator-0.6.0.tar.gz 
+wget https://github.com/TrivadisPF/streamsets-dev-simulator/releases/download/0.7.0/dev-simulator-0.7.0.tar.gz 
 
-tar -xvzf dev-simulator-0.6.0.tar.gz 
-rm dev-simulator-0.6.0.tar.gz 
+tar -xvzf dev-simulator-0.7.0.tar.gz 
+rm dev-simulator-0.7.0.tar.gz 
 
 cd ../../..
 ```
