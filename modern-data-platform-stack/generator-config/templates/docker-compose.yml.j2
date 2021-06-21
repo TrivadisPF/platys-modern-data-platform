@@ -452,10 +452,10 @@ networks:
         {% if loop.first %}
            {% set ns.bootstrapServers = serviceName ~ ":1" ~ port %}
            {% set ns.controllerQuorumVoters = loop.index ~ ":1" ~ serviceName ~ ":1" ~ port %}
-           {% set ns.controllerQuorumVoters = loop.index ~ "@" ~ serviceName ~ ":1" ~ port %}
+           {% set ns.controllerQuorumVoters = loop.index ~ "@" ~ serviceName ~ ":3" ~ port %}
         {% else %}
            {% set ns.bootstrapServers = ns.bootstrapServers ~ ',' ~ serviceName ~ ":1" ~ port %}
-           {% set ns.controllerQuorumVoters = ns.controllerQuorumVoters ~ ',' ~ loop.index ~ "@" ~ serviceName ~ ":1" ~ port %}
+           {% set ns.controllerQuorumVoters = ns.controllerQuorumVoters ~ ',' ~ loop.index ~ "@" ~ serviceName ~ ":3" ~ port %}
         {% endif %}
       {% endfor %}
     {% endfor %}
@@ -615,8 +615,11 @@ services:
       {% if KAFKA_use_kraft | default(false) %}
       KAFKA_CONTROLLER_LISTENER_NAMES: LISTENER_CONTROLLER
       KAFKA_CONTROLLER_QUORUM_VOTERS: '{{ns.controllerQuorumVoters}}'
+      KAFKA_PROCESS_ROLES: 'broker,controller'
+      KAFKA_NODE_ID: {{loop.index}}
+      CLUSTER_ID: xtzWWN4bTjitpL3kfd9s5g
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'LISTENER_CONTROLLER:PLAINTEXT,LISTENER_INTERNAL:PLAINTEXT,LISTENER_DOCKERHOST:PLAINTEXT,LISTENER_EXTERNAL:PLAINTEXT'
-      KAFKA_LISTENERS: 'LISTENER_CONTROLLER://{{serviceName}}:1{{port}},LISTENER_INTERNAL://{{serviceName}}:1{{port}},LISTENER_DOCKERHOST://{{serviceName}}:2{{port}},LISTENER_EXTERNAL://{{serviceName}}:{{port}}'
+      KAFKA_LISTENERS: 'LISTENER_CONTROLLER://{{serviceName}}:3{{port}},LISTENER_INTERNAL://{{serviceName}}:1{{port}},LISTENER_DOCKERHOST://{{serviceName}}:2{{port}},LISTENER_EXTERNAL://{{serviceName}}:{{port}}'
       {% else %}
       KAFKA_ZOOKEEPER_CONNECT: 'zookeeper-1:2181'
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'LISTENER_INTERNAL:PLAINTEXT,LISTENER_DOCKERHOST:PLAINTEXT,LISTENER_EXTERNAL:PLAINTEXT'
