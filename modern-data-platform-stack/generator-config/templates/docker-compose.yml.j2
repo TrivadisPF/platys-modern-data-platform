@@ -274,7 +274,7 @@ networks:
   {% set KAFKA_enable = true -%}
 {% endif -%}   {# DATAHUB_enable  #}
 
-{% if KAFKA_enable or ATLAS_enable or DRILL_enable or PINOT_enable -%}
+{% if (KAFKA_enable AND not KAFKA_use_kraft) or ATLAS_enable or DRILL_enable or PINOT_enable -%}
 # enforce some dependencies
   {% set ZOOKEEPER_enable = true -%}
 {% endif -%}   {# KAFKA_enable or ATLAS_enable or DATAHUB_enable #}
@@ -429,6 +429,7 @@ networks:
 {#  ================================== Handling external services ========================================== #}
 
 {% set ns = namespace(bootstrapServers='') %}
+{% set ns = namespace(controllerQuorumVoters='') %}
 {% if (external['KAFKA_enable']) | default(false) %}
     {% set ns.bootstrapServers = external['KAFKA_bootstrap_servers'] %}
     {% set ns.schemaRegistryUrl = external['SCHEMA_REGISTRY_url'] %}
@@ -450,8 +451,11 @@ networks:
         {% set serviceName = serviceBaseName ~ loop.index %}
         {% if loop.first %}
            {% set ns.bootstrapServers = serviceName ~ ":1" ~ port %}
+           {% set ns.controllerQuorumVoters = loop.index ~ ":1" serviceName ~ ":1" ~ port %}
+           {% set ns.controllerQuorumVoters = loop.index ~ "@" ~ serviceName ~ ":1" ~ port %}
         {% else %}
            {% set ns.bootstrapServers = ns.bootstrapServers ~ ',' ~ serviceName ~ ":1" ~ port %}
+           {% set ns.controllerQuorumVoters = ns.controllerQuorumVoters ~ ',' ~ loop.index ~ "@" ~ serviceName ~ ":1" ~ port %}
         {% endif %}
       {% endfor %}
     {% endfor %}
@@ -605,9 +609,16 @@ services:
     environment:
       KAFKA_BROKER_ID: {{loop.index}}
       KAFKA_BROKER_RACK: '{{dcName}}'
+      {% if KAFKA_use_kraft | default(false) %}
+      KAFKA_CONTROLLER_LISTENER_NAMES: LISTENER_CONTROLLER
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '{{ns.controllerQuorumVoters}}'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'LISTENER_CONTROLLER:PLAINTEXT,LISTENER_INTERNAL:PLAINTEXT,LISTENER_DOCKERHOST:PLAINTEXT,LISTENER_EXTERNAL:PLAINTEXT'
+      KAFKA_LISTENERS: 'LISTENER_CONTROLLER://{{serviceName}}:1{port}},LISTENER_INTERNAL://{{serviceName}}:1{{port}},LISTENER_DOCKERHOST://{{serviceName}}:2{{port}},LISTENER_EXTERNAL://{{serviceName}}:{{port}}'
+      {% else %}
       KAFKA_ZOOKEEPER_CONNECT: 'zookeeper-1:2181'
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'LISTENER_INTERNAL:PLAINTEXT,LISTENER_DOCKERHOST:PLAINTEXT,LISTENER_EXTERNAL:PLAINTEXT'
       KAFKA_LISTENERS: 'LISTENER_INTERNAL://{{serviceName}}:1{{port}},LISTENER_DOCKERHOST://{{serviceName}}:2{{port}},LISTENER_EXTERNAL://{{serviceName}}:{{port}}'
+      {% endif %}
       KAFKA_ADVERTISED_LISTENERS: 'LISTENER_INTERNAL://{{serviceName}}:1{{port}},LISTENER_DOCKERHOST://localhost:2{{port}},LISTENER_EXTERNAL://${PUBLIC_IP:-127.0.0.1}:{{port}}'
       KAFKA_INTER_BROKER_LISTENER_NAME: LISTENER_INTERNAL
       KAFKA_REPLICA_SELECTOR_CLASS: {{KAFKA_replica_selector_class | default(omit)}}
@@ -663,6 +674,9 @@ services:
     {% if KAFKA_volume_map_data %}
       - "./container-volume/kafka-{{loop.index}}:/var/lib/kafka/data"
     {% endif %}
+    {% if KAFKA_use_kraft %}
+      - "./scripts/kafka/kraft/update_run.sh:/tmp/update_run.sh"
+    {% endif %}
     {% if KAFKA_jmx_monitoring_prometheus_enable %}
       - ./scripts/kafka/jmx-exporter/:/usr/share/jmx-exporter
     {% endif -%}
@@ -670,6 +684,9 @@ services:
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
+    {% if KAFKA_use_kraft %}
+    command: "bash -c 'if [ ! -f /tmp/update_run.sh ]; then echo \"ERROR: Did you forget the update_run.sh file that came with this docker-compose.yml file?\" && exit 1 ; else /tmp/update_run.sh && /etc/confluent/docker/run ; fi'"
+    {% endif %}
     restart: {{container_restart_policy}}
 
     {% endfor %}
