@@ -10,7 +10,10 @@ The Modern Data Platform version 1.13.0 contains the following bug fixes and enh
 
 ### New Cookbook Recipes
 
-### Version upgrades  
+### Version upgrades 
+
+ * Update `Confluent` to `6.2.0` 
+ * Update `Marquez` to `0.15.2` 
 
 ### Enhancements 
 
