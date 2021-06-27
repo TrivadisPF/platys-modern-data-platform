@@ -2433,10 +2433,12 @@ services:
     container_name: datahub-gms
     depends_on:
       - datahub-elasticsearch
-      - kafka-1
       - datahub-mysql
-      - schema-registry-1
+    {%if (DATAHUB_graph_service_impl | lower) == 'neo4j'  | default(true) %}
       - datahub-neo4j
+    {% endif -%}   {#  DATAHUB_graph_service_impl #}
+      - kafka-1
+      - schema-registry-1
     labels:
       com.platys.restapi.title: "DataHub GMS API"
       com.platys.restapi.url: "http://${PUBLIC_IP}:28142"
@@ -2453,10 +2455,21 @@ services:
       - KAFKA_SCHEMAREGISTRY_URL=http://schema-registry-1:8081
       - ELASTICSEARCH_HOST=datahub-elasticsearch
       - ELASTICSEARCH_PORT=9200
-      - NEO4J_HOST=datahub-neo4j:7474
+      - JAVA_OPTS=-Xms256m -Xmx256m
+      - GRAPH_SERVICE_IMPL={{DATAHUB_graph_service_impl}}
+    {%if (DATAHUB_graph_service_impl | lower) == 'neo4j'  | default(true) %}
+      - NEO4J_HOST=http://datahub-neo4j:7474
       - NEO4J_URI=bolt://${PUBLIC_IP}:17688
       - NEO4J_USERNAME=neo4j
       - NEO4J_PASSWORD=abc123!
+    {% endif -%}   {#  DATAHUB_graph_service_impl #}
+    {%if not DATAHUB_mae_consumer_standalone | default(true) %}
+      - MAE_CONSUMER_ENABLED=true
+    {% endif -%}   {#  not DATAHUB_mae_consumer_standalone #}
+    {%if not DATAHUB_mce_consumer_standalone | default(true) %}
+      - MCE_CONSUMER_ENABLED=true
+    {% endif -%}   {#  not DATAHUB_mce_consumer_standalone #}
+      - DATAHUB_ANALYTICS_ENABLED={{DATAHUB_use_analytics}}
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -2468,6 +2481,7 @@ services:
     {% endif -%}   {#  use_timezone #}
     restart: {{container_restart_policy}}
 
+  {%if DATAHUB_use_ember_ui | default(false) %}
   datahub-frontend-ember:
     image: linkedin/datahub-frontend:{{__DATAHUB_version}}
     hostname: datahub-frontend-ember
@@ -2495,7 +2509,9 @@ services:
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
     restart: {{container_restart_policy}}
+  {% endif -%}   {#  DATAHUB_use_ember_ui #}
 
+  {%if DATAHUB_use_react_ui | default(false) %}
   datahub-frontend-react:
     image: linkedin/datahub-frontend-react:{{__DATAHUB_version}}
     hostname: datahub-frontend-react
@@ -2513,6 +2529,11 @@ services:
       - DATAHUB_SECRET=abc123!
       - DATAHUB_APP_VERSION=1.0
       - DATAHUB_PLAY_MEM_BUFFER_SIZE=10MB
+      - JAVA_OPTS=-Xms256m -Xmx256m -Dhttp.port=9002 -Dconfig.file=datahub-frontend/conf/application.conf -Djava.security.auth.login.config=datahub-frontend/conf/jaas.conf -Dlogback.configurationFile=datahub-frontend/conf/logback.xml -Dlogback.debug=false -Dpidfile.path=/dev/null
+      - KAFKA_BOOTSTRAP_SERVER=kafka-1:19092
+      - DATAHUB_TRACKING_TOPIC=DataHubUsageEvent_v1
+      - ELASTIC_CLIENT_HOST=datahub-elasticsearch
+      - ELASTIC_CLIENT_PORT=9200
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -2523,7 +2544,9 @@ services:
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
     restart: {{container_restart_policy}}
+  {% endif -%}   {#  DATAHUB_use_react_ui #}
 
+  {%if DATAHUB_mae_consumer_standalone | default(true) %}
   datahub-mae-consumer:
     image: linkedin/datahub-mae-consumer:{{__DATAHUB_version}}
     hostname: datahub-mae-consumer
@@ -2556,7 +2579,9 @@ services:
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
     restart: {{container_restart_policy}}
+  {% endif -%}   {#  DATAHUB_mae_consumer_standalone #}
 
+  {%if DATAHUB_mce_consumer_standalone | default(true) %}
   datahub-mce-consumer:
     image: linkedin/datahub-mce-consumer:{{__DATAHUB_version}}
     hostname: datahub-mce-consumer
@@ -2584,6 +2609,7 @@ services:
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
     restart: {{container_restart_policy}}
+  {% endif -%}   {#  DATAHUB_mce_consumer_standalone #}
 
   datahub-mysql:
     image: mysql:5.7
@@ -2611,6 +2637,7 @@ services:
     {% endif -%}   {#  use_timezone #}
     restart: {{container_restart_policy}}
 
+  {%if (DATAHUB_graph_service_impl | lower) == 'neo4j'  | default(true) %}
   datahub-neo4j:
     image: neo4j:4.0.6
     hostname: datahub-neo4j
@@ -2638,6 +2665,7 @@ services:
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
     restart: {{container_restart_policy}}
+  {% endif -%}   {#  DATAHUB_graph_service_impl #}
 
   datahub-elasticsearch:
     image: elasticsearch:7.9.3
@@ -2655,6 +2683,13 @@ services:
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
+    healthcheck:
+      retries: 4
+      start_period: 2m
+      test:
+      - CMD-SHELL
+      - curl -sS --fail 'http://localhost:9200/_cluster/health?wait_for_status=yellow&timeout=0s'
+        || exit 1
     volumes:
       - ./data-transfer:/data-transfer
     {% if DATAHUB_volume_map_data %}
@@ -2666,6 +2701,7 @@ services:
     {% endif -%}   {#  use_timezone #}
     restart: {{container_restart_policy}}
 
+  {%if DATAHUB_use_kibana | default(true) %}
   datahub-kibana:
     image: kibana:7.9.3
     container_name: datahub-kibana
@@ -2691,6 +2727,30 @@ services:
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
     restart: {{container_restart_policy}}
+  {% endif -%}   {#  DATAHUB_use_kibana #}
+
+  # This "container" is a workaround to pre-create search indices
+  datahub-mysql-setup:
+    image: acryldata/datahub-mysql-setup:head
+    hostname: datahub-mysql-setup
+    container_name: datahub-mysql-setup
+    depends_on:
+      - datahub-mysql
+    environment:
+      MYSQL_HOST: datahub-mysql
+      MYSQL_PORT: 3306
+      MYSQL_USERNAME: datahub
+      MYSQL_PASSWORD: datahub
+      DATAHUB_DB_NAME: datahub
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
 
   # This "container" is a workaround to pre-create search indices
   datahub-elasticsearch-setup:
