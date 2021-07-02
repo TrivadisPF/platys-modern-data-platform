@@ -24,6 +24,8 @@ The Modern Data Platform version 1.13.0 contains the following bug fixes and enh
 
 ### Bug Fixes 
 
+  * fix error "panic: runtime error: slice bounds out of range" in `schema-registry-ui` and `kafka-connect-ui` by allowing the mapping the `resolv.conf` into the container. It is enabled by default.
+
 ## What's new in 1.12.1
 
 The Modern Data Platform version 1.12.1 contains the following bug fixes and enhancements:
