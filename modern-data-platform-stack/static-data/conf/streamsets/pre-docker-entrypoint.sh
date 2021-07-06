@@ -10,7 +10,7 @@ set -e
 
 # Install dockerize
 DOCKERIZE_VERSION=v0.6.1
-RUN sudo wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
+wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
     && sudo tar -C /usr/local/bin -xzvf dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
     && sudo rm dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz
 
@@ -140,6 +140,12 @@ done
 #  SCH_AUTHENTICATION_TOKEN
 #  SCH_SDC_INSTANCE_ID
 #fi
+
+if [ -n "${PLATYS_SDC_ID}" ]
+then
+    echo 'write the configured SDC_ID (${PLATYS_SDC_ID}) to the sdc.id file'
+	echo "${PLATYS_SDC_ID}" > $SDC_DATA/sdc.id
+fi
 
 echo "$(date -Iseconds) Exiting: $0"
 exec /docker-entrypoint.sh "$@"
