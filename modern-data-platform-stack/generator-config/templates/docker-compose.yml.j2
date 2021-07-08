@@ -633,7 +633,9 @@ services:
       {% endif %}
       {% if (KAFKA_edition | lower) == 'enterprise' | default(false) %}
       KAFKA_CONFLUENT_LICENSE_TOPIC_REPLICATION_FACTOR: {{KAFKA_internal_replication_factor | default(1)}}
+      {% if KAFKA_confluent_log_placement_constraints is defined and KAFKA_confluent_log_placement_constraints %}
       KAFKA_CONFLUENT_LOG_PLACEMENT_CONSTRAINTS: '{{KAFKA_confluent_log_placement_constraints}}'
+      {% endif %}
       {%if KAFKA_confluent_tier_enable | default(false) %}
       KAFKA_CONFLUENT_TIER_ENABLE: '{{KAFKA_confluent_tier_enable | default(omit) }}'
       KAFKA_CONFLUENT_TIER_FEATURE: '{{KAFKA_confluent_tier_feature | default(omit) }}'
@@ -642,12 +644,16 @@ services:
       KAFKA_CONFLUENT_TIER_S3_PREFIX: '{{KAFKA_confluent_tier_s3_prefix| default(omit) }}'
       KAFKA_CONFLUENT_TIER_S3_REGION: '{{KAFKA_confluent_tier_s3_region | default('us-east-1') }}'
       KAFKA_CONFLUENT_TIER_S3_AWS_ENDPOINT_OVERRIDE: '{{KAFKA_confluent_tier_s3_aws_endpoint_override | default(omit) }}'
+      KAFKA_CONFLUENT_TIER_S3_FORCE_PATH_STYLE_ACCESS: '{{KAFKA_confluent_tier_s3_force_path_style_access | default(omit) }}'
+      KAFKA_CONFLUENT_TIER_S3_SSE_ALGORITHM: "none"
       KAFKA_CONFLUENT_TIER_LOCAL_HOTSET_BYTES: {{KAFKA_confluent_tier_local_hotset_bytes | default(omit) }}
       KAFKA_CONFLUENT_TIER_LOCAL_HOTSET_MS: {{KAFKA_confluent_tier_local_hotset_ms | default(omit) }}
       KAFKA_CONFLUENT_TIER_ARCHIVER_NUM_THREADS: {{KAFKA_confluent_tier_archiver_num_threads | default(omit) }}
       KAFKA_CONFLUENT_TIER_FETCHER_NUM_THREADS: {{KAFKA_confluent_tier_fetcher_num_threads | default(omit) }}
       KAFKA_CONFLUENT_TIER_TOPIC_DELETE_CHECK_INTERVAL_MS: {{KAFKA_confluent_tier_topic_delete_check_interval_ms | default(omit) }}
       KAFKA_CONFLUENT_TIER_METADATA_REPLICATION_FACTOR: {{KAFKA_confluent_tier_metadata_replication_factor | default(1) }}
+      #KAFKA_CONFLUENT_TIER_S3_AWS_ACCESS_KEY_ID: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
+      #KAFKA_CONFLUENT_TIER_S3_AWS_SECRET_ACCESS_KEY: {{s3SecretAccessKey}}
       AWS_ACCESS_KEY_ID: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
       AWS_SECRET_ACCESS_KEY: {{s3SecretAccessKey}}
       {% endif -%} {# KAFKA_confluent_tier_enable #}
@@ -6516,6 +6522,8 @@ services:
       MINIO_SECRET_KEY: {{MINIO_secret_key}}
       MINIO_REGION_NAME: {{s3DefaultRegion if s3DefaultRegion is defined and s3DefaultRegion else omit}}
       MINIO_BROWSER: "{{MINIO_browser_enable | default(true) }}"
+      #MINIO_PUBLIC_IPS: {{serviceName}}
+      #MINIO_DOMAIN: minio.io
       #MINIO_DEFAULT_BUCKETS: 'admin-bucket,{{MINIO_default_buckets}}'
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
