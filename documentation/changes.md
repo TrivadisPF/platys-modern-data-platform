@@ -8,6 +8,8 @@ The Modern Data Platform version 1.13.0 contains the following bug fixes and enh
 
 ### New Services
 
+ * Nuclio FaaS
+
 ### New Cookbook Recipes
 
  * [Support StreamSets Data Collector Activation](../cookbooks/recipes/streamsets-oss-activation)
