@@ -241,6 +241,7 @@ networks:
 {% set __LAKEFS_version = LAKEFS_version | default('latest') -%}
 
 {% set __CODE_SERVER_version = CODE_SERVER_version | default('latest') -%}
+{% set __FIREFOX_version = FIREFOX_version | default('latest') -%}
 {% set __FILE_BROWSER_version = FILE_BROWSER_version | default('latest') -%}
 {% set __VAULT_version = VAULT_version | default('latest') -%}
 {% set __KEYCLOCK_version = KEYCLOCK_version | default('latest') -%}
@@ -419,6 +420,7 @@ networks:
   {% set POSTMAN_enable = false -%}
   {% set MICROCKS_enable = false -%}
   {% set CODE_SERVER_enable = false -%}
+  {% set FIREFOX_enable = false -%}
   {% set FILE_BROWSER_enable = false -%}
   {% set CADVISOR_enable = false -%}
   {% set HAWTIO_enable = false -%}
@@ -7260,6 +7262,32 @@ services:
     {% if CODE_SERVER_volume_map_platform_root %}
       - ../:/home/coder/platform-root:Z
     {% endif %}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: unless-stopped
+{% endif %}   {# CODE_SERVER_enable #}
+
+{% if FIREFOX_enable | default(false) %}
+  #  ================================== Firefox Browser ================= #
+  firefox:
+    image: jlesage/firefox:{{__FIREFOX_version}}
+    container_name: firefox
+    hostname: firefox
+    labels:
+      com.platys.webui.title: "Firefox UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:80"
+    ports:
+      - 80:5800
+    shm_size: 2g
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/home/coder/data-transfer
+      - /container-volume/firefox:/config:rw
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
