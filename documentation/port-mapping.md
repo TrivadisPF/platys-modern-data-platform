@@ -7,6 +7,7 @@ This table reserves the external ports for the various services. Not all service
 Container Port(s) | Internal Port(s)           | Service (alternatives) |
 --------------------|------------------|-----------------------|
 21 | 21 | ftp |
+80 | 80 | markdown-viewer or firefox |
 1433 | 1433 | sqlserver |
 1521 | 1521 | oracledb |
 1095 | 1095 | ksqldb-server-1 (jmx) |
@@ -65,6 +66,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 5701 | 5701 | hazelcast	-1 | 
 5705 | 5701 | zeebe-1 | 
 5800 | 5800 | filezilla | 
+5801 | 5800 | firefox | 
 5820 | 5820 | stardog-1 |
 5900 | 5900 | filezilla |  
 6060 | 6060 | zeppelin |

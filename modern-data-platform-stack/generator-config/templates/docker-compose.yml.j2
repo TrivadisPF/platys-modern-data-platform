@@ -326,6 +326,12 @@ networks:
   {% set POSTMAN_enable = true -%}
 {% endif -%}   {# MICROCKS_enable #}
 
+{% if FIREFOX_use_port_80 -%}
+  # if FIREFOX runs on port 80, then markdown viewer can not run on 80
+  {% set MARKDOWN_VIEWER_use_port_80 = false -%}
+{% endif -%}   {# FIREFOX_use_port_80 #}
+
+
 {% if (__hw_arch | upper) == 'ARM' -%}
 # if we use stack type ARM, then disable some containers which do not support ARM
   {% set ZOOKEEPER_enable = false -%}
@@ -7285,9 +7291,9 @@ services:
     hostname: firefox
     labels:
       com.platys.webui.title: "Firefox UI"
-      com.platys.webui.url: "http://${PUBLIC_IP}:80"
+      com.platys.webui.url: "http://${PUBLIC_IP}:{{80 if (FIREFOX_use_port_80 | default(true) )  else 5801 }}"
     ports:
-      - 80:5800
+      - "{{80 if (FIREFOX_use_port_80 | default(true) )  else 5801 }}:5800"
     shm_size: 2g
     {%if use_timezone | default(false) %}
     environment:
