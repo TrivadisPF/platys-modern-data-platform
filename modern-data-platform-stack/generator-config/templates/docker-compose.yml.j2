@@ -7499,8 +7499,18 @@ services:
     ports:
       - 9411:9411
     environment:
-      STORAGE_TYPE: {{ZIPKIN_storage_type}}
+      STORAGE_TYPE: {{ZIPKIN_storage_type | lower}}
+    {%if (ZIPKIN_storage_type | lower) == 'mysql' | default(false) %}
       MYSQL_HOST: mysql
+    {% endif -%}   {#  ZIPKIN_storage_type #}
+    {%if (ZIPKIN_storage_type | lower) == 'elasticsearch' | default(false) %}
+      ES_HOST: elasticsearch
+    {% endif -%}   {#  ZIPKIN_storage_type #}
+    {%if (ZIPKIN_storage_type | lower) == 'cassandra3' | default(false) %}
+      CASSANDRA_ENSURE_SCHEMA: false
+      CASSANDRA_CONTACT_POINTS: cassandra
+      # CASSANDRA_USERNAME: cassandra
+      # CASSANDRA_PASSWORD: cassandra
     {%if ZIPKIN_collect_kafka and KAFKA_enable | default(false) %}
       KAFKA_BOOTSTRAP_SERVERS: kafka-1:19092,kafka-2:19093
     {% endif -%}   {#  KAFKA_enable #}
@@ -7528,8 +7538,19 @@ services:
       com.platys.webui.title: "Zipkin Dependencies UI"
       com.platys.webui.url: "http://${PUBLIC_IP}:9411/dependency"
     environment:
-      STORAGE_TYPE: {{ZIPKIN_storage_type}}
+      STORAGE_TYPE: {{ZIPKIN_storage_type | lower}}
+    {%if (ZIPKIN_storage_type | lower) == 'mysql' | default(false) %}
       MYSQL_HOST: mysql
+    {% endif -%}   {#  ZIPKIN_storage_type #}
+    {%if (ZIPKIN_storage_type | lower) == 'elasticsearch' | default(false) %}
+      ES_HOST: elasticsearch
+    {% endif -%}   {#  ZIPKIN_storage_type #}
+    {%if (ZIPKIN_storage_type | lower) == 'cassandra3' | default(false) %}
+      CASSANDRA_ENSURE_SCHEMA: false
+      CASSANDRA_CONTACT_POINTS: cassandra
+      # CASSANDRA_USERNAME: cassandra
+      # CASSANDRA_PASSWORD: cassandra
+    {% endif -%}   {#  ZIPKIN_storage_type #}
     {%if ZIPKIN_debug | default(false) %}
       ZIPKIN_LOG_LEVEL: DEBUG
     {% endif -%}   {#  ZIPKIN_debug #}
