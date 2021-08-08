@@ -263,6 +263,8 @@ networks:
 
 {% set __MICROCKS_version = MICROCKS_version | default('latest') -%}
 
+{% set __ZIPKIN_version = ZIPKIN_version | default('latest') -%}
+
 {% set __hw_arch = hw_arch | default('x86-64') -%}
 {% set __PYTHON_VERSION = PYTHON_version | default('3') -%}
 
@@ -419,6 +421,7 @@ networks:
   {% set KEYCLOCK_enable = false -%}
   {% set POSTMAN_enable = false -%}
   {% set MICROCKS_enable = false -%}
+  {% set ZIPKIN_enable = false -%}
   {% set CODE_SERVER_enable = false -%}
   {% set FIREFOX_enable = false -%}
   {% set FILE_BROWSER_enable = false -%}
@@ -7479,6 +7482,72 @@ services:
     {% endif -%}   {#  use_timezone #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  MICROCKS_enable #}
+
+{% if ZIPKIN_enable | default(false) %}
+  #  ================================== Zipkin ========================================== #
+  zipkin:
+    {%if ZIPKIN_collect_kafka and KAFKA_enable | default(false) %}
+    image: ghcr.io/openzipkin/zipkin:{{__ZIPKIN_version}}
+    {% else %}
+    image: ghcr.io/openzipkin/zipkin-slim:{{__ZIPKIN_version}}
+    {% endif -%}   {#  KAFKA_enable #}
+    container_name: zipkin
+    hostname: zipkin
+    labels:
+      com.platys.webui.title: "Zipkin UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:9411"
+    ports:
+      - 9411:9411
+    environment:
+      STORAGE_TYPE: {{ZIPKIN_storage_type}}
+      MYSQL_HOST: mysql
+    {%if ZIPKIN_collect_kafka and KAFKA_enable | default(false) %}
+      KAFKA_BOOTSTRAP_SERVERS: kafka-1:19092,kafka-2:19093
+    {% endif -%}   {#  KAFKA_enable #}
+      #SELF_TRACING_ENABLED: true
+      #JAVA_OPTS: '-Xms128m -Xmx128m -XX:+ExitOnOutOfMemoryError'
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if ZIPKIN_debug | default(false) %}
+    command: --logging.level.zipkin2=DEBUG
+    {% endif -%}   {#  ZIPKIN_debug #}
+    restart: {{container_restart_policy}}
+
+  zipkin-dependencies:
+    image: ghcr.io/openzipkin/zipkin-dependencies
+    container_name: zipkin-dependencies
+    hostname: zipkin-dependencies
+    labels:
+      com.platys.webui.title: "Zipkin Dependencies UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:9411/dependency"
+    environment:
+      STORAGE_TYPE: {{ZIPKIN_storage_type}}
+      MYSQL_HOST: mysql
+    {%if ZIPKIN_debug | default(false) %}
+      ZIPKIN_LOG_LEVEL: DEBUG
+    {% endif -%}   {#  ZIPKIN_debug #}
+      # Uncomment to adjust memory used by the dependencies job
+      JAVA_OPTS: '-verbose:gc -Xms1G -Xmx1G'
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    entrypoint: crond -f
+    restart: {{container_restart_policy}}
+
+{% endif %}   {# ZIPKIN_enable #}
 
 {% if PORTAINER_enable | default(false) %}
   #  ================================== Portainer ========================================== #

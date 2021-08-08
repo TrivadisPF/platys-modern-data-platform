@@ -10,6 +10,7 @@ The Modern Data Platform version 1.13.0 contains the following bug fixes and enh
 
  * Nuclio FaaS
  * Firefox Browser
+ * Zipkin
 
 ### New Cookbook Recipes
 

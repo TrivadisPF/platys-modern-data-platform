@@ -140,6 +140,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 9096 | 9096 | kafka-5     |
 9097 | 9097 | kafka-6     |
 9393 | 9393 | spring-dataflow-server |
+9411 | 9411 | zipkin |
 9600 | 9600 | zeebe-1 |
 9851 | 9851 | tile38 |
 9870 | 9870 | namenode |
