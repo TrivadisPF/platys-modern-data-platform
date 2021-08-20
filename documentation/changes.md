@@ -25,6 +25,7 @@ The Modern Data Platform version 1.13.0 contains the following bug fixes and enh
  * Update `DataHub` to `0.8.3`
  * Update `Minio` to `RELEASE.2021-06-17T00-10-46Z`
  * Update `ksqlDB` to `0.19.0`
+ * Updaet `tile38` to `1.25.2`
 
 ### Enhancements 
 
