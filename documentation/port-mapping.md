@@ -333,6 +333,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28225 | 18083 | emqx-1 |
 28226 | 9000 | questdb |
 28227 | 8080 | debezium-ui |
+28228 | 9998 | tikka |
 
 ## Ports > 28500
 
