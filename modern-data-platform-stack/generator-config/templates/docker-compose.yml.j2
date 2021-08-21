@@ -57,7 +57,7 @@ networks:
   {% set __ZEPPELIN_version = ZEPPELIN_version ~ "-spark" ~ "2.4" ~ "-hadoop2.8" -%}
 {% endif -%}
 
-{% set __TIKKA_version = TIKKA_version | default('latest') -%}
+{% set __TIKA_version = TIKA_version | default('latest') -%}
 
 {% set __HIVE_version = HIVE_version | default('latest') -%}
 {% set __HIVE_version_suffix = HIVE_version_suffix | default('postgresql-metastore-s3') -%}
@@ -346,7 +346,7 @@ networks:
   {% set KAFKA_LAG_EXPORTER_enable = false -%}
   {% set HADOOP_enable = false -%}
   {% set SPARK_enable = false -%}
-  {% set TIKKA_enable = false -%}
+  {% set TIKA_enable = false -%}
   {% set HIVE_enable = false -%}
   {% set RANGER_enable = false -%}
   {% set RANGER_POSTGRES_enable = false -%}
@@ -2190,14 +2190,14 @@ services:
     restart: always
 {% endif %}   {#  SPARK_livy_enable #}
 
-{% if TIKKA_enable | default(false) %}
-  #  ================================== Apache Tikka Server ========================================== #
-  tikka:
-    image: apache/tika:{{__TIKKA_version}}{{ '-full' if (ELASTICSEARCH_edition | lower) == 'full' else '' }}
-    container_name: tikka
-    hostname: tikka
+{% if TIKA_enable | default(false) %}
+  #  ================================== Apache Tika Server ========================================== #
+  tika-server:
+    image: apache/tika:{{__TIKA_version}}{{ '-full' if (TIKA_edition | lower) == 'full' else '' }}
+    container_name: tika-server
+    hostname: tika-server
     labels:
-      com.platys.restapi.title: "Tikka API"
+      com.platys.restapi.title: "Tika Server API"
       com.platys.restapi.url: "http://${PUBLIC_IP}:28228/"
     ports:
       - "28228:9998"
@@ -2212,7 +2212,7 @@ services:
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
     restart: always
-{% endif %}   {#  TIKKA_enable #}
+{% endif %}   {#  TIKA_enable #}
 
 {% if HIVE_SERVER_enable and HADOOP_enable | default(false) %}
   #  ================================== Apache Hive Server ========================================== #
