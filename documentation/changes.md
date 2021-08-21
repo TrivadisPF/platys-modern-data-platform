@@ -20,7 +20,7 @@ The Modern Data Platform version 1.13.0 contains the following bug fixes and enh
 ### Version upgrades 
 
  * Update `Confluent` to `6.2.0` 
- * Update `Marquez` to `0.16.1` 
+ * Update `Marquez` to `0.17.0` 
  * Update `Trino` to `360`
  * Update `Starburstdata` to `359-e`
  * Update `DataHub` to `0.8.3`
