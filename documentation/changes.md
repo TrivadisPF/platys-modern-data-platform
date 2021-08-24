@@ -26,7 +26,8 @@ The Modern Data Platform version 1.13.0 contains the following bug fixes and enh
  * Update `DataHub` to `0.8.3`
  * Update `Minio` to `RELEASE.2021-06-17T00-10-46Z`
  * Update `ksqlDB` to `0.20.0`
- * Updaet `tile38` to `1.25.2`
+ * Update `tile38` to `1.25.2`
+ * Update 'kcat' to `1.7.0` (used to be `kafkacat`)
 
 ### Enhancements 
 
@@ -34,6 +35,7 @@ The Modern Data Platform version 1.13.0 contains the following bug fixes and enh
  * Support setting the `SDC ID` to a fixed value for StreamSets, so that an Activation code is still valid after recreating the `streamsets-1` docker container
  * Switch from `cp-enterprise-kafka` to `cp-server` image for Confluent Enterprise
  * Support multiple databases within one single Posgresql container
+ * Rename `kafkacat` to `kcat` (to reflect the GitHub project)
 
 ### Bug Fixes 
 
