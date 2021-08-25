@@ -27,7 +27,30 @@ The Modern Data Platform version 1.13.0 contains the following bug fixes and enh
  * Update `Minio` to `RELEASE.2021-06-17T00-10-46Z`
  * Update `ksqlDB` to `0.20.0`
  * Update `tile38` to `1.25.2`
- * Update 'kcat' to `1.7.0` (used to be `kafkacat`)
+ * Update `kcat` to `1.7.0` (used to be `kafkacat`)
+ * Update `Elasticsearch` to `7.14.0`
+ * Update `Kibana` to `7.14.0`
+ * Update `Cassandra` to `3.11`
+ * Update `DSE-Server` to `6.8.14`
+ * Update `MongoDB` to `5.0`
+ * Update `Neo4J` to `4.2`
+ * Update `Stardog` to `7.7.1-java11-preview`
+ * Update `Stardog-Studio` to `current`
+ * Update `Chronograf` to `1.9`
+ * Update `Telegraf` to `1.19`
+ * Update `Influxdb2` to `v2.0.8`
+ * Update `Kudu` to `1.15`
+ * Update `Pinot` to `0.8.0`
+ * Update `Pinot` to `0.8.0`
+ * Update `Prometheus` to `v2.29.1`
+ * Update `Prometheus Pushgateway` to `v1.4.1`
+ * Update `Prometheus Nodeexporter` to `v1.2.2`
+ * Update `Yugabyte` to `2.4.6.0-b10`
+ * Update `GraphDB` to `9.9.0`
+ * Update `Druid` to `0.21.1`
+ * Update `Solr` to `8.9`
+ * Update `Redis` to `6.0.15`
+ * Update `Memcached` to `1.6.10`
 
 ### Enhancements 
 
