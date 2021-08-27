@@ -117,6 +117,9 @@ networks:
   {% set __JUPYTER_version = JUPYTER_ALL_SPARK_version | default('latest') -%}
 {% endif -%}
 
+{% set __RSTUDIO_version = RSTUDIO_version | default('latest') -%}
+{% set __SHINY_SERVER_version = SHINY_SERVER_version | default('latest') -%}
+
 {% set __DATAIKU_DSS_version = DATAIKU_DSS_version | default('latest') -%}
 
 {% set __GRAFANA_version = GRAFANA_version | default('latest') -%}
@@ -362,6 +365,8 @@ networks:
   {% set AIRFLOW_enable = false -%}
   {% set ZEPPELIN_enable = false -%}
   {% set JUPYTER_enable = false -%}
+  {% set RSTUDIO_enable = false -%}
+  {% set SHINY_SERVER_enable = false -%}
   {% set DATAIKU_DSS_enable = false -%}
   {% set SUPERSET_enable = false -%}
   {% set REDASH_enable = false -%}
@@ -3835,6 +3840,55 @@ services:
     restart: {{container_restart_policy}}
 
 {% endif %}   {#  JUPYTER_enable  #}
+
+{%if RSTUDIO_enable | default(false) %}
+  #  ================================== RStudio ========================================== #
+  rstudio:
+    image: rocker/rstudio:{{__RSTUDIO_version}}
+    container_name: rstudio
+    hostname: rstudio
+    labels:
+      com.platys.webui.title: "RStudio UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:8787"
+    ports:
+      - "8787:8787"
+    environment:
+      PASSWORD: {{admin_password}}
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  RSTUDIO_enable  #}
+
+{%if SHINY_SERVER_enable | default(false) %}
+  #  ================================== Shiny Server ========================================== #
+  shiny-server:
+    image: rocker/{{ 'shiny' if (SHINY_SERVER_edition | lower) == 'base' else 'shiny-verse' }}:{{__SHINY_version}}
+    container_name: shiny-server
+    hostname: shiny-server
+    labels:
+      com.platys.webui.title: "Shiny Server UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:3838/appdir"
+    ports:
+      - "3838:3838"
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  SHINY_SERVER_enable  #}
 
 {%if DATAIKU_DSS_enable | default(false) %}
   #  ================================== Dataiku Data Science Studio  ========================================== #

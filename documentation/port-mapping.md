@@ -35,6 +35,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 3010 | 3000 | postman |
 3306 | 3306 | mysql |
 3307 | 3306 | datahub-mysql |
+3838 | 3838 | shiny-server | 
 4000 | 4000 | graphql-mesh |
 4004 | 4004 | log4brains |
 4040 | 4040 | spark-master (ui) |
@@ -112,6 +113,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 8124 | 8124 | axon-server |
 8161 | 8161 | activemq |
 8200 | 8200 | vault |
+8787 | 8787 | r-studio |
 8812 | 8812 | questdb |
 8888 | 8888 | hue |
 8978 | 8978 | cloudbeaver |

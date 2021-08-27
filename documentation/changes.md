@@ -12,6 +12,8 @@ The Modern Data Platform version 1.13.0 contains the following bug fixes and enh
  * Firefox Browser
  * Zipkin
  * Apache Tika Server
+ * RStudio
+ * Shiny Server
 
 ### New Cookbook Recipes
 
@@ -53,7 +55,7 @@ The Modern Data Platform version 1.13.0 contains the following bug fixes and enh
  * Update `Memcached` to `1.6.10`
  * Update `Grafana` to `8.1.2`
  * Update `QuestDB` to `6.0.4`
- * Update `Spark` to `3.1.1
+ * Update `Spark` to `3.1.1`
 
 ### Enhancements 
 
