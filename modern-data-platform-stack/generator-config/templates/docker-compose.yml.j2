@@ -3869,7 +3869,7 @@ services:
 {%if SHINY_SERVER_enable | default(false) %}
   #  ================================== Shiny Server ========================================== #
   shiny-server:
-    image: rocker/{{ 'shiny' if (SHINY_SERVER_edition | lower) == 'base' else 'shiny-verse' }}:{{__SHINY_version}}
+    image: rocker/{{ 'shiny' if (SHINY_SERVER_edition | lower) == 'base' else 'shiny-verse' }}:{{__SHINY_SERVER_version}}
     container_name: shiny-server
     hostname: shiny-server
     labels:
@@ -3916,6 +3916,44 @@ services:
     {% endif -%}   {#  use_timezone #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  DATAIKU_DSS_enable  #}
+
+{%if MLFLOW_SERVER_enable | default(false) %}
+  #  ================================== MLflow Server ========================================== #
+  mlflow_server:
+    image: trivadis/mlflow-server:{{__MLFLOW_SERVER_version}}
+    container_name: mlflow_server
+    hostname: mlflow_server
+    labels:
+      com.platys.webui.title: "MLflow UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28229"
+    ports:
+      - "28229:5000"
+    environment:
+      BACKEND_URI: postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgresql:5432/mlflow-db
+      ARTIFACT_ROOT: /mlflow-data
+      PORT: 5000
+    {%if MINIO_enable or external['S3_enable'] | default(false) %}
+      AWS_ACCESS_KEY_ID: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
+      AWS_SECRET_ACCESS_KEY: ${PLATYS_AWS_SECRET_ACCESS_KEY:-{{MINIO_secret_key}}}
+      MLFLOW_S3_ENDPOINT_URL: {{s3Endpoint if s3Endpoint is defined and s3Endpoint else omit}}
+      AWS_DEFAULT_REGION: {{s3DefaultRegion if s3DefaultRegion is defined and s3DefaultRegion else omit}}
+    {% endif %}
+
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {% if MLFLOW_SERVER_volume_map_data %}
+      - ./container-volume/mlflow/data:/mlflow-data
+    {% endif -%}   {#  use_timezone #}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    entrypoint: ./wait-for-it.sh db:3306 -t 90 -- mlflow server --backend-store-uri mysql+pymysql://${MYSQL_USER}:${MYSQL_PASSWORD}@db:3306/${MYSQL_DATABASE} --default-artifact-root s3://${AWS_BUCKET_NAME}/ -h 0.0.0.0
+    restart: {{container_restart_policy}}
+{% endif %}   {#  MLFLOW_SERVER_enable  #}
 
 {% if GRAFANA_enable | default(false) %}
   #  ================================== Grafana ========================================== #

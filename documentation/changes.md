@@ -14,6 +14,7 @@ The Modern Data Platform version 1.13.0 contains the following bug fixes and enh
  * Apache Tika Server
  * RStudio
  * Shiny Server
+ * MLflow Server
 
 ### New Cookbook Recipes
 
