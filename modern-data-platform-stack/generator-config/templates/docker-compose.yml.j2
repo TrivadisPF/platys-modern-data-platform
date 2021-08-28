@@ -3937,8 +3937,14 @@ services:
     ports:
       - "28229:5000"
     environment:
-      BACKEND_URI: postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgresql:5432/mlflow-db
-      ARTIFACT_ROOT: /mlflow-data
+    {%if MLFLOW_SERVER_backend | default('file') == 'postgres' %}
+      BACKEND_URI: postgresql+psycopg2://${MLFLOW_SERVER_db_user}:${MLFLOW_SERVER_db_password}@postgresql:5432/mlflowdb
+    {%elif MLFLOW_SERVER_backend | default('file') == 'mylsql' %}
+      BACKEND_URI: mysql+mysqldb://${MLFLOW_SERVER_db_user}:${MLFLOW_SERVER_db_password}@mlflowdb:3306/mlflowdb
+    {%elif MLFLOW_SERVER_backend | default('file') == 'file' %}
+      BACKEND_URI: /mlruns
+    {% endif %}   {#  MLFLOW_SERVER_backend  #}
+      ARTIFACT_ROOT: {{MLFOW_SERVER_artifact_root | default ('/mlruns')}}
       PORT: 5000
     {%if MINIO_enable or external['S3_enable'] | default(false) %}
       AWS_ACCESS_KEY_ID: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
@@ -3953,7 +3959,7 @@ services:
     volumes:
       - ./data-transfer:/data-transfer
     {% if MLFLOW_SERVER_volume_map_data %}
-      - ./container-volume/mlflow/data:/mlflow-data
+      - ./container-volume/mlflow/data:/mlruns
     {% endif -%}   {#  use_timezone #}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
