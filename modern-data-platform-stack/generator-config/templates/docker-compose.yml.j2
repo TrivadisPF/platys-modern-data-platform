@@ -124,6 +124,8 @@ networks:
 
 {% set __MLFLOW_SERVER_version = MLFLOW_SERVER_version | default('latest') -%}
 
+{% set __OPTUNA_version = OPTUNA_version | default('latest') -%}
+
 {% set __GRAFANA_version = GRAFANA_version | default('latest') -%}
 
 {% set __KIBANA_version = KIBANA_version | default('latest') -%}
@@ -369,6 +371,8 @@ networks:
   {% set JUPYTER_enable = false -%}
   {% set RSTUDIO_enable = false -%}
   {% set SHINY_SERVER_enable = false -%}
+  {% set MLFLOW_SERVER_enable = false -%}
+  {% set OPTUNA_enable = false -%}
   {% set DATAIKU_DSS_enable = false -%}
   {% set SUPERSET_enable = false -%}
   {% set REDASH_enable = false -%}
@@ -3952,7 +3956,6 @@ services:
       MLFLOW_S3_ENDPOINT_URL: {{s3Endpoint if s3Endpoint is defined and s3Endpoint else omit}}
       AWS_DEFAULT_REGION: {{s3DefaultRegion if s3DefaultRegion is defined and s3DefaultRegion else omit}}
     {% endif %}
-
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -3967,6 +3970,30 @@ services:
     {% endif -%}   {#  use_timezone #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  MLFLOW_SERVER_enable  #}
+
+{% if (OPTUNA_enable) | default(false) %}
+  #  ================================== Optuna  ========================================== #
+  optuna:
+    image: optuna/optuna:{{__OPTUNA_version}}
+    container_name: optuna
+    hostname: optuna
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        while [ 1 -eq 1 ];do sleep 60;done
+    restart: {{container_restart_policy}}
+{% endif %}   {# OPTUNA_enable and KCAT_enable #}
 
 {% if GRAFANA_enable | default(false) %}
   #  ================================== Grafana ========================================== #
