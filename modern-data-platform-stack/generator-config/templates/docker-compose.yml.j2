@@ -3854,6 +3854,8 @@ services:
       - "8787:8787"
     environment:
       PASSWORD: {{admin_password}}
+      ROOT: '{{RSTUDIO_run_as_root | default(false)}}'
+      DISABLE_AUTH: '{{RSTUDIO_disable_auth | default(false)}}'
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -3874,15 +3876,19 @@ services:
     hostname: shiny-server
     labels:
       com.platys.webui.title: "Shiny Server UI"
-      com.platys.webui.url: "http://${PUBLIC_IP}:3838/appdir"
+      com.platys.webui.url: "http://${PUBLIC_IP}:3838"
     ports:
       - "3838:3838"
-    {%if use_timezone | default(false) %}
     environment:
+      APPLICATION_LOGS_TO_STDOUT: 'false'
+    {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
+    {% if SHINY_SERVER_volume_map_apps %}
+      - ./plugins/shiny-server/apps:/srv/shiny-server'
+    {% endif -%}   {#  use_timezone #}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -3951,7 +3957,6 @@ services:
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
-    entrypoint: ./wait-for-it.sh db:3306 -t 90 -- mlflow server --backend-store-uri mysql+pymysql://${MYSQL_USER}:${MYSQL_PASSWORD}@db:3306/${MYSQL_DATABASE} --default-artifact-root s3://${AWS_BUCKET_NAME}/ -h 0.0.0.0
     restart: {{container_restart_policy}}
 {% endif %}   {#  MLFLOW_SERVER_enable  #}
 
