@@ -337,6 +337,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28227 | 8080 | debezium-ui |
 28228 | 9998 | tikka-server |
 28229 | 5000 | mlflow-server |
+28230 | 8080 | optuna-dashboard |
 
 ## Ports > 28500
 

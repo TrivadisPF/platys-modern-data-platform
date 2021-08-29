@@ -15,6 +15,8 @@ The Modern Data Platform version 1.13.0 contains the following bug fixes and enh
  * RStudio
  * Shiny Server
  * MLflow Server
+ * Optuna
+ * Optuna Dashboard
 
 ### New Cookbook Recipes
 
