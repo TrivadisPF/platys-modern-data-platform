@@ -1,9 +1,8 @@
 # Postgresql
 
-* **Homepage**: <www.postgresql.org>
-* **Documentation**: <https://www.postgresql.org/docs/>
+**[Website](http://www.postgresql.org)** | **[Documentation](https://www.postgresql.org/docs/)** | **[GitHub](https://github.com/postgres/postgres)**
 
-
+### Init
 ```
 platys init --enable-services POSTRESQL
 platys gen

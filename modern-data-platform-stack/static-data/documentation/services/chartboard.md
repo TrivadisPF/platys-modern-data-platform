@@ -1,8 +1,6 @@
 # Chartboard
 
-* **Homepage**: <https://github.com/the-maux/Chartboard>
-* **Documentation**: <https://github.com/the-maux/Chartboard>
-
+**[Website](https://github.com/the-maux/Chartboard)** | **[Documentation](https://github.com/the-maux/tipboard/wiki)** | **[GitHub](https://github.com/the-maux/Chartboard)**
 
 ```
 platys init --enable-services CHARTBOARD
