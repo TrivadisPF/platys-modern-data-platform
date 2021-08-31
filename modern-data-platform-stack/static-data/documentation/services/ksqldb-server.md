@@ -7,3 +7,8 @@ platys init --enable-services KAFKA_KSQLDB
 platys gen
 ```
 
+### Running the CLI
+
+```
+docker exec -it ksqldb-cli ksql http://ksqldb-server-1:8088
+```
