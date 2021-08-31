@@ -28,7 +28,7 @@ The Modern Data Platform version 1.13.0 contains the following bug fixes and enh
  * Update `Marquez` to `0.17.0` 
  * Update `Trino` to `360`
  * Update `Starburstdata` to `359-e`
- * Update `DataHub` to `0.8.3`
+ * Update `DataHub` to `0.8.11`
  * Update `Minio` to `RELEASE.2021-06-17T00-10-46Z`
  * Update `ksqlDB` to `0.20.0`
  * Update `tile38` to `1.25.2`
