@@ -249,6 +249,7 @@ networks:
 {% set __LAKEFS_version = LAKEFS_version | default('latest') -%}
 
 {% set __CODE_SERVER_version = CODE_SERVER_version | default('latest') -%}
+{% set __EXCALIDRAW_version = EXCALIDRAW_version | default('latest') -%}
 {% set __FIREFOX_version = FIREFOX_version | default('latest') -%}
 {% set __FILE_BROWSER_version = FILE_BROWSER_version | default('latest') -%}
 {% set __VAULT_version = VAULT_version | default('latest') -%}
@@ -450,6 +451,7 @@ networks:
   {% set MICROCKS_enable = false -%}
   {% set ZIPKIN_enable = false -%}
   {% set CODE_SERVER_enable = false -%}
+  {% set EXCALIDRAW_enable = false -%}
   {% set FIREFOX_enable = false -%}
   {% set FILE_BROWSER_enable = false -%}
   {% set CADVISOR_enable = false -%}
@@ -7499,6 +7501,35 @@ services:
     {% endif -%}   {#  use_timezone #}
     restart: unless-stopped
 {% endif %}   {# CODE_SERVER_enable #}
+
+
+{% if EXCALIDRAW_enable | default(false) %}
+  #  ================================== Excalidraw ================= #
+  excalidraw:
+    image: excalidraw/excalidraw:{{__EXCALIDRAW_version}}
+    container_name: excalidraw
+    hostname: excalidraw
+    labels:
+      com.platys.webui.title: "Excalidraw UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28140"
+    ports:
+      - 28231:80
+    stdin_open: true
+    healthcheck:
+      disable: true
+    environment:
+      NODE_ENV: 'development'
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/home/coder/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: unless-stopped
+{% endif %}   {# EXCALIDRAW_enable #}
 
 {% if FIREFOX_enable | default(false) %}
   #  ================================== Firefox Browser ================= #

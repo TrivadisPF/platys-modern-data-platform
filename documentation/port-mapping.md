@@ -338,6 +338,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28228 | 9998 | tikka-server |
 28229 | 5000 | mlflow-server |
 28230 | 8080 | optuna-dashboard |
+28231 | 80 | excalidraw |
 
 ## Ports > 28500
 
