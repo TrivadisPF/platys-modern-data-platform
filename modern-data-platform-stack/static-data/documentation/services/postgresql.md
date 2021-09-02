@@ -1,5 +1,7 @@
 # Postgresql
 
+PostgreSQL is a powerful, open source object-relational database system with over 30 years of active development that has earned it a strong reputation for reliability, feature robustness, and performance. 
+
 **[Website](http://www.postgresql.org)** | **[Documentation](https://www.postgresql.org/docs/)** | **[GitHub](https://github.com/postgres/postgres)**
 
 ### Init

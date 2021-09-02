@@ -1,5 +1,7 @@
 # ksqlDB
 
+The database purpose-built for stream processing applications. 
+
 **[Website](https://ksqldb.io/)** | **[Documentation](https://ksqldb.io/quickstart.html)** | **[GitHub](https://github.com/confluentinc/ksql)**
 
 ```
