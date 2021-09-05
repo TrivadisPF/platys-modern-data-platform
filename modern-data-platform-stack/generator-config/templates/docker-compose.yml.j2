@@ -4634,6 +4634,7 @@ services:
       - CASSANDRA_CLUSTER_NAME="Test Cluster"
       - CASSANDRA_DC=se1
       - CASSANDRA_ENDPOINT_SNITCH=GossipingPropertyFileSnitch
+      - LOCAL_JMX=no
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -4669,6 +4670,43 @@ services:
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
     restart: {{container_restart_policy}}
+
+  reaper:
+    image: cassandra-reaper:latest
+    container_name: reaper
+    hostname: reaper
+    env_file:
+      - ./docker-services/reaper/reaper.env
+    labels:
+      com.platys.webui.title: "Reaper Application UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28232"
+      com.platys.webui.title: "Reaper Admin UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28233"
+    ports:
+      - "28232:8080"
+      - "28233:8081"
+    environment:
+      - REAPER_STORAGE_TYPE=memory
+      - REAPER_AUTO_SCHEDULING_ENABLED=true
+      - REAPER_AUTO_SCHEDULING_INITIAL_DELAY_PERIOD="PT15S"
+      - REAPER_AUTO_SCHEDULING_TIME_BEFORE_FIRST_SCHEDULE="PT1M"
+      - REAPER_AUTO_SCHEDULING_PERIOD_BETWEEN_POLLS="PT1M"
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+#      - ./data/reaper:/var/log/cassandra-reaper
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
 {% endif %}   {#  CASSANDRA_enable #}
 
 {% if DATASTAX_enable | default(false) %}

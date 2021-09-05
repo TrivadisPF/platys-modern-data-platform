@@ -339,6 +339,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28229 | 5000 | mlflow-server |
 28230 | 8080 | optuna-dashboard |
 28231 | 80 | excalidraw |
+28232 | 8080 | reaper (app UI) |
+28233 | 8081 | reaper (admin UI) |
 
 ## Ports > 28500
 
