@@ -81,6 +81,8 @@ networks:
   {% set __CASSANDRA_version = CASSANDRA4_version  -%}
 {% endif -%}
 
+{% set __REAPER_version = REAPER_version | default('latest') -%}
+
 {% set __DATASTAX_version = DATASTAX_version | default('latest') -%}
 
 {% set __ELASTICSEARCH_version = ELASTICSEARCH_version | default('latest') -%}
@@ -4671,8 +4673,9 @@ services:
     {% endif -%}   {#  use_timezone #}
     restart: {{container_restart_policy}}
 
+  {% if REAPER_enable | default(false) %}
   reaper:
-    image: cassandra-reaper:latest
+    image: cassandra-reaper:{{__REAPER_version}}
     container_name: reaper
     hostname: reaper
     env_file:
@@ -4705,6 +4708,7 @@ services:
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
+    {% endif %}   {#  REAPER_enable #}
 {% endif %}   {#  CASSANDRA_enable #}
 
 {% if DATASTAX_enable | default(false) %}
