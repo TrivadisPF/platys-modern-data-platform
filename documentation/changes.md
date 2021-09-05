@@ -44,7 +44,7 @@ The Modern Data Platform version 1.13.0 contains the following bug fixes and enh
  * Update `Stardog-Studio` to `current`
  * Update `Chronograf` to `1.9`
  * Update `Telegraf` to `1.19`
- * Update `Influxdb2` to `v2.0.8`
+ * Update `Influxdb2` to `2.0.8` (switch to official docker image)
  * Update `Kudu` to `1.15`
  * Update `Pinot` to `0.8.0`
  * Update `Pinot` to `0.8.0`
