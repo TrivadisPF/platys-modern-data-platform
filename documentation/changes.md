@@ -55,7 +55,7 @@ The Modern Data Platform version 1.13.0 contains the following bug fixes and enh
  * Update `GraphDB` to `9.9.0`
  * Update `Druid` to `0.21.1`
  * Update `Solr` to `8.9`
- * Update `Redis` to `6.0.15`
+ * Update `Redis` to `6.2`
  * Update `Memcached` to `1.6.10`
  * Update `Grafana` to `8.1.2`
  * Update `QuestDB` to `6.0.4`
