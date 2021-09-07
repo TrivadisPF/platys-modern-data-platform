@@ -764,14 +764,20 @@ services:
       - "{{external_port}}:{{port}}"
     environment:
       SCHEMA_REGISTRY_HOST_NAME: schema-registry-{{loop.index}}
+      SCHEMA_REGISTRY_LISTENERS: "http://0.0.0.0:{{port}}"
     {% if KAFKA_SCHEMA_REGISTRY_use_zookeeper_election %}
       SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL: 'zookeeper-1:2181'
     {% endif %}
       SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: '{{ns.bootstrapServers}}'
-      SCHEMA_REGISTRY_MASTER_ELIGIBILITY: "true"
+      SCHEMA_REGISTRY_KAFKASTORE_SECURITY_PROTOCOL: PLAINTEXT
+      SCHEMA_REGISTRY_LEADER_ELIGIBILITY: "{{KAFKA_SCHEMA_REGISTRY_leader_eligibility}}"
+      SCHEMA_REGISTRY_MODE_MUTABILITY: "{{KAFKA_SCHEMA_REGISTRY_mode_mutability}}"
+      SCHEMA_REGISTRY_SCHEMA_COMPATIBILITY_LEVEL: "{{KAFKA_SCHEMA_REGISTRY_schema_compatibility_level}}"
       SCHEMA_REGISTRY_KAFKASTORE_TOPIC_REPLICATION_FACTOR: {{KAFKA_SCHEMA_REGISTRY_replication_factor}}
       SCHEMA_REGISTRY_ACCESS_CONTROL_ALLOW_ORIGIN: '*'
       SCHEMA_REGISTRY_ACCESS_CONTROL_ALLOW_METHODS: 'GET,POST,PUT,OPTIONS'
+      SCHEMA_REGISTRY_LOG4J_ROOT_LOGLEVEL: INFO
+      SCHEMA_REGISTRY_DEBUG: {{KAFKA_SCHEMA_REGISTRY_debug}}
     {% if KAFKA_jmx_monitoring_prometheus_enable %}
       EXTRA_ARGS: -javaagent:/usr/share/jmx-exporter/jmx_prometheus_javaagent-0.12.0.jar=1234:/usr/share/jmx-exporter/confluent_schemaregistry.yml
     {% endif -%}
@@ -4695,7 +4701,7 @@ services:
       - REAPER_JMX_AUTH_USERNAME=reaper
       - REAPER_JMX_AUTH_PASSWORD=abc123!
       - CRYPTO_SYSTEM_PROPERTY_SECRET="CRYPTO_SECRET"
-      - CRYPTO_SECRET="secret"      
+      - CRYPTO_SECRET="secret"
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
