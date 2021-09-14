@@ -341,6 +341,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28231 | 80 | excalidraw |
 28232 | 8080 | reaper (app UI) |
 28233 | 8081 | reaper (admin UI) |
+28234 | 8080 | KIE Server (drools) |
 
 ## Ports > 28500
 

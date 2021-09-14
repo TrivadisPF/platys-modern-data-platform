@@ -133,6 +133,8 @@ networks:
 {% set __OPTUNA_version = OPTUNA_version | default('latest') -%}
 {% set __OPTUNA_DASHBOARD_version = OPTUNA_DASHBOARD_version | default('latest') -%}
 
+{% set __KIE_SERVER_version = KIE_SERVER_version | default('latest') -%}
+
 {% set __GRAFANA_version = GRAFANA_version | default('latest') -%}
 
 {% set __KIBANA_version = KIBANA_version | default('latest') -%}
@@ -390,6 +392,7 @@ networks:
   {% set MLFLOW_SERVER_enable = false -%}
   {% set OPTUNA_enable = false -%}
   {% set DATAIKU_DSS_enable = false -%}
+  {% set KIE_SERVER_enable = false -%}
   {% set SUPERSET_enable = false -%}
   {% set REDASH_enable = false -%}
   {% set SMASHING_enable = false -%}
@@ -4043,6 +4046,33 @@ services:
     restart: {{container_restart_policy}}
   {% endif %}   {# OPTUNA_DASHBOARD_enable  #}
 {% endif %}   {# OPTUNA_enable  #}
+
+{%if KIE_SERVER_enable | default(false) %}
+  #  ================================== Drools KIE Server  ========================================== #
+  kie-server:
+    image: jboss/kie-server-:{{__KIE_SERVER_version}}
+    container_name: kie-server
+    hostname: kie-server
+    labels:
+      com.platys.restapi.title: "Drools KIE Server REST API"
+      com.platys.restapi.url: "http://${PUBLIC_IP}:28234"
+    ports:
+      - "28234:8080"
+    environment:
+      KIE_SERVER_LOCATION: http://kie-server:8080/kie-server/services/rest/server
+      KIE_SERVER_CONTROLLER: http://business-central:8080/business-central/rest/controller
+      KIE_MAVEN_REPO: http://business-central:8080/business-central/maven2
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  KIE_SERVER_enable  #}
 
 {% if GRAFANA_enable | default(false) %}
   #  ================================== Grafana ========================================== #
