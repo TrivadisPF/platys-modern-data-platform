@@ -55,6 +55,8 @@ networks:
   {% set __ZEPPELIN_version = ZEPPELIN_version ~ "-spark" ~ "2.4" ~ "-hadoop2.8" -%}
 {% endif -%}
 
+{% set __FLINK_version = FLINK_version | default('latest') -%}
+
 {% set __TIKA_version = TIKA_version | default('latest') -%}
 
 {% set __HIVE_version = HIVE_version | default('latest') -%}
@@ -2226,6 +2228,50 @@ services:
       - "8998:8998"
     restart: always
 {% endif %}   {#  SPARK_livy_enable #}
+
+{% if FLINK_enable | default(false) %}
+  #  ================================== Apache Flink ========================================== #
+  flink-jobmanager:
+    image: flink:{{__FLINK_version}}
+    container_name: flink-jobmanager
+    hostname: flink-jobmanager
+    labels:
+      com.platys.webui.title: "Flink JobManager UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28235/"
+    ports:
+      - "28235:8081"
+    environment:
+      FLINK_PROPERTIES: "jobmanager.rpc.address: jobmanager"
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    command: jobmanager
+    restart: always
+
+  flink-taskmanager:
+    image: flink:{{__FLINK_version}}
+    container_name: flink-taskmanager
+    hostname: flink-taskmanager
+    environment:
+      FLINK_PROPERTIES: "jobmanager.rpc.address: jobmanager taskmanager.numberOfTaskSlots: 2"
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    command: taskmanager
+    restart: always
+{% endif %}   {#  FLINK_enable #}
 
 {% if TIKA_enable | default(false) %}
   #  ================================== Apache Tika Server ========================================== #
