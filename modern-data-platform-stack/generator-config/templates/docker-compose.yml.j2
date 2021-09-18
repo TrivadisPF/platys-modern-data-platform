@@ -56,6 +56,7 @@ networks:
 {% endif -%}
 
 {% set __FLINK_version = FLINK_version | default('latest') -%}
+{% set __NUSSKNACKER_version = NUSSKNACKER_version | default('latest') -%}
 
 {% set __TIKA_version = TIKA_version | default('latest') -%}
 
@@ -2299,6 +2300,27 @@ services:
     {% endif -%}   {#  use_timezone #}
     restart: always
   {% endif -%}   {#  FLINK_SQL_CLI_enable #}
+
+  nussknacker_designer:
+    image: touk/nussknacker:{{__NUSSKNACKER_version}}
+    container_name: nussknacker_designer
+    hostname: nussknacker_designer
+    labels:
+      com.platys.webui.title: "Nussknacker UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28237"
+    ports:
+      - "28237:8080"
+    environment:
+      #multiple, comma separated, config files can be used. They will be merged in order, via HOCON fallback mechanism
+      #https://github.com/lightbend/config/blob/master/HOCON.md#config-object-merging-and-file-merging
+      CONFIG_FILE: /opt/nussknacker/conf/application.conf,/opt/nussknacker/conf/nussknacker.conf
+      JDK_JAVA_OPTIONS: -Xmx256M
+      FLINK_REST_URL: http://flink-jobmanager:8081
+      FLINK_QUERYABLE_STATE_PROXY_URL: flink-taskmanager-1:9069
+      KAFKA_ADDRESS: kafka-1:19092
+      SCHEMA_REGISTRY_URL: http://schema-registry-1:8081
+      COUNTS_URL: http://influxdb-1:8086/query
+      OPENAPI_SERVICE_URL: http://customerservice:5000
 {% endif %}   {#  FLINK_enable #}
 
 {% if TIKA_enable | default(false) %}
@@ -4147,7 +4169,7 @@ services:
     restart: {{container_restart_policy}}
 
   kie-server:
-    image: jboss/kie-server-:{{__KIE_SERVER_version}}
+    image: jboss/kie-server:{{__KIE_SERVER_version}}
     container_name: kie-server
     hostname: kie-server
     labels:
