@@ -2254,10 +2254,12 @@ services:
     command: jobmanager
     restart: always
 
-  flink-taskmanager:
+  {% for num in range(FLINK_taskmanagers | default(1) ) %}
+
+  flink-taskmanager-{{loop.index}}:
     image: flink:{{__FLINK_version}}
-    container_name: flink-taskmanager
-    hostname: flink-taskmanager
+    container_name: flink-taskmanager-{{loop.index}}
+    hostname: flink-taskmanager-{{loop.index}}
     environment:
       FLINK_PROPERTIES: "jobmanager.rpc.address: jobmanager taskmanager.numberOfTaskSlots: 2"
     {%if use_timezone | default(false) %}
@@ -2271,6 +2273,29 @@ services:
     {% endif -%}   {#  use_timezone #}
     command: taskmanager
     restart: always
+  {% endfor %}
+
+  {% if FLINK_SQL_CLI_enable | default(false) %}
+  flink-sql-cli:
+    image: trivadis/flink-sql-cli:{{__FLINK_version}}
+    container_name: flink-sql-cli
+    hostname: flink-sql-cli
+    environment:
+      FLINK_JOBMANAGER_HOST: flink-jobmanager
+      ZOOKEEPER_CONNECT: zookeeper-1
+      KAFKA_BOOTSTRAP: kafka-1:19092
+      MYSQL_HOST: mysql-1
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: always
+  {% endif -%}   {#  FLINK_SQL_CLI_enable #}
 {% endif %}   {#  FLINK_enable #}
 
 {% if TIKA_enable | default(false) %}
