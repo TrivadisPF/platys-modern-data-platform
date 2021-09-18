@@ -342,7 +342,9 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28232 | 8080 | reaper (app UI) |
 28233 | 8081 | reaper (admin UI) |
 28234 | 8080 | KIE Server (drools) |
-28235 | 8081 | Flink Jobmanager |
+28235 | 8001 | Business Central Workbench (drools) |
+28236 | 8080 | Business Central Workbench (drools) |
+28237 | 8081 | Flink Jobmanager |
 
 ## Ports > 28500
 
