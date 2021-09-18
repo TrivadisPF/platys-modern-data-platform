@@ -344,7 +344,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28234 | 8080 | KIE Server (drools) |
 28235 | 8001 | Business Central Workbench (drools) |
 28236 | 8080 | Business Central Workbench (drools) |
-28237 | 8081 | Flink Jobmanager |
+28237 | 8081 | Flink JobManager |
+28238 | 8081 | Nussknacker |
 
 ## Ports > 28500
 
