@@ -19,6 +19,7 @@ The Modern Data Platform version 1.13.0 contains the following bug fixes and enh
  * Optuna Dashboard
  * Excalidraw
  * Drools KIE Server
+ * Drools Business Central Workbench
  * Flink
 
 ### New Cookbook Recipes
@@ -28,7 +29,7 @@ The Modern Data Platform version 1.13.0 contains the following bug fixes and enh
 ### Version upgrades 
 
  * Update `Confluent` to `6.2.0` 
- * Update `Marquez` to `0.17.0` 
+ * Update `Marquez` to `0.18.0` 
  * Update `Trino` to `361`
  * Update `Starburstdata` to `360-e`
  * Update `DataHub` to `0.8.11`
