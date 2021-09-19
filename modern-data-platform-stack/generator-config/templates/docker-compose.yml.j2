@@ -909,7 +909,6 @@ services:
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
-    restart: {{container_restart_policy}}
     {%if loop.index == 1 | default(false) %}
     command:
       # In the command section, $ are replaced with $$ to avoid the error 'Invalid interpolation format for "command" option'
@@ -927,6 +926,7 @@ services:
         #
         sleep infinity
     {% endif %}
+    restart: {{container_restart_policy}}
   {% endfor %}
 {% endif %}   {# KAFKA_enable and KAFKA_CONNECT_enable  #}
 
@@ -937,6 +937,8 @@ services:
     {% set port = 8088 %}
     {% set jmx_external_port = 1095 + loop.index - 1 %}
     {% set jmx_port = 1095 %}
+    {% set connect_external_port = 8083 + loop.index - 1 %}
+    {% set connect_port = 8083 + loop.index - 1 %}
   ksqldb-server-{{loop.index}} :
     image: confluentinc/ksqldb-server:{{__KAFKA_KSQLDB_version}}
     hostname: ksqldb-server-{{loop.index}}
@@ -1006,6 +1008,25 @@ services:
     {% if KAFKA_jmx_monitoring_prometheus_enable %}
       KSQL_OPTS: -javaagent:/usr/share/jmx-exporter/jmx_prometheus_javaagent-0.12.0.jar=1234:/usr/share/jmx-exporter/confluent_ksql.yml
     {% endif -%}
+    {% if KAFKA_KSQLDB_use_embedded_connect %}
+      KSQL_KSQL_CONNECT_WORKER_CONFIG: "/etc/ksqldb/connect.properties"
+      # Kafka Connect config below
+      KSQL_CONNECT_BOOTSTRAP_SERVERS: "kafka-1:19092"
+      KSQL_CONNECT_REST_ADVERTISED_HOST_NAME: 'ksqldb-server-{{loop.index}}'
+      KSQL_CONNECT_REST_PORT: {{connect_port}}
+      KSQL_CONNECT_GROUP_ID: ksqldb-kafka-connect-group-01
+      KSQL_CONNECT_CONFIG_STORAGE_TOPIC: _ksqldb-kafka-connect-group-01-configs
+      KSQL_CONNECT_OFFSET_STORAGE_TOPIC: _ksqldb-kafka-connect-group-01-offsets
+      KSQL_CONNECT_STATUS_STORAGE_TOPIC: _ksqldb-kafka-connect-group-01-status
+      KSQL_CONNECT_KEY_CONVERTER: org.apache.kafka.connect.storage.StringConverter
+      KSQL_CONNECT_VALUE_CONVERTER: io.confluent.connect.avro.AvroConverter
+      KSQL_CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL: 'http://schema-registry-1:8081'
+      KSQL_CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: '1'
+      KSQL_CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: '1'
+      KSQL_CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: '1'
+      KSQL_CONNECT_LOG4J_APPENDER_STDOUT_LAYOUT_CONVERSIONPATTERN: "[%d] %p %X{connector.context}%m (%c:%L)%n"
+      KSQL_CONNECT_PLUGIN_PATH: '/usr/share/java,/etc/kafka-connect/addl-plugins'
+    {% endif -%}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -1013,6 +1034,7 @@ services:
       - ./data-transfer:/data-transfer
       - ./plugins/ksql:/etc/ksqldb/ext
       - ./conf/ksqldb/etc/log4j.properties:/etc/ksqldb/log4j.properties
+      - ./plugins/kafka-connect:/etc/kafka-connect/addl-plugins
     {% if KAFKA_jmx_monitoring_prometheus_enable %}
       - ./scripts/kafka/jmx-exporter/:/usr/share/jmx-exporter
     {% endif -%}
@@ -1020,6 +1042,23 @@ services:
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
+    {%if KAFKA_KSQLDB_use_embedded_connect and loop.index == 1 | default(false) %}
+    command:
+      # In the command section, $ are replaced with $$ to avoid the error 'Invalid interpolation format for "command" option'
+      - bash
+      - -c
+      - |
+        echo "Installing Connectors"
+          for i in $$(echo "{{KAFAK_KSQLDB_connect_connectors}}" | sed "s/,/ /g")
+        do
+          confluent-hub install --no-prompt --component-dir /etc/kafka-connect/addl-plugins --verbose "$$i"
+        done
+        #
+        echo "Launching Kafka Connect worker"
+        /etc/confluent/docker/run &
+        #
+        sleep infinity
+    {% endif %}
     restart: {{container_restart_policy}}
   {% endfor %}
 
