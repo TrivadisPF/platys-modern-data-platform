@@ -9,6 +9,12 @@ platys init --enable-services KAFKA_KSQLDB
 platys gen
 ```
 
+### List Configuration
+
+```
+docker exec -ti ksqldb-server-1 cat /etc/ksqldb/ksqldb-server.properties
+```
+
 ### Running the CLI
 
 ```
