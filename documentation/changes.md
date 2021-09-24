@@ -74,6 +74,7 @@ The Modern Data Platform version 1.13.0 contains the following bug fixes and enh
  * Rename `kafkacat` to `kcat` (to reflect the GitHub project)
  * Add support for both Cassandra 3 and Cassandra 4
  * Add additional configuration properties to Confluent Schema Registry
+ * Support installing Python packages when starting Jupyter
 
 ### Bug Fixes 
 
