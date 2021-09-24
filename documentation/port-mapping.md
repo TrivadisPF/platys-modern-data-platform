@@ -119,15 +119,22 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 8978 | 8978 | cloudbeaver |
 8983 | 8983 | solr |
 8998 | 8998 | livy |
-9000 | 9000 | minio |
-9001 | 9001 | mosquitto-1 |
-9002 | 9002 | mosquitto-2 |
-9003 | 9003 | mosquitto-3 |
+9000 | 9000 | minio-1 |
+9001 | 9000 | minio-2 |
+9002 | 9000 | minio-3 |
+9003 | 9000 | minio-4 |
 9009 | 9009 | questdb |
+9010 | 9010 | minio-1 ui |
+9011 | 9011 | minio-2 ui |
+9012 | 9012 | minio-3 ui |
+9013 | 9013 | minio-4 ui |
 9042 | 9042 | dse-1 |
 9043 | 9042 | dse-2 |
 9044 | 9042 | dse-3 |
 9047 | 9047 | dremio |
+9101 | 9001 | mosquitto-1 |
+9102 | 9002 | mosquitto-2 |
+9103 | 9003 | mosquitto-3 |
 9200 | 9200 | elasticsearch-1 |
 9300 | 9300 | elasticsearch-1 |
 9160 | 9160 | cassandra-1 |
