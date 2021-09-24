@@ -1581,6 +1581,7 @@ services:
     environment:
       KAFKA_CLUSTERS_0_NAME: local
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: '{{ns.bootstrapServers}}'
+      KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper-1:2181
       KAFKA_CLUSTERS_0_KSQLDBSERVER: 'ksqldb-server-1'
       KAFKA_CLUSTERS_0_SCHEMAREGISTRY: 'http://schema-registry-1:8081'
       KAFKA_CLUSTERS_0_JMXPORT: '9992'
@@ -3994,8 +3995,11 @@ services:
       AWS_SECRET_ACCESS_KEY: ${PLATYS_AWS_SECRET_ACCESS_KEY:-{{MINIO_secret_key}}}
       AWS_ENDPOINT: {{s3Endpoint if s3Endpoint is defined and s3Endpoint else omit}}
       AWS_DEFAULT_REGION: {{s3DefaultRegion if s3DefaultRegion is defined and s3DefaultRegion else omit}}
+      {%if MLFLOW_SERVER_enable | default(false) %}
+      MLFLOW_S3_ENDPOINT_URL: {{s3Endpoint | default(omit) }}
+      MLFLOW_TRACKING_URI: http://mlflow-server:5000
+      {% endif %}
     {% endif %}
-
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -4118,13 +4122,15 @@ services:
     {%elif MLFLOW_SERVER_backend | default('file') == 'file' %}
       BACKEND_URI: '/mlruns'
     {% endif -%}   {#  MLFLOW_SERVER_backend  #}
-      ARTIFACT_ROOT: '{{MLFOW_SERVER_artifact_root | default ('/mlruns')}}'
       PORT: 5000
     {%if MINIO_enable or external['S3_enable'] | default(false) %}
       AWS_ACCESS_KEY_ID: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
       AWS_SECRET_ACCESS_KEY: ${PLATYS_AWS_SECRET_ACCESS_KEY:-{{MINIO_secret_key}}}
       MLFLOW_S3_ENDPOINT_URL: {{s3Endpoint if s3Endpoint is defined and s3Endpoint else omit}}
       AWS_DEFAULT_REGION: {{s3DefaultRegion if s3DefaultRegion is defined and s3DefaultRegion else omit}}
+      ARTIFACT_ROOT: '{{MLFOW_SERVER_artifact_root | default ('s3://mlruns/')}}'
+    {% else %}
+      ARTIFACT_ROOT: '{{MLFOW_SERVER_artifact_root | default ('/mlruns')}}'
     {% endif %}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
@@ -7076,6 +7082,9 @@ services:
       - |
         sleep 10
         mc mb --ignore-existing minio-1/admin-bucket
+    {% if MLFLOW_SERVER_enable | default(false) %}
+        mc mb --ignore-existing minio-1/mlruns
+    {% endif %}   {#  MLFLOW_SERVER_enable #}
         for i in $$(echo "{{MINIO_default_buckets}}" | sed "s/,/ /g")
         do
           mc mb --ignore-existing minio-1/$$i
