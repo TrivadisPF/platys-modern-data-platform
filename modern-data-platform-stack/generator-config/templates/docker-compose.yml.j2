@@ -30,6 +30,7 @@ networks:
 {% set __KAFKA_AKHQ_version = KAFKA_AKHQ_version | default('latest') -%}
 {% set __KAFKA_UI_version = KAFKA_UI_version | default('latest') -%}
 {% set __KAFKA_EAGLE_version = KAFKA_EAGLE_version | default('latest') -%}
+{% set __KOWL_version = KOWL_version | default('latest') -%}
 {% set __STREAMS_EXPLORER_version = STREAMS_EXPLORER_version | default('latest') -%}
 {% set __KAFKA_LAG_EXPORTER_version = KAFKA_LAG_EXPORTER_version | default('latest') -%}
 
@@ -369,6 +370,7 @@ networks:
   {% set KCAT_enable = false -%}
   {% set KAFKA_UI_enable = false -%}
   {% set KAFKA_EAGLE_enable = false -%}
+  {% set KOWL_enable = false -%}
   {% set KAFKA_LAG_EXPORTER_enable = false -%}
   {% set HADOOP_enable = false -%}
   {% set SPARK_enable = false -%}
@@ -1624,6 +1626,31 @@ services:
     {% endif -%}   {#  use_timezone #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  KAFKA_enable and KAFKA_UI_enable #}
+
+{% if ((KAFKA_enable or external['KAFKA_enable']) and KOWL_enable) | default(false) %}
+  #  ================================== Kafka Eagle ========================================== #
+  kowl:
+    image: quay.io/cloudhut/kowl:{{__KOWL_version}}
+    container_name: kowl
+    hostname: kowl
+    labels:
+      com.platys.webui.title: 'Kowl UI'
+      com.platys.webui.url: "http://${PUBLIC_IP}:28239"
+    ports:
+      - 28239:8080
+    environment:
+      KAFKA_BROKERS: '{{ns.bootstrapServers}}'
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  KAFKA_enable and KOWL_enable #}
 
 {% if ((KAFKA_enable or external['KAFKA_enable']) and STREAMS_EXPLORER_enable) | default(false) %}
   #  ================================== Streams Explorer ========================================== #

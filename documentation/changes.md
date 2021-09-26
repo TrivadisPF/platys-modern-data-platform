@@ -21,6 +21,7 @@ The Modern Data Platform version 1.13.0 contains the following bug fixes and enh
  * Drools KIE Server
  * Drools Business Central Workbench
  * Flink
+ * Kowl
 
 ### New Cookbook Recipes
 
@@ -64,7 +65,7 @@ The Modern Data Platform version 1.13.0 contains the following bug fixes and enh
  * Update `QuestDB` to `6.0.4`
  * Update `Spark` to `3.1.1`
  * Update `Minio` to `RELEASE.2021-09-15T04-54-25Z`
- * Update `` to `4.5.7`
+ * Update `Axon Server` to `4.5.7`
 
 ### Enhancements 
 

@@ -353,6 +353,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28236 | 8080 | Business Central Workbench (drools) |
 28237 | 8081 | Flink JobManager |
 28238 | 8081 | Nussknacker |
+28239 | 8080 | Kowl |
 
 ## Ports > 28500
 
