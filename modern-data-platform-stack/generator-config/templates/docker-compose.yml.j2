@@ -1585,10 +1585,14 @@ services:
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: '{{ns.bootstrapServers}}'
       KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper-1:2181
       KAFKA_CLUSTERS_0_KSQLDBSERVER: 'ksqldb-server-1'
+    {% if ( KAFKA_SCHEMA_REGISTRY_enable ) | default(false) %}
       KAFKA_CLUSTERS_0_SCHEMAREGISTRY: 'http://schema-registry-1:8081'
+    {% endif -%}   {#  SCHEMA_REGISTRY_enable #}
       KAFKA_CLUSTERS_0_JMXPORT: '9992'
+    {% if ( KAFKA_CONNECT_enable ) | default(false) %}
       KAFKA_CLUSTERS_0_KAFKACONNECT_0_NAME: 'kafka-connect'
       KAFKA_CLUSTERS_0_KAFKACONNECT_0_ADDRESS: 'http://kafka-connect-1:8083'
+    {% endif -%}   {#  KAFKA_CONNECT_enable #}
       KAFKA_CLUSTERS_0_READONLY: 'False'
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
@@ -1640,6 +1644,15 @@ services:
       - 28239:8080
     environment:
       KAFKA_BROKERS: '{{ns.bootstrapServers}}'
+    {% if ( KAFKA_SCHEMA_REGISTRY_enable ) | default(false) %}
+      KAFKA_SCHEMAREGISTRY_ENABLED: 'True'
+      KAFKA_SCHEMAREGISTRY_URLS: 'http://schema-registry-1:8081'
+    {% endif -%}   {#  SCHEMA_REGISTRY_enable #}
+    {% if ( KAFKA_CONNECT_enable ) | default(false) %}
+      CONNECT_ENABLED: 'True'
+      CONNECT_CLUSTERS_NAME: 'kafka-connect'
+      CONNECT_CLUSTERS_URL: 'http://kafka-connect-1:8083'
+    {% endif -%}   {#  KAFKA_CONNECT_enable #}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
