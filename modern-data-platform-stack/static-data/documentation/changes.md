@@ -46,7 +46,6 @@ The Modern Data Platform version 1.13.0 contains the following bug fixes and enh
  * Update `Influxdb2` to `v2.0.8`
  * Update `Kudu` to `1.15`
  * Update `Pinot` to `0.8.0`
- * Update `Pinot` to `0.8.0`
  * Update `Prometheus` to `v2.29.1`
  * Update `Prometheus Pushgateway` to `v1.4.1`
  * Update `Prometheus Nodeexporter` to `v1.2.2`
@@ -59,6 +58,7 @@ The Modern Data Platform version 1.13.0 contains the following bug fixes and enh
  * Update `Grafana` to `8.1.2`
  * Update `QuestDB` to `6.0.4`
  * Update `Spark` to `3.1.1`
+ * Update `Druid` to `0.22.0`
 
 ### Enhancements 
 
