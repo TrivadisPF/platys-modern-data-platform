@@ -67,6 +67,8 @@ The Modern Data Platform version 1.13.0 contains the following bug fixes and enh
  * Switch from `cp-enterprise-kafka` to `cp-server` image for Confluent Enterprise
  * Support multiple databases within one single Posgresql container
  * Rename `kafkacat` to `kcat` (to reflect the GitHub project)
+ * Add configuration to `kafka-ui` to support ksqlDB and Kafka-Connect
+ * Allow Python packages to be pre-installed when staring Jupyter service (config `JUPYTER_python_packages`)
 
 ### Bug Fixes 
 
