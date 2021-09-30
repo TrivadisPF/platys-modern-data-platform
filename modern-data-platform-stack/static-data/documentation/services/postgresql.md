@@ -4,11 +4,14 @@ PostgreSQL is a powerful, open source object-relational database system with ove
 
 **[Website](http://www.postgresql.org)** | **[Documentation](https://www.postgresql.org/docs/)** | **[GitHub](https://github.com/postgres/postgres)**
 
-### Init
+## How to enable?
+
 ```
 platys init --enable-services POSTRESQL
 platys gen
 ```
+
+## How to use it?
 
 ### Connect to the Postgresql CLI
 

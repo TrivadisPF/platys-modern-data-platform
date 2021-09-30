@@ -1,11 +1,17 @@
 # Timescale
 
+An open-source time-series SQL database optimized for fast ingest and complex queries. Packaged as a PostgreSQL extension. 
+
 **[Website](https://www.timescale.com/)** | **[Documentation](https://docs.timescale.com/)** | **[GitHub](https://github.com/timescale/timescaledb)**
+
+### How to enable?
 
 ```
 platys init --enable-services TIMESCALDEB
 platys gen
 ```
+
+### How to use it?
 
 ```
 docker exec -it timescaledb psql -U timescaledb
