@@ -43,4 +43,4 @@ Connect to Postgresql CLI to see that the table has been created:
 
 ```
 docker exec -ti postgresql psql -d demodb -U demo -c "SELECT * FROM driver"
-```
+```	

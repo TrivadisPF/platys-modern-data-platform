@@ -4,12 +4,13 @@ Apache Kafka Web UI for exploring messages, consumers, configurations and more w
 
 **[Website](https://cloudhut.dev/)** | **[Documentation](https://cloudhut.dev/docs)** | **[GitHub](https://github.com/cloudhut/kowl)**
 
-### How to enable
+### How to enable?
 
 ```
 platys init --enable-services KOWL
 platys gen
 ```
 
-### Other links
+### How to use it?
 
+Navigate to <http://dataplatform:28239>

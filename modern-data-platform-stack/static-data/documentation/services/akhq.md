@@ -4,12 +4,15 @@ Kafka GUI for Apache Kafka to manage topics, topics data, consumers group, schem
 
 **[Website](https://akhq.io/)** | **[Documentation](https://github.com/tchiotludo/akhq#quick-preview)** | **[GitHub](https://github.com/tchiotludo/akhq)**
 
-### How to enable
+### How to enable?
 
 ```
 platys init --enable-services AKHQ
 platys gen
 ```
 
-### Other links
+### How to use it?
+
+Navigate to <http://dataplatform:28107>
+
 
