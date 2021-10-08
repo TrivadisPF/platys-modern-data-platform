@@ -353,9 +353,10 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28235 | 8001 | Business Central Workbench (drools) |
 28236 | 8080 | Business Central Workbench (drools) |
 28237 | 8081 | Flink JobManager |
-28238 | 8081 | Nussknacker |
-28239 | 8080 | Kowl |
-28240 | 8008 | Gridgain Control Center UI |
+28238 | 8081 | nussknacker |
+28239 | 8080 | kowl |
+28240 | 8080 | ignite-1 |
+28241 | 8008 | gridgain-cc-frontend |
 
 ## Ports > 28500
 
