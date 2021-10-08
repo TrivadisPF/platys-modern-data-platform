@@ -62,7 +62,7 @@ The Modern Data Platform version 1.13.0 contains the following bug fixes and enh
  * Update `Solr` to `8.9`
  * Update `Redis` to `6.2`
  * Update `Memcached` to `1.6.10`
- * Update `Grafana` to `8.1.2`
+ * Update `Grafana` to `8.2.0`
  * Update `QuestDB` to `6.0.4`
  * Update `Spark` to `3.1.1`
  * Update `Minio` to `RELEASE.2021-09-15T04-54-25Z`
