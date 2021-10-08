@@ -349,11 +349,11 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28231 | 80 | excalidraw |
 28232 | 8080 | reaper (app UI) |
 28233 | 8081 | reaper (admin UI) |
-28234 | 8080 | KIE Server (drools) |
-28235 | 8001 | Business Central Workbench (drools) |
-28236 | 8080 | Business Central Workbench (drools) |
-28237 | 8081 | Flink JobManager |
-28238 | 8081 | nussknacker |
+28234 | 8080 | kie-server (drools) |
+28235 | 8001 | business-central (drools) |
+28236 | 8080 | business-central (drools) |
+28237 | 8081 | flink-jobmanager |
+28238 | 8081 | nussknacker-designer |
 28239 | 8080 | kowl |
 28240 | 8080 | ignite-1 |
 28241 | 8008 | gridgain-cc-frontend |
