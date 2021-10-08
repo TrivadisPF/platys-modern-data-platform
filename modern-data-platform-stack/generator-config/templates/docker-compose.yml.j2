@@ -186,6 +186,7 @@ networks:
 {% set __PINOT_version = PINOT_version | default('latest') -%}
 
 {% set __IGNITE_version = IGNITE_version | default('latest') -%}
+{% set __GRIDGAIN_CC_version = GRIDGAIN_CC_version | default('latest') -%}
 
 {% set __PROMETHEUS_version = PROMETHEUS_version | default('latest') -%}
 {% set __PROMETHEUS_PUSHGATEWAY_version = PROMETHEUS_PUSHGATEWAY_version | default('latest') -%}
@@ -5960,6 +5961,8 @@ services:
     hostname: ignite-1
     container_name: ignite-1
     ports:
+      - "10800:10800"
+      - "11212:11211"
       - "11212:11211"
     environment:
       #CONFIG_URI: file:/config/ignite-config.xml
@@ -5981,6 +5984,40 @@ services:
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
     restart: {{container_restart_policy}}
+
+  gridgain-cc-backend:
+    image: gridgain/control-center-backend:{{__GRIDGAIN_CC_version}}
+    hostname: gridgain-cc-backend
+    container_name: gridgain-cc-backend
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./gridgain-console-work:/opt/gridgain-web-console-server/work
+      #- ./config:/config:ro
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+
+  gridgain-cc-frontend:
+    image: gridgain/control-center-frontend:{{__GRIDGAIN_CC_version}}
+    hostname: gridgain-cc-frontend
+    container_name: gridgain-cc-frontend
+    labels:
+      com.platys.webui.title: "Gridgain Control Center UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28240"
+    ports:
+      # Port mapping format (change if needed) - HOST:CONTAINER
+      - 28240:8008
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./control-center.conf:/etc/nginx/control-center.conf
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+
 {% endif %}   {# IGNITE_enable #}
 
 {% if PROMETHEUS_enable | default(false) %}

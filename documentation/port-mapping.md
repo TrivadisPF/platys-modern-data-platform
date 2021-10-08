@@ -355,6 +355,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28237 | 8081 | Flink JobManager |
 28238 | 8081 | Nussknacker |
 28239 | 8080 | Kowl |
+28240 | 8008 | Gridgain Control Center UI |
 
 ## Ports > 28500
 
