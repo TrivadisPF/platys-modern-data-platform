@@ -6063,31 +6063,6 @@ services:
   {% endif %}   {#  PROMETHEUS_NODEEXPORTER_enable #}
 {% endif %}   {#  PROMETHEUS_enable #}
 
-{% if IGNITE_enable | default(false) %}
-  #  ================================== Apache Ignite ========================================== #
-  ignite-1:
-    image: apacheignite/ignite:{{__IGNITE_version}}
-    container_name: ignite-1
-    hostname: ignite-1
-    ports:
-     - "11211:11211"
-     - "47500-47509:47500-47509"
-    environment:
-      CONFIG_URI: file:/config/ignite-config.xml
-      IGNITE_QUIET: "false"
-      OPTION_LIBS: ignite-rest-http,ignite-cassandra-store,ignite-cassandra-serializers,ignite-kubernetes
-      JVM_OPTS: "-server -Xms1g  -Xmx1g -XX:NewSize=512m -XX:SurvivorRatio=6 -XX:+AlwaysPreTouch
-              -XX:+UseG1GC -XX:MaxGCPauseMillis=2000 -XX:GCTimeRatio=4 -XX:InitiatingHeapOccupancyPercent=30
-              -XX:G1HeapRegionSize=8M -XX:ConcGCThreads=2 -XX:G1HeapWastePercent=10 -XX:+UseTLAB
-              -XX:+ScavengeBeforeFullGC -XX:+DisableExplicitGC"
-    {%if use_timezone | default(false) %}
-      TZ: {{use_timezone}}
-    {% endif -%}   {#  use_timezone #}
-    volumes:
-      - ./config:/config:ro
-    restart: {{container_restart_policy}}
-{% endif %}   {#  IGNITE_enable #}
-
 {% if TILE38_enable | default(false) %}
   #  ================================== Tile38 ========================================== #
   tile38:
