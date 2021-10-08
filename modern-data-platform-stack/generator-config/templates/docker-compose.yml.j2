@@ -185,6 +185,8 @@ networks:
 
 {% set __PINOT_version = PINOT_version | default('latest') -%}
 
+{% set __IGNITE_version = IGNITE_version | default('latest') -%}
+
 {% set __PROMETHEUS_version = PROMETHEUS_version | default('latest') -%}
 {% set __PROMETHEUS_PUSHGATEWAY_version = PROMETHEUS_PUSHGATEWAY_version | default('latest') -%}
 {% set __PROMETHEUS_NODEEXPORTER_version = PROMETHEUS_NODEEXPORTER_version | default('latest') -%}
@@ -413,6 +415,7 @@ networks:
   {% set INFLUXDB2_enable = false -%}
   {% set DRUID_enable = false -%}
   {% set PINOT_enable = false -%}
+  {% set IGNITE_enable = false -%}
   {% set NEO4J_enable = false -%}
   {% set DGRAPH_enable = false -%}
   {% set STARDOG_enable = false -%}
@@ -5949,6 +5952,36 @@ services:
     restart: {{container_restart_policy}}
   {% endfor %}
 {% endif %}   {# PINOT_enable #}
+
+{% if IGNITE_enable | default(false) %}
+  #  ================================== Apache Ignite ========================================== #
+  ignite-1:
+    image: apacheignite/ignite:{{__IGNITE_version}}
+    hostname: ignite-1
+    container_name: ignite-1
+    ports:
+      - "11212:11211"
+    environment:
+      #CONFIG_URI: file:/config/ignite-config.xml
+      IGNITE_QUIET: "false"
+      OPTION_LIBS: {{IGNITE_option_libs}}
+      IGNITE_WORK_DIR: '/storage'
+      JVM_OPTS: "-server -Xms1g  -Xmx1g -XX:NewSize=512m -XX:SurvivorRatio=6 -XX:+AlwaysPreTouch
+              -XX:+UseG1GC -XX:MaxGCPauseMillis=2000 -XX:GCTimeRatio=4 -XX:InitiatingHeapOccupancyPercent=30
+              -XX:G1HeapRegionSize=8M -XX:ConcGCThreads=2 -XX:G1HeapWastePercent=10 -XX:+UseTLAB
+              -XX:+ScavengeBeforeFullGC -XX:+DisableExplicitGC"
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  PINOT_volume_map_data #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      #- ./config:/config:ro
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+{% endif %}   {# IGNITE_enable #}
 
 {% if PROMETHEUS_enable | default(false) %}
   #  ================================== Prometheus ========================================== #
