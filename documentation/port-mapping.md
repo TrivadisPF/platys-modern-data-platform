@@ -356,7 +356,11 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28238 | 8081 | nussknacker-designer |
 28239 | 8080 | kowl |
 28240 | 8080 | ignite-1 |
-28241 | 8008 | gridgain-cc-frontend |
+28241 | 8080 | ignite-2 |
+28242 | 8080 | ignite-3 |
+28243 | 8080 | ignite-4 |
+28244 | 8080 | ignite-5 |
+28245 | 8008 | gridgain-cc-frontend |
 
 ## Ports > 28500
 

@@ -5956,15 +5956,17 @@ services:
 
 {% if IGNITE_enable | default(false) %}
   #  ================================== Apache Ignite ========================================== #
-  ignite-1:
+  {% for num in range(IGNITE_servers | default(1) ) %}
+    {% set external_port = 28240 + loop.index - 1 %}
+  ignite-{{loop.index}}:
     image: apacheignite/ignite:{{__IGNITE_version}}
-    hostname: ignite-1
-    container_name: ignite-1
+    hostname: ignite-{{loop.index}}
+    container_name: ignite-{{loop.index}}
     labels:
       com.platys.restapi.title: "Ignite REST API"
       com.platys.restapi.url: "http://${PUBLIC_IP}:28240/ignite?cmd=version"
     ports:
-      - "28240:8080"
+      - "{{external_port}}:8080"
       - "10800:10800"
       - "11212:11211"
     environment:
@@ -5987,6 +5989,7 @@ services:
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
     restart: {{container_restart_policy}}
+  {% endfor %}
 
   gridgain-cc-backend:
     image: gridgain/control-center-backend:{{__GRIDGAIN_CC_version}}
@@ -6011,7 +6014,7 @@ services:
       com.platys.webui.url: "http://${PUBLIC_IP}:28241"
     ports:
       # Port mapping format (change if needed) - HOST:CONTAINER
-      - 28241:8008
+      - 28245:8008
     volumes:
       - ./data-transfer:/data-transfer
       - ./conf/gridgain/control-center.conf:/etc/nginx/control-center.conf
