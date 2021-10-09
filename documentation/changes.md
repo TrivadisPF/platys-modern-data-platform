@@ -69,6 +69,10 @@ The Modern Data Platform version 1.13.0 contains the following bug fixes and enh
  * Update `Axon Server` to `4.5.7`
  * Update `Hazelcast` to `5.0`
 
+### Breaking Changes
+
+ * Changed `HAZELCAST_IMDG_xxxxxx` to `HAZELCAST_xxxxxx` 
+
 ### Enhancements 
 
  * Support Zookeeper-Less Kafka Setup in KRaft mode (`KAFKA_use_kraft_mode`)
@@ -83,6 +87,8 @@ The Modern Data Platform version 1.13.0 contains the following bug fixes and enh
 ### Bug Fixes 
 
   * fix error "panic: runtime error: slice bounds out of range" in `schema-registry-ui` and `kafka-connect-ui` by allowing the mapping the `resolv.conf` into the container. It is enabled by default.
+
+
 
 ## What's new in 1.12.1
 
