@@ -67,6 +67,7 @@ The Modern Data Platform version 1.13.0 contains the following bug fixes and enh
  * Update `Spark` to `3.1.1`
  * Update `Minio` to `RELEASE.2021-09-15T04-54-25Z`
  * Update `Axon Server` to `4.5.7`
+ * Update `Hazelcast` to `5.0`
 
 ### Enhancements 
 
