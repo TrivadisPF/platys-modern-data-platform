@@ -7357,7 +7357,7 @@ services:
 {% endif %}   {#  AWSCLI_enable #}
 
 
-{% if LAKEFS_enable | default(false) %}
+  {% if LAKEFS_enable | default(false) %}
   #  ================================== LakeFS ========================================== #
   lakefs:
     image: treeverse/lakefs:{{__LAKEFS_version}}
@@ -7366,18 +7366,22 @@ services:
     ports:
       - 28220:8000
     environment:
-      LAKEFS_AUTH_ENCRYPT_SECRET_KEY: ${LAKEFS_AUTH_ENCRYPT_SECRET_KEY:-some random secret string}
-      LAKEFS_DATABASE_CONNECTION_STRING: ${LAKEFS_DATABASE_CONNECTION_STRING:-postgres://lakefs:lakefs@postgres/postgres?sslmode=disable}
-      LAKEFS_BLOCKSTORE_TYPE: ${LAKEFS_BLOCKSTORE_TYPE:-local}
-      LAKEFS_BLOCKSTORE_LOCAL_PATH: ${LAKEFS_BLOCKSTORE_LOCAL_PATH:-/home/lakefs}
-      LAKEFS_GATEWAYS_S3_DOMAIN_NAME: ${LAKEFS_GATEWAYS_S3_DOMAIN_NAME:-s3.local.lakefs.io:8000}
-      LAKEFS_BLOCKSTORE_S3_CREDENTIALS_ACCESS_KEY_ID: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
-      LAKEFS_BLOCKSTORE_S3_CREDENTIALS_ACCESS_SECRET_KEY: ${PLATYS_AWS_SECRET_ACCESS_KEY:-{{MINIO_secret_key}}}
-      LAKEFS_LOGGING_LEVEL: ${LAKEFS_LOGGING_LEVEL:-INFO}
-      LAKEFS_STATS_ENABLED: 'true'
+      LAKEFS_BLOCKSTORE_TYPE: {{LAKEFS_blockstore_type | local}}
+    {%if LAKEFS_blockstore_type == 'local' %}
+      LAKEFS_BLOCKSTORE_LOCAL_PATH: '/home/lakefs'
+    {%elif LAKEFS_blockstore_type == 's3' %}
+      LAKEFS_BLOCKSTORE_S3_FORCE_PATH_STYLE: '{{s3PathStyleAccess}}'
       LAKEFS_BLOCKSTORE_S3_ENDPOINT: {{ (s3Endpoint | replace('http://','')) if s3Endpoint is defined and s3Endpoint else omit}}
       LAKEFS_BLOCKSTORE_S3_REGION: {{s3DefaultRegion if s3DefaultRegion is defined and s3DefaultRegion else omit}}
       LAKEFS_BLOCKSTORE_S3_FORCE_PATH_STYLE: '{{s3PathStyleAccess}}'
+      LAKEFS_BLOCKSTORE_S3_CREDENTIALS_ACCESS_KEY_ID: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
+      LAKEFS_BLOCKSTORE_S3_CREDENTIALS_ACCESS_SECRET_KEY: ${PLATYS_AWS_SECRET_ACCESS_KEY:-{{MINIO_secret_key}}}
+    {% endif -%}   {#  LAKEFS_blockstore_type #}
+      LAKEFS_AUTH_ENCRYPT_SECRET_KEY: ${LAKEFS_AUTH_ENCRYPT_SECRET_KEY:-some random secret string}
+      LAKEFS_DATABASE_CONNECTION_STRING: ${LAKEFS_DATABASE_CONNECTION_STRING:-postgres://lakefs:lakefs@postgres/postgres?sslmode=disable}
+      LAKEFS_GATEWAYS_S3_DOMAIN_NAME: ${LAKEFS_GATEWAYS_S3_DOMAIN_NAME:-s3.local.lakefs.io:8000}
+      LAKEFS_LOGGING_LEVEL: {{LAKEFS_logging_level | INFO}}
+      LAKEFS_STATS_ENABLED: 'true'
       LAKEFS_COMMITTED_LOCAL_CACHE_DIR: ${LAKEFS_COMMITTED_LOCAL_CACHE_DIR:-/home/lakefs/.local_tier}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
@@ -7389,6 +7393,27 @@ services:
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
     entrypoint: ["/app/wait-for", "postgres-1:5432", "--", "/app/lakefs", "run"]
+    restart: {{container_restart_policy}}
+
+  lakectl:
+    image: treeverse/lakectl
+    container_name: lakectl
+    hostname: lakectl
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        while [ 1 -eq 1 ];do sleep 60;done
     restart: {{container_restart_policy}}
 {% endif %}   {#  LAKEFS_enable #}
 
