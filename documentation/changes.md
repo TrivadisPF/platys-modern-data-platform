@@ -70,6 +70,9 @@ The Modern Data Platform version 1.13.0 contains the following bug fixes and enh
  * Update `Hazelcast` to `5.0`
  * Update `Apache Atlas` to `2.2.0`
  * Update `LakeFS` to `0.52.2`
+ * Update `Amundsen-Frontend` to `3.13.0`
+ * Update `Amundsen-Metadata` to `3.10.0`
+ * Update `Amundsen-Search` to `2.11.1`
 
 ### Breaking Changes
 
