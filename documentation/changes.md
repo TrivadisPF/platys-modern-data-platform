@@ -32,8 +32,8 @@ The Modern Data Platform version 1.13.0 contains the following bug fixes and enh
 
  * Update `Confluent` to `6.2.0` 
  * Update `Marquez` to `0.18.0` 
- * Update `Trino` to `361`
- * Update `Starburstdata` to `360-e`
+ * Update `Trino` to `363`
+ * Update `Starburstdata` to `363-e`
  * Update `DataHub` to `0.8.15`
  * Update `Minio` to `RELEASE.2021-06-17T00-10-46Z`
  * Update `ksqlDB` to `0.20.0`
@@ -69,6 +69,7 @@ The Modern Data Platform version 1.13.0 contains the following bug fixes and enh
  * Update `Axon Server` to `4.5.7`
  * Update `Hazelcast` to `5.0`
  * Update `Apache Atlas` to `2.2.0`
+ * Update `LakeFS` to `0.52.2`
 
 ### Breaking Changes
 
