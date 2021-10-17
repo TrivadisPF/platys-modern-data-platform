@@ -1,0 +1,1 @@
+Contains the data of debezium-server, if flag DEBEZIUM_SERVER_volume_map_data is set to true.
