@@ -1,4 +1,4 @@
-# `modern-data-platform` - Port Mappings - 1.12.1
+# `modern-data-platform` - Port Mappings - 1.13.0
 
 This table reserves the external ports for the various services. Not all services have to be used in the platform at a given time. But by reserving, we can assure that there are no conflicts if a service is added at a later time.
 
@@ -361,6 +361,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28243 | 8080 | ignite-4 |
 28244 | 8080 | ignite-5 |
 28245 | 8008 | gridgain-cc-frontend |
+28246 | 8080 | debezium-server |
+28247 | 80 | pgadmin |
 
 ## Ports > 28500
 

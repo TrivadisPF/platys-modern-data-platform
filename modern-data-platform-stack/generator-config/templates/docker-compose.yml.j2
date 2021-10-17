@@ -206,6 +206,7 @@ networks:
 {% set __SQLSERVER_version = SQLSERVER_version | default('latest') -%}
 {% set __YUGABYTE_version = YUGABYTE_version | default('latest') -%}
 
+{% set __PGADMIN_version = PGADMIN_version | default('latest') -%}
 {% set __ADMINER_version = ADMINER_version | default('latest') -%}
 {% set __CLOUDBEAVER_version = CLOUDBEAVER_version | default('latest') -%}
 {% set __SQLPAD_version = SQLPAD_version | default('latest') -%}
@@ -433,6 +434,7 @@ networks:
   {% set MYSQL_enable = false -%}
   {% set SQLSERVER_enable = false -%}
   {% set TIMESCALEDB_enable = false -%}
+  {% set PGADMIN_enable = false -%}
   {% set ADMINER_enable = false -%}
   {% set CLOUDBEAVER_enable = false -%}
   {% set SQLPAD_enable = false -%}
@@ -6402,7 +6404,7 @@ services:
     restart: {{container_restart_policy}}
 
 
-  {% if POSTGRESQL_enable and POSTGREST_enable| default(false) %}
+  {% if POSTGREST_enable| default(false) %}
   #  ================================== PostgREST ========================================== #
   postgrest:
     image: postgrest/postgrest:{{__POSTGREST_version}}
@@ -6437,8 +6439,36 @@ services:
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
     restart: {{container_restart_policy}}
-  {% endif %}   {#  POSTGRESQL_enable #}
+  {% endif %}   {#  POSTGREST_enable #}
 {% endif %}   {#  POSTGRESQL_enable #}
+
+{% if POSTGRESQL_enable and PGADMIN_enable| default(false) %}
+  #  ================================== pgAdmin ========================================== #
+  pgadmin:
+    image: dpage/pgadmin4{{__PGADMIN_version}}
+    container_name: pgadmin
+    hostname: pgadmin
+    depends_on:
+      - postgresql
+    labels:
+      com.platys.webui.title: "PGAdmin UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28247"
+    ports:
+      - "28247:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: abc123!
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+{% endif %}   {# PGADMIN_enable #}
 
 {% if TIMESCALEDB_enable | default(false) %}
   #  ================================== Timescale DB ========================================== #

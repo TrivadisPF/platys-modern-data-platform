@@ -24,6 +24,7 @@ The Modern Data Platform version 1.13.0 contains the following bug fixes and enh
  * Kowl
  * Apache Ignite
  * Debezium Server
+ * pgAdmin
 
 ### New Cookbook Recipes
 
