@@ -25,6 +25,7 @@ The Modern Data Platform version 1.13.0 contains the following bug fixes and enh
  * Apache Ignite
  * Debezium Server
  * pgAdmin
+ * Oracle XE
 
 ### New Cookbook Recipes
 
@@ -79,6 +80,7 @@ The Modern Data Platform version 1.13.0 contains the following bug fixes and enh
 ### Breaking Changes
 
  * Changed `HAZELCAST_IMDG_xxxxxx` to `HAZELCAST_xxxxxx` 
+ * Changed `ORACLE_xxxxxx` to `ORACLE_EE_xxxxxx` 
 
 ### Enhancements 
 
@@ -94,7 +96,6 @@ The Modern Data Platform version 1.13.0 contains the following bug fixes and enh
 ### Bug Fixes 
 
   * fix error "panic: runtime error: slice bounds out of range" in `schema-registry-ui` and `kafka-connect-ui` by allowing the mapping the `resolv.conf` into the container. It is enabled by default.
-
 
 
 ## What's new in 1.12.1

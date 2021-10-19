@@ -9,7 +9,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 21 | 21 | ftp |
 80 | 80 | markdown-viewer or firefox |
 1433 | 1433 | sqlserver |
-1521 | 1521 | oracledb |
+1521 | 1521 | oracledb-ee |
+1522 | 1521 | oracledb-xe |
 1095 | 1095 | ksqldb-server-1 (jmx) |
 1096 | 1096 | ksqldb-server-2 (jmx) |
 1097 | 1097 | ksqldb-server-3 (jmx) |
@@ -54,7 +55,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 5010 | 5000 | marquez |
 5011 | 5001 | marquez |
 5050 | 5050 | zeppelin |
-5500 | 5500 | oracledb |
+5500 | 5500 | oracledb-ee |
+5501 | 5500 | oracledb-xe |
 \-     | 5432 | hive-metastore-db |
 \-     | 5432 | hue-db |
 5432 | 5432 | postgresql |
@@ -291,7 +293,6 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28150 | 8888 | druid-sandbox |
 28151 | 8088 | superset |
 28152 | 8080 | superset |
-28153 | 8888 | oracle-rest-1 |
 28154 | 8080 | penthao |
 28155 | 8080 | hawtio |
 28156 | 8080 | swagger-editor |
@@ -363,6 +364,10 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28245 | 8008 | gridgain-cc-frontend |
 28246 | 8080 | debezium-server |
 28247 | 80 | pgadmin |
+28250 | 8888 | oracle-ee |
+28251 | 8888 | oracle-xe |
+28252 | 8888 | oracle-rest-1 |
+
 
 ## Ports > 28500
 

@@ -429,6 +429,7 @@ networks:
   {% set GRAPHDB_enable = false -%}
   {% set TILE38_enable = false -%}
   {% set POSTGREST_enable = false -%}
+  {% set ORACLE_XE_enable = false -%}
   {% set ORACLE_enable = false -%}
   {% set ORACLE_REST_DATA_SERVICE_enable = false -%}
   {% set MYSQL_enable = false -%}
@@ -6229,59 +6230,24 @@ services:
 
 {% endif %}   {#  YUGABYTE_enable #}
 
-{% if ORACLE_enable | default(false) %}
-  #  ================================== Oracle ========================================== #
-  {% if (ORACLE_edition | lower) == 'xe' | default(true) %}
-  oracledb:
-{% if ORACLE_xe_docker_image is defined and ORACLE_xe_docker_image | length %}
-    image: {{ORACLE_xe_docker_image}}:{{__ORACLE_XE_version}}
-{% else %}
-    image: {{private_docker_repository_name}}/ora_db:{{__ORACLE_XE_version}}
-{% endif %}
-    container_name: oracledb
-    hostname: oracledb
-    labels:
-      com.platys.webui.title: "Oracle UI"
-      com.platys.webui.url: "http://${PUBLIC_IP}:28152/ords"
-    ports:
-      - "1521:1521"
-      - "28152:8080"
-      - "5500:5500"
-    environment:
-      ORACLE_PWD: {{ORACLE_password}}
-      ORACLE_CHARACTERSET: AL32UTF8
-    {%if use_timezone | default(false) %}
-      TZ: {{use_timezone}}
-    {% endif -%}   {#  use_timezone #}
-    volumes:
-      - ./data-transfer:/data-transfer
-    {% if ORACLE_volume_map_data %}
-      - ./container-volume/oracle/data:/opt/oracle/oradata
-    {% endif %}
-    {%if use_timezone | default(false) %}
-      - "./etc/timezone:/etc/timezone:ro"
-      - "./etc/localtime:/etc/localtime:ro"
-    {% endif -%}   {#  use_timezone #}
-    restart: {{container_restart_policy}}
-  {% endif %}   {#  ORACLE_edition #}
-
-  {% if (ORACLE_edition | lower) == 'ee' | default(false) %}
-  oracledb:
+{% if ORACLE_EE_enable | default(false) %}
+  #  ================================== Oracle EE ========================================== #
+  oracledb-ee:
     image: {{private_docker_repository_name}}/ora_db:{{__ORACLE_EE_version}}
-    container_name: oracledb
-    hostname: oracledb
+    container_name: oracledb-ee
+    hostname: oracledb-ee
     labels:
       com.platys.webui.title: "Oracle UI"
-      com.platys.webui.url: "http://${PUBLIC_IP}:28152/ords"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28250/ords"
     ports:
       - "1521:1521"
-      - "28152:8080"
+      - "28250:8080"
       - "5500:5500"
     environment:
-      CONTAINER: '{{ORACLE_container_enable}}'
+      CONTAINER: '{{ORACLE_EE_container_enable}}'
       ORACLE_SID: ORCLCDB
       ORACLE_PDB: ORCLPDB1
-      ORACLE_PWD: {{ORACLE_password}}
+      ORACLE_PWD: {{ORACLE_EE_password}}
       ORACLE_CHARACTERSET: AL32UTF8
       INSTANCE_INIT: '/u01/config'
     {%if use_timezone | default(false) %}
@@ -6289,7 +6255,7 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
-    {% if ORACLE_volume_map_data %}
+    {% if ORACLE_EE_volume_map_data %}
       - ./container-volume/oracle/data:/u01
     {% endif %}
       - ./init/oracle/startup:/u01/config/startup
@@ -6299,27 +6265,80 @@ services:
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
     restart: {{container_restart_policy}}
-  {% endif %}   {#  ORACLE_edition #}
+{% endif %}   {#  ORACLE_EE_enable #}
 
-  {% if ORACLE_REST_DATA_SERVICE_enable | default(false) %}
+{% if ORACLE_XE_enable | default(false) %}
+  #  ================================== Oracle XE ========================================== #
+  oracledb-xe:
+{% if ORACLE_XE_edition is not defined or ORACLE_XE_edition == 'regular' %}
+    image: gvenzl/oracle-xe:{{__ORACLE_XE_version}}
+{% elif ORACLE_XE_edition == 'slim' %} %}
+    image: gvenzl/oracle-xe:{{__ORACLE_XE_version}}-slim
+{% elif ORACLE_XE_edition == 'full' %} %}
+    image: gvenzl/oracle-xe:{{__ORACLE_XE_version}}-full
+{% endif %}
+    container_name: oracledb-xe
+    hostname: oracledb-xe
+    labels:
+      com.platys.webui.title: "Oracle XE UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28251/ords"
+    ports:
+      - "1522:1521"
+      - "28251:8080"
+      - "5501:5500"
+    environment:
+    {% if ORACLE_XE_database is defined and ORACLE_XE_database | length %}
+      ORACLE_DATABASE: {{ORACLE_XE_database}}
+    {% endif -%}   {#  ORACLE_XE_random_password #}
+      ORACLE_PASSWORD: {{ORACLE_XE_password}}
+    {% if ORACLE_XE_random_password is defined and ORACLE_XE_random_password | length %}
+      ORACLE_RANDOM_PASSWORD: '{{ORACLE_XE_random_password}}'
+    {% endif -%}   {#  ORACLE_XE_random_password #}
+    {% if ORACLE_XE_app_user is defined and ORACLE_XE_app_user | length %}
+      APP_USER: {{ORACLE_XE_app_user}}
+      APP_USER_PASSWORD: {ORACLE_XE_app_user_password}}
+    {% endif -%}   {#  ORACLE_XE_app_user #}
+      ORACLE_CHARACTERSET: AL32UTF8
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./init/oraclexe:/container-entrypoint-initdb.d/
+    {% if ORACLE_XE_volume_map_data %}
+      - ./container-volume/oraclexe/data:/opt/oracle/oradata
+    {% endif %}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  ORACLE_XE_enable #}
+
+{% if ORACLE_REST_DATA_SERVICE_enable | default(false) %}
+  #  ================================== Oracle REST Data Service (ORDS) ========================================== #
   oracle-rest-1:
     image: {{private_docker_repository_name}}/restdataservices:{{__ORACLE_REST_DATA_SERVICE_version}}
     container_name: oracle-rest-1
     hostname: oracle-rest-1
     labels:
       com.platys.restapi.title: "ORDS Rest API"
-      com.platys.restapi.url: "http://${PUBLIC_IP}:28153/ords"
+      com.platys.restapi.url: "http://${PUBLIC_IP}:28252/ords"
     ports:
-      - "28153:8888"
+      - "28252:8888"
     environment:
       ORACLE_HOST: oracledb
       ORACLE_PORT: 1521
       ORACLE_SERVICE: ORCLCDB
       ORACLE_PWD: abc123!
       ORDS_PWD: abc123!
-    restart: always
-  {% endif %}   {#  ORACLE_REST_DATA_SERVICE_enable #}
-{% endif %}   {#  ORACLE_enable #}
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    restart: {{container_restart_policy}}
+{% endif %}   {#  ORACLE_REST_DATA_SERVICE_enable #}
 
 {% if MYSQL_enable | default(false) %}
   #  ================================== MySQL ========================================== #
