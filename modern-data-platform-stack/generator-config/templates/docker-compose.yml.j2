@@ -492,7 +492,8 @@ networks:
 
 {% set ns = namespace(bootstrapServers='') %}
 {% set ns = namespace(controllerQuorumVoters='') %}
-{% set ns = namespace(connectServers='') %}
+{% set ns = namespace(connectServersInternalUrl='') %}
+{% set ns = namespace(connectServersUrl='') %}
 {% if (external['KAFKA_enable']) | default(false) %}
     {% set ns.bootstrapServers = external['KAFKA_bootstrap_servers'] %}
     {% set ns.schemaRegistryUrl = external['SCHEMA_REGISTRY_url'] %}
@@ -521,7 +522,17 @@ networks:
            {% set ns.controllerQuorumVoters = ns.controllerQuorumVoters ~ ',' ~ loop.index ~ "@" ~ serviceName ~ ":3" ~ port %}
         {% endif %}
       {% endfor %}
-      {% set ns.connectServers = 'http://kafka-connect-1:8083' %}
+      {%if KAFKA_CONNECT_UI_use_public_ip | default(true) %}
+        {% set ns.connectServersUrl = 'http://${PUBLIC_IP}:8083/,http://${PUBLIC_IP}:8084/' %}
+      {% else %}
+        {% set ns.connectServersUrl = 'http://${DOCKER_HOST_IP}:8083,http://${DOCKER_HOST_IP}:8084/' %}
+      {% endif -%}   {#  KAFKA_CONNECT_UI_use_public_ip #}
+        {%if KAFKA_CONNECT_UI_use_public_ip | default(true) %}
+      {%if KAFKA_KSQLDB_use_embedded_connect | default(true) %}
+        {% set ns.connectServersInternalUrl = 'http://ksqldb-server-1:8083' %}
+      {% else %}
+        {% set ns.connectServersInternalUrl = 'http://kafka-connect-1:8083' %}
+      {% endif -%}   {#  KAFKA_CONNECT_UI_use_public_ip #}
     {% endfor %}
     {% set ns.schemaRegistryUrl = 'http://schema-registry-1:8081' %}
 {% endif %}   {# external['KAFKA_enable'] #}
@@ -998,7 +1009,7 @@ services:
 
     {% if ( KAFKA_CONNECT_enable ) | default(false) %}
       #KSQL_KSQL_CONNECT_URL: http://kafka-connect-1:{{connect_port}}
-      KSQL_KSQL_CONNECT_URL: {{ns.connectServers}}
+      KSQL_KSQL_CONNECT_URL: {{ns.connectServersInternalUrl}}
     {% endif -%}   {#  KAFKA_CONNECT_enable #}
       KSQL_KSQL_SCHEMA_REGISTRY_URL: '{{ns.schemaRegistryUrl}}'
     {% if schemaRegistryUsername is defined and schemaRegistryUsername|length %}
@@ -1584,7 +1595,7 @@ services:
     {% if ( KAFKA_CONNECT_enable or KAFKA_KSQLDB_use_embedded_connect ) | default(false) %}
       KAFKA_CLUSTERS_0_KAFKACONNECT_0_NAME: 'kafka-connect'
       #KAFKA_CLUSTERS_0_KAFKACONNECT_0_ADDRESS: 'http://${DOCKER_HOST_IP}:8083'
-      KAFKA_CLUSTERS_0_KAFKACONNECT_0_ADDRESS: {{ns.connectServers}}
+      KAFKA_CLUSTERS_0_KAFKACONNECT_0_ADDRESS: {{ns.connectServersUrl}}
     {% endif -%}   {#  KAFKA_CONNECT_enable #}
       KAFKA_CLUSTERS_0_READONLY: 'False'
     {%if use_timezone | default(false) %}
