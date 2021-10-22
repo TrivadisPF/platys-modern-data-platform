@@ -962,6 +962,9 @@ services:
     ports:
       - "{{external_port}}:{{port}}"
       - "{{jmx_external_port}}:{{jmx_port}}"
+    {% if ( KAFKA_KSQLDB_use_embedded_connect ) | default(false) %}
+      - {{connect_external_port}}:{{connect_port}}
+    {% endif %}
     environment:
       KSQL_LOG4J_ROOT_LOGLEVEL: INFO
       KSQL_LOG4J_OPTS: "-Dlog4j.configuration=file:/etc/ksqldb/log4j.properties"
@@ -992,7 +995,7 @@ services:
     {% endif -%}   {#  external['KAFKA_enable'] #}
 
     {% if ( KAFKA_CONNECT_enable ) | default(false) %}
-      KSQL_KSQL_CONNECT_URL: http://kafka-connect-1:8083
+      KSQL_KSQL_CONNECT_URL: http://kafka-connect-1:{{connect_port}}
     {% endif -%}   {#  KAFKA_CONNECT_enable #}
       KSQL_KSQL_SCHEMA_REGISTRY_URL: '{{ns.schemaRegistryUrl}}'
     {% if schemaRegistryUsername is defined and schemaRegistryUsername|length %}
