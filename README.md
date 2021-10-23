@@ -24,9 +24,9 @@ See [What's new?](./documentation/changes.md) for a detailed list of changes.
 
 ## Documentation
 
-* [Getting Started with `platys` and `modern-data-platform` stack](./documentation/getting-started)
-* [Configuration](./documentation/configuration) - all settings configurable in the `config.yml`
-* [Cookbooks](./cookbooks/README) - various recipes showing how to use specific features of `platys`
+* [Getting Started with `platys` and `modern-data-platform` stack](./documentation/getting-started.md)
+* [Configuration](./documentation/configuration.md) - all settings configurable in the `config.yml`
+* [Cookbooks](./cookbooks/README.md) - various recipes showing how to use specific features of `platys`
 * [Port Mapping](./documentation/port-mapping.md)
 * [Frequently Asked Questions](./documentation/faq.md)
 * [Troubleshooting](./documentation/troubleshooting.md)
