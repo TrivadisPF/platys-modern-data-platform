@@ -524,30 +524,30 @@ networks:
     {% set ns.schemaRegistryUrl = 'http://schema-registry-1:8081' %}
 {% endif %}   {# external['KAFKA_enable'] #}
 
-{% set ns = namespace(connectServersInternalUrl='') %}
-{% set ns = namespace(connectServersUrl='') %}
-{% set ns = namespace(connectNodes=0) %}
+{% set ns1 = namespace(connectServersInternalUrl='') %}
+{% set ns1 = namespace(connectServersUrl='') %}
+{% set ns1 = namespace(connectNodes=0) %}
 {% if (KAFKA_CONNECT_enable or KAFKA_KSQLDB_use_embedded_connect) | default(false) %}
   {% if KAFKA_CONNECT_enable %}
-    {% set ns.connectNodes = KAFKA_CONNECT_nodes %}
+    {% set ns1.connectNodes = KAFKA_CONNECT_nodes %}
   {% else %}
-    {% set ns.connectNodes = KAFKA_KSQLDB_nodes %}
+    {% set ns1.connectNodes = KAFKA_KSQLDB_nodes %}
   {% endif %}
 
-  {% for num in range(ns.connectNodes | default(1) ) %}
+  {% for num in range(ns1.connectNodes | default(1) ) %}
     {% set port = 8083 + loop.index-1 %}
     {% if loop.first %}
     {% else %}
     {% endif %}
       {%if KAFKA_CONNECT_UI_use_public_ip | default(true) %}
-        {% set ns.connectServersUrl = 'http://${PUBLIC_IP}:8083/,http://${PUBLIC_IP}:8084/' %}
+        {% set ns1.connectServersUrl = 'http://${PUBLIC_IP}:8083/,http://${PUBLIC_IP}:8084/' %}
       {% else %}
-        {% set ns.connectServersUrl = 'http://${DOCKER_HOST_IP}:8083,http://${DOCKER_HOST_IP}:8084/' %}
+        {% set ns1.connectServersUrl = 'http://${DOCKER_HOST_IP}:8083,http://${DOCKER_HOST_IP}:8084/' %}
       {% endif -%}   {#  KAFKA_CONNECT_UI_use_public_ip #}
       {%if KAFKA_KSQLDB_use_embedded_connect | default(true) %}
-        {% set ns.connectServersInternalUrl = 'http://ksqldb-server-1:8083' %}
+        {% set ns1.connectServersInternalUrl = 'http://ksqldb-server-1:8083' %}
       {% else %}
-        {% set ns.connectServersInternalUrl = 'http://kafka-connect-1:8083' %}
+        {% set ns1.connectServersInternalUrl = 'http://kafka-connect-1:8083' %}
       {% endif -%}   {#  KAFKA_KSQLDB_use_embedded_connect #}
   {% endfor %}
 {% endif %}   {# KAFKA_CONNECT_enable or KAFKA_KSQLDB_use_embedded_connect #}
