@@ -382,6 +382,7 @@ networks:
   {% set KAFKA_UI_enable = false -%}
   {% set KAFKA_EFAK_enable = false -%}
   {% set KOWL_enable = false -%}
+  {% set EFAK_enable = false -%}
   {% set KAFKA_LAG_EXPORTER_enable = false -%}
   {% set DEBEZIUM_SERVER_enable = false -%}
   {% set DEBEZIUM_UI_enable = false -%}
@@ -529,14 +530,35 @@ networks:
     {% set ns.schemaRegistryUrl = 'http://schema-registry-1:8081' %}
 {% endif %}   {# external['KAFKA_enable'] #}
 
+{% if (external['S3_enable']) | default(false) %}
+  {% if (external['S3_endpoint'] != None) | default(false) %}
+    {% set s3Endpoint = external['S3_endpoint'] %}
+  {% endif %}
+    {% set s3Endpoint = 's3.amazonaws.com' %}
+    {% set s3PathStyleAccess = external['S3_path_style_access'] %}
+    {% set s3AccessKey = '${PLATYS_AWS_ACCESS_KEY:?PLATYS_AWS_ACCESS_KEY must be set either in .env or as an environment variable}' %}
+    {% set s3SecretAccessKey = '${PLATYS_AWS_SECRET_ACCESS_KEY:?PLATYS_AWS_SECRET_ACCESS_KEY must be set either in .env or as an environment variable}' %}
+    {% set s3DefaultRegion = external['S3_default_region'] %}
+{% else %}
+    {% set s3Endpoint = 'http://minio-1:9000' %}
+    {% set s3PathStyleAccess = 'true' %}
+    {% set s3AccessKey = MINIO_access_key %}
+    {% set s3SecretAccessKey = MINIO_secret_key %}
+    {% set s3DefaultRegion = 'us-east-1' %}
+{% endif %}   {# external['s3Endpoint'] #}
+
+{#  ================================== Kafka Connect Settings ========================================== #}
+
 {% set ns1 = namespace(connectServersInternalUrl='') %}
 {% set ns1 = namespace(connectServersUrl='') %}
-{% set ns1 = namespace(connectNodes=0) %}
+{% set ns1 = namespace(connectClusterName='') %}
 {% if (KAFKA_CONNECT_enable or KAFKA_KSQLDB_use_embedded_connect) | default(false) %}
   {% if KAFKA_CONNECT_enable %}
     {% set connectNodes = KAFKA_CONNECT_nodes %}
+    {% set ns1.connectClusterName = 'connect-custer' %}
   {% else %}
     {% set connectNodes = KAFKA_KSQLDB_nodes %}
+    {% set ns1.connectClusterName = 'ksqldb-connect-custer' %}
   {% endif %}
   {% for num in range(connectNodes | default(1) ) %}
     {% set port = 8083 + loop.index-1 %}
@@ -565,23 +587,6 @@ networks:
     {% endif %}
   {% endfor %}
 {% endif %}   {# KAFKA_CONNECT_enable or KAFKA_KSQLDB_use_embedded_connect #}
-
-{% if (external['S3_enable']) | default(false) %}
-  {% if (external['S3_endpoint'] != None) | default(false) %}
-    {% set s3Endpoint = external['S3_endpoint'] %}
-  {% endif %}
-    {% set s3Endpoint = 's3.amazonaws.com' %}
-    {% set s3PathStyleAccess = external['S3_path_style_access'] %}
-    {% set s3AccessKey = '${PLATYS_AWS_ACCESS_KEY:?PLATYS_AWS_ACCESS_KEY must be set either in .env or as an environment variable}' %}
-    {% set s3SecretAccessKey = '${PLATYS_AWS_SECRET_ACCESS_KEY:?PLATYS_AWS_SECRET_ACCESS_KEY must be set either in .env or as an environment variable}' %}
-    {% set s3DefaultRegion = external['S3_default_region'] %}
-{% else %}
-    {% set s3Endpoint = 'http://minio-1:9000' %}
-    {% set s3PathStyleAccess = 'true' %}
-    {% set s3AccessKey = MINIO_access_key %}
-    {% set s3SecretAccessKey = MINIO_secret_key %}
-    {% set s3DefaultRegion = 'us-east-1' %}
-{% endif %}   {# external['s3Endpoint'] #}
 
 {#  ================================== Services ========================================== #}
 
@@ -1037,7 +1042,6 @@ services:
     {% endif -%}   {#  external['KAFKA_enable'] #}
 
     {% if ( KAFKA_CONNECT_enable ) | default(false) %}
-      #KSQL_KSQL_CONNECT_URL: http://kafka-connect-1:{{connect_port}}
       KSQL_KSQL_CONNECT_URL: {{ns1.connectServersInternalUrl}}
     {% endif -%}   {#  KAFKA_CONNECT_enable #}
       KSQL_KSQL_SCHEMA_REGISTRY_URL: '{{ns.schemaRegistryUrl}}'
@@ -1440,11 +1444,7 @@ services:
     ports:
       - "28103:8000"
     environment:
-    {%if KAFKA_CONNECT_UI_use_public_ip | default(true) %}
-      CONNECT_URL: "http://${PUBLIC_IP}:8083/,http://${PUBLIC_IP}:8084/"
-    {% else %}
-      CONNECT_URL: 'http://${DOCKER_HOST_IP}:8083,http://${DOCKER_HOST_IP}:8084/'
-    {% endif -%}   {#  KAFKA_CONNECT_UI_use_public_ip #}
+      CONNECT_URL: {{ns1.connectServersUrl}}
       PROXY: "true"
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
@@ -1581,10 +1581,9 @@ services:
     {% endif -%}   {#  SCHEMA_REGISTRY_enable #}
     {% if ( KAFKA_CONNECT_enable or KAFKA_KSQLDB_use_embedded_connect) | default(false) %}
               connect:
-      {% for num in range(KAFKA_CONNECT_nodes | default(1) ) %}
-          {% set port = 8083 + loop.index - 1 %}
+      {% for item in ns1.connectServersUrl.split(",") %}
                 - name: "kafka-connect-{{loop.index}}"
-                  url: "http://${DOCKER_HOST_IP}:{{port}}"
+                  url: "{{item}}"
       {% endfor -%}
     {% endif -%}   {#  KAFKA_CONNECT_enable #}
     {%if use_timezone | default(false) %}
@@ -1622,9 +1621,9 @@ services:
     {% endif -%}   {#  SCHEMA_REGISTRY_enable #}
       KAFKA_CLUSTERS_0_JMXPORT: '9992'
     {% if ( KAFKA_CONNECT_enable or KAFKA_KSQLDB_use_embedded_connect ) | default(false) %}
-      KAFKA_CLUSTERS_0_KAFKACONNECT_0_NAME: 'kafka-connect'
+      KAFKA_CLUSTERS_0_KAFKACONNECT_0_NAME: '{{ns1.connectClusterName}}'
       #KAFKA_CLUSTERS_0_KAFKACONNECT_0_ADDRESS: 'http://${DOCKER_HOST_IP}:8083'
-      KAFKA_CLUSTERS_0_KAFKACONNECT_0_ADDRESS: {{ns1.connectServersUrl}}
+      KAFKA_CLUSTERS_0_KAFKACONNECT_0_ADDRESS: {{ns1.connectServersUrl.split(',')[0]}}
     {% endif -%}   {#  KAFKA_CONNECT_enable #}
       KAFKA_CLUSTERS_0_READONLY: 'False'
     {%if use_timezone | default(false) %}
@@ -1683,7 +1682,7 @@ services:
     {% endif -%}   {#  SCHEMA_REGISTRY_enable #}
     {% if ( KAFKA_CONNECT_enable or KAFKA_KSQLDB_use_embedded_connect) | default(false) %}
       CONNECT_ENABLED: 'True'
-      CONNECT_CLUSTERS_NAME: 'kafka-connect'
+      CONNECT_CLUSTERS_NAME: '{{ns1.connectClusterName}}'
       CONNECT_CLUSTERS_URL: '{{ns1.connectServersInternalUrl.split(',')[0]}}'
     {% endif -%}   {#  KAFKA_CONNECT_enable #}
     {%if use_timezone | default(false) %}
