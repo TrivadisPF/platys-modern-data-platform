@@ -28,7 +28,7 @@ networks:
 {% set __KAFKA_KADMIN_version = KAFKA_KADMIN_version | default('latest') -%}
 {% set __KAFKA_AKHQ_version = KAFKA_AKHQ_version | default('latest') -%}
 {% set __KAFKA_UI_version = KAFKA_UI_version | default('latest') -%}
-{% set __KAFKA_EAGLE_version = KAFKA_EAGLE_version | default('latest') -%}
+{% set __KAFKA_EFAK_version = KAFKA_EFAK_version | default('latest') -%}
 {% set __KOWL_version = KOWL_version | default('latest') -%}
 {% set __STREAMS_EXPLORER_version = STREAMS_EXPLORER_version | default('latest') -%}
 {% set __KAFKA_LAG_EXPORTER_version = KAFKA_LAG_EXPORTER_version | default('latest') -%}
@@ -322,6 +322,11 @@ networks:
   {% set KAFKA_RESTPROXY_enable = true -%}
 {% endif -%}   {# KAFKA_TOPICS_UI_enable #}
 
+{% if KAFKA_CONNECT_enable -%}
+# enforce some dependencies
+  {% set KAFKA_KSQLDB_use_embedded_connect = false -%}
+{% endif -%}   {# KAFKA_CONNECT_enable #}
+
 {% if KAFKA_KSQLDB_enable and not external['SCHEMA_REGISTRY_url'] -%}
 # enforce some dependencies
   {% set KAFKA_SCHEMA_REGISTRY_enable = true -%}
@@ -375,7 +380,7 @@ networks:
   {% set KAFKA_REPLICATOR_enable = false -%}
   {% set KCAT_enable = false -%}
   {% set KAFKA_UI_enable = false -%}
-  {% set KAFKA_EAGLE_enable = false -%}
+  {% set KAFKA_EFAK_enable = false -%}
   {% set KOWL_enable = false -%}
   {% set KAFKA_LAG_EXPORTER_enable = false -%}
   {% set DEBEZIUM_SERVER_enable = false -%}
@@ -529,26 +534,35 @@ networks:
 {% set ns1 = namespace(connectNodes=0) %}
 {% if (KAFKA_CONNECT_enable or KAFKA_KSQLDB_use_embedded_connect) | default(false) %}
   {% if KAFKA_CONNECT_enable %}
-    {% set ns1.connectNodes = KAFKA_CONNECT_nodes %}
+    {% set connectNodes = KAFKA_CONNECT_nodes %}
   {% else %}
-    {% set ns1.connectNodes = KAFKA_KSQLDB_nodes %}
+    {% set connectNodes = KAFKA_KSQLDB_nodes %}
   {% endif %}
-  {% set ns1.connectServersUrl = 'http://${PUBLIC_IP}:8083/,http://${PUBLIC_IP}:8084/' %}
-  {% for num in range(ns1.connectNodes | default(1) ) %}
+  {% for num in range(connectNodes | default(1) ) %}
     {% set port = 8083 + loop.index-1 %}
     {% if loop.first %}
-    {% else %}
-    {% endif %}
       {%if KAFKA_CONNECT_UI_use_public_ip | default(true) %}
-        {% set ns1.connectServersUrl = 'http://${PUBLIC_IP}:8083/,http://${PUBLIC_IP}:8084/' %}
+        {% set ns1.connectServersUrl = 'http://${PUBLIC_IP}:' ~ port %}
       {% else %}
-        {% set ns1.connectServersUrl = 'http://${DOCKER_HOST_IP}:8083,http://${DOCKER_HOST_IP}:8084/' %}
+        {% set ns1.connectServersUrl = 'http://${DOCKER_HOST_IP}:' ~ port %}
       {% endif -%}   {#  KAFKA_CONNECT_UI_use_public_ip #}
       {%if KAFKA_KSQLDB_use_embedded_connect | default(true) %}
-        {% set ns1.connectServersInternalUrl = 'http://ksqldb-server-1:8083' %}
+        {% set ns1.connectServersInternalUrl = 'http://ksqldb-server-' ~ loop.index ~ ':' ~ port %}
       {% else %}
-        {% set ns1.connectServersInternalUrl = 'http://kafka-connect-1:8083' %}
+        {% set ns1.connectServersInternalUrl = 'http://kafka-connect-' ~ loop.index ~ ':' ~ port %}
       {% endif -%}   {#  KAFKA_KSQLDB_use_embedded_connect #}
+    {% else %}
+      {%if KAFKA_CONNECT_UI_use_public_ip | default(true) %}
+        {% set ns1.connectServersUrl = ns1.connectServersUrl ~ ',http://${PUBLIC_IP}' ~ port %}
+      {% else %}
+        {% set ns1.connectServersUrl = ns1.connectServersUrl ~ ',http://${DOCKER_HOST_IP}' ~ port %}
+      {% endif -%}   {#  KAFKA_CONNECT_UI_use_public_ip #}
+      {%if KAFKA_KSQLDB_use_embedded_connect | default(true) %}
+        {% set ns1.connectServersInternalUrl = ns1.connectServersInternalUrl ~ ',http://ksqldb-server-' ~ loop.index ~ ':' ~ port %}
+      {% else %}
+        {% set ns1.connectServersInternalUrl = ns1.connectServersInternalUrl ~ ',http://kafka-connect-' ~ loop.index ~ ':' ~ port %}
+      {% endif -%}   {#  KAFKA_KSQLDB_use_embedded_connect #}
+    {% endif %}
   {% endfor %}
 {% endif %}   {# KAFKA_CONNECT_enable or KAFKA_KSQLDB_use_embedded_connect #}
 
@@ -1024,7 +1038,7 @@ services:
 
     {% if ( KAFKA_CONNECT_enable ) | default(false) %}
       #KSQL_KSQL_CONNECT_URL: http://kafka-connect-1:{{connect_port}}
-      KSQL_KSQL_CONNECT_URL: {{ns.connectServersInternalUrl}}
+      KSQL_KSQL_CONNECT_URL: {{ns1.connectServersInternalUrl}}
     {% endif -%}   {#  KAFKA_CONNECT_enable #}
       KSQL_KSQL_SCHEMA_REGISTRY_URL: '{{ns.schemaRegistryUrl}}'
     {% if schemaRegistryUsername is defined and schemaRegistryUsername|length %}
@@ -1625,14 +1639,14 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {#  KAFKA_enable and KAFKA_UI_enable #}
 
-{% if ((KAFKA_enable or external['KAFKA_enable']) and KAFKA_EAGLE_enable) | default(false) %}
-  #  ================================== Kafka Eagle ========================================== #
-  kafka-eagle:
-    image: trivadis/kafka-eagle:{{__KAFKA_EAGLE_version}}
-    container_name: kafka-eagle
-    hostname: kafka-eagle
+{% if ((KAFKA_enable or external['KAFKA_enable']) and KAFKA_EFAK_enable) | default(false) %}
+  #  ================================== Kafka EFAK (previously Kafka Eagle) ========================================== #
+  kafka-efak:
+    image: trivadis/efak:{{__KAFKA_EFAK_version}}
+    container_name: kafka-efak
+    hostname: kafka-efak
     labels:
-      com.platys.webui.title: 'Kafka Eagle UI'
+      com.platys.webui.title: 'Kafka EFAK UI'
       com.platys.webui.url: "http://${PUBLIC_IP}:8048"
     ports:
       - 8048:8048
@@ -1648,10 +1662,10 @@ services:
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
     restart: {{container_restart_policy}}
-{% endif %}   {#  KAFKA_enable and KAFKA_UI_enable #}
+{% endif %}   {#  KAFKA_enable and KAFKA_EFAK_UI_enable #}
 
 {% if ((KAFKA_enable or external['KAFKA_enable']) and KOWL_enable) | default(false) %}
-  #  ================================== Kafka Eagle ========================================== #
+  #  ================================== Kowl ========================================== #
   kowl:
     image: quay.io/cloudhut/kowl:{{__KOWL_version}}
     container_name: kowl
@@ -1670,7 +1684,7 @@ services:
     {% if ( KAFKA_CONNECT_enable or KAFKA_KSQLDB_use_embedded_connect) | default(false) %}
       CONNECT_ENABLED: 'True'
       CONNECT_CLUSTERS_NAME: 'kafka-connect'
-      CONNECT_CLUSTERS_URL: '{{ns1.connectServersUrl}}'
+      CONNECT_CLUSTERS_URL: '{{ns1.connectServersInternalUrl.split(',')[0]}}'
     {% endif -%}   {#  KAFKA_CONNECT_enable #}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
@@ -1697,7 +1711,7 @@ services:
       - 28195:80
     environment:
       SE_SCHEMAREGISTRY__url: http://schema-registry-1:8081
-      SE_KAFKACONNECT__url: http://kafka-connect-1:8083
+      SE_KAFKACONNECT__url: {{ns1.connectServersInternalUrl.split(',')[0]}}
       SE_PROMETHEUS__url: http://host.docker.internal:9090
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}

@@ -82,6 +82,7 @@ The Modern Data Platform version 1.13.0 contains the following bug fixes and enh
  * Changed `HAZELCAST_IMDG_xxxxxx` to `HAZELCAST_xxxxxx` 
  * Changed `ORACLE_xxxxxx` to `ORACLE_EE_xxxxxx` 
  * Changed default of `KAFKA_CONNECT_nodes` from `2` to `1`
+ * Changed `KAFKA_EAGLE_enable` to `KAFKA_EFAK_enable`
 
 ### Enhancements 
 
