@@ -21,13 +21,17 @@ RUN apk add tzdata &&  apk add jq
 RUN wget -q -O /usr/bin/yq $(wget -q -O - https://api.github.com/repos/mikefarah/yq/releases/latest | jq -r '.assets[] | select(.name == "yq_linux_amd64") | .browser_download_url') &&  chmod +x /usr/bin/yq
 
 # copy generator config into the image (templates & config.yml)
-COPY ./generator-config /opt/mdps-gen
+COPY ./modern-data-platform-stack/generator-config /opt/mdps-gen
 
 # copy static data needed for the stack to run into the image
-COPY ./static-data /opt/mdps-gen/static-data
+COPY ./modern-data-platform-stack/static-data /opt/mdps-gen/static-data
+
+# copy documentation folder
+COPY ./documentation /opt/mdps-gen/static-data/documentation/documenation
+COPY ./README.md /opt/mdps-gen/static-data/documentation
 
 # copy the generator script and make it executable
-COPY generate.sh /usr/local/bin/
+COPY ./modern-data-platform-stack/generate.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/generate.sh
 
 # ================ Jinja2 (currently not used) =========================== #
