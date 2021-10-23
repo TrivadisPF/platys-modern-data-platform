@@ -21,6 +21,7 @@ The Modern Data Platform version 1.13.0 contains the following bug fixes and enh
  * Drools KIE Server
  * Drools Business Central Workbench
  * Flink
+ * Nussknacker Designer
  * Kowl
  * Apache Ignite
  * Debezium Server
