@@ -27,7 +27,7 @@ COPY ./modern-data-platform-stack/generator-config /opt/mdps-gen
 COPY ./modern-data-platform-stack/static-data /opt/mdps-gen/static-data
 
 # copy documentation folder
-COPY ./documentation /opt/mdps-gen/static-data/documentation/documenation
+COPY ./documentation /opt/mdps-gen/static-data/documentation/documentation
 COPY ./README.md /opt/mdps-gen/static-data/documentation
 
 # copy the generator script and make it executable
