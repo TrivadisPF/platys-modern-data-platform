@@ -492,8 +492,6 @@ networks:
 
 {% set ns = namespace(bootstrapServers='') %}
 {% set ns = namespace(controllerQuorumVoters='') %}
-{% set ns = namespace(connectServersInternalUrl='') %}
-{% set ns = namespace(connectServersUrl='') %}
 {% if (external['KAFKA_enable']) | default(false) %}
     {% set ns.bootstrapServers = external['KAFKA_bootstrap_servers'] %}
     {% set ns.schemaRegistryUrl = external['SCHEMA_REGISTRY_url'] %}
@@ -522,6 +520,21 @@ networks:
            {% set ns.controllerQuorumVoters = ns.controllerQuorumVoters ~ ',' ~ loop.index ~ "@" ~ serviceName ~ ":3" ~ port %}
         {% endif %}
       {% endfor %}
+    {% endfor %}
+    {% set ns.schemaRegistryUrl = 'http://schema-registry-1:8081' %}
+{% endif %}   {# external['KAFKA_enable'] #}
+
+{% set ns = namespace(connectServersInternalUrl='') %}
+{% set ns = namespace(connectServersUrl='') %}
+{% set ns = namespace(connectNodes=0) %}
+{% if (KAFKA_CONNECT_enable or KAFKA_KSQLDB_use_embedded_connect) | default(false) %}
+  {% if KAFKA_CONNECT_enable %}
+    {% set ns.connectNodes = KAFKA_CONNECT_nodes %}
+  {% else %}
+    {% set ns.connectNodes = KAFKA_KSQLDB_nodes %}
+  {% endif %}
+
+  {% for num in range(ns.connectNodes | default(1) ) %}
       {%if KAFKA_CONNECT_UI_use_public_ip | default(true) %}
         {% set ns.connectServersUrl = 'http://${PUBLIC_IP}:8083/,http://${PUBLIC_IP}:8084/' %}
       {% else %}
@@ -532,9 +545,8 @@ networks:
       {% else %}
         {% set ns.connectServersInternalUrl = 'http://kafka-connect-1:8083' %}
       {% endif -%}   {#  KAFKA_KSQLDB_use_embedded_connect #}
-    {% endfor %}
-    {% set ns.schemaRegistryUrl = 'http://schema-registry-1:8081' %}
-{% endif %}   {# external['KAFKA_enable'] #}
+  {% endfor %}
+{% endif %}   {# KAFKA_CONNECT_enable or KAFKA_KSQLDB_use_embedded_connect #}
 
 {% if (external['S3_enable']) | default(false) %}
   {% if (external['S3_endpoint'] != None) | default(false) %}
