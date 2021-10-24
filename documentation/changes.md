@@ -96,6 +96,14 @@ The Modern Data Platform version 1.13.0 contains the following bug fixes and enh
  * Add support for both Cassandra 3 and Cassandra 4
  * Add additional configuration properties to Confluent Schema Registry
  * Support installing Python packages when starting Jupyter
+ * Add support for embedded Kafka Connect server in ksqlDB Server (set `KAFKA_KSQLDB_use_embedded_connect` to `true`)
+ * Add additional Kafka UI (Kowl)
+ * Add support for Flink
+ * Add support for Drools
+ * Add support for Ignite and Hazelcast
+ * Add support for Otuna and MLFlow
+ * Add support for installing Python packages when starting Jupyter (`JUPYTER_python_packages`)
+ * Add detail pages for some services linked from the **List of Services** page rendered by the Markdown viewer
 
 ### Bug Fixes 
 
