@@ -6,14 +6,14 @@ Tipboard - in-house, tasty, local dashboarding system
 
 ## How to enable?
 
-```
+```bash
 platys init --enable-services TIPBOARD
 platys gen
 ```
 
 ## How to use it?
 
-Navigate to <http://dataplatform:28172>
+Navigate to <http://${PUBLIC_IP}:28172>
 
 
 
