@@ -600,6 +600,8 @@ services:
     image: confluentinc/cp-zookeeper:{{__CONFLUENT_PLATFORM_version}}
     container_name: zookeeper-{{loop.index}}
     hostname: zookeeper-{{loop.index}}
+    labels:
+      com.platys.name: "zookeeper"
     ports:
       - "{{port}}:{{port}}"
     environment:
@@ -639,6 +641,7 @@ services:
     container_name: zoonavigator
     hostname: zoonavigator
     labels:
+      com.platys.name: "zoonavigator"
       com.platys.webui.title: 'Zoonavigator UI'
       com.platys.webui.url: http://${PUBLIC_IP}:28100
     ports:
@@ -664,6 +667,7 @@ services:
     image: elkozmon/zoonavigator-api:{{__ZOONAVIGATOR_API_version}}
     container_name: zoonavigator-api
     labels:
+      com.platys.name: "zoonavigator"
       com.platys.restapi.title: 'Zoonavigator REST API'
       com.platys.restapi.url: 'http://${PUBLIC_IP}:28101'
     ports:
@@ -708,6 +712,8 @@ services:
     image: confluentinc/{{ 'cp-server' if (KAFKA_edition | lower) == 'enterprise' else 'cp-kafka' }}:{{__CONFLUENT_PLATFORM_version}}
     container_name: {{serviceName}}
     hostname: {{serviceName}}
+    labels:
+      com.platys.name: "kafka"
     {% if not KAFKA_use_kraft_mode | default(false) %}
     depends_on:
       - zookeeper-1
@@ -824,6 +830,7 @@ services:
     hostname: schema-registry-{{loop.index}}
     container_name: schema-registry-{{loop.index}}
     labels:
+      com.platys.name: "schema-registry"
       com.platys.restapi.title: 'Schema Registry REST API'
       com.platys.restapi.url: "http://${PUBLIC_IP}:{{external_port}}"
     ports:
@@ -875,6 +882,7 @@ services:
     hostname: apicurio-registry-{{loop.index}}
     container_name: apicurio-registry-{{loop.index}}
     labels:
+      com.platys.name: "apicurio-registry"
       com.platys.restapi.title: 'Apicurio Registry REST API'
       com.platys.restapi.url: "http://${PUBLIC_IP}:{{external_port}}"
     depends_on:
@@ -909,6 +917,7 @@ services:
     image: confluentinc/cp-kafka-connect:{{__CONFLUENT_PLATFORM_version}}
     container_name: kafka-connect-{{loop.index}}
     labels:
+      com.platys.name: "kafka-connect"
       com.platys.restapi.title: 'Kafka Connect REST API'
       com.platys.restapi.url: "http://${PUBLIC_IP}:{{external_port}}"
     ports:
@@ -1004,6 +1013,7 @@ services:
     hostname: ksqldb-server-{{loop.index}}
     container_name: ksqldb-server-{{loop.index}}
     labels:
+      com.platys.name: "ksqldb"
       com.platys.restapi.title: 'ksqlDB Server REST API'
       com.platys.restapi.url: "http://${PUBLIC_IP}:{{external_port}}"
     ports:
@@ -1132,6 +1142,8 @@ services:
     image: confluentinc/ksqldb-cli:{{__KAFKA_KSQLDB_version}}
     container_name: ksqldb-cli
     hostname: ksqldb-cli
+    labels:
+      com.platys.name: "ksqldb-cli"
     depends_on:
       - ksqldb-server-1
     {%if use_timezone | default(false) %}
@@ -1154,6 +1166,8 @@ services:
     image: materialize/materialized:{{__MATERIALIZE_version}}
     hostname: materialize-1
     container_name: materialize-1
+    labels:
+      com.platys.name: "materialize"
     ports:
       - "6875:6875"
     {%if use_timezone | default(false) %}
@@ -1175,6 +1189,7 @@ services:
     hostname: azkarra-worker-1
     container_name: azkarra-worker-1
     labels:
+      com.platys.name: "azkarra-worker"
       com.platys.restapi.title: 'Kafka REST Proxy'
       com.platys.restapi.url: "http://${PUBLIC_IP}:28085"
     depends_on:
@@ -5971,6 +5986,7 @@ services:
     hostname: pinot-controller
     container_name: pinot-controller
     labels:
+      com.platys.name: "pinot"
       com.platys.webui.title: "Pinot Console UI"
       com.platys.webui.url: "http://${PUBLIC_IP}:28210"
     ports:
@@ -5991,6 +6007,8 @@ services:
     image: apachepinot/pinot:{{__PINOT_version}}
     hostname: pinot-broker-1
     container_name: pinot-broker-1
+    labels:
+      com.platys.name: "pinot"
     depends_on:
       - pinot-controller
     ports:
@@ -6013,6 +6031,8 @@ services:
     image: apachepinot/pinot:{{__PINOT_version}}
     hostname: pinot-server-{{loop.index}}
     container_name: pinot-server-{{loop.index}}
+    labels:
+      com.platys.name: "pinot"
     depends_on:
       - pinot-controller
 #    ports:
@@ -6091,6 +6111,7 @@ services:
     hostname: gridgain-cc-frontend
     container_name: gridgain-cc-frontend
     labels:
+      com.platys.name: "gridgain"
       com.platys.webui.title: "Gridgain Control Center UI"
       com.platys.webui.url: "http://${PUBLIC_IP}:28245"
     ports:
