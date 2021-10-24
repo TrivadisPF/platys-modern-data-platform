@@ -2,6 +2,114 @@
 
 See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/platys/blob/master/documentation/upgrade-platform-stack.md) for how to upgrade to newer version.
 
+## What's new in 1.13.0
+
+The Modern Data Platform version 1.13.0 contains the following bug fixes and enhancements:
+
+### New Services
+
+ * Nuclio FaaS
+ * Firefox Browser
+ * Zipkin
+ * Apache Tika Server
+ * RStudio
+ * Shiny Server
+ * MLflow Server
+ * Optuna
+ * Optuna Dashboard
+ * Excalidraw
+ * Drools KIE Server
+ * Drools Business Central Workbench
+ * Flink
+ * Nussknacker Designer
+ * Kowl
+ * Apache Ignite
+ * Debezium Server
+ * pgAdmin
+ * Oracle XE
+
+### New Cookbook Recipes
+
+ * [Support StreamSets Data Collector Activation](../cookbooks/recipes/streamsets-oss-activation)
+
+### Version upgrades 
+
+ * Update `Confluent` to `6.2.0` 
+ * Update `Marquez` to `0.19.0` 
+ * Update `Trino` to `363`
+ * Update `Starburstdata` to `363-e`
+ * Update `DataHub` to `0.8.15`
+ * Update `Minio` to `RELEASE.2021-06-17T00-10-46Z`
+ * Update `ksqlDB` to `0.20.0`
+ * Update `tile38` to `1.25.2`
+ * Update `kcat` to `1.7.0` (used to be `kafkacat`)
+ * Update `Elasticsearch` to `7.14.0`
+ * Update `Kibana` to `7.14.0`
+ * Update `Cassandra` to `3.11`
+ * Update `DSE-Server` to `6.8.14`
+ * Update `MongoDB` to `5.0`
+ * Update `Neo4J` to `4.2`
+ * Update `Stardog` to `7.7.1-java11-preview`
+ * Update `Stardog-Studio` to `current`
+ * Update `Chronograf` to `1.9`
+ * Update `Telegraf` to `1.19`
+ * Update `Influxdb2` to `2.0.8` (switch to official docker image)
+ * Update `Kudu` to `1.15`
+ * Update `Pinot` to `0.8.0`
+ * Update `Pinot` to `0.8.0`
+ * Update `Prometheus` to `v2.29.1`
+ * Update `Prometheus Pushgateway` to `v1.4.1`
+ * Update `Prometheus Nodeexporter` to `v1.2.2`
+ * Update `Yugabyte` to `2.4.6.0-b10`
+ * Update `GraphDB` to `9.9.0`
+ * Update `Druid` to `0.21.1`
+ * Update `Solr` to `8.9`
+ * Update `Redis` to `6.2`
+ * Update `Memcached` to `1.6.10`
+ * Update `Grafana` to `8.2.0`
+ * Update `QuestDB` to `6.0.4`
+ * Update `Spark` to `3.1.1`
+ * Update `Minio` to `RELEASE.2021-09-15T04-54-25Z`
+ * Update `Axon Server` to `4.5.7`
+ * Update `Hazelcast` to `5.0`
+ * Update `Apache Atlas` to `2.2.0`
+ * Update `LakeFS` to `0.52.2`
+ * Update `Amundsen-Frontend` to `3.13.0`
+ * Update `Amundsen-Metadata` to `3.10.0`
+ * Update `Amundsen-Search` to `2.11.1`
+
+### Breaking Changes
+
+ * Changed `HAZELCAST_IMDG_xxxxxx` to `HAZELCAST_xxxxxx` 
+ * Changed `ORACLE_xxxxxx` to `ORACLE_EE_xxxxxx` 
+ * Changed default of `KAFKA_CONNECT_nodes` from `2` to `1`
+ * Changed `KAFKA_EAGLE_enable` to `KAFKA_EFAK_enable`
+
+### Enhancements 
+
+ * Documentation markdown pages are copied into the generated platform and available in the markdown viewer 
+ * Support Zookeeper-Less Kafka Setup in KRaft mode (`KAFKA_use_kraft_mode`)
+ * Support setting the `SDC ID` to a fixed value for StreamSets, so that an Activation code is still valid after recreating the `streamsets-1` docker container
+ * Switch from `cp-enterprise-kafka` to `cp-server` image for Confluent Enterprise
+ * Support multiple databases within one single Posgresql container
+ * Rename `kafkacat` to `kcat` (to reflect the GitHub project)
+ * Add support for both Cassandra 3 and Cassandra 4
+ * Add additional configuration properties to Confluent Schema Registry
+ * Support installing Python packages when starting Jupyter
+ * Add support for embedded Kafka Connect server in ksqlDB Server (set `KAFKA_KSQLDB_use_embedded_connect` to `true`)
+ * Add additional Kafka UI (Kowl)
+ * Add support for Flink
+ * Add support for Drools
+ * Add support for Ignite and Hazelcast
+ * Add support for Otuna and MLFlow
+ * Add support for installing Python packages when starting Jupyter (`JUPYTER_python_packages`)
+ * Add detail pages for some services linked from the **List of Services** page rendered by the Markdown viewer
+
+### Bug Fixes 
+
+  * fix error "panic: runtime error: slice bounds out of range" in `schema-registry-ui` and `kafka-connect-ui` by allowing the mapping the `resolv.conf` into the container. It is enabled by default.
+
+
 ## What's new in 1.12.1
 
 The Modern Data Platform version 1.12.1 contains the following bug fixes and enhancements:

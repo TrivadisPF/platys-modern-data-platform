@@ -1,4 +1,4 @@
-# `modern-data-platform` - Port Mappings - 1.12.1
+# `modern-data-platform` - Port Mappings - 1.13.0
 
 This table reserves the external ports for the various services. Not all services have to be used in the platform at a given time. But by reserving, we can assure that there are no conflicts if a service is added at a later time.
 
@@ -7,8 +7,10 @@ This table reserves the external ports for the various services. Not all service
 Container Port(s) | Internal Port(s)           | Service (alternatives) |
 --------------------|------------------|-----------------------|
 21 | 21 | ftp |
+80 | 80 | markdown-viewer or firefox |
 1433 | 1433 | sqlserver |
-1521 | 1521 | oracledb |
+1521 | 1521 | oracledb-ee |
+1522 | 1521 | oracledb-xe |
 1095 | 1095 | ksqldb-server-1 (jmx) |
 1096 | 1096 | ksqldb-server-2 (jmx) |
 1097 | 1097 | ksqldb-server-3 (jmx) |
@@ -34,6 +36,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 3010 | 3000 | postman |
 3306 | 3306 | mysql |
 3307 | 3306 | datahub-mysql |
+3838 | 3838 | shiny-server | 
 4000 | 4000 | graphql-mesh |
 4004 | 4004 | log4brains |
 4040 | 4040 | spark-master (ui) |
@@ -52,7 +55,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 5010 | 5000 | marquez |
 5011 | 5001 | marquez |
 5050 | 5050 | zeppelin |
-5500 | 5500 | oracledb |
+5500 | 5500 | oracledb-ee |
+5501 | 5500 | oracledb-xe |
 \-     | 5432 | hive-metastore-db |
 \-     | 5432 | hue-db |
 5432 | 5432 | postgresql |
@@ -65,6 +69,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 5701 | 5701 | hazelcast	-1 | 
 5705 | 5701 | zeebe-1 | 
 5800 | 5800 | filezilla | 
+5801 | 5800 | firefox | 
 5820 | 5820 | stardog-1 |
 5900 | 5900 | filezilla |  
 6060 | 6060 | zeppelin |
@@ -96,6 +101,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 8048 | 8048 | kafka-eagle |
 8050 | 8050 | kudu-tserver-1 |
 8051 | 8051 | kudo-master-1 |
+8070 | 8070 | nuclio |
 8080 | 8080 | spark-master |
 8081 | 8081 | schema-registry-1     |
 8082 | 8081 | schema-registry-2     |
@@ -109,20 +115,28 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 8124 | 8124 | axon-server |
 8161 | 8161 | activemq |
 8200 | 8200 | vault |
+8787 | 8787 | r-studio |
 8812 | 8812 | questdb |
 8888 | 8888 | hue |
 8978 | 8978 | cloudbeaver |
 8983 | 8983 | solr |
 8998 | 8998 | livy |
-9000 | 9000 | minio |
-9001 | 9001 | mosquitto-1 |
-9002 | 9002 | mosquitto-2 |
-9003 | 9003 | mosquitto-3 |
+9000 | 9000 | minio-1 |
+9001 | 9000 | minio-2 |
+9002 | 9000 | minio-3 |
+9003 | 9000 | minio-4 |
 9009 | 9009 | questdb |
+9010 | 9010 | minio-1 ui |
+9011 | 9011 | minio-2 ui |
+9012 | 9012 | minio-3 ui |
+9013 | 9013 | minio-4 ui |
 9042 | 9042 | dse-1 |
 9043 | 9042 | dse-2 |
 9044 | 9042 | dse-3 |
 9047 | 9047 | dremio |
+9101 | 9001 | mosquitto-1 |
+9102 | 9002 | mosquitto-2 |
+9103 | 9003 | mosquitto-3 |
 9200 | 9200 | elasticsearch-1 |
 9300 | 9300 | elasticsearch-1 |
 9160 | 9160 | cassandra-1 |
@@ -139,6 +153,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 9096 | 9096 | kafka-5     |
 9097 | 9097 | kafka-6     |
 9393 | 9393 | spring-dataflow-server |
+9411 | 9411 | zipkin |
 9600 | 9600 | zeebe-1 |
 9851 | 9851 | tile38 |
 9870 | 9870 | namenode |
@@ -160,6 +175,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 10002 | 10002 | hive-server |
 10005 | 10000 | nifi |
 11211 | 11211 | memcached |
+11212 | 11211 | ignite-1 |
 15433 | 5433| yb-tserver-1 |
 15672 | 15672 | rabbitmq (ui) |
 16379 | 6379| yb-tserver-1 |
@@ -277,7 +293,6 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28150 | 8888 | druid-sandbox |
 28151 | 8088 | superset |
 28152 | 8080 | superset |
-28153 | 8888 | oracle-rest-1 |
 28154 | 8080 | penthao |
 28155 | 8080 | hawtio |
 28156 | 8080 | swagger-editor |
@@ -329,6 +344,30 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28225 | 18083 | emqx-1 |
 28226 | 9000 | questdb |
 28227 | 8080 | debezium-ui |
+28228 | 9998 | tikka-server |
+28229 | 5000 | mlflow-server |
+28230 | 8080 | optuna-dashboard |
+28231 | 80 | excalidraw |
+28232 | 8080 | reaper (app UI) |
+28233 | 8081 | reaper (admin UI) |
+28234 | 8080 | kie-server (drools) |
+28235 | 8001 | business-central (drools) |
+28236 | 8080 | business-central (drools) |
+28237 | 8081 | flink-jobmanager |
+28238 | 8081 | nussknacker-designer |
+28239 | 8080 | kowl |
+28240 | 8080 | ignite-1 |
+28241 | 8080 | ignite-2 |
+28242 | 8080 | ignite-3 |
+28243 | 8080 | ignite-4 |
+28244 | 8080 | ignite-5 |
+28245 | 8008 | gridgain-cc-frontend |
+28246 | 8080 | debezium-server |
+28247 | 80 | pgadmin |
+28250 | 8888 | oracle-ee |
+28251 | 8888 | oracle-xe |
+28252 | 8888 | oracle-rest-1 |
+
 
 ## Ports > 28500
 

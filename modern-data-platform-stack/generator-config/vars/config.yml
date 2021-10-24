@@ -4,7 +4,7 @@
       platys:
         platform-name: 'platys-platform'
         platform-stack: 'trivadis/platys-modern-data-platform'
-        platform-stack-version: '1.12.1'
+        platform-stack-version: '1.13.0-preview'
         structure: 'flat'
 
       # ========================================================================
@@ -63,6 +63,7 @@
       KAFKA_volume_map_data: false
       KAFKA_datacenters: 1
       KAFKA_broker_nodes: 3
+      KAFKA_use_kraft_mode: false
       KAFKA_internal_replication_factor: 3
       KAFKA_delete_topic_enable: true
       KAFKA_auto_create_topics_enable: false
@@ -75,13 +76,14 @@
       # KAFKA_compression_type:
       # KAFKA_min_insync_replicas:
       # KAFKA_replica_selector_class: org.apache.kafka.common.replica.RackAwareReplicaSelector
-      KAFKA_confluent_log_placement_constraints: {}
+      KAFKA_confluent_log_placement_constraints:
       KAFKA_confluent_tier_feature: false
       KAFKA_confluent_tier_enable: false
       KAFKA_confluent_tier_backend: S3
       KAFKA_confluent_tier_s3_bucket: kafka-logs
       KAFKA_confluent_tier_s3_region: us-east-1
       KAFKA_confluent_tier_s3_aws_endpoint_override:
+      KAFKA_confluent_tier_s3_force_path_style_access: false
       KAFKA_confluent_tier_local_hotset_bytes:
       KAFKA_confluent_tier_local_hotset_ms:
       KAFKA_confluent_tier_archiver_num_threads:
@@ -95,7 +97,14 @@
       KAFKA_SCHEMA_REGISTRY_enable: false
       KAFKA_SCHEMA_REGISTRY_nodes: 1
       KAFKA_SCHEMA_REGISTRY_use_zookeeper_election: false
+      KAFKA_SCHEMA_REGISTRY_group_id: schema-registry
       KAFKA_SCHEMA_REGISTRY_replication_factor: 1
+      KAFKA_SCHEMA_REGISTRY_leader_eligibility: true
+      KAFKA_SCHEMA_REGISTRY_mode_mutability: true
+      # One of `none`, `backward`, `backward_transitive`, `forward`, `forward_transitive`, `full` or `full_transitive`.
+      KAFKA_SCHEMA_REGISTRY_schema_compatibility_level: backward
+      KAFKA_SCHEMA_REGISTRY_log4j_root_loglevel: info
+      KAFKA_SCHEMA_REGISTRY_debug: false
 
       #
       # ===== Apicurio Schema Registry ========
@@ -107,7 +116,7 @@
       # ===== Kafka Connect ========
       #
       KAFKA_CONNECT_enable: false
-      KAFKA_CONNECT_nodes: 2
+      KAFKA_CONNECT_nodes: 1
       KAFKA_CONNECT_connectors:
       KAFKA_CONNECT_config_providers: 'file'
       KAFKA_CONNECT_config_providers_classes: 'org.apache.kafka.common.config.provider.FileConfigProvider'
@@ -125,7 +134,8 @@
       KAFKA_KSQLDB_query_pull_table_scan_enabled: false
       KAFKA_KSQLDB_queries_file: ''
       KAFKA_KSQLDB_response_http_headers_config: ''
-
+      KAFKA_KSQLDB_use_embedded_connect: false
+      KAFAK_KSQLDB_connect_connectors: 
 
       #
       # ===== Materialize ========
@@ -159,22 +169,21 @@
       KAFKA_MQTTPROXY_topic_regex_list:
 
       #
-      # ===== Kafkacat ========
+      # ===== kcat (used to be kafkacat) ========
       #
-      KAFKACAT_enable: false
+      KCAT_enable: false
 
       #
       # ===== Various Kafka UIs ========
       #
       KAFKA_SCHEMA_REGISTRY_UI_enable: false
       KAFKA_SCHEMA_REGISTRY_UI_use_public_ip: true
+      KAFKA_SCHEMA_REGISTRY_UI_map_resolv_conf: true
       KAFKA_TOPICS_UI_enable: false
+      KAFKA_TOPICS_UI_map_resolv_conf: true
       KAFKA_CONNECT_UI_enable: false
-
-      #
-      # ===== Debezium UI ========
-      #      
-      DEBEZIUM_UI_enable: false
+      KAFKA_CONNECT_UI_use_public_ip: true
+      KAFKA_CONNECT_UI_map_resolv_conf: true
 
       #
       # ===== Cluster Manager for Apache Kafka ========
@@ -205,9 +214,14 @@
       KAFKA_UI_enable: false
 
       #
-      # ===== Kafka Eagle ========
+      # ===== EFAK (previously Kafka Eagle) ========
       #
-      KAFKA_EAGLE_enable: false
+      KAFKA_EFAK_enable: false
+
+      #
+      # ===== kowl ========
+      #
+      KOWL_enable: false
 
       #
       # ===== Streams Explorer UI ========
@@ -223,6 +237,17 @@
       # ===== Linkedin Burrow ========
       #
       KAFKA_BURROW_enable: false
+
+      #
+      # ===== Debezium Server ========
+      #      
+      DEBEZIUM_SERVER_enable: false
+      DEBEZIUM_SERVER_volume_map_data: false
+
+      #
+      # ===== Debezium UI ========
+      #      
+      DEBEZIUM_UI_enable: false
 
       #
       # ===== Apache Hadoop ========
@@ -256,7 +281,6 @@
       SPARK_cores_max:
       SPARK_executor_memory:
 
-
       # misc spark 'addons'
       SPARK_HISTORY_enable: false
       SPARK_THRIFT_enable: false
@@ -265,6 +289,23 @@
       # ===== Apache Livy ========
       #
       LIVY_enable: false
+
+
+      #
+      # ===== Apache Flink ========
+      #
+      FLINK_enable: false
+      FLINK_taskmanagers: 1
+      FLINK_SQL_CLI_enable: false
+      FLINK_NUSSKNACKER_enable: false
+
+      #
+      # ===== Apache Tika ========
+      #
+      TIKA_enable: false
+      # 'minimal' or 'full'
+      TIKA_edition: 'minimal'
+
 
       #
       # ===== Apache Hive ========
@@ -295,6 +336,14 @@
       #
       DATAHUB_enable: false
       DATAHUB_volume_map_data: false
+      DATAHUB_use_ember_ui: false
+      DATAHUB_use_react_ui: true
+      DATAHUB_mce_consumer_standalone: false
+      DATAHUB_mae_consumer_standalone: false
+      # one of "neo4j" or "elasticsearch"
+      DATAHUB_graph_service_impl: neo4j
+      DATAHUB_use_analytics: false
+      DATAHUB_use_kibana: true
 
       #
       #===== Amundsen ========
@@ -332,11 +381,12 @@
 
       # some values for stage libs:  'streamsets-datacollector-apache-kafka_2_6-lib,streamsets-datacollector-aws-lib,streamsets-datacollector-azure-lib,streamsets-datacollector-groovy_2_4-lib,streamsets-datacollector-jdbc-lib'
       # https://streamsets.com/documentation/datacollector/latest/help/datacollector/UserGuide/Installation/AddtionalStageLibs.html
-      STREAMSETS_stage_libs: 'streamsets-datacollector-apache-kafka_2_6-lib'
+      STREAMSETS_stage_libs: ''
       STREAMSETS_enterprise_stage_libs: ''
       STREAMSETS_install_pipelines: false
-      # one of 'none', 'basic', 'digest', or 'form'
+      # one of 'none', 'basic', 'digest', 'form' or 'aster'
       STREAMSETS_http_authentication: form
+      STREAMSETS_sdc_id: ''
 
       #
       # =====  Streamsets Transformer ========
@@ -415,12 +465,53 @@
       # one of 'minimal', 'r', 'scipy', 'tensorflow', 'datascience', 'all-spark'
       JUPYTER_edition: 'minimal'
       JUPYTER_volume_map_data: false
+      JUPYTER_python_packages: ''
+
+      #
+      # ===== RStudio ========
+      #
+      RSTUDIO_enable: false
+      RSTUDIO_password: rstudio
+      RSTUDIO_run_as_root: false
+      RSTUDIO_disable_auth: false
+
+      #
+      # ===== Shiny Server ========
+      #
+      SHINY_SERVER_enable: false
+      # one of: 'base' or 'verse' 
+      SHINY_SERVER_edition: base
+      SHINY_SERVER_volume_map_apps: false
+
+      #
+      # ===== MLflow Server ========
+      #
+      MLFLOW_SERVER_enable: false
+      MLFLOW_SERVER_volume_map_data: false
+      # one of 'file', 'postgresql', 'mysql'
+      MLFLOW_SERVER_backend: 'file'
+      MLFLOW_SERVER_db_user: mlflow
+      MLFLOW_SERVER_db_password: abc123!
+      MLFOW_SERVER_artifact_root: '/mlruns'
+
+      #
+      # ===== Optuna Server ========
+      #
+      OPTUNA_enable: false
+      OPTUNA_dev_edition: false
+
+      OPTUNA_DASHBOARD_enable: false
 
       #
       # ===== Dataiku Data Science Studio ========
       #
       DATAIKU_DSS_enable: false
       DATAIKU_DSS_volume_map_data: false
+
+      #
+      # ===== Drools KIE Server ========
+      #
+      KIE_SERVER_enable: false
 
       #
       # ===== Grafana ========
@@ -506,6 +597,10 @@
       # ===== Apache Casandra ========
       #
       CASSANDRA_enable: false
+      # either 3 or 4
+      CASSANDRA_major_version: 3
+
+      REAPER_enable: false
 
       #
       # ===== DataStax ========
@@ -625,14 +720,27 @@
       YUGABYTE_enable: false
 
       #
+      # ===== Oracle XE RDBMS ========
+      #
+      ORACLE_XE_enable: false
+      # one of 'slim', 'regular', 'full'
+      ORACLE_XE_edition: 'regular'
+      ORACLE_XE_volume_map_data: false
+      # For Oracle 18 and higher, specify the name of the pluggable database
+      ORACLE_XE_database: ''
+      ORACLE_XE_password: 'EAo4KsTfRR'
+      # set to true, if a random password should be generated
+      ORACLE_XE_random_password: ''
+      ORACLE_XE_app_user: ''
+      ORACLE_XE_app_user_password: ''
+
+      #
       # ===== Oracle RDBMS ========
       #
-      ORACLE_enable: false
-      ORACLE_edition: 'ee'
-      ORACLE_volume_map_data: false
-      ORACLE_container_enable: false
-      ORACLE_password: 'EAo4KsTfRR'
-      ORACLE_xe_docker_image: ''
+      ORACLE_EE_enable: false
+      ORACLE_EE_volume_map_data: false
+      ORACLE_EE_container_enable: false
+      ORACLE_EE_password: 'EAo4KsTfRR'
 
       #
       # ===== Oracle REST Data Service ========
@@ -654,16 +762,24 @@
       #
       POSTGRESQL_enable: false
       POSTGRESQL_volume_map_data: false
-      POSTGRESQL_database: demodb
-      POSTGRESQL_user: demo
+      POSTGRESQL_database: postgres
+      POSTGRESQL_multiple_databases: 'demodb'
+      POSTGRESQL_multiple_users: 'demo'
+      POSTGRESQL_multiple_passwords: 'abc123!'
+      POSTGRESQL_user: postgres
       POSTGRESQL_password: abc123!
       POSTGRESQL_schema: demo
-      POSTGRESQL_anon_role: appuser
+      #POSTGRESQL_anon_role: appuser
       
       #
       # ===== Posgrest ========
       #
       POSTGREST_enable: false
+
+      #
+      # ===== pgAdmin ========
+      #
+      PGADMIN_enable: false
 
       #
       # ===== TimeScale DB ========
@@ -695,9 +811,17 @@
       #
       # ===== Hazelcast IMDG ========
       #
-      HAZELCAST_IMDG_enable: false
-      HAZELCAST_IMDG_nodes: 1
+      HAZELCAST_enable: false
+      HAZELCAST_nodes: 1
       HAZELCAST_MC_enable: true
+
+      #
+      # ===== Apache Ignite IMDG ========
+      #
+      IGNITE_enable: false
+      IGNITE_servers: 1
+      # A list of modules to enable such as: 'ignite-rest-http,ignite-cassandra-store,ignite-cassandra-serializers'
+      IGNITE_option_libs: 'ignite-rest-http' 
 
       #
       # ===== Axon Event Store ========
@@ -755,6 +879,11 @@
       # ===== GraphQL Mesh ========
       #
       GRAPHQL_MESH_enable: false
+
+      #
+      # ===== Nuclio FaaS ========
+      #
+      NUCLIO_enable: false
 
       #
       # ===== MQTT Mosquitto ========
@@ -830,6 +959,8 @@
       #===== LakeFS ========
       #
       LAKEFS_enable: false
+      LAKEFS_blockstore_type: s3
+      LAKEFS_logging_level: 'INFO'
 
       #
       # ===== FTP ========
@@ -856,6 +987,17 @@
       #
       CODE_SERVER_enable: false
       CODE_SERVER_volume_map_platform_root: false
+
+      #
+      # ===== Excalidraw ========
+      #
+      EXCALIDRAW_enable: false
+
+      #
+      # ===== Firefox Browser ========
+      #
+      FIREFOX_enable: false
+      FIREFOX_use_port_80: false
 
       #
       # ===== File Browser ========
@@ -889,6 +1031,15 @@
       #
       MICROCKS_enable: false
 
+      #
+      # ===== Zipkin ========
+      #
+      ZIPKIN_enable: false
+      # one of 'mem', 'mysql', 'cassandra3', 'elasticsearch'
+      ZIPKIN_storage_type: 'mem'
+      ZIPKIN_collect_kafka: false
+      ZIPKIN_debug: false
+      
       #
       # ===== Portainer Container UI ========
       #

@@ -1,13 +1,17 @@
 # Postgresql
 
-* **Homepage**: <www.postgresql.org>
-* **Documentation**: <https://www.postgresql.org/docs/>
+PostgreSQL is a powerful, open source object-relational database system with over 30 years of active development that has earned it a strong reputation for reliability, feature robustness, and performance. 
 
+**[Website](http://www.postgresql.org)** | **[Documentation](https://www.postgresql.org/docs/)** | **[GitHub](https://github.com/postgres/postgres)**
+
+## How to enable?
 
 ```
 platys init --enable-services POSTRESQL
 platys gen
 ```
+
+## How to use it?
 
 ### Connect to the Postgresql CLI
 
@@ -42,4 +46,4 @@ Connect to Postgresql CLI to see that the table has been created:
 
 ```
 docker exec -ti postgresql psql -d demodb -U demo -c "SELECT * FROM driver"
-```
+```	

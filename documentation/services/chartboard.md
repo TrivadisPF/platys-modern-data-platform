@@ -1,8 +1,8 @@
 # Chartboard
 
-* **Homepage**: <https://github.com/the-maux/Chartboard>
-* **Documentation**: <https://github.com/the-maux/Chartboard>
+Simple dashboard to show widget chart 
 
+**[Website](https://github.com/the-maux/Chartboard)** | **[Documentation](https://github.com/the-maux/tipboard/wiki)** | **[GitHub](https://github.com/the-maux/Chartboard)**
 
 ```
 platys init --enable-services CHARTBOARD
