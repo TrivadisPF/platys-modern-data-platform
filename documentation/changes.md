@@ -87,6 +87,7 @@ The Modern Data Platform version 1.13.0 contains the following bug fixes and enh
 
 ### Enhancements 
 
+ * Documentation markdown pages are copied into the generated platform and available in the markdown viewer 
  * Support Zookeeper-Less Kafka Setup in KRaft mode (`KAFKA_use_kraft_mode`)
  * Support setting the `SDC ID` to a fixed value for StreamSets, so that an Activation code is still valid after recreating the `streamsets-1` docker container
  * Switch from `cp-enterprise-kafka` to `cp-server` image for Confluent Enterprise
