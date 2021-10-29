@@ -33,6 +33,8 @@ COPY ./README.md /opt/mdps-gen/static-data/doc
 
 # copy remove all .md extensions in links inside *.md files, as for the markdown viewer used the links only work without the extensions
 RUN find /opt/mdps-gen/static-data/doc/**.md -exec sed -i 's/.md)/)/g' {} \;
+RUN find /opt/mdps-gen/static-data/doc/cookbooks/**.md -exec sed -i 's/.md)/)/g' {} \;
+RUN find /opt/mdps-gen/static-data/doc/documentation/**.md -exec sed -i 's/.md)/)/g' {} \;
 
 # copy the generator script and make it executable
 COPY ./modern-data-platform-stack/generate.sh /usr/local/bin/
