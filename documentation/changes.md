@@ -7,12 +7,17 @@ See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/plat
 The Modern Data Platform version 1.14.0 contains the following bug fixes and enhancements:
 
 ### New Services
+
 ### New Cookbook Recipes
+
 ### Version upgrades
 
  * Update `DataHub` to `0.8.16`
  
 ### Breaking Changes
+
+ * InfluxDB is now listening on `19999` instead of `9999`
+
 ### Enhancements 
 ### Bug Fixes 
 
