@@ -18,6 +18,7 @@ networks:
 {% endif %}
 
 {% set __CONFLUENT_PLATFORM_version = CONFLUENT_PLATFORM_version | default('latest') -%}
+{% set __KAFKA_MM2_version = KAFKA_MM2_version | default('latest') -%}
 {% set __APICURIO_REGISTRY_version = APICURIO_REGISTRY_version | default('latest') -%}
 {% set __ZOONAVIGATOR_version = ZOONAVIGATOR_version | default('latest') -%}
 {% set __ZOONAVIGATOR_API_version = ZOONAVIGATOR_API_version | default('latest') -%}
@@ -1368,6 +1369,31 @@ services:
     {% endif -%}   {#  use_timezone #}
     restart: {{container_restart_policy}}
 {% endif %}   {# KAFKA_enable and KAFKA_REPLICATOR_enable #}
+
+{% if ((KAFKA_enable or external['KAFKA_enable']) and (KAFKA_edition | lower) == 'enterprise' and KAFKA_MM2_enable) | default(false) %}
+  mirror-maker-1:
+    image: trivadis/mirrormaker2:{{__KAFKA_MM2_version}}
+    container_name: mirror-maker-1:
+    hostname: mirror-maker-1:
+    labels:
+      com.platys.name: "mirror-maker2"
+    depends_on:
+      - kafka{{dataCenter}}-1
+      - schema-registry-1
+    environment:
+      MM2: ''
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./scripts/mirror-maker2/mm2.properties:/opt/mm2/kafka-mm2.properties:ro
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+{% endif %}   {# KAFKA_enable and KAFKA_MM2_enable #}
 
 {% if (KCAT_enable) | default(false) %}
   #  ================================== kcat (used to be kafkacat)  ========================================== #
