@@ -28,10 +28,14 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 1891 | 1883 | emqx-1 |
 2113 | 2113 | eventstore |
 2181 | 2181 | zookeeper-1 |
-2182 | 2181 | zookeeper-2 |
-2183 | 2181 | zookeeper-3 |
+2182 | 2182 | zookeeper-2 |
+2183 | 2183 | zookeeper-3 |
+2184 | 2184 | zookeeper-4 |
+2185 | 2185 | zookeeper-5 |
+2186 | 2186 | zookeeper-6 |
 3000 | 3000 | grafana |
-3001 | 3000 | wetty |
+3001 | 3000 | wetty-1 |
+3002 | 3000 | wetty-2 |
 3005 | 3000 | marquez-web |
 3010 | 3000 | postman |
 3306 | 3306 | mysql |
@@ -152,6 +156,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 9095 | 9095 | kafka-4     |
 9096 | 9096 | kafka-5     |
 9097 | 9097 | kafka-6     |
+9098 | 9098 | kafka-7     |
+9099 | 9099 | kafka-8     |
 9393 | 9393 | spring-dataflow-server |
 9411 | 9411 | zipkin |
 9600 | 9600 | zeebe-1 |
@@ -169,7 +175,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 9995 | 9995 | kafka-4 (jmx) |
 9996 | 9996 | kafka-5 (jmx) |
 9997 | 9997 | kafka-6 (jmx) |
-9999 | 9999 | influxdb2 |
+9998 | 9998 | kafka-7 (jmx) |
+9999 | 9999 | kafka-8 (jmx) |
 10000 | 10000 | hive-server |
 10001 | 10001 | hive-server |
 10002 | 10002 | hive-server |
@@ -207,9 +214,18 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 19200 | 9200 | elasticsearch-atlas |
 19201 | 9200 | amundsen-elasticsearch |
 19202 | 9200 | datahub-elasticsearch |
+19092 | 19092 | kafka-1 (docker-host)   |
+19093 | 19093 | kafka-2 (docker-host    |
+19094 | 19094 | kafka-3 (docker-host)   |
+19095 | 19095 | kafka-4 (docker-host)   |
+19096 | 19096 | kafka-5 (docker-host)   |
+19097 | 19097 | kafka-6 (docker-host)   |
+19098 | 19098 | kafka-7 (docker-host)   |
+19099 | 19099 | kafka-8 (docker-host)   |
 19630 | 19630 | streamsets-transformer-1 | 
 19631 | 19630 | streamsets-transformer-1 | 
 19632 | 19630 | streamsets-transformer-1 | 
+19999 | 9999 | influxdb2 |
 21000 | 21000 | atlas |
 26500 | 26500 | zeebe-1 |
 27017 | 27017 | mongodb-1 |
@@ -232,6 +248,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 29095 | 29095 | kafka-4 (docker-host)   |
 29096 | 29096 | kafka-5 (docker-host)   |
 29097 | 29097 | kafka-6 (docker-host)   |
+29098 | 29098 | kafka-7 (docker-host)   |
+29099 | 29099 | kafka-8 (docker-host)   |
 31010 | 31010 | dremio |
 45678 | 45678 | dremio |
 61613 | 61613 | activemq (stomp) |
