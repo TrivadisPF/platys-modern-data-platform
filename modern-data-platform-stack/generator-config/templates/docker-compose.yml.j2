@@ -6859,11 +6859,20 @@ services:
       - HZ_NETWORK_JOIN_AUTODETECTION_ENABLED=false
       - HZ_NETWORK_JOIN_MULTICAST_ENABLED=true
       - HZ_NETWORK_JOIN_AWS_ENABLED=false
+      - HZ_JET_ENABLED={{HAZELCAST_use_jet}}
+    {% if HAZELCAST_volume_map_custom_config | default(false) %}
+      - HAZELCAST_CONFIG=hazelcast.yml
+    {% endif -%}   {#  HAZELCAST_volume_map_custom_config #}
+      - CLASSPATH="/opt/hazelcast/ext/"
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
+      - ./plugins/hazelcast/:/opt/hazelcast/ext
+    {% if HAZELCAST_volume_map_custom_config | default(false) %}
+      - ./hazelcast.yml:/opt/hazelcast/hazelcast.yml
+    {% endif -%}   {#  HAZELCAST_volume_map_custom_config #}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
