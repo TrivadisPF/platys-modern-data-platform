@@ -13,6 +13,7 @@ The Modern Data Platform version 1.14.0 contains the following bug fixes and enh
 ### Version upgrades
 
  * Update `DataHub` to `0.8.16`
+ * Update `Trino` to `364`
  
 ### Breaking Changes
 
