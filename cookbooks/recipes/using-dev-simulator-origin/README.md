@@ -1,7 +1,7 @@
 ---
 technoglogies:      streamsets
-version:				1.12.0
-validated-at:			10.5.2021
+version:				1.13.0
+validated-at:			11.11.2021
 ---
 
 # Using Dev Simulator Orgin to simulate streaming data
@@ -85,6 +85,62 @@ Dev Simulator Properties (only the ones which have to change from the defaults):
   * **Timestamp Mode:** `Relative from Anchor Timestamp`
   * **Timestamp Field:** `/0`
   * **Relative Time Resolution:** `seconds`
+  * **Anchor Time is Now?:** `true`
+* **Data Format**
+  * **Header Line:** `No Header Line`
+
+### without header and milliseconds
+
+`relative-anchor-without-header-millisec.csv`
+
+```
+1000,10,1
+5000,10,2
+10000,10,3
+15000,10,4
+20000,10,5
+```
+
+Streamsets: `RelativeAnchorTimeWithoutHeaderMillisec`
+
+Dev Simulator Properties (only the ones which have to change from the defaults):
+
+* **Files**
+  * **Files Directory:** `/data-transfer/data`
+  * **File Name Pattern:** `relative-anchor-without-header-millisec.csv`
+  * **Different Record Types?:** `false`
+* **Event Time**
+  * **Timestamp Mode:** `Relative from Anchor Timestamp`
+  * **Timestamp Field:** `/0`
+  * **Relative Time Resolution:** `milliseconds`
+  * **Anchor Time is Now?:** `true`
+* **Data Format**
+  * **Header Line:** `No Header Line`
+
+### without header and milliseconds (with decimals)
+
+`relative-anchor-without-header-millisec-decimals.csv`
+
+```
+1000.10,10,1
+5000.11,10,2
+10000.12,10,3
+15000.00,10,4
+20000.50,10,5
+```
+
+Streamsets: `RelativeAnchorTimeWithoutHeaderMillisecDecimals`
+
+Dev Simulator Properties (only the ones which have to change from the defaults):
+
+* **Files**
+  * **Files Directory:** `/data-transfer/data`
+  * **File Name Pattern:** `relative-anchor-without-header-millisec.csv`
+  * **Different Record Types?:** `false`
+* **Event Time**
+  * **Timestamp Mode:** `Relative from Anchor Timestamp`
+  * **Timestamp Field:** `/0`
+  * **Relative Time Resolution:** `milliseconds`
   * **Anchor Time is Now?:** `true`
 * **Data Format**
   * **Header Line:** `No Header Line`
