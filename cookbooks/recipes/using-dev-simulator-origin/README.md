@@ -317,3 +317,38 @@ Dev Simulator Properties (only the ones which have to change from the defaults):
   * **Descriminator field:** `/descriminator`
 * **Data Format**
   * **Header Line:** `With Header Line`
+
+## Using Absolute
+
+You can find the StreamSets pipeline in the folder `streamsets`.
+
+### without header
+
+`absolute-without-header.csv`
+
+```
+2021-11-16T09:00:01+0100,10,1
+2021-11-16T09:00:05+0100,10,2
+2021-11-16T09:00:10+0100,10,3
+2021-11-16T09:00:15+0100,10,3
+2021-11-16T09:00:20+0100,10,3
+```
+
+Streamsets: `AbsoluteTimeWithoutHeader`
+
+Dev Simulator Properties (only the ones which have to change from the defaults):
+
+* **Files**
+  * **Files Directory:** `/data-transfer/data`
+  * **File Name Pattern:** `absolute-without-header.csv`
+  * **Different Record Types?:** `false`
+* **Event Time**
+  * **Timestamp Mode:** `Absolute with Start Timestamp`
+  * **Timestamp Field:** `/0`
+  * **Timestamp Format** `yyyy-MM-dd'T'HH:mm:ssZ`
+  * **Simulation Start Timestamp:** `2021-11-16T09:00:00+0100`
+  * **Simulation Start Timestamp Format** `yyyy-MM-dd'T'HH:mm:ssZ`
+* **Data Format**
+  * **Header Line:** `No Header Line`
+
+  
