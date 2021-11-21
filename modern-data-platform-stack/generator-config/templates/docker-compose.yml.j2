@@ -39,6 +39,7 @@ networks:
 {% set __KAFKA_UI_version = KAFKA_UI_version | default('latest') -%}
 {% set __KAFKA_EFAK_version = KAFKA_EFAK_version | default('latest') -%}
 {% set __KOWL_version = KOWL_version | default('latest') -%}
+{% set __KOUNCIL_version = KOUNCIL_version | default('latest') -%}
 {% set __STREAMS_EXPLORER_version = STREAMS_EXPLORER_version | default('latest') -%}
 {% set __KAFKA_LAG_EXPORTER_version = KAFKA_LAG_EXPORTER_version | default('latest') -%}
 
@@ -392,6 +393,7 @@ networks:
   {% set KAFKA_UI_enable = false -%}
   {% set KAFKA_EFAK_enable = false -%}
   {% set KOWL_enable = false -%}
+  {% set KOUNCIL_enable = false -%}
   {% set EFAK_enable = false -%}
   {% set KAFKA_LAG_EXPORTER_enable = false -%}
   {% set DEBEZIUM_SERVER_enable = false -%}
@@ -1764,6 +1766,32 @@ services:
     {% endif -%}   {#  use_timezone #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  KAFKA_enable and KOWL_enable #}
+
+{% if ((KAFKA_enable or external['KAFKA_enable']) and KOUNCIL_enable) | default(false) %}
+  #  ================================== Kowl ========================================== #
+  kouncil:
+    image: consdata/kouncil:{{__KOWL_version}}
+    container_name: kouncil
+    hostname: kouncil
+    labels:
+      com.platys.name: "kouncil"
+      com.platys.webui.title: 'Kouncil UI'
+      com.platys.webui.url: "http://${PUBLIC_IP}:28253"
+    ports:
+      - 28253:8080
+    environment:
+      bootstrapServers: '{{ns.bootstrapServers}}'
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  KAFKA_enable and KOUNCIL_enable #}
 
 {% if ((KAFKA_enable or external['KAFKA_enable']) and STREAMS_EXPLORER_enable) | default(false) %}
   #  ================================== Streams Explorer ========================================== #

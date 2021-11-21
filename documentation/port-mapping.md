@@ -1,4 +1,4 @@
-# `modern-data-platform` - Port Mappings - 1.13.0
+# `modern-data-platform` - Port Mappings - 1.14.0
 
 This table reserves the external ports for the various services. Not all services have to be used in the platform at a given time. But by reserving, we can assure that there are no conflicts if a service is added at a later time.
 
@@ -385,6 +385,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28250 | 8888 | oracle-ee |
 28251 | 8888 | oracle-xe |
 28252 | 8888 | oracle-rest-1 |
+28253 | 8888 | kouncil |
 
 
 ## Ports > 28500

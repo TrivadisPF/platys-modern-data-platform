@@ -8,6 +8,8 @@ The Modern Data Platform version 1.14.0 contains the following bug fixes and enh
 
 ### New Services
 
+ * Kouncil
+
 ### New Cookbook Recipes
 
 ### Version upgrades
@@ -17,6 +19,7 @@ The Modern Data Platform version 1.14.0 contains the following bug fixes and enh
  * Update `Confluent` to `7.0.0`
  * Update `Apache NiFi` to `1.15.0`
  * Update `Hasura` to `v2.0.0-beta.2`
+ * Update `ksqlDB` to `0.22.0`
  
 ### Breaking Changes
 
