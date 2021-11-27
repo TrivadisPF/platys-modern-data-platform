@@ -20,6 +20,9 @@ The Modern Data Platform version 1.14.0 contains the following bug fixes and enh
  * Update `Apache NiFi` to `1.15.0`
  * Update `Hasura` to `v2.0.0-beta.2`
  * Update `ksqlDB` to `0.22.0`
+ * Update `Zeppelin` to `0.10.0`
+ * Update `Livy` to `0.7.1-incubating`
+ * Update `Spark 3` to `3.2
  
 ### Breaking Changes
 
