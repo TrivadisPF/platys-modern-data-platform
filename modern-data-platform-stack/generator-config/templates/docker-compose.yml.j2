@@ -891,23 +891,30 @@ services:
     {% set http_external_port = 28162 + loop.index - 1 %}
     {% set http_port = 8080 + loop.index - 1 %}
   apicurio-registry-{{loop.index}}:
-    image: apicurio/apicurio-registry-streams:{{__APICURIO_REGISTRY_version}}
+    image: apicurio/apicurio-registry-{{APICURIO_REGISTRY_storage}}:{{__APICURIO_REGISTRY_version}}
     hostname: apicurio-registry-{{loop.index}}
     container_name: apicurio-registry-{{loop.index}}
     labels:
       com.platys.name: "apicurio-registry"
       com.platys.restapi.title: 'Apicurio Registry REST API'
       com.platys.restapi.url: "http://${PUBLIC_IP}:{{external_port}}"
+    {% if (APICURIO_REGISTRY_storage | lower) == 'kafkasql'  %}
     depends_on:
       - kafka{{dataCenter}}-1
+    {% endif -%}   {#  APICURIO_REGISTRY_storage == kafkasql #}
     ports:
       - "{{external_port}}:9000"
       - "{{http_external_port}}:{{http_port}}"
     environment:
       QUARKUS_PROFILE: prod
+    {% if (APICURIO_REGISTRY_storage | lower) == 'kafkasql'  %}
       KAFKA_BOOTSTRAP_SERVERS: '{{ns.bootstrapServers}}'
-      APPLICATION_ID: registry_id
-      APPLICATION_SERVER: apicurio-registry-{{loop.index}}
+    {% endif -%}   {#  APICURIO_REGISTRY_storage == sql #}
+    {% if (APICURIO_REGISTRY_storage | lower) == 'sql'  %}
+      REGISTRY_DATASOURCE_URL: jdbc:postgresql://postgres/apicurio-registry
+      REGISTRY_DATASOURCE_USERNAME: apicurio
+      REGISTRY_DATASOURCE_PASSWORD: abc123!
+    {% endif -%}   {#  APICURIO_REGISTRY_storage == sql #}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
