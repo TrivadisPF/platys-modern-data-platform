@@ -887,7 +887,6 @@ services:
 {% if ( (KAFKA_enable or external['KAFKA_enable']) and APICURIO_REGISTRY_enable ) | default(false) %}
   #  ================================== Apicurio Registry ========================================== #
   {% for num in range(APICURIO_REGISTRY_nodes | default(1) ) %}
-    {% set external_port = 29000 + loop.index - 1 %}
     {% set http_external_port = 28162 + loop.index - 1 %}
     {% set http_port = 8080 + loop.index - 1 %}
   apicurio-registry-{{loop.index}}:
@@ -896,14 +895,15 @@ services:
     container_name: apicurio-registry-{{loop.index}}
     labels:
       com.platys.name: "apicurio-registry"
+      com.platys.webui.title: 'Apicurio Registry UI'
+      com.platys.webui.url: "http://${PUBLIC_IP}:{{http_external_port}}"
       com.platys.restapi.title: 'Apicurio Registry REST API'
-      com.platys.restapi.url: "http://${PUBLIC_IP}:{{external_port}}"
+      com.platys.restapi.url: "http://${PUBLIC_IP}:{{http_external_port}}/apis/ccompat/v6"
     {% if (APICURIO_REGISTRY_storage | lower) == 'kafkasql'  %}
     depends_on:
       - kafka{{dataCenter}}-1
     {% endif -%}   {#  APICURIO_REGISTRY_storage == kafkasql #}
     ports:
-      - "{{external_port}}:9000"
       - "{{http_external_port}}:{{http_port}}"
     environment:
       QUARKUS_PROFILE: prod
