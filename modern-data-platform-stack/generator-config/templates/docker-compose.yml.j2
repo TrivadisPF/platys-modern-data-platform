@@ -19,7 +19,7 @@ networks:
 
 {% set __CONFLUENT_PLATFORM_version = CONFLUENT_PLATFORM_version | default('latest') -%}
 {% set __KAFKA_MM2_version = KAFKA_MM2_version | default('latest') -%}
-{% set __APICURIO_REGISTRY_version = APICURIO_REGISTRY_version | default('latest') -%}
+{% set __APICURIO_SCHEMA_REGISTRY_version = APICURIO_SCHEMA_REGISTRY_version | default('latest') -%}
 {% set __ZOONAVIGATOR_version = ZOONAVIGATOR_version | default('latest') -%}
 {% set __ZOONAVIGATOR_API_version = ZOONAVIGATOR_API_version | default('latest') -%}
 {% set __KAFKA_KSQLDB_version = KAFKA_KSQLDB_version | default('latest') -%}
@@ -393,7 +393,7 @@ networks:
 # if we use stack type ARM, then disable some containers which do not support ARM
   {% set ZOOKEEPER_enable = false -%}
   {% set KAFKA_enable = false -%}
-  {% set APICURIO_REGISTRY_enable = false -%}
+  {% set APICURIO_SCHEMA_REGISTRY_enable = false -%}
   {% set KAFKA_REPLICATOR_enable = false -%}
   {% set KAFKA_MM2_enable = false -%}
   {% set KCAT_enable = false -%}
@@ -849,8 +849,8 @@ services:
 {% endif %} {# KAFKA_enable #}
 
 {% if ( (KAFKA_enable or external['KAFKA_enable']) and (SCHEMA_REGISTRY_flavour | lower) == 'confluent' ) | default(false) %}
-  #  ================================== Schema Registry ========================================== #
-  {% for num in range(KAFKA_SCHEMA_REGISTRY_nodes | default(1) ) %}
+  #  ================================== Confluent Schema Registry ========================================== #
+  {% for num in range(SCHEMA_REGISTRY_nodes | default(1) ) %}
     {% set external_port = 8081 + loop.index - 1 %}
     {% set port = 8081 + loop.index - 1 %}
   schema-registry-{{loop.index}}:
@@ -871,15 +871,15 @@ services:
     {% endif %}
       SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: '{{ns.bootstrapServers}}'
       SCHEMA_REGISTRY_KAFKASTORE_SECURITY_PROTOCOL: PLAINTEXT
-      SCHEMA_REGISTRY_GROUP_ID: "{{KAFKA_SCHEMA_REGISTRY_group_id}}"
-      SCHEMA_REGISTRY_LEADER_ELIGIBILITY: "{{KAFKA_SCHEMA_REGISTRY_leader_eligibility}}"
-      SCHEMA_REGISTRY_MODE_MUTABILITY: "{{KAFKA_SCHEMA_REGISTRY_mode_mutability}}"
-      SCHEMA_REGISTRY_SCHEMA_COMPATIBILITY_LEVEL: "{{KAFKA_SCHEMA_REGISTRY_schema_compatibility_level}}"
-      SCHEMA_REGISTRY_KAFKASTORE_TOPIC_REPLICATION_FACTOR: {{KAFKA_SCHEMA_REGISTRY_replication_factor}}
+      SCHEMA_REGISTRY_GROUP_ID: "{{CONFLUENT_SCHEMA_REGISTRY_group_id}}"
+      SCHEMA_REGISTRY_LEADER_ELIGIBILITY: "{{CONFLUENT_SCHEMA_REGISTRY_leader_eligibility}}"
+      SCHEMA_REGISTRY_MODE_MUTABILITY: "{{CONFLUENT_SCHEMA_REGISTRY_mode_mutability}}"
+      SCHEMA_REGISTRY_SCHEMA_COMPATIBILITY_LEVEL: "{{CONFLUENT_SCHEMA_REGISTRY_schema_compatibility_level}}"
+      SCHEMA_REGISTRY_KAFKASTORE_TOPIC_REPLICATION_FACTOR: {{CONFLUENT_SCHEMA_REGISTRY_replication_factor}}
       SCHEMA_REGISTRY_ACCESS_CONTROL_ALLOW_ORIGIN: '*'
       SCHEMA_REGISTRY_ACCESS_CONTROL_ALLOW_METHODS: 'GET,POST,PUT,OPTIONS'
-      SCHEMA_REGISTRY_LOG4J_ROOT_LOGLEVEL: "{{KAFKA_SCHEMA_REGISTRY_log4j_root_loglevel}}"
-      SCHEMA_REGISTRY_DEBUG: "{{KAFKA_SCHEMA_REGISTRY_debug}}"
+      SCHEMA_REGISTRY_LOG4J_ROOT_LOGLEVEL: "{{CONFLUENT_SCHEMA_REGISTRY_log4j_root_loglevel}}"
+      SCHEMA_REGISTRY_DEBUG: "{{CONFLUENT_SCHEMA_REGISTRY_debug}}"
     {% if KAFKA_jmx_monitoring_prometheus_enable %}
       EXTRA_ARGS: -javaagent:/usr/share/jmx-exporter/jmx_prometheus_javaagent-0.12.0.jar=1234:/usr/share/jmx-exporter/confluent_schemaregistry.yml
     {% endif -%}
@@ -897,15 +897,15 @@ services:
     {% endif -%}   {#  use_timezone #}
     restart: {{container_restart_policy}}
   {% endfor %}
-{% endif %}   {# KAFKA_enable and KAFKA_SCHEMA_REGISTRY_enable #}
+{% endif %}   {# KAFKA_enable and SCHEMA_REGISTRY_flavour == confluent #}
 
 {% if ( (KAFKA_enable or external['KAFKA_enable']) and (SCHEMA_REGISTRY_flavour | lower) == 'apicurio' ) | default(false) %}
-  #  ================================== Apicurio Registry ========================================== #
-  {% for num in range(APICURIO_REGISTRY_nodes | default(1) ) %}
+  #  ================================== Apicurio Schema Registry ========================================== #
+  {% for num in range(SCHEMA_REGISTRY_nodes | default(1) ) %}
     {% set http_external_port = 8081 + loop.index - 1 %}
     {% set http_port = 8080 + loop.index - 1 %}
   apicurio-registry-{{loop.index}}:
-    image: apicurio/apicurio-registry-{{APICURIO_REGISTRY_storage}}:{{__APICURIO_REGISTRY_version}}
+    image: apicurio/apicurio-registry-{{APICURIO_SCHEMA_REGISTRY_storage}}:{{__APICURIO_SCHEMA_REGISTRY_version}}
     hostname: apicurio-registry-{{loop.index}}
     container_name: apicurio-registry-{{loop.index}}
     labels:
@@ -914,22 +914,22 @@ services:
       com.platys.webui.url: "http://${PUBLIC_IP}:{{http_external_port}}"
       com.platys.restapi.title: 'Apicurio Registry REST API'
       com.platys.restapi.url: "http://${PUBLIC_IP}:{{http_external_port}}/apis/ccompat/v6"
-    {% if (APICURIO_REGISTRY_storage | lower) == 'kafkasql'  %}
+    {% if (APICURIO_SCHEMA_REGISTRY_storage | lower) == 'kafkasql'  %}
     depends_on:
       - kafka{{dataCenter}}-1
-    {% endif -%}   {#  APICURIO_REGISTRY_storage == kafkasql #}
+    {% endif -%}   {#  APICURIO_SCHEMA_REGISTRY_storage == kafkasql #}
     ports:
       - "{{http_external_port}}:{{http_port}}"
     environment:
       QUARKUS_PROFILE: prod
-    {% if (APICURIO_REGISTRY_storage | lower) == 'kafkasql'  %}
+    {% if (APICURIO_SCHEMA_REGISTRY_storage | lower) == 'kafkasql'  %}
       KAFKA_BOOTSTRAP_SERVERS: '{{ns.bootstrapServers}}'
-    {% endif -%}   {#  APICURIO_REGISTRY_storage == sql #}
-    {% if (APICURIO_REGISTRY_storage | lower) == 'sql'  %}
+    {% endif -%}   {#  APICURIO_SCHEMA_REGISTRY_storage == sql #}
+    {% if (APICURIO_SCHEMA_REGISTRY_storage | lower) == 'sql'  %}
       REGISTRY_DATASOURCE_URL: jdbc:postgresql://postgres/apicurio-registry
       REGISTRY_DATASOURCE_USERNAME: apicurio
       REGISTRY_DATASOURCE_PASSWORD: abc123!
-    {% endif -%}   {#  APICURIO_REGISTRY_storage == sql #}
+    {% endif -%}   {#  APICURIO_SCHEMA_REGISTRY_storage == sql #}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -941,7 +941,7 @@ services:
     {% endif -%}   {#  use_timezone #}
     restart: {{container_restart_policy}}
   {% endfor %}
-{% endif %}   {# KAFKA_enable and APICURIO_REGISTRY_enable #}
+{% endif %}   {# KAFKA_enable and SCHEMA_REGISTRY_flavour == apicurio #}
 
 {% if ( (KAFKA_enable or external['KAFKA_enable']) and KAFKA_CONNECT_enable ) | default(false) %}
   #  ================================== Kafka Connect ========================================== #

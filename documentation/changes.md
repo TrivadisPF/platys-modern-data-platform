@@ -9,6 +9,7 @@ The Modern Data Platform version 1.14.0 contains the following bug fixes and enh
 ### New Services
 
  * Kouncil
+ * Apicurio Registry
 
 ### New Cookbook Recipes
 
@@ -27,8 +28,12 @@ The Modern Data Platform version 1.14.0 contains the following bug fixes and enh
 ### Breaking Changes
 
  * InfluxDB is now listening on `19999` instead of `9999`
+ * All `KAFKA_SCHEMA_REGISTRY_xxxx` renamed to `CONFLUENT_SCHEMA_REGISTRY_xxxx`
 
 ### Enhancements 
+
+ * Apicurio Schema Registry as a drop-in replacement for the Confluent Schema Registry
+
 ### Bug Fixes 
 
 ## What's new in 1.13.0
