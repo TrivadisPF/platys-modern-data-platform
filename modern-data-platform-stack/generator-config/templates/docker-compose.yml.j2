@@ -327,6 +327,13 @@ networks:
   {% set GRAFANA_enable = true -%}
 {% endif -%}   {# KAFKA_jmx_monitoring_prometheus_enable #}
 
+# backward compatiblity to platform < 1.14.0
+{% if KAFKA_SCHEMA_REGISTRY_enable -%}
+# enforce some dependencies
+  {% set SCHEMA_REGISTRY_enable = true -%}
+{% endif -%}   {# KAFKA_SCHEMA_REGISTRY_enable #}
+
+
 {% if KAFKA_TOPICS_UI_enable -%}
 # enforce some dependencies
   {% set KAFKA_RESTPROXY_enable = true -%}
@@ -551,7 +558,15 @@ networks:
         {% endif %}
       {% endfor %}
     {#% endfor #}  {# datacenter in (KAFKA_datacenters.split(',') | default([]) ) #}
-    {% set ns.schemaRegistryUrl = 'http://schema-registry-1:8081' %}
+    {% if SCHEMA_REGISTRY_flavour == "confluent" %}
+      {% set ns.schemaRegistryUrl = 'http://schema-registry-1:8081' %}
+      {% set ns.schemaRegistryServiceName = 'schema-registry' %}
+    {% elif SCHEMA_REGISTRY_flavour == "apicurio" %}
+      {% set ns.schemaRegistryUrl = 'http://apicurio-registry-1:28162' %}
+      {% set ns.schemaRegistryServiceName = 'apicurio-registry' %}
+    {% else %}
+      {% set ns.schemaRegistryUrl = 'http://<schema-registry-not-enabled>' %}
+    {% endif %}
 {% endif %}   {# external['KAFKA_enable'] #}
 
 {% if (external['S3_enable']) | default(false) %}
@@ -1240,7 +1255,7 @@ services:
       com.platys.restapi.url: "http://${PUBLIC_IP}:18086"
     depends_on:
       - kafka{{dataCenter}}-1
-      - schema-registry-1
+      - {{ns.schemaRegistryServiceName}}
     ports:
       - "18086:8086"
     environment:
@@ -1345,7 +1360,7 @@ services:
       com.platys.name: "confluent-replicator"
     depends_on:
       - kafka{{dataCenter}}-1
-      - schema-registry-1
+      - {{ns.schemaRegistryServiceName}}
     ports:
       - 18083:8083
     environment:
@@ -1390,7 +1405,7 @@ services:
       com.platys.name: "mirror-maker2"
     depends_on:
       - kafka{{dataCenter}}-1
-      - schema-registry-1
+      - {{ns.schemaRegistryServiceName}}
     environment:
       MM2: ''
     {%if use_timezone | default(false) %}
@@ -1444,7 +1459,7 @@ services:
       com.platys.webui.url: "http://${PUBLIC_IP}:28102"
     depends_on:
       - kafka{{dataCenter}}-1
-      - schema-registry-1
+      - {{ns.schemaRegistryServiceName}}
     ports:
       - "28102:8000"
     environment:
@@ -1580,7 +1595,7 @@ services:
       - "28105:9020"
     environment:
       KAFKA_BROKERCONNECT: kafka-1:19092
-      SCHEMAREGISTRY_CONNECT: http://schema-registry-1:8081
+      SCHEMAREGISTRY_CONNECT: '{{ns.schemaRegistryUrl}}'
       MESSAGE_FORMAT: AVRO
       JVM_OPTS: "-Xms32M -Xmx64M"
       SERVER_SERVLET_CONTEXTPATH: "/"
@@ -1651,7 +1666,7 @@ services:
                 bootstrap.servers: '{{ns.bootstrapServers}}'
     {% if ( KAFKA_SCHEMA_REGISTRY_enable ) | default(false) %}
               schema-registry:
-                url: "http://schema-registry-1:8081"
+                url: "{{ns.schemaRegistryUrl}}"
                 type: "confluent"
     {% endif -%}   {#  SCHEMA_REGISTRY_enable #}
     {% if ( KAFKA_CONNECT_enable or KAFKA_KSQLDB_use_embedded_connect) | default(false) %}
@@ -1693,7 +1708,7 @@ services:
       KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper-1:2181
       KAFKA_CLUSTERS_0_KSQLDBSERVER: 'http://ksqldb-server-1:8088'
     {% if ( KAFKA_SCHEMA_REGISTRY_enable ) | default(false) %}
-      KAFKA_CLUSTERS_0_SCHEMAREGISTRY: 'http://schema-registry-1:8081'
+      KAFKA_CLUSTERS_0_SCHEMAREGISTRY: '{{ns.schemaRegistryUrl}}'
     {% endif -%}   {#  SCHEMA_REGISTRY_enable #}
       KAFKA_CLUSTERS_0_JMXPORT: '9992'
     {% if ( KAFKA_CONNECT_enable or KAFKA_KSQLDB_use_embedded_connect ) | default(false) %}
@@ -1756,7 +1771,7 @@ services:
       KAFKA_BROKERS: '{{ns.bootstrapServers}}'
     {% if ( KAFKA_SCHEMA_REGISTRY_enable ) | default(false) %}
       KAFKA_SCHEMAREGISTRY_ENABLED: 'True'
-      KAFKA_SCHEMAREGISTRY_URLS: 'http://schema-registry-1:8081'
+      KAFKA_SCHEMAREGISTRY_URLS: '{{ns.schemaRegistryUrl}}'
     {% endif -%}   {#  SCHEMA_REGISTRY_enable #}
     {% if ( KAFKA_CONNECT_enable or KAFKA_KSQLDB_use_embedded_connect) | default(false) %}
       CONNECT_ENABLED: 'True'
@@ -1813,7 +1828,7 @@ services:
     ports:
       - 28195:80
     environment:
-      SE_SCHEMAREGISTRY__url: http://schema-registry-1:8081
+      SE_SCHEMAREGISTRY__url: '{{ns.schemaRegistryUrl}}'
       SE_KAFKACONNECT__url: {{ns1.connectServersInternalUrl.split(',')[0]}}
       SE_PROMETHEUS__url: http://host.docker.internal:9090
     {%if use_timezone | default(false) %}
@@ -2604,7 +2619,7 @@ services:
       FLINK_REST_URL: http://flink-jobmanager:8081
       FLINK_QUERYABLE_STATE_PROXY_URL: flink-taskmanager-1:9069
       KAFKA_ADDRESS: kafka-1:19092
-      SCHEMA_REGISTRY_URL: http://schema-registry-1:8081
+      SCHEMA_REGISTRY_URL: '{{ns.schemaRegistryUrl}}'
       COUNTS_URL: http://influxdb-1:8086/query
       OPENAPI_SERVICE_URL: http://customerservice:5000
 {% endif %}   {#  FLINK_enable #}
@@ -2914,7 +2929,7 @@ services:
       - datahub-neo4j
     {% endif -%}   {#  DATAHUB_graph_service_impl #}
       - kafka{{dataCenter}}-1
-      - schema-registry-1
+      - {{ns.schemaRegistryServiceName}}
     labels:
       com.platys.restapi.title: "DataHub GMS API"
       com.platys.restapi.url: "http://${PUBLIC_IP}:28142"
@@ -2928,7 +2943,7 @@ services:
       - EBEAN_DATASOURCE_URL=jdbc:mysql://datahub-mysql:3306/datahub?verifyServerCertificate=false&useSSL=true&useUnicode=yes&characterEncoding=UTF-8
       - EBEAN_DATASOURCE_DRIVER=com.mysql.jdbc.Driver
       - KAFKA_BOOTSTRAP_SERVER=kafka-1:19092
-      - KAFKA_SCHEMAREGISTRY_URL=http://schema-registry-1:8081
+      - KAFKA_SCHEMAREGISTRY_URL='{{ns.schemaRegistryUrl}}'
       - ELASTICSEARCH_HOST=datahub-elasticsearch
       - ELASTICSEARCH_PORT=9200
       - JAVA_OPTS=-Xms256m -Xmx256m
@@ -3038,7 +3053,7 @@ services:
         - "28145:9091"
     environment:
       - KAFKA_BOOTSTRAP_SERVER=kafka-1:19092
-      - KAFKA_SCHEMAREGISTRY_URL=http://schema-registry-1:8081
+      - KAFKA_SCHEMAREGISTRY_URL='{{ns.schemaRegistryUrl}}'
       - ELASTICSEARCH_HOST=datahub-elasticsearch
       - ELASTICSEARCH_PORT=9200
       - NEO4J_HOST=datahub-neo4j:7474
@@ -3072,7 +3087,7 @@ services:
         - "28146:9090"
     environment:
       - KAFKA_BOOTSTRAP_SERVER=kafka-1:19092
-      - KAFKA_SCHEMAREGISTRY_URL=http://schema-registry-1:8081
+      - KAFKA_SCHEMAREGISTRY_URL='{{ns.schemaRegistryUrl}}'
       - GMS_HOST=datahub-gms
       - GMS_PORT=8080
     {%if use_timezone | default(false) %}
@@ -3255,7 +3270,7 @@ services:
     container_name: kafka-setup
     depends_on:
       - kafka{{dataCenter}}-1
-      - schema-registry-1
+      - {{ns.schemaRegistryServiceName}}
     environment:
       # The following settings are listed here only to satisfy the image's requirements.
       # We override the image's `command` anyways, hence this container will not start a broker.
