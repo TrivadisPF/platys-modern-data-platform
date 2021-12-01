@@ -29,6 +29,7 @@ The Modern Data Platform version 1.14.0 contains the following bug fixes and enh
 
  * InfluxDB is now listening on `19999` instead of `9999`
  * All `KAFKA_SCHEMA_REGISTRY_xxxx` renamed to `CONFLUENT_SCHEMA_REGISTRY_xxxx`
+ * All `KAFKA_SCHEMA_REGISTRY_UI_xxxx` renamed to `SCHEMA_REGISTRY_UI_xxxx`
 
 ### Enhancements 
 

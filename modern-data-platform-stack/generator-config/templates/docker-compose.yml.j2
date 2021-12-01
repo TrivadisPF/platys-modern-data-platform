@@ -1447,7 +1447,7 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {# KAFKA_enable and KCAT_enable #}
 
-{% if ((KAFKA_enable or external['KAFKA_enable']) and KAFKA_SCHEMA_REGISTRY_UI_enable) | default(false) %}
+{% if SCHEMA_REGISTRY_enable AND SCHEMA_REGISTRY_UI_enable | default(false) %}
   #  ================================== Schema Registry UI ========================================== #
   schema-registry-ui:
     image: landoop/schema-registry-ui:{{__SCHEMA_REGISTRY_UI_version}}
@@ -1458,22 +1458,21 @@ services:
       com.platys.webui.title: 'Confluent Schema Registry UI'
       com.platys.webui.url: "http://${PUBLIC_IP}:28102"
     depends_on:
-      - kafka{{dataCenter}}-1
       - {{ns.schemaRegistryServiceName}}
     ports:
       - "28102:8000"
     environment:
-    {%if KAFKA_SCHEMA_REGISTRY_UI_use_public_ip | default(true) %}
+    {%if SCHEMA_REGISTRY_UI_use_public_ip | default(true) %}
       SCHEMAREGISTRY_URL: 'http://${PUBLIC_IP}:8081'
     {% else %}
       SCHEMAREGISTRY_URL: 'http://${DOCKER_HOST_IP}:8081'
-    {% endif -%}   {#  KAFKA_SCHEMA_REGISTRY_use_public_ip #}
+    {% endif -%}   {#  SCHEMA_REGISTRY_use_public_ip #}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
-    {%if KAFKA_SCHEMA_REGISTRY_UI_map_resolv_conf | default(false) %}
+    {%if SCHEMA_REGISTRY_UI_map_resolv_conf | default(false) %}
       - ./conf/resolv.conf:/etc/resolv.conf:ro
     {% endif -%}   {#  use_timezone #}
     {%if use_timezone | default(false) %}
@@ -1481,7 +1480,7 @@ services:
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
     restart: {{container_restart_policy}}
-{% endif %}   {# KAFKA_enable and KAFKA_SCHEMA_REGISTRY_UI_enable #}
+{% endif %}   {# SCHEMA_REGISTRY_enable and SCHEMA_REGISTRY_UI_enable #}
 
 {% if ((KAFKA_enable or external['KAFKA_enable']) and KAFKA_TOPICS_UI_enable) | default(false) %}
   #  ================================== Kafka Topics UI ========================================== #
