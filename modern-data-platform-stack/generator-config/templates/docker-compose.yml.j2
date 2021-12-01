@@ -558,14 +558,25 @@ networks:
         {% endif %}
       {% endfor %}
     {#% endfor #}  {# datacenter in (KAFKA_datacenters.split(',') | default([]) ) #}
+
+    {% if SCHEMA_REGISTRY_flavour is defined %}
+        {%if SCHEMA_REGISTRY_UI_use_public_ip | default(true) %}
+          {% set ns.schemaRegistryUrlExternal = 'http://${PUBLIC_IP}:8081' %}
+        {% else %}
+          {% set ns.schemaRegistryUrlExternal = 'http://${DOCKER_HOST_IP}:8081' %}
+        {% endif -%}   {#  SCHEMA_REGISTRY_use_public_ip #}
+    {% endif %}
+
     {% if SCHEMA_REGISTRY_flavour == "confluent" %}
       {% set ns.schemaRegistryUrl = 'http://schema-registry-1:8081' %}
       {% set ns.schemaRegistryServiceName = 'schema-registry-1' %}
     {% elif SCHEMA_REGISTRY_flavour == "apicurio" %}
       {% set ns.schemaRegistryUrl = 'http://apicurio-registry-1:8081/apis/ccompat/v6' %}
+      {% set ns.schemaRegistryUrl = ns.schemaRegistryUrl ~ '/apis/ccompat/v6' %}
       {% set ns.schemaRegistryServiceName = 'apicurio-registry-1' %}
     {% else %}
       {% set ns.schemaRegistryUrl = 'http://<schema-registry-not-enabled>' %}
+      {% set ns.schemaRegistryUrlExternal = 'http://<schema-registry-not-enabled>' %}
     {% endif %}
 {% endif %}   {# external['KAFKA_enable'] #}
 
