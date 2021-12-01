@@ -107,8 +107,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 8051 | 8051 | kudo-master-1 |
 8070 | 8070 | nuclio |
 8080 | 8080 | spark-master |
-8081 | 8081 | schema-registry-1     |
-8082 | 8081 | schema-registry-2     |
+8081 | 8081 / 8080 | schema-registry-1 / apicurio-registry-1    |
+8082 | 8081 / 8080 | schema-registry-2 / apicurio-registry-2    |
 8083 | 8083 | connect-1 |
 8084 | 8084 | connect-2 |
 8085 | 8085 | connect-3 |
@@ -316,9 +316,6 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28159 | 8081 | quix-backend |
 28160 | 8081 | quix-frontend |
 28161 | 5000 | redash-server |
-28162 | 8080 | apicurio-registry-1 |
-28163 | 8080 | apicurio-registry-2 |
-28164 | 8080 | apicurio-registry-3 |
 28170 | 80 | stardog-studio |
 28171 | 3030 | smashing |
 28172 | 3030 | tipboard |
