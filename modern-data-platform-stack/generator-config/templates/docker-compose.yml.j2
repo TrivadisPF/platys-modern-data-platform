@@ -848,101 +848,6 @@ services:
 
 {% endif %} {# KAFKA_enable #}
 
-{% if ( (KAFKA_enable or external['KAFKA_enable']) and (SCHEMA_REGISTRY_flavour | lower) == 'confluent' ) | default(false) %}
-  #  ================================== Confluent Schema Registry ========================================== #
-  {% for num in range(SCHEMA_REGISTRY_nodes | default(1) ) %}
-    {% set external_port = 8081 + loop.index - 1 %}
-    {% set port = 8081 + loop.index - 1 %}
-  schema-registry-{{loop.index}}:
-    image: confluentinc/cp-schema-registry:{{__CONFLUENT_PLATFORM_version}}
-    hostname: schema-registry-{{loop.index}}
-    container_name: schema-registry-{{loop.index}}
-    labels:
-      com.platys.name: "schema-registry"
-      com.platys.restapi.title: 'Schema Registry REST API'
-      com.platys.restapi.url: "http://${PUBLIC_IP}:{{external_port}}"
-    ports:
-      - "{{external_port}}:{{port}}"
-    environment:
-      SCHEMA_REGISTRY_HOST_NAME: schema-registry-{{loop.index}}
-      SCHEMA_REGISTRY_LISTENERS: "http://0.0.0.0:{{port}}"
-    {% if CONFLUENT_SCHEMA_REGISTRY_use_zookeeper_election %}
-      SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL: 'zookeeper-1:2181'
-    {% endif %}
-      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: '{{ns.bootstrapServers}}'
-      SCHEMA_REGISTRY_KAFKASTORE_SECURITY_PROTOCOL: PLAINTEXT
-      SCHEMA_REGISTRY_GROUP_ID: "{{CONFLUENT_SCHEMA_REGISTRY_group_id}}"
-      SCHEMA_REGISTRY_LEADER_ELIGIBILITY: "{{CONFLUENT_SCHEMA_REGISTRY_leader_eligibility}}"
-      SCHEMA_REGISTRY_MODE_MUTABILITY: "{{CONFLUENT_SCHEMA_REGISTRY_mode_mutability}}"
-      SCHEMA_REGISTRY_SCHEMA_COMPATIBILITY_LEVEL: "{{CONFLUENT_SCHEMA_REGISTRY_schema_compatibility_level}}"
-      SCHEMA_REGISTRY_KAFKASTORE_TOPIC_REPLICATION_FACTOR: {{CONFLUENT_SCHEMA_REGISTRY_replication_factor}}
-      SCHEMA_REGISTRY_ACCESS_CONTROL_ALLOW_ORIGIN: '*'
-      SCHEMA_REGISTRY_ACCESS_CONTROL_ALLOW_METHODS: 'GET,POST,PUT,OPTIONS'
-      SCHEMA_REGISTRY_LOG4J_ROOT_LOGLEVEL: "{{CONFLUENT_SCHEMA_REGISTRY_log4j_root_loglevel}}"
-      SCHEMA_REGISTRY_DEBUG: "{{CONFLUENT_SCHEMA_REGISTRY_debug}}"
-    {% if KAFKA_jmx_monitoring_prometheus_enable %}
-      EXTRA_ARGS: -javaagent:/usr/share/jmx-exporter/jmx_prometheus_javaagent-0.12.0.jar=1234:/usr/share/jmx-exporter/confluent_schemaregistry.yml
-    {% endif -%}
-    {%if use_timezone | default(false) %}
-      TZ: {{use_timezone}}
-    {% endif -%}   {#  use_timezone #}
-    volumes:
-      - ./data-transfer:/data-transfer
-    {% if KAFKA_jmx_monitoring_prometheus_enable %}
-      - ./scripts/kafka/jmx-exporter/:/usr/share/jmx-exporter
-    {% endif -%}
-    {%if use_timezone | default(false) %}
-      - "./etc/timezone:/etc/timezone:ro"
-      - "./etc/localtime:/etc/localtime:ro"
-    {% endif -%}   {#  use_timezone #}
-    restart: {{container_restart_policy}}
-  {% endfor %}
-{% endif %}   {# KAFKA_enable and SCHEMA_REGISTRY_flavour == confluent #}
-
-{% if ( (KAFKA_enable or external['KAFKA_enable']) and (SCHEMA_REGISTRY_flavour | lower) == 'apicurio' ) | default(false) %}
-  #  ================================== Apicurio Schema Registry ========================================== #
-  {% for num in range(SCHEMA_REGISTRY_nodes | default(1) ) %}
-    {% set http_external_port = 8081 + loop.index - 1 %}
-    {% set http_port = 8080 + loop.index - 1 %}
-  apicurio-registry-{{loop.index}}:
-    image: apicurio/apicurio-registry-{{APICURIO_SCHEMA_REGISTRY_storage}}:{{__APICURIO_SCHEMA_REGISTRY_version}}
-    hostname: apicurio-registry-{{loop.index}}
-    container_name: apicurio-registry-{{loop.index}}
-    labels:
-      com.platys.name: "apicurio-registry"
-      com.platys.webui.title: 'Apicurio Registry UI'
-      com.platys.webui.url: "http://${PUBLIC_IP}:{{http_external_port}}"
-      com.platys.restapi.title: 'Apicurio Registry REST API'
-      com.platys.restapi.url: "http://${PUBLIC_IP}:{{http_external_port}}/apis/ccompat/v6"
-    {% if (APICURIO_SCHEMA_REGISTRY_storage | lower) == 'kafkasql'  %}
-    depends_on:
-      - kafka{{dataCenter}}-1
-    {% endif -%}   {#  APICURIO_SCHEMA_REGISTRY_storage == kafkasql #}
-    ports:
-      - "{{http_external_port}}:{{http_port}}"
-    environment:
-      QUARKUS_PROFILE: prod
-    {% if (APICURIO_SCHEMA_REGISTRY_storage | lower) == 'kafkasql'  %}
-      KAFKA_BOOTSTRAP_SERVERS: '{{ns.bootstrapServers}}'
-    {% endif -%}   {#  APICURIO_SCHEMA_REGISTRY_storage == sql #}
-    {% if (APICURIO_SCHEMA_REGISTRY_storage | lower) == 'sql'  %}
-      REGISTRY_DATASOURCE_URL: jdbc:postgresql://postgres/apicurio-registry
-      REGISTRY_DATASOURCE_USERNAME: apicurio
-      REGISTRY_DATASOURCE_PASSWORD: abc123!
-    {% endif -%}   {#  APICURIO_SCHEMA_REGISTRY_storage == sql #}
-    {%if use_timezone | default(false) %}
-      TZ: {{use_timezone}}
-    {% endif -%}   {#  use_timezone #}
-    volumes:
-      - ./data-transfer:/data-transfer
-    {%if use_timezone | default(false) %}
-      - "./etc/timezone:/etc/timezone:ro"
-      - "./etc/localtime:/etc/localtime:ro"
-    {% endif -%}   {#  use_timezone #}
-    restart: {{container_restart_policy}}
-  {% endfor %}
-{% endif %}   {# KAFKA_enable and SCHEMA_REGISTRY_flavour == apicurio #}
-
 {% if ( (KAFKA_enable or external['KAFKA_enable']) and KAFKA_CONNECT_enable ) | default(false) %}
   #  ================================== Kafka Connect ========================================== #
   {% for num in range(KAFKA_CONNECT_nodes | default(1) ) %}
@@ -1308,6 +1213,136 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {# KAFKA_enable and KAFKA_MQTTPROXY_enable #}
 
+{% if (SCHEMA_REGISTRY_flavour | lower) == 'confluent' | default(false) %}
+  #  ================================== Confluent Schema Registry ========================================== #
+  {% for num in range(SCHEMA_REGISTRY_nodes | default(1) ) %}
+    {% set external_port = 8081 + loop.index - 1 %}
+    {% set port = 8081 + loop.index - 1 %}
+  schema-registry-{{loop.index}}:
+    image: confluentinc/cp-schema-registry:{{__CONFLUENT_PLATFORM_version}}
+    hostname: schema-registry-{{loop.index}}
+    container_name: schema-registry-{{loop.index}}
+    labels:
+      com.platys.name: "schema-registry"
+      com.platys.restapi.title: 'Schema Registry REST API'
+      com.platys.restapi.url: "http://${PUBLIC_IP}:{{external_port}}"
+    ports:
+      - "{{external_port}}:{{port}}"
+    environment:
+      SCHEMA_REGISTRY_HOST_NAME: schema-registry-{{loop.index}}
+      SCHEMA_REGISTRY_LISTENERS: "http://0.0.0.0:{{port}}"
+    {% if CONFLUENT_SCHEMA_REGISTRY_use_zookeeper_election %}
+      SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL: 'zookeeper-1:2181'
+    {% endif %}
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: '{{ns.bootstrapServers}}'
+      SCHEMA_REGISTRY_KAFKASTORE_SECURITY_PROTOCOL: PLAINTEXT
+      SCHEMA_REGISTRY_GROUP_ID: "{{CONFLUENT_SCHEMA_REGISTRY_group_id}}"
+      SCHEMA_REGISTRY_LEADER_ELIGIBILITY: "{{CONFLUENT_SCHEMA_REGISTRY_leader_eligibility}}"
+      SCHEMA_REGISTRY_MODE_MUTABILITY: "{{CONFLUENT_SCHEMA_REGISTRY_mode_mutability}}"
+      SCHEMA_REGISTRY_SCHEMA_COMPATIBILITY_LEVEL: "{{CONFLUENT_SCHEMA_REGISTRY_schema_compatibility_level}}"
+      SCHEMA_REGISTRY_KAFKASTORE_TOPIC_REPLICATION_FACTOR: {{CONFLUENT_SCHEMA_REGISTRY_replication_factor}}
+      SCHEMA_REGISTRY_ACCESS_CONTROL_ALLOW_ORIGIN: '*'
+      SCHEMA_REGISTRY_ACCESS_CONTROL_ALLOW_METHODS: 'GET,POST,PUT,OPTIONS'
+      SCHEMA_REGISTRY_LOG4J_ROOT_LOGLEVEL: "{{CONFLUENT_SCHEMA_REGISTRY_log4j_root_loglevel}}"
+      SCHEMA_REGISTRY_DEBUG: "{{CONFLUENT_SCHEMA_REGISTRY_debug}}"
+    {% if KAFKA_jmx_monitoring_prometheus_enable %}
+      EXTRA_ARGS: -javaagent:/usr/share/jmx-exporter/jmx_prometheus_javaagent-0.12.0.jar=1234:/usr/share/jmx-exporter/confluent_schemaregistry.yml
+    {% endif -%}
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {% if KAFKA_jmx_monitoring_prometheus_enable %}
+      - ./scripts/kafka/jmx-exporter/:/usr/share/jmx-exporter
+    {% endif -%}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+  {% endfor %}
+{% endif %}   {# KAFKA_enable and SCHEMA_REGISTRY_flavour == confluent #}
+
+{% if (SCHEMA_REGISTRY_flavour | lower) == 'apicurio' | default(false) %}
+  #  ================================== Apicurio Schema Registry ========================================== #
+  {% for num in range(SCHEMA_REGISTRY_nodes | default(1) ) %}
+    {% set http_external_port = 8081 + loop.index - 1 %}
+    {% set http_port = 8080 + loop.index - 1 %}
+  apicurio-registry-{{loop.index}}:
+    image: apicurio/apicurio-registry-{{APICURIO_SCHEMA_REGISTRY_storage}}:{{__APICURIO_SCHEMA_REGISTRY_version}}
+    hostname: apicurio-registry-{{loop.index}}
+    container_name: apicurio-registry-{{loop.index}}
+    labels:
+      com.platys.name: "apicurio-registry"
+      com.platys.webui.title: 'Apicurio Registry UI'
+      com.platys.webui.url: "http://${PUBLIC_IP}:{{http_external_port}}"
+      com.platys.restapi.title: 'Apicurio Registry REST API'
+      com.platys.restapi.url: "http://${PUBLIC_IP}:{{http_external_port}}/apis/ccompat/v6"
+    {% if (APICURIO_SCHEMA_REGISTRY_storage | lower) == 'kafkasql'  %}
+    depends_on:
+      - kafka{{dataCenter}}-1
+    {% endif -%}   {#  APICURIO_SCHEMA_REGISTRY_storage == kafkasql #}
+    ports:
+      - "{{http_external_port}}:{{http_port}}"
+    environment:
+      QUARKUS_PROFILE: prod
+    {% if (APICURIO_SCHEMA_REGISTRY_storage | lower) == 'kafkasql'  %}
+      KAFKA_BOOTSTRAP_SERVERS: '{{ns.bootstrapServers}}'
+    {% endif -%}   {#  APICURIO_SCHEMA_REGISTRY_storage == sql #}
+    {% if (APICURIO_SCHEMA_REGISTRY_storage | lower) == 'sql'  %}
+      REGISTRY_DATASOURCE_URL: jdbc:postgresql://postgres/apicurio-registry
+      REGISTRY_DATASOURCE_USERNAME: apicurio
+      REGISTRY_DATASOURCE_PASSWORD: abc123!
+    {% endif -%}   {#  APICURIO_SCHEMA_REGISTRY_storage == sql #}
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+  {% endfor %}
+{% endif %}   {# KAFKA_enable and SCHEMA_REGISTRY_flavour == apicurio #}
+
+{% if (SCHEMA_REGISTRY_enable and SCHEMA_REGISTRY_UI_enable) | default(false) %}
+  #  ================================== Schema Registry UI ========================================== #
+  schema-registry-ui:
+    image: landoop/schema-registry-ui:{{__SCHEMA_REGISTRY_UI_version}}
+    container_name: schema-registry-ui
+    hostname: schema-registry-ui
+    labels:
+      com.platys.name: "schema-registry-ui"
+      com.platys.webui.title: 'Confluent Schema Registry UI'
+      com.platys.webui.url: "http://${PUBLIC_IP}:28102"
+    depends_on:
+      - {{ns.schemaRegistryServiceName}}
+    ports:
+      - "28102:8000"
+    environment:
+    {%if SCHEMA_REGISTRY_UI_use_public_ip | default(true) %}
+      SCHEMAREGISTRY_URL: 'http://${PUBLIC_IP}:8081'
+    {% else %}
+      SCHEMAREGISTRY_URL: 'http://${DOCKER_HOST_IP}:8081'
+    {% endif -%}   {#  SCHEMA_REGISTRY_use_public_ip #}
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if SCHEMA_REGISTRY_UI_map_resolv_conf | default(false) %}
+      - ./conf/resolv.conf:/etc/resolv.conf:ro
+    {% endif -%}   {#  use_timezone #}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+{% endif %}   {# SCHEMA_REGISTRY_enable and SCHEMA_REGISTRY_UI_enable #}
+
 {% if ((KAFKA_enable or external['KAFKA_enable']) and (KAFKA_edition | lower) == 'enterprise' and KAFKA_CCC_enable) | default(false) %}
   #  ================================== Confluent Control Center ========================================== #
   control-center:
@@ -1446,41 +1481,6 @@ services:
         while [ 1 -eq 1 ];do sleep 60;done
     restart: {{container_restart_policy}}
 {% endif %}   {# KAFKA_enable and KCAT_enable #}
-
-{% if (SCHEMA_REGISTRY_enable and SCHEMA_REGISTRY_UI_enable) | default(false) %}
-  #  ================================== Schema Registry UI ========================================== #
-  schema-registry-ui:
-    image: landoop/schema-registry-ui:{{__SCHEMA_REGISTRY_UI_version}}
-    container_name: schema-registry-ui
-    hostname: schema-registry-ui
-    labels:
-      com.platys.name: "schema-registry-ui"
-      com.platys.webui.title: 'Confluent Schema Registry UI'
-      com.platys.webui.url: "http://${PUBLIC_IP}:28102"
-    depends_on:
-      - {{ns.schemaRegistryServiceName}}
-    ports:
-      - "28102:8000"
-    environment:
-    {%if SCHEMA_REGISTRY_UI_use_public_ip | default(true) %}
-      SCHEMAREGISTRY_URL: 'http://${PUBLIC_IP}:8081'
-    {% else %}
-      SCHEMAREGISTRY_URL: 'http://${DOCKER_HOST_IP}:8081'
-    {% endif -%}   {#  SCHEMA_REGISTRY_use_public_ip #}
-    {%if use_timezone | default(false) %}
-      TZ: {{use_timezone}}
-    {% endif -%}   {#  use_timezone #}
-    volumes:
-      - ./data-transfer:/data-transfer
-    {%if SCHEMA_REGISTRY_UI_map_resolv_conf | default(false) %}
-      - ./conf/resolv.conf:/etc/resolv.conf:ro
-    {% endif -%}   {#  use_timezone #}
-    {%if use_timezone | default(false) %}
-      - "./etc/timezone:/etc/timezone:ro"
-      - "./etc/localtime:/etc/localtime:ro"
-    {% endif -%}   {#  use_timezone #}
-    restart: {{container_restart_policy}}
-{% endif %}   {# SCHEMA_REGISTRY_enable and SCHEMA_REGISTRY_UI_enable #}
 
 {% if ((KAFKA_enable or external['KAFKA_enable']) and KAFKA_TOPICS_UI_enable) | default(false) %}
   #  ================================== Kafka Topics UI ========================================== #
