@@ -112,6 +112,7 @@ networks:
 {% set __STREAMSETS_version = STREAMSETS_version | default('latest') -%}
 {% set __STREAMSETS_TRANSFORMER_version = STREAMSETS_TRANSFORMER_version | default('latest') -%}
 {% set __STREAMSETS_EDGE_version = STREAMSETS_EDGE_version | default('3.12.0') -%}
+{% set __STREAMSETS_CLOUD_version = STREAMSETS_CLOUD_version | default('latest') -%}
 
 {% set __NIFI_version = NIFI_version | default('latest') -%}
 {% set __NIFI_REGISTRY_version = NIFI_REGISTRY_version | default('latest') -%}
@@ -418,6 +419,7 @@ networks:
   {% set HUE_enable = false -%}
   {% set STREAMSETS_enable = false -%}
   {% set STREAMSETS_TRANSFORMER_enable = false -%}
+  {% set STREAMSETS_CLOUD_enable = false -%}
   {% set NIFI_enable = false -%}
   {% set NIFI_REGISTRY_enable = false -%}
   {% set STREAMSHEETS_enable = false -%}
@@ -1300,6 +1302,7 @@ services:
       QUARKUS_PROFILE: prod
     {% if (APICURIO_SCHEMA_REGISTRY_storage | lower) == 'kafkasql'  %}
       KAFKA_BOOTSTRAP_SERVERS: '{{ns.bootstrapServers}}'
+      REGISTRY_KAFKASQL_TOPIC: 'kafkasql-journal'
     {% endif -%}   {#  APICURIO_SCHEMA_REGISTRY_storage == sql #}
     {% if (APICURIO_SCHEMA_REGISTRY_storage | lower) == 'sql'  %}
       REGISTRY_DATASOURCE_URL: jdbc:postgresql://postgres/apicurio-registry
@@ -3706,6 +3709,7 @@ services:
     container_name: streamsets-transformer-1
     hostname: streamsets-transformer-1
     labels:
+      com.platys.name: "streamsets-transformer"
       com.platys.webui.title: "StreamSets Transformer UI"
       com.platys.webui.url: "http://${PUBLIC_IP}:19630"
       com.platys.restapi.title: "StreamSets Transformer REST API"
@@ -3739,6 +3743,7 @@ services:
     container_name: streamsets-edge-1
     hostname: streamsets-edge-1
     labels:
+      com.platys.name: "streamsets-edge"
       com.platys.restapi.title: "StreamSets Data Collector Edge REST API"
       com.platys.restapi.url: "http://${PUBLIC_IP}:18633"
     ports:
@@ -3755,6 +3760,30 @@ services:
     {% endif -%}   {#  use_timezone #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  STREAMSETS_enable  #}
+
+{%if STREAMSETS_CLOUD_enable | default(false) %}
+  #  ================================== StreamSets DataCollector Cloud ========================================== #
+  streamsets-cloud-1:
+    image: streamsets/datacollector:{{__STREAMSETS_CLOUD_version}}
+    container_name: streamsets-cloud-1
+    hostname: streamsets-cloud-1
+    labels:
+      com.platys.name: "streamsets-cloud"
+    environment:
+      STREAMSETS_DEPLOYMENT_SCH_URL: '{{STREAMSETS_CLOUD_deployment_sch_url}}'
+      STREAMSETS_DEPLOYMENT_ID: '{{STREAMSETS_CLOUD_deployment_id}}'
+      STREAMSETS_DEPLOYMENT_TOKEN: '{{STREAMSETS_CLOUD_deployment_token}}'
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  STREAMSETS_CLOUD_enable  #}
 
 {%if NIFI_enable | default(false) %}
   #  ================================== NiFi ========================================== #
