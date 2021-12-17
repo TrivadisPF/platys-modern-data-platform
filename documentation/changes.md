@@ -26,6 +26,7 @@ The Modern Data Platform version 1.14.0 contains the following bug fixes and enh
  * Update `Livy` to `0.7.1-incubating`
  * Update `Spark 3` to `3.2`
  * Update `Streamsheets` to `2.5-milestone`
+ * Update `Neo4J` to `4.4`
  
 ### Breaking Changes
 
