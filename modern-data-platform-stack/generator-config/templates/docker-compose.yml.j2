@@ -748,13 +748,6 @@ services:
   #  ================================== Kafka ========================================== #
   {% for serviceName in (ns.serviceNames.split(',')) %}
     {% set port = ns.ports.split(',')[loop.index-1] %}
-    {% if KAFKA_use_standard_port_for_external_interface | default(false) %}
-      {% set externalPort = port %}
-      {% set dockerHostPort = '2' ~ port %}
-    {% else %}
-      {% set externalPort = '2' ~ port %}
-      {% set dockerHostPort = port %}
-    {% endif %}
     {% set portJMX = ns.portsJMX.split(',')[loop.index-1] %}
     {% set dcName = 'rack1' %}
     {% set zookeeperPort = 2181 + (dataCenterId * ZOOKEEPER_nodes) %}
@@ -784,13 +777,13 @@ services:
       KAFKA_NODE_ID: {{loop.index}}
       CLUSTER_ID: xtzWWN4bTjitpL3kfd9s5g
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'LISTENER_CONTROLLER:PLAINTEXT,LISTENER_INTERNAL:PLAINTEXT,LISTENER_DOCKERHOST:PLAINTEXT,LISTENER_EXTERNAL:PLAINTEXT'
-      KAFKA_LISTENERS: 'LISTENER_CONTROLLER://{{serviceName}}:3{{port}},LISTENER_INTERNAL://{{serviceName}}:1{{port}},LISTENER_DOCKERHOST://{{serviceName}}:{{dockerHostPort}},LISTENER_EXTERNAL://{{serviceName}}:{{externalPort}}'
+      KAFKA_LISTENERS: 'LISTENER_CONTROLLER://{{serviceName}}:3{{port}},LISTENER_INTERNAL://{{serviceName}}:1{{port}},LISTENER_DOCKERHOST://{{serviceName}}:2{{port}},LISTENER_EXTERNAL://{{serviceName}}:{{port}}'
       {% else %}
       KAFKA_ZOOKEEPER_CONNECT: 'zookeeper{{dataCenter}}-1:{{zookeeperPort}}'
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'LISTENER_INTERNAL:PLAINTEXT,LISTENER_DOCKERHOST:PLAINTEXT,LISTENER_EXTERNAL:PLAINTEXT'
-      KAFKA_LISTENERS: 'LISTENER_INTERNAL://{{serviceName}}:1{{port}},LISTENER_DOCKERHOST://{{serviceName}}:{{dockerHostPort}},LISTENER_EXTERNAL://{{serviceName}}:{{externalPort}}'
-      {% endif %} {# KAFKA_use_kraft_mode #}
-      KAFKA_ADVERTISED_LISTENERS: 'LISTENER_INTERNAL://{{serviceName}}:1{{port}},LISTENER_DOCKERHOST://localhost:{{dockerHostPort}},LISTENER_EXTERNAL://${PUBLIC_IP:-127.0.0.1}:{{externalPort}}'
+      KAFKA_LISTENERS: 'LISTENER_INTERNAL://{{serviceName}}:1{{port}},LISTENER_DOCKERHOST://{{serviceName}}:2{{port}},LISTENER_EXTERNAL://{{serviceName}}:{{port}}'
+      {% endif %}
+      KAFKA_ADVERTISED_LISTENERS: 'LISTENER_INTERNAL://{{serviceName}}:1{{port}},LISTENER_DOCKERHOST://localhost:2{{port}},LISTENER_EXTERNAL://${PUBLIC_IP:-127.0.0.1}:{{port}}'
       KAFKA_REPLICA_SELECTOR_CLASS: {{KAFKA_replica_selector_class | default(omit)}}
       {% if KAFKA_CCC_enable and (KAFKA_edition | lower) == 'enterprise' | default(false) %}
       KAFKA_METRIC_REPORTERS: io.confluent.metrics.reporter.ConfluentMetricsReporter
