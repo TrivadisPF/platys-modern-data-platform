@@ -248,7 +248,15 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 29098 | 29098 | kafka-7 (docker-host)   |
 29099 | 29099 | kafka-8 (docker-host)   |
 31010 | 31010 | dremio |
-45678 | 45678 | dremio |
+39092 | 29092 | kafka-1 (localhost)   |
+39093 | 29093 | kafka-2 (localhost    |
+39094 | 29094 | kafka-3 (localhost)   |
+39095 | 29095 | kafka-4 (localhost)   |
+39096 | 29096 | kafka-5 (localhost)   |
+39097 | 29097 | kafka-6 (localhost)   |
+39098 | 29098 | kafka-7 (localhost)   |
+39099 | 29099 | kafka-8 (localhost)   |
+78 | 45678 | dremio |
 61613 | 61613 | activemq (stomp) |
 61614 | 61614 | activemq (ws) |
 61616 | 61616 | activemq (jms) |
