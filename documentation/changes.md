@@ -17,16 +17,17 @@ The Modern Data Platform version 1.14.0 contains the following bug fixes and enh
 ### Version upgrades
 
  * Update `DataHub` to `0.8.17`
- * Update `Trino` to `365`
+ * Update `Trino` to `366`
  * Update `Confluent` to `7.0.0`
  * Update `Apache NiFi` to `1.15.0`
  * Update `Hasura` to `v2.0.0-beta.2`
- * Update `ksqlDB` to `0.22.0`
+ * Update `ksqlDB` to `0.23.1`
  * Update `Zeppelin` to `0.10.0`
  * Update `Livy` to `0.7.1-incubating`
  * Update `Spark 3` to `3.2`
  * Update `Streamsheets` to `2.5-milestone`
  * Update `Neo4J` to `4.4`
+ * Update `Confluent` to `7.0.1`
  
 ### Breaking Changes
 
