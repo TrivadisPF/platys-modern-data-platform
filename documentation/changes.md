@@ -16,7 +16,7 @@ The Modern Data Platform version 1.14.0 contains the following bug fixes and enh
 
 ### Version upgrades
 
- * Update `DataHub` to `0.8.17`
+ * Update `DataHub` to `0.8.20`
  * Update `Trino` to `366`
  * Update `Confluent` to `7.0.0`
  * Update `Apache NiFi` to `1.15.0`
@@ -28,6 +28,8 @@ The Modern Data Platform version 1.14.0 contains the following bug fixes and enh
  * Update `Streamsheets` to `2.5-milestone`
  * Update `Neo4J` to `4.4`
  * Update `Confluent` to `7.0.1`
+ * Update `NiFi` to `1.15.2` and `NiFi Registry` to `1.15.1`
+ * Update `Marquez` to `0.20.0`
  
 ### Breaking Changes
 
