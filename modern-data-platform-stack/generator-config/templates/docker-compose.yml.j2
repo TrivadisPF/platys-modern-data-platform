@@ -152,6 +152,8 @@ networks:
 
 {% set __KIE_SERVER_version = KIE_SERVER_version | default('latest') -%}
 
+{% set __LOKI_version = LOKI_version | default('latest') -%}
+
 {% set __GRAFANA_version = GRAFANA_version | default('latest') -%}
 
 {% set __KIBANA_version = KIBANA_version | default('latest') -%}
@@ -4595,6 +4597,34 @@ services:
     {% endif -%}   {#  use_timezone #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  KIE_SERVER_enable  #}
+
+{% if LOKI_enable | default(false) %}
+  #  ================================== Grafana ========================================== #
+  loki:
+    image: grafana/loki:{{__LOKI_version}}
+    hostname: loki
+    container_name: loki
+    labels:
+      com.platys.name: "loki"
+      com.platys.webui.title: "Loki UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:3000"
+    expose:
+      - 3100
+    ports:
+      - "3100:3100"
+    environment:
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    command: -config.file=/etc/loki/local-config.yaml
+    restart: {{container_restart_policy}}
+{% endif %}   {#  LOKI #}
 
 {% if GRAFANA_enable | default(false) %}
   #  ================================== Grafana ========================================== #
