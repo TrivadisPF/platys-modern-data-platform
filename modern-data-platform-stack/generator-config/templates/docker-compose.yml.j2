@@ -3329,7 +3329,6 @@ services:
     image: linkedin/datahub-ingestion:{{__DATAHUB_version}}
     hostname: datahub-ingestion
     container_name: datahub-ingestion
-    command: "ingest -c /sample_recipe.yml"
     {%if use_timezone | default(false) %}
     environment:
       TZ: {{use_timezone}}
@@ -3338,9 +3337,12 @@ services:
       - ./data-transfer:/data-transfer
       - ./scripts/datahub/sample_recipe.yml:/sample_recipe.yml:ro
       - ./scripts/datahub/bootstrap_mce.json:/bootstrap_mce.json:ro
+      - ./scripts/docker/wait-for-it.sh:/usr/src/app/wait-for-it.sh
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
+    entrypoint: ["./wait-for-it.sh", "datahub-gms:8080", "--", "datahub"]
+    command: "ingest -c /sample_recipe.yml"
     {% endif -%}   {#  use_timezone #}
 
   datahub-cli:
