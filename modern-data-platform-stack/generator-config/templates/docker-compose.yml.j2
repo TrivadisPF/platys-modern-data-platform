@@ -3340,6 +3340,24 @@ services:
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
+
+  datahub-cli:
+    image: linkedin/datahub-ingestion:{{__DATAHUB_version}}
+    hostname: datahub-cli
+    container_name: datahub-cli
+    entrypoint: "tail -f /dev/null"
+    tty: true
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
 {% endif %}   {#  DATALAB_enable #}
 
 {% if AMUNDSEN_enable  | default(false) %}
