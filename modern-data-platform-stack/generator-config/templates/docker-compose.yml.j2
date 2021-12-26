@@ -152,6 +152,7 @@ networks:
 
 {% set __KIE_SERVER_version = KIE_SERVER_version | default('latest') -%}
 
+{% set __PROMTAIL_version = PROMTAIL_version | default('latest') -%}
 {% set __LOKI_version = LOKI_version | default('latest') -%}
 
 {% set __GRAFANA_version = GRAFANA_version | default('latest') -%}
@@ -4599,6 +4600,24 @@ services:
     {% endif -%}   {#  use_timezone #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  KIE_SERVER_enable  #}
+
+{% if PROMTAIL_enable | default(false) %}
+  #  ================================== Grafana ========================================== #
+  promtail:
+    image: grafana/promtail:{{__PROMTAIL_version}}
+    hostname: promtail
+    container_name: promtail
+    volumes:
+      - ./data-transfer:/data-transfer
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - ./conf/promtail/promtail-config.yaml:/etc/promtail/config.yaml
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    command: -config.file=/etc/promtail/config.yml
+    restart: {{container_restart_policy}}
+{% endif %}   {#  PROMTAIL_enable  #}
 
 {% if LOKI_enable | default(false) %}
   #  ================================== Grafana ========================================== #

@@ -12,6 +12,7 @@ The Modern Data Platform version 1.14.0 contains the following bug fixes and enh
  * Apicurio Registry
  * Streamsets DataCollector Cloud
  * Grafana Loki
+ * Grafana Promtail
 
 ### New Cookbook Recipes
 
