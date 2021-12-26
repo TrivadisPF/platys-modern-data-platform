@@ -2958,13 +2958,17 @@ services:
       - EBEAN_DATASOURCE_USERNAME=datahub
       - EBEAN_DATASOURCE_PASSWORD=datahub
       - EBEAN_DATASOURCE_HOST=datahub-mysql:3306
-      - EBEAN_DATASOURCE_URL=jdbc:mysql://datahub-mysql:3306/datahub?verifyServerCertificate=false&useSSL=true&useUnicode=yes&characterEncoding=UTF-8
+      - EBEAN_DATASOURCE_URL=jdbc:mysql://mysql:3306/datahub?verifyServerCertificate=false&useSSL=true&useUnicode=yes&characterEncoding=UTF-8&enabledTLSProtocols=TLSv1.2
       - EBEAN_DATASOURCE_DRIVER=com.mysql.jdbc.Driver
       - KAFKA_BOOTSTRAP_SERVER=kafka-1:19092
       - KAFKA_SCHEMAREGISTRY_URL='{{ns.schemaRegistryUrl}}'
       - ELASTICSEARCH_HOST=datahub-elasticsearch
       - ELASTICSEARCH_PORT=9200
-      - JAVA_OPTS=-Xms256m -Xmx256m
+      - JAVA_OPTS=-Xms1g -Xmx1g
+      - ENTITY_REGISTRY_CONFIG_PATH=/datahub/datahub-gms/resources/entity-registry.yml
+      - METADATA_AUDIT_EVENT_NAME=MetadataAuditEvent_v4
+      - METADATA_CHANGE_EVENT_NAME=MetadataChangeEvent_v4
+      - FAILED_METADATA_CHANGE_EVENT_NAME=FailedMetadataChangeEvent_v4
       - GRAPH_SERVICE_IMPL={{DATAHUB_graph_service_impl}}
     {%if (DATAHUB_graph_service_impl | lower) == 'neo4j'  | default(true) %}
       - NEO4J_HOST=http://datahub-neo4j:7474
@@ -2979,6 +2983,7 @@ services:
       - MCE_CONSUMER_ENABLED=true
     {% endif -%}   {#  not DATAHUB_mce_consumer_standalone #}
       - DATAHUB_ANALYTICS_ENABLED={{DATAHUB_use_analytics}}
+      - ANALYTICS_ENABLED=false
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -3038,11 +3043,13 @@ services:
       - DATAHUB_SECRET=abc123!
       - DATAHUB_APP_VERSION=1.0
       - DATAHUB_PLAY_MEM_BUFFER_SIZE=10MB
-      - JAVA_OPTS=-Xms256m -Xmx256m -Dhttp.port=9002 -Dconfig.file=datahub-frontend/conf/application.conf -Djava.security.auth.login.config=datahub-frontend/conf/jaas.conf -Dlogback.configurationFile=datahub-frontend/conf/logback.xml -Dlogback.debug=false -Dpidfile.path=/dev/null
+      - JAVA_OPTS=-Xms512m -Xmx512m -Dhttp.port=9002 -Dconfig.file=datahub-frontend/conf/application.conf -Djava.security.auth.login.config=datahub-frontend/conf/jaas.conf -Dlogback.configurationFile=datahub-frontend/conf/logback.xml -Dlogback.debug=false -Dpidfile.path=/dev/null
       - KAFKA_BOOTSTRAP_SERVER=kafka-1:19092
       - DATAHUB_TRACKING_TOPIC=DataHubUsageEvent_v1
       - ELASTIC_CLIENT_HOST=datahub-elasticsearch
       - ELASTIC_CLIENT_PORT=9200
+      - METADATA_SERVICE_AUTH_ENABLED=false
+      - DATAHUB_ANALYTICS_ENABLED=true
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -3070,6 +3077,7 @@ services:
     ports:
         - "28145:9091"
     environment:
+      - MAE_CONSUMER_ENABLED=true
       - KAFKA_BOOTSTRAP_SERVER=kafka-1:19092
       - KAFKA_SCHEMAREGISTRY_URL='{{ns.schemaRegistryUrl}}'
       - ELASTICSEARCH_HOST=datahub-elasticsearch
@@ -3078,6 +3086,12 @@ services:
       - NEO4J_URI=bolt://${PUBLIC_IP}:17688
       - NEO4J_USERNAME=neo4j
       - NEO4J_PASSWORD=abc123!
+      - GMS_HOST=datahub-gms
+      - GMS_PORT=8080
+      - GRAPH_SERVICE_IMPL=neo4j
+      - ENTITY_REGISTRY_CONFIG_PATH=/datahub/datahub-mae-consumer/resources/entity-registry.yml
+      - KAFKA_TOPIC_NAME=MetadataAuditEvent_v4
+      - DATAHUB_USAGE_EVENT_NAME=DataHubUsageEvent_v1
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -3104,10 +3118,13 @@ services:
     ports:
         - "28146:9090"
     environment:
+      - MCE_CONSUMER_ENABLED=true
       - KAFKA_BOOTSTRAP_SERVER=kafka-1:19092
       - KAFKA_SCHEMAREGISTRY_URL='{{ns.schemaRegistryUrl}}'
       - GMS_HOST=datahub-gms
       - GMS_PORT=8080
+      - KAFKA_MCE_TOPIC_NAME=MetadataChangeEvent_v4
+      - KAFKA_FMCE_TOPIC_NAME=FailedMetadataChangeEvent_v4
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -3188,17 +3205,14 @@ services:
     environment:
       - discovery.type=single-node
       - xpack.security.enabled=false
-      - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
+      - "ES_JAVA_OPTS=-Xms256m -Xmx256m -Dlog4j2.formatMsgNoLookups=true"
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     healthcheck:
-      retries: 4
-      start_period: 2m
-      test:
-      - CMD-SHELL
-      - curl -sS --fail 'http://localhost:9200/_cluster/health?wait_for_status=yellow&timeout=0s'
-        || exit 1
+      test: ["CMD-SHELL", "curl -sS --fail 'http://localhost:9200/_cluster/health?wait_for_status=yellow&timeout=0s' || exit 1"]
+        start_period: 2m
+        retries: 4
     volumes:
       - ./data-transfer:/data-transfer
     {% if DATAHUB_volume_map_data %}
