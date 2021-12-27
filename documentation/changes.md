@@ -14,6 +14,8 @@ The Modern Data Platform version 1.14.0 contains the following bug fixes and enh
  * Grafana Loki
  * Grafana Promtail
  * Avro Tools
+ * Kafka Magic
+ * StreamPipes
 
 ### New Cookbook Recipes
 
