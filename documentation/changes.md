@@ -16,7 +16,6 @@ The Modern Data Platform version 1.14.0 contains the following bug fixes and enh
  * Avro Tools
  * Kafka Magic
  * StreamPipes
- * Burrow (did not work before)
 
 ### New Cookbook Recipes
 
@@ -54,6 +53,8 @@ The Modern Data Platform version 1.14.0 contains the following bug fixes and enh
 
 ### Bug Fixes 
 
+ * fixed error with Burrow service
+ 
 ## What's new in 1.13.0
 
 The Modern Data Platform version 1.13.0 contains the following bug fixes and enhancements:
