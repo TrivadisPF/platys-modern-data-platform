@@ -13,6 +13,7 @@ The Modern Data Platform version 1.14.0 contains the following bug fixes and enh
  * Streamsets DataCollector Cloud
  * Grafana Loki
  * Grafana Promtail
+ * Avro Tools
 
 ### New Cookbook Recipes
 
@@ -33,6 +34,7 @@ The Modern Data Platform version 1.14.0 contains the following bug fixes and enh
  * Update `NiFi` to `1.15.2` and `NiFi Registry` to `1.15.1`
  * Update `Marquez` to `0.20.0`
  * Update `Amundsen Frontend` to `4.0.0` and `Amundsen Search` to `3.0.0`
+ * Update `InfluxDB 2` to `2.1.1`
  
 ### Breaking Changes
 

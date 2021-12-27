@@ -77,6 +77,8 @@ networks:
 {% set __HIVE_version_suffix = HIVE_version_suffix | default('postgresql-metastore-s3') -%}
 {% set __HIVE_METASTORE_DB_version = HIVE_METASTORE_DB_version | default('latest') -%}
 
+{% set __AVRO_TOOLS_version = AVRO_TOOLS_version | default('latest') -%}
+
 {% set __RANGER_version = RANGER_version | default('latest') -%}
 {% set __RANGER_postgresql_version = RANGER_postgresql_version | default('latest') -%}
 
@@ -413,6 +415,7 @@ networks:
   {% set SPARK_enable = false -%}
   {% set TIKA_enable = false -%}
   {% set HIVE_enable = false -%}
+  {% set AVRO_TOOLS_enable = false -%}
   {% set RANGER_enable = false -%}
   {% set RANGER_POSTGRES_enable = false -%}
   {% set ATLAS_enable = false -%}
@@ -933,7 +936,7 @@ services:
       - ./data-transfer:/data-transfer
       - ./plugins/kafka-connect:/etc/kafka-connect/addl-plugins
     {%if KAFKA_CONNECT_map_settings_file | default(false) %}
-      - ./conf.override/kafka-connect/settings.properties:/data/settings.properties
+      - ./custom-conf/kafka-connect/settings.properties:/data/settings.properties
     {% endif -%}   {#  KAFKA_CONNECT_map_credentials_file #}
     {% if KAFKA_jmx_monitoring_prometheus_enable %}
       - ./scripts/kafka/jmx-exporter/:/usr/share/jmx-exporter
@@ -2776,6 +2779,27 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {#  HIVE_enable #}
 
+{% if AVRO_TOOLS_enable  | default(false) %}
+  #  ================================== Apache Avro Tools ========================================== #
+  avrotools-cli:
+    image: trivadis/apache-avro-tools:{{__AVRO_TOOLS_version}}
+    hostname: avrotools-cli
+    container_name: avrotools-cli
+    entrypoint: "tail -f /dev/null"
+    tty: true
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  AVRO_TOOLS_enable #}
+
 {% if RANGER_enable  | default(false) %}
   #  ================================== Apache Ranger ========================================== #
   ranger-admin:
@@ -3727,7 +3751,7 @@ services:
       - ./container-volume/streamsets-1/logs:/logs:Z
     {% endif %}
     {% if STREAMSETS_volume_map_security_policy %}
-      - ./conf.override/streamsets/sdc-security.policy:/etc/sdc/sdc-security.policy:Z
+      - ./custom-conf/streamsets/sdc-security.policy:/etc/sdc/sdc-security.policy:Z
     {% endif %}
     {%if STREAMSETS_install_pipelines is defined and STREAMSETS_install_pipelines | default(false) %}
       - ./scripts/streamsets/pipelines:/tmp/pipelines
@@ -5973,6 +5997,9 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
+    {% if INFLUXDB2_volume_map_config %}
+      - "./conf/influxdb2/config.yml:/etc/influxdb2/config.yml"
+    {% endif %}
     {% if INFLUXDB2_volume_map_data %}
       - "./container-volume/influxdb2:/var/lib/influxdb2"
     {% endif %}
