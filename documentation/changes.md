@@ -16,6 +16,7 @@ The Modern Data Platform version 1.14.0 contains the following bug fixes and enh
  * Avro Tools
  * Kafka Magic
  * StreamPipes
+ * Burrow (did not work before)
 
 ### New Cookbook Recipes
 
@@ -45,6 +46,7 @@ The Modern Data Platform version 1.14.0 contains the following bug fixes and enh
  * All `KAFKA_SCHEMA_REGISTRY_UI_xxxx` renamed to `SCHEMA_REGISTRY_UI_xxxx`
  * Add additional Kafka Advertised Listener for localhost (port 39092 - 39099) and distinguish it from the Docker Listener (on $DOCKER_HOST_IP with port 29092 - 29099)
  * allow to switch Kafka standard port usage between EXTERNAL and DOCKER_HOST Listener (config parameter `KAFKA_use_standard_port_for_external_interface`)
+ * `KAFKA_BURROW_enable` renamed to `BURROW_enable`
 
 ### Enhancements 
 

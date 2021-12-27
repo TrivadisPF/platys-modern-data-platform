@@ -44,9 +44,9 @@ networks:
 {% set __STREAMS_EXPLORER_version = STREAMS_EXPLORER_version | default('latest') -%}
 {% set __KAFKA_LAG_EXPORTER_version = KAFKA_LAG_EXPORTER_version | default('latest') -%}
 
-{% set __KAFKA_BURROW_version = KAFKA_BURROW_version | default('latest') -%}
-{% set __KAFKA_BURROW_UI_version = KAFKA_BURROW_UI_version | default('latest') -%}
-{% set __KAFKA_BURROW_DASHBOARD_version = KAFKA_BURROW_DASHBOARD_version | default('latest') -%}
+{% set __BURROW_version = BURROW_version | default('latest') -%}
+{% set __BURROW_UI_version = BURROW_UI_version | default('latest') -%}
+{% set __BURROW_DASHBOARD_version = BURROW_DASHBOARD_version | default('latest') -%}
 
 {% set __DEBEZIUM_SERVER_version = DEBEZIUM_SERVER_version | default('latest') -%}
 {% set __DEBEZIUM_UI_version = DEBEZIUM_UI_version | default('latest') -%}
@@ -1921,9 +1921,9 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {#  KAFKA_enable and KAFKA_LAG_EXPORTER_enable #}
 
-{% if ((KAFKA_enable or external['KAFKA_enable']) and KAFKA_BURROW_enable) | default(false) %}
+{% if ((KAFKA_enable or external['KAFKA_enable']) and BURROW_enable) | default(false) %}
   burrow:
-    image: trivadis/burrow:{{__KAFKA_BURROW_version}}
+    image: trivadis/burrow:{{__BURROW_version}}
     container_name: burrow
     hostname: burrow
     labels:
@@ -1949,12 +1949,13 @@ services:
     {% endif -%}   {#  use_timezone #}
     restart: {{container_restart_policy}}
 
+  {% if (BURROW_enable and BURROW_UI_enable) | default(false) %}
   burrow-ui:
-    image: generalmills/burrowui:{{__KAFKA_BURROW_UI_version}}
+    image: generalmills/burrowui:{{__BURROW_UI_version}}
     container_name: burrow-ui
     hostname: burrow-ui
     labels:
-      com.platys.name: 'burrow'
+      com.platys.name: 'burrow-ui'
       com.platys.webui.title: 'Burrow UI'
       com.platys.webui.url: "http://${PUBLIC_IP}:28108"
     ports:
@@ -1974,13 +1975,15 @@ services:
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
     restart: {{container_restart_policy}}
+  {% endif -%}   {#  BURROW_enable and BURROW_UI_enable #}
 
+  {% if (BURROW_enable and BURROW_DASHBOARD_enable) | default(false) %}
   burrow-dashboard:
-    image: joway/burrow-dashboard:{{__KAFKA_BURROW_DASHBOARD_version}}
+    image: joway/burrow-dashboard:{{__BURROW_DASHBOARD_version}}
     container_name: burrow-dashboard
     hostname: burrow-dashboard
     labels:
-      com.platys.name: 'burrow'
+      com.platys.name: 'burrow-dashboard'
       com.platys.webui.title: 'Burrow Dashboard'
       com.platys.webui.url: "http://${PUBLIC_IP}:28109"
     ports:
@@ -2000,7 +2003,8 @@ services:
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
     restart: {{container_restart_policy}}
-{% endif %}   {# KAFKA_enable and KAFKA_BURROW_enable #}
+  {% endif -%}   {#  BURROW_enable and BURROW_DASHBOARD_enable #}
+{% endif %}   {# KAFKA_enable and BURROW_enable #}
 
 {% if DEBEZIUM_SERVER_enable | default(false) %}
   #  ================================== Debezium UI ========================================== #
