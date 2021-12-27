@@ -389,7 +389,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28251 | 8888 | oracle-xe |
 28252 | 8888 | oracle-rest-1 |
 28253 | 8888 | kouncil |
-
+28254 | 80 | kafka-magic |
 
 ## Ports > 28500
 

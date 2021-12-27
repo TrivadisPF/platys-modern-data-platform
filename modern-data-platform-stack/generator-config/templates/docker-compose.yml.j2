@@ -40,6 +40,7 @@ networks:
 {% set __KAFKA_EFAK_version = KAFKA_EFAK_version | default('latest') -%}
 {% set __KOWL_version = KOWL_version | default('latest') -%}
 {% set __KOUNCIL_version = KOUNCIL_version | default('latest') -%}
+{% set __KAFKA_MAGIC_version = KAFKA_MAGIC_version | default('latest') -%}
 {% set __STREAMS_EXPLORER_version = STREAMS_EXPLORER_version | default('latest') -%}
 {% set __KAFKA_LAG_EXPORTER_version = KAFKA_LAG_EXPORTER_version | default('latest') -%}
 
@@ -407,6 +408,7 @@ networks:
   {% set KAFKA_EFAK_enable = false -%}
   {% set KOWL_enable = false -%}
   {% set KOUNCIL_enable = false -%}
+  {% set KAFKA_MAGIC_enable = false -%}
   {% set EFAK_enable = false -%}
   {% set KAFKA_LAG_EXPORTER_enable = false -%}
   {% set DEBEZIUM_SERVER_enable = false -%}
@@ -1815,7 +1817,7 @@ services:
 {% endif %}   {#  KAFKA_enable and KOWL_enable #}
 
 {% if ((KAFKA_enable or external['KAFKA_enable']) and KOUNCIL_enable) | default(false) %}
-  #  ================================== Kowl ========================================== #
+  #  ================================== Kouncil ========================================== #
   kouncil:
     image: consdata/kouncil:{{__KOUNCIL_version}}
     container_name: kouncil
@@ -1839,6 +1841,33 @@ services:
     {% endif -%}   {#  use_timezone #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  KAFKA_enable and KOUNCIL_enable #}
+
+{% if ((KAFKA_enable or external['KAFKA_enable']) and KAFKA_MAGIC_enable) | default(false) %}
+  #  ================================== Kafka Magic ========================================== #
+  kafka-magic:
+    image: digitsy/kafka-magic:{{__KAFKA_MAGIC_version}}
+    container_name: kafka-magic
+    hostname: kafka-magic
+    labels:
+      com.platys.name: "kafka-magic"
+      com.platys.webui.title: 'Kafka Magic UI'
+      com.platys.webui.url: "http://${PUBLIC_IP}:28254"
+    ports:
+      - 28254:80
+    environment:
+      KMAGIC_ALLOW_TOPIC_DELETE: "true"
+      KMAGIC_ALLOW_SCHEMA_DELETE: "true"
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  KAFKA_enable and KAFKA_MAGIC_enable #}
 
 {% if ((KAFKA_enable or external['KAFKA_enable']) and STREAMS_EXPLORER_enable) | default(false) %}
   #  ================================== Streams Explorer ========================================== #
@@ -4634,7 +4663,7 @@ services:
     hostname: promtail
     container_name: promtail
     labels:
-      com.platys.name: "promtail"    
+      com.platys.name: "promtail"
     volumes:
       - ./data-transfer:/data-transfer
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
