@@ -120,6 +120,8 @@ networks:
 {% set __NIFI_version = NIFI_version | default('latest') -%}
 {% set __NIFI_REGISTRY_version = NIFI_REGISTRY_version | default('latest') -%}
 
+{% set __STREAMPIPES_version = STREAMPIPES_version | default('latest') -%}
+
 {% set __NODERED_version = NODERED_version | default('latest') -%}
 
 {% set __STREAMSHEETS_version = STREAMSHEETS_version | default('latest') -%}
@@ -3961,6 +3963,158 @@ services:
   {% endif %}   {#  NIFI_REGISTRY_enable  #}
 {% endif %}   {#  NIFI_enable  #}
 
+{%if STREAMPIPES_enable | default(false) %}
+  #  ================================== Apache StreamPipes ========================================== #
+  streampipes-backend:
+    image: apachestreampipes/backend:{{__STREAMPIPES_version}}
+    container_name: streampipes-backend
+    hostname: streampipes-backend
+    labels:
+      com.platys.name: 'streampipes'
+    depends_on:
+      - streampipes-consul
+      - streampipes-couchdb
+    environment:
+      CONSUL_LOCATION: streampipes-consul
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+#      - backend:/root/.streampipes
+#      - files:/spImages
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+
+  streampipes-connect-worker:
+    image: apachestreampipes/connect-worker:{{__STREAMPIPES_version}}
+    container_name: streampipes-connect-worker
+    hostname: streampipes-connect-worker
+    labels:
+      com.platys.name: 'streampipes'
+    depends_on:
+      - streampipes-consul
+      - streampipes-couchdb
+    environment:
+      SP_BACKEND_HOST: streampipes-backend
+      SP_CONNECT_CONTAINER_WORKER: streampipes-connect-worker
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+#      - connect:/data/
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+
+  streampipes-ui:
+    image: apachestreampipes/ui:{{__STREAMPIPES_version}}
+    container_name: streampipes-ui
+    hostname: streampipes-ui
+    labels:
+      com.platys.name: 'streampipes'
+      com.platys.webui.title: "StreamPipes Dashboard"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28255"
+    ports:
+      - "28255:80"
+    depends_on:
+      - streampipes-couchdb
+      - streampipes-activemq
+      - streampipes-consul
+      - streampipes-backend
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+#      - connect:/data/
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+
+  streampipes-activemq:
+    image: fogsyio/activemq:5.15.9
+    container_name: streampipes-activemq
+    hostname: streampipes-activemq
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+#      - connect:/data/
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+
+  streampipes-consul:
+    image: fogsyio/consul:1.7.1
+    container_name: streampipes-consul
+    hostname: streampipes-consul
+    environment:
+      CONSUL_LOCAL_CONFIG: '{\"disable_update_check\": true}'
+      CONSUL_BIND_INTERFACE: eth0
+      CONSUL_HTTP_ADDR: 0.0.0.0
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+#      - consul:/consul/data
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+
+  streampipes-couchdb:
+    image: fogsyio/couchdb:2.3.1
+    container_name: streampipes-couchdb
+    hostname: streampipes-couchdb
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+#      - couchdb:/opt/couchdb/data
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+
+  streampipes-pipeline-elements-all-jvm:
+    image: apachestreampipes/pipeline-elements-all-jvm::{{__STREAMPIPES_version}}
+    container_name: streampipes-pipeline-elements-all-jvm
+    hostname: streampipes-pipeline-elements-all-jvm
+    depends_on:
+      - streampipes-consul
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+#      - files:/spImages
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  STREAMPIPES_enable #}
+
 {%if NODERED_enable | default(false) %}
   #  ================================== Node-RED ========================================== #
   nodered-1:
@@ -4015,7 +4169,6 @@ services:
     {% endif -%}   {#  use_timezone #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  STREAMSHEETS_enable #}
-
 
 {%if SPRING_DATAFLOW_enable | default(false) %}
   #  ================================== Spring Cloud Data Flow ========================================== #

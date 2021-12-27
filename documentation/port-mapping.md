@@ -390,6 +390,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28252 | 8888 | oracle-rest-1 |
 28253 | 8888 | kouncil |
 28254 | 80 | kafka-magic |
+28255 | 80 | streampipes-ui |
 
 ## Ports > 28500
 
