@@ -52,6 +52,9 @@ Inhere we are documenting cookbooks on how to use the platform:
  * **Kafka Connect**
    * [Using additional Kafka Connect Connector](./recipes/using-additional-kafka-connect-connector/README.md)    
 
+ * **APICurio Registry**
+   * [APICurio Registry with SQL Storage (PostgreSQL)](./recipes/apicurio-with-database-storage/README.md)    
+
  * **Oracle RDMBS**
    * [Using private (Trivadis) Oracle EE image](./recipes/using-private-oracle-ee-image/README.md) - `1.13.0`    
    * [Using public Oracle XE image](./recipes/using-public-oracle-xe-image/README.md) - `1.13.0`    
