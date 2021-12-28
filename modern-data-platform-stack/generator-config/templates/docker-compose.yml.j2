@@ -1244,7 +1244,7 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {# KAFKA_enable and KAFKA_MQTTPROXY_enable #}
 
-{% if (SCHEMA_REGISTRY_flavour | lower) == 'confluent' | default(false) %}
+{% if (SCHEMA_REGISTRY_enable and SCHEMA_REGISTRY_flavour | lower) == 'confluent' | default(false) %}
   #  ================================== Confluent Schema Registry ========================================== #
   {% for num in range(SCHEMA_REGISTRY_nodes | default(1) ) %}
     {% set external_port = 8081 + loop.index - 1 %}
@@ -1295,7 +1295,7 @@ services:
   {% endfor %}
 {% endif %}   {# KAFKA_enable and SCHEMA_REGISTRY_flavour == confluent #}
 
-{% if (SCHEMA_REGISTRY_flavour | lower) == 'apicurio' | default(false) %}
+{% if (SCHEMA_REGISTRY_enable and SCHEMA_REGISTRY_flavour | lower) == 'apicurio' | default(false) %}
   #  ================================== Apicurio Schema Registry ========================================== #
   {% for num in range(SCHEMA_REGISTRY_nodes | default(1) ) %}
     {% set http_external_port = 8081 + loop.index - 1 %}
@@ -1323,9 +1323,9 @@ services:
       REGISTRY_KAFKASQL_TOPIC: 'kafkasql-journal'
     {% endif -%}   {#  APICURIO_SCHEMA_REGISTRY_storage == sql #}
     {% if (APICURIO_SCHEMA_REGISTRY_storage | lower) == 'sql'  %}
-      REGISTRY_DATASOURCE_URL: jdbc:postgresql://postgresql/apicuriodb
-      REGISTRY_DATASOURCE_USERNAME: apicurio
-      REGISTRY_DATASOURCE_PASSWORD: abc123!
+      REGISTRY_DATASOURCE_URL: jdbc:postgresql://postgresql/{{APICURIO_SCHEMA_REGISTRY_storage_database}}
+      REGISTRY_DATASOURCE_USERNAME: {{APICURIO_SCHEMA_REGISTRY_storage_user}}
+      REGISTRY_DATASOURCE_PASSWORD: {{APICURIO_SCHEMA_REGISTRY_storage_password}}
     {% endif -%}   {#  APICURIO_SCHEMA_REGISTRY_storage == sql #}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
@@ -3994,8 +3994,8 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
-#      - backend:/root/.streampipes
-#      - files:/spImages
+      - ./container-volume/streampipes-backend:/root/.streampipes
+      - ./container-volume/streampipes-backend/files:/spImages
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
