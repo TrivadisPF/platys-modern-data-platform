@@ -391,6 +391,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28253 | 8888 | kouncil |
 28254 | 80 | kafka-magic |
 28255 | 80 | streampipes-ui |
+28256 | 80 | mendix |
 
 ## Ports > 28500
 
