@@ -16,7 +16,6 @@ The Modern Data Platform version 1.14.0 contains the following bug fixes and enh
  * Avro Tools
  * Kafka Magic
  * StreamPipes
- * Mendix
 
 ### New Cookbook Recipes
 
