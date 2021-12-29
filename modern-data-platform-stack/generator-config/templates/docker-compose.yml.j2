@@ -44,6 +44,8 @@ networks:
 {% set __STREAMS_EXPLORER_version = STREAMS_EXPLORER_version | default('latest') -%}
 {% set __KAFKA_LAG_EXPORTER_version = KAFKA_LAG_EXPORTER_version | default('latest') -%}
 
+{% set __REMORA_version = REMORA_version | default('latest') -%}
+
 {% set __BURROW_version = BURROW_version | default('latest') -%}
 {% set __BURROW_UI_version = BURROW_UI_version | default('latest') -%}
 {% set __BURROW_DASHBOARD_version = BURROW_DASHBOARD_version | default('latest') -%}
@@ -413,6 +415,7 @@ networks:
   {% set KAFKA_MAGIC_enable = false -%}
   {% set EFAK_enable = false -%}
   {% set KAFKA_LAG_EXPORTER_enable = false -%}
+  {% set REMORA_enable = false -%}
   {% set DEBEZIUM_SERVER_enable = false -%}
   {% set DEBEZIUM_UI_enable = false -%}
   {% set HADOOP_enable = false -%}
@@ -1923,7 +1926,34 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {#  KAFKA_enable and KAFKA_LAG_EXPORTER_enable #}
 
+{% if ((KAFKA_enable or external['KAFKA_enable']) and REMORA_enable) | default(false) %}
+  #  ================================== Remora ========================================== #
+  remora:
+    image: registry.opensource.zalan.do/machina/remora:{{__REMORA_version}}
+    container_name: remora
+    hostname: remora
+    labels:
+      com.platys.name: "remora"
+      com.platys.webui.title: 'Remora'
+      com.platys.webui.url: "http://${PUBLIC_IP}:28256"
+    ports:
+      - 28256:9000
+    environment:
+      KAFKA_ENDPOINT: '{{ns.bootstrapServers}}'
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  KAFKA_enable and REMORA_enable #}
+
 {% if ((KAFKA_enable or external['KAFKA_enable']) and BURROW_enable) | default(false) %}
+  #  ================================== Burrow ========================================== #
   burrow:
     image: trivadis/burrow:{{__BURROW_version}}
     container_name: burrow
