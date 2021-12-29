@@ -5052,7 +5052,7 @@ services:
       MB_DB_TYPE: h2
       {% if METABASE_volume_map_data %}
       MB_DB_FILE: /metabase-data/metabase.db
-      {% endif -%}   {#  METABASE_volume_map_data = h2 #}
+      {% endif -%}   {#  METABASE_volume_map_data #}
     {% endif -%}   {#  METABASE_db_type = h2 #}
     {% if (METABASE_db_type | lower) == 'postgres' %}
       MB_DB_TYPE: postgres
@@ -5683,6 +5683,8 @@ services:
     image: cassandra:{{__CASSANDRA_version}}
     container_name: cassandra-1
     hostname: cassandra-1
+    labels:
+      com.platys.name: "cassandra"
     ports:
       - 29042:9042
       - 7199:7199
@@ -5711,6 +5713,7 @@ services:
     container_name: cassandra-web
     hostname: cassandra-web
     labels:
+      com.platys.name: "cassandra"
       com.platys.webui.title: "Cassandra Web UI"
       com.platys.webui.url: "http://${PUBLIC_IP}:28120"
     ports:
@@ -5737,6 +5740,7 @@ services:
     container_name: reaper
     hostname: reaper
     labels:
+      com.platys.name: "cassandra"
       com.platys.webui.title: "Reaper Application UI"
       com.platys.webui.url: "http://${PUBLIC_IP}:28232/webui"
     ports:
@@ -5772,6 +5776,8 @@ services:
   dse-{{loop.index}}: # DataStax Enterprise Database
     image: datastax/dse-server:{{__DATASTAX_version}}
     hostname: dse-{{loop.index}}
+    labels:
+      com.platys.name: "datastax"
     container_name: dse-{{loop.index}}
     command: [ -s -k ] # Run with Search and Spark capabilities enabled
   {% if loop.index == 1 %}
@@ -5807,6 +5813,7 @@ services:
     container_name: dse-studio
     hostname: dse-studio
     labels:
+      com.platys.name: "datastax-studio"
       com.platys.webui.title: "DataStax Studio Web UI"
       com.platys.webui.url: "http://${PUBLIC_IP}:28121"
     ports:
@@ -5829,6 +5836,7 @@ services:
     container_name: dse-opscenter
     hostname: dse-opscenter
     labels:
+      com.platys.name: "datastax"
       com.platys.webui.title: "DataStax OpsCenter Web UI"
       com.platys.webui.url: "http://${PUBLIC_IP}:28122"
     ports:
@@ -5856,6 +5864,8 @@ services:
     image: mongo:{{__MONGO_version}}
     container_name: mongo-{{loop.index}}
     hostname: mongo-{{loop.index}}
+    labels:
+      com.platys.name: "mongodb"
     ports:
       - {{external_port}}:27017
     environment:
@@ -5881,7 +5891,8 @@ services:
     container_name: mongo-express
     hostname: mongo-express
     labels:
-      com.platys.webui.title: "Cassandra Web UI"
+      com.platys.name: "mongo-express"
+      com.platys.webui.title: "Mongo Express UI"
       com.platys.webui.url: "http://${PUBLIC_IP}:28123"
     ports:
       - 28123:8081
@@ -5903,6 +5914,7 @@ services:
     container_name: admin-mongo
     hostname: admin-mongo
     labels:
+      com.platys.name: "admin-mongo"
       com.platys.webui.title: "Admin Mongo UI"
       com.platys.webui.url: "http://${PUBLIC_IP}:28124"
     ports:
@@ -5927,6 +5939,7 @@ services:
     container_name: solr
     hostname: solr
     labels:
+      com.platys.name: "solr"
       com.platys.webui.title: "SolR UI"
       com.platys.webui.url: "http://${PUBLIC_IP}:8983"
     ports:
@@ -5951,6 +5964,7 @@ services:
     hostname: elasticsearch-1
     container_name: elasticsearch-1
     labels:
+      com.platys.name: "elasticsearch"
       com.platys.restapi.title: "Elasticsearch REST API"
       com.platys.restapi.url: "http://${PUBLIC_IP}:9200"
       com.platys.manual.step.msgs: "sudo sysctl -w vm.max_map_count=262144"
@@ -5984,6 +5998,7 @@ services:
     container_name: dejavu
     hostname: dejuvu
     labels:
+      com.platys.name: "elasticsearch"
       com.platys.webui.title: "Elasticsearch Dejavu UI"
       com.platys.webui.url: "http://${PUBLIC_IP}:28125"
     ports:
@@ -6007,6 +6022,7 @@ services:
     container_name: cerebro
     hostname: cerebro
     labels:
+      com.platys.name: "elasticsearch"
       com.platys.webui.title: "Elasticsearch Cerbero UI"
       com.platys.webui.url: "http://${PUBLIC_IP}:28126"
     ports:
@@ -6030,6 +6046,7 @@ services:
     container_name: elastichq
     hostname: elatichq
     labels:
+      com.platys.name: "elasticsearch"
       com.platys.webui.title: "ElasticHQ UI"
       com.platys.webui.url: "http://${PUBLIC_IP}:28127"
     ports:
@@ -6054,6 +6071,7 @@ services:
     hostname: kibana
     container_name: kibana
     labels:
+      com.platys.name: "kibana"
       com.platys.webui.title: "Kibana UI"
       com.platys.webui.url: "http://${PUBLIC_IP}:5601"
     depends_on:
@@ -6090,6 +6108,7 @@ services:
     hostname: neo4j-1
     container_name: neo4j-1
     labels:
+      com.platys.name: "neo4j"
       com.platys.webui.title: "Neo4J UI"
       com.platys.webui.url: "http://${PUBLIC_IP}:7474"
     ports:
@@ -6127,6 +6146,7 @@ services:
     hostname: dgraph-1
     container_name: dgraph-1
     labels:
+      com.platys.name: "dgraph"
       com.platys.webui.title: "Dgraph Ratel UI"
       com.platys.webui.url: "http://${PUBLIC_IP}:28182"
     ports:
@@ -6153,8 +6173,9 @@ services:
     hostname: stardog-1
     container_name: stardog-1
     labels:
-      com.platys.webui.title: "Stardog UI"
-      com.platys.webui.url: "http://${PUBLIC_IP}:7474"
+      com.platys.name: "stardog"
+      com.platys.webui.title: "Stardog API"
+      com.platys.webui.url: "http://${PUBLIC_IP}:5820"
     ports:
       - "5820:5820"
     environment:
@@ -6183,6 +6204,7 @@ services:
     hostname: stardog-studio
     container_name: stardog-studio
     labels:
+      com.platys.name: "stardog-studio"
       com.platys.webui.title: "Stardog Studio UI"
       com.platys.webui.url: "http://${PUBLIC_IP}:28170"
     ports:
@@ -6215,6 +6237,7 @@ services:
     hostname: graphdb-1
     container_name: graphdb-1
     labels:
+      com.platys.name: "graphdb"
       com.platys.webui.title: "GraphDBs UI"
       com.platys.webui.url: "http://${PUBLIC_IP}:17200"
     ports:
@@ -6255,6 +6278,7 @@ services:
     container_name: influxdb
     hostname: influxdb
     labels:
+      com.platys.name: "influxdb"
       com.platys.restapi.title: "InfluxDB Rest API"
       com.platys.restapi.url: "http://${PUBLIC_IP}:8086"
     ports:
@@ -6280,6 +6304,7 @@ services:
     container_name: influxdb-ui
     hostname: influxdb-ui
     labels:
+      com.platys.name: "influxdb"
       com.platys.webui.title: "InfluxDB UI"
       com.platys.webui.url: "http://${PUBLIC_IP}:28128"
     ports:
@@ -6300,6 +6325,7 @@ services:
     hostname: chronograf
     container_name: chronograf
     labels:
+      com.platys.name: "chronograf"
       com.platys.webui.title: "Chronograf UI"
       com.platys.webui.url: "http://${PUBLIC_IP}:28129"
     depends_on:
@@ -6333,6 +6359,7 @@ services:
     hostname: kapacitor
     container_name: kapacitor
     labels:
+      com.platys.name: "kapacitor"
       com.platys.restapi.title: "Kapacitor REST API"
       com.platys.restapi.url: "http://${PUBLIC_IP}:28130/kapacitor/v1"
     ports:
@@ -6363,6 +6390,8 @@ services:
     image: telegraf:{{__TELEGRAF_version}}
     container_name: telegraf
     hostname: telegraf
+    labels:
+      com.platys.name: "telegraf"
     environment:
       HOSTNAME: telegraf
     {%if use_timezone | default(false) %}
@@ -6387,6 +6416,7 @@ services:
     hostname: influxdb2
     container_name: influxdb2
     labels:
+      com.platys.name: "influxdb2"
       com.platys.webui.title: "InfluxDB 2.0 UI"
       com.platys.webui.url: "http://${PUBLIC_IP}:19999"
       com.platys.restapi.title: "InfluxDB 2.0 Rest API"
@@ -6420,6 +6450,7 @@ services:
     container_name: questdb
     hostname: questdb
     labels:
+      com.platys.name: "questdb"
       com.platys.webui.title: "QuestDB Web Console"
       com.platys.webui.url: "http://${PUBLIC_IP}:28226"
       com.platys.restapi.title: "QuestDB Rest API"
@@ -6445,10 +6476,13 @@ services:
 {% endif %}   {#  QUESTDB_enable #}
 
 {% if KUDU_enable | default(false) %}
+  #  ================================== Apache Kudu ========================================== #
   kudu-master-1:
     image: apache/kudu:{{__KUDU_version}}
     hostname: kudu-master-1
     container_name: kudu-master-1
+    labels:
+      com.platys.name: "kudu"
     ports:
       - "7051:7051"
       - "8051:8051"
@@ -6460,6 +6494,8 @@ services:
     image: apache/kudu:{{__KUDU_version}}
     hostname: kudu-master-2
     container_name: kudu-master-2
+    labels:
+      com.platys.name: "kudu"
     ports:
       - "7051"
       - "8051"
@@ -6471,6 +6507,8 @@ services:
     image: apache/kudu:{{__KUDU_version}}
     hostname: kudu-master-3
     container_name: kudu-master-3
+    labels:
+      com.platys.name: "kudu"
     ports:
       - "7051"
       - "8051"
@@ -6482,6 +6520,8 @@ services:
     image: apache/kudu:latest
     hostname: kudu-tserver-1
     container_name: kudu-tserver-1
+    labels:
+      com.platys.name: "kudu"
     depends_on:
       - kudu-master-1
       - kudu-master-2
@@ -6502,6 +6542,7 @@ services:
     hostname: druid-sandbox
     container_name: druid-sandbox
     labels:
+      com.platys.name: "druid"
       com.platys.webui.title: "Druid Console UI"
       com.platys.webui.url: "http://${PUBLIC_IP}:28150"
     ports:
@@ -6524,6 +6565,8 @@ services:
     image: apache/druid:{{__DRUID_version}}
     hostname: druid-coordinator
     container_name: druid-coordinator
+    labels:
+      com.platys.name: "druid"
     depends_on:
       - zookeeper{{dataCenter}}-1
       - druid-postgres
@@ -6551,6 +6594,8 @@ services:
     image: apache/druid:{{__DRUID_version}}
     hostname: druid-broker-1
     container_name: druid-broker-1
+    labels:
+      com.platys.name: "druid"
     depends_on:
       - zookeeper{{dataCenter}}-1
       - druid-postgres
@@ -6577,6 +6622,8 @@ services:
     image: apache/druid:{{__DRUID_version}}
     hostname: druid-historical-1
     container_name: druid-historical-1
+    labels:
+      com.platys.name: "druid"
     volumes:
       - ./container-volume/druid/storage:/opt/data
 #      - historical_var:/opt/druid/var
@@ -6605,9 +6652,8 @@ services:
   druid-middlemanager:
     image: apache/druid:{{__DRUID_version}}
     container_name: druid-middlemanager
-    volumes:
-      - ./container-volume/druid/storage:/opt/data
-#      - middle_var:/opt/druid/var
+    labels:
+      com.platys.name: "druid"
     depends_on:
       - zookeeper{{dataCenter}}-1
       - druid-postgres
@@ -6622,6 +6668,7 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
+      - ./container-volume/druid/storage:/opt/data
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -6634,6 +6681,7 @@ services:
     image: apache/druid:{{__DRUID_version}}
     container_name: druid-router
     labels:
+      com.platys.name: "druid"
       com.platys.webui.title: "Druid Console UI"
       com.platys.webui.url: "http://${PUBLIC_IP}:28150/graph"
     depends_on:
@@ -6662,6 +6710,8 @@ services:
     image: postgres:latest
     hostname: druid-postgres
     container_name: druid-postgres
+    labels:
+      com.platys.name: "druid"
     environment:
       - POSTGRES_PASSWORD=abc123!
       - POSTGRES_USER=druid
@@ -6798,6 +6848,8 @@ services:
     image: gridgain/control-center-backend:{{__GRIDGAIN_CC_version}}
     hostname: gridgain-cc-backend
     container_name: gridgain-cc-backend
+    labels:
+      com.platys.name: "ignite"
     volumes:
       - ./data-transfer:/data-transfer
       - ./gridgain-console-work:/opt/gridgain-web-console-server/work
@@ -6813,6 +6865,7 @@ services:
     hostname: gridgain-cc-frontend
     container_name: gridgain-cc-frontend
     labels:
+      com.platys.name: "ignite"
       com.platys.webui.title: "Gridgain Control Center UI"
       com.platys.webui.url: "http://${PUBLIC_IP}:28245"
     ports:
@@ -6836,6 +6889,7 @@ services:
     container_name: prometheus-1
     hostname: prometheus-1
     labels:
+      com.platys.name: "prometheus"
       com.platys.webui.title: "Prometheus UI"
       com.platys.webui.url: "http://${PUBLIC_IP}:9090/graph"
       com.platys.restapi.title: "Prometheus Rest API"
