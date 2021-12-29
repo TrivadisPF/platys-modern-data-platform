@@ -5048,7 +5048,18 @@ services:
     ports:
       - "28257:3000"
     environment:
+    {% if (METABASE_db_type | lower) == 'h2' %}
+      MB_DB_TYPE: h2
       MB_DB_FILE: /metabase-data/metabase.db
+    {% endif -%}   {#  METABASE_db_type = h2 #}
+    {% if (METABASE_db_type | lower) == 'postgres' %}
+      MB_DB_TYPE: postgres
+      MB_DB_DBNAME: {{METABASE_postgres_dbname}}
+      MB_DB_PORT: 5432
+      MB_DB_USER: {{METABASE_postgres_user}}
+      MB_DB_PASS: {{METABASE_postgres_password}}
+      MB_DB_HOST: posgresql
+    {% endif -%}   {#  METABASE_db_type = postgres #}
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
