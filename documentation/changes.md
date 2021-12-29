@@ -17,6 +17,7 @@ The Modern Data Platform version 1.14.0 contains the following bug fixes and enh
  * Kafka Magic
  * StreamPipes
  * Remora
+ * Metabase
 
 ### New Cookbook Recipes
 

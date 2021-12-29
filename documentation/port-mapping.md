@@ -392,6 +392,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28254 | 80 | kafka-magic |
 28255 | 80 | streampipes-ui |
 28256 | 80 | remora |
+28257 | 80 | metabase |
 
 ## Ports > 28500
 
