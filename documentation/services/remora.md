@@ -13,4 +13,26 @@ platys gen
 
 ## How to use it?
 
-Navigate to <http://dataplatform:28256>
+Show active consumers
+
+```bash
+curl http://dataplatform:28256/consumers
+```
+
+Show specific consumer group information
+
+```bash
+curl http://dataplatform:28256/consumers/<consumer-group-id>
+```
+
+Show health
+
+```bash
+curl http://dataplatform:28256/health
+```
+
+Metrics
+
+```bash
+curl http://dataplatform:28256/metrics
+```
