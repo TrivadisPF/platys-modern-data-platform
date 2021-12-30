@@ -7,9 +7,13 @@ cd /output
 echo ${USE_PUBLIC_IP}
    echo "======================================================================"
 
-if [ ${USE_PUBLIC_IP:-true} -eq "True" ]
+if [ ${USE_PUBLIC_IP:-True} == "True" ]
 then
 	find . -name "*.md" -exec sed -i 's/dataplatform:/'"$PUBLIC_IP"':/g' {} \;
 else
 	find . -name "*.md" -exec sed -i 's/dataplatform:/'"$DOCKER_HOST_IP"':/g' {} \;
 fi	
+
+
+# move data folders from cookbooks
+#find  .   -type   d   -name   "data" -exec mv -i {} ../data-transfer/ \;
