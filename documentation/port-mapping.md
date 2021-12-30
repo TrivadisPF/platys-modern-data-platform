@@ -348,7 +348,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28201 | 1883 | thingsbaord (mqtt) |
 28202 | 5683 | thingsbaord (coap) |
 28203 | 8080 | microcks |
-28204 | 8080 | keyclock |
+28204 | 8080 | keycloak |
 28205 | 10000 | dataiku-dss |
 28206 | 3000 | postgrest |
 28207 | 8080 | operate |
