@@ -3,7 +3,9 @@ jinja2 /templates/index.md.j2 /variables/config.yml --format=yaml --outfile /out
 
 # in all .md files, replace dataplatform: by the environment variable
 cd /output
-
+   echo "======================================================================"
+echo ${USE_PUBLIC_IP}
+   echo "======================================================================"
 
 if [ ${USE_PUBLIC_IP:-true} -eq "True" ]
 then
