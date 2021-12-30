@@ -1,4 +1,4 @@
-# Markdown Viever
+# Markdown Viewer
 
 Easy website using markdown files. 
 
