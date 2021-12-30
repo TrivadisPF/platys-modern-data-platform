@@ -60,17 +60,17 @@ docker-compose up -d
 To see what Jikkou has done you can visit the log file of the `jikkou` service:
 
 ```bash
-docker-compose logs -f jikkou
+docker logs -f jikkou
 ```
 
 you should see an output similar to the one below
 
 ```bash
-18:17:34.937 [kafka-admin-client-thread | adminclient-1] WARN  o.apache.kafka.clients.NetworkClient - [AdminClient clientId=adminclient-1] Connection to node -3 (kafka-3/192.168.208.9:19094) could not be established. Broker may not be available.
+20:34:59.775 [kafka-admin-client-thread | adminclient-1] WARN  o.apache.kafka.clients.NetworkClient - [AdminClient clientId=adminclient-1] Connection to node -1 (kafka-1/172.18.0.8:19092) could not be established. Broker may not be available.
 Can't read specification from file '/jikkou/topic-specs.yml': /jikkou/topic-specs.yml (No such file or directory)
 TASK [CREATE] Create a new topic topic-2 (partitions=1, replicas=3) - CHANGED ***************************
 TASK [CREATE] Create a new topic topic-1 (partitions=8, replicas=3) - CHANGED ***************************
-EXECUTION in 14s 959ms 
+EXECUTION in 2s 884ms 
 ok : 0, created : 2, altered : 0, deleted : 0 failed : 0
 ```
 
@@ -114,11 +114,47 @@ and visit the log. You should see the following additional lines
 TASK [CREATE] Create a new topic topic-3 (partitions=8, replicas=3) - CHANGED ***************************
 TASK [ALTER] Alter topic topic-1 - CHANGED *************************************************************
 TASK [NONE] Unchanged topic topic-2  - OK ********************************************************
-EXECUTION in 2s 347ms 
+EXECUTION in 2s 371ms 
 ok : 1, created : 1, altered : 1, deleted : 0 failed : 0
 ```
 
+## Set the label `topic.prefix`
 
+For the names of the topics in the `topic-specs.yml`, we have used the label `topic.prefix` to specify a prefix for the topic names. So far the prefix is empty, as we have not yet specified it. 
+
+We can do that by adding it to the `JIKKOU_set_labels` property. 
+
+Edit the `config.yml` and add te follwing line right after `JIKKOU_enable: true`:
+
+```bash
+      JIKKOU_set_labels: 'topic.prefix=dev-'
+```
+
+Regenerate the platform and again run `docker-compose`
+
+```bash
+platys gen
+docker-compose up -d
+```
+
+View the log 
+
+```bash
+docker logs -f jikkou
+```
+
+and see that the old topics have been removed and the new ones with the prefix `dev-` were created.
+
+```bash
+TASK [CREATE] Create a new topic dev-topic-3 (partitions=8, replicas=3) - CHANGED ***********************
+TASK [DELETE] Delete topic topic-1  - CHANGED ***********************************************************
+TASK [CREATE] Create a new topic dev-topic-2 (partitions=1, replicas=3) - CHANGED ***********************
+TASK [DELETE] Delete topic topic-2  - CHANGED ***********************************************************
+TASK [CREATE] Create a new topic dev-topic-1 (partitions=8, replicas=3) - CHANGED ***********************
+TASK [DELETE] Delete topic topic-3  - CHANGED ***********************************************************
+EXECUTION in 3s 51ms 
+ok : 0, created : 3, altered : 0, deleted : 3 failed : 0
+```
 
 
 
