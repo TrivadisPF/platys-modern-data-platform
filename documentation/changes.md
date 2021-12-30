@@ -18,6 +18,7 @@ The Modern Data Platform version 1.14.0 contains the following bug fixes and enh
  * StreamPipes
  * Remora
  * Metabase
+ * Jikkou
 
 ### New Cookbook Recipes
 
