@@ -1540,7 +1540,11 @@ services:
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
-    command: "topics create --file-path /jikkou/topic-specs.yml {{'--verbose' if JIKKOU_use_verbose_mode}} --yes"
+    {% for label in JIKKOU_set_labels.split(",") %}
+      "--set-label",
+      "{{label}}"
+    {% endfor -%}
+    command: ["topics", "apply", "--file-path", "/jikkou/topic-specs.yml", "{{'--verbose' if JIKKOU_use_verbose_mode}}", "--yes"]
 {% endif %}   {# JIKKOU_enable #}
 
 {% if ((KAFKA_enable or external['KAFKA_enable']) and KAFKA_TOPICS_UI_enable) | default(false) %}
