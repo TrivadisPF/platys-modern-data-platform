@@ -30,6 +30,8 @@ networks:
 
 {% set __KCAT_version = KCAT_version | default('latest') -%}
 
+{% set __JIKKOU_version = JIKKOU_version | default('latest') -%}
+
 {% set __KAFKA_TOPICS_UI_version = KAFKA_TOPICS_UI_version | default('latest') -%}
 {% set __KAFKA_CONNECT_UI_version = KAFKA_CONNECT_UI_version | default('latest') -%}
 {% set __KAFKA_CMAK_version = KAFKA_CMAK_version | default('latest') -%}
@@ -1515,7 +1517,37 @@ services:
       - |
         while [ 1 -eq 1 ];do sleep 60;done
     restart: {{container_restart_policy}}
-{% endif %}   {# KAFKA_enable and KCAT_enable #}
+{% endif %}   {# KCAT_enable #}
+
+{% if (JIKKOU_enable) | default(false) %}
+  #  ================================== Jikkou ========================================== #
+  jikkou:
+    image: streamthoughts/jikkou:{{__JIKKOU_version}}
+    container_name: jikkou
+    hostname: jikkou
+    labels:
+      com.platys.name: "jikkou"
+    environment:
+      JIKKOU_DEFAULT_KAFKA_BOOTSTRAP_SERVERS: '{{ns.bootstrapServers}}'
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./scripts/docker/wait-for-it.sh:/usr/src/app/wait-for-it.sh
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    command:
+      # In the command section, $ are replaced with $$ to avoid the error 'Invalid interpolation format for "command" option'
+      - bash
+      - -c
+      - |
+        wait-for-it kafka-1:19092 --timeout=0 -- /opt/jikkou/bin/jikkou"
+        sleep infinity
+    restart: {{container_restart_policy}}
+{% endif %}   {# JIKKOU_enable #}
 
 {% if ((KAFKA_enable or external['KAFKA_enable']) and KAFKA_TOPICS_UI_enable) | default(false) %}
   #  ================================== Kafka Topics UI ========================================== #
