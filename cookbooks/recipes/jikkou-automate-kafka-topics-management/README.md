@@ -68,9 +68,9 @@ you should see an output similar to the one below
 ```bash
 18:17:34.937 [kafka-admin-client-thread | adminclient-1] WARN  o.apache.kafka.clients.NetworkClient - [AdminClient clientId=adminclient-1] Connection to node -3 (kafka-3/192.168.208.9:19094) could not be established. Broker may not be available.
 Can't read specification from file '/jikkou/topic-specs.yml': /jikkou/topic-specs.yml (No such file or directory)
-TASK [CREATE] Create a new topic topic-1 (partitions=8, replicas=3) - CHANGED ***************************
 TASK [CREATE] Create a new topic topic-2 (partitions=1, replicas=3) - CHANGED ***************************
-EXECUTION in 2s 809ms 
+TASK [CREATE] Create a new topic topic-1 (partitions=8, replicas=3) - CHANGED ***************************
+EXECUTION in 14s 959ms 
 ok : 0, created : 2, altered : 0, deleted : 0 failed : 0
 ```
 
@@ -112,9 +112,10 @@ and visit the log. You should see the following additional lines
 
 ```bash
 TASK [CREATE] Create a new topic topic-3 (partitions=8, replicas=3) - CHANGED ***************************
-TASK [CREATE] Create a new topic topic-2 (partitions=1, replicas=3) - OK ***************************
-EXECUTION in 2s 332ms 
-ok : 1, created : 1, altered : 0, deleted : 0 failed : 0
+TASK [ALTER] Alter topic topic-1 - CHANGED *************************************************************
+TASK [NONE] Unchanged topic topic-2  - OK ********************************************************
+EXECUTION in 2s 347ms 
+ok : 1, created : 1, altered : 1, deleted : 0 failed : 0
 ```
 
 
