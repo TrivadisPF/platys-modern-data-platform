@@ -293,7 +293,7 @@ networks:
 {% set __FIREFOX_version = FIREFOX_version | default('latest') -%}
 {% set __FILE_BROWSER_version = FILE_BROWSER_version | default('latest') -%}
 {% set __VAULT_version = VAULT_version | default('latest') -%}
-{% set __KEYCLOCK_version = KEYCLOCK_version | default('latest') -%}
+{% set __KEYCLOAK_version = KEYCLOAK_version | default('latest') -%}
 {% set __PORTAINER_version = PORTAINER_version | default('latest') -%}
 {% set __CADVISOR_version = CADVISOR_version | default('latest') -%}
 {% set __HAWTIO_version = HAWTIO_version | default('latest') -%}
@@ -383,7 +383,7 @@ networks:
 
 {% if MICROCKS_enable -%}
 # enforce some dependencies
-  {% set KEYCLOCK_enable = true -%}
+  {% set KEYCLOAK_enable = true -%}
   {% set POSTMAN_enable = true -%}
 {% endif -%}   {# MICROCKS_enable #}
 
@@ -513,7 +513,7 @@ networks:
   {% set FILESTASH_enable = false -%}
   {% set S3MANAGER_enable = false -%}
   {% set AWSCLI_enable = false -%}
-  {% set KEYCLOCK_enable = false -%}
+  {% set KEYCLOAK_enable = false -%}
   {% set POSTMAN_enable = false -%}
   {% set MICROCKS_enable = false -%}
   {% set ZIPKIN_enable = false -%}
@@ -8984,10 +8984,10 @@ services:
     command: vault server -config=/vault/config/vault.json
 {% endif %}   {#  VAULT_enable #}
 
-{% if KEYCLOCK_enable | default(false) %}
+{% if KEYCLOAK_enable | default(false) %}
   #  ================================== Keycloak ================= #
   keycloak:
-    image: jboss/keycloak:{{__KEYCLOCK_version}}
+    image: jboss/keycloak:{{__KEYCLOAK_version}}
     hostname: keycloak
     container_name: keycloak
     labels:
@@ -9009,7 +9009,7 @@ services:
       - "./etc/localtime:/etc/localtime:ro"
     restart: {{container_restart_policy}}
     {% endif -%}   {#  use_timezone #}
-{% endif %}   {#  KEYCLOCK_enable #}
+{% endif %}   {#  KEYCLOAK_enable #}
 
 {% if POSTMAN_enable | default(false) %}
   #  ================================== Postman ================= #
@@ -9017,6 +9017,10 @@ services:
     image: quay.io/microcks/microcks-postman-runtime:{{__POSTMAN_version}}
     container_name: postman
     hostname: postman
+    labels:
+      com.platys.name: "postman"
+      com.platys.webui.title: "Postman UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:3010"
     ports:
       - 3010:3000
     {%if use_timezone | default(false) %}
@@ -9039,6 +9043,7 @@ services:
     container_name: swagger-editor
     hostname: swagger-editor
     labels:
+      com.platys.name: "swagger-editor"
       com.platys.webui.title: "Swagger Editor UI"
       com.platys.webui.url: "http://${PUBLIC_IP}:28156"
     ports:
@@ -9063,6 +9068,7 @@ services:
     container_name: swagger-ui
     hostname: swagger-ui
     labels:
+      com.platys.name: "swagger-ui"
       com.platys.webui.title: "Swagger UI"
       com.platys.webui.url: "http://${PUBLIC_IP}:28157"
     ports:
@@ -9087,6 +9093,7 @@ services:
     container_name: microcks
     hostname: microcks
     labels:
+      com.platys.name: "microcks"
       com.platys.webui.title: "Microcks UI"
       com.platys.webui.url: "http://${PUBLIC_IP}:28203"
     ports:
@@ -9123,6 +9130,7 @@ services:
     container_name: zipkin
     hostname: zipkin
     labels:
+      com.platys.name: "zipkin"        
       com.platys.webui.title: "Zipkin UI"
       com.platys.webui.url: "http://${PUBLIC_IP}:9411"
     ports:

@@ -59,6 +59,7 @@ The Modern Data Platform version 1.14.0 contains the following bug fixes and enh
 ### Bug Fixes 
 
  * fixed error with Burrow service
+ * `KEYCLOCK` changed to `KEYCLOAK` to reflect the right name
  
 ## What's new in 1.13.0
 
