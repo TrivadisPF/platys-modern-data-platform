@@ -1534,18 +1534,12 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
-      - ./scripts/docker/wait-for-it.sh:/usr/src/app/wait-for-it.sh
+      - ./scripts/jikkou/:/jikkou
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
-    command:
-      # In the command section, $ are replaced with $$ to avoid the error 'Invalid interpolation format for "command" option'
-      - bash
-      - -c
-      - |
-        wait-for-it kafka-1:19092 --timeout=0 -- /opt/jikkou/bin/jikkou"
-        sleep infinity
+    command: "create --file-path /jikkou/topic-specs.yml --yes"
     restart: {{container_restart_policy}}
 {% endif %}   {# JIKKOU_enable #}
 
