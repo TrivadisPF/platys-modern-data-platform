@@ -55,6 +55,9 @@ Inhere we are documenting cookbooks on how to use the platform:
  * **APICurio Registry**
    * [APICurio Registry with SQL Storage (PostgreSQL)](./recipes/apicurio-with-database-storage/README.md)    
 
+ * **Jikkou**
+   * [Automate managment of Kafka topics on the platform](./recipes/jikkou-automate-kafka-topics-management/README.md)    
+
  * **Oracle RDMBS**
    * [Using private (Trivadis) Oracle EE image](./recipes/using-private-oracle-ee-image/README.md) - `1.13.0`    
    * [Using public Oracle XE image](./recipes/using-public-oracle-xe-image/README.md) - `1.13.0`    
