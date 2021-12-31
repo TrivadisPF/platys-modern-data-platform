@@ -10,7 +10,7 @@ This recipe will show how to use the Apicurio Registry as a Confluent-compliant 
 
 ## Initialise data platform
 
-First [initialise a platys-supported data platform](../documentation/getting-started.md) with the following services enabled
+First [initialise a platys-supported data platform](../../../documentation/getting-started.md) with the following services enabled
 
 ```
 platys init --enable-services KAFKA,SCHEMA_REGISTRY,POSTGRESQL,KAFKA_UI,ADMINER -s trivadis/platys-modern-data-platform -w 1.14.0
