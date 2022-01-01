@@ -1,7 +1,8 @@
 # Smashing
 
-* **Homepage**: <https://smashing.github.io/>
-* **Documentation**: <https://github.com/Smashing/smashing/wiki>
+The exceptionally handsome dashboard framework in Ruby and Coffeescript. 
+
+[**Homepage**](https://smashing.github.io/) | [**Documentation**](https://github.com/Smashing/smashing/wiki)| **[GitHub](https://github.com/Smashing/smashing)**
 
 ```
 platys init --enable-services SMASHING
