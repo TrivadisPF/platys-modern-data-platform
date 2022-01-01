@@ -29,14 +29,14 @@ There are some overall settings which will control the behaviour for all or a gr
 | `S3_path_style_access`                             	| `false` | 1.9.0 | Use Path Style Access if set to `true`, otherwise the default of virtual hosted-style access is used. | 
 
 
-## Platform Service
+## Platform Services
 
 The configuration settings for enabling/disabling a given service are named `XXXXX_enable` where XXXXX is the name of the service (he used to be named `XXXXX_enabled` in version 1.0.0).
 For each service there might be some other settings, such as controlling the number of nodes to start the service with, whether the service should map a data volume into the container or controlling some other proprietary configuration properties of the service itself.
 
 | Config                                         	| Default 	| Since 	| Description                                                                                                                                                                        	                    	|
 |------------------------------------------------	|:-------:	|-------	|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------	|
-| **_Apache Zookeeper_**   &nbsp;&nbsp;&nbsp;&nbsp;![x86-64](./images/x86-64.png)                	|         	|       	|                                                                                                                                                                                     	|
+| [**_Apache Zookeeper_**](./services/zookeeper.md)   &nbsp;&nbsp;&nbsp;&nbsp;![x86-64](./images/x86-64.png)                	|         	|       	|                                                                                                                                                                                     	|
 | `ZOOKEEPER_enable`                             	| `false` 	| 1.0.0 	| [Apache Zookeeper](https://zookeeper.apache.org/) is a coordination service used by Apache Kafka and Apache Atlas services. It is automatically enabled if using either of the two. 	|             	|                                
 | `ZOOKEEPER_nodes`                              	|   `1`   	| 1.0.0 	| number of Zookeeper nodes                                                                                                                                                           	|
 | `ZOOKEEPER_navigator_enable`                   	| `false` 	| 1.1.0 	| Zookeeper Navigator is a UI for managing and viewing zookeeper cluster.                                                                                                             	|      
