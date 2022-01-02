@@ -9349,17 +9349,18 @@ services:
 {% endif %}   {# HAWTIO_enable #}
 
 {% if WETTY_enable | default(false) %}
-  #  ================================== cAdvisor ========================================== #
-  wetty:
+  #  ================================== Wetty ========================================== #
+  {% set externalPort = 3001 + dataCenterId %}
+  wetty{dataCenter}}:
     image: svenihoney/wetty:{{__WETTY_version}}
-    container_name: wetty
-    hostname: wetty
+    container_name: wetty{dataCenter}}
+    hostname: wetty{dataCenter}}
     labels:
       com.platys.name: "wetty"
       com.platys.webui.title: "WeTTY UI"
-      com.platys.webui.url: "http://${PUBLIC_IP}:3001"
+      com.platys.webui.url: "http://${PUBLIC_IP}:{{externalPort}}"
     ports:
-      - "3001:3000"
+      - "{{externalPort}}:3000"
     environment:
       - REMOTE_SSH_SERVER=${DOCKER_HOST_IP}
       - REMOTE_SSH_PORT=22
