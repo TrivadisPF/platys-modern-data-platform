@@ -1382,19 +1382,20 @@ services:
 
 {% if ((KAFKA_enable or external['KAFKA_enable']) and (KAFKA_edition | lower) == 'enterprise' and KAFKA_CCC_enable) | default(false) %}
   #  ================================== Confluent Control Center ========================================== #
-  control-center:
+  {% set externalPort = 9021 + dataCenterId %}
+  control-center{{dataCenter}}:
     image: confluentinc/cp-enterprise-control-center:{{__CONFLUENT_PLATFORM_version}}
-    hostname: control-center
-    container_name: control-center
+    hostname: control-center{{dataCenter}}
+    container_name: control-center{{dataCenter}}
     labels:
       com.platys.name: "confluent-control-center"
       com.platys.webui.title: 'Control Center UI'
-      com.platys.webui.url: "http://${PUBLIC_IP}:9021"
+      com.platys.webui.url: "http://${PUBLIC_IP}:{{externalPort}}"
     depends_on:
       - zookeeper{{dataCenter}}-1
       - kafka{{dataCenter}}-1
     ports:
-      - "9021:9021"
+      - "{{externalPort}}:9021"
     environment:
       CONTROL_CENTER_BOOTSTRAP_SERVERS: '{{ns.bootstrapServers}}'
       CONTROL_CENTER_ZOOKEEPER_CONNECT: 'zookeeper-1:2181'
