@@ -13,6 +13,7 @@ There are some overall settings which will control the behaviour for all or a gr
 | `uid`                             	| `1000` 	| 1.9.0 | The UID to use when using the "user" property in a service to override the user inside the container. |  
 | `data_centers`                             	| `dc1,dc2` 	| 1.14.0 | A comma-separated list of data-center names, to use if the property `data_center_to_use` has a value != 0. |  
 | `data_center_to_use`                             	| `0` 	| 1.14.0 | The data-center to use, if multiple DC should be simulated for a Kafka setup. |  
+| `copy_cookbook_data_folder`                             	| `true` 	| 1.14.0 | Copy all the `data` folders of the various cookbook recipes into the `data-transfer/cookbook-data` folder. |  
 
 ## External Services
 
