@@ -14,5 +14,5 @@ fi
 # move data folders from cookbooks
 if [ ${PLATYS_COPY_COOKBOOK_DATA:-True} == "True" ]
 then
-	find  .  -type  d  -name  "cookbooks" -exec cp -i {} /data-transfer/ \;
+	find  cookbooks/recipes  -type  d  -name  "data" -exec cp -r -i {} /data-transfer/cookbook-data \;
 fi	
