@@ -1,13 +1,13 @@
-# Yugabyte
+# Prometheus
 
-The high-performance distributed SQL database for global, internet-scale apps. 
+The Prometheus monitoring system and time series database.  
 
-**[Website](https://www.yugabyte.com/)** | **[Documentation](https://docs.yugabyte.com/latest/)** | **[GitHub](https://github.com/yugabyte/yugabyte-db)**
+**[Website](https://prometheus.io/)** | **[Documentation](https://prometheus.io/docs/introduction/overview/)** | **[GitHub](https://github.com/prometheus/prometheus)**
 
 ## How to enable?
 
 ```
-platys init --enable-services YUGABYTE	
+platys init --enable-services PROMETHEUS	
 platys gen
 ```
 
