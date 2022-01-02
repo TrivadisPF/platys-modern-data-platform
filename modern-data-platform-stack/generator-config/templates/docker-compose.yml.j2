@@ -315,6 +315,7 @@ networks:
 {% set __MICROCKS_version = MICROCKS_version | default('latest') -%}
 
 {% set __ZIPKIN_version = ZIPKIN_version | default('latest') -%}
+{% set __PTICHFORK_version = PITCHFORK_version | default('latest') -%}
 
 {% set __hw_arch = hw_arch | default('x86-64') -%}
 {% set __PYTHON_VERSION = PYTHON_version | default('3') -%}
@@ -9188,6 +9189,8 @@ services:
       com.platys.name: "zipkin"
       com.platys.webui.title: "Zipkin UI"
       com.platys.webui.url: "http://${PUBLIC_IP}:9411"
+      com.platys.restapi.title: "Zipkin API"
+      com.platys.restapi.url: "http://${PUBLIC_IP}:9411/api/v2/spans"
     ports:
       - 9411:9411
     environment:
@@ -9263,6 +9266,34 @@ services:
     restart: {{container_restart_policy}}
 
 {% endif %}   {# ZIPKIN_enable #}
+
+{% if PITCHFORK_enable | default(false) %}
+  #  =================== Pitchfork ================= #
+  ptichfork:
+    image: hotelsdotcom/pitchfork:{{__PITCHFORK_version}}
+    container_name: ptichfork
+    hostname: ptichfork
+    labels:
+      com.platys.name: "pitchfork"
+    environment:
+      SERVER_PORT: {{PITCHFORK_server_port}}
+      PITCHFORK_FORWARDERS_LOGGING_ENABLED: "{PITCHFORK_use_logging}"
+      PITCHFORK_FORWARDERS_LOGGING_LOG_FULL_SPAN: "true"
+      PITCHFORK_FORWARDERS_ZIPKIN_HTTP_ENABLED: "{PITCHFORK_use_zipkin_http}"
+      PITCHFORK_FORWARDERS_ZIPKIN_HTTP_ENDPOINT: "http://zipkin:9411/api/v2/spans"
+      PITCHFORK_FORWARDERS_HAYSTACK_KAFKA_ENABLED: "PITCHFORK_use_haystack_kafka"
+      PITCHFORK_FORWARDERS_HAYSTACK_KAFKA_BOOTSTRAP_SERVERS: "{{ns.bootstrapServers}}"
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  PITCHFORK_enable #}
 
 {% if PORTAINER_enable | default(false) %}
   #  ================================== Portainer ========================================== #
