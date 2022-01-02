@@ -53,6 +53,7 @@ The Modern Data Platform version 1.14.0 contains the following bug fixes and enh
  * Add additional Kafka Advertised Listener for localhost (port 39092 - 39099) and distinguish it from the Docker Listener (on $DOCKER_HOST_IP with port 29092 - 29099)
  * allow to switch Kafka standard port usage between EXTERNAL and DOCKER_HOST Listener (config parameter `KAFKA_use_standard_port_for_external_interface`)
  * `KAFKA_BURROW_enable` renamed to `BURROW_enable`
+ * `conf-override` renamed to `custom-conf` to better reflect the fact, that this folder is only for cusotmized configuration files which will not be overwritten when re-generating the platform
 
 ### Enhancements 
 
