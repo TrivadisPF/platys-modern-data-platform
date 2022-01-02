@@ -11,6 +11,10 @@ else
 	find . -name "*.md" -exec sed -i 's/dataplatform:/'"$DOCKER_HOST_IP"':/g' {} \;
 fi	
 
+find  .  -type  d  -name  "cookbooks" 
 
 # move data folders from cookbooks
-find  .  -type  d  -name  "cookbooks" -exec mv -i {} /data-transfer/ \;
+if [ ${PLATYS_COPY_COOKBOOK_DATA:-True} == "True" ]
+then
+	find  .  -type  d  -name  "cookbooks" -exec mv -i {} /data-transfer/ \;
+fi	
