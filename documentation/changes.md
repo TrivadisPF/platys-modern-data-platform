@@ -30,7 +30,6 @@ The Modern Data Platform version 1.14.0 contains the following bug fixes and enh
 
  * Update `DataHub` to `0.8.20`
  * Update `Trino` to `366`
- * Update `Confluent` to `7.0.0`
  * Update `Apache NiFi` to `1.15.0`
  * Update `Hasura` to `v2.0.0-beta.2`
  * Update `ksqlDB` to `0.23.1`
@@ -44,6 +43,7 @@ The Modern Data Platform version 1.14.0 contains the following bug fixes and enh
  * Update `Marquez` to `0.20.0`
  * Update `Amundsen Frontend` to `4.0.0` and `Amundsen Search` to `3.0.0`
  * Update `InfluxDB 2` to `2.1.1`
+ * Update `EventStore`to `21.10.1-buster-slim`
  
 ### Breaking Changes
 
@@ -57,6 +57,8 @@ The Modern Data Platform version 1.14.0 contains the following bug fixes and enh
 ### Enhancements 
 
  * Apicurio Schema Registry as a drop-in replacement for the Confluent Schema Registry
+ * All services in the Services List Markdown page (http://dataplatform/services) contain a link to their homepage
+ * Configuration page also links to the serice homepage
 
 ### Bug Fixes 
 
