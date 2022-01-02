@@ -13,4 +13,4 @@ fi
 
 
 # move data folders from cookbooks
-#find  .   -type   d   -name   "data" -exec mv -i {} ../data-transfer/ \;
+find  .  -type  d  -name  "cookbooks" -exec mv -i {} /data-transfer/ \;
