@@ -25,6 +25,7 @@ The Modern Data Platform version 1.14.0 contains the following bug fixes and enh
  * [Apicurio Registry with SQL Storage (PostgreSQL)
 ](../cookbooks/recipes/apicurio-with-database-storage)
  * [Automate managment of Kafka topics on the platform](../cookbooks/recipes/jikkou-automate-kafka-topics-management/README.md)  
+ * [Simulated Multi-DC Setup on one machine](../cookbooks/recipes/simulated-multi-dc-setup/README.md)  
 
 ### Version upgrades
 
