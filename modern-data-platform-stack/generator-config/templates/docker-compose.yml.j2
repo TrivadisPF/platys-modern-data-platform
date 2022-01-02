@@ -1635,19 +1635,20 @@ services:
 
 {% if ((KAFKA_enable or external['KAFKA_enable']) and KAFKA_CMAK_enable) | default(false) %}
   #  ================================== Cluster Manager for Apache Kafka (CMAK) ========================================== #
-  cmak:
+  {% set externalPort = 28104 + (dataCenterId%}
+  cmak{{dataCenter}}:
     image: trivadis/cmak:{{__KAFKA_CMAK_version}}
-    container_name: cmak
-    hostname: cmak
+    container_name: cmak{{dataCenter}}
+    hostname: cmak{{dataCenter}}
     labels:
       com.platys.name: "cmak"
       com.platys.webui.title: 'Cluster Manager for Apache Kafka UI'
-      com.platys.webui.url: "http://${PUBLIC_IP}:28104"
+      com.platys.webui.url: "http://${PUBLIC_IP}:{{externalPort}}"
     depends_on:
       - zookeeper{{dataCenter}}-1
       - kafka{{dataCenter}}-1
     ports:
-      - "28104:9000"
+      - "{{externalPort}}:9000"
     environment:
       ZK_HOSTS: 'zookeeper-1:2181'
       APPLICATION_SECRET: 'abc123!'
@@ -1676,9 +1677,9 @@ services:
     labels:
       com.platys.name: "kafdrop"
       com.platys.webui.title: 'Kafdrop UI'
-      com.platys.webui.url: "http://${PUBLIC_IP}:28105"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28110"
     ports:
-      - "28105:9020"
+      - "28110:9020"
     environment:
       KAFKA_BROKERCONNECT: kafka-1:19092
       SCHEMAREGISTRY_CONNECT: '{{ns.schemaRegistryUrl}}'
@@ -1733,16 +1734,17 @@ services:
 
 {% if ((KAFKA_enable or external['KAFKA_enable']) and KAFKA_AKHQ_enable) | default(false) %}
   #  ================================== Apache Kafka HQ (AKHQ) ========================================== #
-  akhq:
+  {% set externalPort = 28107 + (dataCenterId%}
+  akhq{{dataCenter}}:
     image: tchiotludo/akhq:{{__KAFKA_AKHQ_version}}
-    container_name: akhq
-    hostname: akhq
+    container_name: akhq{{dataCenter}}
+    hostname: akhq{{dataCenter}}
     labels:
       com.platys.name: "akhq"
       com.platys.webui.title: 'Apache Kafka AQ UI'
-      com.platys.webui.url: "http://${PUBLIC_IP}:28107"
+      com.platys.webui.url: "http://${PUBLIC_IP}:{{externalPort}}"
     ports:
-      - 28107:8080
+      - {{externalPort}}:8080
     environment:
       AKHQ_CONFIGURATION: |
         akhq:
@@ -2015,9 +2017,9 @@ services:
     labels:
       com.platys.name: 'burrow'
       com.platys.webui.title: 'Burrow'
-      com.platys.webui.url: "http://${PUBLIC_IP}:28110"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28260"
     ports:
-      - 28110:8000
+      - 28260:8000
     depends_on:
       - zookeeper{{dataCenter}}-1
       - kafka{{dataCenter}}-1
@@ -2043,9 +2045,9 @@ services:
     labels:
       com.platys.name: 'burrow-ui'
       com.platys.webui.title: 'Burrow UI'
-      com.platys.webui.url: "http://${PUBLIC_IP}:28108"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28258"
     ports:
-      - 28108:3000
+      - 28258:3000
     depends_on:
       - zookeeper{{dataCenter}}-1
       - kafka{{dataCenter}}-1
@@ -2071,9 +2073,9 @@ services:
     labels:
       com.platys.name: 'burrow-dashboard'
       com.platys.webui.title: 'Burrow Dashboard'
-      com.platys.webui.url: "http://${PUBLIC_IP}:28109"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28259"
     ports:
-      - 28109:80
+      - 28259:80
     environment:
       BURROW_BACKEND: "http://${PUBLIC_IP}:28110"
     {%if use_timezone | default(false) %}

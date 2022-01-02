@@ -148,7 +148,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 9161 | 9160 | cassandra-2 |
 9162 | 9160 | cassandra-3 |
 9083 | 9083 | hive-metastore |
-9021 | 9021 | control-center | 
+9021 | 9021 | control-center (dc1) | 
+9022 | 9021 | control-center (dc2) | 
 9090 | 9090 | prometheus-1 |
 9091 | 9091 | prometheus-pushgateway |
 9092 | 9092 | kafka-1     |
@@ -270,13 +271,12 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28101 | 9010 | zoonavigator-api     |
 28102 | 8000 | schema-registry-ui   |
 28103 | 8000 | kafka-connect-ui     |
-28104 | 9000 | cmak |
-28105 | 9020 | kafdrop     |
+28104 | 9000 | cmak (dc1) |
+28105 | 9000 | cmak (dc2) |
 28106 | 8080 | kadmin     |
-28107 | 8080 | akhq     |
-28108 | 3000 | burrow-ui |
-28109 | 80 | burrow-dashboard |
-28110 | 8000 | burrow |
+28107 | 8080 | akhq (dc1)    |
+28107 | 8080 | akhq (dc2)     |
+28110 | 9020 | kafdrop     |
 28111 | 28111 | spark-worker-1 |
 28112 | 28112 | spark-worker-2 |
 28113 | 28113 | spark-worker-3 |
@@ -393,6 +393,9 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28255 | 80 | streampipes-ui |
 28256 | 80 | remora |
 28257 | 80 | metabase |
+28258 | 3000 | burrow-ui |
+28259 | 80 | burrow-dashboard |
+28260 | 8000 | burrow |
 
 ## Ports > 28500
 
