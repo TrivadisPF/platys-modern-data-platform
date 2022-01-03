@@ -929,10 +929,11 @@ services:
       CONNECT_LOG4J_LOGGERS: "org.apache.kafka.connect.runtime.rest=WARN,org.reflections=ERROR"
       CONNECT_LOG4J_APPENDER_STDOUT_LAYOUT_CONVERSIONPATTERN: "[%d] %p %X{connector.context}%m (%c:%L)%n"
       CONNECT_PLUGIN_PATH: "/usr/share/java,/etc/kafka-connect/addl-plugins"
+      CONNECT_CONNECTOR_CLIENT_CONFIG_OVERRIDE_POLICY: 'All'
       # CONNECT_SECURITY_PROTOCOL: SSL
       # CONNECT_SASL_MECHANISM: PLAIN
       # CONNECT_SASL_JAAS_CONFIG: org.apache.kafka.common.security.plain.PlainLoginModule required username="$CLUSTER_API_KEY" password="$CLUSTER_API_SECRET";
-      CLASSPATH: /usr/share/java/monitoring-interceptors/monitoring-interceptors-4.0.0.jar
+      #CLASSPATH: /usr/share/java/monitoring-interceptors/monitoring-interceptors-4.0.0.jar
       AWS_ACCESS_KEY_ID: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
       AWS_SECRET_ACCESS_KEY: {{s3SecretAccessKey}}
       # External secrets config
@@ -947,7 +948,7 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
-      - ./plugins/kafka-connect:/etc/kafka-connect/addl-plugins
+      - ./plugins/kafka-connect/connectors:/etc/kafka-connect/addl-plugins
     {%if KAFKA_CONNECT_map_settings_file | default(false) %}
       - ./custom-conf/kafka-connect/settings.properties:/data/settings.properties
     {% endif -%}   {#  KAFKA_CONNECT_map_credentials_file #}
@@ -1043,9 +1044,10 @@ services:
       KSQL_KSQL_STREAMS_REPLICATION_FACTOR: {{KAFKA_KSQLDB_internal_replication_factor | default(1)}}
       KSQL_KSQL_QUERY_PULL_METRICS_ENABLED: "true"
       KSQL_KSQL_HIDDEN_TOPICS: '^_.*,default_ksql_processing_log'
-
-#      KSQL_PRODUCER_INTERCEPTOR_CLASSES: "io.confluent.monitoring.clients.interceptor.MonitoringProducerInterceptor"
-#      KSQL_CONSUMER_INTERCEPTOR_CLASSES: "io.confluent.monitoring.clients.interceptor.MonitoringConsumerInterceptor"
+    {% if (KAFKA_edition | lower) == 'enterprise' %}
+      KSQL_PRODUCER_INTERCEPTOR_CLASSES: "io.confluent.monitoring.clients.interceptor.MonitoringProducerInterceptor"
+      KSQL_CONSUMER_INTERCEPTOR_CLASSES: "io.confluent.monitoring.clients.interceptor.MonitoringConsumerInterceptor"
+    {% endif %}
 
       KSQL_KSQL_SUPPRESS_ENABLED: "{{KAFKA_KSQLDB_suppress_enabled | default(omit)}}"
       KSQL_KSQL_SUPPRESS_BUFFER_SIZE_BYTES: "{{KAFKA_KSQLDB_suppress_buffer_size_bytes | default(-1)}}"

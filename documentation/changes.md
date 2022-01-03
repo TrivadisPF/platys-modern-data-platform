@@ -56,6 +56,7 @@ The Modern Data Platform version 1.14.0 contains the following bug fixes and enh
  * allow to switch Kafka standard port usage between EXTERNAL and DOCKER_HOST Listener (config parameter `KAFKA_use_standard_port_for_external_interface`)
  * `KAFKA_BURROW_enable` renamed to `BURROW_enable`
  * `conf-override` renamed to `custom-conf` to better reflect the fact, that this folder is only for cusotmized configuration files which will not be overwritten when re-generating the platform
+ * If manually copying Kafka Connect connectors, then no longer place them into `plugins/kafka-connect` but `plugins/kafka-connect/connectors`
 
 ### Enhancements 
 
