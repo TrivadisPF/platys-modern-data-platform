@@ -9180,6 +9180,37 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {#  MICROCKS_enable #}
 
+{% if OTEL_COLLECTOR_enable | default(false) %}
+  #  ======================= OpenTelemetry Collector ================= #
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib-dev:{{__OTEL_COLLECTOR_version}}
+    container_name: otel-collector
+    hostname: otel-collector
+    labels:
+      com.platys.name: "otel-collector"
+    ports:
+      - "4317:4317"        # OTLP gRPC receiver
+#      - "1888:1888"   # pprof extension
+      - "28261:8888"   # Prometheus metrics exposed by the collector
+      - "28262:8889"   # Prometheus exporter metrics
+      - "13133:13133" # health_check extension
+#      - "55670:55679" # zpages extension
+    {%if use_timezone | default(false) %}
+    environment:
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./config/otel-collector/config.yaml:/etc/otel-collector-config.yaml
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    command: ["--config=/etc/otel-collector-config.yaml", "--log-level debug"]
+    restart: {{container_restart_policy}}
+
+{% endif %}   {# OTEL_COLLECTOR_enable #}
+
 {% if ZIPKIN_enable | default(false) %}
   #  ================================== Zipkin ========================================== #
   zipkin:

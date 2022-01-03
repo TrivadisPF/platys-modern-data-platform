@@ -54,6 +54,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 4052 | 4052 | zeppelin (spark ui) |
 4053 | 4053 | zeppelin (spark ui) |
 4054 | 4054 | zeppelin (spark ui) |
+4317 | 4317 | otel-collector |
 5000 | 5000 | amundsenfrontend |
 5001 | 5000 | amundsensearch |
 5002 | 5000 | amundsenmetadata |
@@ -190,6 +191,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 10005 | 10000 | nifi |
 11211 | 11211 | memcached |
 11212 | 11211 | ignite-1 |
+13133 | 13133 | otel-collector |
 14271 | 14271 | jaeger (admin port) |
 15433 | 5433| yb-tserver-1 |
 15672 | 15672 | rabbitmq (ui) |
@@ -403,6 +405,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28258 | 3000 | burrow-ui |
 28259 | 80 | burrow-dashboard |
 28260 | 8000 | burrow |
+28261 | 8888 | otel-collector |
+28262 | 8889 | otel-collector |
 
 ## Ports > 28500
 
