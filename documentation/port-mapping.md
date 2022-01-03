@@ -73,6 +73,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 5673 | 5672 | rabbitmq (amqp) |
 5701 | 5701 | hazelcast	-1 | 
 5705 | 5701 | zeebe-1 | 
+5778 | 5778 | jaeger (config) |
 5800 | 5800 | filezilla | 
 5801 | 5800 | firefox | 
 5820 | 5820 | stardog-1 |
@@ -85,6 +86,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 6381 | 6379 | redis-replica-1 |
 6382 | 6379 | redis-replica-1 |
 6385 | 6379 | redash-redis |
+6831 | 6831 | jaeger (udp) |
+6832 | 6832 | jaeger (udp) |
 6875 | 6875 | materialize-1 |
 7000 | 7000 | yb-master |
 7050 | 7050 | kudu-tserver-1 |
@@ -162,7 +165,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 9099 | 9099 | kafka-8     |
 9393 | 9393 | spring-dataflow-server |
 9411 | 9411 | zipkin |
-9412 | 9412 | pitchfork |
+9412 | 9412 | jaeger |
+9413 | 9413 | pitchfork |
 9600 | 9600 | zeebe-1 |
 9851 | 9851 | tile38 |
 9870 | 9870 | namenode |
@@ -186,9 +190,11 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 10005 | 10000 | nifi |
 11211 | 11211 | memcached |
 11212 | 11211 | ignite-1 |
+14271 | 14271 | jaeger (admin port) |
 15433 | 5433| yb-tserver-1 |
 15672 | 15672 | rabbitmq (ui) |
 16379 | 6379| yb-tserver-1 |
+16686 | 16686 | jaeger |
 17200 | 7200 | graphdb-1 |
 17474 | 7474 | amundsen-neo4j |
 17687 | 7687 | amundsen-neo4j |

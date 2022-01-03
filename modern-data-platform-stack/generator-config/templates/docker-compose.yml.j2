@@ -315,6 +315,7 @@ networks:
 {% set __MICROCKS_version = MICROCKS_version | default('latest') -%}
 
 {% set __ZIPKIN_version = ZIPKIN_version | default('latest') -%}
+{% set __JAEGER_version = JAEGER_version | default('latest') -%}
 {% set __PITCHFORK_version = PITCHFORK_version | default('latest') -%}
 
 {% set __hw_arch = hw_arch | default('x86-64') -%}
@@ -521,6 +522,8 @@ networks:
   {% set POSTMAN_enable = false -%}
   {% set MICROCKS_enable = false -%}
   {% set ZIPKIN_enable = false -%}
+  {% set JAEGER_enable = false -%}
+  {% set PITCHFORK_enable = false -%}
   {% set CODE_SERVER_enable = false -%}
   {% set EXCALIDRAW_enable = false -%}
   {% set FIREFOX_enable = false -%}
@@ -9268,6 +9271,39 @@ services:
     restart: {{container_restart_policy}}
 
 {% endif %}   {# ZIPKIN_enable #}
+
+{% if JAEGER_enable | default(false) %}
+  #  ================================== Jaeger ========================================== #
+  jaeger:
+    image: jaegertracing/all-in-one:{{__JAEGER_version}}
+    container_name: jaeger
+    hostname: jaeger
+    labels:
+      com.platys.name: "jaeger"
+      com.platys.webui.title: "Jaeger UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:16686"
+      com.platys.restapi.title: "Jaeger Zipkin API"
+      com.platys.restapi.url: "http://${PUBLIC_IP}:{{JAEGER_zipkin_port}}/api/v2/spans"
+    ports:
+      - 16686:16686
+      - 14271:14271
+      - 5778:5778
+      - 6831:6831/udp
+      - 6832:6832/udp
+      - {{JAEGER_zipkin_port}}:{{JAEGER_zipkin_port}}
+    environment:
+      COLLECTOR_ZIPKIN_HOST_PORT: ":{{JAEGER_zipkin_port}}"
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+{% endif %}   {# JAEGER_enable #}
 
 {% if PITCHFORK_enable | default(false) %}
   #  =================== Pitchfork ================= #
