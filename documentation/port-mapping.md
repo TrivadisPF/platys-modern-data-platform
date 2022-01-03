@@ -192,6 +192,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 11211 | 11211 | memcached |
 11212 | 11211 | ignite-1 |
 13133 | 13133 | otel-collector |
+14250 | 14250 | jaeger (model.proto port)
 14271 | 14271 | jaeger (admin port) |
 15433 | 5433| yb-tserver-1 |
 15672 | 15672 | rabbitmq (ui) |
