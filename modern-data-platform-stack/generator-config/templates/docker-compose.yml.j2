@@ -8848,7 +8848,12 @@ services:
       com.platys.restapi.url: "http://${PUBLIC_IP}:28263/engine-rest"
     ports:
       - 28263:8080
-    restart: always
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
     mem_limit: 1g
     restart: {{container_restart_policy}}
 {% endif %}   {#  CAMUNDA_BPM_PLATFORM_enable #}
@@ -8877,6 +8882,7 @@ services:
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
+      - ./data-transfer:/data-transfer
       - ./conf/camunda-optimize/environment-config.yaml:/optimize/config/environment-config.yaml
       - ./custom-conf/camunda/CamundaLicense.txt:/optimize/config/OptimizeLicense.txt
       - ./plugins/optimize/sso-plugin-jar-with-dependencies.jar:/optimize/plugin/sso.jar
