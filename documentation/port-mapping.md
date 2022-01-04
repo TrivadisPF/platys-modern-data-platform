@@ -38,6 +38,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 3002 | 3000 | wetty (dc2 |
 3005 | 3000 | marquez-web |
 3010 | 3000 | postman |
+3030 | 3030 | lenses |
 3100 | 3100 | loki |
 3306 | 3306 | mysql |
 3307 | 3306 | datahub-mysql |
