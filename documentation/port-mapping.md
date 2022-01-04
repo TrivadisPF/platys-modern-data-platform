@@ -409,8 +409,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28260 | 8000 | burrow |
 28261 | 8888 | otel-collector |
 28262 | 8889 | otel-collector |
-28262 | 8090 | optimize |
-28262 | 8889 | bpm-platform |
+28263 | 8889 | bpm-platform |
+28264 | 8090 | optimize |
 
 ## Ports > 28500
 

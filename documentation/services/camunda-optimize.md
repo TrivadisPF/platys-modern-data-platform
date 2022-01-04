@@ -11,6 +11,12 @@ platys init --enable-services CAMUNDA_BPM_PLATFORM,CAMUNDA_OPTIMIZE,ELASTICSEARC
 platys gen
 ```
 
+```
+docker login registry.camunda.cloud
+
+docker-compose up -d
+```
+
 ## How to use it?
 
 Navigate to <http://dataplatform:28262>.

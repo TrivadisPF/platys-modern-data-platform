@@ -22,6 +22,9 @@ The Modern Data Platform version 1.14.0 contains the following bug fixes and enh
  * Pitchfork
  * Jaeger
  * OTEL Collector (OpenTelemetry)
+ * Camunda BPM Platform
+ * Camunda Optimize
+ * Lenses Box
 
 ### New Cookbook Recipes
 
