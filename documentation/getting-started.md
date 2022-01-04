@@ -215,7 +215,7 @@ Now we are ready to generate the platform. In the `platys-demo-platform` folder,
 platys gen -c ${PWD}/config.yml
 ```
 
-**Note:** Th useage of `-c ${PWD}/config.yml` is only needed with Platys CLI Version 2.4.1 and will be fixed with this issue: https://github.com/TrivadisPF/platys/issues/52
+**Note:** Usage of `-c ${PWD}/config.yml` is only necessary with Platys CLI Version 2.4.1 and will be fixed with this issue: https://github.com/TrivadisPF/platys/issues/52
 
 and you should see an output similar to this
 
