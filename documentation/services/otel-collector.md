@@ -15,3 +15,7 @@ platys gen
 
 OLTP receiver is listening on Port `4317` and recives data via gRPC or HTTP using [OTLP](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/protocol/otlp.md) format.
 
+```
+"-javaagent:/tmp/opentelemetry-javaagent.jar -Dotel.exporter.otlp.endpoint=otel-collector:4317"    
+```
+
