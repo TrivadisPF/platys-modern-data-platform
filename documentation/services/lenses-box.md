@@ -15,4 +15,4 @@ Add the `LENSES_BOX_license` property with the license information you have gott
 
 ## How to use it?
 
-Navigate to <http://dataplatform:3030>
+Navigate to <http://dataplatform:3030> and login with admin/admin.
