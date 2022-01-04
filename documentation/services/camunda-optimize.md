@@ -7,7 +7,7 @@ Get the insights you need to understand and continuously improve your business p
 ## How to enable?
 
 ```
-platys init --enable-services CAMUNDA_BPM_PLATFORM,CAMUNDA_OPTIMIZE
+platys init --enable-services CAMUNDA_BPM_PLATFORM,CAMUNDA_OPTIMIZE,ELASTICSEARCH
 platys gen
 ```
 
