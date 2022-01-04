@@ -28,7 +28,7 @@ networks:
 
 {% set __SCHEMA_REGISTRY_UI_version = SCHEMA_REGISTRY_UI_version | default('latest') -%}
 
-{% set __LENSES_version = LENSES_version | default('latest') -%}
+{% set __LENSES_BOX_version = LENSES_BOX_version | default('latest') -%}
 
 {% set __KCAT_version = KCAT_version | default('latest') -%}
 
@@ -417,7 +417,7 @@ networks:
   {% set APICURIO_SCHEMA_REGISTRY_enable = false -%}
   {% set KAFKA_REPLICATOR_enable = false -%}
   {% set KAFKA_MM2_enable = false -%}
-  {% set LENSES_enable = false -%}
+  {% set LENSES_BOX_enable = false -%}
   {% set KCAT_enable = false -%}
   {% set JIKKOU_enable = false -%}
   {% set KAFKA_UI_enable = false -%}
@@ -1518,23 +1518,26 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {# KAFKA_enable and KAFKA_MM2_enable #}
 
-{% if (LENSES_enable) | default(false) %}
-  #  ================================== Lenses  ========================================== #
-  lenses:
-    image: lensesio/box:{{__LENSES_version}}
-    container_name: lenses
-    hostname: lenses
+{% if (LENSES_BOX_enable) | default(false) %}
+  #  ================================== Lenses Box ========================================== #
+  lenses-box:
+    image: lensesio/box:{{__LENSES_BOX_version}}
+    container_name: lenses-box
+    hostname: lenses-box
     labels:
-      com.platys.name: "lenses"
-      com.platys.webui.title: 'Lenses UI'
+      com.platys.name: "lenses-box"
+      com.platys.webui.title: 'Lenses Box UI'
       com.platys.webui.url: "http://${PUBLIC_IP}:3030"
     ports:
       - 3030:3030
-      - 9092:9092
+      - 9192:9192
     environment:
-      ADV_HOST: ${PUBLIC_IP}
-      EULA: "https://licenses.lenses.io/download/lensesdl?id=4363d224-6d53-11ec-9ed6-42010af01003"
+      ADV_HOST: "${PUBLIC_IP}"
+      BORKER_PORT: 9192
+      EULA: "{{LENSES_BOX_license}}"
       SAMPLEDATA: 1
+      RUNNING_SAMPLEDATA: 1
+      BROWSECONFIGS: 1
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -1545,7 +1548,7 @@ services:
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
     restart: {{container_restart_policy}}
-{% endif %}   {# LENSES_enable #}
+{% endif %}   {# LENSES_BOX_enable #}
 
 {% if (KCAT_enable) | default(false) %}
   #  ================================== kcat (used to be kafkacat)  ========================================== #
