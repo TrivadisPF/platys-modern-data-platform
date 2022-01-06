@@ -40,6 +40,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 3010 | 3000 | postman |
 3030 | 3030 | lenses |
 3100 | 3100 | loki |
+3200 | 3200 | tempo |
 3306 | 3306 | mysql |
 3307 | 3306 | datahub-mysql |
 3838 | 3838 | shiny-server | 

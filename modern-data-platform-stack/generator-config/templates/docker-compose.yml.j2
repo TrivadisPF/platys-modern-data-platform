@@ -9445,6 +9445,10 @@ services:
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
     command: -config.file=/etc/loki/local-config.yaml
+    logging:
+      driver: loki
+      options:
+        loki-url: 'http://loki:3100/loki/api/v1/push'
     restart: {{container_restart_policy}}
 {% endif %}   {#  LOKI #}
 
@@ -9456,21 +9460,27 @@ services:
     container_name: tempo
     labels:
       com.platys.name: "tempo"
-      com.platys.webui.title: "Tempo UI"
-      com.platys.webui.url: "http://${PUBLIC_IP}:28265"
     ports:
-      - "28265:80"
+      - "3200:3200" # tempo
+      - "14268"     # jaeger ingest
+      - "55680"     # otlp grpc
+      - "55681"     # otlp http
+      - "9411"      # zipkin
     {%if use_timezone | default(false) %}
     environment:
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
+      - ./conf/tempo/tempo.yaml:/etc/tempo.yaml
+    {% if TEMPO_volume_map_data %}
+      - ./container-volume/tempo/data:/tmp/tempo
+    {% endif -%}   {#  TEMPO_volume_map_data #}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
-    command: ["--target=all", "--storage.trace.backend=local", "--storage.trace.local.path=/var/tempo", "--auth.enabled=false"]
+    command: ["--config.file=/etc/tempo.yaml", "--search-enabled=true"]
     restart: {{container_restart_policy}}
 
   tempo-query:
@@ -9498,7 +9508,7 @@ services:
     logging:
       driver: loki
       options:
-        loki-url: 'http://loki:3100/api/prom/push'
+        loki-url: 'http://loki:3100/loki/api/v1/push'
     #command: ["--grpc-storage-plugin.configuration-file=/etc/tempo-query.yaml"]
     restart: {{container_restart_policy}}
 {% endif %}   {#  TEMPO_enable #}
