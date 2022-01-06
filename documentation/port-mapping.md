@@ -412,6 +412,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28262 | 8889 | otel-collector |
 28263 | 8889 | bpm-platform |
 28264 | 8090 | optimize |
+28265 | 80 | tempo |
+28267 | 16686 | tempo (jaeger ui) |
 
 ## Ports > 28500
 

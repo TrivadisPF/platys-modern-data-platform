@@ -165,6 +165,7 @@ networks:
 
 {% set __PROMTAIL_version = PROMTAIL_version | default('latest') -%}
 {% set __LOKI_version = LOKI_version | default('latest') -%}
+{% set __TEMPO_version = TEMPO_version | default('latest') -%}
 
 {% set __GRAFANA_version = GRAFANA_version | default('latest') -%}
 
@@ -5069,86 +5070,6 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {#  KIE_SERVER_enable  #}
 
-{% if PROMTAIL_enable | default(false) %}
-  #  ================================== Promtail ========================================== #
-  promtail:
-    image: grafana/promtail:{{__PROMTAIL_version}}
-    hostname: promtail
-    container_name: promtail
-    labels:
-      com.platys.name: "promtail"
-    volumes:
-      - ./data-transfer:/data-transfer
-      - /var/lib/docker/containers:/var/lib/docker/containers:ro
-      - ./conf/promtail/promtail-config.yaml:/etc/promtail/config.yaml
-    {%if use_timezone | default(false) %}
-      - "./etc/timezone:/etc/timezone:ro"
-      - "./etc/localtime:/etc/localtime:ro"
-    {% endif -%}   {#  use_timezone #}
-    command: -config.file=/etc/promtail/config.yaml
-    restart: {{container_restart_policy}}
-{% endif %}   {#  PROMTAIL_enable  #}
-
-{% if LOKI_enable | default(false) %}
-  #  ================================== Grafana ========================================== #
-  loki:
-    image: grafana/loki:{{__LOKI_version}}
-    hostname: loki
-    container_name: loki
-    labels:
-      com.platys.name: "loki"
-      com.platys.webui.title: "Loki UI"
-      com.platys.webui.url: "http://${PUBLIC_IP}:3100"
-    expose:
-      - 3100
-    ports:
-      - "3100:3100"
-    {%if use_timezone | default(false) %}
-    environment:
-      - TZ={{use_timezone}}
-    {% endif -%}   {#  use_timezone #}
-    volumes:
-      - ./data-transfer:/data-transfer
-    {%if use_timezone | default(false) %}
-      - "./etc/timezone:/etc/timezone:ro"
-      - "./etc/localtime:/etc/localtime:ro"
-    {% endif -%}   {#  use_timezone #}
-    command: -config.file=/etc/loki/local-config.yaml
-    restart: {{container_restart_policy}}
-{% endif %}   {#  LOKI #}
-
-{% if GRAFANA_enable | default(false) %}
-  #  ================================== Grafana ========================================== #
-  grafana:
-    image: grafana/grafana:{{__GRAFANA_version}}
-    hostname: grafana
-    container_name: grafana
-    labels:
-      com.platys.name: "grafana"
-      com.platys.webui.title: "Grafana UI"
-      com.platys.webui.url: "http://${PUBLIC_IP}:3000"
-    expose:
-      - 3000
-    ports:
-      - "3000:3000"
-    environment:
-      - GF_INSTALL_PLUGINS=grafana-piechart-panel
-      - GF_SECURITY_ADMIN_USER=admin
-      - GF_SECURITY_ADMIN_PASSWORD={{admin_password}}
-      - GF_USERS_ALLOW_SIGN_UP=false
-    {%if use_timezone | default(false) %}
-      - TZ={{use_timezone}}
-    {% endif -%}   {#  use_timezone #}
-    volumes:
-      - ./data-transfer:/data-transfer
-      - ./plugins/grafana:/etc/grafana/provisioning
-    {%if use_timezone | default(false) %}
-      - "./etc/timezone:/etc/timezone:ro"
-      - "./etc/localtime:/etc/localtime:ro"
-    {% endif -%}   {#  use_timezone #}
-    restart: {{container_restart_policy}}
-{% endif %}   {#  GRAFANA_enable #}
-
 {% if METABASE_enable | default(false) %}
   #  ================================== Metabase ========================================== #
   metabase:
@@ -9298,7 +9219,7 @@ services:
       com.platys.name: "otel-collector"
     ports:
       - "4317:4317"        # OTLP gRPC receiver
-      - "4318:4318"        # OTLP gRPC receiver      
+      - "4318:4318"        # OTLP gRPC receiver
 #      - "1888:1888"   # pprof extension
       - "28261:8888"   # Prometheus metrics exposed by the collector
       - "28262:8889"   # Prometheus exporter metrics
@@ -9477,6 +9398,142 @@ services:
     {% endif -%}   {#  use_timezone #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  PITCHFORK_enable #}
+
+
+{% if PROMTAIL_enable | default(false) %}
+  #  ================================== Promtail ========================================== #
+  promtail:
+    image: grafana/promtail:{{__PROMTAIL_version}}
+    hostname: promtail
+    container_name: promtail
+    labels:
+      com.platys.name: "promtail"
+    volumes:
+      - ./data-transfer:/data-transfer
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - ./conf/promtail/promtail-config.yaml:/etc/promtail/config.yaml
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    command: -config.file=/etc/promtail/config.yaml
+    restart: {{container_restart_policy}}
+{% endif %}   {#  PROMTAIL_enable  #}
+
+{% if LOKI_enable | default(false) %}
+  #  ================================== Grafana ========================================== #
+  loki:
+    image: grafana/loki:{{__LOKI_version}}
+    hostname: loki
+    container_name: loki
+    labels:
+      com.platys.name: "loki"
+      com.platys.webui.title: "Loki UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:3100"
+    expose:
+      - 3100
+    ports:
+      - "3100:3100"
+    {%if use_timezone | default(false) %}
+    environment:
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    command: -config.file=/etc/loki/local-config.yaml
+    restart: {{container_restart_policy}}
+{% endif %}   {#  LOKI #}
+
+{% if TEMPO_enable | default(false) %}
+  #  ================================== Tempo ========================================== #
+  tempo:
+    image: ggrafana/tempo:{{__TEMPO_version}}
+    hostname: tempo
+    container_name: tempo
+    labels:
+      com.platys.name: "tempo"
+      com.platys.webui.title: "Tempo UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28265"
+    ports:
+      - "28265:80"
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    command: ["--target=all", "--storage.trace.backend=local", "--storage.trace.local.path=/var/tempo", "--auth.enabled=false"]
+    restart: {{container_restart_policy}}
+
+  tempo-query:
+    image: grafana/tempo-query:{{__TEMPO_version}}
+    hostname: tempo-query
+    container_name: tempo-query
+    labels:
+      com.platys.name: "tempo-query"
+      com.platys.webui.title: "Tempo Query UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28266"
+    ports:
+      - "28266:16686"  # jaeger-ui
+    environment:
+      BACKEND: tempo:80
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+#      - ./conf/tempo/tempo-query.yaml:/etc/tempo-query.yaml
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    logging:
+      driver: loki
+      options:
+        loki-url: 'http://loki:3100/api/prom/push'
+    #command: ["--grpc-storage-plugin.configuration-file=/etc/tempo-query.yaml"]
+    restart: {{container_restart_policy}}
+{% endif %}   {#  TEMPO_enable #}
+
+{% if GRAFANA_enable | default(false) %}
+  #  ================================== Grafana ========================================== #
+  grafana:
+    image: grafana/grafana:{{__GRAFANA_version}}
+    hostname: grafana
+    container_name: grafana
+    labels:
+      com.platys.name: "grafana"
+      com.platys.webui.title: "Grafana UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:3000"
+    expose:
+      - 3000
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_INSTALL_PLUGINS=grafana-piechart-panel
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD={{admin_password}}
+      - GF_USERS_ALLOW_SIGN_UP=false
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./plugins/grafana:/etc/grafana/provisioning
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  GRAFANA_enable #}
 
 {% if PORTAINER_enable | default(false) %}
   #  ================================== Portainer ========================================== #
