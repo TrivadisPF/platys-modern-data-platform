@@ -355,7 +355,6 @@ networks:
   {% set SCHEMA_REGISTRY_enable = true -%}
 {% endif -%}   {# KAFKA_SCHEMA_REGISTRY_enable #}
 
-
 {% if KAFKA_TOPICS_UI_enable -%}
 # enforce some dependencies
   {% set KAFKA_RESTPROXY_enable = true -%}
@@ -370,6 +369,11 @@ networks:
 # enforce some dependencies
   {% set SCHEMA_REGISTRY_enable = true -%}
 {% endif -%}   {# KAFKA_KSQLDB_enable #}
+
+{% if (SCHEMA_REGISTRY_enable and SCHEMA_REGISTRY_flavour | lower) == 'apicurio' and APICURIO_auth_enabled | default(false) -%}
+# enforce keycloak dependencies
+  {% set KEYCLOAK_enable = true -%}
+{% endif -%}   {# PLATFORM_ARM_enable #}
 
 {% if HUE_enable -%}
 # enforce some dependencies
@@ -1363,6 +1367,20 @@ services:
       REGISTRY_DATASOURCE_USERNAME: {{APICURIO_SCHEMA_REGISTRY_sql_storage_user}}
       REGISTRY_DATASOURCE_PASSWORD: {{APICURIO_SCHEMA_REGISTRY_sql_storage_password}}
     {% endif -%}   {#  APICURIO_SCHEMA_REGISTRY_storage == sql #}
+    {% if (APICURIO_auth_enabled | default(false) %}
+      AUTH_ENABLED: '{{APICURIO_auth_enabled}}'
+      KEYCLOAK_URL: 'http://${PUBLIC_IP}:28204/auth'
+      KEYCLOAK_REALM: 'registry'
+      KEYCLOAK_API_CLIENT_ID: 'registry-api'
+      KEYCLOAK_UI_CLIENT_ID: 'apicurio-registry'
+      REGISTRY_AUTH_ANONYMOUS_READ_ACCESS_ENABLED: 'True'
+      ROLE_BASED_AUTHZ_ENABLED: 'True'
+      ROLE_BASED_AUTHZ_SOURCE: 'token'
+#     OWNER_ONLY_AUTHZ_ENABLED
+#     REGISTRY_AUTH_ADMIN_OVERRIDE_ENABLED: 'True'
+#     REGISTRY_AUTH_ADMIN_OVERRIDE_ROLE: ''
+    {% endif -%}   {#  APICURIO_auth_enabled #}
+      CLIENT_CREDENTIALS_BASIC_AUTH_ENABLED: 'True'
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -4885,7 +4903,7 @@ services:
     volumes:
       - ./data-transfer:/data-transfer
     {% if SHINY_SERVER_volume_map_apps %}
-      - ./plugins/shiny-server/apps:/srv/shiny-server'
+      - ./plugins/shiny-server/apps:/srv/shiny-server
     {% endif -%}   {#  use_timezone #}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
@@ -9090,11 +9108,26 @@ services:
     environment:
       KEYCLOAK_USER: "admin"
       KEYCLOAK_PASSWORD: "admin"
-      KEYCLOAK_IMPORT: "/tmp/microcks-realm.json"
+      KEYCLOAK_IMPORT: "{{KEYCLOAK_import_realms}}"
       KEYCLOAK_FRONTEND_URL: "http://${PUBLIC_IP}:28204/auth"
+    {%if (KEYCLOAK_db_vendor | lower) == 'postgres' | default(false) %}
+      DB_VENDOR: postgres
+      DB_ADDR: postgresql
+      DB_DATABASE: keycloakdb
+      DB_USER: keycloak
+      DB_PASSWORD: abc123!
+    {% endif -%}   {#  KEYCLOAK_db_vendor #}
+    {%if (KEYCLOAK_db_vendor | lower) == 'mysql' | default(false) %}
+      DB_VENDOR: mysql
+      DB_ADDR: mysql
+      DB_DATABASE: keycloakdb
+      DB_USER: keycloak
+      DB_PASSWORD: abc123!
+    {% endif -%}   {#  KEYCLOAK_db_vendor #}
     volumes:
       - ./data-transfer:/data-transfer
-      - ./conf/keycloak/microcks-realm-sample.json:/tmp/microcks-realm.json
+#      - ./conf/keycloak/microcks-realm-sample.json:/tmp/microcks-realm.json
+      - ./conf/keycloak/apicurio-realm.json:/tmp/apicurio-realm.json
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
