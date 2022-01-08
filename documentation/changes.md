@@ -51,6 +51,7 @@ The Modern Data Platform version 1.14.0 contains the following bug fixes and enh
  * Update `Amundsen Frontend` to `4.0.0` and `Amundsen Search` to `3.0.0`
  * Update `InfluxDB 2` to `2.1.1`
  * Update `EventStore`to `21.10.1-buster-slim`
+ * Update `Keycloak` to `16.1.0`
  
 ### Breaking Changes
 
@@ -68,6 +69,7 @@ The Modern Data Platform version 1.14.0 contains the following bug fixes and enh
  * Apicurio Schema Registry as a drop-in replacement for the Confluent Schema Registry
  * All services in the Services List Markdown page (http://dataplatform/services) contain a link to their homepage
  * Configuration page also links to the serice homepage
+ * Support Authentication and Authorization in Apicurio Registry via Keycloak
 
 ### Bug Fixes 
 
