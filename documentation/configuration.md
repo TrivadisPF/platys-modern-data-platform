@@ -269,7 +269,7 @@ For each service there might be some other settings, such as controlling the num
 | [**_Keycloak_**](./services/keycloak.md)   &nbsp;&nbsp;&nbsp;&nbsp;![x86-64](./images/x86-64.png)                     	|         	|       	|                                                                                                                                                                                     	|        
 | `KEYCLOAK_enable`                             	| `false` 	| 1.14.0 	| Generate Keycloak service                                                                                                                                             	|
 | `KEYCLOAK_import_realms`                             	| `apicurio-realm.json` 	| 1.14.0 	| Comma-separated list of one or more realm files previously exported.                                                                                                                                     	|
-| `KEYCLOAK_db_vendor`                             	| `h2` 	| 1.14.0 	| The database to use, currently `postgres`, `h2` or `mysql` are supported by platys.                                                                                                                                     	|
+| `KEYCLOAK_db_vendor`                             	| `h2` 	| 1.14.0 	| The database to use, currently `postgres`, `h2`, `mssql` or `mysql` are supported by platys.                                                                                                                                     	|
 
 ### Data Ingestion & Data Integration
 
