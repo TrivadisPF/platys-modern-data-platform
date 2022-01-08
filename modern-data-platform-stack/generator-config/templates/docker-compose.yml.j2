@@ -1381,6 +1381,14 @@ services:
 #     REGISTRY_AUTH_ADMIN_OVERRIDE_ROLE: ''
 #     CLIENT_CREDENTIALS_BASIC_AUTH_ENABLED: 'True'
     {% endif -%}   {#  APICURIO_auth_enabled #}
+    {% if APICURIO_eventsourcing_enabled | default(false) %}
+      {% if (APICURIO_eventsourcing_type | lower) == 'kafka'  %}
+      KAFKA_BOOTSTRAP_SERVERS: '{{ns.bootstrapServers}}'
+      REGISTRY_EVENTS_KAFKA_TOPIC: '{{APICURIO_eventsourcing_kafka_topic}}'
+      {% else -%}   {#  APICURIO_eventsourcing_type #}
+      REGISTY_EVENTS_SINK_CONSUMER: '{{APICURIO_eventsourcing_http_endpoint}}'
+      {% endif -%}   {#  APICURIO_eventsourcing_type #}
+    {% endif -%}   {#  APICURIO_eventsourcing_enabled #}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
