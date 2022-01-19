@@ -960,8 +960,10 @@ services:
       # See https://docs.confluent.io/current/connect/security.html#externalizing-secrets
       CONNECT_CONFIG_PROVIDERS: '{{KAFKA_CONNECT_config_providers}}'
       CONNECT_CONFIG_PROVIDERS_{{KAFKA_CONNECT_config_providers | upper }}_CLASS: '{{KAFKA_CONNECT_config_providers_classes}}'
+    {% if OTEL_COLLECTOR_enable | default(false) %}
       OTEL_RESOURCE_ATTRIBUTES: 'service.name=connect'
       KAFKA_OPTS: '-javaagent:/tmp/opentelemetry-javaagent.jar -Dotel.exporter.otlp.endpoint=http://otel-collector:4317'
+    {% endif -%}
     {% if KAFKA_jmx_monitoring_prometheus_enable %}
       EXTRA_ARGS: -javaagent:/usr/share/jmx-exporter/jmx_prometheus_javaagent-0.12.0.jar=1234:/usr/share/jmx-exporter/kafka_connect.yml
     {% endif -%}
@@ -1049,9 +1051,10 @@ services:
       KSQL_BOOTSTRAP_SERVERS: '{{ns.bootstrapServers}}'
       KSQL_CACHE_MAX_BYTES_BUFFERING: 0
       KSQL_RESPONSE_HTTP_HEADERS_CONFIG: '{{KAFKA_KSQLDB_response_http_headers_config}}'
-
+    {% if OTEL_COLLECTOR_enable | default(false) %}
       OTEL_RESOURCE_ATTRIBUTES: 'service.name=ksqldb'
       KSQL_OPTS: '-javaagent:/tmp/opentelemetry-javaagent.jar -Dotel.exporter.otlp.endpoint=http://otel-collector:4317'
+    {% endif -%}   {#  OTEL_COLLECTOR_enable #}
     {% if external['KAFKA_enable'] | default(false) %}
       KSQL_SECURITY_PROTOCOL: SASL_SSL
       KSQL_SASL_MECHANISM: PLAIN
@@ -1315,8 +1318,10 @@ services:
       SCHEMA_REGISTRY_ACCESS_CONTROL_ALLOW_METHODS: 'GET,POST,PUT,OPTIONS'
       SCHEMA_REGISTRY_LOG4J_ROOT_LOGLEVEL: "{{CONFLUENT_SCHEMA_REGISTRY_log4j_root_loglevel}}"
       SCHEMA_REGISTRY_DEBUG: "{{CONFLUENT_SCHEMA_REGISTRY_debug}}"
+    {% if OTEL_COLLECTOR_enable | default(false) %}
       OTEL_RESOURCE_ATTRIBUTES: 'service.name=schema-registry'
       SCHEMA_REGISTRY_OPTS: '-javaagent:/tmp/opentelemetry-javaagent.jar -Dotel.exporter.otlp.endpoint=http://otel-collector:4317'
+    {% endif -%}
     {% if KAFKA_jmx_monitoring_prometheus_enable %}
       EXTRA_ARGS: -javaagent:/usr/share/jmx-exporter/jmx_prometheus_javaagent-0.12.0.jar=1234:/usr/share/jmx-exporter/confluent_schemaregistry.yml
     {% endif -%}
