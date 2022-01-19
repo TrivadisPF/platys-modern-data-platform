@@ -19,6 +19,6 @@ docker-compose up -d
 
 ## How to use it?
 
-Navigate to <http://dataplatform:28262>.
+Navigate to <http://dataplatform:28264> and login as user `demo` with password `demo`.
 
 
