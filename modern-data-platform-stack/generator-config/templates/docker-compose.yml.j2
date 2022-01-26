@@ -9722,7 +9722,7 @@ services:
 {% if PYTHON_enable | default(false) %}
   #  ================================== python ========================================== #
   python:
-    image: python:{{__PYTHON_VERSION}}
+    image: {{PYTHON_image}}:{{__PYTHON_VERSION}}
     container_name: python
     hostname: python
     labels:
@@ -9733,16 +9733,18 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
-    {% if PYTHON_script_folder is defined and PYTHON_script_folder|length %}
-      - {{PYTHON_script_folder}}:/tmp:ro
+    {% if PYTHON_artefact_folder is defined and PYTHON_artefact_folder|length %}
+      - {{PYTHON_artefact_folder}}:/tmp:ro
     {% endif %}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
-    {% if PYTHON_script is defined and PYTHON_script|length %}
-    command: ['python3', '/tmp/{{PYTHON_script}}']
-    {% endif %}
+    {% if PYTHON_requirements_file is defined and PYTHON_requirements_file|length %}
+        command: ['run_pip_and_python.sh', /tmp/{{PYTHON_requirements_file}}, '/tmp/{{PYTHON_script_file}}']
+    {% else %}
+        command: ['run_pip_and_python.sh', '', '/tmp/{{PYTHON_script_file}}']
+    {% endif %}   {#  PYTHON_requirements_file #}
     restart: {{container_restart_policy}}
 {% endif %}   {# PYTHON_enable #}
 
