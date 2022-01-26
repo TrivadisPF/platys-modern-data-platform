@@ -64,6 +64,7 @@ The Modern Data Platform version 1.14.0 contains the following bug fixes and enh
  * `KAFKA_BURROW_enable` renamed to `BURROW_enable`
  * `conf-override` renamed to `custom-conf` to better reflect the fact, that this folder is only for cusotmized configuration files which will not be overwritten when re-generating the platform
  * If manually copying Kafka Connect connectors, then no longer place them into `plugins/kafka-connect` but `plugins/kafka-connect/connectors`
+ * Rename of the `python` configuration settings (`PYTHON_artefacts_folder` and `PYTHON_script_file`)
 
 ### Enhancements 
 
@@ -71,6 +72,7 @@ The Modern Data Platform version 1.14.0 contains the following bug fixes and enh
  * All services in the Services List Markdown page (http://dataplatform/services) contain a link to their homepage
  * Configuration page also links to the serice homepage
  * Support Authentication and Authorization in Apicurio Registry via Keycloak
+ * Added support for PIP packages to be installed before running the `python` container
 
 ### Bug Fixes 
 
