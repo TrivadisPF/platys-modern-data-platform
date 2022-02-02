@@ -1,7 +1,7 @@
 ---
 technoglogies:      kafka,jikkou
 version:				1.14.0
-validated-at:			30.12.2021
+validated-at:			2.2.2022
 ---
 
 # Automate managment of Kafka topics on the platform
@@ -30,7 +30,7 @@ docker-compose up -d
 
 In this recipe we will create to topics
 
- * `topic-1` - with 8 partitoins, replication-factor 3 and min.insync.replicas = 2
+ * `topic-1` - with 8 paritions, replication-factor 3 and min.insync.replicas = 2
  * `topic-2` - with 1 partition, replication-factor 3 as a log-compacted topic
 
 In the `scripts/jikkou` folder, create a file named `topic-specs.yml` and add the following content
