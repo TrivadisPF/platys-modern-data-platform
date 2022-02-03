@@ -114,4 +114,4 @@ Starting markdown-renderer ... done
 
 As you can see, the `streamsets-1` container will be re-created, using the same `SDC ID` as before. 
 
-When reloading the StreamSets UI, you will have to re-active, but you can now use the exact same Activation Code as before. 
+When reloading the StreamSets UI, you will have to re-activate, but you can now use the exact same Activation Code as before. 
