@@ -53,6 +53,7 @@ The Modern Data Platform version 1.14.0 contains the following bug fixes and enh
  * Update `InfluxDB 2` to `2.1.1`
  * Update `EventStore`to `21.10.1-buster-slim`
  * Update `Keycloak` to `16.1.0`
+ * Update `Dremio` to `20.0`
  
 ### Breaking Changes
 
