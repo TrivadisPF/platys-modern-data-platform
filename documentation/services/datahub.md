@@ -13,4 +13,3 @@ platys gen
 
 ## How to use it?
 
-Navigate to <http://dataplatform:28144> and log in with user `datahub` and password `datahub`.
