@@ -3270,7 +3270,6 @@ services:
       - METADATA_AUDIT_EVENT_NAME=MetadataAuditEvent_v4
       - METADATA_CHANGE_EVENT_NAME=MetadataChangeEvent_v4
       - FAILED_METADATA_CHANGE_EVENT_NAME=FailedMetadataChangeEvent_v4
-      - GRAPH_SERVICE_IMPL={{DATAHUB_graph_service_impl}}
       - AUTH_POLICIES_ENABLED={{DATAHUB_auth_policies_enabled}}
     {%if (DATAHUB_graph_service_impl | lower) == 'neo4j'  | default(true) %}
       - NEO4J_HOST=http://datahub-neo4j:7474
@@ -3481,12 +3480,12 @@ services:
     ports:
       - "3307:3306"
     environment:
-      MYSQL_DATABASE: 'datahub'
-      MYSQL_USER: 'datahub'
-      MYSQL_PASSWORD: 'datahub'
-      MYSQL_ROOT_PASSWORD: 'datahub'
+      - MYSQL_DATABASE=datahub
+      - MYSQL_USER=datahub
+      - MYSQL_PASSWORD=datahub
+      - MYSQL_ROOT_PASSWORD=datahub
     {%if use_timezone | default(false) %}
-      TZ: {{use_timezone}}
+      - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
@@ -3606,13 +3605,13 @@ services:
     depends_on:
       - datahub-mysql
     environment:
-      MYSQL_HOST: datahub-mysql
-      MYSQL_PORT: 3306
-      MYSQL_USERNAME: datahub
-      MYSQL_PASSWORD: datahub
-      DATAHUB_DB_NAME: datahub
+      - MYSQL_HOST=datahub-mysql
+      - MYSQL_PORT=3306
+      - MYSQL_USERNAME=datahub
+      - MYSQL_PASSWORD=datahub
+      - DATAHUB_DB_NAME=datahub
     {%if use_timezone | default(false) %}
-      TZ: {{use_timezone}}
+      - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
@@ -3631,12 +3630,12 @@ services:
     depends_on:
       - datahub-elasticsearch
     environment:
-      ELASTICSEARCH_HOST: datahub-elasticsearch
-      ELASTICSEARCH_PORT: 9200
-      ELASTICSEARCH_PROTOCOL: http
-      DATAHUB_ANALYTICS_ENABLED: {{DATAHUB_use_analytics}}
+      - ELASTICSEARCH_HOST=datahub-elasticsearch
+      - ELASTICSEARCH_PORT=9200
+      - ELASTICSEARCH_PROTOCOL=http
+      - DATAHUB_ANALYTICS_ENABLED={{DATAHUB_use_analytics}}
     {%if use_timezone | default(false) %}
-      TZ: {{use_timezone}}
+      - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
@@ -3658,11 +3657,11 @@ services:
     environment:
       # The following settings are listed here only to satisfy the image's requirements.
       # We override the image's `command` anyways, hence this container will not start a broker.
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper-1:2181
-      KAFKA_BOOTSTRAP_SERVER: kafka-1:19092
-      DATAHUB_ANALYTICS_ENABLED: {{DATAHUB_use_analytics}}
+      - KAFKA_ZOOKEEPER_CONNECT=zookeeper-1:2181
+      - KAFKA_BOOTSTRAP_SERVER=kafka-1:19092
+      - DATAHUB_ANALYTICS_ENABLED={{DATAHUB_use_analytics}}
     {%if use_timezone | default(false) %}
-      TZ: {{use_timezone}}
+      - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
@@ -3679,7 +3678,7 @@ services:
       com.platys.name: "datahub"
     {%if use_timezone | default(false) %}
     environment:
-      TZ: {{use_timezone}}
+      - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
@@ -3703,7 +3702,7 @@ services:
     tty: true
     {%if use_timezone | default(false) %}
     environment:
-      TZ: {{use_timezone}}
+      TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
