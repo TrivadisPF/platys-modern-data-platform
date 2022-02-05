@@ -3264,6 +3264,7 @@ services:
       - ELASTICSEARCH_HOST=datahub-elasticsearch
       - ELASTICSEARCH_PORT=9200
       - JAVA_OPTS=-Xms1g -Xmx1g
+      - GRAPH_SERVICE_IMPL={{DATAHUB_graph_service_impl}}
       - ENTITY_REGISTRY_CONFIG_PATH=/datahub/datahub-gms/resources/entity-registry.yml
       - METADATA_AUDIT_EVENT_NAME=MetadataAuditEvent_v4
       - METADATA_CHANGE_EVENT_NAME=MetadataChangeEvent_v4
@@ -3351,7 +3352,7 @@ services:
       - ELASTIC_CLIENT_HOST=datahub-elasticsearch
       - ELASTIC_CLIENT_PORT=9200
       - METADATA_SERVICE_AUTH_ENABLED=false
-      - DATAHUB_ANALYTICS_ENABLED=true
+      - DATAHUB_ANALYTICS_ENABLED={{DATAHUB_use_analytics}}
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -3363,6 +3364,33 @@ services:
     {% endif -%}   {#  use_timezone #}
     restart: {{container_restart_policy}}
   {% endif -%}   {#  DATAHUB_use_react_ui #}
+
+  datahub-actions:
+    image: public.ecr.aws/datahub/acryl-datahub-actions:${ACTIONS_VERSION:-head}
+    hostname: datahub-actions
+    container_name: datahub-actions
+    labels:
+      com.platys.name: "datahub"
+    environment:
+      - GMS_HOST=datahub-gms
+      - GMS_PORT=8080
+      - KAFKA_BOOTSTRAP_SERVER=kafka-1:19092
+      - SCHEMA_REGISTRY_URL=http://schema-registry-1:8081
+      - METADATA_AUDIT_EVENT_NAME=MetadataAuditEvent_v4
+      - METADATA_CHANGE_LOG_VERSIONED_TOPIC_NAME=MetadataChangeLog_Versioned_v1
+      - DATAHUB_SYSTEM_CLIENT_ID=__datahub_system
+      - DATAHUB_SYSTEM_CLIENT_SECRET=JohnSnowKnowsNothing
+      - KAFKA_PROPERTIES_SECURITY_PROTOCOL=PLAINTEXT
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
 
   {%if DATAHUB_mae_consumer_standalone | default(true) %}
   datahub-mae-consumer:
@@ -3603,6 +3631,7 @@ services:
       ELASTICSEARCH_HOST: datahub-elasticsearch
       ELASTICSEARCH_PORT: 9200
       ELASTICSEARCH_PROTOCOL: http
+      DATAHUB_ANALYTICS_ENABLED: {{DATAHUB_use_analytics}}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -3628,6 +3657,7 @@ services:
       # We override the image's `command` anyways, hence this container will not start a broker.
       KAFKA_ZOOKEEPER_CONNECT: zookeeper-1:2181
       KAFKA_BOOTSTRAP_SERVER: kafka-1:19092
+      DATAHUB_ANALYTICS_ENABLED: {{DATAHUB_use_analytics}}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
