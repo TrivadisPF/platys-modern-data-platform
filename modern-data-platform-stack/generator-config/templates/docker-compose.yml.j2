@@ -3270,7 +3270,7 @@ services:
       - METADATA_AUDIT_EVENT_NAME=MetadataAuditEvent_v4
       - METADATA_CHANGE_EVENT_NAME=MetadataChangeEvent_v4
       - FAILED_METADATA_CHANGE_EVENT_NAME=FailedMetadataChangeEvent_v4
-      - AUTH_POLICIES_ENABLED={{DATAHUB_auth_policies_enabled}}
+      - AUTH_POLICIES_ENABLED={{DATAHUB_auth_policies_enabled | lower}}
     {%if (DATAHUB_graph_service_impl | lower) == 'neo4j'  | default(true) %}
       - NEO4J_HOST=http://datahub-neo4j:7474
       - NEO4J_URI=bolt://${PUBLIC_IP}:17688
@@ -3283,7 +3283,7 @@ services:
     {%if not DATAHUB_mce_consumer_standalone | default(true) %}
       - MCE_CONSUMER_ENABLED=true
     {% endif -%}   {#  not DATAHUB_mce_consumer_standalone #}
-      - DATAHUB_ANALYTICS_ENABLED={{DATAHUB_use_analytics}}
+      - DATAHUB_ANALYTICS_ENABLED={{DATAHUB_use_analytics | lower}}
       - ANALYTICS_ENABLED=false
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
@@ -3670,6 +3670,7 @@ services:
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
 
+  {%if DATAHUB_provision_sample_data %}
   datahub-ingestion:
     image: linkedin/datahub-ingestion:{{__DATAHUB_version}}
     hostname: datahub-ingestion
@@ -3691,6 +3692,7 @@ services:
     {% endif -%}   {#  use_timezone #}
     entrypoint: ["/tmp/wait-for-it.sh", "datahub-gms:8080", "--timeout=0", "--", "datahub"]
     command: "ingest -c /sample_recipe.yml"
+  {% endif -%}   {#  DATAHUB_provision_sample_data #}
 
   datahub-cli:
     image: linkedin/datahub-ingestion:{{__DATAHUB_version}}
