@@ -57,7 +57,37 @@ The Modern Data Platform version 1.14.0 contains the following bug fixes and enh
  * Update `Minio` to `RELEASE.2022-02-01T18-00-14Z`
  * Update `lakeFS` to `0.58.0`
  * Update `Vault` to `1.9.3`
- 
+ * Update `Ranger` to `2.2.0`
+ * Update `Materialize` to `v0.19.0`
+ * Update `kcat` to `1.7.1`
+ * Update `Debezium` to `1.8.0.Final`
+ * Update `Datastax` to `6.8.19`
+ * Update `Elasticsearch` to `7.17.0`
+ * Update `Node-RED` to `2.2.0`
+ * Update `Spring Dataflow` to `2.9.2` and `Skipper` to `2.8.2`
+ * Update `MLflow` to `1.23.1`
+ * Update `Optuna Dashboard` to `0.5.0`
+ * Update `Kie-Server` to `7.61.0.Final`
+ * Update `Grafana` to `8.3.4`
+ * Update `Kibana` to `7.17.0`
+ * Update `Memchached` to `1.6.13`
+ * Update `Solr` to `8.11` 
+ * Update `DGraph` to `v21.12.0`
+ * Update `Stardog` to `7.8.3-java11-preview`
+ * Update `GraphDB` to `9.10.1`
+ * Update `QuestDB` to `6.2`
+ * Update `Druid` to `0.22.1`
+ * Update `Pinot` to `0.9.3`
+ * Update `Prometheus` to `v2.33.1` and `pushgateway` to `v1.4.2` and `nodeexporter` to `v1.3.1`
+ * Update `Tile38` to `1.27.1`
+ * Update `Axon` to `4.5.10`
+ * Update `Hasura` to `v2.2.0`
+ * Update `Emq` to `4.3.11`
+ * Update `Cedalo Mgmt Center` to `2.2`
+ * Update `Thingsboard` to `3.3.3`
+ * Update `RabbitMQ` to `3.9-management`
+ * Update `Watchtower` to `1.4.0`
+
 ### Breaking Changes
 
  * InfluxDB is now listening on `19999` instead of `9999`
