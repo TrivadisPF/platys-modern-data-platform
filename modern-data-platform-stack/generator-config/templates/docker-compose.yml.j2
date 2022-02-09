@@ -7826,6 +7826,10 @@ services:
       POSTGRESQL_USER: {{POSTGRESQL_user | default('demo') }}
       POSTGRESQL_PASSWORD: {{POSTGRESQL_password | default('abc123!') }}
   {% endif %}
+  {% if ORACLE_EE_enable or ORACLE_XE_enable | default(false) %}
+      ORACLE_USER: {{TRINO_oracle_user | default('demo') }}
+      ORACLE_PASSWORD: {{TRINO_oracle_password | default('abc123!') }}
+  {% endif %}
       # this is only generated to keep the structure valid if no other env variables are present
       IGNORE: ignore
   {% if TRINO_event_listeners is defined and TRINO_event_listeners | length | default(false) %}
@@ -7855,6 +7859,9 @@ services:
   {% endif %}
   {% if POSTGRESQL_enable | default(false) %}
       - './conf/{{conf_dir}}/catalog/postgresql.properties:{{trino_etc_dir}}/catalog/postgresql.properties'
+  {% endif %}
+  {% if ORACLE_EE_enable or ORACLE_XE_enable | default(false) %}
+      - './conf/{{conf_dir}}/catalog/oracle.properties:{{trino_etc_dir}}/catalog/oracle.properties'
   {% endif %}
   {% if TRINO_event_listeners is defined and TRINO_event_listeners | length | default(false) %}
       - ./conf/trino/{{TRINO_event_listener}}.properties:/etc/trino/{{TRINO_event_listener}}.properties
