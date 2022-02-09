@@ -7828,10 +7828,12 @@ services:
   {% endif %}
       # this is only generated to keep the structure valid if no other env variables are present
       IGNORE: ignore
+  {% if TRINO_event_listener_config_files is defined and TRINO_event_listener_config_files|length | default(false)  %}
       EVENT_LISTENER_CONFIG_FILES: {{TRINO_event_listener_config_files}}
-    {%if use_timezone | default(false) %}
+  {% endif %}
+  {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
-    {% endif -%}   {#  use_timezone #}
+  {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
   {% if (TRINO_install | lower) == 'cluster'  %}
@@ -7854,9 +7856,9 @@ services:
   {% if POSTGRESQL_enable | default(false) %}
       - './conf/{{conf_dir}}/catalog/postgresql.properties:{{trino_etc_dir}}/catalog/postgresql.properties'
   {% endif %}
-      {% for eventlistener in TRINO_event_listeners.split(",") %}
+  {% for eventlistener in TRINO_event_listeners.split(",") %}
       - ./plugins/trino/{{eventlistener}}/:/usr/lib/trino/plugin/{{eventlistener}}/
-      {% endfor -%}
+  {% endfor -%}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
