@@ -7828,8 +7828,8 @@ services:
   {% endif %}
       # this is only generated to keep the structure valid if no other env variables are present
       IGNORE: ignore
-  {% if TRINO_event_listener_config_files is defined and TRINO_event_listener_config_files|length | default(false)  %}
-      EVENT_LISTENER_CONFIG_FILES: {{TRINO_event_listener_config_files}}
+  {% if TRINO_event_listeners is defined and TRINO_event_listeners | length | default(false) %}
+      EVENT_LISTENER_CONFIG_FILES: /etc/trino/{{TRINO_event_listener}}.properties
   {% endif %}
   {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
@@ -7856,7 +7856,11 @@ services:
   {% if POSTGRESQL_enable | default(false) %}
       - './conf/{{conf_dir}}/catalog/postgresql.properties:{{trino_etc_dir}}/catalog/postgresql.properties'
   {% endif %}
-#  {% for eventlistener in TRINO_event_listener_config_files.split(",") %}
+  {% if TRINO_event_listeners is defined and TRINO_event_listeners | length | default(false) %}
+      - ./conf/trino/{{TRINO_event_listener}}.properties:/etc/trino/{{TRINO_event_listener}}.properties
+      - ./plugins/trino/{{TRINO_event_listener}}/:/usr/lib/trino/plugin/{{TRINO_event_listener}}/
+  {% endif %}
+#  {% for eventlistener in TRINO_event_listeners.split(",") %}
 #      - ./plugins/trino/{{eventlistener}}/:/usr/lib/trino/plugin/{{eventlistener}}/
 #  {% endfor -%}
     {%if use_timezone | default(false) %}
