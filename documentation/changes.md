@@ -36,7 +36,7 @@ The Modern Data Platform version 1.14.0 contains the following bug fixes and enh
 ### Version upgrades
 
  * Update `DataHub` to `0.8.25`
- * Update `Trino` to `370`
+ * Update `Trino` to `371`
  * Update `Starburst Enterprise` to `369-e`
  * Update `Apache NiFi` to `1.15.0`
  * Update `Hasura` to `v2.0.0-beta.2`
