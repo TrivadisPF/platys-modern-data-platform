@@ -74,9 +74,9 @@ The URL by default is set to `https://eu01.hub.streamsets.com`. If you need anot
 
 ## Check the status in Streamsets DataOps Platform
 
-Click on **Check Engine Status after runing the script**, if you have not done it yet. 
+In StreamSets DataOps Platform screen, click on **Check Engine Status after runing the script**, if you have not done it yet. 
 
-![](images/new-deployment-3.png)
+![](images/new-deployment-4.png)
 
 Now generate and start the platform
 
@@ -90,7 +90,7 @@ docker-compose up -d
 
 In StreamSets DataOps Platform after a while you should get the following confirmation message.
 
-![](images/new-deployment-4.png)
+![](images/new-deployment-5.png)
 
 The engine running in docker has successfully connected to the StreamSets DataOps Platform. Click on **Close**.
 
