@@ -24,7 +24,7 @@ and you will get to the StreamSets DataOps homepage
 
 ![](images/homepage.png)
 
-## Create a StreamSets Data Collector engine
+## Create a StreamSets Data Collector deployment
 
 In the navigator to the left, click on **Set Up** and navigate to the **Environments** item. You should see a default Self-Managed environment **Default Self-Managed Environment**. We will use this and next create a deployment. 
 
@@ -32,7 +32,19 @@ Navigate to **Deployments** and click on the **Create deployment** link in the m
 
 ![](images/new-deployment.png)
 
-Scroll down and click on **Save & Next** and again **Save & Next**. Chose `Docker Image` for the **Install Type**. 
+Scroll down and click on **Save & Next**.
+
+On the next step, click on the link **3 stage libraries selected**
+
+![](images/new-deployment-1.png)
+
+to configure additional libraries to be installed. On the rigtht side, the installed stage libraries are shown, on the left side, the available stage libraries can be found. Install a library by clicking on the **+** icon.
+
+![](images/new-deployment-1a.png)
+
+Once you are finished, click on **OK** to go back the configuration of the deployment.
+
+Now click once again on **Save & Next**. Chose `Docker Image` for the **Install Type**. 
 
 ![](images/new-deployment-2.png)
 
