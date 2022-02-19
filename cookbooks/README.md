@@ -41,6 +41,11 @@ Inhere we are documenting cookbooks on how to use the platform:
    * [Support StreamSets Data Collector Activation](./recipes/streamsets-oss-activation/README.md) - `1.13.0` 
    * [Consume a binary file and send it as Kafka message](./recipes/streamsets-binary-file-to-kafka/README.md) 
    * [Using Dev Simulator Origin to simulate streaming data](./recipes/using-dev-simulator-origin/README.md) - `1.12.0` 
+   * [Loading Streamsets Pipeline(s) upon start of container](./recipes/streamsets-loading-pipelines/README.md) - `1.14.0` 
+
+ * **StreamSets DataOps Platform**
+   * [Creating a self-managed Environment using Platys](./recipes/streamsets-dataops-creating-environment/README.md) - `1.14.0` 
+   * 
  * **Kafka**
    * [Simulated Multi-DC Setup on one machine](./recipes/simulated-multi-dc-setup/README.md) 
  
