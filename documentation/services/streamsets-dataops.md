@@ -7,7 +7,7 @@ StreamSets DataOps Platform is a cloud-native platform for building, running, an
 ### How to enable
 
 ```
-platys init --enable-services STREAMSETS_CLOUD
+platys init --enable-services STREAMSETS_DATAOPS
 platys gen
 ```
 
