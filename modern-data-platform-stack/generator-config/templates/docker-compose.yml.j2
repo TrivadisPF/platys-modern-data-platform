@@ -9167,27 +9167,33 @@ services:
       - 8200:8200
     environment:
       - VAULT_ADDR=http://0.0.0.0:8200
+#      - VAULT_LOCAL_CONFIG='{"listener": [{"tcp":{"address": "0.0.0.0:8200","tls_disable":"0", "tls_cert_file":"/data/vault-volume/certificate.pem", "tls_key_file":"/data/vault-volume/key.pem"}}], "default_lease_ttl": "168h", "max_lease_ttl": "720h"}, "ui": true}'
       - VAULT_API_ADDR=http://0.0.0.0:8200
       - VAULT_ADDRESS=http://0.0.0.0:8200
+    {% if VAULT_use_dev_mode | default(false) %}
       - VAULT_DEV_LISTEN_ADDRESS=0.0.0.0:8200
       - VAULT_DEV_ROOT_TOKEN_ID=abc123!
+    {% endif -%}   {#  VAULT_use_dev_mode #}
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
       - ./conf/vault/config:/vault/config
-      - ./conf/vault/policies:/vault/policies
-    {% if VAULT_volume_map_data %}
+    {% if VAULT_use_dev_mode %}
       - "./container-volume/vault/data:/vault/data"
-    {% endif %}
+    {% endif %}   {#  VAULT_use_dev_mode #}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
     cap_add:
       - IPC_LOCK
+    {% if VAULT_use_dev_mode | default(false) %}
+    command: vault server -dev
+    {% else -%}
     command: vault server -config=/vault/config/vault.json
+    {% endif -%}   {#  VAULT_use_dev_mode #}
 {% endif %}   {#  VAULT_enable #}
 
 {% if KEYCLOAK_enable | default(false) %}
