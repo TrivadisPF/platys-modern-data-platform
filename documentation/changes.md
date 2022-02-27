@@ -25,14 +25,22 @@ The Modern Data Platform version 1.14.0 contains the following bug fixes and enh
  * Camunda BPM Platform
  * Camunda Optimize
  * Lenses Box
+ * Tempo & Tempo Query
+ * Promtail
 
 ### New Cookbook Recipes
 
  * [Apicurio Registry with SQL Storage (PostgreSQL)
 ](../cookbooks/recipes/apicurio-with-database-storage)
  * [Automate managment of Kafka topics on the platform](../cookbooks/recipes/jikkou-automate-kafka-topics-management/README.md)  
- * [Simulated Multi-DC Setup on one machine](../cookbooks/recipes/simulated-multi-dc-setup/README.md)  
+ * [Simulated Multi-DC Setup on one machine](../cookbooks/recipes/simulated-multi-dc-setup/README.md)
+ * [Creating a self-managed StreamSets DataOps Environment using Platys](../cookbooks/recipes/streamsets-dataops-creating-environment/README.md)
+ * [Loading Streamsets Pipeline(s) upon start of container](../cookbooks/recipes/streamsets-loading-pipelines/README.md)
+ * [Working with Tipboard and Kafka](../cookbooks/recipes/tipboard-and-kafka/README.md)
+ * [Querying data in Kafka from Trino (formerly PrestoSQL)](../cookbooks/recipes/querying-kafka-with-trino/README.md)
+ * [Using a Kafka Connect Connector not in Confluent Hub](../cookbooks/recipes/using-kafka-connector-not-in-confluent-hub/README.md)
 
+ 
 ### Version upgrades
 
  * Update `DataHub` to `0.8.25`
