@@ -51,7 +51,7 @@ Inhere we are documenting cookbooks on how to use the platform:
    * [Automate managment of Kafka topics on the platform](./recipes/jikkou-automate-kafka-topics-management/README.md) - `1.14.0` 
  
  * **Confluent Enterprise Platform**
-   * [Using Confluent Enterprise Tiered Storage](./recipes/confluent-tiered-storage/README.md) 
+   * [Using Confluent Enterprise Tiered Storage](./recipes/confluent-tiered-storage/README.md) - `1.13.0` 
 
  * **ksqlDB**
    * [Connecting through ksqlDB CLI](./recipes/connecting-through-ksqldb-cli/README.md)    
