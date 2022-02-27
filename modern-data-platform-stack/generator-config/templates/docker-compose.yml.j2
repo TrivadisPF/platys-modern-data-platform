@@ -763,7 +763,9 @@ services:
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
+    {%if LOKI_collect_docker_logs | default(false) %}
     <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
     restart: {{container_restart_policy}}
 
   zoonavigator-api:
@@ -786,7 +788,9 @@ services:
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
+    {%if LOKI_collect_docker_logs | default(false) %}
     <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
     restart: {{container_restart_policy}}
   {% endif %}   {# ZOOKEEPER_NAVIGATOR_enable #}
 
@@ -921,7 +925,9 @@ services:
     {% if KAFKA_use_kraft_mode %}
     command: "bash -c 'if [ ! -f /tmp/update_run.sh ]; then echo \"ERROR: Did you forget the update_run.sh file that came with this docker-compose.yml file?\" && exit 1 ; else /tmp/update_run.sh && /etc/confluent/docker/run ; fi'"
     {% endif %}
+    {%if LOKI_collect_docker_logs | default(false) %}
     <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
     restart: {{container_restart_policy}}
   {% endfor %} {# for serviceName in (ns.serviceNames) #}
 
@@ -1020,6 +1026,9 @@ services:
         #
         sleep infinity
     {% endif %}
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
     restart: {{container_restart_policy}}
   {% endfor %}
 {% endif %}   {# KAFKA_enable and KAFKA_CONNECT_enable  #}
@@ -1164,6 +1173,9 @@ services:
         #
         sleep infinity
     {% endif %}
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
     restart: {{container_restart_policy}}
   {% endfor %}
 
@@ -1211,6 +1223,9 @@ services:
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
     restart: {{container_restart_policy}}
 {% endif %}   {# MATERIALIZE_enable #}
 
@@ -9600,10 +9615,6 @@ services:
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
     command: -config.file=/etc/loki/local-config.yaml
-    logging:
-      driver: loki
-      options:
-        loki-url: 'http://host.docker.internal:3100/loki/api/v1/push'
     restart: {{container_restart_policy}}
 {% endif %}   {#  LOKI #}
 
