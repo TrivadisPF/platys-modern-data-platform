@@ -4,7 +4,7 @@ version:				1.14.0
 validated-at:			19.2.2022
 ---
 
-# Creating a self-managed Environment using Platys
+# Creating a self-managed StreamSets DataOps Environment using Platys
 
 This recipe will show how to create a self-managed environment for the [StreamSets DataOps Platform](https://streamsets.com/products/dataops-platform/). 
 
