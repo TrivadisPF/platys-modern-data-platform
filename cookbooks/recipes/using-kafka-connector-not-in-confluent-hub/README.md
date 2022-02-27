@@ -1,3 +1,9 @@
+---
+technoglogies:      kafka-connect,kafka
+version:				1.14.0
+validated-at:			27.2.2022
+---
+
 # Using a Kafka Connect Connector not in Confluent Hub
 
 This recipe will show how to use a Kafka Connect connector JAR which is not available in [Confluent Hub](https://www.confluent.io/hub). Popular connector not available there are the ones offered as the [Stream Reactor](https://github.com/lensesio/stream-reactor) project.

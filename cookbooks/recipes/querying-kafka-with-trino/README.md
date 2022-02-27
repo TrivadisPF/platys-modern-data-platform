@@ -1,6 +1,6 @@
 ---
 technoglogies:      trino,kafka
-version:				1.13.0
+version:				1.14.0
 validated-at:			18.11.2021
 ---
 
