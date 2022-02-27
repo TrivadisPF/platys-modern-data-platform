@@ -149,7 +149,7 @@ docker run -ti -v ${PWD}:/opt/adr trivadis/log4brains log4brains build
 After a while you should see the following output
 
 ```
-docker@ubuntu:~/platys-cookbook/adr$ docker run -ti -v ${PWD}:/opt/adr trivadis/log4brains log4brains build
+docker@ubuntu:~/platys-cookbook/adr$ docker run -ti -v "${PWD}":/opt/adr trivadis/log4brains log4brains build
 Building Log4brains...
 info  - Creating an optimized production build  
 info  - Collecting page data  
@@ -159,4 +159,4 @@ info  - Finalizing page optimization
  ✔  Your Log4brains static site was successfully generated to .log4brains/out with a total of 3 ADRs
 ```
 
-The static website is available in `.log4brains/out`. Consult the [Log4brains GitHub](https://github.com/thomvaill/log4brains#-cicd-configuration-examples) to see examples on how deploy it to various static hoting services.
+The static website is available in `.log4brains/out`. Consult the [Log4brains GitHub](https://github.com/thomvaill/log4brains#-cicd-configuration-examples) to see examples on how deploy it to various static hosting services.
