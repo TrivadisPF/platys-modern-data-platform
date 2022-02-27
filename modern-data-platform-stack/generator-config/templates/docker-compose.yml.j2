@@ -680,6 +680,16 @@ networks:
   {% endfor %}
 {% endif %}   {# KAFKA_CONNECT_enable or KAFKA_KSQLDB_use_embedded_connect #}
 
+{#  ================================== Extension Fields ========================================== #}
+
+x-logging: &logging
+  logging:
+    driver: loki
+    options:
+      loki-url: "http://localhost:3100/loki/api/v1/push"
+      loki-batch-size: "400"
+      loki-retries: "0"
+
 {#  ================================== Services ========================================== #}
 
 services:
@@ -753,6 +763,7 @@ services:
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
+    *logging
     restart: {{container_restart_policy}}
 
   zoonavigator-api:
@@ -775,6 +786,7 @@ services:
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
+    *logging
     restart: {{container_restart_policy}}
   {% endif %}   {# ZOOKEEPER_NAVIGATOR_enable #}
 
@@ -909,10 +921,7 @@ services:
     {% if KAFKA_use_kraft_mode %}
     command: "bash -c 'if [ ! -f /tmp/update_run.sh ]; then echo \"ERROR: Did you forget the update_run.sh file that came with this docker-compose.yml file?\" && exit 1 ; else /tmp/update_run.sh && /etc/confluent/docker/run ; fi'"
     {% endif %}
-    logging:
-      driver: loki
-      options:
-        loki-url: 'http://loki:3100/loki/api/v1/push'    
+    *logging
     restart: {{container_restart_policy}}
   {% endfor %} {# for serviceName in (ns.serviceNames) #}
 
@@ -9594,7 +9603,7 @@ services:
     logging:
       driver: loki
       options:
-        loki-url: 'http://loki:3100/loki/api/v1/push'
+        loki-url: 'http://host.docker.internal:3100/loki/api/v1/push'
     restart: {{container_restart_policy}}
 {% endif %}   {#  LOKI #}
 
@@ -9656,7 +9665,7 @@ services:
     logging:
       driver: loki
       options:
-        loki-url: 'http://loki:3100/loki/api/v1/push'
+        loki-url: 'http://host.docker.internal:3100/loki/api/v1/push'
     #command: ["--grpc-storage-plugin.configuration-file=/etc/tempo-query.yaml"]
     restart: {{container_restart_policy}}
   {% endif %}   {#  TEMPO_with_tempo_query #}
