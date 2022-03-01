@@ -352,4 +352,4 @@ At this point, you have seen the basics of how `platys` works using the `modern-
 
 * [Explore the full list of Platys commands](https://github.com/TrivadisPF/platys/tree/master/documentation/overview-platys-command.md)
 * [Modern Data Platform Stack configuration file reference](configuration.md)
-1.13.0
+1.14.0
