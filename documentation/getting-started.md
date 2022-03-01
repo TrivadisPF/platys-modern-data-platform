@@ -212,8 +212,10 @@ platys list_services --stack trivadis/platys-modern-data-platform --stack-versio
 Now we are ready to generate the platform. In the `platys-demo-platform` folder, run the following command:
 
 ```
-platys gen
+platys gen -c ${PWD}/config.yml
 ```
+
+**Note:** Usage of `-c ${PWD}/config.yml` is only necessary with Platys CLI Version 2.4.1 and will be fixed with this issue: https://github.com/TrivadisPF/platys/issues/52
 
 and you should see an output similar to this
 
@@ -350,4 +352,4 @@ At this point, you have seen the basics of how `platys` works using the `modern-
 
 * [Explore the full list of Platys commands](https://github.com/TrivadisPF/platys/tree/master/documentation/overview-platys-command.md)
 * [Modern Data Platform Stack configuration file reference](configuration.md)
-1.14.0
+
