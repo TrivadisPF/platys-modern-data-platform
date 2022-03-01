@@ -11,6 +11,9 @@ FROM python:3.8.0-alpine3.10
 # upgrade pip
 RUN python3 -m pip install --upgrade pip
 
+RUN apk add --no-cache gcc musl-dev python3-dev
+RUN pip install ruamel.yaml.clib
+
 # install docker-compose-templer
 RUN pip install docker-compose-templer && mkdir /opt/mdps-gen && chmod 777 -R /opt/mdps-gen
 
