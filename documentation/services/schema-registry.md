@@ -13,4 +13,6 @@ platys gen
 
 ## How to use it?
 
-
+```
+jq -n --slurpfile schema movies-raw.avsc  '$schema | {schema: tostring}' | curl -X POST -H "Content-Type: application/vnd.schemaregistry.v1+json" --data @- http://dataplatform:8081/subjects/movies-raw-value/versions  
+```

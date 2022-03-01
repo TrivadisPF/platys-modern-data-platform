@@ -1,7 +1,7 @@
 ---
 technoglogies:      trino,kafka
-version:				1.11.0
-validated-at:			21.3.2021
+version:				1.14.0
+validated-at:			18.11.2021
 ---
 
 # Querying data in Kafka from Trino (formerly PrestoSQL)
@@ -13,7 +13,7 @@ This recipe will show how to query data from a Kakfa topic using Trino. It is an
 First [initialise a platys-supported data platform](../../getting-started.md) with the following services enabled 
 
 ```bash
-platys init --enable-services TRINO,KAFKA,SCHEMA_REGISTRY,KAFKA_AKHQ,KAFKACAT,PROVISIONING_DATA -s trivadis/platys-modern-data-platform -w 1.11.0
+platys init --enable-services TRINO,KAFKA,SCHEMA_REGISTRY,KAFKA_AKHQ,KAFKACAT,PROVISIONING_DATA -s trivadis/platys-modern-data-platform -w 1.13.0
 ```
 
 add the follwing property to `config.yml`

@@ -15,4 +15,8 @@ platys gen
 
 Navigate to <http://dataplatform:28082>
 
+To connect over the CLI, use:
 
+```
+docker exec -it trino-cli trino --server trino-1:8080
+```

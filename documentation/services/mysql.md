@@ -13,3 +13,18 @@ platys gen
 
 ### Other links
 
+
+
+### Backup & Restore
+
+To backup a database perform
+
+```bash
+docker exec mysql /usr/bin/mysqldump -u root --password=root DATABASE > backup.sql
+```
+
+To restore from a backup, perform
+
+```bash
+cat backup.sql | docker exec -i mysql /usr/bin/mysql -u root --password=root DATABASE
+```

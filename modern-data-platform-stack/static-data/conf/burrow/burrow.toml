@@ -1,25 +1,43 @@
+[client-profile.platys]
+kafka-version="2.8.0"
+client-id="burrow-client"
+
+[cluster.local]
+client-profile="platys"
+class-name="kafka"
+servers=[ "kafka-1:19092","kafka-2:19093" ]
+topic-refresh=60
+offset-refresh=30
+groups-reaper-refresh=30
+
 [zookeeper]
 servers=[ "zookeeper-1:2181" ]
 timeout=6
 root-path="/burrow"
 
-[client-profile.myclient]
-kafka-version="2.1.0"
-client-id="burrow-myclient"
-
-[cluster.local]
-class-name="kafka"
-servers=[ "broker-1:9092" ]
-client-profile="myclient"
-topic-refresh=60
-offset-refresh=30
-
 [consumer.local]
 class-name="kafka"
+client-profile="platys"
 cluster="local"
-servers=[ "broker-1:9092" ]
-client-profile="myclient"
-group-whitelist=".*"
+servers=[ "kafka-1:19092" ]
+group-denylist="^(console-consumer-|python-kafka-consumer-).*$"
+group-allowlist=".*"
+
+[consumer.local_zk]
+class-name="kafka_zk"
+cluster="local"
+servers=[ "zookeeper-1:2181" ]
+zookeeper-path=""
+zookeeper-timeout=30
+group-denylist="^(console-consumer-|python-kafka-consumer-).*$"
+group-allowlist=""
 
 [httpserver.default]
 address=":8000"
+
+[storage.default]
+class-name="inmemory"
+workers=20
+intervals=15
+expire-group=604800
+min-distance=1

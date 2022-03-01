@@ -10,7 +10,7 @@ Inhere we are documenting cookbooks on how to use the platform:
    * [Trino, Spark and Delta Lake (Spark 3.0.1 & Delta Lake 0.7.0)](./recipes/delta-lake-and-trino-spark3.0/README.md) - `1.11.0`
    * [Querying S3 data (MinIO) using MinIO](./recipes/querying-minio-with-trino/README.md) - `1.11.0`
    * [Querying PostgreSQL data (MinIO) using MinIO](./recipes/querying-postgresql-with-trino/README.md) - `1.11.0`
-   * [Querying Kafka data using Trino](./recipes/querying-kafka-with-trino/README.md) - `1.11.0` 
+   * [Querying data in Kafka from Trino (formerly PrestoSQL)](./recipes/querying-kafka-with-trino/README.md) - `1.14.0` 
    * [Querying HDFS data using Trino](./recipes/querying-hdfs-with-presto/README.md) - `1.11.0`
    * Joining data between RDBMS and MinIO
 
@@ -38,23 +38,42 @@ Inhere we are documenting cookbooks on how to use the platform:
    * [Submit Spark Application over Livy](./recipes/run-spark-simple-app-scala-livy/README.md)
 
  * **StreamSets Data Collector**
-   * [Support StreamSets DataCollector Activation](./recipes/streamsets-oss-activation/README.md) - `1.13.0` 
+   * [Support StreamSets Data Collector Activation](./recipes/streamsets-oss-activation/README.md) - `1.13.0` 
    * [Consume a binary file and send it as Kafka message](./recipes/streamsets-binary-file-to-kafka/README.md) 
    * [Using Dev Simulator Origin to simulate streaming data](./recipes/using-dev-simulator-origin/README.md) - `1.12.0` 
+   * [Loading Streamsets Pipeline(s) upon start of container](./recipes/streamsets-loading-pipelines/README.md) - `1.14.0` 
 
+ * **StreamSets DataOps Platform**
+   * [Creating a self-managed StreamSets DataOps Environment using Platys](./recipes/streamsets-dataops-creating-environment/README.md) - `1.14.0` 
+   
+ * **Kafka**
+   * [Simulated Multi-DC Setup on one machine](./recipes/simulated-multi-dc-setup/README.md) - `1.14.0`  
+   * [Automate managment of Kafka topics on the platform](./recipes/jikkou-automate-kafka-topics-management/README.md) - `1.14.0` 
+ 
  * **Confluent Enterprise Platform**
-   * [Using Confluent Enterprise Tiered Storage](./recipes/confluent-tiered-storage/README.md) 
+   * [Using Confluent Enterprise Tiered Storage](./recipes/confluent-tiered-storage/README.md) - `1.13.0` 
 
  * **ksqlDB**
    * [Connecting through ksqlDB CLI](./recipes/connecting-through-ksqldb-cli/README.md)    
    * [Custom UDF and ksqlDB](./recipes/custom-udf-and-ksqldb/README.md)    
 
  * **Kafka Connect**
-   * [Using additional Kafka Connect Connector](./recipes/using-additional-kafka-connect-connector/README.md)    
+   * [Using additional Kafka Connect Connector](./recipes/using-additional-kafka-connect-connector/README.md) 
+   * [Using a Kafka Connect Connector not in Confluent Hub](./recipes/using-kafka-connector-not-in-confluent-hub/README.md) - `1.14.0` 
+
+ * **Apicurio Registry**
+   * [Apicurio Registry with SQL Storage (PostgreSQL)](./recipes/apicurio-with-database-storage/README.md) - `1.14.0` 
+
+ * **Jikkou**
+   * [Automate managment of Kafka topics on the platform](./recipes/jikkou-automate-kafka-topics-management/README.md)    
 
  * **Oracle RDMBS**
    * [Using private (Trivadis) Oracle EE image](./recipes/using-private-oracle-ee-image/README.md) - `1.13.0`    
    * [Using public Oracle XE image](./recipes/using-public-oracle-xe-image/README.md) - `1.13.0`    
 
+ * **Tipboard**
+   * [ Working with Tipboard and Kafka](./recipes/tipboard-and-kafka/README.md) - `1.14.0`    
+
  * **Architecture Decision Records (ADR)**
    * [Creating and visualizing ADRs with log4brains](./recipes/creating-adr-with-log4brains/README.md) - `1.12.0`    
+

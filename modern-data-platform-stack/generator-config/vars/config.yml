@@ -4,7 +4,7 @@
       platys:
         platform-name: 'platys-platform'
         platform-stack: 'trivadis/platys-modern-data-platform'
-        platform-stack-version: '1.13.0'
+        platform-stack-version: '1.14.0-preview'
         structure: 'flat'
 
       # ========================================================================
@@ -17,6 +17,10 @@
       # the UID to use when using the "user" property in a service to override the user inside the container
       uid: '1000'
 
+      data_centers: 'dc1,dc2'
+      data_center_to_use: 0
+
+      copy_cookbook_data_folder: true
 
       # ========================================================================
       # External Services
@@ -48,6 +52,7 @@
       ZOOKEEPER_enable: false
       ZOOKEEPER_volume_map_data: false
       ZOOKEEPER_nodes: 1            # either 1 or 3
+      ZOOKEEPER_node_first_port: 2181
 
       #
       # ===== Apache Zookeeper Navigator ========
@@ -61,8 +66,10 @@
       # one of enterprise, community
       KAFKA_edition: 'community'
       KAFKA_volume_map_data: false
+      KAFKA_use_standard_port_for_external_interface: true
       KAFKA_datacenters: 1
       KAFKA_broker_nodes: 3
+      KAFKA_broker_first_port: 9092
       KAFKA_use_kraft_mode: false
       KAFKA_internal_replication_factor: 3
       KAFKA_delete_topic_enable: true
@@ -90,27 +97,9 @@
       KAFKA_confluent_tier_fetcher_num_threads:
       KAFKA_confluent_tier_topic_delete_check_interval_ms:
       KAFKA_confluent_tier_metadata_replication_factor: 1
-
-      #
-      # ===== Confluent Schema Registry ========
-      #
-      KAFKA_SCHEMA_REGISTRY_enable: false
-      KAFKA_SCHEMA_REGISTRY_nodes: 1
-      KAFKA_SCHEMA_REGISTRY_use_zookeeper_election: false
-      KAFKA_SCHEMA_REGISTRY_group_id: schema-registry
-      KAFKA_SCHEMA_REGISTRY_replication_factor: 1
-      KAFKA_SCHEMA_REGISTRY_leader_eligibility: true
-      KAFKA_SCHEMA_REGISTRY_mode_mutability: true
-      # One of `none`, `backward`, `backward_transitive`, `forward`, `forward_transitive`, `full` or `full_transitive`.
-      KAFKA_SCHEMA_REGISTRY_schema_compatibility_level: backward
-      KAFKA_SCHEMA_REGISTRY_log4j_root_loglevel: info
-      KAFKA_SCHEMA_REGISTRY_debug: false
-
-      #
-      # ===== Apicurio Schema Registry ========
-      #
-      APICURIO_REGISTRY_enable: false
-      APICURIO_REGISTRY_nodes: 1
+      KAFKA_log4j_root_level: 'INFO'
+      KAFKA_log4j_loggers: ''   
+      KAFKA_tools_log4j_level: 'INFO' 
 
       #
       # ===== Kafka Connect ========
@@ -158,6 +147,57 @@
       KAFKA_REPLICATOR_enable: false
 
       #
+      # ===== Kafka Mirror Maker 2 ========
+      #
+      KAFKA_MM2_enable: false
+
+      #
+      # ===== Schema Registry ========
+      #
+      SCHEMA_REGISTRY_enable: false
+      # either "confluent", "apicurio"
+      SCHEMA_REGISTRY_flavour: confluent
+      SCHEMA_REGISTRY_nodes: 1
+
+      # ===== Confluent Schema Registry ========
+      CONFLUENT_SCHEMA_REGISTRY_use_zookeeper_election: false
+      CONFLUENT_SCHEMA_REGISTRY_group_id: schema-registry
+      CONFLUENT_SCHEMA_REGISTRY_replication_factor: 1
+      CONFLUENT_SCHEMA_REGISTRY_leader_eligibility: true
+      CONFLUENT_SCHEMA_REGISTRY_mode_mutability: true
+      # One of "none", "backward", "backward_transitive", "forward", "forward_transitive", "full" or "full_transitive".
+      CONFLUENT_SCHEMA_REGISTRY_schema_compatibility_level: backward
+      CONFLUENT_SCHEMA_REGISTRY_log4j_root_loglevel: info
+      CONFLUENT_SCHEMA_REGISTRY_debug: false
+
+      # ===== Apicurio Schema Registry ========
+      # either "mem","sql","kafkasql"
+      APICURIO_SCHEMA_REGISTRY_storage: kafkasql
+
+      APICURIO_SCHEMA_REGISTRY_sql_storage_database: apicuriodb
+      APICURIO_SCHEMA_REGISTRY_sql_storage_user: apicurio
+      APICURIO_SCHEMA_REGISTRY_sql_storage_password: abc123!
+
+      APICURIO_auth_enabled: false
+      APICURIO_auth_anonymous_read_access_enabled: false
+      APICURIO_auth_import_default_users: false
+      APICURIO_basic_auth_enabled: false
+
+      APICURIO_eventsourcing_enabled: false
+      # either 'http' or 'kafka'
+      APICURIO_eventsourcing_protocol: 'kafka'
+      APICURIO_eventsourcing_kafka_topic: 'registry-events'
+      APICURIO_eventsourcing_http_endpoint: ''
+      
+      
+      #
+      # ===== Schema Registry UI ========
+      #
+      SCHEMA_REGISTRY_UI_enable: false
+      SCHEMA_REGISTRY_UI_use_public_ip: true
+      SCHEMA_REGISTRY_UI_map_resolv_conf: true
+
+      #
       # ===== Confluent Rest Proxy ========
       #
       KAFKA_RESTPROXY_enable: false
@@ -169,16 +209,33 @@
       KAFKA_MQTTPROXY_topic_regex_list:
 
       #
+      # ===== Lenses ========
+      #
+      LENSES_BOX_enable: false
+      LENSES_BOX_license: ''
+
+      #
       # ===== kcat (used to be kafkacat) ========
       #
       KCAT_enable: false
 
       #
+      # ===== jikkou ========
+      #
+      JIKKOU_enable: false
+      JIKKOU_use_verbose_option: false
+      JIKKOU_use_delete_config_orphans_option: false
+      JIKKOU_use_delete_topic_orphans_option: false
+      JIKKOU_use_exclude_internals_option: true
+      JIKKOU_exclude_resources_regexp: ''
+      JIKKOU_include_resources_regexp: ''
+      JIKKOU_set_labels: ''
+      JIKKOU_set_variables: ''
+
+      #
       # ===== Various Kafka UIs ========
       #
-      KAFKA_SCHEMA_REGISTRY_UI_enable: false
-      KAFKA_SCHEMA_REGISTRY_UI_use_public_ip: true
-      KAFKA_SCHEMA_REGISTRY_UI_map_resolv_conf: true
+
       KAFKA_TOPICS_UI_enable: false
       KAFKA_TOPICS_UI_map_resolv_conf: true
       KAFKA_CONNECT_UI_enable: false
@@ -224,6 +281,16 @@
       KOWL_enable: false
 
       #
+      # ===== kouncil ========
+      #
+      KOUNCIL_enable: false
+
+      #
+      # ===== kafka magic ========
+      #
+      KAFKA_MAGIC_enable: false
+
+      #
       # ===== Streams Explorer UI ========
       #
       STREAMS_EXPLORER_enable: false
@@ -234,9 +301,16 @@
       KAFKA_LAG_EXPORTER_enable: false
 
       #
+      # ===== Remora ========
+      #
+      REMORA_enable: false
+
+      #
       # ===== Linkedin Burrow ========
       #
-      KAFKA_BURROW_enable: false
+      BURROW_enable: false
+      BURROW_UI_enable: false
+      BURROW_DASHBOARD_enable: false
 
       #
       # ===== Debezium Server ========
@@ -268,8 +342,8 @@
       SPARK_workers: 2
       # to restrict the default cores, use '-Dspark.deploy.defaultCores=6'
       SPARK_master_opts: ''
-      SPAKR_worker_cores:
-      SPAKR_worker_memory:
+      SPARK_worker_cores:
+      SPARK_worker_memory:
       SPARK_worker_opts: '-Dspark.worker.cleanup.enabled=true'
       SPARK_jars_repositories: ''
       SPARK_jars_packages: ''
@@ -289,7 +363,6 @@
       # ===== Apache Livy ========
       #
       LIVY_enable: false
-
 
       #
       # ===== Apache Flink ========
@@ -318,6 +391,11 @@
       HIVE_METASTORE_enable: false
 
       #
+      # ===== Apache Avro Tools ========
+      #
+      AVRO_TOOLS_enable: false
+
+      #
       # ===== Apache Ranger ========
       #
       RANGER_enable: false
@@ -340,10 +418,15 @@
       DATAHUB_use_react_ui: true
       DATAHUB_mce_consumer_standalone: false
       DATAHUB_mae_consumer_standalone: false
+      DATAHUB_auth_policies_enabled: true
       # one of "neo4j" or "elasticsearch"
       DATAHUB_graph_service_impl: neo4j
       DATAHUB_use_analytics: false
-      DATAHUB_use_kibana: true
+      DATAHUB_use_kibana: false
+      DATAHUB_provision_sample_data: false
+
+
+      DATAHUB_ACTIONS_enable: true
 
       #
       #===== Amundsen ========
@@ -383,6 +466,7 @@
       # https://streamsets.com/documentation/datacollector/latest/help/datacollector/UserGuide/Installation/AddtionalStageLibs.html
       STREAMSETS_stage_libs: ''
       STREAMSETS_enterprise_stage_libs: ''
+      STREAMSETS_jdbc_jars: ''
       STREAMSETS_install_pipelines: false
       # one of 'none', 'basic', 'digest', 'form' or 'aster'
       STREAMSETS_http_authentication: form
@@ -401,6 +485,14 @@
       STREAMSETS_EDGE_volume_map_data: false
 
       #
+      # =====  Streamsets DataOps Platform (Cloud) ========
+      #
+      STREAMSETS_DATAOPS_enable: false
+      STREAMSETS_DATAOPS_deployment_sch_url: 'https://eu01.hub.streamsets.com'
+      STREAMSETS_DATAOPS_deployment_id:
+      STREAMSETS_DATAOPS_deployment_token: 
+
+      #
       # ===== Apache NiFi ========
       #
       NIFI_enable: false
@@ -413,6 +505,11 @@
       # ===== Apache NiFi Registry ========
       #
       NIFI_REGISTRY_enable: false
+
+      #
+      # ===== Apache StreamPipes ========
+      #
+      STREAMPIPES_enable: false
 
       #
       # ===== Node Red  ========
@@ -514,9 +611,63 @@
       KIE_SERVER_enable: false
 
       #
+      # ===== OpenTelemetry Collector ========
+      #
+      OTEL_COLLECTOR_enable: false
+      OTEL_COLLECTOR_use_custom_conf: false
+
+      #
+      # ===== Zipkin ========
+      #
+      ZIPKIN_enable: false
+      # one of 'mem', 'mysql', 'cassandra3', 'elasticsearch'
+      ZIPKIN_storage_type: 'mem'
+      ZIPKIN_collect_kafka: false
+      ZIPKIN_debug: false
+      
+      #
+      # ===== Jaeger ========
+      #
+      JAEGER_enable: false
+      JAEGER_zipkin_port: 9412
+
+      #
+      # ===== Pitchfork ========
+      #
+      PITCHFORK_enable: false
+      PITCHFORK_server_port: 9413
+      PITCHFORK_use_logging: false
+      PITCHFORK_use_zipkin_http: false
+      PITCHFORK_use_haystack_kafka: false
+      PITCHFORK_haystack_kafka_topic: 'proto-spans'
+
+      #
+      # ===== Promtail ========
+      #
+      PROMTAIL_enable: false
+
+      #
+      # ===== Loki ========
+      #
+      LOKI_enable: false
+      LOKI_collect_docker_logs: false
+
+      #
+      # ===== Tempo ========
+      #
+      TEMPO_enable: false
+      TEMPO_volume_map_data: false
+      TEMPO_with_tempo_query: false
+      TEMPO_use_custom_conf: false
+
+      #
       # ===== Grafana ========
       #
       GRAFANA_enable: false
+      # list of preview features to enable (tempoSearch, tempoServiceGraph, ... see https://grafana.com/docs/grafana/latest/packages_api/data/featuretoggles/#featuretoggles-interface)
+      GRAFANA_feature_toggles: ''
+      # list of plugins to install (see here: https://grafana.com/grafana/plugins/) 
+      GRAFANA_install_plugins: 'grafana-piechart-panel'
 
       #
       # ===== Elastic Kibana ========
@@ -524,6 +675,18 @@
       KIBANA_enable: false #needs to have elasticsearch enabled to work
       # one of 'oss', 'elastic',
       KIBANA_edition: 'oss'
+
+      #
+      # ===== Metabase ========
+      #
+      METABASE_enable: false
+      METABASE_volume_map_data: false
+      # either h2 or postgres
+      METABASE_db_type: h2
+      METABASE_postgres_dbname: 'metabasedb'
+      METABASE_postgres_user: 'metabase'
+      METABASE_postgres_password: 'abc123!'
+
 
       #
       # ===== Superset ========
@@ -673,8 +836,14 @@
       # ===== Influx DB 2.x ========
       #
       INFLUXDB2_enable: false
+      INFLUXDB2_volume_map_config: false
       INFLUXDB2_volume_map_data: false
-
+      INFLUXDB2_username: influx
+      INFLUXDB2_password: abc123abc123!
+      INFLUXDB2_admin_token: 
+      INFLUXDB2_org: demo
+      INFLUXDB2_bucket: demo-bucket
+      
       #
       # ===== QuestDB ========
       #
@@ -813,6 +982,8 @@
       #
       HAZELCAST_enable: false
       HAZELCAST_nodes: 1
+      HAZELCAST_volume_map_custom_config: false
+      HAZELCAST_use_jet: true
       HAZELCAST_MC_enable: true
 
       #
@@ -843,6 +1014,9 @@
       # either starburstdata or oss
       TRINO_edition: 'starburstdata'
       TRINO_kafka_table_names: ''
+      TRINO_event_listener: ''
+      TRINO_oracle_user: ''
+      TRINO_oracle_password: ''
       
       # Trino-CLI is enabled by default
       TRINO_CLI_enable: true
@@ -970,6 +1144,10 @@
       #
       # ===== Camunda ========
       #
+      CAMUNDA_BPM_PLATFORM_enable: false
+
+      CAMUNDA_OPTIMIZE_enable: false
+
       CAMUNDA_ZEEBE_enable: false
       CAMUNDA_ZEEBE_volume_map_data: false
 
@@ -1008,12 +1186,16 @@
       # ===== Vault ========
       #
       VAULT_enable: false
+      VAULT_use_dev_mode: false
       VAULT_volume_map_data: false
 
       #
-      # ===== Keyclock ========
+      # ===== Keycloak ========
       #
-      KEYCLOCK_enable: false
+      KEYCLOAK_enable: false
+      KEYCLOAK_db_vendor: 'h2'
+      KEYCLOAK_import_realms: '/tmp/apicurio-realm.json'
+      KEYCLOAK_loglevel: 'INFO'
 
       #
       # ===== Swagger API Management ========
@@ -1031,15 +1213,6 @@
       #
       MICROCKS_enable: false
 
-      #
-      # ===== Zipkin ========
-      #
-      ZIPKIN_enable: false
-      # one of 'mem', 'mysql', 'cassandra3', 'elasticsearch'
-      ZIPKIN_storage_type: 'mem'
-      ZIPKIN_collect_kafka: false
-      ZIPKIN_debug: false
-      
       #
       # ===== Portainer Container UI ========
       #
@@ -1085,5 +1258,7 @@
       # ===== Python image ========
       #
       PYTHON_enable: false
-      PYTHON_script_folder: ''
-      PYTHON_script: ''
+      PYTHON_image: 'python'
+      PYTHON_artefacts_folder: ''
+      PYTHON_script_file: ''
+      PYTHON_requirements_file: ''

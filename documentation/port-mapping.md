@@ -1,4 +1,4 @@
-# `modern-data-platform` - Port Mappings - 1.13.0
+# `modern-data-platform` - Port Mappings - 1.14.0
 
 This table reserves the external ports for the various services. Not all services have to be used in the platform at a given time. But by reserving, we can assure that there are no conflicts if a service is added at a later time.
 
@@ -28,12 +28,19 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 1891 | 1883 | emqx-1 |
 2113 | 2113 | eventstore |
 2181 | 2181 | zookeeper-1 |
-2182 | 2181 | zookeeper-2 |
-2183 | 2181 | zookeeper-3 |
+2182 | 2182 | zookeeper-2 |
+2183 | 2183 | zookeeper-3 |
+2184 | 2184 | zookeeper-4 |
+2185 | 2185 | zookeeper-5 |
+2186 | 2186 | zookeeper-6 |
 3000 | 3000 | grafana |
-3001 | 3000 | wetty |
+3001 | 3000 | wetty (dc1) |
+3002 | 3000 | wetty (dc2 |
 3005 | 3000 | marquez-web |
 3010 | 3000 | postman |
+3030 | 3030 | lenses |
+3100 | 3100 | loki |
+3200 | 3200 | tempo |
 3306 | 3306 | mysql |
 3307 | 3306 | datahub-mysql |
 3838 | 3838 | shiny-server | 
@@ -49,6 +56,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 4052 | 4052 | zeppelin (spark ui) |
 4053 | 4053 | zeppelin (spark ui) |
 4054 | 4054 | zeppelin (spark ui) |
+4317 | 4317 | otel-collector |
 5000 | 5000 | amundsenfrontend |
 5001 | 5000 | amundsensearch |
 5002 | 5000 | amundsenmetadata |
@@ -68,6 +76,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 5673 | 5672 | rabbitmq (amqp) |
 5701 | 5701 | hazelcast	-1 | 
 5705 | 5701 | zeebe-1 | 
+5778 | 5778 | jaeger (config) |
 5800 | 5800 | filezilla | 
 5801 | 5800 | firefox | 
 5820 | 5820 | stardog-1 |
@@ -80,6 +89,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 6381 | 6379 | redis-replica-1 |
 6382 | 6379 | redis-replica-1 |
 6385 | 6379 | redash-redis |
+6831 | 6831 | jaeger (udp) |
+6832 | 6832 | jaeger (udp) |
 6875 | 6875 | materialize-1 |
 7000 | 7000 | yb-master |
 7050 | 7050 | kudu-tserver-1 |
@@ -103,8 +114,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 8051 | 8051 | kudo-master-1 |
 8070 | 8070 | nuclio |
 8080 | 8080 | spark-master |
-8081 | 8081 | schema-registry-1     |
-8082 | 8081 | schema-registry-2     |
+8081 | 8081 / 8080 | schema-registry-1 / apicurio-registry-1    |
+8082 | 8081 / 8080 | schema-registry-2 / apicurio-registry-2    |
 8083 | 8083 | connect-1 |
 8084 | 8084 | connect-2 |
 8085 | 8085 | connect-3 |
@@ -143,7 +154,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 9161 | 9160 | cassandra-2 |
 9162 | 9160 | cassandra-3 |
 9083 | 9083 | hive-metastore |
-9021 | 9021 | control-center | 
+9021 | 9021 | control-center (dc1) | 
+9022 | 9021 | control-center (dc2) | 
 9090 | 9090 | prometheus-1 |
 9091 | 9091 | prometheus-pushgateway |
 9092 | 9092 | kafka-1     |
@@ -152,8 +164,13 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 9095 | 9095 | kafka-4     |
 9096 | 9096 | kafka-5     |
 9097 | 9097 | kafka-6     |
+9098 | 9098 | kafka-7     |
+9099 | 9099 | kafka-8     |
+9192 | 9192 | lenses-box     |
 9393 | 9393 | spring-dataflow-server |
 9411 | 9411 | zipkin |
+9412 | 9412 | jaeger |
+9413 | 9413 | pitchfork |
 9600 | 9600 | zeebe-1 |
 9851 | 9851 | tile38 |
 9870 | 9870 | namenode |
@@ -169,16 +186,21 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 9995 | 9995 | kafka-4 (jmx) |
 9996 | 9996 | kafka-5 (jmx) |
 9997 | 9997 | kafka-6 (jmx) |
-9999 | 9999 | influxdb2 |
+9998 | 9998 | kafka-7 (jmx) |
+9999 | 9999 | kafka-8 (jmx) |
 10000 | 10000 | hive-server |
 10001 | 10001 | hive-server |
 10002 | 10002 | hive-server |
 10005 | 10000 | nifi |
 11211 | 11211 | memcached |
 11212 | 11211 | ignite-1 |
+13133 | 13133 | otel-collector |
+14250 | 14250 | jaeger (model.proto port)
+14271 | 14271 | jaeger (admin port) |
 15433 | 5433| yb-tserver-1 |
 15672 | 15672 | rabbitmq (ui) |
 16379 | 6379| yb-tserver-1 |
+16686 | 16686 | jaeger |
 17200 | 7200 | graphdb-1 |
 17474 | 7474 | amundsen-neo4j |
 17687 | 7687 | amundsen-neo4j |
@@ -207,9 +229,18 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 19200 | 9200 | elasticsearch-atlas |
 19201 | 9200 | amundsen-elasticsearch |
 19202 | 9200 | datahub-elasticsearch |
+19092 | 19092 | kafka-1 (docker-host)   |
+19093 | 19093 | kafka-2 (docker-host    |
+19094 | 19094 | kafka-3 (docker-host)   |
+19095 | 19095 | kafka-4 (docker-host)   |
+19096 | 19096 | kafka-5 (docker-host)   |
+19097 | 19097 | kafka-6 (docker-host)   |
+19098 | 19098 | kafka-7 (docker-host)   |
+19099 | 19099 | kafka-8 (docker-host)   |
 19630 | 19630 | streamsets-transformer-1 | 
 19631 | 19630 | streamsets-transformer-1 | 
 19632 | 19630 | streamsets-transformer-1 | 
+19999 | 9999 | influxdb2 |
 21000 | 21000 | atlas |
 26500 | 26500 | zeebe-1 |
 27017 | 27017 | mongodb-1 |
@@ -220,9 +251,6 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28082 | 8080 | trino-1 |
 28085 | 8080 | azkarra-worker-1 |
 28888 | 8888 | jupyter |
-29000 | 9000 | apicurio-registry-1 |
-29001 | 9000 | apicurio-registry-2 |
-29002 | 9000 | apicurio-registry-3 |
 29042 | 9042 | cassandra-1 |
 29043 | 9042 | cassandra-1 |
 29044 | 9042 | cassandra-1 |
@@ -232,8 +260,18 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 29095 | 29095 | kafka-4 (docker-host)   |
 29096 | 29096 | kafka-5 (docker-host)   |
 29097 | 29097 | kafka-6 (docker-host)   |
+29098 | 29098 | kafka-7 (docker-host)   |
+29099 | 29099 | kafka-8 (docker-host)   |
 31010 | 31010 | dremio |
-45678 | 45678 | dremio |
+39092 | 29092 | kafka-1 (localhost)   |
+39093 | 29093 | kafka-2 (localhost    |
+39094 | 29094 | kafka-3 (localhost)   |
+39095 | 29095 | kafka-4 (localhost)   |
+39096 | 29096 | kafka-5 (localhost)   |
+39097 | 29097 | kafka-6 (localhost)   |
+39098 | 29098 | kafka-7 (localhost)   |
+39099 | 29099 | kafka-8 (localhost)   |
+78 | 45678 | dremio |
 61613 | 61613 | activemq (stomp) |
 61614 | 61614 | activemq (ws) |
 61616 | 61616 | activemq (jms) |
@@ -246,13 +284,12 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28101 | 9010 | zoonavigator-api     |
 28102 | 8000 | schema-registry-ui   |
 28103 | 8000 | kafka-connect-ui     |
-28104 | 9000 | cmak |
-28105 | 9020 | kafdrop     |
+28104 | 9000 | cmak (dc1) |
+28105 | 9000 | cmak (dc2) |
 28106 | 8080 | kadmin     |
-28107 | 8080 | akhq     |
-28108 | 3000 | burrow-ui |
-28109 | 80 | burrow-dashboard |
-28110 | 8000 | burrow |
+28107 | 8080 | akhq (dc1)    |
+28107 | 8080 | akhq (dc2)     |
+28110 | 9020 | kafdrop     |
 28111 | 28111 | spark-worker-1 |
 28112 | 28112 | spark-worker-2 |
 28113 | 28113 | spark-worker-3 |
@@ -301,9 +338,6 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28159 | 8081 | quix-backend |
 28160 | 8081 | quix-frontend |
 28161 | 5000 | redash-server |
-28162 | 8080 | apicurio-registry-1 |
-28163 | 8080 | apicurio-registry-2 |
-28164 | 8080 | apicurio-registry-3 |
 28170 | 80 | stardog-studio |
 28171 | 3030 | smashing |
 28172 | 3030 | tipboard |
@@ -327,7 +361,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28201 | 1883 | thingsbaord (mqtt) |
 28202 | 5683 | thingsbaord (coap) |
 28203 | 8080 | microcks |
-28204 | 8080 | keyclock |
+28204 | 8080 | keycloak |
 28205 | 10000 | dataiku-dss |
 28206 | 3000 | postgrest |
 28207 | 8080 | operate |
@@ -367,7 +401,20 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28250 | 8888 | oracle-ee |
 28251 | 8888 | oracle-xe |
 28252 | 8888 | oracle-rest-1 |
-
+28253 | 8888 | kouncil |
+28254 | 80 | kafka-magic |
+28255 | 80 | streampipes-ui |
+28256 | 80 | remora |
+28257 | 80 | metabase |
+28258 | 3000 | burrow-ui |
+28259 | 80 | burrow-dashboard |
+28260 | 8000 | burrow |
+28261 | 8888 | otel-collector |
+28262 | 8889 | otel-collector |
+28263 | 8889 | bpm-platform |
+28264 | 8090 | optimize |
+28265 | 80 | tempo |
+28267 | 16686 | tempo (jaeger ui) |
 
 ## Ports > 28500
 

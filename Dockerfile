@@ -27,12 +27,13 @@ COPY ./modern-data-platform-stack/generator-config /opt/mdps-gen
 COPY ./modern-data-platform-stack/static-data /opt/mdps-gen/static-data
 
 # copy documentation folder, cookbooks and README
-COPY ./documentation /opt/mdps-gen/static-data/doc/documentation
-COPY ./cookbooks /opt/mdps-gen/static-data/doc/cookbooks
-COPY ./README.md /opt/mdps-gen/static-data/doc
+COPY ./documentation /opt/mdps-gen/static-data/artefacts/documentation
+COPY ./cookbooks /opt/mdps-gen/static-data/artefacts/cookbooks
+COPY ./README.md /opt/mdps-gen/static-data/artefacts
 
 # copy remove all .md extensions in links inside *.md files, as for the markdown viewer used the links only work without the extensions
-RUN find /opt/mdps-gen/static-data/doc/**.md -exec sed -i 's/.md)/)/g' {} \;
+WORKDIR /opt/mdps-gen/static-data/artefacts
+RUN find . -name "*.md" -exec sed -i 's/.md)/)/g' {} \;
 
 # copy the generator script and make it executable
 COPY ./modern-data-platform-stack/generate.sh /usr/local/bin/
