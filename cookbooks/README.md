@@ -1,5 +1,4 @@
-# Modern Data Platform Cookbooks
-
+# Modern Data Platform Cookbooks  - v1.15.0
 Inhere we are documenting cookbooks on how to use the platform:
 
  * **Airflow**
