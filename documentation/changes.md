@@ -115,6 +115,7 @@ The Modern Data Platform version 1.14.0 contains the following bug fixes and enh
  * Configuration page also links to the serice homepage
  * Support Authentication and Authorization in Apicurio Registry via Keycloak
  * Added support for PIP packages to be installed before running the `python` container
+ * Support sending docker logs to Grafana Loki
 
 ### Bug Fixes 
 
