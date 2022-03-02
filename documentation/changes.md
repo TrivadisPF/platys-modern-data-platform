@@ -2,6 +2,40 @@
 
 See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/platys/blob/master/documentation/upgrade-platform-stack.md) for how to upgrade to newer version.
 
+## What's new in 1.15.0
+
+The Modern Data Platform version 1.15.0 contains the following bug fixes and enhancements:
+
+### New Services
+
+ * 
+
+### New Cookbook Recipes
+
+ *
+ 
+### Version upgrades
+
+ * Update `Apache NiFi` to `1.15.3` and `Apache NiFi Registry` to `1.15.3`
+ * 
+ 
+### Breaking Changes
+
+ * 
+
+### Breaking Changes
+
+ * 
+
+### Enhancements 
+
+ * 
+
+### Bug Fixes 
+
+ * 
+
+
 ## What's new in 1.14.0
 
 The Modern Data Platform version 1.14.0 contains the following bug fixes and enhancements:
