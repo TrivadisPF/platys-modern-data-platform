@@ -4507,7 +4507,7 @@ services:
     {%if NIFI_create_cluster  | default(false) %}
       NIFI_CLUSTER_IS_NODE: 'true'
       NIFI_CLUSTER_NODE_PROTOCOL_PORT: 8082
-      NIFI_ZK_CONNECT_STRING: zookeeper-1:2181/nifi
+      NIFI_ZK_CONNECT_STRING: zookeeper-1:2181
       NIFI_ELECTION_MAX_WAIT: '1 min'
     {% endif -%}   {#  NIFI_create_cluster #}
       NIFI_WEB_HTTP_PORT: '8080'
@@ -4553,11 +4553,17 @@ services:
       - 19090:19090
     environment:
       NIFI_REGISTRY_WEB_HTTP_PORT: 19090
+      NIFI_REGISTRY_DB_DIR: '/opt/nifi-registry/nifi-registry-current/database'
+      NIFI_REGISTRY_FLOW_PROVIDER: file
+      NIFI_REGISTRY_FLOW_STORAGE_DIR: '/opt/nifi-registry/nifi-registry-current/flow_storage'
+      LOG_LEVEL: INFO
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
+      - ./container-volume/nifi_registry/database:/opt/nifi-registry/nifi-registry-current/database
+      - ./container-volume/nifi_registry/flow_storage:/opt/nifi-registry/nifi-registry-current/flow_storage
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
