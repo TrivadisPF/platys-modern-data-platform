@@ -191,7 +191,9 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 10000 | 10000 | hive-server |
 10001 | 10001 | hive-server |
 10002 | 10002 | hive-server |
-10005 | 10000 | nifi |
+10005 | 10000 | nifi-1 |
+10006 | 10000 | nifi-2 |
+10007 | 10000 | nifi-3 |
 11211 | 11211 | memcached |
 11212 | 11211 | ignite-1 |
 13133 | 13133 | otel-collector |
@@ -206,7 +208,9 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 17687 | 7687 | amundsen-neo4j |
 17475 | 7474 | datahub-neo4j |
 17688 | 7687 | datahub-neo4j |
-18080 | 18080 | nifi-1 |
+18080 | 8080 | nifi-1 |
+18081 | 8080 | nifi-2 |
+18082 | 8080 | nifi-3 |
 18088 | 8088 | resourcemanager |
 18042 | 8042 | nodemanager |
 18083 | 8083 | replicator-1 |
