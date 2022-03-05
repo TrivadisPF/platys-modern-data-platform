@@ -344,10 +344,10 @@ networks:
   {% set ZOOKEEPER_enable = true -%}
 {% endif -%}   {# KAFKA_enable or ATLAS_enable or DATAHUB_enable #}
 
-{% if (NIFI_enable and NIFI_nodes > 1) -%}
+{% if (NIFI_enable and NIFI_create_cluster) -%}
 # enforce some dependencies
   {% set ZOOKEEPER_enable = true -%}
-{% endif -%}   {# NIFI_enable and NIFI_nodes > 1 #}
+{% endif -%}   {# NIFI_enable and NIFI_create_cluster #}
 
 {% if KAFKA_jmx_monitoring_prometheus_enable -%}
 # enforce some dependencies
@@ -4487,10 +4487,10 @@ services:
 
 {%if NIFI_enable | default(false) %}
   #  ================================== NiFi ========================================== #
-  {% for num in range(NFI_nodes | default('1') ) %}
+  {% for num in range(NIFI_nodes | default('1') ) %}
     {% set externalPort = 18080 + loop.index-1 %}
     {% set externalRemotePort = 10005 + loop.index-1 %}
-  nfif-{{loop.index}}:
+  nifi-{{loop.index}}:
     image: apache/nifi:{{__NIFI_version}}
     container_name: nifi-{{loop.index}}
     hostname: nifi-{{loop.index}}
@@ -4504,12 +4504,12 @@ services:
       # Remote Input Socket
       - {{externalRemotePort}}:10000/tcp
     environment:
-    {%if NFI_nodes > 1 | default(false) %}
+    {%if NIFI_create_cluster  | default(false) %}
       NIFI_CLUSTER_IS_NODE: 'true'
       NIFI_CLUSTER_NODE_PROTOCOL_PORT: 8082
       NIFI_ZK_CONNECT_STRING: zookeeper-1:2181/nifi
       NIFI_ELECTION_MAX_WAIT: '1 min'
-    {% endif -%}   {#  use_timezone #}
+    {% endif -%}   {#  NIFI_create_cluster #}
       NIFI_WEB_HTTP_PORT: '8080'
       NIFI_JVM_HEAP_INIT: {{ NIFI_jvm_heap_init if NIFI_jvm_heap_init is defined and NIFI_jvm_heap_init != None else omit }}
       NIFI_JVM_HEAP_MAX: {{ NIFI_jvm_heap_max if NIFI_jvm_heap_max is defined and NIFI_jvm_heap_max != None else omit }}
