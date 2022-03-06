@@ -28,6 +28,7 @@ The Modern Data Platform version 1.15.0 contains the following bug fixes and enh
 ### Enhancements 
 
  * Add support for Nifi Cluster (setting the new config seeting `NIFI_create_cluster` to `true`
+ * Apache NiFi is now secure by default, so you have to use https to get to the UI and then authenticate using the user and password specified.
  
 ### Bug Fixes 
 
