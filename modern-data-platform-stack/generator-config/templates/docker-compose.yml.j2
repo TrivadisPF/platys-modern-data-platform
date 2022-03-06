@@ -4498,11 +4498,10 @@ services:
     labels:
       com.platys.name: 'nifi'
       com.platys.webui.title: "Apache NiFi UI Node {{externalPort}}"
-      com.platys.webui.url: "http://${PUBLIC_IP}:{{externalPort}}/nifi"
-      com.platys.webui.url: "https://${PUBLIC_IP}:{{externalPort}}/nifi"
+      com.platys.webui.url: "http{{ 's' if NIFI_run_secure}}://${PUBLIC_IP}:{{externalPort}}/nifi"
     ports:
       # HTTP
-      - "{{externalPort}}:8080"
+      - "{{externalPort}}:{{externalPort}}"
       # Remote Input Socket
       - {{externalRemotePort}}:10000/tcp
     environment:
@@ -4513,10 +4512,11 @@ services:
       NIFI_ZK_ROOT_NODE: '/nifi'
       NIFI_ELECTION_MAX_WAIT: '{{NIFI_election_max_wait}}'
     {% endif -%}   {#  NIFI_create_cluster #}
-    {%if NIFI_run_unsecure  | default(false) %}
-      NIFI_WEB_HTTP_PORT: '8080'
+    {%if NIFI_run_secure  | default(false) %}
+      NIFI_WEB_HTTPS_HOST: '${PUBLIC_IP}'
+      NIFI_WEB_HTTPS_PORT: '{{externalPort}}'
     {% else -%}
-      NIFI_WEB_HTTPS_PORT: '8080'
+      NIFI_WEB_HTTP_PORT: '{{externalPort}}'
     {% endif -%}   {#  NIFI_run_unsecure #}
       NIFI_JVM_HEAP_INIT: {{ NIFI_jvm_heap_init if NIFI_jvm_heap_init is defined and NIFI_jvm_heap_init != None else omit }}
       NIFI_JVM_HEAP_MAX: {{ NIFI_jvm_heap_max if NIFI_jvm_heap_max is defined and NIFI_jvm_heap_max != None else omit }}
