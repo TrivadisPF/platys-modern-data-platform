@@ -4491,6 +4491,7 @@ services:
   {% for num in range(NIFI_nodes | default('1') ) %}
     {% set externalPort = 18080 + loop.index-1 %}
     {% set externalRemotePort = 10005 + loop.index-1 %}
+    {% set clusterPort = 11005 + loop.index-1 %}
   nifi-{{loop.index}}:
     image: apache/nifi:{{__NIFI_version}}
     container_name: nifi-{{loop.index}}
@@ -4503,11 +4504,12 @@ services:
       # HTTP
       - "{{externalPort}}:{{externalPort}}"
       # Remote Input Socket
-      - {{externalRemotePort}}:10000/tcp
+      - {{externalRemotePort}}:{{externalRemotePort}}/tcp
     environment:
     {%if NIFI_create_cluster  | default(false) %}
       NIFI_CLUSTER_IS_NODE: 'true'
-      NIFI_CLUSTER_NODE_PROTOCOL_PORT: 8082
+      NIFI_CLUSTER_ADDRESS: 'nifi-{{loop.index}}'
+      NIFI_CLUSTER_NODE_PROTOCOL_PORT: {{clusterPort}}
       NIFI_ZK_CONNECT_STRING: zookeeper-1:2181
       NIFI_ZK_ROOT_NODE: '/nifi'
       NIFI_ELECTION_MAX_WAIT: '{{NIFI_election_max_wait}}'
@@ -4518,6 +4520,7 @@ services:
     {% else -%}
       NIFI_WEB_HTTP_PORT: '{{externalPort}}'
     {% endif -%}   {#  NIFI_run_unsecure #}
+      NIFI_REMOTE_INPUT_SOCKET_PORT: '{{externalRemotePort}}'
       NIFI_JVM_HEAP_INIT: {{ NIFI_jvm_heap_init if NIFI_jvm_heap_init is defined and NIFI_jvm_heap_init != None else omit }}
       NIFI_JVM_HEAP_MAX: {{ NIFI_jvm_heap_max if NIFI_jvm_heap_max is defined and NIFI_jvm_heap_max != None else omit }}
       NIFI_SENSITIVE_PROPS_KEY: '12345678901234567890A'
