@@ -4517,10 +4517,20 @@ services:
     {%if NIFI_run_secure  | default(false) %}
       NIFI_WEB_HTTPS_PORT: '{{externalPort}}'
       NIFI_WEB_PROXY_HOST: '${PUBLIC_IP}:{{externalPort}},${DOCKER_HOST_IP}{{externalPort}}'
+      AUTH: tls
+      KEYSTORE_PATH: /opt/certs/keystore.jks
+      KEYSTORE_TYPE: JKS
+      KEYSTORE_PASSWORD: '+4JF4Bb7gESv0nhOygX5e5Q4hUInVldgN+10ZAXp5Iw'
+      TRUSTSTORE_PATH: /opt/certs/truststore.jks
+      TRUSTSTORE_TYPE: JKS
+      TRUSTSTORE_PASSWORD: '24hJSDSg3TE8XbNmFU5bz4dUmq4Aipk9YRNgdEV85/k'
+      NIFI_SECURITY_USER_AUTHORIZER: single-user-authorizer
+      NIFI_SECURITY_USER_LOGIN_IDENTITY_PROVIDER: single-user-provider
     {% else %}
       NIFI_WEB_HTTP_PORT: '{{externalPort}}'
     {% endif -%}   {#  NIFI_run_unsecure #}
       NIFI_REMOTE_INPUT_SOCKET_PORT: '{{externalRemotePort}}'
+      NIFI_REMOTE_INPUT_HOST: 'nifi-{{loop.index}}'
       NIFI_JVM_HEAP_INIT: {{ NIFI_jvm_heap_init if NIFI_jvm_heap_init is defined and NIFI_jvm_heap_init != None else omit }}
       NIFI_JVM_HEAP_MAX: {{ NIFI_jvm_heap_max if NIFI_jvm_heap_max is defined and NIFI_jvm_heap_max != None else omit }}
       NIFI_SENSITIVE_PROPS_KEY: '12345678901234567890A'
@@ -4531,6 +4541,8 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
+      - ./conf/nifi/keystore.jks:/opt/certs/keystore.jks
+      - ./conf/nifi/truststore.jks:/opt/certs/truststore.jks
     {% if NIFI_volume_map_data %}
       - ./container-volume/nifi-{{loop.index}}/database_repository:/opt/nifi/nifi-current/database_repository
       - ./container-volume/nifi-{{loop.index}}/flowfile_repository:/opt/nifi/nifi-current/flowfile_repository
