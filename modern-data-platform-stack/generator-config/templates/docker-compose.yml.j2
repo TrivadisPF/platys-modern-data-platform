@@ -126,6 +126,7 @@ networks:
 
 {% set __NIFI_version = NIFI_version | default('latest') -%}
 {% set __NIFI_REGISTRY_version = NIFI_REGISTRY_version | default('latest') -%}
+{% set __MONITOFI_version = MONITOFI_version | default('latest') -%}
 
 {% set __STREAMPIPES_version = STREAMPIPES_version | default('latest') -%}
 
@@ -4592,6 +4593,34 @@ services:
     {% endif -%}   {#  LOKI_collect_docker_logs #}
     restart: {{container_restart_policy}}
   {% endif %}   {#  NIFI_REGISTRY_enable  #}
+
+  {%if MONITOFI_enable | default(false) %}
+  #  ================================== MonitoFi ========================================== #
+  monitofi:
+    image: dtushar/monitofi:{{__MONITOFI_version}}
+    container_name: monitofi
+    hostname: monitofi
+    environment:
+      INFLUXDB_SERVER: influxdb
+      ENDPOINT_LIST: 'controller/cluster,flow/cluster/summary,flow/process-groups/root,flow/status,counters,system-diagnostics'
+      SLEEP_INTERVAL: 300
+      API_URL: 'http://nifi-1:8080/nifi-api/'
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    restart: {{container_restart_policy}}
+  {% endif %}   {#  MONITOFI_enable  #}
+{% endif %}   {#  NIFI_enable  #}
+
 {%if STREAMPIPES_enable | default(false) %}
   #  ================================== Apache StreamPipes ========================================== #
   backend:
