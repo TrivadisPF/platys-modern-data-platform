@@ -125,7 +125,7 @@ networks:
 {% set __STREAMSETS_DATAOPS_version = STREAMSETS_DATAOPS_version | default('latest') -%}
 
 {% set __NIFI_version = NIFI_version | default('latest') -%}
-{% set __NIFI_REGISTRY_version = NIFI_REGISTRY_version | default('latest') -%}
+{% set __NIFI_REGISTRY_version = GISTRY_version | default('latest') -%}
 
 {% set __STREAMPIPES_version = STREAMPIPES_version | default('latest') -%}
 
@@ -4551,11 +4551,18 @@ services:
       com.platys.webui.url: "http://${PUBLIC_IP}:19090/nifi-registry"
     ports:
       - 19090:19090
+    user: "root"  
     environment:
       NIFI_REGISTRY_WEB_HTTP_PORT: 19090
+      NIFI_REGISTRY_DB_CLASS: 'org.h2.Driver'
+      NIFI_REGISTRY_DB_USER: 'nifireg'
+      NIFI_REGISTRY_DB_PASS: 'nifireg'
       NIFI_REGISTRY_DB_DIR: '/opt/nifi-registry/nifi-registry-current/database'
       NIFI_REGISTRY_FLOW_PROVIDER: file
       NIFI_REGISTRY_FLOW_STORAGE_DIR: '/opt/nifi-registry/nifi-registry-current/flow_storage'
+      NIFI_REGISTRY_BUNDLE_PROVIDER: {% filter filter %}
+      NIFI_REGISTRY_BUNDLE_STORAGE_DIR: './extension_bundles'
+      {% endfilter %}
       LOG_LEVEL: INFO
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
