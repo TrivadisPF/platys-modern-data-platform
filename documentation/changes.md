@@ -20,6 +20,7 @@ The Modern Data Platform version 1.15.0 contains the following bug fixes and enh
  * Update `Trino` to `372`
  * Update `Starburst Enterprise` to `371-e`
  * Update `Debezium Server` to `1.9`
+ * Update `DataHub` to `v0.8.29` 
  
 ### Breaking Changes
 
@@ -32,7 +33,7 @@ The Modern Data Platform version 1.15.0 contains the following bug fixes and enh
  
 ### Bug Fixes 
 
- * 
+ * fix bug in `markdown-renderer` on Apple Silicon (M1)
 
 
 ## What's new in 1.14.0
