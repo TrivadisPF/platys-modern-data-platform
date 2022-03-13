@@ -1956,7 +1956,7 @@ services:
                 sasl.mechanism: "{{external['KAFKA_sasl_mechanism']}}"
                 sasl.jaas.config: "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"{{kafkaUsername}}\" password=\"{{kafkaPassword}}\";"
     {% endif -%}   {#  external['KAFKA_sasl_mechanism'] is defined #}
-    {% if ( SCHEMA_REGISTRY_enable ) | default(false) %}
+    {% if (SCHEMA_REGISTRY_enable or external['SCHEMA_REGISTRY_enable']) | default(false) %}
               schema-registry:
                 url: "{{ns.schemaRegistryUrlExternal}}"
                 type: "confluent"
@@ -2011,12 +2011,14 @@ services:
       KAFKA_CLUSTERS_0_PROPERTIES_SECURITY_PROTOCOL: "{{external['KAFKA_security_protocol']}}"
       KAFKA_CLUSTERS_0_PROPERTIES_SASL_MECHANISM: "{{external['KAFKA_sasl_mechanism']}}"
       KAFKA_CLUSTERS_0_PROPERTIES_SASL_JAAS_CONFIG: "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"{{kafkaUsername}}\" password=\"{{kafkaPassword}}\";"
+      KAFKA_CLUSTERS_0_PROPERTIES_CLIENT_DNS_LOOKUP: use_all_dns_ips
+      KAFKA_CLUSTERS_0_DISABLELOGDIRSCOLLECTION: 'true'
     {% endif -%}   {#  external['KAFKA_sasl_mechanism'] is defined #}
-    {% if ( SCHEMA_REGISTRY_enable ) | default(false) %}
+    {% if (SCHEMA_REGISTRY_enable or external['SCHEMA_REGISTRY_enable']) | default(false) %}
       KAFKA_CLUSTERS_0_SCHEMAREGISTRY: '{{ns.schemaRegistryUrlExternal}}'
         {% if schemaRegistryUsername is defined and schemaRegistryUsername|length %}
-                KAFKA_CLUSTERS_0_SCHEMAREGISTRYAUTH_USERNAME: "{{schemaRegistryUsername}}"
-                basic-KAFKA_CLUSTERS_0_SCHEMAREGISTRYAUTH_PASSWORD: "{schemaRegistryPassword}}"
+      KAFKA_CLUSTERS_0_SCHEMAREGISTRYAUTH_USERNAME: "{{schemaRegistryUsername}}"
+      basic-KAFKA_CLUSTERS_0_SCHEMAREGISTRYAUTH_PASSWORD: "{schemaRegistryPassword}}"
         {% endif %}
     {% endif -%}   {#  SCHEMA_REGISTRY_enable #}
       KAFKA_CLUSTERS_0_KSQLDBSERVER: 'http://ksqldb-server-1:8088'
