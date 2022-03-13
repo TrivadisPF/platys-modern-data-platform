@@ -1253,8 +1253,6 @@ services:
       com.platys.name: "azkarra-worker"
       com.platys.restapi.title: 'Kafka REST Proxy'
       com.platys.restapi.url: "http://${PUBLIC_IP}:28085"
-    depends_on:
-      - kafka{{dataCenter}}-1
     ports:
       - "28085:8080"
     environment:
@@ -1282,9 +1280,6 @@ services:
       com.platys.name: "kafka-rest"
       com.platys.restapi.title: 'Kafka REST Proxy'
       com.platys.restapi.url: "http://${PUBLIC_IP}:18086"
-    depends_on:
-      - kafka{{dataCenter}}-1
-      - {{ns.schemaRegistryServiceName}}
     ports:
       - "18086:8086"
     environment:
@@ -1417,10 +1412,6 @@ services:
       com.platys.webui.url: "http://${PUBLIC_IP}:{{http_external_port}}"
       com.platys.restapi.title: 'Apicurio Registry REST API (Confluent compliant)'
       com.platys.restapi.url: "http://${PUBLIC_IP}:{{http_external_port}}/apis/ccompat/v6"
-    {% if (APICURIO_SCHEMA_REGISTRY_storage | lower) == 'kafkasql'  %}
-    depends_on:
-      - kafka{{dataCenter}}-1
-    {% endif -%}   {#  APICURIO_SCHEMA_REGISTRY_storage == kafkasql #}
     ports:
       - "{{http_external_port}}:{{http_port}}"
     environment:
@@ -1485,8 +1476,6 @@ services:
       com.platys.name: "schema-registry-ui"
       com.platys.webui.title: 'Confluent Schema Registry UI'
       com.platys.webui.url: "http://${PUBLIC_IP}:28102"
-    depends_on:
-      - {{ns.schemaRegistryServiceName}}
     ports:
       - "28102:8000"
     environment:
@@ -1520,9 +1509,6 @@ services:
       com.platys.name: "confluent-control-center"
       com.platys.webui.title: 'Control Center UI'
       com.platys.webui.url: "http://${PUBLIC_IP}:{{externalPort}}"
-    depends_on:
-      - zookeeper{{dataCenter}}-1
-      - kafka{{dataCenter}}-1
     ports:
       - "{{externalPort}}:9021"
     environment:
@@ -1564,9 +1550,6 @@ services:
     hostname: replicator-1
     labels:
       com.platys.name: "confluent-replicator"
-    depends_on:
-      - kafka{{dataCenter}}-1
-      - {{ns.schemaRegistryServiceName}}
     ports:
       - 18083:8083
     environment:
@@ -1612,9 +1595,6 @@ services:
     hostname: mirror-maker{{dataCenter}}-1:
     labels:
       com.platys.name: "mirror-maker2"
-    depends_on:
-      - kafka{{dataCenter}}-1
-      - {{ns.schemaRegistryServiceName}}
     environment:
       MM2: ''
     {%if use_timezone | default(false) %}
@@ -1774,9 +1754,6 @@ services:
       com.platys.name: "kafka-topics-ui"
       com.platys.webui.title: 'Kafka Topics UI'
       com.platys.webui.url: "http://${PUBLIC_IP}:28141"
-    depends_on:
-      - kafka{{dataCenter}}-1
-      - kafka-rest-1
     ports:
       - "28141:8000"
     environment:
@@ -1845,9 +1822,6 @@ services:
       com.platys.name: "cmak"
       com.platys.webui.title: 'Cluster Manager for Apache Kafka UI'
       com.platys.webui.url: "http://${PUBLIC_IP}:{{externalPort}}"
-    depends_on:
-      - zookeeper{{dataCenter}}-1
-      - kafka{{dataCenter}}-1
     ports:
       - "{{externalPort}}:9000"
     environment:
@@ -3321,7 +3295,6 @@ services:
       com.platys.webui.url: "http://${PUBLIC_IP}:21000"
     depends_on:
       - zookeeper{{dataCenter}}-1
-      - kafka{{dataCenter}}-1
       - atlas-kafka-setup
       - cassandra-atlas
     ports:
@@ -3358,9 +3331,6 @@ services:
     container_name: atlas-kafka-setup
     labels:
       com.platys.name: "atlas"
-    depends_on:
-      - kafka{{dataCenter}}-1
-      - zookeeper{{dataCenter}}-1
     environment:
       # The following settings are listed here only to satisfy the image's requirements.
       # We override the image's `command` anyways, hence this container will not start a broker.
@@ -3885,9 +3855,6 @@ services:
     container_name: kafka-setup
     labels:
       com.platys.name: "datahub"
-    depends_on:
-      - kafka{{dataCenter}}-1
-      - {{ns.schemaRegistryServiceName}}
     environment:
       # The following settings are listed here only to satisfy the image's requirements.
       # We override the image's `command` anyways, hence this container will not start a broker.
@@ -4917,8 +4884,6 @@ services:
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
-    depends_on:
-      - kafka{{dataCenter}}-1
     entrypoint: "./wait-for-it.sh -t 180 spring-skipper-server:7577 -- java -jar /maven/spring-cloud-dataflow-server.jar"
     volumes:
       - ./data-transfer:/data-transfer
