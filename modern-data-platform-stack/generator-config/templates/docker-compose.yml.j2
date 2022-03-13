@@ -1876,6 +1876,9 @@ services:
     environment:
       KAFKA_BROKERCONNECT: '{{ns.bootstrapServers}}'
       SCHEMAREGISTRY_CONNECT: '{{ns.schemaRegistryUrl}}'
+      {% if schemaRegistryUsername is defined and schemaRegistryUsername|length %}
+      SCHEMAREGISTRY_AUTH: '{{schemaRegistryUsername}}:{{schemaRegistryPassword}}'
+      {% endif %}
       MESSAGE_FORMAT: AVRO
       JVM_OPTS: "-Xms32M -Xmx64M"
       SERVER_SERVLET_CONTEXTPATH: "/"
@@ -2087,6 +2090,7 @@ services:
     ports:
       - 28239:8080
     environment:
+      # config according to: https://github.com/cloudhut/kowl/blob/master/docs/config/kowl.yaml
       KAFKA_BROKERS: '{{ns.bootstrapServers}}'
     {%if external['KAFKA_sasl_mechanism'] is defined and external['KAFKA_sasl_mechanism'] | length %}
       KAFKA_TLS_ENABLED: 'true'
