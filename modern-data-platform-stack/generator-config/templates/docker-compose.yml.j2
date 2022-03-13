@@ -1069,11 +1069,7 @@ services:
     {% set connect_external_port = 8083 + loop.index - 1 %}
     {% set connect_port = 8083 + loop.index - 1 %}
   ksqldb-server-{{loop.index}} :
-  {% if (KAFKA_KSQLDB_edition | lower) == 'oss' -%}
-    image: confluentinc/ksqldb-server:{{__KAFKA_KSQLDB_version}}
-  {% elif (KAFKA_KSQLDB_edition | lower) == 'cp' -%}
-    image: confluentinc/cp-ksqldb-server:{{__CONFLUENT_PLATFORM_version}}
-  {% endif -%}
+    image: confluentinc/{{ 'ksqldb-server' if (KAFKA_KSQLDB_edition | lower) == 'oss' else 'cp-ksqldb-server' }}:{{__KAFKA_KSQLDB_version if (KAFKA_KSQLDB_edition | lower) == 'oss' else __CONFLUENT_PLATFORM_version}}
     hostname: ksqldb-server-{{loop.index}}
     container_name: ksqldb-server-{{loop.index}}
     labels:
