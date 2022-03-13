@@ -1874,7 +1874,7 @@ services:
     ports:
       - "28110:9020"
     environment:
-      KAFKA_BROKERCONNECT: kafka-1:19092
+      KAFKA_BROKERCONNECT: '{{ns.bootstrapServers}}'
       SCHEMAREGISTRY_CONNECT: '{{ns.schemaRegistryUrl}}'
       MESSAGE_FORMAT: AVRO
       JVM_OPTS: "-Xms32M -Xmx64M"
@@ -1911,7 +1911,7 @@ services:
     {% if external['KAFKA_enable'] | default(false) %}
       ZOOKEEPER_HOST: zookeeper-1:2181
     {% endif %}   {#  external['KAFKA_enable']) #}
-      KAFKA_HOST: kafka-1:19092
+      KAFKA_HOST: {{ns.bootstrapServers}}
       #SECURITY_PROTOCOL: SSL
       TRUST_STORE_LOCATION: ssl/client.truststore.jks
       TRUST_STORE_PASSWORD: password
@@ -2019,10 +2019,10 @@ services:
     {% endif -%}   {#  external['KAFKA_sasl_mechanism'] is defined #}
     {% if (SCHEMA_REGISTRY_enable or external['SCHEMA_REGISTRY_enable']) | default(false) %}
       KAFKA_CLUSTERS_0_SCHEMAREGISTRY: '{{ns.schemaRegistryUrlExternal}}'
-        {% if schemaRegistryUsername is defined and schemaRegistryUsername|length %}
+      {% if schemaRegistryUsername is defined and schemaRegistryUsername|length %}
       KAFKA_CLUSTERS_0_SCHEMAREGISTRYAUTH_USERNAME: "{{schemaRegistryUsername}}"
       KAFKA_CLUSTERS_0_SCHEMAREGISTRYAUTH_PASSWORD: "{{schemaRegistryPassword}}"
-        {% endif %}
+      {% endif %}
     {% endif -%}   {#  SCHEMA_REGISTRY_enable #}
       KAFKA_CLUSTERS_0_KSQLDBSERVER: 'http://ksqldb-server-1:8088'
     {% if ( KAFKA_CONNECT_enable or KAFKA_KSQLDB_use_embedded_connect ) | default(false) %}
@@ -2088,9 +2088,19 @@ services:
       - 28239:8080
     environment:
       KAFKA_BROKERS: '{{ns.bootstrapServers}}'
-    {% if ( SCHEMA_REGISTRY_enable ) | default(false) %}
+    {%if external['KAFKA_sasl_mechanism'] is defined and external['KAFKA_sasl_mechanism'] | length %}
+      KAFKA_TLS_ENABLED: 'true'
+      KAFKA_SASL_ENABLED: 'true'
+      KAFKA_SASL_USERNAME: {{kafkaUsername}}
+      KAFKA_SASL_PASSWORD: {{kafkaPassword}}
+    {% endif -%}   {#  external['KAFKA_sasl_mechanism'] is defined #}
+    {% if ( SCHEMA_REGISTRY_enable or external['SCHEMA_REGISTRY_enable']) | default(false) %}
       KAFKA_SCHEMAREGISTRY_ENABLED: 'True'
       KAFKA_SCHEMAREGISTRY_URLS: '{{ns.schemaRegistryUrlExternal}}'
+      {% if schemaRegistryUsername is defined and schemaRegistryUsername|length %}
+      KAFKA_SCHEMAREGISTRY_USERNAME: "{{schemaRegistryUsername}}"
+      KAFKA_SCHEMAREGISTRY_PASSWORD: "{{schemaRegistryPassword}}"
+      {% endif -%}   {#  schemaRegistryUsername is defined #}
     {% endif -%}   {#  SCHEMA_REGISTRY_enable #}
     {% if ( KAFKA_CONNECT_enable or KAFKA_KSQLDB_use_embedded_connect) | default(false) %}
       CONNECT_ENABLED: 'True'
