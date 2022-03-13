@@ -1906,7 +1906,9 @@ services:
     ports:
       - "28106:8080"
     environment:
+    {% if external['KAFKA_enable'] | default(false) %}
       ZOOKEEPER_HOST: zookeeper-1:2181
+    {% endif %}   {#  external['KAFKA_enable']) #}
       KAFKA_HOST: kafka-1:19092
       #SECURITY_PROTOCOL: SSL
       TRUST_STORE_LOCATION: ssl/client.truststore.jks
@@ -1998,13 +2000,26 @@ services:
     ports:
       - 28179:8080
     environment:
+    {% if external['KAFKA_enable'] | default(false) %}
+      KAFKA_CLUSTERS_0_NAME: external
+    {% else -%}
       KAFKA_CLUSTERS_0_NAME: local
-      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: '{{ns.bootstrapServers}}'
       KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper-1:2181
-      KAFKA_CLUSTERS_0_KSQLDBSERVER: 'http://ksqldb-server-1:8088'
+    {% endif -%}   {#  external['KAFKA_enable'] #}
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: '{{ns.bootstrapServers}}'
+    {%if external['KAFKA_sasl_mechanism'] is defined and external['KAFKA_sasl_mechanism'] | length %}
+      KAFKA_CLUSTERS_0_PROPERTIES_SECURITY_PROTOCOL: "{{external['KAFKA_security_protocol']}}"
+      KAFKA_CLUSTERS_0_PROPERTIES_SASL_MECHANISM: "{{external['KAFKA_sasl_mechanism']}}"
+      KAFKA_CLUSTERS_0_PROPERTIES_SASL_JAAS_CONFIG: "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"{{kafkaUsername}}\" password=\"{{kafkaPassword}}\";"
+    {% endif -%}   {#  external['KAFKA_sasl_mechanism'] is defined #}
     {% if ( SCHEMA_REGISTRY_enable ) | default(false) %}
       KAFKA_CLUSTERS_0_SCHEMAREGISTRY: '{{ns.schemaRegistryUrlExternal}}'
+        {% if schemaRegistryUsername is defined and schemaRegistryUsername|length %}
+                KAFKA_CLUSTERS_0_SCHEMAREGISTRYAUTH_USERNAME: "{{schemaRegistryUsername}}"
+                basic-KAFKA_CLUSTERS_0_SCHEMAREGISTRYAUTH_PASSWORD: "{schemaRegistryPassword}}"
+        {% endif %}
     {% endif -%}   {#  SCHEMA_REGISTRY_enable #}
+      KAFKA_CLUSTERS_0_KSQLDBSERVER: 'http://ksqldb-server-1:8088'
       KAFKA_CLUSTERS_0_JMXPORT: '9992'
     {% if ( KAFKA_CONNECT_enable or KAFKA_KSQLDB_use_embedded_connect ) | default(false) %}
       KAFKA_CLUSTERS_0_KAFKACONNECT_0_NAME: '{{ns1.connectClusterName}}'
