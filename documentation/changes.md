@@ -21,6 +21,7 @@ The Modern Data Platform version 1.15.0 contains the following bug fixes and enh
  * Update `Starburst Enterprise` to `371-e`
  * Update `Debezium Server` to `1.9`
  * Update `DataHub` to `v0.8.29` 
+ * Update `ksqldb` to `0.24.0?
  
 ### Breaking Changes
 
