@@ -990,17 +990,17 @@ services:
       CONNECT_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: "https"
       CONNECT_SASL_MECHANISM: "{{external['KAFKA_sasl_mechanism']}}"
       CONNECT_SECURITY_PROTOCOL: "{{external['KAFKA_security_protocol']}}"
-      CONNECT_SASL_JAAS_CONFIG: "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"${PLATYS_KAFKA_USERNAME}\" password=\"${PLATYS_KAFKA_PASSWORD}\";"
+      CONNECT_SASL_JAAS_CONFIG: "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"{{kafkaUsername}}\" password=\"{{kafkaPassword}}\";"
       #
       CONNECT_CONSUMER_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: "https"
       CONNECT_CONSUMER_SASL_MECHANISM: "{{external['KAFKA_sasl_mechanism']}}"
       CONNECT_CONSUMER_SECURITY_PROTOCOL: "{{external['KAFKA_security_protocol']}}"
-      CONNECT_CONSUMER_SASL_JAAS_CONFIG: "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"${PLATYS_KAFKA_USERNAME}\" password=\"${PLATYS_KAFKA_PASSWORD}\";"
+      CONNECT_CONSUMER_SASL_JAAS_CONFIG: "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"{{kafkaUsername}}\" password=\"{{kafkaPassword}}\";"
       #
       CONNECT_PRODUCER_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: "https"
       CONNECT_PRODUCER_SASL_MECHANISM: "{{external['KAFKA_sasl_mechanism']}}"
       CONNECT_PRODUCER_SECURITY_PROTOCOL: "{{external['KAFKA_security_protocol']}}"
-      CONNECT_PRODUCER_SASL_JAAS_CONFIG: "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"${PLATYS_KAFKA_USERNAME}\" password=\"${PLATYS_KAFKA_PASSWORD}\";"
+      CONNECT_PRODUCER_SASL_JAAS_CONFIG: "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"{{kafkaUsername}}\" password=\"{{kafkaPassword}}\";"
     {% endif -%}   {#  external['KAFKA_sasl_mechanism'] is defined #}
       #CLASSPATH: /usr/share/java/monitoring-interceptors/monitoring-interceptors-4.0.0.jar
       AWS_ACCESS_KEY_ID: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
@@ -1107,11 +1107,11 @@ services:
       OTEL_RESOURCE_ATTRIBUTES: 'service.name=ksqldb'
       KSQL_OPTS: '-javaagent:/tmp/opentelemetry-javaagent.jar -Dotel.exporter.otlp.endpoint=http://otel-collector:4317'
     {% endif -%}   {#  OTEL_COLLECTOR_enable #}
-    {% if external['KAFKA_enable'] | default(false) %}
-      KSQL_SECURITY_PROTOCOL: SASL_SSL
-      KSQL_SASL_MECHANISM: PLAIN
-      KSQL_SASL_JAAS_CONFIG: org.apache.kafka.common.security.plain.PlainLoginModule required username="{{kafkaUsername}}" password="{{kafkaPassword}}";
-    {% endif -%}   {#  external['KAFKA_enable'] #}
+    {%if external['KAFKA_sasl_mechanism'] is defined and external['KAFKA_sasl_mechanism'] | length %}
+      KSQL_SASL_MECHANISM: "{{external['KAFKA_sasl_mechanism']}}"
+      KSQL_SECURITY_PROTOCOL: "{{external['KAFKA_security_protocol']}}"
+      KSQL_SASL_JAAS_CONFIG: "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"{{kafkaUsername}}\" password=\"{{kafkaPassword}}\";"
+    {% endif -%}   {#  external['KAFKA_sasl_mechanism'] is defined #}
 
     {% if ( KAFKA_CONNECT_enable ) | default(false) %}
       KSQL_KSQL_CONNECT_URL: {{ns1.connectServersInternalUrl}}
