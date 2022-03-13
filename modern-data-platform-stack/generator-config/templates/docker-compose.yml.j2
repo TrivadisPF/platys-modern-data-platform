@@ -988,18 +988,18 @@ services:
       CONNECT_CONNECTOR_CLIENT_CONFIG_OVERRIDE_POLICY: 'All'
     {%if external['KAFKA_sasl_mechanism'] is defined and external['KAFKA_sasl_mechanism'] | length %}
       CONNECT_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: "https"
-      CONNECT_SASL_MECHANISM: "{{external['KAFKA_sasl_mechanism']}}"
       CONNECT_SECURITY_PROTOCOL: "{{external['KAFKA_security_protocol']}}"
+      CONNECT_SASL_MECHANISM: "{{external['KAFKA_sasl_mechanism']}}"
       CONNECT_SASL_JAAS_CONFIG: "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"{{kafkaUsername}}\" password=\"{{kafkaPassword}}\";"
       #
       CONNECT_CONSUMER_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: "https"
-      CONNECT_CONSUMER_SASL_MECHANISM: "{{external['KAFKA_sasl_mechanism']}}"
       CONNECT_CONSUMER_SECURITY_PROTOCOL: "{{external['KAFKA_security_protocol']}}"
+      CONNECT_CONSUMER_SASL_MECHANISM: "{{external['KAFKA_sasl_mechanism']}}"
       CONNECT_CONSUMER_SASL_JAAS_CONFIG: "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"{{kafkaUsername}}\" password=\"{{kafkaPassword}}\";"
       #
       CONNECT_PRODUCER_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: "https"
-      CONNECT_PRODUCER_SASL_MECHANISM: "{{external['KAFKA_sasl_mechanism']}}"
       CONNECT_PRODUCER_SECURITY_PROTOCOL: "{{external['KAFKA_security_protocol']}}"
+      CONNECT_PRODUCER_SASL_MECHANISM: "{{external['KAFKA_sasl_mechanism']}}"
       CONNECT_PRODUCER_SASL_JAAS_CONFIG: "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"{{kafkaUsername}}\" password=\"{{kafkaPassword}}\";"
     {% endif -%}   {#  external['KAFKA_sasl_mechanism'] is defined #}
       #CLASSPATH: /usr/share/java/monitoring-interceptors/monitoring-interceptors-4.0.0.jar
@@ -1108,8 +1108,8 @@ services:
       KSQL_OPTS: '-javaagent:/tmp/opentelemetry-javaagent.jar -Dotel.exporter.otlp.endpoint=http://otel-collector:4317'
     {% endif -%}   {#  OTEL_COLLECTOR_enable #}
     {%if external['KAFKA_sasl_mechanism'] is defined and external['KAFKA_sasl_mechanism'] | length %}
-      KSQL_SASL_MECHANISM: "{{external['KAFKA_sasl_mechanism']}}"
       KSQL_SECURITY_PROTOCOL: "{{external['KAFKA_security_protocol']}}"
+      KSQL_SASL_MECHANISM: "{{external['KAFKA_sasl_mechanism']}}"
       KSQL_SASL_JAAS_CONFIG: "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"{{kafkaUsername}}\" password=\"{{kafkaPassword}}\";"
     {% endif -%}   {#  external['KAFKA_sasl_mechanism'] is defined #}
 
@@ -1949,6 +1949,11 @@ services:
             docker-kafka-server:
               properties:
                 bootstrap.servers: '{{ns.bootstrapServers}}'
+    {%if external['KAFKA_sasl_mechanism'] is defined and external['KAFKA_sasl_mechanism'] | length %}
+                security.protocol: "{{external['KAFKA_security_protocol']}}"
+                sasl.mechanism: "{{external['KAFKA_sasl_mechanism']}}"
+                sasl.jaas.config: "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"{{kafkaUsername}}\" password=\"{{kafkaPassword}}\";"
+    {% endif -%}   {#  external['KAFKA_sasl_mechanism'] is defined #}
     {% if ( SCHEMA_REGISTRY_enable ) | default(false) %}
               schema-registry:
                 url: "{{ns.schemaRegistryUrlExternal}}"
