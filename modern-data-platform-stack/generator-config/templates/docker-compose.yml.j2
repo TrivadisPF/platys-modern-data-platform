@@ -663,22 +663,14 @@ networks:
   {% for num in range(connectNodes | default(1) ) %}
     {% set port = 8083 + loop.index-1 %}
     {% if loop.first %}
-      {%if KAFKA_CONNECT_UI_use_public_ip | default(true) %}
-        {% set ns1.connectServersUrl = 'http://${PUBLIC_IP}:' ~ port %}
-      {% else %}
-        {% set ns1.connectServersUrl = 'http://${DOCKER_HOST_IP}:' ~ port %}
-      {% endif -%}   {#  KAFKA_CONNECT_UI_use_public_ip #}
+      {% set ns1.connectServersUrl = 'http://${PUBLIC_IP}:' ~ port %}
       {%if KAFKA_KSQLDB_use_embedded_connect | default(true) %}
         {% set ns1.connectServersInternalUrl = 'http://ksqldb-server-' ~ loop.index ~ ':' ~ port %}
       {% else %}
         {% set ns1.connectServersInternalUrl = 'http://kafka-connect-' ~ loop.index ~ ':' ~ port %}
       {% endif -%}   {#  KAFKA_KSQLDB_use_embedded_connect #}
     {% else %}
-      {%if KAFKA_CONNECT_UI_use_public_ip | default(true) %}
-        {% set ns1.connectServersUrl = ns1.connectServersUrl ~ ',http://${PUBLIC_IP}:' ~ port %}
-      {% else %}
-        {% set ns1.connectServersUrl = ns1.connectServersUrl ~ ',http://${DOCKER_HOST_IP}:' ~ port %}
-      {% endif -%}   {#  KAFKA_CONNECT_UI_use_public_ip #}
+      {% set ns1.connectServersUrl = ns1.connectServersUrl ~ ',http://${PUBLIC_IP}:' ~ port %}
       {%if KAFKA_KSQLDB_use_embedded_connect | default(true) %}
         {% set ns1.connectServersInternalUrl = ns1.connectServersInternalUrl ~ ',http://ksqldb-server-' ~ loop.index ~ ':' ~ port %}
       {% else %}
