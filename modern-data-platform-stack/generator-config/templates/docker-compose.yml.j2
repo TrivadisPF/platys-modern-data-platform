@@ -663,22 +663,14 @@ networks:
   {% for num in range(connectNodes | default(1) ) %}
     {% set port = 8083 + loop.index-1 %}
     {% if loop.first %}
-      {%if KAFKA_CONNECT_UI_use_public_ip | default(true) %}
-        {% set ns1.connectServersUrl = 'http://${PUBLIC_IP}:' ~ port %}
-      {% else %}
-        {% set ns1.connectServersUrl = 'http://${DOCKER_HOST_IP}:' ~ port %}
-      {% endif -%}   {#  KAFKA_CONNECT_UI_use_public_ip #}
+      {% set ns1.connectServersUrl = 'http://${PUBLIC_IP}:' ~ port %}
       {%if KAFKA_KSQLDB_use_embedded_connect | default(true) %}
         {% set ns1.connectServersInternalUrl = 'http://ksqldb-server-' ~ loop.index ~ ':' ~ port %}
       {% else %}
         {% set ns1.connectServersInternalUrl = 'http://kafka-connect-' ~ loop.index ~ ':' ~ port %}
       {% endif -%}   {#  KAFKA_KSQLDB_use_embedded_connect #}
     {% else %}
-      {%if KAFKA_CONNECT_UI_use_public_ip | default(true) %}
-        {% set ns1.connectServersUrl = ns1.connectServersUrl ~ ',http://${PUBLIC_IP}:' ~ port %}
-      {% else %}
-        {% set ns1.connectServersUrl = ns1.connectServersUrl ~ ',http://${DOCKER_HOST_IP}:' ~ port %}
-      {% endif -%}   {#  KAFKA_CONNECT_UI_use_public_ip #}
+      {% set ns1.connectServersUrl = ns1.connectServersUrl ~ ',http://${PUBLIC_IP}:' ~ port %}
       {%if KAFKA_KSQLDB_use_embedded_connect | default(true) %}
         {% set ns1.connectServersInternalUrl = ns1.connectServersInternalUrl ~ ',http://ksqldb-server-' ~ loop.index ~ ':' ~ port %}
       {% else %}
@@ -954,6 +946,7 @@ services:
   kafka-connect-{{loop.index}} :
     image: confluentinc/cp-kafka-connect:{{__CONFLUENT_PLATFORM_version}}
     container_name: kafka-connect-{{loop.index}}
+    hostname: kafka-connect-{{loop.index}}
     labels:
       com.platys.name: "kafka-connect"
       com.platys.restapi.title: 'Kafka Connect REST API'
@@ -962,9 +955,10 @@ services:
       - "{{external_port}}:{{port}}"
     environment:
       CONNECT_BOOTSTRAP_SERVERS: '{{ns.bootstrapServers}}'
+      CONNECT_LISTENERS: 'http://0.0.0.0:{{port}}'
       CONNECT_REST_ADVERTISED_HOST_NAME: kafka-connect-{{loop.index}}
-      CONNECT_REST_PORT: {{port}}
-      CONNECT_GROUP_ID: kafka-connect
+      CONNECT_REST_ADVERTISED_PORT: {{port}}
+      CONNECT_GROUP_ID: kafka-connect-cluster
       CONNECT_CONFIG_STORAGE_TOPIC: _connect-configs
       CONNECT_OFFSET_STORAGE_TOPIC: _connect-offsets
       CONNECT_STATUS_STORAGE_TOPIC: _connect-status
@@ -988,7 +982,7 @@ services:
       CONNECT_LOG4J_APPENDER_STDOUT_LAYOUT_CONVERSIONPATTERN: "[%d] %p %X{connector.context}%m (%c:%L)%n"
       CONNECT_PLUGIN_PATH: "/usr/share/java,/etc/kafka-connect/addl-plugins"
       CONNECT_CONNECTOR_CLIENT_CONFIG_OVERRIDE_POLICY: 'All'
-    {%if external['KAFKA_sasl_mechanism'] is defined and external['KAFKA_sasl_mechanism'] | length %}
+    {%if external['KAFKA_enable'] and external['KAFKA_sasl_mechanism'] is defined and external['KAFKA_sasl_mechanism'] | length %}
       CONNECT_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: "https"
       CONNECT_SECURITY_PROTOCOL: "{{external['KAFKA_security_protocol']}}"
       CONNECT_SASL_MECHANISM: "{{external['KAFKA_sasl_mechanism']}}"
@@ -1083,6 +1077,13 @@ services:
       - {{connect_external_port}}:{{connect_port}}
     {% endif %}
     environment:
+    {% if ( KAFKA_KSQLDB_edition | lower) == 'cp'  | default(false) %}
+      KSQL_LOG4J_ROOT_LOGLEVEL: "ERROR"
+      KSQL_LOG4J_LOGGERS: "org.apache.kafka.connect.runtime.rest=WARN,org.reflections=ERROR"
+      KSQL_LOG4J_PROCESSING_LOG_TOPIC: ksql_processing_log
+      KSQL_LOG4J_PROCESSING_LOG_BROKERLIST: '{{ns.bootstrapServers}}'
+    {% endif %}
+
       #KSQL_KSQL_LOGGING_PROCESSING_TOPIC_NAME: 'ksql_processing_log'
       KSQL_KSQL_LOGGING_PROCESSING_TOPIC_REPLICATION_FACTOR: {{KAFKA_KSQLDB_internal_replication_factor | default(1)}}
       KSQL_KSQL_LOGGING_PROCESSING_TOPIC_AUTO_CREATE: 'true'
@@ -1148,7 +1149,7 @@ services:
       # Kafka Connect config below
       KSQL_CONNECT_BOOTSTRAP_SERVERS: "kafka-1:19092"
       KSQL_CONNECT_REST_ADVERTISED_HOST_NAME: 'ksqldb-server-{{loop.index}}'
-      KSQL_CONNECT_REST_PORT: {{connect_port}}
+      KSQL_CONNECT_REST_ADVERTISED_PORT: {{connect_port}}
       KSQL_CONNECT_GROUP_ID: ksqldb-kafka-connect-group-01
       KSQL_CONNECT_CONFIG_STORAGE_TOPIC: _ksqldb-kafka-connect-group-01-configs
       KSQL_CONNECT_OFFSET_STORAGE_TOPIC: _ksqldb-kafka-connect-group-01-offsets
@@ -1803,7 +1804,7 @@ services:
     ports:
       - "28103:8000"
     environment:
-      CONNECT_URL: {{ns1.connectServersUrl}}
+      CONNECT_URL: {{ns1.connectServersInternalUrl}}
       PROXY: "true"
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
@@ -1970,7 +1971,7 @@ services:
     {% if ( KAFKA_CONNECT_enable or KAFKA_KSQLDB_use_embedded_connect) | default(false) %}
               connect:
       {% for item in ns1.connectServersInternalUrl.split(",") %}
-                - name: "{{ns1.connectClusterName}}-{{loop.index}}"
+                - name: "connect-{{loop.index}}"
                   url: "{{item}}"
       {% endfor -%}
     {% endif -%}   {#  KAFKA_CONNECT_enable #}

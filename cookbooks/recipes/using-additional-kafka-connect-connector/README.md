@@ -93,7 +93,7 @@ Download and unpack it into the `$DATAPLATFORM_HOME/plugins/kafka-connect` folde
 ```
 export MQTT_CONNECTOR_VERSION=2.1.3-2.5.0
 
-cd $DATAPLATFORM_HOME/plugins/kafka-connect
+cd $DATAPLATFORM_HOME/plugins/kafka-connect/connectors
 
 wget https://github.com/lensesio/stream-reactor/releases/download/2.1.3/kafka-connect-mqtt-$MQTT_CONNECTOR_VERSION-all.tar.gz
 mkdir kafka-connect-mqtt-$MQTT_CONNECTOR_VERSION-all 

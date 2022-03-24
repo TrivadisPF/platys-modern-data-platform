@@ -31,7 +31,7 @@ docker-compose up -d
 Navigate into the kafka-connect folder
 
 ```bash
-cd plugins/kafka-connect
+cd plugins/kafka-connect/connectors
 ```
 
 and download the a conector JAR from the Landoop Stream-Reactor Project project (here we are using the MQTT connector, but it works in the same way for any other connector)

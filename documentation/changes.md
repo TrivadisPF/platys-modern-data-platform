@@ -17,15 +17,15 @@ The Modern Data Platform version 1.15.0 contains the following bug fixes and enh
 ### Version upgrades
 
  * Update `Apache NiFi` to `1.15.3` and `Apache NiFi Registry` to `1.15.3`
- * Update `Trino` to `373`
- * Update `Starburst Enterprise` to `371-e`
+ * Update `Trino` to `374`
+ * Update `Starburst Enterprise` to `373-e`
  * Update `Debezium Server` to `1.9`
  * Update `DataHub` to `v0.8.29` 
  * Update `ksqldb` to `0.24.0?
  
 ### Breaking Changes
 
- * 
+ * `KAFKA_CONNECT_UI_use_public_ip` option has been removed, as now `kafka-connect-ui` is using the internal service name to connect to kafka-connect.
 
 ### Enhancements 
 
@@ -35,6 +35,7 @@ The Modern Data Platform version 1.15.0 contains the following bug fixes and enh
 ### Bug Fixes 
 
  * fix bug in `markdown-renderer` on Apple Silicon (M1)
+ * fix bug if a kafka-connect cluster is used
 
 
 ## What's new in 1.14.0
