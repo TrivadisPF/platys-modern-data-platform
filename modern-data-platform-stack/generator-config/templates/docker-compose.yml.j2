@@ -180,6 +180,8 @@ networks:
 {% set __TIPBOARD_version = TIPBOARD_version | default('latest') -%}
 {% set __CHARTBOARD_version = CHARTBOARD_version | default('latest') -%}
 
+{% set __RETOOL_version = RETOOL_version | default('latest') -%}
+
 {% set __MEMCACHED_version = MEMCACHED_version | default('latest') -%}
 
 {% set __REDIS_version = REDIS_version | default('latest') -%}
@@ -6129,9 +6131,9 @@ services:
 {% endif %}   {#  TIPBOARD_enable #}
 
 {% if CHARTBOARD_enable | default(false) %}
-  #  ================================== Tiboard Dashboard ========================================== #
+  #  ================================== Chartboard Dashboard ========================================== #
   chartboard:
-    image: trivadis/chartboard:{{__TIPBOARD_version}}
+    image: trivadis/chartboard:{{__CHARTBOARD_version}}
     hostname: chartboard
     container_name: chartboard
     labels:
@@ -6158,6 +6160,111 @@ services:
     {% endif -%}   {#  LOKI_collect_docker_logs #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  CHARTBOARD_enable #}
+
+{% if RETOOL_enable | default(false) %}
+  #  ================================== Retool ========================================== #
+  retool-api:
+    image: tryretool/backend:{{__RETOOL_version}}
+    hostname: retool-api
+    container_name: retool-api
+    labels:
+      com.platys.name: "retool"
+      com.platys.webui.title: "ReTool API"
+      com.platys.webui.url: "http://${PUBLIC_IP}:3000"
+    ports:
+      - 3000:3000
+    environment:
+      SERVICE_TYPE: MAIN_BACKEND
+      DB_CONNECTOR_HOST: http://db-connector
+      DB_CONNECTOR_PORT: 3002
+      DB_SSH_CONNECTOR_HOST: http://db-ssh-connector
+      DB_SSH_CONNECTOR_PORT: 3002
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./scripts/docker/wait-for-it.sh:/usr/src/app/wait-for-it.sh
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    command: bash -c "/usr/src/app/wait-for-it.sh postgres:5432; ./docker_scripts/start_api.sh"
+    restart: {{container_restart_policy}}
+
+  retool-jobs-runner:
+    image: tryretool/backend:{{__RETOOL_version}}
+    hostname: retool-jobs-runner
+    container_name: retool-jobs-runner
+    labels:
+      com.platys.name: "retool"
+    environment:
+      SERVICE_TYPE: JOBS_RUNNER
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./scripts/docker/wait-for-it.sh:/usr/src/app/wait-for-it.sh
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    command: bash -c "chmod -R +x ./docker_scripts; sync; /usr/src/app/wait-for-it.sh postgres:5432; ./docker_scripts/start_api.sh"
+    restart: {{container_restart_policy}}
+
+  retool-db-connector:
+    image: tryretool/backend:{{__RETOOL_version}}
+    hostname: retool-db-connector
+    container_name: retool-db-connector
+    labels:
+      com.platys.name: "retool"
+    environment:
+      SERVICE_TYPE: DB_CONNECTOR_SERVICE
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    command: bash -c "./retool_backend"
+    restart: {{container_restart_policy}}
+
+  retool-db-ssh-connector:
+    image: tryretool/backend:{{__RETOOL_version}}
+    hostname: retool-db-ssh-connector
+    container_name: retool-db-ssh-connector
+    labels:
+      com.platys.name: "retool"
+    environment:
+      SERVICE_TYPE: DB_SSH_CONNECTOR_SERVICE
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    command: bash -c "./docker_scripts/generate_key_pair.sh; ./retool_backend"
+    restart: {{container_restart_policy}}
+{% endif %}   {#  RETOOL_enable #}
 
 {% if MEMCACHED_enable | default(false) %}
   #  ================================== Memcached ========================================== #
