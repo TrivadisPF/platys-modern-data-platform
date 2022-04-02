@@ -26,6 +26,8 @@ The Modern Data Platform version 1.15.0 contains the following bug fixes and enh
  * Update `spring-cloud-dataflow-server` to `2.9.3`
  * Update `spring-cloud-skipper-server` to `2.8.3`
  * Update `streamsheet` to `2.5.3-milestone`
+ * Update `thingsboard` to `3.3.4.1`
+ * Update `datahub` to `v0.8.31`
  
 ### Breaking Changes
 
