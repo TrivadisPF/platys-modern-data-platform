@@ -28,6 +28,7 @@ The Modern Data Platform version 1.15.0 contains the following bug fixes and enh
  * Update `streamsheet` to `2.5.3-milestone`
  * Update `thingsboard` to `3.3.4.1`
  * Update `datahub` to `v0.8.31`
+ * Update `nifi` to `1.16.0` and `nifi-registry` to `1.16.0`
  
 ### Breaking Changes
 
