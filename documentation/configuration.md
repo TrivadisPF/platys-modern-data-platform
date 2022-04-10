@@ -349,6 +349,13 @@ For each service there might be some other settings, such as controlling the num
 | [**_Penthao Webspoon_**](./services/penthao.md)   &nbsp;&nbsp;&nbsp;&nbsp;![x86-64](./images/x86-64.png)                        	|         	|       	|                                                                                                                                                                                     	|             	|                                	|
 | `PENTHAO_enable`                                 	| `false` 	| 1.6.0 	| Generate Penthao Webspoon service                                                                                                                                                              	|     
 
+### Data Engineer Workbench
+
+| Config                                         	| Default 	| Since 	| Description                                                                                                                                                                        	                    	|
+|------------------------------------------------	|:-------:	|-------	|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------	|
+| [**_dbt_**](./services/dbt.md)  &nbsp;&nbsp;&nbsp;&nbsp;![x86-64](./images/x86-64.png)                          	|         	|       	|                                                                                                                                                                                     	|   
+| `DBT_enable`                              	| `false` 	| 1.15.0 	| Generate dbt CLI service                                                                                                                                                    	|             	|                                	|
+
 
 ### Data Science Workbench
 
