@@ -126,6 +126,7 @@ networks:
 
 {% set __NIFI_version = NIFI_version | default('latest') -%}
 {% set __NIFI_REGISTRY_version = NIFI_REGISTRY_version | default('latest') -%}
+{% set __NIFI_TOOLKIT_version = NIFI_TOOLKIT_version | default('latest') -%}
 {% set __MONITOFI_version = MONITOFI_version | default('latest') -%}
 
 {% set __STREAMPIPES_version = STREAMPIPES_version | default('latest') -%}
@@ -4637,6 +4638,35 @@ services:
     {% endif -%}   {#  LOKI_collect_docker_logs #}
     restart: {{container_restart_policy}}
   {% endif %}   {#  NIFI_REGISTRY_enable  #}
+
+  {%if NIFI_TOOLKIT_enable | default(false) %}
+  #  ================================== NiFi Toolkit ========================================== #
+  nifi-toolkit:
+    image: apache/nifi-toolkit:{{__NIFI_TOOLKIT_version}}
+    container_name: nifi-toolkit
+    hostname: nifi-toolkit
+    labels:
+      com.platys.name: 'nifi-toolkit'
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        while [ 1 -eq 1 ];do sleep 60;done    
+    restart: {{container_restart_policy}}
+  {% endif %}   {#  NIFI_TOOLKIT_enable  #}
 
   {%if MONITOFI_enable | default(false) %}
   #  ================================== MonitoFi ========================================== #

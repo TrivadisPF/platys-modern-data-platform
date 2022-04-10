@@ -10,6 +10,7 @@ The Modern Data Platform version 1.15.0 contains the following bug fixes and enh
 
  * dbt
  * Quine
+ * NiFi Toolkit
 
 ### New Cookbook Recipes
 
