@@ -6975,6 +6975,35 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {#  NEO4J_enable #}
 
+{% if QUINE_enable | default(false) %}
+  #  ================================== Quine ========================================== #
+  quine-1:
+    image: neo4j:{{__QUINE_version}}
+    hostname: quine-1
+    container_name: quine-1
+    labels:
+      com.platys.name: "quine"
+      com.platys.webui.title: "Quine UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28268"
+    ports:
+      - "28268:8080"
+    environment:
+      - DUMMY=xb
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  QUINE_enable #}
+
 {% if DGRAPH_enable | default(false) %}
   #  ================================== Dgraph ========================================== #
   dgraph-1:

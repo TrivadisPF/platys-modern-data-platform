@@ -420,6 +420,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28264 | 8090 | optimize |
 28265 | 80 | tempo |
 28267 | 16686 | tempo (jaeger ui) |
+28268 | 8080 | quine-1 |
 
 ## Ports > 28500
 
