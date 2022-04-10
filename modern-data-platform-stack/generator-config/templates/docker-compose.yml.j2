@@ -299,6 +299,8 @@ networks:
 
 {% set __LAKEFS_version = LAKEFS_version | default('latest') -%}
 
+{% set __DBT_version = DBT_version | default('latest') -%}
+
 {% set __CODE_SERVER_version = CODE_SERVER_version | default('latest') -%}
 {% set __EXCALIDRAW_version = EXCALIDRAW_version | default('latest') -%}
 {% set __FIREFOX_version = FIREFOX_version | default('latest') -%}
@@ -10019,6 +10021,36 @@ services:
     {% endif -%}   {#  LOKI_collect_docker_logs #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  PENTHAO_enable #}
+
+{% if DBT_enable | default(false) %}
+  #  ================================== DBT (Data Build Tool) ========================================== #
+  dbt:
+    image: xemuliam/dbt:{{__DBT_version}}
+    container_name: dbt
+    hostname: dbt
+    labels:
+      com.platys.name: "dbt"
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./data-transfer/dbt:/usr/app
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        while [ 1 -eq 1 ];do sleep 60;done
+    restart: {{container_restart_policy}}
+{% endif %}   {#  DBT_enable #}
 
 {% if CODE_SERVER_enable | default(false) %}
   #  ================================== Code-Server IDE (VS Code in Browser) ================= #
