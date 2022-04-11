@@ -38,7 +38,7 @@ The Modern Data Platform version 1.15.0 contains the following bug fixes and enh
 ### Breaking Changes
 
  * `KAFKA_CONNECT_UI_use_public_ip` option has been removed, as now `kafka-connect-ui` is using the internal service name to connect to kafka-connect.
- * 
+ * `SPARK_major_version` has been replaced by `SPARK_base_version` to be able to set the major and minor version for the Spark version to use.
 
 ### Enhancements 
 
