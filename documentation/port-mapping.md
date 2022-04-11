@@ -421,6 +421,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28265 | 80 | tempo |
 28267 | 16686 | tempo (jaeger ui) |
 28268 | 8080 | quine-1 |
+28269 | 8080 | conduit |
 
 ## Ports > 28500
 

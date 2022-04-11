@@ -11,6 +11,7 @@ The Modern Data Platform version 1.15.0 contains the following bug fixes and enh
  * dbt
  * Quine
  * NiFi Toolkit
+ * Conduit
 
 ### New Cookbook Recipes
 
@@ -37,6 +38,7 @@ The Modern Data Platform version 1.15.0 contains the following bug fixes and enh
 ### Breaking Changes
 
  * `KAFKA_CONNECT_UI_use_public_ip` option has been removed, as now `kafka-connect-ui` is using the internal service name to connect to kafka-connect.
+ * 
 
 ### Enhancements 
 

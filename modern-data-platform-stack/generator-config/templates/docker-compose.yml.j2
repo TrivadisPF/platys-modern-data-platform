@@ -135,6 +135,8 @@ networks:
 
 {% set __STREAMPIPES_version = STREAMPIPES_version | default('latest') -%}
 
+{% set __CONDUIT_version = CONDUIT_version | default('latest') -%}
+
 {% set __NODERED_version = NODERED_version | default('latest') -%}
 
 {% set __STREAMSHEETS_version = STREAMSHEETS_version | default('latest') -%}
@@ -470,7 +472,9 @@ networks:
   {% set STREAMSETS_DATAOPS_enable = false -%}
   {% set NIFI_enable = false -%}
   {% set NIFI_REGISTRY_enable = false -%}
+  {% set NIFI_TOOLKIT_enable = false -%}
   {% set STREAMSHEETS_enable = false -%}
+  {% set CONDUIT_enable = false -%}
   {% set SPRING_DATAFLOW_enable = false -%}
   {% set AIRFLOW_enable = false -%}
   {% set ZEPPELIN_enable = false -%}
@@ -4882,6 +4886,34 @@ services:
     {% endif -%}   {#  LOKI_collect_docker_logs #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  STREAMPIPES_enable #}
+
+{%if CONDUIT_enable | default(false) %}
+  #  ================================== Conduit ========================================== #
+  conduit:
+    image: ghcr.io/conduitio/conduit:{{__CONDUIT_version}}
+    container_name: conduit
+    hostname: conduit
+    labels:
+      com.platys.name: 'conduit'
+      com.platys.webui.title: "Conduit UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28269"
+    ports:
+      - "28269:8080"
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  CONDUIT_enable  #}
 
 {%if NODERED_enable | default(false) %}
   #  ================================== Node-RED ========================================== #
