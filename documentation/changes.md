@@ -34,6 +34,8 @@ The Modern Data Platform version 1.15.0 contains the following bug fixes and enh
  * Update `nifi` to `1.16.0` and `nifi-registry` to `1.16.0`
  * Update `minio` to `RELEASE.2022-04-01T03-41-39Z`
  * Update `spark` to `3.1.3`
+ * Update `zeppelin` to `0.10.1`
+ * Update `Confluent Platform` to `7.1.0`
  
 ### Breaking Changes
 
@@ -44,12 +46,12 @@ The Modern Data Platform version 1.15.0 contains the following bug fixes and enh
 
  * Add support for Nifi Cluster (setting the new config seeting `NIFI_create_cluster` to `true`
  * Apache NiFi is now secure by default, so you have to use https to get to the UI and then authenticate using the user and password specified.
+ * Zeppelin images are now in Sync with Spark version (all 3 digits x.x.x).
  
 ### Bug Fixes 
 
  * fix bug in `markdown-renderer` on Apple Silicon (M1)
  * fix bug if a kafka-connect cluster is used
-
 
 ## What's new in 1.14.0
 
