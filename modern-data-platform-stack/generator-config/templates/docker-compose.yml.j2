@@ -7029,6 +7029,18 @@ services:
     {% endif -%}   {#  NEO4J_dbms_memory_pagecache_size #}
       - NEO4J_dbms_logs_debug_level={{NEO4J_dbms_logs_debug_level}}
       - EXTENSION_SCRIPT={{NEO4J_extension_script}}
+    {% if KAFKA_enable or external['KAFKA_enable'] | default(false) %}
+      - NEO4J_kafka_bootstrap_servers="{{ns.bootstrapServers}}"
+      - NEO4J_kafka_acks={{NEO4J_kafka_acks}}
+      - NEO4J_kafka_streams_log_compaction_strategy='compact'
+      - NEO4J_kafka_transactional_id='{{NEO4J_kafka_transactional_id}}'
+    {% if NEO4J_streams_enabledj is defined and NEO4J_streams_enabledj | length %}
+      - NEO4J_streams_source_enabled='{{NEO4J_streams_enabledj}}'
+    {% endif -%}   {#  NEO4J_dbms_memory_pagecache_size #}
+      - NEO4J_streams_source_topic_nodes_{NEO4J_topic_name}}={{NEO4J_streams_source_topic_nodes_neo4j}}
+      - NEO4J_streams_source_topic_relationships_neo4j={{NEO4J_streams_source_topic_relationships_neo4j}}
+      - NEO4J_streams_source_schema_polling_interval=10000
+    {% endif -%}   {#  KAFKA_enable #}
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -10564,7 +10576,7 @@ services:
       # CASSANDRA_PASSWORD: cassandra
     {% endif -%}   {#  ZIPKIN_storage_type #}
     {%if ZIPKIN_collect_kafka and KAFKA_enable | default(false) %}
-      KAFKA_BOOTSTRAP_SERVERS: kafka-1:19092,kafka-2:19093
+      KAFKA_BOOTSTRAP_SERVERS: "{{ns.bootstrapServers}}"
     {% endif -%}   {#  KAFKA_enable #}
       #SELF_TRACING_ENABLED: true
       #JAVA_OPTS: '-Xms128m -Xmx128m -XX:+ExitOnOutOfMemoryError'
