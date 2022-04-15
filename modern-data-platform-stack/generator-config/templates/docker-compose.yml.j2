@@ -7005,7 +7005,7 @@ services:
 {% if NEO4J_enable | default(false) %}
   #  ================================== Neo4J ========================================== #
   neo4j-1:
-    image: neo4j:{{__NEO4J_version}}
+    image: neo4j:{{__NEO4J_version}}{{ '-enterprise' if (NEO4J_edition | lower) == 'enterprise'}}
     hostname: neo4j-1
     container_name: neo4j-1
     labels:
@@ -7016,16 +7016,25 @@ services:
       - "7474:7474"
       - "7687:7687"
     environment:
+    {% if (NEO4J_edition | lower) == 'enterprise'  %}
       - NEO4J_ACCEPT_LICENSE_AGREEMENT=yes
-      - NEO4J_HEAP_MEMORY=2048
-      - NEO4J_CACHE_MEMORY=1G
+    {% endif -%}   {#  use_timezone #}
       - NEO4J_AUTH=neo4j/{{admin_password}}
+      - NEO4JLABS_PLUGINS={{NEO4J_plugins}}
+    {% if NEO4J_dbms_memory_pagecache_size is defined and NEO4J_dbms_memory_pagecache_size | length %}
+      - NEO4J_dbms_memory_pagecache_size={{NEO4J_dbms_memory_pagecache_size}}
+    {% endif -%}   {#  NEO4J_dbms_memory_pagecache_size #}
+    {% if NEO4J_dbms_memory_pagecache_size is defined and NEO4J_dbms_memory_pagecache_size | length %}
+      - NEO4J_dbms_memory_heap_max__size={{NEO4J_dbms_memory_pagecache_size}}
+    {% endif -%}   {#  NEO4J_dbms_memory_pagecache_size #}
+      - NEO4J_dbms_logs_debug_level={{NEO4J_dbms_logs_debug_level}}
+      - EXTENSION_SCRIPT={{NEO4J_extension_script}}
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
-#      - "./conf/neo4j/neo4j.conf:/conf/neo4j.conf"
+      - "./init/neo4j:/init"
       - "./plugins/neo4j/:/plugins"
     {% if NEO4J_volume_map_data %}
       - "./container-volume/neo4j/data:/data"
