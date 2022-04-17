@@ -141,6 +141,8 @@ networks:
 {% set __SPRING_DATAFLOW_version = SPRING_DATAFLOW_version | default('latest') -%}
 {% set __SPRING_SKIPPER_version = SPRING_SKIPPER_version | default('latest') -%}
 
+{% set __AIRBYTE_version = AIRBYTE_version | default('latest') -%}
+
 {% set __AIRFLOW_version = AIRFLOW_version | default('latest') -%}
 
 {%if (JUPYTER_edition | lower) == 'minimal' | default(false) %}
@@ -473,6 +475,7 @@ networks:
   {% set STREAMSHEETS_enable = false -%}
   {% set CONDUIT_enable = false -%}
   {% set SPRING_DATAFLOW_enable = false -%}
+  {% set AIRBYTE_enable = false -%}
   {% set AIRFLOW_enable = false -%}
   {% set ZEPPELIN_enable = false -%}
   {% set JUPYTER_enable = false -%}
@@ -5070,6 +5073,9 @@ services:
       - SPRING_DATASOURCE_PASSWORD=rootpw
       - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.mariadb.jdbc.Driver
       - LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_CLOUD_SKIPPER_SERVER_DEPLOYER=ERROR
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
     entrypoint: "/usr/src/app/wait-for-it.sh spring-dataflow-mysql:3306 -- /cnb/process/web"
     volumes:
       - ./data-transfer:/data-transfer
@@ -5094,8 +5100,332 @@ services:
       MYSQL_DATABASE: dataflow
       MYSQL_USER: root
       MYSQL_ROOT_PASSWORD: rootpw
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
     expose:
       - 3306
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  SPRING_DATAFLOW_enable #}
+
+{%if AIRBYTE_enable | default(false) %}
+  airbyte-init:
+    image: airbyte/init:{{__AIRBYTE_version}}
+    container_name: init
+    hostname: init
+    labels:
+      com.platys.name: 'airbyte'
+    environment:
+      - LOCAL_ROOT=/tmp/airbyte_local
+      - HACK_LOCAL_ROOT_PARENT=/tmp
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./tmp:/local_parent
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    command: /bin/sh -c "./scripts/create_mount_directories.sh /local_parent /tmp tmp/airbyte_local"
+    restart: {{container_restart_policy}}
+
+  airbyte-bootloader:
+    image: airbyte/bootloader:{{__AIRBYTE_version}}
+    container_name: airbyte-bootloader
+    hostname: airbyte-bootloader
+    labels:
+      com.platys.name: 'airbyte'
+    environment:
+      - AIRBYTE_VERSION={{__AIRBYTE_version}}
+      - CONFIG_DATABASE_PASSWORD=${CONFIG_DATABASE_PASSWORD:-}
+      - CONFIG_DATABASE_URL=${CONFIG_DATABASE_URL:-}
+      - CONFIG_DATABASE_USER=${CONFIG_DATABASE_USER:-}
+      - DATABASE_PASSWORD={{AIRBYTE_database_password}}
+      - DATABASE_URL={{AIRBYTE_database_url}}
+      - DATABASE_USER={{AIRBYTE_database_user}}
+      - LOG_LEVEL=INFO
+      - RUN_DATABASE_MIGRATION_ON_STARTUP="true"
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    restart: {{container_restart_policy}}
+
+  airbyte-db:
+    image: airbyte/db:{{__AIRBYTE_version}}
+    container_name: airbyte-db
+    hostname: airbyte-db
+    labels:
+      com.platys.name: 'airbyte'
+    environment:
+      - CONFIG_DATABASE_PASSWORD=${CONFIG_DATABASE_PASSWORD:-}
+      - CONFIG_DATABASE_URL=${CONFIG_DATABASE_URL:-}
+      - CONFIG_DATABASE_USER=${CONFIG_DATABASE_USER:-}
+      - DATABASE_PASSWORD={{AIRBYTE_database_password}}
+      - DATABASE_URL={{AIRBYTE_database_url}}
+      - DATABASE_USER={{AIRBYTE_database_user}}
+      - POSTGRES_PASSWORD={{AIRBYTE_database_password}}
+      - POSTGRES_USER={{AIRBYTE_database_user}}
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if AIRBYTE_volume_map_data %}
+      - ./container-volume/airbyte/db:/var/lib/postgresql/data
+    {% endif -%}   {#  AIRBYTE_volume_map_data #}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    restart: {{container_restart_policy}}
+
+  airbyte-scheduler:
+    image: airbyte/scheduler:{{__AIRBYTE_version}}
+    container_name: airbyte-scheduler
+    hostname: airbyte-scheduler
+    labels:
+      com.platys.name: 'airbyte'
+    environment:
+      - AIRBYTE_ROLE=${AIRBYTE_ROLE:-}
+      - AIRBYTE_VERSION={{__AIRBYTE_version}}
+      - CONFIG_DATABASE_PASSWORD=${CONFIG_DATABASE_PASSWORD:-}
+      - CONFIG_DATABASE_URL=${CONFIG_DATABASE_URL:-}
+      - CONFIG_DATABASE_USER=${CONFIG_DATABASE_USER:-}
+      - CONFIG_ROOT=/data
+      - DATABASE_PASSWORD={{AIRBYTE_database_password}}
+      - DATABASE_URL={{AIRBYTE_database_url}}
+      - DATABASE_USER={{AIRBYTE_database_user}}
+      - INTERNAL_API_HOST=airbyte-server:8001
+      - JOB_MAIN_CONTAINER_CPU_LIMIT=''
+      - JOB_MAIN_CONTAINER_CPU_REQUEST=''
+      - JOB_MAIN_CONTAINER_MEMORY_LIMIT=''
+      - JOB_MAIN_CONTAINER_MEMORY_REQUEST=''
+      - LOCAL_ROOT=/tmp/airbyte_local
+      - LOCAL_DOCKER_MOUNT=/tmp/airbyte_local
+      - LOG_LEVEL=INFO
+      - NEW_SCHEDULER="false"
+      - SECRET_PERSISTENCE=${SECRET_PERSISTENCE}
+      - SYNC_JOB_MAX_ATTEMPTS=3
+      - SYNC_JOB_MAX_TIMEOUT_DAYS=3
+      - SUBMITTER_NUM_THREADS=10
+      - TEMPORAL_HOST=airbyte-temporal:7233
+      - TRACKING_STRATEGY=segment
+      - WEBAPP_URL=http://localhost:8000/
+      - WORKER_ENVIRONMENT=${WORKER_ENVIRONMENT}
+      - WORKSPACE_DOCKER_MOUNT=airbyte_workspace
+      - WORKSPACE_ROOT=/tmp/workspace
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./container-volume/airbyte/data:/data
+      - ./container-volume/airbyte/workspace:/tmp/workspace
+      - /tmp/airbyte_local:/tmp/airbyte_local
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    restart: {{container_restart_policy}}
+
+  airbyte-worker:
+    image: airbyte/worker:{{__AIRBYTE_version}}
+    container_name: airbyte-worker
+    hostname: airbyte-worker
+    labels:
+      com.platys.name: 'airbyte'
+    environment:
+      - AIRBYTE_VERSION={{__AIRBYTE_version}}
+      - AUTO_DISABLE_FAILING_CONNECTIONS=${AUTO_DISABLE_FAILING_CONNECTIONS}
+      - CONFIG_DATABASE_PASSWORD=${CONFIG_DATABASE_PASSWORD:-}
+      - CONFIG_DATABASE_URL=${CONFIG_DATABASE_URL:-}
+      - CONFIG_DATABASE_USER=${CONFIG_DATABASE_USER:-}
+      - CONFIG_ROOT=/data
+      - DATABASE_PASSWORD={{AIRBYTE_database_password}}
+      - DATABASE_URL={{AIRBYTE_database_url}}
+      - DATABASE_USER={{AIRBYTE_database_user}}
+      - JOB_MAIN_CONTAINER_CPU_LIMIT=''
+      - JOB_MAIN_CONTAINER_CPU_REQUEST=''
+      - JOB_MAIN_CONTAINER_MEMORY_LIMIT=''
+      - JOB_MAIN_CONTAINER_MEMORY_REQUEST=''
+      - LOCAL_ROOT=/tmp/airbyte_local
+      - LOCAL_DOCKER_MOUNT=/tmp/airbyte_local
+      - LOG_LEVEL=INFO
+      - MAX_CHECK_WORKERS=5
+      - MAX_DISCOVER_WORKERS=5
+      - MAX_SPEC_WORKERS=5
+      - MAX_SYNC_WORKERS=5
+      - SECRET_PERSISTENCE=${SECRET_PERSISTENCE}
+      - SYNC_JOB_MAX_ATTEMPTS=3
+      - SYNC_JOB_MAX_TIMEOUT_DAYS=3
+      - TEMPORAL_HOST=airbyte-temporal:7233
+      - TRACKING_STRATEGY=segment
+      - WEBAPP_URL=http://localhost:8000/
+      - WORKER_ENVIRONMENT=${WORKER_ENVIRONMENT}
+      - WORKSPACE_DOCKER_MOUNT=airbyte_workspace
+      - WORKSPACE_ROOT=/tmp/workspace
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./container-volume/airbyte/workspace:/tmp/workspace
+      - /tmp/airbyte_local:/tmp/airbyte_local
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    restart: {{container_restart_policy}}
+
+  airbyte-server:
+    image: airbyte/server:{{__AIRBYTE_version}}
+    logging: *default-logging
+    container_name: airbyte-server
+    hostname: airbyte-server
+    labels:
+      com.platys.name: 'airbyte'
+      com.platys.restapi.title: "Airbyte REST API"
+      com.platys.restapi.url: "http://${PUBLIC_IP}:28270/api/v1"
+    ports:
+      - 28270:8001
+    environment:
+      - AIRBYTE_ROLE=${AIRBYTE_ROLE:-}
+      - AIRBYTE_VERSION={{__AIRBYTE_version}}
+      - CONFIG_DATABASE_PASSWORD=${CONFIG_DATABASE_PASSWORD:-}
+      - CONFIG_DATABASE_URL=${CONFIG_DATABASE_URL:-}
+      - CONFIG_DATABASE_USER=${CONFIG_DATABASE_USER:-}
+      - CONFIGS_DATABASE_MINIMUM_FLYWAY_MIGRATION_VERSION=${CONFIGS_DATABASE_MINIMUM_FLYWAY_MIGRATION_VERSION:-}
+      - CONFIG_ROOT=/data
+      - DATABASE_PASSWORD={{AIRBYTE_database_password}}
+      - DATABASE_URL={{AIRBYTE_database_url}}
+      - DATABASE_USER={{AIRBYTE_database_user}}
+      - JOB_MAIN_CONTAINER_CPU_LIMIT=''
+      - JOB_MAIN_CONTAINER_CPU_REQUEST=''
+      - JOB_MAIN_CONTAINER_MEMORY_LIMIT=''
+      - JOB_MAIN_CONTAINER_MEMORY_REQUEST=''
+      - JOBS_DATABASE_MINIMUM_FLYWAY_MIGRATION_VERSION=${JOBS_DATABASE_MINIMUM_FLYWAY_MIGRATION_VERSION:-}
+      - LOG_LEVEL=INFO
+      - NEW_SCHEDULER="false"
+      - SECRET_PERSISTENCE=${SECRET_PERSISTENCE}
+      - TEMPORAL_HOST=airbyte-temporal:7233
+      - TRACKING_STRATEGY=segment
+      - WEBAPP_URL=http://localhost:8000/
+      - WORKER_ENVIRONMENT=${WORKER_ENVIRONMENT}
+      - WORKSPACE_ROOT=/tmp/workspace
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./container-volume/airbyte/workspace:/tmp/workspace
+      - ./container-volume/airbyte/data:/data
+      - /tmp/airbyte_local:/tmp/airbyte_local
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    restart: {{container_restart_policy}}
+
+  airbyte-webapp:
+    image: airbyte/webapp:{{__AIRBYTE_version}}
+    container_name: airbyte-webapp
+    hostname: airbyte-webapp
+    labels:
+      com.platys.name: 'airbyte'
+      com.platys.webui.title: "Airbyte UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28271"
+    ports:
+      - 28271:80
+    environment:
+      - AIRBYTE_ROLE=${AIRBYTE_ROLE:-}
+      - AIRBYTE_VERSION={{__AIRBYTE_version}}
+      - API_URL=/api/v1/
+      - FULLSTORY=${FULLSTORY:-}
+      - INTERNAL_API_HOST=airbyte-server:8001
+      - IS_DEMO="true"
+      - OPENREPLAY=${OPENREPLAY:-}
+      - PAPERCUPS_STORYTIME=${PAPERCUPS_STORYTIME:-}
+      - TRACKING_STRATEGY="segment"
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    restart: {{container_restart_policy}}$
+
+  airbyte-temporal:
+    image: airbyte/temporal:{{__AIRBYTE_version}}
+    container_name: airbyte-temporal
+    hostname: airbyte-temporal
+    labels:
+      com.platys.name: 'airbyte'
+      com.platys.restapi.title: "Airbyte Temporal"
+      com.platys.restapi.url: "http://${PUBLIC_IP}:28272"
+    ports:
+      - 28272:7233
+    environment:
+      - DB=postgresql
+      - DB_PORT={{AIRBYTE_database_port}}
+      - DYNAMIC_CONFIG_FILE_PATH=config/dynamicconfig/development.yaml
+      - LOG_LEVEL=${LOG_LEVEL}
+      - POSTGRES_PWD={{AIRBYTE_database_password}}
+      - POSTGRES_SEEDS={{AIRBYTE_database_host}}
+      - POSTGRES_USER={{AIRBYTE_database_user}}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./conf/airbyte/temporal/dynamicconfig:/etc/temporal/config/dynamicconfig
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    restart: {{container_restart_policy}}
+
 {% endif %}   {#  SPRING_DATAFLOW_enable #}
 
 {%if AIRFLOW_enable | default(false) %}

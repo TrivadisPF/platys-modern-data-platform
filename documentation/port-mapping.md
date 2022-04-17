@@ -38,7 +38,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 3002 | 3000 | wetty (dc2 |
 3005 | 3000 | marquez-web |
 3010 | 3000 | postman |
-3006 | 3000 | retool-api | 
+3006 | 3000 | retool-api |
 3030 | 3030 | lenses |
 3100 | 3100 | loki |
 3200 | 3200 | tempo |
@@ -422,6 +422,9 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28267 | 16686 | tempo (jaeger ui) |
 28268 | 8080 | quine-1 |
 28269 | 8080 | conduit |
+28270 | 8001 | airbyte-server |
+28271 | 80 | airbyte-webapp |
+28272 | 7233 | airbyte-temporal |
 
 ## Ports > 28500
 
