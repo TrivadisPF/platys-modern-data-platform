@@ -1268,6 +1268,29 @@ services:
     <<: *logging
     {% endif -%}   {#  LOKI_collect_docker_logs #}
     restart: {{container_restart_policy}}
+
+  mzcli:
+    image: materialize/cli:latest
+    hostname: mzcli
+    container_name: mzcli
+    labels:
+      com.platys.name: "materialize"
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        while [ 1 -eq 1 ];do sleep 60;done
+    restart: {{container_restart_policy}}
 {% endif %}   {# MATERIALIZE_enable #}
 
 {% if (AZKARRA_enable) | default(false) %}
