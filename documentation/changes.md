@@ -16,7 +16,7 @@ The Modern Data Platform version 1.15.0 contains the following bug fixes and enh
 ### New Cookbook Recipes
 
  *
- 
+
 ### Version upgrades
 
  * Update `Apache NiFi` to `1.15.3` and `Apache NiFi Registry` to `1.15.3`
@@ -24,7 +24,7 @@ The Modern Data Platform version 1.15.0 contains the following bug fixes and enh
  * Update `Starburst Enterprise` to `375-e`
  * Update `dremio` to `20.1`
  * Update `Debezium Server` to `1.9`
- * Update `DataHub` to `v0.8.32` 
+ * Update `DataHub` to `v0.8.32`
  * Update `ksqldb` to `0.24.0`
  * Update `spring-cloud-dataflow-server` to `2.9.3`
  * Update `spring-cloud-skipper-server` to `2.8.3`
@@ -36,19 +36,20 @@ The Modern Data Platform version 1.15.0 contains the following bug fixes and enh
  * Update `spark` to `3.1.3`
  * Update `zeppelin` to `0.10.1`
  * Update `Confluent Platform` to `7.1.0`
- 
+ * Update `Materialize` to `v0.26.0`
+
 ### Breaking Changes
 
  * `KAFKA_CONNECT_UI_use_public_ip` option has been removed, as now `kafka-connect-ui` is using the internal service name to connect to kafka-connect.
  * `SPARK_major_version` has been replaced by `SPARK_base_version` to be able to set the major and minor version for the Spark version to use.
 
-### Enhancements 
+### Enhancements
 
  * Add support for Nifi Cluster (setting the new config seeting `NIFI_create_cluster` to `true`
  * Apache NiFi is now secure by default, so you have to use https to get to the UI and then authenticate using the user and password specified.
  * Zeppelin images are now in Sync with Spark version (all 3 digits x.x.x).
- 
-### Bug Fixes 
+
+### Bug Fixes
 
  * fix bug in `markdown-renderer` on Apple Silicon (M1)
  * fix bug if a kafka-connect cluster is used
@@ -91,7 +92,7 @@ The Modern Data Platform version 1.14.0 contains the following bug fixes and enh
  * [Querying data in Kafka from Trino (formerly PrestoSQL)](../cookbooks/recipes/querying-kafka-with-trino/README.md)
  * [Using a Kafka Connect Connector not in Confluent Hub](../cookbooks/recipes/using-kafka-connector-not-in-confluent-hub/README.md)
 
- 
+
 ### Version upgrades
 
  * Update `DataHub` to `0.8.25`
@@ -130,7 +131,7 @@ The Modern Data Platform version 1.14.0 contains the following bug fixes and enh
  * Update `Grafana` to `8.3.4`
  * Update `Kibana` to `7.17.0`
  * Update `Memchached` to `1.6.13`
- * Update `Solr` to `8.11` 
+ * Update `Solr` to `8.11`
  * Update `DGraph` to `v21.12.0`
  * Update `Stardog` to `7.8.3-java11-preview`
  * Update `GraphDB` to `9.10.1`
@@ -159,7 +160,7 @@ The Modern Data Platform version 1.14.0 contains the following bug fixes and enh
  * If manually copying Kafka Connect connectors, then no longer place them into `plugins/kafka-connect` but `plugins/kafka-connect/connectors`
  * Rename of the `python` configuration settings (`PYTHON_artefacts_folder` and `PYTHON_script_file`)
 
-### Enhancements 
+### Enhancements
 
  * Apicurio Schema Registry as a drop-in replacement for the Confluent Schema Registry
  * All services in the Services List Markdown page (http://dataplatform/services) contain a link to their homepage
@@ -168,11 +169,11 @@ The Modern Data Platform version 1.14.0 contains the following bug fixes and enh
  * Added support for PIP packages to be installed before running the `python` container
  * Support sending docker logs to Grafana Loki
 
-### Bug Fixes 
+### Bug Fixes
 
  * fixed error with Burrow service
  * `KEYCLOCK` changed to `KEYCLOAK` to reflect the right name
- 
+
 ## What's new in 1.13.0
 
 The Modern Data Platform version 1.13.0 contains the following bug fixes and enhancements:
@@ -203,10 +204,10 @@ The Modern Data Platform version 1.13.0 contains the following bug fixes and enh
 
  * [Support StreamSets Data Collector Activation](../cookbooks/recipes/streamsets-oss-activation)
 
-### Version upgrades 
+### Version upgrades
 
- * Update `Confluent` to `6.2.0` 
- * Update `Marquez` to `0.19.0` 
+ * Update `Confluent` to `6.2.0`
+ * Update `Marquez` to `0.19.0`
  * Update `Trino` to `363`
  * Update `Starburstdata` to `363-e`
  * Update `DataHub` to `0.8.15`
@@ -251,14 +252,14 @@ The Modern Data Platform version 1.13.0 contains the following bug fixes and enh
 
 ### Breaking Changes
 
- * Changed `HAZELCAST_IMDG_xxxxxx` to `HAZELCAST_xxxxxx` 
- * Changed `ORACLE_xxxxxx` to `ORACLE_EE_xxxxxx` 
+ * Changed `HAZELCAST_IMDG_xxxxxx` to `HAZELCAST_xxxxxx`
+ * Changed `ORACLE_xxxxxx` to `ORACLE_EE_xxxxxx`
  * Changed default of `KAFKA_CONNECT_nodes` from `2` to `1`
  * Changed `KAFKA_EAGLE_enable` to `KAFKA_EFAK_enable`
 
-### Enhancements 
+### Enhancements
 
- * Documentation markdown pages are copied into the generated platform and available in the markdown viewer 
+ * Documentation markdown pages are copied into the generated platform and available in the markdown viewer
  * Support Zookeeper-Less Kafka Setup in KRaft mode (`KAFKA_use_kraft_mode`)
  * Support setting the `SDC ID` to a fixed value for StreamSets, so that an Activation code is still valid after recreating the `streamsets-1` docker container
  * Switch from `cp-enterprise-kafka` to `cp-server` image for Confluent Enterprise
@@ -276,7 +277,7 @@ The Modern Data Platform version 1.13.0 contains the following bug fixes and enh
  * Add support for installing Python packages when starting Jupyter (`JUPYTER_python_packages`)
  * Add detail pages for some services linked from the **List of Services** page rendered by the Markdown viewer
 
-### Bug Fixes 
+### Bug Fixes
 
   * fix error "panic: runtime error: slice bounds out of range" in `schema-registry-ui` and `kafka-connect-ui` by allowing the mapping the `resolv.conf` into the container. It is enabled by default.
 
@@ -287,13 +288,13 @@ The Modern Data Platform version 1.12.1 contains the following bug fixes and enh
 
 ### Version upgrades  
 
- * Update `NiFi` to `1.13.2` 
- * Update `DataHub` to `v0.8.0` 
- * Update `ksqlDb` to `0.18.0` 
+ * Update `NiFi` to `1.13.2`
+ * Update `DataHub` to `v0.8.0`
+ * Update `ksqlDb` to `0.18.0`
  * Update `Jupyter` to `spark-3.1.1`
 
-### Bug Fixes 
- 
+### Bug Fixes
+
  * Fix Thrift Server which did not work in previous release due to Spark images which are based on Alpine Linux
 
 ## What's new in 1.12.0
@@ -313,20 +314,20 @@ The Modern Data Platform version 1.12.0 contains the following new services and 
  * QuestDB Timeseries DB
  * Materialize
  * Debezium UI
- 
+
 ### New Cookbook Recipes
- 
+
  * [Creating and visualizing ADRs with log4brains](../cookbooks/recipes/creating-adr-with-log4brains)
  * [Using Dev Simulator Orgin to simulate streaming data](../cookbooks/recipes/using-dev-simulator-origin)
  * [Using private (Trivadis) Oracle XE image](../cookbooks/recipes/using-private-oracle-xe-image)    
  * [Using private (Trivadis) Oracle EE image](../cookbooks/recipes/using-private-oracle-ee-image)
  * [Using public Oracle XE image](../cookbooks/recipes/using-public-oracle-xe-image)
- 
+
 ### Version upgrades  
 
  * Update `Azkarra` to `0.9.1`
  * Update `Hasura` to `v2.0.0-alpha.9`
- * Update `Marquez` to `0.14.2` 
+ * Update `Marquez` to `0.14.2`
  * Update `Grafana` to `7.5.2`
  * Update `Axonserver` to `4.5`
  * Update `Streamsheets` to `2.3-milestone`
@@ -347,12 +348,12 @@ The Modern Data Platform version 1.12.0 contains the following new services and 
  * Update `HiveMQ 4` to `4.6.1`
  * Update `Airflow` to `2`
 
-### Enhancements 
-  
+### Enhancements
+
  * Added support for Kafka Monitoring using JMX and Prometheus/Grafana (with input from this [confluent github project](https://github.com/confluentinc/jmx-monitoring-stacks)
  * use official Cloudbeaver docker image and no longer the trivadis one
  * [solution documentend](https://github.com/TrivadisPF/platys/blob/master/documentation/docker-compose-without-internet.md) on how to use a Platys-generated Platform without internet on the target infrastructure
- 
+
 ## What's new in 1.11.0
 
 The Modern Data Platform version 1.11.0 contains the following new services and enhancements:
@@ -382,13 +383,13 @@ The Modern Data Platform version 1.11.0 contains the following new services and 
  * GraphDB added
  * PostgREST added
  * Log4brains added
- 
+
 ### New Cookbook Recipes
 
- * [Spark with PostgreSQL](../cookbooks/recipes/spark-with-postgresql) 
+ * [Spark with PostgreSQL](../cookbooks/recipes/spark-with-postgresql)
  * [Querying S3 data (MinIO) using MinIO](../cookbooks/recipes/querying-minio-with-trino/)
  * [Querying Kafka data using Trino](../cookbooks/recipes/querying-kafka-with-trino/)
- 
+
 ### Version upgrades  
 
 * Update `Elasticsearch` to `7.10.1`
@@ -398,7 +399,7 @@ The Modern Data Platform version 1.11.0 contains the following new services and 
 * Update `Axon Server` to `4.4.5`
 * Switch to official `Streamsets DataCollector` of `3.21.0`
 * Update `Marquez` to `0.12.2`
-* Update `Cedalo Management Center` to `2.1` 
+* Update `Cedalo Management Center` to `2.1`
 * Update `Confluent Platform` to `6.1.0`
 * Update `ksqlDB` to `0.15.0`
 * Update `APICurio Registry` to `1.3.2`
@@ -406,8 +407,8 @@ The Modern Data Platform version 1.11.0 contains the following new services and 
 * Update `Ahana PrestoDB` to `0.249`
 * Update `PrestoDB` to `0.249`
 * Update `DataHub` to `0.7.0`
- 
-### Enhancements 
+
+### Enhancements
 * Allow configuring the additional StreamSets stage libraries to be installed upon starting StreamSets (we no longer use the Trivadis docker images)
 * Support automatically installing StreamSets pipelines upon starting StreamSets
 * Support for Trino added (renamed PrestoSQL project) in parallel to PrestoDB (the other fork of Presto)
@@ -421,8 +422,8 @@ The Modern Data Platform version 1.10.0 contains the following new services and 
  * Spring Cloud Data Flow
 
 ### New Cookbook Recipes
- * [Using additional Kafka Connect Connector](../cookbooks/recipes/using-additional-kafka-connect-connector) 
- * [Custom UDF and ksqlDB](../cookbooks/recipes/custom-udf-and-ksqldb) 
+ * [Using additional Kafka Connect Connector](../cookbooks/recipes/using-additional-kafka-connect-connector)
+ * [Custom UDF and ksqlDB](../cookbooks/recipes/custom-udf-and-ksqldb)
  * [Using Confluent MQTT Proxy](../cookbooks/recipes/using-mqtt-proxy/)
  * [Spark with internal S3 (using on minIO)](..cookbooks//recipes/spark-with-internal-s3)
  * [Spark with external S3](../cookbooks/recipes/spark-with-extern-s3)
@@ -435,10 +436,10 @@ The Modern Data Platform version 1.10.0 contains the following new services and 
 * Update `Confluent` to `6.0.1`
 * Update `Presto` to `348-e`
 * Update `Stardog` to `7.4.5-java11-preview` and `Stardog Studio` to `1.30.0`
- 
-### Enhancements 
 
-* add the option to change the port of the markdown viewer to `8000`, with the default still being port `80`. 
+### Enhancements
+
+* add the option to change the port of the markdown viewer to `8000`, with the default still being port `80`.
 * add an option to use the content of the `DOCKER_HOST_IP` variable instead of the `PUBLIC_IP` variable for the web links to services.
 * change `minio` image to the one from `bitnami`, which allows for creating buckets upon start of the service
 * allow configuration of `spark.max.cores` and `spark.executor.memory` in Zeppelin
@@ -505,7 +506,7 @@ The Modern Data Platform version 1.9.0 contains the following new services and e
 * Update `Mosquitto` to `2.0`
 * Update `Streamsheets` to `2.1-milestone`
 
-### Enhancements 
+### Enhancements
 
 * support Master/Slave Redis setup
 * automatically set the name of the docker network to the value of the `platform-name` property from the `config.yml`
@@ -522,7 +523,7 @@ The Modern Data Platform version 1.9.0 contains the following new services and e
 * Volume mapped `data` folder in Streamsets (`STREAMSETS_volume_map_data=true`) is now mapped to `container-volume/streamsets-1/data` and no longer to `container-volume/streamsets-1`
 * No longer use the `KAFKA_bootstrap_servers` to configure external kafka, but `external['KAFKA_enable']` property in `config.yml`
 
-### Bug Fixes 
+### Bug Fixes
 
 * Fix for the error when using the `STREAMSETS_volume_map_data` feature
 
@@ -545,7 +546,7 @@ The Modern Data Platform version 1.8.0 contains the following new services and e
 * update `Confluent Platfrom` to `6.0.0`
 * update `ksqlDB` to `0.12.0`
 
-### Enhancements 
+### Enhancements
 * make Postgreqsql user, password and database configurable
 * support configuration of `KAFKA_MQTTPROXY_topic_regex_list` on `KAFKA_MQTTPROXY`
 * automatically create the `default-bucket` in Minio if `MINIO_ENABLE` is `true`
@@ -559,12 +560,12 @@ The Modern Data Platform version 1.8.0 contains the following new services and e
 * change service name of `redis` to `redis-1`
 * change property `RANGER_POSTGRESQL_volume_map_data ` to `RANGER_postgresql_volume_map_data` for the `RANGER` service
 
-### Bug Fixes 
+### Bug Fixes
 * support for the `hive` option in SPARK has been fixed so that Spark can use the Hive Metastore instead of the default, built-in metastore
 
 ## What's new in 1.7.0
 
-**Note:** you have to install the latest version of [`platys`](http://github/trivadispf/platys) (> 2.3.0)  to use this new version of the platform stack. 
+**Note:** you have to install the latest version of [`platys`](http://github/trivadispf/platys) (> 2.3.0)  to use this new version of the platform stack.
 
 The Modern Data Platform version 1.7.0 contains the following new services and enhancements:
 
@@ -637,8 +638,8 @@ The Modern Data Platform version 1.5.0 contains the following new services and e
 * Oracle XE (only through private docker image) added
 * Oracle EE (only through private docker image) added
 * Oracle REST Data Service (only through private docker image) added
-* Hashicorp Vault added 
-* Yugabyte Database added 
+* Hashicorp Vault added
+* Yugabyte Database added
 * Marquez added
 * Apache Ranger added
 
@@ -674,7 +675,7 @@ The Modern Analytical Data Platform Stack version 1.3.0 contains the following n
 
 * Apache Airflow
 * Apache Sqoop (previously part of `hadoop-client` service)
-* Code-Server (VS Code IDE in Browser) 
+* Code-Server (VS Code IDE in Browser)
 
 ### Enhancements / Changes
 
@@ -701,11 +702,9 @@ The Modern Analytical Data Platform Stack version 1.2.0 contains the following n
 ### Enhancements / Changes
 
 * refactor some ports back to original ports
-* rename all properties from `XXXX_enabled` to `XXXX_enable` 
-* rename all properties from 'XXXX_yyyy_enabled` to 'XXXX_YYYY_enabled` to clearly distinguish between product/service and the properties 
+* rename all properties from `XXXX_enabled` to `XXXX_enable`
+* rename all properties from 'XXXX_yyyy_enabled` to 'XXXX_YYYY_enabled` to clearly distinguish between product/service and the properties
 * Rename `connect-n` service to `kafka-connect-n` to be more clear
 * Rename `broker-n` service to `kafka-n` to be more clear
 * Upgrade to Confluent Platform 5.4.0
 * Add [concept of edition](service-design.md) for Kafka and Jupyter services
-
-	
