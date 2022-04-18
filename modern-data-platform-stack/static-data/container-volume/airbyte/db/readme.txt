@@ -1,1 +1,0 @@
-Contains the data of airbyte postgresql service, if flag AIRBYTE_volume_map_data is set to true.
