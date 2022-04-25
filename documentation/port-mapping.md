@@ -425,6 +425,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28270 | 8001 | airbyte-server |
 28271 | 80 | airbyte-webapp |
 28272 | 7233 | airbyte-temporal |
+28273 | 1090 | mockserver |
 
 ## Ports > 28500
 

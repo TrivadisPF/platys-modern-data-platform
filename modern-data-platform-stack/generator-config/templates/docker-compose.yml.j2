@@ -319,6 +319,7 @@ networks:
 {% set __FILE_BROWSER_version = FILE_BROWSER_version | default('latest') -%}
 {% set __VAULT_version = VAULT_version | default('latest') -%}
 {% set __KEYCLOAK_version = KEYCLOAK_version | default('latest') -%}
+{% set __MOCK_SERVER_version = MOCK_SERVER_version | default('latest') -%}
 {% set __PORTAINER_version = PORTAINER_version | default('latest') -%}
 {% set __CADVISOR_version = CADVISOR_version | default('latest') -%}
 {% set __HAWTIO_version = HAWTIO_version | default('latest') -%}
@@ -563,6 +564,7 @@ networks:
   {% set KEYCLOAK_enable = false -%}
   {% set POSTMAN_enable = false -%}
   {% set MICROCKS_enable = false -%}
+  {% set MOCK_SERVER_enable = false -%}
   {% set OTEL_COLLECTOR_enable = false %}
   {% set ZIPKIN_enable = false -%}
   {% set JAEGER_enable = false -%}
@@ -11262,6 +11264,48 @@ services:
     {% endif -%}   {#  LOKI_collect_docker_logs #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  GRAFANA_enable #}
+
+{% if MOCK_SERVER_enable | default(false) %}
+  #  ================================== MockServer ========================================== #
+  mockserver:
+    image: mockserver/mockserver:{{__MOCK_SERVER_version}}
+    container_name: mockserver
+    hostname: mockserver
+    labels:
+      com.platys.name: "mockserver"
+      com.platys.webui.title: "MockServer UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28273"
+    ports:
+      - 28273:1090
+    environment:
+      MOCKSERVER_SERVER_PORT: 1090
+      MOCKSERVER_LOG_LEVEL: {{MOCK_SERVER_log_level | default(DEBUG)}}
+    {% if MOCK_SERVER_persist_expectations | default(false) %}
+      MOCKSERVER_PERSIST_EXPECTATIONS: {{MOCK_SERVER_persist_expectations}}
+      MOCKSERVER_PERSISTED_EXPECTATIONS_PATH: {{MOCK_SERVER_persisted_expecations_path}}
+    {% endif -%}   {#  MOCK_SERVER_persist_expectations #}
+    {% if MOCK_SERVER_initialization_json_file is defined and MOCK_SERVER_initialization_json_file|length %}
+      MOCKSERVER_INITIALIZATION_JSON_PATH: /config/{{MOCK_SERVER_initialization_json_file}}
+    {% endif -%}   {#  MOCK_SERVER_initialization_json_file #}
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - /var/run/docker.sock:/var/run/docker.sock
+    {% if MOCK_SERVER_initialization_json_file is defined and MOCK_SERVER_initialization_json_file|length %}
+      - /scripts/mockserver/:/config
+    {% endif -%}   {#  MOCK_SERVER_initialization_json_file #}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    command: --admin-password '$$2y$$05$$NrPTXkUOIHTTbdHUqdAZVuSbncaZ9frWZYXDbA4v/WYqY0nAY1Sui'
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    restart: {{container_restart_policy}}
+{% endif %}   {# MOCK_SERVER_enable #}
 
 {% if PORTAINER_enable | default(false) %}
   #  ================================== Portainer ========================================== #
