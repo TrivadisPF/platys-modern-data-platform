@@ -1,6 +1,6 @@
 # PostgreSQL
 
-PostgreSQL is a powerful, open source object-relational database system with over 30 years of active development that has earned it a strong reputation for reliability, feature robustness, and performance. 
+PostgreSQL is a powerful, open source object-relational database system with over 30 years of active development that has earned it a strong reputation for reliability, feature robustness, and performance.
 
 **[Website](http://www.postgresql.org)** | **[Documentation](https://www.postgresql.org/docs/)** | **[GitHub](https://github.com/postgres/postgres)**
 
@@ -19,13 +19,18 @@ platys gen
 docker exec -ti postgresql psql -d demodb -U demo
 ```
 
+### Connect through JDBC
+
+* **JDBC Url:**  	`jdbc:postgresql://dataplatform/postgres`
+* **JDBC Driver Class Name:** 	`org.postgresql.Driver`
+
 ### How to create tables and add data when starting Postgresql?
 
 Navigate to `./init/postgresql` and create a sql file
 
 ```bash
 cd ./init/postgresql
-nano create_driver.sql
+nano 01_create_driver.sql
 ```
 
 and add the following commands:
@@ -46,4 +51,4 @@ Connect to Postgresql CLI to see that the table has been created:
 
 ```
 docker exec -ti postgresql psql -d demodb -U demo -c "SELECT * FROM driver"
-```	
+```
