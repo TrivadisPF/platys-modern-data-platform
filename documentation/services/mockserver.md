@@ -16,6 +16,8 @@ platys gen
 Navigate to <http://dataplatform:28273>.
 
 
+### Setting expectations using Json Config File
+
 ```json
 [ {
   "httpRequest" : {
@@ -29,6 +31,8 @@ Navigate to <http://dataplatform:28273>.
   }
 } ]
 ```
+
+### Setting expectations using Curl
 
 ```bash
 curl -X PUT 'localhost:28273/mockserver/expectation' \
@@ -44,5 +48,5 @@ curl -X PUT 'localhost:28273/mockserver/expectation' \
       }
     }
   }
-]
+]'
 ```
