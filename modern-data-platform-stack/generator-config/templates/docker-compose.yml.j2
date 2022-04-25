@@ -239,7 +239,9 @@ networks:
 
 {% set __ORACLE_XE_version = ORACLE_XE_version | default('latest') -%}
 {% set __ORACLE_EE_version = ORACLE_EE_version | default('latest') -%}
+{% set __ORACLE_SQLCL_version = ORACLE_SQLCL_version | default('latest') -%}
 {% set __ORACLE_REST_DATA_SERVICE_version = ORACLE_REST_DATA_SERVICE_version | default('latest') -%}
+
 {% set __MYSQL_version = MYSQL_version | default('latest') -%}
 {% set __POSTGRESQL_version = POSTGRESQL_version | default('latest') -%}
 {% set __POSTGREST_version = POSTGREST_version | default('latest') -%}
@@ -514,6 +516,7 @@ networks:
   {% set POSTGREST_enable = false -%}
   {% set ORACLE_XE_enable = false -%}
   {% set ORACLE_EE_enable = false -%}
+  {% set ORACLE_SQLCL_enable = false -%}
   {% set ORACLE_REST_DATA_SERVICE_enable = false -%}
   {% set MYSQL_enable = false -%}
   {% set SQLSERVER_enable = false -%}
@@ -8567,6 +8570,30 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {#  ORACLE_XE_enable #}
 
+{% if ORACLE_SQLCL_enable | default(false) %}
+  #  ================================== Oracle SQLcl ========================================== #
+  oracle-sqlcl:
+    image: trivadis/oracle-sqlcl:{{__ORACLE_SQLCL_version}}
+    container_name: oracle-sqlcl
+    hostname: oracle-sqlcl
+    labels:
+      com.platys.name: "oracle-sqlcl"
+    environment:
+      ORACLE_HOST: oracledb-xe
+      ORACLE_PORT: 1521
+      ORACLE_SERVICE: XEPDB1
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    command: tail -f /dev/null
+    restart: {{container_restart_policy}}
+{% endif %}   {#  ORACLE_SQLCL_enable #}
+
 {% if ORACLE_REST_DATA_SERVICE_enable | default(false) %}
   #  ================================== Oracle REST Data Service (ORDS) ========================================== #
   oracle-rest-1:
@@ -9862,7 +9889,7 @@ services:
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
-    command: tail -f /dev/null
+      command: tail -f /dev/null
     {%if LOKI_collect_docker_logs | default(false) %}
     <<: *logging
     {% endif -%}   {#  LOKI_collect_docker_logs #}
