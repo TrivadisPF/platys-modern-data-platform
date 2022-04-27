@@ -29,7 +29,7 @@ The Modern Data Platform version 1.15.0 contains the following bug fixes and enh
  * Update `dremio` to `20.1`
  * Update `Debezium Server` to `1.9`
  * Update `DataHub` to `v0.8.33`
- * Update `ksqldb` to `0.24.0`
+ * Update `ksqldb` to `0.25.1`
  * Update `spring-cloud-dataflow-server` to `2.9.3`
  * Update `spring-cloud-skipper-server` to `2.8.3`
  * Update `streamsheet` to `2.5.3-milestone`
