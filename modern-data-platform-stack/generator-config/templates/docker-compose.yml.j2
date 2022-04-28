@@ -4417,7 +4417,7 @@ services:
     {%if STREAMSETS_activate_https | default(false) %}
       SDC_CONF_HTTPS_PORT: 18629
     {% endif %}
-      SDC_CONF_RUNTIME_CONF_LOCATION: {{STREAMSETS_runtime_conf_location if STREAMSETS_runtime_conf_location is defined and STREAMSETS_runtime_conf_location | length else "embedded"}}
+      SDC_CONF_RUNTIME_CONF_LOCATION: {{"/etc/sdc/configuration.properties" if STREAMSETS_use_external_conf_file else "embedded"}}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -4436,6 +4436,9 @@ services:
       - ./scripts/streamsets/pipelines:/tmp/pipelines
     {% endif %}
       - ./conf/streamsets/pre-docker-entrypoint.sh:/pre-docker-entrypoint.sh
+    {% if STREAMSETS_use_external_conf_file %}
+      - ./conf/streamsets/configuration.properties:/etc/sdc/configuration.properties
+    {% endif %}
       - ./plugins/streamsets/user-libs:/opt/streamsets-datacollector-user-libs:Z
     {% for jdbcjar in STREAMSETS_jdbc_jars.split(",") %}
       - ./plugins/streamsets/libs-extras/streamsets-datacollector-jdbc-lib/{{jdbcjar}}:/opt/streamsets-datacollector-{{STREAMSETS_version}}/streamsets-libs-extras/streamsets-datacollector-jdbc-lib/lib/{{jdbcjar}}:Z
