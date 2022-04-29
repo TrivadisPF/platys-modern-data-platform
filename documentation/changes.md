@@ -41,6 +41,7 @@ The Modern Data Platform version 1.15.0 contains the following bug fixes and enh
  * Update `zeppelin` to `0.10.1`
  * Update `Confluent Platform` to `7.1.0`
  * Update `Materialize` to `v0.26.0`
+ * Update `lakeFS` to `0.63.0`
 
 ### Breaking Changes
 
@@ -54,6 +55,7 @@ The Modern Data Platform version 1.15.0 contains the following bug fixes and enh
  * Zeppelin images are now in Sync with Spark version (all 3 digits x.x.x).
  * Option for installing Adventureworks demo database with SQL Server
  * Externalize version of the container used when `PROVISIONING_DATA_enable` is activated
+ * Support external property file for configuration values in `streamsets`
 
 ### Bug Fixes
 
