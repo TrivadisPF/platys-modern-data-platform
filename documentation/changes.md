@@ -36,7 +36,7 @@ The Modern Data Platform version 1.15.0 contains the following bug fixes and enh
  * Update `thingsboard` to `3.3.4.1`
  * Update `datahub` to `v0.8.31`
  * Update `nifi` to `1.16.0` and `nifi-registry` to `1.16.0`
- * Update `minio` to `RELEASE.2022-04-01T03-41-39Z`
+ * Update `minio` to `RELEASE.2022-05-04T07-45-27Z`
  * Update `spark` to `3.1.3`
  * Update `zeppelin` to `0.10.1`
  * Update `Confluent Platform` to `7.1.0`
