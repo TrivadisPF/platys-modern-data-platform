@@ -70,7 +70,7 @@ networks:
   {% set __SPARK_version = SPARK_3_1_version ~ "-hadoop3.2" -%}
   {% set __LIVY_version = LIVY_version ~ "-spark" ~ SPARK_3_1_version.split(".")[0]  ~ "." ~ SPARK_3_1_version.split(".")[1] -%}
 {% elif (SPARK_base_version | lower) == '3.2'  %}
-  {% set __SPARK_version = SPARK_3_2_version ~ "-hadoop3.2" -%}
+  {% set __SPARK_version = SPARK_3_2_version ~ "-hadoop3.3" -%}
   {% set __LIVY_version = LIVY_version ~ "-spark" ~ SPARK_3_2_version.split(".")[0]  ~ "." ~ SPARK_3_2_version.split(".")[1] -%}
 {% else -%}
   {% set __SPARK_version = SPARK_2_4_version ~ "-hadoop2.8" -%}
@@ -2010,7 +2010,7 @@ services:
     {% endif -%}   {#  external['KAFKA_sasl_mechanism'] is defined #}
     {% if (SCHEMA_REGISTRY_enable or external['SCHEMA_REGISTRY_enable']) | default(false) %}
               schema-registry:
-                url: "{{ns.schemaRegistryUrlExternal}}"
+                url: "{{ns.schemaRegistryUrl}}"
                 type: "confluent"
         {% if schemaRegistryUsername is defined and schemaRegistryUsername|length %}
                 basic-auth-username: "{{schemaRegistryUsername}}"
@@ -9652,7 +9652,9 @@ services:
       MINIO_ROOT_USER: {{MINIO_access_key}}
       MINIO_ROOT_PASSWORD: {{MINIO_secret_key}}
       MINIO_REGION_NAME: {{s3DefaultRegion if s3DefaultRegion is defined and s3DefaultRegion else omit}}
-      MINIO_BROWSER: "{{MINIO_browser_enable | default(true) }}"
+    {%if not MINIO_browser_enable | default(false) %}
+      MINIO_BROWSER: "off"
+    {% endif -%}   {#  MINIO_browser_enable #}
       #MINIO_PUBLIC_IPS: {{serviceName}}
       #MINIO_DOMAIN: minio.io
       #MINIO_DEFAULT_BUCKETS: 'admin-bucket,{{MINIO_default_buckets}}'
@@ -9731,7 +9733,7 @@ services:
     ports:
       - "28193:9090"
     environment:
-      CONSOLE_MINIO_SERVER: "http://minio-1:9090"
+      CONSOLE_MINIO_SERVER: "http://minio-1:9000"
       CONSOLE_PBKDF_PASSPHRASE: abc123!
       CONSOLE_PBKDF_SALT: abc123!
     {%if use_timezone | default(false) %}
@@ -9925,7 +9927,7 @@ services:
       LAKEFS_BLOCKSTORE_S3_REGION: {{s3DefaultRegion if s3DefaultRegion is defined and s3DefaultRegion else omit}}
       LAKEFS_BLOCKSTORE_S3_FORCE_PATH_STYLE: '{{s3PathStyleAccess}}'
       LAKEFS_BLOCKSTORE_S3_CREDENTIALS_ACCESS_KEY_ID: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
-      LAKEFS_BLOCKSTORE_S3_CREDENTIALS_ACCESS_SECRET_KEY: ${PLATYS_AWS_SECRET_ACCESS_KEY:-{{MINIO_secret_key}}}
+      LAKEFS_BLOCKSTORE_S3_CREDENTIALS_SECRET_ACCESS_KEY: ${PLATYS_AWS_SECRET_ACCESS_KEY:-{{MINIO_secret_key}}}
     {% endif -%}   {#  LAKEFS_blockstore_type #}
       LAKEFS_AUTH_ENCRYPT_SECRET_KEY: ${LAKEFS_AUTH_ENCRYPT_SECRET_KEY:-some random secret string}
       LAKEFS_DATABASE_CONNECTION_STRING: "postgres://lakefs:lakefs@postgresql/lakefs?sslmode=disable"
