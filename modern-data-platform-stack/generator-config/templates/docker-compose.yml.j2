@@ -8731,6 +8731,12 @@ services:
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
+    {%if POSTGRESQL_wal_level is defined AND POSTGRESQL_wal_level AND POSTGRESQL_wal_level | length | default(false) %}
+    command:
+      - "postgres"
+      - "-c"
+      - "wal_level={{POSTGRESQL_wal_level | lower }}"
+    {% endif -%}   {#  POSTGRESQL_wal_level #}
     {%if LOKI_collect_docker_logs | default(false) %}
     <<: *logging
     {% endif -%}   {#  LOKI_collect_docker_logs #}
