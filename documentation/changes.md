@@ -43,6 +43,7 @@ The Modern Data Platform version 1.15.0 contains the following bug fixes and enh
  * Update `Materialize` to `v0.26.0`
  * Update `lakeFS` to `0.63.0`
  * Update `Pinot` to `0.10.0`
+ * Update `Marquez` to `0.22.0`
 
 ### Breaking Changes
 
