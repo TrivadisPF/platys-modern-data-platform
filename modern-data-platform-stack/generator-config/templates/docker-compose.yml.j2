@@ -1004,7 +1004,7 @@ services:
       CONNECT_LOG4J_ROOT_LOGLEVEL: "INFO"
       CONNECT_LOG4J_LOGGERS: "org.apache.kafka.connect.runtime.rest=WARN,org.reflections=ERROR"
       CONNECT_LOG4J_APPENDER_STDOUT_LAYOUT_CONVERSIONPATTERN: "[%d] %p %X{connector.context}%m (%c:%L)%n"
-      CONNECT_PLUGIN_PATH: "/usr/share/java,/etc/kafka-connect/addl-plugins"
+      CONNECT_PLUGIN_PATH: "/usr/share/java,/etc/kafka-connect/addl-plugins,/etc/kafka-connect/cflthub-plugins"
       CONNECT_CONNECTOR_CLIENT_CONFIG_OVERRIDE_POLICY: 'All'
     {%if external['KAFKA_enable'] and external['KAFKA_sasl_mechanism'] is defined and external['KAFKA_sasl_mechanism'] | length %}
       CONNECT_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: "https"
@@ -1031,7 +1031,7 @@ services:
       CONNECT_CONFIG_PROVIDERS_{{KAFKA_CONNECT_config_providers | upper }}_CLASS: '{{KAFKA_CONNECT_config_providers_classes}}'
     {% if OTEL_COLLECTOR_enable | default(false) %}
       OTEL_RESOURCE_ATTRIBUTES: 'service.name=connect'
-      KAFKA_OPTS: '-javaagent:/tmp/opentelemetry-javaagent.jar -Dotel.exporter.otlp.endpoint=http://otel-collector:4317'
+      KAFKA_OPTS: '-javaagent:/otel/opentelemetry-javaagent.jar -Dotel.exporter.otlp.endpoint=http://otel-collector:4317'
     {% endif -%}
     {% if KAFKA_jmx_monitoring_prometheus_enable %}
       EXTRA_ARGS: -javaagent:/usr/share/jmx-exporter/jmx_prometheus_javaagent-0.12.0.jar=1234:/usr/share/jmx-exporter/kafka_connect.yml
@@ -1042,7 +1042,7 @@ services:
     volumes:
       - ./data-transfer:/data-transfer
       - ./plugins/kafka-connect/connectors:/etc/kafka-connect/addl-plugins
-      - ./plugins/opentelemetry/agents:/tmp
+      - ./plugins/opentelemetry/agents:/otel
     {%if KAFKA_CONNECT_map_settings_file | default(false) %}
       - ./custom-conf/kafka-connect/settings.properties:/data/settings.properties
     {% endif -%}   {#  KAFKA_CONNECT_map_credentials_file #}
@@ -1060,9 +1060,10 @@ services:
       - -c
       - |
         echo "Installing Connectors"
+        mkdir -p /etc/kafka-connect/cflthub-plugins
         for i in $$(echo "{{KAFKA_CONNECT_connectors}}" | sed "s/,/ /g")
         do
-          confluent-hub install --no-prompt --component-dir /etc/kafka-connect/addl-plugins --verbose "$$i"
+          confluent-hub install --no-prompt --component-dir /etc/kafka-connect/cflthub-plugins --verbose "$$i"
         done
         #
         echo "Launching Kafka Connect worker"
@@ -5698,7 +5699,12 @@ services:
       ZEPPELIN_USER_USERNAME: {{ZEPPELIN_user_username}}
       ZEPPELIN_USER_PASSWORD: {{ZEPPELIN_user_password}}
       # set spark-master for Zeppelin interpreter
+
+  {%if ZEPPELIN_use_local_spark | default(false) %}
+      ZEPPELIN_SPARK_MASTER: "local[*]"
+  {% else %}
       ZEPPELIN_SPARK_MASTER: "spark://spark-master:7077"
+  {% endif -%}   {#  ZEPPELIN_use_local_spark #}
       ZEPPELIN_NOTEBOOK_DIR: '{{ZEPPELIN_notebook_dir}}'
       ZEPPELIN_NOTEBOOK_CRON_ENABLE: '{{ZEPPELIN_notebook_cron_enable}}'
       PYSPARK_PYTHON: "python3"
@@ -6924,6 +6930,9 @@ services:
       - ./data-transfer:/data-transfer
       - ./conf/cassandra/jmxremote.access:/usr/lib/jvm/java-8-openjdk-amd64/jre/lib/management/jmxremote.access
       - ./conf/cassandra/jmxremote.password:/etc/cassandra/jmxremote.password
+    {% if CASSANDRA_volume_map_data %}
+      - "./container-volume/cassandra/data/cassandra-1:/var/lib/cassandra"
+    {% endif %}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -8730,6 +8739,12 @@ services:
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
+    {%if POSTGRESQL_wal_level is defined and POSTGRESQL_wal_level and POSTGRESQL_wal_level | length | default(false) %}
+    command:
+      - "postgres"
+      - "-c"
+      - "wal_level={{POSTGRESQL_wal_level | lower }}"
+    {% endif -%}   {#  POSTGRESQL_wal_level #}
     {%if LOKI_collect_docker_logs | default(false) %}
     <<: *logging
     {% endif -%}   {#  LOKI_collect_docker_logs #}
