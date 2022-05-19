@@ -426,6 +426,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28271 | 80 | airbyte-webapp |
 28272 | 7233 | airbyte-temporal |
 28273 | 1090 | mockserver |
+28274 | 8080 | kafka-webviewer |
 
 ## Ports > 28500
 

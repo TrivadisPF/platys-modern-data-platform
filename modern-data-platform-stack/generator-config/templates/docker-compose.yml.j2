@@ -47,6 +47,7 @@ networks:
 {% set __KOWL_version = KOWL_version | default('latest') -%}
 {% set __KOUNCIL_version = KOUNCIL_version | default('latest') -%}
 {% set __KAFKA_MAGIC_version = KAFKA_MAGIC_version | default('latest') -%}
+{% set __KAFKA_WEBVIEW_version = KAFKA_WEBVIEW_version | default('latest') -%}
 {% set __STREAMS_EXPLORER_version = STREAMS_EXPLORER_version | default('latest') -%}
 {% set __KAFKA_LAG_EXPORTER_version = KAFKA_LAG_EXPORTER_version | default('latest') -%}
 
@@ -2233,6 +2234,34 @@ services:
     {% endif -%}   {#  LOKI_collect_docker_logs #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  KAFKA_enable and KAFKA_MAGIC_enable #}
+
+{% if ((KAFKA_enable or external['KAFKA_enable']) and KAFKA_WEBVIEW_enable) | default(false) %}
+  #  ================================== Kafka Webview ========================================== #
+  kafka-webview:
+    image: sourcelaborg/kafka-webview:{{__KAFKA_WEBVIEW_version}}
+    container_name: kafka-webview
+    hostname: kafka-webview
+    labels:
+      com.platys.name: "kafka-webview"
+      com.platys.webui.title: 'Kafka Webview UI'
+      com.platys.webui.url: "http://${PUBLIC_IP}:28274"
+    ports:
+      - 28274:8080
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  KAFKA_enable and KAFKA_WEBVIEW_enable #}
 
 {% if ((KAFKA_enable or external['KAFKA_enable']) and STREAMS_EXPLORER_enable) | default(false) %}
   #  ================================== Streams Explorer ========================================== #
@@ -9670,6 +9699,8 @@ services:
     {%if not MINIO_browser_enable | default(false) %}
       MINIO_BROWSER: "off"
     {% endif -%}   {#  MINIO_browser_enable #}
+      MINIO_SERVER_URL: http://${PUBLIC_IP}
+
       #MINIO_PUBLIC_IPS: {{serviceName}}
       #MINIO_DOMAIN: minio.io
       #MINIO_DEFAULT_BUCKETS: 'admin-bucket,{{MINIO_default_buckets}}'
