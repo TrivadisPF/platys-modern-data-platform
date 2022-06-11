@@ -1,1 +1,1 @@
-Place additional Jars here
+Place additional Jars here (such as jdbc drivers)

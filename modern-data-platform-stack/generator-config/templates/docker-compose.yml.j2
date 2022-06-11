@@ -47,6 +47,7 @@ networks:
 {% set __KOWL_version = KOWL_version | default('latest') -%}
 {% set __KOUNCIL_version = KOUNCIL_version | default('latest') -%}
 {% set __KAFKA_MAGIC_version = KAFKA_MAGIC_version | default('latest') -%}
+{% set __KAFKA_WEBVIEW_version = KAFKA_WEBVIEW_version | default('latest') -%}
 {% set __STREAMS_EXPLORER_version = STREAMS_EXPLORER_version | default('latest') -%}
 {% set __KAFKA_LAG_EXPORTER_version = KAFKA_LAG_EXPORTER_version | default('latest') -%}
 
@@ -1042,6 +1043,7 @@ services:
     volumes:
       - ./data-transfer:/data-transfer
       - ./plugins/kafka-connect/connectors:/etc/kafka-connect/addl-plugins
+      - ./plugins/kafka-connect/jars:/etc/kafka-connect/jars
       - ./plugins/opentelemetry/agents:/otel
     {%if KAFKA_CONNECT_map_settings_file | default(false) %}
       - ./custom-conf/kafka-connect/settings.properties:/data/settings.properties
@@ -1053,7 +1055,6 @@ services:
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
-    {%if loop.index == 1 | default(false) %}
     command:
       # In the command section, $ are replaced with $$ to avoid the error 'Invalid interpolation format for "command" option'
       - bash
@@ -1070,7 +1071,6 @@ services:
         /etc/confluent/docker/run &
         #
         sleep infinity
-    {% endif %}
     {%if LOKI_collect_docker_logs | default(false) %}
     <<: *logging
     {% endif -%}   {#  LOKI_collect_docker_logs #}
@@ -1102,6 +1102,7 @@ services:
       - {{connect_external_port}}:{{connect_port}}
     {% endif %}
     environment:
+      KSQL_LOG4J_OPTS: "-Dlog4j.configuration=file:/etc/ksqldb/log4j-rolling.properties"
     {% if ( KAFKA_KSQLDB_edition | lower) == 'cp'  | default(false) %}
       KSQL_LOG4J_ROOT_LOGLEVEL: "ERROR"
       KSQL_LOG4J_LOGGERS: "org.apache.kafka.connect.runtime.rest=WARN,org.reflections=ERROR"
@@ -1109,15 +1110,20 @@ services:
       KSQL_LOG4J_PROCESSING_LOG_BROKERLIST: '{{ns.bootstrapServers}}'
     {% endif %}
 
-      #KSQL_KSQL_LOGGING_PROCESSING_TOPIC_NAME: 'ksql_processing_log'
+      KSQL_KSQL_LOGGING_PROCESSING_TOPIC_NAME: 'ksql_processing_log'
       KSQL_KSQL_LOGGING_PROCESSING_TOPIC_REPLICATION_FACTOR: {{KAFKA_KSQLDB_internal_replication_factor | default(1)}}
       KSQL_KSQL_LOGGING_PROCESSING_TOPIC_AUTO_CREATE: 'true'
       KSQL_KSQL_LOGGING_PROCESSING_STREAM_AUTO_CREATE: 'true'
+      KSQL_KSQL_LOGGING_PROCESSING_ROWS_INCLUDE: 'true'
 
       # For Demo purposes: improve resource utilization and avoid timeouts
       KSQL_KSQL_STREAMS_NUM_STREAM_THREADS: 1
 
       KSQL_PRODUCER_ENABLE_IDEMPOTENCE: 'true'
+      KSQL_KSQL_PERSISTENCE_DEFAULT_FORMAT_KEY: '{{KAFKA_KSQLDB_persistence_default_format_key | default(KAFKA) }}'
+    {% if KAFKA_KSQLDB_persistence_default_format_value is defined and KAFKA_KSQLDB_persistence_default_format_value|length %}
+      KSQL_KSQL_PERSISTENCE_DEFAULT_FORMAT_VALUE: '{{KAFKA_KSQLDB_persistence_default_format_value}}'
+    {% endif %}
 
       KSQL_APPLICATION_ID: "ksqldb-cluster"
       KSQL_KSQL_SERVICE_ID: "ksqldb-cluster"
@@ -1128,7 +1134,7 @@ services:
       KSQL_RESPONSE_HTTP_HEADERS_CONFIG: '{{KAFKA_KSQLDB_response_http_headers_config}}'
     {% if OTEL_COLLECTOR_enable | default(false) %}
       OTEL_RESOURCE_ATTRIBUTES: 'service.name=ksqldb'
-      KSQL_OPTS: '-javaagent:/tmp/opentelemetry-javaagent.jar -Dotel.exporter.otlp.endpoint=http://otel-collector:4317'
+      KSQL_OPTS: '-javaagent:/otel/opentelemetry-javaagent.jar -Dotel.exporter.otlp.endpoint=http://otel-collector:4317'
     {% endif -%}   {#  OTEL_COLLECTOR_enable #}
     {% if external['KAFKA_enable'] and external['KAFKA_sasl_mechanism'] is defined and external['KAFKA_sasl_mechanism'] | length %}
       KSQL_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: "https"
@@ -1186,7 +1192,7 @@ services:
       KSQL_CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: '1'
       KSQL_CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: '1'
       KSQL_CONNECT_LOG4J_APPENDER_STDOUT_LAYOUT_CONVERSIONPATTERN: "[%d] %p %X{connector.context}%m (%c:%L)%n"
-      KSQL_CONNECT_PLUGIN_PATH: '/usr/share/java,/etc/kafka-connect/addl-plugins'
+      KSQL_CONNECT_PLUGIN_PATH: '/usr/share/java,/etc/kafka-connect/addl-plugins,/etc/kafka-connect/cflthub-plugins'
     {% endif -%}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
@@ -1194,9 +1200,10 @@ services:
     volumes:
       - ./data-transfer:/data-transfer
       - ./plugins/ksqldb:/etc/ksqldb/ext
-      - ./conf/ksqldb/etc/log4j.properties:/etc/ksqldb/log4j.properties
+#      - ./conf/ksqldb/etc/log4j.properties:/etc/ksqldb/log4j.properties
       - ./plugins/kafka-connect/connectors:/etc/kafka-connect/addl-plugins
-      - ./plugins/opentelemetry/agents:/tmp
+      - ./plugins/kafka-connect/jars:/etc/kafka-connect/jars
+      - ./plugins/opentelemetry/agents:/otel
     {% if KAFKA_jmx_monitoring_prometheus_enable %}
       - ./scripts/kafka/jmx-exporter/:/usr/share/jmx-exporter
     {% endif -%}
@@ -1213,7 +1220,7 @@ services:
         echo "Installing Connectors"
           for i in $$(echo "{{KAFAK_KSQLDB_connect_connectors}}" | sed "s/,/ /g")
         do
-          confluent-hub install --no-prompt --component-dir /etc/kafka-connect/addl-plugins --verbose "$$i"
+          confluent-hub install --no-prompt --component-dir /etc/kafka-connect/cflthub-plugins --verbose "$$i"
         done
         #
         echo "Launching ksqlDB server"
@@ -1435,7 +1442,7 @@ services:
       SCHEMA_REGISTRY_DEBUG: "{{CONFLUENT_SCHEMA_REGISTRY_debug}}"
     {% if OTEL_COLLECTOR_enable | default(false) %}
       OTEL_RESOURCE_ATTRIBUTES: 'service.name=schema-registry'
-      SCHEMA_REGISTRY_OPTS: '-javaagent:/tmp/opentelemetry-javaagent.jar -Dotel.exporter.otlp.endpoint=http://otel-collector:4317'
+      SCHEMA_REGISTRY_OPTS: '-javaagent:/otel/opentelemetry-javaagent.jar -Dotel.exporter.otlp.endpoint=http://otel-collector:4317'
     {% endif -%}
     {% if KAFKA_jmx_monitoring_prometheus_enable %}
       EXTRA_ARGS: -javaagent:/usr/share/jmx-exporter/jmx_prometheus_javaagent-0.12.0.jar=1234:/usr/share/jmx-exporter/confluent_schemaregistry.yml
@@ -1445,7 +1452,7 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
-      - ./plugins/opentelemetry/agents:/tmp
+      - ./plugins/opentelemetry/agents:/otel
     {% if KAFKA_jmx_monitoring_prometheus_enable %}
       - ./scripts/kafka/jmx-exporter/:/usr/share/jmx-exporter
     {% endif -%}
@@ -2234,6 +2241,34 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {#  KAFKA_enable and KAFKA_MAGIC_enable #}
 
+{% if ((KAFKA_enable or external['KAFKA_enable']) and KAFKA_WEBVIEW_enable) | default(false) %}
+  #  ================================== Kafka Webview ========================================== #
+  kafka-webview:
+    image: sourcelaborg/kafka-webview:{{__KAFKA_WEBVIEW_version}}
+    container_name: kafka-webview
+    hostname: kafka-webview
+    labels:
+      com.platys.name: "kafka-webview"
+      com.platys.webui.title: 'Kafka Webview UI'
+      com.platys.webui.url: "http://${PUBLIC_IP}:28274"
+    ports:
+      - 28274:8080
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  KAFKA_enable and KAFKA_WEBVIEW_enable #}
+
 {% if ((KAFKA_enable or external['KAFKA_enable']) and STREAMS_EXPLORER_enable) | default(false) %}
   #  ================================== Streams Explorer ========================================== #
   streams-explorer:
@@ -2989,8 +3024,8 @@ services:
       CORE_CONF_fs_s3a_endpoint: 'http://minio:9000'
       CORE_CONF_fs_s3a_path_style_access: 'true'
       HIVE_SITE_CONF_fs_s3a_endpoint: http://minio:9000
-      HIVE_SITE_CONF_fs_s3a_access_key: V42FCGRVMK24JJ8DHUYG
-      HIVE_SITE_CONF_fs_s3a_secret_key: bKhWxVF3kQoLY9kFmt91l+tDrEoZjqnWXzY9Eza
+      HIVE_SITE_CONF_fs_s3a_access_key: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
+      HIVE_SITE_CONF_fs_s3a_secret_key: {{s3SecretAccessKey}}
       HIVE_SITE_CONF_fs_s3a_path_style_access: 'true'
       HIVE_SITE_CONF_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
@@ -9900,7 +9935,7 @@ services:
       com.platys.name: "awscli"
     environment:
       AWS_ACCESS_KEY_ID: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
-      SECRET_ACCESS_KEY: ${PLATYS_AWS_SECRET_ACCESS_KEY:-{{MINIO_secret_key}}}
+      AWS_SECRET_ACCESS_KEY: ${PLATYS_AWS_SECRET_ACCESS_KEY:-{{MINIO_secret_key}}}
       AWS_ENDPOINT: {{ (s3Endpoint | replace('http://','')) if s3Endpoint is defined and s3Endpoint else omit}}
       AWS_DEFAULT_REGION: {{s3DefaultRegion if s3DefaultRegion is defined and s3DefaultRegion else omit}}
     {% if use_timezone | default(false) %}
@@ -9908,7 +9943,7 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
-      - './conf/s3cfg:/root/.s3cfg.template'
+      - './conf/s3cfg:/root/.s3cfg'
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"

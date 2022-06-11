@@ -16,6 +16,7 @@ The Modern Data Platform version 1.15.0 contains the following bug fixes and enh
  * Airbyte
  * Oracle SQLcl
  * MockServer
+ * Kafka WebView
 
 ### New Cookbook Recipes
 
@@ -29,14 +30,14 @@ The Modern Data Platform version 1.15.0 contains the following bug fixes and enh
  * Update `dremio` to `20.1`
  * Update `Debezium Server` to `1.9`
  * Update `DataHub` to `v0.8.36`
- * Update `ksqldb` to `0.25.1`
+ * Update `ksqldb` to `0.26.0`
  * Update `spring-cloud-dataflow-server` to `2.9.3`
  * Update `spring-cloud-skipper-server` to `2.8.3`
  * Update `streamsheet` to `2.5.3-milestone`
  * Update `thingsboard` to `3.3.4.1`
  * Update `datahub` to `v0.8.31`
  * Update `nifi` to `1.16.1` and `nifi-registry` to `1.16.1`
- * Update `minio` to `RELEASE.2022-05-08T23-50-31Z`
+ * Update `minio` to `RELEASE.2022-05-19T18-20-59Z`
  * Update `spark` to `3.1.3`
  * Update `zeppelin` to `0.10.1`
  * Update `Confluent Platform` to `7.1.0`
