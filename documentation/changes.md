@@ -25,8 +25,8 @@ The Modern Data Platform version 1.15.0 contains the following bug fixes and enh
 ### Version upgrades
 
  * Update `Apache NiFi` to `1.15.3` and `Apache NiFi Registry` to `1.15.3`
- * Update `Trino` to `385`
- * Update `Starburst Enterprise` to `384-e`
+ * Update `Trino` to `387`
+ * Update `Starburst Enterprise` to `386-e`
  * Update `dremio` to `20.1`
  * Update `Debezium Server` to `1.9`
  * Update `DataHub` to `v0.8.36`
@@ -36,7 +36,7 @@ The Modern Data Platform version 1.15.0 contains the following bug fixes and enh
  * Update `streamsheet` to `2.5.3-milestone`
  * Update `thingsboard` to `3.3.4.1`
  * Update `datahub` to `v0.8.31`
- * Update `nifi` to `1.16.1` and `nifi-registry` to `1.16.1`
+ * Update `nifi` to `1.16.3` and `nifi-registry` to `1.16.3`
  * Update `minio` to `RELEASE.2022-05-19T18-20-59Z`
  * Update `spark` to `3.1.3`
  * Update `zeppelin` to `0.10.1`
