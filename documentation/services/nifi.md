@@ -15,4 +15,6 @@ platys gen
 
 Navigate to <http://${PUBLIC_IP}:18080/nifi>
 
+Login with User `nifi` and password `1234567890ACD`.
+
 
