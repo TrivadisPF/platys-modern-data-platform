@@ -17,6 +17,7 @@ The Modern Data Platform version 1.15.0 contains the following bug fixes and enh
  * Oracle SQLcl
  * MockServer
  * Kafka WebView
+ * OpenSearch & OpenSearch Dashboards
 
 ### New Cookbook Recipes
 
