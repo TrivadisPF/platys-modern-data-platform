@@ -73,6 +73,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 5434 | 5432 | marquez-db |
 5601 | 5601 | kibana |
 5602 | 5601 | datahub-kibana |
+5603 | 5601 | opensearch-dashboards |
 5672 | 5672 | activemq |
 5673 | 5672 | rabbitmq (amqp) |
 5701 | 5701 | hazelcast	-1 |
@@ -267,6 +268,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 29097 | 29097 | kafka-6 (docker-host)   |
 29098 | 29098 | kafka-7 (docker-host)   |
 29099 | 29099 | kafka-8 (docker-host)   |
+29200 | 9200 | opensearch-1 |
+29600 | 9600 | opensearch-1 |
 31010 | 31010 | dremio |
 39092 | 29092 | kafka-1 (localhost)   |
 39093 | 29093 | kafka-2 (localhost    |
