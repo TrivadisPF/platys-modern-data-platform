@@ -119,6 +119,7 @@ networks:
 {% set __DEJAVU_version = DEJAVU_version | default('latest') -%}
 {% set __CEREBRO_version = CEREBRO_version | default('latest') -%}
 {% set __ELASTICSEARCHHQ_version = ELASTICSEARCHHQ_version | default('latest') -%}
+{% set __ELASTICVUE_version = ELASTICVUE_version | default('latest') -%}
 
 {% set __OPENSEARCH_version = OPENSEARCH_version | default('latest') -%}
 {% set __OPENSEARCH_DASHBOARDS_version = OPENSEARCH_DASHBOARDS_version | default('latest') -%}
@@ -7374,6 +7375,34 @@ services:
     {% endif -%}   {#  LOKI_collect_docker_logs #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  ELASTICHQ_enable #}
+
+{% if ELASTICVUE_enable | default(false) %}
+  #  ================================== ElasticVue ========================================== #
+  elasticvue:
+    image: cars10/elasticvue:{{__ELASTICVUE_version}}
+    container_name: elasticvue
+    hostname: elasticvue
+    labels:
+      com.platys.name: "elasticvue"
+      com.platys.webui.title: "ElasticVue UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28275"
+    ports:
+      - "28275:8080"
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  ELASTICVUE_enable #}
 
 {% if KIBANA_enable | default(false) %}
   #  ================================== Kibana ========================================== #

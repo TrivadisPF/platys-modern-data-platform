@@ -430,6 +430,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28272 | 7233 | airbyte-temporal |
 28273 | 1090 | mockserver |
 28274 | 8080 | kafka-webviewer |
+28275 | 8080 | elasticvue |
 
 ## Ports > 28500
 
