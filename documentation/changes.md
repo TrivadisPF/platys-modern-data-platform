@@ -19,6 +19,7 @@ The Modern Data Platform version 1.15.0 contains the following bug fixes and enh
  * Kafka WebView
  * OpenSearch & OpenSearch Dashboards
  * ElasticVue
+ * NocoDB
 
 ### New Cookbook Recipes
 

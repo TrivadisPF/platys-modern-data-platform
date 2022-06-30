@@ -431,6 +431,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28273 | 1090 | mockserver |
 28274 | 8080 | kafka-webviewer |
 28275 | 8080 | elasticvue |
+28276 | 8080 | nocodb |
 
 ## Ports > 28500
 

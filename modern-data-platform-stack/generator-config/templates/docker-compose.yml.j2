@@ -509,7 +509,7 @@ networks:
   {% set DEJAVU_enable = false -%}
   {% set CEREBRO_enable = false -%}
   {% set ELASTICHQ_enable = false -%}
-  {% set ELASTICVUE_enable = false -%}  
+  {% set ELASTICVUE_enable = false -%}
   {% set KIBANA_enable = false -%}
   {% set INFLUXDB2_enable = false -%}
   {% set DRUID_enable = false -%}
@@ -9129,6 +9129,38 @@ services:
     {% endif -%}   {#  LOKI_collect_docker_logs #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  SQLPAD_enable #}
+
+{% if NOCODB_enable | default(false) %}
+  #  ================================== NocoDB ========================================== #
+  nocodb:
+    image: nocodb/nocodb:{{__NOCODB_version}}
+    container_name: nocodb
+    hostname: nocodb
+    labels:
+      com.platys.name: "nocodb"
+      com.platys.webui.title: "NocoDB UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28276"
+    ports:
+      - "28276:8080"
+    environment:
+      NC_DB: 'pg://postgresql:5432?u=postgres&p=abc123!&d=postgres'
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      {% if NOCODB_volume_map_data | default(false) %}
+      - ./container-volumes/nocodb/data:/usr/app/data
+      {% endif %}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  NOCODB_enable #}
 
 {% if QUIX_enable | default(false) %}
   #  ================================== Quix ========================================== #
