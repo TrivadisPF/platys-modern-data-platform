@@ -432,6 +432,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28274 | 8080 | kafka-webviewer |
 28275 | 8080 | elasticvue |
 28276 | 8080 | nocodb |
+28277 | 8080 | zilla |
+28278 | 9090 | zilla |
 
 ## Ports > 28500
 

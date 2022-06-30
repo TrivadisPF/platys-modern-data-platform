@@ -50,6 +50,7 @@ networks:
 {% set __KAFKA_WEBVIEW_version = KAFKA_WEBVIEW_version | default('latest') -%}
 {% set __STREAMS_EXPLORER_version = STREAMS_EXPLORER_version | default('latest') -%}
 {% set __KAFKA_LAG_EXPORTER_version = KAFKA_LAG_EXPORTER_version | default('latest') -%}
+{% set __ZILLA_version = ZILLA_version | default('latest') -%}
 
 {% set __REMORA_version = REMORA_version | default('latest') -%}
 
@@ -462,6 +463,7 @@ networks:
   {% set KAFKA_MAGIC_enable = false -%}
   {% set EFAK_enable = false -%}
   {% set KAFKA_LAG_EXPORTER_enable = false -%}
+  {% set ZILLA_enable = false -%}
   {% set REMORA_enable = false -%}
   {% set DEBEZIUM_SERVER_enable = false -%}
   {% set DEBEZIUM_UI_enable = false -%}
@@ -1417,6 +1419,36 @@ services:
     {% endif -%}   {#  LOKI_collect_docker_logs #}
     restart: {{container_restart_policy}}
 {% endif %}   {# KAFKA_enable and KAFKA_MQTTPROXY_enable #}
+
+{% if ZILLA_enable | default(false) %}
+  #  ================================== Zilla ========================================== #
+  zilla:
+    image: ghcr.io/aklivity/zilla:{{__ZILLA_version}}
+    container_name: zilla
+    hostname: zilla
+    labels:
+      com.platys.name: "zilla"
+      com.platys.restapi.title: 'Zilla'
+      com.platys.restapi.url: "http://${PUBLIC_IP}:28277"
+    ports:
+      - "28277:8080"
+      - "28278:9090"
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    command: [ "start", "-v", "-e" ]
+    restart: {{container_restart_policy}}
+{% endif %}   {# ZILLA_enable #}
 
 {% if (SCHEMA_REGISTRY_enable and SCHEMA_REGISTRY_flavour | lower) == 'confluent' | default(false) %}
   #  ================================== Confluent Schema Registry ========================================== #
