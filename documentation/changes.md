@@ -43,7 +43,7 @@ The Modern Data Platform version 1.15.0 contains the following bug fixes and enh
  * Update `minio` to `RELEASE.2022-05-19T18-20-59Z`
  * Update `spark` to `3.1.3`
  * Update `zeppelin` to `0.10.1`
- * Update `Confluent Platform` to `7.1.0`
+ * Update `Confluent Platform` to `7.1.2`
  * Update `Materialize` to `v0.26.0`
  * Update `lakeFS` to `0.63.0`
  * Update `Pinot` to `0.10.0`
