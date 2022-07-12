@@ -28,8 +28,8 @@ The Modern Data Platform version 1.15.0 contains the following bug fixes and enh
 ### Version upgrades
 
  * Update `Apache NiFi` to `1.15.3` and `Apache NiFi Registry` to `1.15.3`
- * Update `Trino` to `387`
- * Update `Starburst Enterprise` to `386-e`
+ * Update `Trino` to `389`
+ * Update `Starburst Enterprise` to `388-e`
  * Update `dremio` to `20.1`
  * Update `Debezium Server` to `1.9`
  * Update `DataHub` to `v0.8.40`
