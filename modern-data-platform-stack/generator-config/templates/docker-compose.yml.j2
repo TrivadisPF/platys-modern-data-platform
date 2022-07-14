@@ -3338,6 +3338,10 @@ services:
       HIVE_SITE_CONF_fs_s3a_secret_key: {{s3SecretAccessKey}}
       HIVE_SITE_CONF_fs_s3a_path_style_access: '{{s3PathStyleAccess}}'
       HIVE_SITE_CONF_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
+  {%elif external['ADLS_enable'] | default(false) %}
+      CORE_CONF_fs_defaultFS: file:///tmp
+      HIVE_SITE_CONF_fs_azure_account_auth_type_gusstorage_dfs_core_windows_net: 'SharedKey'
+      HIVE_SITE_CONF_fs_azure_account_key_gusstorage_dfs_core_windows_net: {{adlsAccessKey}}
   {% else %}
       CORE_CONF_fs_defaultFS: file:///tmp
   {% endif -%}   {#  HADOOP_enable or MINIO_enable #}
@@ -9509,6 +9513,9 @@ services:
   {%if MINIO_enable or external['S3_enable'] | default(false) %}
       - './conf/{{conf_dir}}/catalog/minio.properties:{{trino_etc_dir}}/catalog/minio.properties'
   {% endif %}
+  {%if external['ADLS_enable'] | default(false) %}
+      - './conf/{{conf_dir}}/catalog/adls.properties:{{trino_etc_dir}}/catalog/adls.properties'
+  {% endif %}
   {% if TRINO_kafka_table_names is defined and TRINO_kafka_table_names|length and (KAFKA_enable or external['KAFKA_enable']) | default(false)  %}
       - './conf/{{conf_dir}}/catalog/kafka.properties:{{trino_etc_dir}}/catalog/kafka.properties'
       - './conf/{{conf_dir}}/kafka/:{{trino_etc_dir}}/kafka/'
@@ -9577,6 +9584,9 @@ services:
   {%if MINIO_enable or external['S3_enable'] | default(false) %}
       - './conf/{{conf_dir}}/catalog/minio.properties:{{trino_etc_dir}}/catalog/minio.properties'
   {% endif %}
+  {%if external['ADLS_enable'] | default(false) %}
+      - './conf/{{conf_dir}}/catalog/adls.properties:{{trino_etc_dir}}/catalog/adls.properties'
+  {% endif %}  
   {%if KAFKA_enable or external['KAFKA_enable'] | default(false) %}
       - './conf/{{conf_dir}}/catalog/kafka.properties:{{trino_etc_dir}}/catalog/kafka.properties'
       - './conf/{{conf_dir}}/kafka/:{{trino_etc_dir}}/kafka/'
