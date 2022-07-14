@@ -683,6 +683,13 @@ networks:
     {% set s3DefaultRegion = 'us-east-1' %}
 {% endif %}   {# external['s3Endpoint'] #}
 
+{% if (external['ADLS_enable']) | default(false) %}
+  {% if (external['ADLS_storage_account'] != None) | default(false) %}
+    {% set adlsStorageAccount = external['S3_storage_account'] %}
+  {% endif %}
+  {% set adlsAccessKey = '${PLATYS_AZURE_ADLS_ACCESS_KEY:?PLATYS_AZURE_ADLS_ACCESS_KEY must be set either in .env or as an environment variable}' %}
+{% endif %}   {# external['s3Endpoint'] #}
+
 {#  ================================== Kafka Connect Settings ========================================== #}
 
 {% set ns1 = namespace(connectServersInternalUrl='') %}
@@ -9467,6 +9474,10 @@ services:
       S3_AWS_SECRET_KEY: {{s3SecretAccessKey}}
       S3_PATH_STYLE_ACCESS: '{{s3PathStyleAccess}}'
   {% endif %}
+  {%if external['ADLS_enable'] | default(false) %}
+      ADLS_STORAGE_ACCOUNT: {{adlsStorageAccount | default(omit) }}
+      ADLS_ACCESS_KEY: {{adlsAccessKey}}
+  {% endif -%}   {#  external['ADLS_enable'] #}
   {% if TRINO_kafka_table_names is defined and TRINO_kafka_table_names|length and (KAFKA_enable or external['KAFKA_enable']) | default(false)  %}
       KAFKA_TABLE_NAMES: {{TRINO_kafka_table_names}}
   {% endif %}
