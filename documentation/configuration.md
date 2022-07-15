@@ -30,7 +30,8 @@ There are some overall settings which will control the behaviour for all or a gr
 | `S3_enable`                             	| `false` | 1.9.0 | Use external S3 service, such as AWS S3 cloud service or an on-premises S3 appliance. You have to configure two environment variables, `PLATYS_AWS_ACCESS_KEY` with the access key and `PLATYS_AWS_SECRET_ACCESS_KEY` with the access secret. This can be done on the on the docker host or in the `.env` file in the platform home (same folder where the `docker-compose.yml` is located). |  
 | `S3_endpoint`                             	| `` | 1.9.0 | The endpoint address of the S3 external service |  
 | `S3_path_style_access`                             	| `false` | 1.9.0 | Use Path Style Access if set to `true`, otherwise the default of virtual hosted-style access is used. |
-
+| `ADLS_enable`                             	| `false` | 1.15.0 | Use external Azure Data Lake Storage Gen2 service. You have to configure two environment variables, `PLATYS_AZURE_ADLS_ACCESS_KEY` with the access key. This can be done on the on the docker host or in the `.env` file in the platform home (same folder where the `docker-compose.yml` is located). |  
+| `ADLS_storage_account`                             	| `` | 1.15.0 | The name of the storage account for the ADLS service. |  
 
 ## Platform Services
 
