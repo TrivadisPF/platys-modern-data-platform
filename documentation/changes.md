@@ -20,6 +20,7 @@ The Modern Data Platform version 1.15.0 contains the following bug fixes and enh
  * OpenSearch & OpenSearch Dashboards
  * ElasticVue
  * NocoDB
+ * Azure CLI
  * Azure Storage Explorer
 
 ### New Cookbook Recipes
