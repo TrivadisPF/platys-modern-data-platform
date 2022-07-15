@@ -434,6 +434,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28276 | 8080 | nocodb |
 28277 | 8080 | zilla |
 28278 | 9090 | zilla |
+28279 | 80 | azure-storage-explorer |
 
 ## Ports > 28500
 

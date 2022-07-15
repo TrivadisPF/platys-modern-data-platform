@@ -315,6 +315,7 @@ networks:
 {% set __S3MANAGER_version = S3MANAGER_version | default('latest') -%}
 {% set __FILESTASH_version = FILESTASH_version | default('latest') -%}
 {% set __AWSCLI_version = AWSCLI_version | default('latest') -%}
+{% set __AZURE_STORAGE_EXPLORER_version = AZURE_STORAGE_EXPLORER_version | default('latest') -%}
 
 {% set __LAKEFS_version = LAKEFS_version | default('latest') -%}
 
@@ -573,6 +574,7 @@ networks:
   {% set FILESTASH_enable = false -%}
   {% set S3MANAGER_enable = false -%}
   {% set AWSCLI_enable = false -%}
+  {% set AZURE_STORAGE_EXPLORER_enable = false -%}
   {% set KEYCLOAK_enable = false -%}
   {% set POSTMAN_enable = false -%}
   {% set MICROCKS_enable = false -%}
@@ -10187,6 +10189,34 @@ services:
     {% endif -%}   {#  LOKI_collect_docker_logs #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  AWSCLI_enable #}
+
+{% if AZURE_STORAGE_EXPLORER_enable | default(false) %}
+  #  ================================== Awscli ========================================== #
+  azure-storage-explorer:
+    image: sebagomez/azurestorageexplorer:{{__AZURE_STORAGE_EXPLORER_version}}
+    container_name: azure-storage-explorer
+    hostname: azure-storage-explorer
+    labels:
+      com.platys.name: "azure-storage-explorer"
+      com.platys.webui.title: "S3 Manager UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28279"
+    ports:
+      - 28279:80
+    {% if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  AZURE_STORAGE_EXPLORER_enable #}
 
 {% if LAKEFS_enable | default(false) %}
   #  ================================== LakeFS ========================================== #
