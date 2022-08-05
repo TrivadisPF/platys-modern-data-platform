@@ -164,7 +164,7 @@ For this sample, we want to create a platform running Kafka and the AKHQ Managem
 
 You only have to explicitly enable what you need, as each service is disabled by default. Other settings have meaningful defaults as well. So you can also delete the values for all the services you don't need. 
 
-All configuration settings for the `platys-modern-data-platform` platform stack are documented [here](Configuration.md).
+All configuration settings for the `platys-modern-data-platform` platform stack are documented [here](configuration.md).
 
 
 A shortcut exists with the `--enable-services` flag, which directly generates a `config.yml` file with the services needed. So to enable `KAFKA` and `AKHQ` directly from the `init`, we can use
