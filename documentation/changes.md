@@ -50,6 +50,7 @@ The Modern Data Platform version 1.15.0 contains the following bug fixes and enh
  * Update `lakeFS` to `0.63.0`
  * Update `Pinot` to `0.10.0`
  * Update `Marquez` to `0.23.0`
+ * Update `DataStax` to `6.8.25`
 
 ### Breaking Changes
 
