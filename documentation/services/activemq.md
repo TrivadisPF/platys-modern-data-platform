@@ -13,4 +13,6 @@ platys gen
 
 ## How to use it?
 
-Navigate to <http://dataplatform:8161>
+Navigate to <http://dataplatform:8161> for the ActiveMQ dashboard.
+
+To manage the ActiveMQ server, navigate to <http://dataplatform:8161/admin/> and use `admin` for the user and `admin` for the password when asked for.
