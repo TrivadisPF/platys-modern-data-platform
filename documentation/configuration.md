@@ -769,6 +769,8 @@ For each service there might be some other settings, such as controlling the num
 | `RABBITMQ_volume_map_logs `                   	| `false` 	| 1.6.0 	| Volume map logs folder into the RabbitMQ broker                                                                                                                                    	|             	|                                	|
 | [**_Pure FTP_**](./services/pure-ftp.md)  &nbsp;&nbsp;&nbsp;&nbsp;![x86-64](./images/x86-64.png)                                    	|         	|       	|                                                                                                                                                                                     	|      
 | `FTP_enable`                                   	| `false` 	| 1.0.0 	| Generate FTP service                                                                                                                                                                	|             	|                                	|
+| `FTP_username`                                   	| `ftp` 	| 1.15.0 	| The username of the user on the FTP Server |             	|                                	|
+| `FTP_username`                                   	| `abc123!` 	| 1.15.0 	| The password of the user on the FTP Server |             	|                                	|
 
 ### Process Orchestration
 
