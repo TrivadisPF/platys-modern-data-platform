@@ -7002,6 +7002,8 @@ services:
   #  ================================== Cassandra ========================================== #
   {% for num in range(CASSANDRA_nodes| default(1) ) %}
     {% set external_port = 29042 + loop.index - 1 %}
+    {% set external_jmx_port = 7199 + loop.index - 1 %}
+    {% set external_thrift_port = 9160 + loop.index - 1 %}
   cassandra-{{loop.index}}:
     image: cassandra:{{__CASSANDRA_version}}
     container_name: cassandra-{{loop.index}}
@@ -7010,8 +7012,8 @@ services:
       com.platys.name: "cassandra"
     ports:
       - {{external_port}}:9042
-      - 7199:7199
-      - 9160:9160
+      - {{external_jmx_port}}:7199
+      - {{external_thrift_port}}:9160
     environment:
       - CASSANDRA_CLUSTER_NAME="Test Cluster"
       - CASSANDRA_DC=se1
