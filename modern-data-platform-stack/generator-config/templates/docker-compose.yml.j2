@@ -34,6 +34,8 @@ networks:
 
 {% set __KCAT_version = KCAT_version | default('latest') -%}
 
+{% set __KAFKACTL_version = KAFKACTL_version | default('latest') -%}
+
 {% set __JIKKOU_version = JIKKOU_version | default('latest') -%}
 
 {% set __KAFKA_TOPICS_UI_version = KAFKA_TOPICS_UI_version | default('latest') -%}
@@ -1802,6 +1804,35 @@ services:
     {% endif -%}   {#  LOKI_collect_docker_logs #}
     restart: {{container_restart_policy}}
 {% endif %}   {# KCAT_enable #}
+
+{% if ((KAFKA_enable or external['KAFKA_enable']) and KAFKACTL_enable) | default(false) %}
+  #  ================================== kafkacatl  ========================================== #
+  kafkactl:
+    image: docker.io/jbvmio/kafkactl/kafkactl:{{__KAFKACTL_version}}
+    container_name: kafkactl
+    hostname: kafkactl
+    labels:
+      com.platys.name: "kafkactl"
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        while [ 1 -eq 1 ];do sleep 60;done
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    restart: {{container_restart_policy}}
+{% endif %}   {# KAFKACTL_enable #}
 
 {% if ((KAFKA_enable or external['KAFKA_enable']) and JIKKOU_enable) | default(false) %}
   #  ================================== Jikkou ========================================== #
