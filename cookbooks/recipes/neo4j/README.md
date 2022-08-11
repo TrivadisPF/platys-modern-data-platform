@@ -1,6 +1,6 @@
 # Working with Neo4J
 
-This recipe will show how to use Neo4J. 
+This recipe will show how to use Neo4J.
 
 ## Initialise data platform
 
@@ -10,7 +10,7 @@ First [initialise a platys-supported data platform](../documentation/getting-sta
 platys init --enable-services NEO4J -s trivadis/platys-modern-data-platform -w 1.8.0
 ```
 
-Now generate and start the data platform. 
+Now generate and start the data platform.
 
 ```
 platys gen
@@ -54,7 +54,7 @@ MATCH (p:Person) RETRUN p
 ```
 
 ```
-CREATE (p:Person {firstName: "Guido", lastName: "Schmutz"}) 
+CREATE (p:Person {firstName: "Guido", lastName: "Schmutz"})
 ```
 
 ```
@@ -70,7 +70,7 @@ CREATE (s:Student)-[r:STUDENT_OF]->(c:Course) RETURN s, c
 ```
 
 ```
-CREATE (p:Person:Student {firstName:"Martin",lastName:"Kraft"}),(c:Course {name: "NoSQL"}) RETURN p, c 
+CREATE (p:Person:Student {firstName:"Martin",lastName:"Kraft"}),(c:Course {name: "NoSQL"}) RETURN p, c
 ```
 
 ```
