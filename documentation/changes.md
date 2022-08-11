@@ -24,6 +24,7 @@ The Modern Data Platform version 1.15.0 contains the following bug fixes and enh
  * Azure Storage Explorer
  * Zilla
  * NocoDB
+ * kafkactl
 
 ### New Cookbook Recipes
 
