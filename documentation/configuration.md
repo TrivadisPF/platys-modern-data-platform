@@ -857,4 +857,3 @@ For each service there might be some other settings, such as controlling the num
 | [**Watchtower**](./services/watchtower.md) &nbsp;&nbsp;&nbsp;&nbsp;![x86-64](./images/x86-64.png)  ![arm](./images/arm.png)                    	|         	|       	            	
 | `WATCHTOWER_enable` | `false` 	| 1.11.0 	| Generates the watchtower service, a container-based solution for automating Docker container base image updates. |
 | `WATCHTOWER_map_config_json` | `false` 	| 1.15.0 	| Map the `config.json` file from `$HOME/.docker/` folder into the `watchtower` container? |
-
