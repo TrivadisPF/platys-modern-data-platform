@@ -22,6 +22,7 @@ The Modern Data Platform version 1.15.0 contains the following bug fixes and enh
  * NocoDB
  * Azure CLI
  * Azure Storage Explorer
+ * Zilla
 
 ### New Cookbook Recipes
 
