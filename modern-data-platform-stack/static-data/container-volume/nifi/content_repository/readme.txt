@@ -1,1 +1,0 @@
-Contains the content_repository data folder of nifi service, if flag NIFI_volume_map_data is set to true.

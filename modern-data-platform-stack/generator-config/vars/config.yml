@@ -4,7 +4,7 @@
       platys:
         platform-name: 'platys-platform'
         platform-stack: 'trivadis/platys-modern-data-platform'
-        platform-stack-version: '1.14.0'
+        platform-stack-version: '1.15.0-preview'
         structure: 'flat'
 
       # ========================================================================
@@ -29,8 +29,8 @@
       external:
         KAFKA_enable: false
         KAFKA_bootstrap_servers:
-        KAFKA_username:
-        KAFKA_password:
+        KAFKA_security_protocol: 
+        KAFKA_sasl_mechanism: 
 
         SCHEMA_REGISTRY_enable: false
         SCHEMA_REGISTRY_url:
@@ -39,6 +39,9 @@
         S3_endpoint:
         S3_default_region:
         S3_path_style_access: false
+
+        ADLS_enable: false
+        ADLS_storage_account:
 
       # ========================================================================
       # Platys Services
@@ -115,6 +118,7 @@
       # ===== Confluent ksqlDB ========
       #
       KAFKA_KSQLDB_enable: false
+      # either 'cp' or 'oss'
       KAFKA_KSQLDB_edition: 'oss'
       KAFKA_KSQLDB_nodes: 1
       KAFKA_KSQLDB_internal_replication_factor: 1
@@ -125,12 +129,15 @@
       KAFKA_KSQLDB_response_http_headers_config: ''
       KAFKA_KSQLDB_use_embedded_connect: false
       KAFAK_KSQLDB_connect_connectors: 
+      KAFKA_KSQLDB_persistence_default_format_key: 'KAFKA'
+      KAFKA_KSQLDB_persistence_default_format_value: ''
 
       #
       # ===== Materialize ========
       #
       MATERIALIZE_enable: false
-      
+      MATERIALIZE_CLI_enable: false
+
       #
       # ===== Azkarra Streams ========
       #
@@ -209,6 +216,11 @@
       KAFKA_MQTTPROXY_topic_regex_list:
 
       #
+      # ===== Zilla ========
+      #
+      ZILLA_enable: false
+
+      #
       # ===== Lenses ========
       #
       LENSES_BOX_enable: false
@@ -239,7 +251,7 @@
       KAFKA_TOPICS_UI_enable: false
       KAFKA_TOPICS_UI_map_resolv_conf: true
       KAFKA_CONNECT_UI_enable: false
-      KAFKA_CONNECT_UI_use_public_ip: true
+      # KAFKA_CONNECT_UI_use_public_ip: true
       KAFKA_CONNECT_UI_map_resolv_conf: true
 
       #
@@ -291,6 +303,11 @@
       KAFKA_MAGIC_enable: false
 
       #
+      # ===== kafka webview ========
+      #
+      KAFKA_WEBVIEW_enable: false
+
+      #
       # ===== Streams Explorer UI ========
       #
       STREAMS_EXPLORER_enable: false
@@ -334,8 +351,9 @@
       #
       SPARK_enable: false
 
-      # either 2 or 3
-      SPARK_major_version: 2
+      # either 2.4 or 3.1 or 3.2
+      SPARK_base_version: 2.4
+      #SPARK_major_version: 2        # has been replaced by SPARK_base_version
 
       # "hive" or "in-memory"
       SPARK_catalog: in-memory
@@ -471,6 +489,7 @@
       # one of 'none', 'basic', 'digest', 'form' or 'aster'
       STREAMSETS_http_authentication: form
       STREAMSETS_sdc_id: ''
+      STREAMSETS_use_external_conf_file: false
 
       #
       # =====  Streamsets Transformer ========
@@ -496,6 +515,13 @@
       # ===== Apache NiFi ========
       #
       NIFI_enable: false
+      NIFI_run_secure: true
+      NIFI_username: nifi
+      # password must be 12 chars minimum, otherwise a random user and password is generated
+      NIFI_password: 1234567890ACD
+      NIFI_nodes: 1
+      NIFI_create_cluster: false
+      NIFI_election_max_wait: '1 min'
       NIFI_volume_map_data: false
       NIFI_volume_map_logs: false
       NIFI_jvm_heap_init:
@@ -505,11 +531,27 @@
       # ===== Apache NiFi Registry ========
       #
       NIFI_REGISTRY_enable: false
+      NIFI_REGISTRY_volume_map_data: false
+
+      #
+      # ===== Apache NiFi Toolkit ========
+      #
+      NIFI_TOOLKIT_enable: false
+
+      #
+      # ===== MonitoFi ========
+      #
+      MONITOFI_enable: false      
 
       #
       # ===== Apache StreamPipes ========
       #
       STREAMPIPES_enable: false
+
+      #
+      # ===== Conduit ========
+      #
+      CONDUIT_enable: false
 
       #
       # ===== Node Red  ========
@@ -526,6 +568,19 @@
       # ===== Spring Cloud DataFlow ========
       #
       SPRING_DATAFLOW_enable: false
+
+      #
+      # ===== Airbyte ========
+      #
+      AIRBYTE_enable: false
+      AIRBYTE_volume_map_data: false
+      AIRBYTE_database_user: airbyte
+      AIRBYTE_database_password: abc123!
+      AIRBYTE_database_db: airbyte
+      AIRBYTE_database_host: airbyte-db
+      AIRBYTE_database_port: 5432
+      AIRBYTE_database_minimum_flyway_migration_version: 0.29.15.001
+      AIRBYTE_log_level: INFO
 
       #
       # ===== Sqoop ========
@@ -552,8 +607,10 @@
       ZEPPELIN_user_password: changeme
       ZEPPELIN_spark_cores_max:
       ZEPPELIN_spark_executor_memory:
+      ZEPPELIN_notebook_dir: 'notebook'
       ZEPPELIN_notebook_cron_enable: true
       ZEPPELIN_spark_submit_options: ""
+      ZEPPELIN_use_local_spark: false
 
       #
       # ===== Jupyter ========
@@ -731,6 +788,11 @@
       CHARTBOARD_volume_map_dashboards: false
 
       #
+      # ===== ReTool ========
+      #
+      RETOOL_enable: false
+
+      #
       # ===== Memcached ========
       #
       MEMCACHED_enable: false
@@ -761,7 +823,9 @@
       #
       CASSANDRA_enable: false
       # either 3 or 4
-      CASSANDRA_major_version: 3
+      CASSANDRA_major_version: 4
+      CASSANDRA_volume_map_data: false
+      CASSANDRA_nodes: 1
 
       REAPER_enable: false
 
@@ -788,16 +852,50 @@
       ELASTICSEARCH_enable: false
       # one of 'oss', 'elastic',
       ELASTICSEARCH_edition: 'oss'
+
+      #
+      # ===== OpenSearch ========
+      #
+      OPENSEARCH_enable: false
+      OPENSEARCH_nodes: 1
+      OPENSEARCH_volume_map_data: false
+      OPENSEARCH_DASHBOARDS_enable: false
+
+      #
+      # ===== Various UIs for Elasticsearch & OpenSearch ========
+      #
       DEJAVU_enable: false
       CEREBRO_enable: false
       ELASTICHQ_enable: false
+      ELASTICVUE_enable: false      
+
+      #
+      # ===== Quine ========
+      #
+      QUINE_enable: false
 
       #
       # ===== Neo4J ========
       #
       NEO4J_enable: false
+      # either "community" or "enterprise"
+      NEO4J_edition: community
+      NEO4J_dbms_memory_pagecache_size: ''
+      NEO4J_dbms_memory_heap_max_size: ''
       NEO4J_volume_map_data: false
       NEO4J_volume_map_logs: false
+      NEO4J_extension_script: ''
+      NEO4J_plugins: ''
+      NEO4J_dbms_logs_debug_level: 'INFO'
+
+      # Neo4J Streams Source (Neo4J -> Kafka)
+      NEO4J_source_enabled: true
+      NEO4J_topic_name: neo4j
+      NEO4J_streams_source_topic_nodes: ''
+      NEO4J_streams_source_topic_relationships: ''
+      NEO4J_kafka_acks: 1
+      NEO4J_kafka_transactional_id: ''
+
 
       #
       # ===== DGraph ========
@@ -902,6 +1000,7 @@
       ORACLE_XE_random_password: ''
       ORACLE_XE_app_user: ''
       ORACLE_XE_app_user_password: ''
+      ORACLE_XE_target_pdb: 'XEPDB1'
 
       #
       # ===== Oracle RDBMS ========
@@ -910,6 +1009,11 @@
       ORACLE_EE_volume_map_data: false
       ORACLE_EE_container_enable: false
       ORACLE_EE_password: 'EAo4KsTfRR'
+
+      #
+      # ===== Oracle SQLcl ========
+      #
+      ORACLE_SQLCL_enable: false
 
       #
       # ===== Oracle REST Data Service ========
@@ -925,6 +1029,9 @@
       # ===== SQL Server ========
       #
       SQLSERVER_enable: false
+      SQLSERVER_provision_adventure_works: false
+      # either oltp, datawarehouse or light
+      SQLSERVER_provision_adventure_works_edition: oltp
 
       #
       # ===== PostgreSQL ========
@@ -938,6 +1045,8 @@
       POSTGRESQL_user: postgres
       POSTGRESQL_password: abc123!
       POSTGRESQL_schema: demo
+      # one of the valid Postgresql wal_levels: "replica", "minimal", "logical". Use logical if you want to work with Debezium.
+      POSTGRESQL_wal_level: 
       #POSTGRESQL_anon_role: appuser
       
       #
@@ -971,6 +1080,12 @@
       # ===== SQLPad UI ========
       #
       SQLPAD_enable: false
+
+      #
+      # ===== NocoDB UI ========
+      #
+      NOCODB_enable: false
+      NOCODB_volume_map_data: false
 
       #
       # ===== Quix Presto UI ========
@@ -1128,6 +1243,8 @@
       FILESTASH_enable: false
       S3MANAGER_enable: false
       AWSCLI_enable: false
+      AZURECLI_enable: false
+      AZURE_STORAGE_EXPLORER_enable: false
 
       #
       #===== LakeFS ========
@@ -1140,6 +1257,8 @@
       # ===== FTP ========
       #
       FTP_enable: false
+      FTP_username: ftp
+      FTP_password: abc123!
 
       #
       # ===== Camunda ========
@@ -1161,10 +1280,27 @@
       PENTHAO_enable: false
 
       #
+      # ===== DBT CLI (Data Build Tool) ========
+      #
+      DBT_enable: false
+      DBT_flavour: 'spark-trino'
+      DBT_repository_name: trivadis
+      DBT_volume_map_data: false
+
+      #
       # ===== Code Server ========
       #
       CODE_SERVER_enable: false
       CODE_SERVER_volume_map_platform_root: false
+
+      #
+      # ===== MockServer ========
+      #
+      MOCK_SERVER_enable: false
+      MOCK_SERVER_log_level: DEBUG
+      MOCK_SERVER_persist_expectations: false
+      MOCK_SERVER_persisted_expecations_path: ''
+      MOCK_SERVER_initialization_json_path: ''
 
       #
       # ===== Excalidraw ========
@@ -1253,6 +1389,7 @@
       # ===== Watchtower ========
       #
       WATCHTOWER_enable: false
+      WATCHTOWER_map_config_json: false
 
       #
       # ===== Python image ========

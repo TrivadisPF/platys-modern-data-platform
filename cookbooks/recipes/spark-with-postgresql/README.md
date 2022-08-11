@@ -1,28 +1,49 @@
 ---
 technoglogies:      spark,postgresql
-version:				1.11.0
-validated-at:			21.3.2021
+version:				1.15.0
+validated-at:			23.4.2022
 ---
 
 # Spark with PostgreSQL
 
-This recipe will show how to use a Spark cluster in the platform and connect it to a PostgreSQL relational database. 
+This recipe will show how to use a Spark cluster in the platform and connect it to a PostgreSQL relational database.
 
 ## Initialise data platform
 
 First [initialise a platys-supported data platform](../documentation/getting-started.md) with the following services enabled
 
 ```
-platys init --enable-services SPARK,POSTGRESQL,ZEPPELIN,PROVISIONING_DATA -s trivadis/platys-modern-data-platform -w 1.11.0
+platys init --enable-services SPARK,POSTGRESQL,ZEPPELIN,PROVISIONING_DATA -s trivadis/platys-modern-data-platform -w 1.15.0
 ```
 
-Before we can generate the platform, we need to extend the `config.yml` with the following SPARK property:
+Before we can generate the platform, we need to extend the `config.yml`. There are two options
+
+**1. use the `SPARK_jars_packages` property to specify a maven coordinate**
+
+add the following property to `config.yml`
 
 ```
-    SPARK_jars_packages: 'org.postgresql:postgresql:9.4.1212'
+    SPARK_jars_packages: 'org.postgresql:postgresql:42.3.4'
 ```
 
-Now set an environment variable to the home folder of the dataplatform and generate and then start the data platform. 
+**2. use the `SPARK_jars` property to point to jar provided in `./plugins/spark/jars`**
+
+download the Jar file from the maven repository to `./plugins/spark/jars`
+
+```bash
+cd $DATAPLATFORM_HOME
+cd ./plugins/spark/jars
+wget https://repo1.maven.org/maven2/org/postgresql/postgresql/42.3.4/postgresql-42.3.4.jar -O postgresql-42.3.4.jar
+```
+
+now add the following property to `config.yml`
+
+```
+    SPARK_jars: '/extra-jars/postgresql:42.3.4.jar'
+```
+
+
+Now set an environment variable to the home folder of the dataplatform and generate and then start the data platform.
 
 ```bash
 export DATAPLATFORM_HOME=${PWD}
@@ -57,7 +78,7 @@ CREATE TABLE flight_data.airport_t
 ```
 
 ```sql
-COPY flight_data.airport_t(iata,airport,city,state,country,lat,long) 
+COPY flight_data.airport_t(iata,airport,city,state,country,lat,long)
 FROM '/data-transfer/flight-data/airports.csv' DELIMITER ',' CSV HEADER;
 ```
 
@@ -82,5 +103,3 @@ val df = spark
 ```
 df.show
 ```
-
-

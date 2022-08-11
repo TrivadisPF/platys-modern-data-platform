@@ -13,4 +13,20 @@ platys gen
 
 ## How to use it?
 
-Navigate to <http://dataplatform:28131>
+Within the container, you can either use the `aws` or `s3cmd` command line interface. 
+
+### aws
+
+If using the local `minio` S3 service then you have to specify the endpoint. The rest is configured through the environment variables. I.e. to list all available buckets:
+
+```bash
+docker exec -ti awscli aws --endpoint-url http://minio-1:9000 s3 ls
+```
+
+### s3cmd
+
+To list all available buckets using s3cmd:
+
+```cmd
+docker exec -ti awscli s3cmd ls
+```

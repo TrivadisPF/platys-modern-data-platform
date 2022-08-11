@@ -17,6 +17,8 @@ networks:
   {% set dataCenterId = 0 %}
 {% endif %}
 
+{% set __PROVISIONING_DATA_version = PROVISIONING_DATA_version | default('latest') -%}
+
 {% set __CONFLUENT_PLATFORM_version = CONFLUENT_PLATFORM_version | default('latest') -%}
 {% set __KAFKA_MM2_version = KAFKA_MM2_version | default('latest') -%}
 {% set __APICURIO_SCHEMA_REGISTRY_version = APICURIO_SCHEMA_REGISTRY_version | default('latest') -%}
@@ -45,8 +47,10 @@ networks:
 {% set __KOWL_version = KOWL_version | default('latest') -%}
 {% set __KOUNCIL_version = KOUNCIL_version | default('latest') -%}
 {% set __KAFKA_MAGIC_version = KAFKA_MAGIC_version | default('latest') -%}
+{% set __KAFKA_WEBVIEW_version = KAFKA_WEBVIEW_version | default('latest') -%}
 {% set __STREAMS_EXPLORER_version = STREAMS_EXPLORER_version | default('latest') -%}
 {% set __KAFKA_LAG_EXPORTER_version = KAFKA_LAG_EXPORTER_version | default('latest') -%}
+{% set __ZILLA_version = ZILLA_version | default('latest') -%}
 
 {% set __REMORA_version = REMORA_version | default('latest') -%}
 
@@ -61,19 +65,20 @@ networks:
 {% set __HADOOP_version = HADOOP_version | default('latest') -%}
 {% set __SQOOP_version = SQOOP_version | default('latest') -%}
 
-{% if (SPARK_major_version | lower) == '2'  %}
-  {% set __SPARK_version = SPARK2_version ~ "-hadoop2.8"  -%}
-  {% set __LIVY_version = LIVY_version ~ "-spark" ~ "2.4"  -%}
-  {% set __ZEPPELIN_version = ZEPPELIN_version ~ "-spark" ~ "2.4" ~ "-hadoop2.8" -%}
-{% elif (SPARK_major_version | lower) == '3'  %}
-  {% set __SPARK_version = SPARK3_version ~ "-hadoop3.2" -%}
-  {% set __LIVY_version = LIVY_version ~ "-spark" ~ "3.0" -%}
-  {% set __ZEPPELIN_version = ZEPPELIN_version ~ "-spark" ~ "3.0" ~ "-hadoop3.2" -%}
+{% if (SPARK_base_version | lower) == '2.4'  %}
+  {% set __SPARK_version = SPARK_2_4_version ~ "-hadoop2.8"  -%}
+  {% set __LIVY_version = LIVY_version ~ "-spark" ~ SPARK_2_4_version.split(".")[0]  ~ "." ~ SPARK_2_4_version.split(".")[1]  -%}
+{% elif (SPARK_base_version | lower) == '3.1'  %}
+  {% set __SPARK_version = SPARK_3_1_version ~ "-hadoop3.2" -%}
+  {% set __LIVY_version = LIVY_version ~ "-spark" ~ SPARK_3_1_version.split(".")[0]  ~ "." ~ SPARK_3_1_version.split(".")[1] -%}
+{% elif (SPARK_base_version | lower) == '3.2'  %}
+  {% set __SPARK_version = SPARK_3_2_version ~ "-hadoop3.3" -%}
+  {% set __LIVY_version = LIVY_version ~ "-spark" ~ SPARK_3_2_version.split(".")[0]  ~ "." ~ SPARK_3_2_version.split(".")[1] -%}
 {% else -%}
-  {% set __SPARK_version = SPARK2_version ~ "-hadoop2.8" -%}
-  {% set __LIVY_version = LIVY_version ~ "-spark" ~ "2.4"  -%}
-  {% set __ZEPPELIN_version = ZEPPELIN_version ~ "-spark" ~ "2.4" ~ "-hadoop2.8" -%}
+  {% set __SPARK_version = SPARK_2_4_version ~ "-hadoop2.8" -%}
+  {% set __LIVY_version = LIVY_version ~ "-spark" ~ SPARK_2_4_version.split(".")[0]  ~ "." ~ SPARK_2_4_version.split(".")[1]  -%}
 {% endif -%}
+{% set __ZEPPELIN_version = ZEPPELIN_version ~ "-spark" ~ __SPARK_version -%}
 
 {% set __FLINK_version = FLINK_version | default('latest') -%}
 {% set __NUSSKNACKER_version = NUSSKNACKER_version | default('latest') -%}
@@ -115,6 +120,10 @@ networks:
 {% set __DEJAVU_version = DEJAVU_version | default('latest') -%}
 {% set __CEREBRO_version = CEREBRO_version | default('latest') -%}
 {% set __ELASTICSEARCHHQ_version = ELASTICSEARCHHQ_version | default('latest') -%}
+{% set __ELASTICVUE_version = ELASTICVUE_version | default('latest') -%}
+
+{% set __OPENSEARCH_version = OPENSEARCH_version | default('latest') -%}
+{% set __OPENSEARCH_DASHBOARDS_version = OPENSEARCH_DASHBOARDS_version | default('latest') -%}
 
 {% set __HUE_version = HUE_version | default('latest') -%}
 {% set __HUE_POSTGRES_version = HUE_POSTGRES_version | default('latest') -%}
@@ -126,8 +135,12 @@ networks:
 
 {% set __NIFI_version = NIFI_version | default('latest') -%}
 {% set __NIFI_REGISTRY_version = NIFI_REGISTRY_version | default('latest') -%}
+{% set __NIFI_TOOLKIT_version = NIFI_TOOLKIT_version | default('latest') -%}
+{% set __MONITOFI_version = MONITOFI_version | default('latest') -%}
 
 {% set __STREAMPIPES_version = STREAMPIPES_version | default('latest') -%}
+
+{% set __CONDUIT_version = CONDUIT_version | default('latest') -%}
 
 {% set __NODERED_version = NODERED_version | default('latest') -%}
 
@@ -135,6 +148,8 @@ networks:
 
 {% set __SPRING_DATAFLOW_version = SPRING_DATAFLOW_version | default('latest') -%}
 {% set __SPRING_SKIPPER_version = SPRING_SKIPPER_version | default('latest') -%}
+
+{% set __AIRBYTE_version = AIRBYTE_version | default('latest') -%}
 
 {% set __AIRFLOW_version = AIRFLOW_version | default('latest') -%}
 
@@ -179,6 +194,8 @@ networks:
 {% set __TIPBOARD_version = TIPBOARD_version | default('latest') -%}
 {% set __CHARTBOARD_version = CHARTBOARD_version | default('latest') -%}
 
+{% set __RETOOL_version = RETOOL_version | default('latest') -%}
+
 {% set __MEMCACHED_version = MEMCACHED_version | default('latest') -%}
 
 {% set __REDIS_version = REDIS_version | default('latest') -%}
@@ -192,6 +209,8 @@ networks:
 {% set __SOLR_version = SOLR_version | default('latest') -%}
 
 {% set __NEO4J_version = NEO4J_version | default('latest') -%}
+
+{% set __QUINE_version = QUINE_version | default('latest') -%}
 
 {% set __DGRAPH_version = DGRAPH_version | default('latest') -%}
 
@@ -226,7 +245,9 @@ networks:
 
 {% set __ORACLE_XE_version = ORACLE_XE_version | default('latest') -%}
 {% set __ORACLE_EE_version = ORACLE_EE_version | default('latest') -%}
+{% set __ORACLE_SQLCL_version = ORACLE_SQLCL_version | default('latest') -%}
 {% set __ORACLE_REST_DATA_SERVICE_version = ORACLE_REST_DATA_SERVICE_version | default('latest') -%}
+
 {% set __MYSQL_version = MYSQL_version | default('latest') -%}
 {% set __POSTGRESQL_version = POSTGRESQL_version | default('latest') -%}
 {% set __POSTGREST_version = POSTGREST_version | default('latest') -%}
@@ -238,6 +259,7 @@ networks:
 {% set __ADMINER_version = ADMINER_version | default('latest') -%}
 {% set __CLOUDBEAVER_version = CLOUDBEAVER_version | default('latest') -%}
 {% set __SQLPAD_version = SQLPAD_version | default('latest') -%}
+{% set __NOCODB_version = NOCODB_version | default('latest') -%}
 {% set __QUIX_version = QUIX_version | default('latest') -%}
 
 {% set __AXON_version = AXON_version | default('latest') -%}
@@ -293,8 +315,12 @@ networks:
 {% set __S3MANAGER_version = S3MANAGER_version | default('latest') -%}
 {% set __FILESTASH_version = FILESTASH_version | default('latest') -%}
 {% set __AWSCLI_version = AWSCLI_version | default('latest') -%}
+{% set __AZURECLI_version = AZURECLI_version | default('latest') -%}
+{% set __AZURE_STORAGE_EXPLORER_version = AZURE_STORAGE_EXPLORER_version | default('latest') -%}
 
 {% set __LAKEFS_version = LAKEFS_version | default('latest') -%}
+
+{% set __DBT_version = DBT_version | default('latest') -%}
 
 {% set __CODE_SERVER_version = CODE_SERVER_version | default('latest') -%}
 {% set __EXCALIDRAW_version = EXCALIDRAW_version | default('latest') -%}
@@ -302,6 +328,7 @@ networks:
 {% set __FILE_BROWSER_version = FILE_BROWSER_version | default('latest') -%}
 {% set __VAULT_version = VAULT_version | default('latest') -%}
 {% set __KEYCLOAK_version = KEYCLOAK_version | default('latest') -%}
+{% set __MOCK_SERVER_version = MOCK_SERVER_version | default('latest') -%}
 {% set __PORTAINER_version = PORTAINER_version | default('latest') -%}
 {% set __CADVISOR_version = CADVISOR_version | default('latest') -%}
 {% set __HAWTIO_version = HAWTIO_version | default('latest') -%}
@@ -343,6 +370,11 @@ networks:
 # enforce some dependencies
   {% set ZOOKEEPER_enable = true -%}
 {% endif -%}   {# KAFKA_enable or ATLAS_enable or DATAHUB_enable #}
+
+{% if (NIFI_enable and NIFI_create_cluster) -%}
+# enforce some dependencies
+  {% set ZOOKEEPER_enable = true -%}
+{% endif -%}   {# NIFI_enable and NIFI_create_cluster #}
 
 {% if KAFKA_jmx_monitoring_prometheus_enable -%}
 # enforce some dependencies
@@ -433,6 +465,7 @@ networks:
   {% set KAFKA_MAGIC_enable = false -%}
   {% set EFAK_enable = false -%}
   {% set KAFKA_LAG_EXPORTER_enable = false -%}
+  {% set ZILLA_enable = false -%}
   {% set REMORA_enable = false -%}
   {% set DEBEZIUM_SERVER_enable = false -%}
   {% set DEBEZIUM_UI_enable = false -%}
@@ -453,8 +486,11 @@ networks:
   {% set STREAMSETS_DATAOPS_enable = false -%}
   {% set NIFI_enable = false -%}
   {% set NIFI_REGISTRY_enable = false -%}
+  {% set NIFI_TOOLKIT_enable = false -%}
   {% set STREAMSHEETS_enable = false -%}
+  {% set CONDUIT_enable = false -%}
   {% set SPRING_DATAFLOW_enable = false -%}
+  {% set AIRBYTE_enable = false -%}
   {% set AIRFLOW_enable = false -%}
   {% set ZEPPELIN_enable = false -%}
   {% set JUPYTER_enable = false -%}
@@ -473,15 +509,19 @@ networks:
   {% set REDIS_COMMANDER_enable = false -%}
   {% set MONGO_enable = false -%}
   {% set ELASTICSEARCH_enable = false -%}
+  {% set OPENSEARCH_enable = false -%}
+  {% set OPENSEARCH_DASHBOARDS_enable = false -%}
   {% set DEJAVU_enable = false -%}
   {% set CEREBRO_enable = false -%}
   {% set ELASTICHQ_enable = false -%}
+  {% set ELASTICVUE_enable = false -%}
   {% set KIBANA_enable = false -%}
   {% set INFLUXDB2_enable = false -%}
   {% set DRUID_enable = false -%}
   {% set PINOT_enable = false -%}
   {% set IGNITE_enable = false -%}
   {% set NEO4J_enable = false -%}
+  {% set QUINE_enable = false -%}
   {% set DGRAPH_enable = false -%}
   {% set STARDOG_enable = false -%}
   {% set STARDOG_STUDIO_enable = false -%}
@@ -490,6 +530,7 @@ networks:
   {% set POSTGREST_enable = false -%}
   {% set ORACLE_XE_enable = false -%}
   {% set ORACLE_EE_enable = false -%}
+  {% set ORACLE_SQLCL_enable = false -%}
   {% set ORACLE_REST_DATA_SERVICE_enable = false -%}
   {% set MYSQL_enable = false -%}
   {% set SQLSERVER_enable = false -%}
@@ -498,6 +539,7 @@ networks:
   {% set ADMINER_enable = false -%}
   {% set CLOUDBEAVER_enable = false -%}
   {% set SQLPAD_enable = false -%}
+  {% set NOCODB_enable = false -%}
   {% set QUIX_enable = false -%}
   {% set AXON_enable = false -%}
   {% set EVENTSTORE_enable = false -%}
@@ -522,6 +564,7 @@ networks:
   {% set CAMUNDA_ZEEBE_enable = false -%}
   {% set CAMUNDA_OPERATE_enable = false -%}
   {% set CAMUNDA_ZEEQS_enable = false -%}
+  {% set DBT_enable = false -%}
   {% set PENTHAO_enable = false -%}
   {% set MINIO_enable = false -%}
   {% set MINIO_MC_enable = false -%}
@@ -532,9 +575,11 @@ networks:
   {% set FILESTASH_enable = false -%}
   {% set S3MANAGER_enable = false -%}
   {% set AWSCLI_enable = false -%}
+  {% set AZURE_STORAGE_EXPLORER_enable = false -%}
   {% set KEYCLOAK_enable = false -%}
   {% set POSTMAN_enable = false -%}
   {% set MICROCKS_enable = false -%}
+  {% set MOCK_SERVER_enable = false -%}
   {% set OTEL_COLLECTOR_enable = false %}
   {% set ZIPKIN_enable = false -%}
   {% set JAEGER_enable = false -%}
@@ -620,6 +665,8 @@ networks:
       {% set ns.schemaRegistryUrl = 'http://<schema-registry-not-enabled>' %}
       {% set ns.schemaRegistryUrlExternal = 'http://<schema-registry-not-enabled>' %}
     {% endif %}
+{% else -%}
+    {% set ns.schemaRegistryUrlExternal = external['SCHEMA_REGISTRY_url'] %}
 {% endif %}   {# not external['SCHEMA_REGISTRY_enable'] #}
 
 {% if (external['S3_enable']) | default(false) %}
@@ -639,6 +686,13 @@ networks:
     {% set s3DefaultRegion = 'us-east-1' %}
 {% endif %}   {# external['s3Endpoint'] #}
 
+{% if (external['ADLS_enable']) | default(false) %}
+  {% if (external['ADLS_storage_account'] != None) | default(false) %}
+    {% set adlsStorageAccount = external['ADLS_storage_account'] %}
+  {% endif %}
+  {% set adlsAccessKey = '${PLATYS_AZURE_ADLS_ACCESS_KEY:?PLATYS_AZURE_ADLS_ACCESS_KEY must be set either in .env or as an environment variable}' %}
+{% endif %}   {# external['s3Endpoint'] #}
+
 {#  ================================== Kafka Connect Settings ========================================== #}
 
 {% set ns1 = namespace(connectServersInternalUrl='') %}
@@ -655,22 +709,14 @@ networks:
   {% for num in range(connectNodes | default(1) ) %}
     {% set port = 8083 + loop.index-1 %}
     {% if loop.first %}
-      {%if KAFKA_CONNECT_UI_use_public_ip | default(true) %}
-        {% set ns1.connectServersUrl = 'http://${PUBLIC_IP}:' ~ port %}
-      {% else %}
-        {% set ns1.connectServersUrl = 'http://${DOCKER_HOST_IP}:' ~ port %}
-      {% endif -%}   {#  KAFKA_CONNECT_UI_use_public_ip #}
+      {% set ns1.connectServersUrl = 'http://${PUBLIC_IP}:' ~ port %}
       {%if KAFKA_KSQLDB_use_embedded_connect | default(true) %}
         {% set ns1.connectServersInternalUrl = 'http://ksqldb-server-' ~ loop.index ~ ':' ~ port %}
       {% else %}
         {% set ns1.connectServersInternalUrl = 'http://kafka-connect-' ~ loop.index ~ ':' ~ port %}
       {% endif -%}   {#  KAFKA_KSQLDB_use_embedded_connect #}
     {% else %}
-      {%if KAFKA_CONNECT_UI_use_public_ip | default(true) %}
-        {% set ns1.connectServersUrl = ns1.connectServersUrl ~ ',http://${PUBLIC_IP}:' ~ port %}
-      {% else %}
-        {% set ns1.connectServersUrl = ns1.connectServersUrl ~ ',http://${DOCKER_HOST_IP}:' ~ port %}
-      {% endif -%}   {#  KAFKA_CONNECT_UI_use_public_ip #}
+      {% set ns1.connectServersUrl = ns1.connectServersUrl ~ ',http://${PUBLIC_IP}:' ~ port %}
       {%if KAFKA_KSQLDB_use_embedded_connect | default(true) %}
         {% set ns1.connectServersInternalUrl = ns1.connectServersInternalUrl ~ ',http://ksqldb-server-' ~ loop.index ~ ':' ~ port %}
       {% else %}
@@ -946,6 +992,7 @@ services:
   kafka-connect-{{loop.index}} :
     image: confluentinc/cp-kafka-connect:{{__CONFLUENT_PLATFORM_version}}
     container_name: kafka-connect-{{loop.index}}
+    hostname: kafka-connect-{{loop.index}}
     labels:
       com.platys.name: "kafka-connect"
       com.platys.restapi.title: 'Kafka Connect REST API'
@@ -954,9 +1001,10 @@ services:
       - "{{external_port}}:{{port}}"
     environment:
       CONNECT_BOOTSTRAP_SERVERS: '{{ns.bootstrapServers}}'
+      CONNECT_LISTENERS: 'http://0.0.0.0:{{port}}'
       CONNECT_REST_ADVERTISED_HOST_NAME: kafka-connect-{{loop.index}}
-      CONNECT_REST_PORT: {{port}}
-      CONNECT_GROUP_ID: kafka-connect
+      CONNECT_REST_ADVERTISED_PORT: {{port}}
+      CONNECT_GROUP_ID: kafka-connect-cluster
       CONNECT_CONFIG_STORAGE_TOPIC: _connect-configs
       CONNECT_OFFSET_STORAGE_TOPIC: _connect-offsets
       CONNECT_STATUS_STORAGE_TOPIC: _connect-status
@@ -978,11 +1026,24 @@ services:
       CONNECT_LOG4J_ROOT_LOGLEVEL: "INFO"
       CONNECT_LOG4J_LOGGERS: "org.apache.kafka.connect.runtime.rest=WARN,org.reflections=ERROR"
       CONNECT_LOG4J_APPENDER_STDOUT_LAYOUT_CONVERSIONPATTERN: "[%d] %p %X{connector.context}%m (%c:%L)%n"
-      CONNECT_PLUGIN_PATH: "/usr/share/java,/etc/kafka-connect/addl-plugins"
+      CONNECT_PLUGIN_PATH: "/usr/share/java,/etc/kafka-connect/addl-plugins,/etc/kafka-connect/cflthub-plugins"
       CONNECT_CONNECTOR_CLIENT_CONFIG_OVERRIDE_POLICY: 'All'
-      # CONNECT_SECURITY_PROTOCOL: SSL
-      # CONNECT_SASL_MECHANISM: PLAIN
-      # CONNECT_SASL_JAAS_CONFIG: org.apache.kafka.common.security.plain.PlainLoginModule required username="$CLUSTER_API_KEY" password="$CLUSTER_API_SECRET";
+    {%if external['KAFKA_enable'] and external['KAFKA_sasl_mechanism'] is defined and external['KAFKA_sasl_mechanism'] | length %}
+      CONNECT_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: "https"
+      CONNECT_SECURITY_PROTOCOL: "{{external['KAFKA_security_protocol']}}"
+      CONNECT_SASL_MECHANISM: "{{external['KAFKA_sasl_mechanism']}}"
+      CONNECT_SASL_JAAS_CONFIG: "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"{{kafkaUsername}}\" password=\"{{kafkaPassword}}\";"
+      #
+      CONNECT_CONSUMER_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: "https"
+      CONNECT_CONSUMER_SECURITY_PROTOCOL: "{{external['KAFKA_security_protocol']}}"
+      CONNECT_CONSUMER_SASL_MECHANISM: "{{external['KAFKA_sasl_mechanism']}}"
+      CONNECT_CONSUMER_SASL_JAAS_CONFIG: "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"{{kafkaUsername}}\" password=\"{{kafkaPassword}}\";"
+      #
+      CONNECT_PRODUCER_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: "https"
+      CONNECT_PRODUCER_SECURITY_PROTOCOL: "{{external['KAFKA_security_protocol']}}"
+      CONNECT_PRODUCER_SASL_MECHANISM: "{{external['KAFKA_sasl_mechanism']}}"
+      CONNECT_PRODUCER_SASL_JAAS_CONFIG: "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"{{kafkaUsername}}\" password=\"{{kafkaPassword}}\";"
+    {% endif -%}   {#  external['KAFKA_sasl_mechanism'] is defined #}
       #CLASSPATH: /usr/share/java/monitoring-interceptors/monitoring-interceptors-4.0.0.jar
       AWS_ACCESS_KEY_ID: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
       AWS_SECRET_ACCESS_KEY: {{s3SecretAccessKey}}
@@ -992,7 +1053,7 @@ services:
       CONNECT_CONFIG_PROVIDERS_{{KAFKA_CONNECT_config_providers | upper }}_CLASS: '{{KAFKA_CONNECT_config_providers_classes}}'
     {% if OTEL_COLLECTOR_enable | default(false) %}
       OTEL_RESOURCE_ATTRIBUTES: 'service.name=connect'
-      KAFKA_OPTS: '-javaagent:/tmp/opentelemetry-javaagent.jar -Dotel.exporter.otlp.endpoint=http://otel-collector:4317'
+      KAFKA_OPTS: '-javaagent:/otel/opentelemetry-javaagent.jar -Dotel.exporter.otlp.endpoint=http://otel-collector:4317'
     {% endif -%}
     {% if KAFKA_jmx_monitoring_prometheus_enable %}
       EXTRA_ARGS: -javaagent:/usr/share/jmx-exporter/jmx_prometheus_javaagent-0.12.0.jar=1234:/usr/share/jmx-exporter/kafka_connect.yml
@@ -1003,7 +1064,8 @@ services:
     volumes:
       - ./data-transfer:/data-transfer
       - ./plugins/kafka-connect/connectors:/etc/kafka-connect/addl-plugins
-      - ./plugins/opentelemetry/agents:/tmp
+      - ./plugins/kafka-connect/jars:/etc/kafka-connect/jars
+      - ./plugins/opentelemetry/agents:/otel
     {%if KAFKA_CONNECT_map_settings_file | default(false) %}
       - ./custom-conf/kafka-connect/settings.properties:/data/settings.properties
     {% endif -%}   {#  KAFKA_CONNECT_map_credentials_file #}
@@ -1014,23 +1076,22 @@ services:
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
-    {%if loop.index == 1 | default(false) %}
     command:
       # In the command section, $ are replaced with $$ to avoid the error 'Invalid interpolation format for "command" option'
       - bash
       - -c
       - |
         echo "Installing Connectors"
+        mkdir -p /etc/kafka-connect/cflthub-plugins
         for i in $$(echo "{{KAFKA_CONNECT_connectors}}" | sed "s/,/ /g")
         do
-          confluent-hub install --no-prompt --component-dir /etc/kafka-connect/addl-plugins --verbose "$$i"
+          confluent-hub install --no-prompt --component-dir /etc/kafka-connect/cflthub-plugins --verbose "$$i"
         done
         #
         echo "Launching Kafka Connect worker"
         /etc/confluent/docker/run &
         #
         sleep infinity
-    {% endif %}
     {%if LOKI_collect_docker_logs | default(false) %}
     <<: *logging
     {% endif -%}   {#  LOKI_collect_docker_logs #}
@@ -1048,7 +1109,7 @@ services:
     {% set connect_external_port = 8083 + loop.index - 1 %}
     {% set connect_port = 8083 + loop.index - 1 %}
   ksqldb-server-{{loop.index}} :
-    image: confluentinc/ksqldb-server:{{__KAFKA_KSQLDB_version}}
+    image: confluentinc/{{ 'ksqldb-server' if (KAFKA_KSQLDB_edition | lower) == 'oss' else 'cp-ksqldb-server' }}:{{__KAFKA_KSQLDB_version if (KAFKA_KSQLDB_edition | lower) == 'oss' else __CONFLUENT_PLATFORM_version}}
     hostname: ksqldb-server-{{loop.index}}
     container_name: ksqldb-server-{{loop.index}}
     labels:
@@ -1062,20 +1123,31 @@ services:
       - {{connect_external_port}}:{{connect_port}}
     {% endif %}
     environment:
-      KSQL_LOG4J_ROOT_LOGLEVEL: INFO
-      KSQL_LOG4J_OPTS: "-Dlog4j.configuration=file:/etc/ksqldb/log4j.properties"
+      #KSQL_LOG4J_OPTS: "-Dlog4j.configuration=file:/etc/ksqldb/log4j-rolling.properties"
+    {% if ( KAFKA_KSQLDB_edition | lower) == 'cp'  | default(false) %}
+      KSQL_LOG4J_ROOT_LOGLEVEL: "INFO"
+      KSQL_LOG4J_LOGGERS: "org.apache.kafka.connect.runtime.rest=WARN,org.reflections=ERROR"
+      KSQL_LOG4J_PROCESSING_LOG_TOPIC: ksql_processing_log
       KSQL_LOG4J_PROCESSING_LOG_BROKERLIST: '{{ns.bootstrapServers}}'
-      KSQL_LOG4J_PROCESSING_LOG_TOPIC: demo_processing_log
-
-      KSQL_KSQL_LOGGING_PROCESSING_TOPIC_NAME: 'demo_processing_log'
+    {% else %}
+      KSQL_LOG4J_LOGGERS: "org.apache.kafka.connect.runtime.rest=WARN,org.reflections=ERROR"
+      KSQL_LOG4J_PROCESSING_LOG_BROKERLIST: '{{ns.bootstrapServers}}'
+      KSQL_LOG4J_PROCESSING_LOG_TOPIC: 'ksql_processing_log'
+    {% endif %}
+      KSQL_KSQL_LOGGING_PROCESSING_TOPIC_NAME: 'ksql_processing_log'
       KSQL_KSQL_LOGGING_PROCESSING_TOPIC_REPLICATION_FACTOR: {{KAFKA_KSQLDB_internal_replication_factor | default(1)}}
-      KSQL_KSQL_LOGGING_PROCESSING_TOPIC_AUTO_CREATE: 'true'
+      KSQL_KSQL_LOGGING_PROCESSING_ROWS_INCLUDE: 'true'
       KSQL_KSQL_LOGGING_PROCESSING_STREAM_AUTO_CREATE: 'true'
+      KSQL_KSQL_LOGGING_PROCESSING_TOPIC_AUTO_CREATE: 'true'
 
       # For Demo purposes: improve resource utilization and avoid timeouts
       KSQL_KSQL_STREAMS_NUM_STREAM_THREADS: 1
 
       KSQL_PRODUCER_ENABLE_IDEMPOTENCE: 'true'
+      KSQL_KSQL_PERSISTENCE_DEFAULT_FORMAT_KEY: '{{KAFKA_KSQLDB_persistence_default_format_key | default(KAFKA) }}'
+    {% if KAFKA_KSQLDB_persistence_default_format_value is defined and KAFKA_KSQLDB_persistence_default_format_value|length %}
+      KSQL_KSQL_PERSISTENCE_DEFAULT_FORMAT_VALUE: '{{KAFKA_KSQLDB_persistence_default_format_value}}'
+    {% endif %}
 
       KSQL_APPLICATION_ID: "ksqldb-cluster"
       KSQL_KSQL_SERVICE_ID: "ksqldb-cluster"
@@ -1086,13 +1158,14 @@ services:
       KSQL_RESPONSE_HTTP_HEADERS_CONFIG: '{{KAFKA_KSQLDB_response_http_headers_config}}'
     {% if OTEL_COLLECTOR_enable | default(false) %}
       OTEL_RESOURCE_ATTRIBUTES: 'service.name=ksqldb'
-      KSQL_OPTS: '-javaagent:/tmp/opentelemetry-javaagent.jar -Dotel.exporter.otlp.endpoint=http://otel-collector:4317'
+      KSQL_OPTS: '-javaagent:/otel/opentelemetry-javaagent.jar -Dotel.exporter.otlp.endpoint=http://otel-collector:4317'
     {% endif -%}   {#  OTEL_COLLECTOR_enable #}
-    {% if external['KAFKA_enable'] | default(false) %}
-      KSQL_SECURITY_PROTOCOL: SASL_SSL
-      KSQL_SASL_MECHANISM: PLAIN
-      KSQL_SASL_JAAS_CONFIG: org.apache.kafka.common.security.plain.PlainLoginModule required username="{{kafkaUsername}}" password="{{kafkaPassword}}";
-    {% endif -%}   {#  external['KAFKA_enable'] #}
+    {% if external['KAFKA_enable'] and external['KAFKA_sasl_mechanism'] is defined and external['KAFKA_sasl_mechanism'] | length %}
+      KSQL_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: "https"
+      KSQL_SECURITY_PROTOCOL: "{{external['KAFKA_security_protocol']}}"
+      KSQL_SASL_MECHANISM: "{{external['KAFKA_sasl_mechanism']}}"
+      KSQL_SASL_JAAS_CONFIG: "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"{{kafkaUsername}}\" password=\"{{kafkaPassword}}\";"
+    {% endif -%}   {#  external['KAFKA_sasl_mechanism'] is defined #}
 
     {% if ( KAFKA_CONNECT_enable ) | default(false) %}
       KSQL_KSQL_CONNECT_URL: {{ns1.connectServersInternalUrl}}
@@ -1103,6 +1176,7 @@ services:
       KSQL_KSQL_SCHEMA_REGISTRY_BASIC_AUTH_USER_INFO:  "{{schemaRegistryUsername}}:{{schemaRegistryPassword}}"
     {% endif %}
       KSQL_KSQL_INTERNAL_TOPIC_REPLICAS: {{KAFKA_KSQLDB_internal_replication_factor | default(1)}}
+      KSQL_KSQL_SINK_REPLICAS: {{KAFKA_KSQLDB_internal_replication_factor | default(1)}}
       KSQL_KSQL_STREAMS_REPLICATION_FACTOR: {{KAFKA_KSQLDB_internal_replication_factor | default(1)}}
       KSQL_KSQL_QUERY_PULL_METRICS_ENABLED: "true"
       KSQL_KSQL_HIDDEN_TOPICS: '^_.*,default_ksql_processing_log'
@@ -1115,7 +1189,7 @@ services:
       KSQL_KSQL_SUPPRESS_BUFFER_SIZE_BYTES: "{{KAFKA_KSQLDB_suppress_buffer_size_bytes | default(-1)}}"
 
       KSQL_KSQL_QUERY_PULL_TABLE_SCAN_ENABLED: "{{KAFKA_KSQLDB_query_pull_table_scan_enabled | default(omit)}}"
-      KSQL_CONFIG_DIR: "/etc/ksql"
+      KSQL_CONFIG_DIR: "/etc/ksqldb"
       KSQL_KSQL_EXTENSION_DIR: '/etc/ksqldb/ext/'
 
     {% if KAFKA_KSQLDB_queries_file is defined and KAFKA_KSQLDB_queries_file|length %}
@@ -1130,7 +1204,7 @@ services:
       # Kafka Connect config below
       KSQL_CONNECT_BOOTSTRAP_SERVERS: "kafka-1:19092"
       KSQL_CONNECT_REST_ADVERTISED_HOST_NAME: 'ksqldb-server-{{loop.index}}'
-      KSQL_CONNECT_REST_PORT: {{connect_port}}
+      KSQL_CONNECT_REST_ADVERTISED_PORT: {{connect_port}}
       KSQL_CONNECT_GROUP_ID: ksqldb-kafka-connect-group-01
       KSQL_CONNECT_CONFIG_STORAGE_TOPIC: _ksqldb-kafka-connect-group-01-configs
       KSQL_CONNECT_OFFSET_STORAGE_TOPIC: _ksqldb-kafka-connect-group-01-offsets
@@ -1142,17 +1216,18 @@ services:
       KSQL_CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: '1'
       KSQL_CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: '1'
       KSQL_CONNECT_LOG4J_APPENDER_STDOUT_LAYOUT_CONVERSIONPATTERN: "[%d] %p %X{connector.context}%m (%c:%L)%n"
-      KSQL_CONNECT_PLUGIN_PATH: '/usr/share/java,/etc/kafka-connect/addl-plugins'
+      KSQL_CONNECT_PLUGIN_PATH: '/usr/share/java,/etc/kafka-connect/addl-plugins,/etc/kafka-connect/cflthub-plugins'
     {% endif -%}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
-      - ./plugins/ksql:/etc/ksqldb/ext
-      - ./conf/ksqldb/etc/log4j.properties:/etc/ksqldb/log4j.properties
+      - ./plugins/ksqldb:/etc/ksqldb/ext
+#      - ./conf/ksqldb/etc/log4j.properties:/etc/ksqldb/log4j.properties
       - ./plugins/kafka-connect/connectors:/etc/kafka-connect/addl-plugins
-      - ./plugins/opentelemetry/agents:/tmp
+      - ./plugins/kafka-connect/jars:/etc/kafka-connect/jars
+      - ./plugins/opentelemetry/agents:/otel
     {% if KAFKA_jmx_monitoring_prometheus_enable %}
       - ./scripts/kafka/jmx-exporter/:/usr/share/jmx-exporter
     {% endif -%}
@@ -1169,7 +1244,7 @@ services:
         echo "Installing Connectors"
           for i in $$(echo "{{KAFAK_KSQLDB_connect_connectors}}" | sed "s/,/ /g")
         do
-          confluent-hub install --no-prompt --component-dir /etc/kafka-connect/addl-plugins --verbose "$$i"
+          confluent-hub install --no-prompt --component-dir /etc/kafka-connect/cflthub-plugins --verbose "$$i"
         done
         #
         echo "Launching ksqlDB server"
@@ -1235,7 +1310,32 @@ services:
     <<: *logging
     {% endif -%}   {#  LOKI_collect_docker_logs #}
     restart: {{container_restart_policy}}
-{% endif %}   {# MATERIALIZE_enable #}
+
+  {% if (MATERIALIZE_CLI_enable) | default(false) %}
+  mzcli:
+    image: materialize/mzcli:latest
+    hostname: mzcli
+    container_name: mzcli
+    labels:
+      com.platys.name: "materialize"
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        while [ 1 -eq 1 ];do sleep 60;done
+    restart: {{container_restart_policy}}
+  {% endif %}   {# MATERIALIZE_enable #}
+{% endif %}   {# MATERIALIZE_CLI_enable #}
 
 {% if (AZKARRA_enable) | default(false) %}
   #  ================================== Azkarra Streams ========================================== #
@@ -1247,8 +1347,6 @@ services:
       com.platys.name: "azkarra-worker"
       com.platys.restapi.title: 'Kafka REST Proxy'
       com.platys.restapi.url: "http://${PUBLIC_IP}:28085"
-    depends_on:
-      - kafka{{dataCenter}}-1
     ports:
       - "28085:8080"
     environment:
@@ -1276,9 +1374,6 @@ services:
       com.platys.name: "kafka-rest"
       com.platys.restapi.title: 'Kafka REST Proxy'
       com.platys.restapi.url: "http://${PUBLIC_IP}:18086"
-    depends_on:
-      - kafka{{dataCenter}}-1
-      - {{ns.schemaRegistryServiceName}}
     ports:
       - "18086:8086"
     environment:
@@ -1337,6 +1432,36 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {# KAFKA_enable and KAFKA_MQTTPROXY_enable #}
 
+{% if ZILLA_enable | default(false) %}
+  #  ================================== Zilla ========================================== #
+  zilla:
+    image: ghcr.io/aklivity/zilla:{{__ZILLA_version}}
+    container_name: zilla
+    hostname: zilla
+    labels:
+      com.platys.name: "zilla"
+      com.platys.restapi.title: 'Zilla'
+      com.platys.restapi.url: "http://${PUBLIC_IP}:28277"
+    ports:
+      - "28277:8080"
+      - "28278:9090"
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    command: [ "start", "-v", "-e" ]
+    restart: {{container_restart_policy}}
+{% endif %}   {# ZILLA_enable #}
+
 {% if (SCHEMA_REGISTRY_enable and SCHEMA_REGISTRY_flavour | lower) == 'confluent' | default(false) %}
   #  ================================== Confluent Schema Registry ========================================== #
   {% for num in range(SCHEMA_REGISTRY_nodes | default(1) ) %}
@@ -1371,7 +1496,7 @@ services:
       SCHEMA_REGISTRY_DEBUG: "{{CONFLUENT_SCHEMA_REGISTRY_debug}}"
     {% if OTEL_COLLECTOR_enable | default(false) %}
       OTEL_RESOURCE_ATTRIBUTES: 'service.name=schema-registry'
-      SCHEMA_REGISTRY_OPTS: '-javaagent:/tmp/opentelemetry-javaagent.jar -Dotel.exporter.otlp.endpoint=http://otel-collector:4317'
+      SCHEMA_REGISTRY_OPTS: '-javaagent:/otel/opentelemetry-javaagent.jar -Dotel.exporter.otlp.endpoint=http://otel-collector:4317'
     {% endif -%}
     {% if KAFKA_jmx_monitoring_prometheus_enable %}
       EXTRA_ARGS: -javaagent:/usr/share/jmx-exporter/jmx_prometheus_javaagent-0.12.0.jar=1234:/usr/share/jmx-exporter/confluent_schemaregistry.yml
@@ -1381,7 +1506,7 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
-      - ./plugins/opentelemetry/agents:/tmp
+      - ./plugins/opentelemetry/agents:/otel
     {% if KAFKA_jmx_monitoring_prometheus_enable %}
       - ./scripts/kafka/jmx-exporter/:/usr/share/jmx-exporter
     {% endif -%}
@@ -1411,10 +1536,6 @@ services:
       com.platys.webui.url: "http://${PUBLIC_IP}:{{http_external_port}}"
       com.platys.restapi.title: 'Apicurio Registry REST API (Confluent compliant)'
       com.platys.restapi.url: "http://${PUBLIC_IP}:{{http_external_port}}/apis/ccompat/v6"
-    {% if (APICURIO_SCHEMA_REGISTRY_storage | lower) == 'kafkasql'  %}
-    depends_on:
-      - kafka{{dataCenter}}-1
-    {% endif -%}   {#  APICURIO_SCHEMA_REGISTRY_storage == kafkasql #}
     ports:
       - "{{http_external_port}}:{{http_port}}"
     environment:
@@ -1479,8 +1600,6 @@ services:
       com.platys.name: "schema-registry-ui"
       com.platys.webui.title: 'Confluent Schema Registry UI'
       com.platys.webui.url: "http://${PUBLIC_IP}:28102"
-    depends_on:
-      - {{ns.schemaRegistryServiceName}}
     ports:
       - "28102:8000"
     environment:
@@ -1514,9 +1633,6 @@ services:
       com.platys.name: "confluent-control-center"
       com.platys.webui.title: 'Control Center UI'
       com.platys.webui.url: "http://${PUBLIC_IP}:{{externalPort}}"
-    depends_on:
-      - zookeeper{{dataCenter}}-1
-      - kafka{{dataCenter}}-1
     ports:
       - "{{externalPort}}:9021"
     environment:
@@ -1558,9 +1674,6 @@ services:
     hostname: replicator-1
     labels:
       com.platys.name: "confluent-replicator"
-    depends_on:
-      - kafka{{dataCenter}}-1
-      - {{ns.schemaRegistryServiceName}}
     ports:
       - 18083:8083
     environment:
@@ -1606,9 +1719,6 @@ services:
     hostname: mirror-maker{{dataCenter}}-1:
     labels:
       com.platys.name: "mirror-maker2"
-    depends_on:
-      - kafka{{dataCenter}}-1
-      - {{ns.schemaRegistryServiceName}}
     environment:
       MM2: ''
     {%if use_timezone | default(false) %}
@@ -1664,7 +1774,7 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {# LENSES_BOX_enable #}
 
-{% if (KCAT_enable) | default(false) %}
+{% if ((KAFKA_enable or external['KAFKA_enable']) and KCAT_enable) | default(false) %}
   #  ================================== kcat (used to be kafkacat)  ========================================== #
   kcat:
     image: edenhill/kcat:{{__KCAT_version}}
@@ -1693,7 +1803,7 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {# KCAT_enable #}
 
-{% if (JIKKOU_enable) | default(false) %}
+{% if ((KAFKA_enable or external['KAFKA_enable']) and JIKKOU_enable) | default(false) %}
   #  ================================== Jikkou ========================================== #
   jikkou:
     image: streamthoughts/jikkou:{{__JIKKOU_version}}
@@ -1768,9 +1878,6 @@ services:
       com.platys.name: "kafka-topics-ui"
       com.platys.webui.title: 'Kafka Topics UI'
       com.platys.webui.url: "http://${PUBLIC_IP}:28141"
-    depends_on:
-      - kafka{{dataCenter}}-1
-      - kafka-rest-1
     ports:
       - "28141:8000"
     environment:
@@ -1808,7 +1915,7 @@ services:
     ports:
       - "28103:8000"
     environment:
-      CONNECT_URL: {{ns1.connectServersUrl}}
+      CONNECT_URL: {{ns1.connectServersInternalUrl}}
       PROXY: "true"
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
@@ -1839,9 +1946,6 @@ services:
       com.platys.name: "cmak"
       com.platys.webui.title: 'Cluster Manager for Apache Kafka UI'
       com.platys.webui.url: "http://${PUBLIC_IP}:{{externalPort}}"
-    depends_on:
-      - zookeeper{{dataCenter}}-1
-      - kafka{{dataCenter}}-1
     ports:
       - "{{externalPort}}:9000"
     environment:
@@ -1879,8 +1983,11 @@ services:
     ports:
       - "28110:9020"
     environment:
-      KAFKA_BROKERCONNECT: kafka-1:19092
+      KAFKA_BROKERCONNECT: '{{ns.bootstrapServers}}'
       SCHEMAREGISTRY_CONNECT: '{{ns.schemaRegistryUrl}}'
+      {% if schemaRegistryUsername is defined and schemaRegistryUsername|length %}
+      SCHEMAREGISTRY_AUTH: '{{schemaRegistryUsername}}:{{schemaRegistryPassword}}'
+      {% endif %}
       MESSAGE_FORMAT: AVRO
       JVM_OPTS: "-Xms32M -Xmx64M"
       SERVER_SERVLET_CONTEXTPATH: "/"
@@ -1913,8 +2020,10 @@ services:
     ports:
       - "28106:8080"
     environment:
+    {% if external['KAFKA_enable'] | default(false) %}
       ZOOKEEPER_HOST: zookeeper-1:2181
-      KAFKA_HOST: kafka-1:19092
+    {% endif %}   {#  external['KAFKA_enable']) #}
+      KAFKA_HOST: {{ns.bootstrapServers}}
       #SECURITY_PROTOCOL: SSL
       TRUST_STORE_LOCATION: ssl/client.truststore.jks
       TRUST_STORE_PASSWORD: password
@@ -1956,15 +2065,24 @@ services:
             docker-kafka-server:
               properties:
                 bootstrap.servers: '{{ns.bootstrapServers}}'
-    {% if ( SCHEMA_REGISTRY_enable ) | default(false) %}
+    {% if external['KAFKA_enable'] and external['KAFKA_sasl_mechanism'] is defined and external['KAFKA_sasl_mechanism'] | length %}
+                security.protocol: "{{external['KAFKA_security_protocol']}}"
+                sasl.mechanism: "{{external['KAFKA_sasl_mechanism']}}"
+                sasl.jaas.config: "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"{{kafkaUsername}}\" password=\"{{kafkaPassword}}\";"
+    {% endif -%}   {#  external['KAFKA_sasl_mechanism'] is defined #}
+    {% if (SCHEMA_REGISTRY_enable or external['SCHEMA_REGISTRY_enable']) | default(false) %}
               schema-registry:
-                url: "{{ns.schemaRegistryUrlExternal}}"
+                url: "{{ns.schemaRegistryUrl}}"
                 type: "confluent"
+        {% if schemaRegistryUsername is defined and schemaRegistryUsername|length %}
+                basic-auth-username: "{{schemaRegistryUsername}}"
+                basic-auth-password: "{{schemaRegistryPassword}}"
+        {% endif %}
     {% endif -%}   {#  SCHEMA_REGISTRY_enable #}
     {% if ( KAFKA_CONNECT_enable or KAFKA_KSQLDB_use_embedded_connect) | default(false) %}
               connect:
       {% for item in ns1.connectServersInternalUrl.split(",") %}
-                - name: "{{ns1.connectClusterName}}-{{loop.index}}"
+                - name: "connect-{{loop.index}}"
                   url: "{{item}}"
       {% endfor -%}
     {% endif -%}   {#  KAFKA_CONNECT_enable #}
@@ -1996,20 +2114,35 @@ services:
     ports:
       - 28179:8080
     environment:
+    {% if external['KAFKA_enable'] | default(false) %}
+      KAFKA_CLUSTERS_0_NAME: external
+    {% else %}
       KAFKA_CLUSTERS_0_NAME: local
-      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: '{{ns.bootstrapServers}}'
       KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper-1:2181
-      KAFKA_CLUSTERS_0_KSQLDBSERVER: 'http://ksqldb-server-1:8088'
-    {% if ( SCHEMA_REGISTRY_enable ) | default(false) %}
-      KAFKA_CLUSTERS_0_SCHEMAREGISTRY: '{{ns.schemaRegistryUrlExternal}}'
-    {% endif -%}   {#  SCHEMA_REGISTRY_enable #}
       KAFKA_CLUSTERS_0_JMXPORT: '9992'
+    {% endif -%}   {#  external['KAFKA_enable'] #}
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: '{{ns.bootstrapServers}}'
+    {% if external['KAFKA_enable'] and external['KAFKA_sasl_mechanism'] is defined and external['KAFKA_sasl_mechanism'] | length %}
+      KAFKA_CLUSTERS_0_PROPERTIES_SECURITY_PROTOCOL: "{{external['KAFKA_security_protocol']}}"
+      KAFKA_CLUSTERS_0_PROPERTIES_SASL_MECHANISM: "{{external['KAFKA_sasl_mechanism']}}"
+      KAFKA_CLUSTERS_0_PROPERTIES_SASL_JAAS_CONFIG: "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"{{kafkaUsername}}\" password=\"{{kafkaPassword}}\";"
+      KAFKA_CLUSTERS_0_PROPERTIES_CLIENT_DNS_LOOKUP: use_all_dns_ips
+      KAFKA_CLUSTERS_0_DISABLELOGDIRSCOLLECTION: 'true'
+    {% endif -%}   {#  external['KAFKA_sasl_mechanism'] is defined #}
+    {% if (SCHEMA_REGISTRY_enable or external['SCHEMA_REGISTRY_enable']) | default(false) %}
+      KAFKA_CLUSTERS_0_SCHEMAREGISTRY: '{{ns.schemaRegistryUrlExternal}}'
+      {% if schemaRegistryUsername is defined and schemaRegistryUsername|length %}
+      KAFKA_CLUSTERS_0_SCHEMAREGISTRYAUTH_USERNAME: "{{schemaRegistryUsername}}"
+      KAFKA_CLUSTERS_0_SCHEMAREGISTRYAUTH_PASSWORD: "{{schemaRegistryPassword}}"
+      {% endif %}
+    {% endif -%}   {#  SCHEMA_REGISTRY_enable #}
+      KAFKA_CLUSTERS_0_KSQLDBSERVER: 'http://ksqldb-server-1:8088'
     {% if ( KAFKA_CONNECT_enable or KAFKA_KSQLDB_use_embedded_connect ) | default(false) %}
       KAFKA_CLUSTERS_0_KAFKACONNECT_0_NAME: '{{ns1.connectClusterName}}'
-      #KAFKA_CLUSTERS_0_KAFKACONNECT_0_ADDRESS: 'http://${DOCKER_HOST_IP}:8083'
       KAFKA_CLUSTERS_0_KAFKACONNECT_0_ADDRESS: {{ns1.connectServersInternalUrl.split(',')[0]}}
     {% endif -%}   {#  KAFKA_CONNECT_enable #}
       KAFKA_CLUSTERS_0_READONLY: 'False'
+      LOGGING_LEVEL_ROOT: 'info'
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -2067,10 +2200,21 @@ services:
     ports:
       - 28239:8080
     environment:
+      # config according to: https://github.com/cloudhut/kowl/blob/master/docs/config/kowl.yaml
       KAFKA_BROKERS: '{{ns.bootstrapServers}}'
-    {% if ( SCHEMA_REGISTRY_enable ) | default(false) %}
+    {% if external['KAFKA_enable'] and external['KAFKA_sasl_mechanism'] is defined and external['KAFKA_sasl_mechanism'] | length %}
+      KAFKA_TLS_ENABLED: 'true'
+      KAFKA_SASL_ENABLED: 'true'
+      KAFKA_SASL_USERNAME: {{kafkaUsername}}
+      KAFKA_SASL_PASSWORD: {{kafkaPassword}}
+    {% endif -%}   {#  external['KAFKA_sasl_mechanism'] is defined #}
+    {% if ( SCHEMA_REGISTRY_enable or external['SCHEMA_REGISTRY_enable']) | default(false) %}
       KAFKA_SCHEMAREGISTRY_ENABLED: 'True'
       KAFKA_SCHEMAREGISTRY_URLS: '{{ns.schemaRegistryUrlExternal}}'
+      {% if schemaRegistryUsername is defined and schemaRegistryUsername|length %}
+      KAFKA_SCHEMAREGISTRY_USERNAME: "{{schemaRegistryUsername}}"
+      KAFKA_SCHEMAREGISTRY_PASSWORD: "{{schemaRegistryPassword}}"
+      {% endif -%}   {#  schemaRegistryUsername is defined #}
     {% endif -%}   {#  SCHEMA_REGISTRY_enable #}
     {% if ( KAFKA_CONNECT_enable or KAFKA_KSQLDB_use_embedded_connect) | default(false) %}
       CONNECT_ENABLED: 'True'
@@ -2150,6 +2294,34 @@ services:
     {% endif -%}   {#  LOKI_collect_docker_logs #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  KAFKA_enable and KAFKA_MAGIC_enable #}
+
+{% if ((KAFKA_enable or external['KAFKA_enable']) and KAFKA_WEBVIEW_enable) | default(false) %}
+  #  ================================== Kafka Webview ========================================== #
+  kafka-webview:
+    image: sourcelaborg/kafka-webview:{{__KAFKA_WEBVIEW_version}}
+    container_name: kafka-webview
+    hostname: kafka-webview
+    labels:
+      com.platys.name: "kafka-webview"
+      com.platys.webui.title: 'Kafka Webview UI'
+      com.platys.webui.url: "http://${PUBLIC_IP}:28274"
+    ports:
+      - 28274:8080
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  KAFKA_enable and KAFKA_WEBVIEW_enable #}
 
 {% if ((KAFKA_enable or external['KAFKA_enable']) and STREAMS_EXPLORER_enable) | default(false) %}
   #  ================================== Streams Explorer ========================================== #
@@ -2906,8 +3078,8 @@ services:
       CORE_CONF_fs_s3a_endpoint: 'http://minio:9000'
       CORE_CONF_fs_s3a_path_style_access: 'true'
       HIVE_SITE_CONF_fs_s3a_endpoint: http://minio:9000
-      HIVE_SITE_CONF_fs_s3a_access_key: V42FCGRVMK24JJ8DHUYG
-      HIVE_SITE_CONF_fs_s3a_secret_key: bKhWxVF3kQoLY9kFmt91l+tDrEoZjqnWXzY9Eza
+      HIVE_SITE_CONF_fs_s3a_access_key: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
+      HIVE_SITE_CONF_fs_s3a_secret_key: {{s3SecretAccessKey}}
       HIVE_SITE_CONF_fs_s3a_path_style_access: 'true'
       HIVE_SITE_CONF_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
@@ -3169,9 +3341,15 @@ services:
       HIVE_SITE_CONF_fs_s3a_secret_key: {{s3SecretAccessKey}}
       HIVE_SITE_CONF_fs_s3a_path_style_access: '{{s3PathStyleAccess}}'
       HIVE_SITE_CONF_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
+  {%elif external['ADLS_enable'] | default(false) %}
+      CORE_CONF_fs_defaultFS: file:///tmp
+      HIVE_SITE_CONF_fs_azure_account_auth_type_gusstorage_dfs_core_windows_net: 'SharedKey'
+      HIVE_SITE_CONF_fs_azure_account_key_gusstorage_dfs_core_windows_net: {{adlsAccessKey}}
   {% else %}
       CORE_CONF_fs_defaultFS: file:///tmp
   {% endif -%}   {#  HADOOP_enable or MINIO_enable #}
+      # necessary for Trino to be able to read from Avro
+      HIVE_SITE_CONF_metastore_storage_schema_reader_impl: "org.apache.hadoop.hive.metastore.SerDeStorageSchemaReader"
       SERVICE_PRECONDITION: "hive-metastore-db:5432"
   {% if ATLAS_install_hive_hook | default(false) %}
       HIVE_SITE_CONF_hive_exec_post_hooks: "org.apache.atlas.hive.hook.HiveHook"
@@ -3315,7 +3493,6 @@ services:
       com.platys.webui.url: "http://${PUBLIC_IP}:21000"
     depends_on:
       - zookeeper{{dataCenter}}-1
-      - kafka{{dataCenter}}-1
       - atlas-kafka-setup
       - cassandra-atlas
     ports:
@@ -3352,9 +3529,6 @@ services:
     container_name: atlas-kafka-setup
     labels:
       com.platys.name: "atlas"
-    depends_on:
-      - kafka{{dataCenter}}-1
-      - zookeeper{{dataCenter}}-1
     environment:
       # The following settings are listed here only to satisfy the image's requirements.
       # We override the image's `command` anyways, hence this container will not start a broker.
@@ -3879,9 +4053,6 @@ services:
     container_name: kafka-setup
     labels:
       com.platys.name: "datahub"
-    depends_on:
-      - kafka{{dataCenter}}-1
-      - {{ns.schemaRegistryServiceName}}
     environment:
       # The following settings are listed here only to satisfy the image's requirements.
       # We override the image's `command` anyways, hence this container will not start a broker.
@@ -4340,6 +4511,7 @@ services:
     {%if STREAMSETS_activate_https | default(false) %}
       SDC_CONF_HTTPS_PORT: 18629
     {% endif %}
+      SDC_CONF_RUNTIME_CONF_LOCATION: {{"configuration.properties" if STREAMSETS_use_external_conf_file else "embedded"}}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -4358,6 +4530,9 @@ services:
       - ./scripts/streamsets/pipelines:/tmp/pipelines
     {% endif %}
       - ./conf/streamsets/pre-docker-entrypoint.sh:/pre-docker-entrypoint.sh
+    {% if STREAMSETS_use_external_conf_file %}
+      - ./custom-conf/streamsets/configuration.properties:/etc/sdc/configuration.properties
+    {% endif %}
       - ./plugins/streamsets/user-libs:/opt/streamsets-datacollector-user-libs:Z
     {% for jdbcjar in STREAMSETS_jdbc_jars.split(",") %}
       - ./plugins/streamsets/libs-extras/streamsets-datacollector-jdbc-lib/{{jdbcjar}}:/opt/streamsets-datacollector-{{STREAMSETS_version}}/streamsets-libs-extras/streamsets-datacollector-jdbc-lib/lib/{{jdbcjar}}:Z
@@ -4482,37 +4657,73 @@ services:
 
 {%if NIFI_enable | default(false) %}
   #  ================================== NiFi ========================================== #
-  nifi-1:
+  {% for num in range(NIFI_nodes | default('1') ) %}
+    {% set externalPort = 18080 + loop.index-1 %}
+    {% set externalRemotePort = 10005 + loop.index-1 %}
+    {% set clusterPort = 11005 + loop.index-1 %}
+  nifi-{{loop.index}}:
     image: apache/nifi:{{__NIFI_version}}
-    container_name: nifi-1
-    hostname: nifi-1
+    container_name: nifi-{{loop.index}}
+    hostname: nifi-{{loop.index}}
     labels:
       com.platys.name: 'nifi'
-      com.platys.webui.title: "Apache NiFi UI"
-      com.platys.webui.url: "http://${PUBLIC_IP}:18080/nifi"
+      com.platys.webui.title: "Apache NiFi UI Node {{externalPort}}"
+      com.platys.webui.url: "http{{ 's' if NIFI_run_secure}}://${PUBLIC_IP}:{{externalPort}}/nifi"
     ports:
       # HTTP
-      - "18080:8080"
+      - "{{externalPort}}:{{externalPort}}"
       # Remote Input Socket
-      - 10005:10000/tcp
+      - {{externalRemotePort}}:{{externalRemotePort}}/tcp
     environment:
-      NIFI_WEB_HTTP_PORT: '8080'
+    {%if NIFI_create_cluster  | default(false) %}
+      NIFI_CLUSTER_IS_NODE: 'true'
+      NIFI_CLUSTER_ADDRESS: nifi-{{loop.index}}
+      NIFI_CLUSTER_NODE_PROTOCOL_PORT: {{clusterPort}}
+      NIFI_ZK_CONNECT_STRING: zookeeper-1:2181
+      NIFI_ZK_ROOT_NODE: '/nifi'
+      NIFI_ELECTION_MAX_WAIT: '{{NIFI_election_max_wait}}'
+    {% endif -%}   {#  NIFI_create_cluster #}
+    {%if NIFI_run_secure  | default(false) %}
+      NIFI_WEB_HTTPS_PORT: '{{externalPort}}'
+      NIFI_WEB_HTTPS_HOST: nifi-{{loop.index}}
+      NIFI_WEB_PROXY_HOST: '${PUBLIC_IP}:{{externalPort}},${DOCKER_HOST_IP}{{externalPort}}'
+      AUTH: tls
+      KEYSTORE_PATH: /opt/certs/keystore.jks
+      KEYSTORE_TYPE: JKS
+      KEYSTORE_PASSWORD: 'PTz7kFl1rzX4wUtcDlurwV6gjm7vID9Ibgbe71N355w'
+      TRUSTSTORE_PATH: /opt/certs/truststore.jks
+      TRUSTSTORE_TYPE: JKS
+      TRUSTSTORE_PASSWORD: 'h8I20cJyr50rFwzJRZkBcodLM8ifnDqQK2kORds8TLk'
+      NIFI_SECURITY_USER_AUTHORIZER: single-user-authorizer
+      NIFI_SECURITY_USER_LOGIN_IDENTITY_PROVIDER: single-user-provider
+    {% else %}
+      NIFI_WEB_HTTP_PORT: '{{externalPort}}'
+    {% endif -%}   {#  NIFI_run_unsecure #}
+      NIFI_REMOTE_INPUT_SOCKET_PORT: '{{externalRemotePort}}'
+      NIFI_REMOTE_INPUT_HOST: nifi-{{loop.index}}
       NIFI_JVM_HEAP_INIT: {{ NIFI_jvm_heap_init if NIFI_jvm_heap_init is defined and NIFI_jvm_heap_init != None else omit }}
       NIFI_JVM_HEAP_MAX: {{ NIFI_jvm_heap_max if NIFI_jvm_heap_max is defined and NIFI_jvm_heap_max != None else omit }}
+      NIFI_SENSITIVE_PROPS_KEY: '12345678901234567890A'
+      SINGLE_USER_CREDENTIALS_USERNAME: '{{NIFI_username}}'
+      SINGLE_USER_CREDENTIALS_PASSWORD: '{{NIFI_password}}'
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
+    {%if NIFI_run_secure  | default(false) %}
+      - ./conf/nifi/keystore.jks:/opt/certs/keystore.jks
+      - ./conf/nifi/truststore.jks:/opt/certs/truststore.jks
+    {% endif -%}   {#  NIFI_run_unsecure #}
     {% if NIFI_volume_map_data %}
-      - ./container-volume/nifi/database_repository:/opt/nifi/nifi-current/database_repository
-      - ./container-volume/nifi/flowfile_repository:/opt/nifi/nifi-current/flowfile_repository
-      - ./container-volume/nifi/content_repository:/opt/nifi/nifi-current/content_repository
-      - ./container-volume/nifi/provenance_repository:/opt/nifi/nifi-current/provenance_repository
-      - ./container-volume/nifi/state:/opt/nifi/nifi-current/state
+      - ./container-volume/nifi-{{loop.index}}/database_repository:/opt/nifi/nifi-current/database_repository
+      - ./container-volume/nifi-{{loop.index}}/flowfile_repository:/opt/nifi/nifi-current/flowfile_repository
+      - ./container-volume/nifi-{{loop.index}}/content_repository:/opt/nifi/nifi-current/content_repository
+      - ./container-volume/nifi-{{loop.index}}/provenance_repository:/opt/nifi/nifi-current/provenance_repository
+      - ./container-volume/nifi-{{loop.index}}/state:/opt/nifi/nifi-current/state
     {% endif %}
     {% if NIFI_volume_map_logs %}
-      - ./container-volume/nifi/logs:/opt/nifi/nifi-current/logs
+      - ./container-volume/nifi-{{loop.index}}/logs:/opt/nifi/nifi-current/logs
     {% endif %}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
@@ -4522,6 +4733,7 @@ services:
     <<: *logging
     {% endif -%}   {#  LOKI_collect_docker_logs #}
     restart: {{container_restart_policy}}
+  {% endfor %}
 
   {%if NIFI_REGISTRY_enable | default(false) %}
   #  ================================== NiFi Registry ========================================== #
@@ -4535,8 +4747,77 @@ services:
       com.platys.webui.url: "http://${PUBLIC_IP}:19090/nifi-registry"
     ports:
       - 19090:19090
+    user: "root"
     environment:
       NIFI_REGISTRY_WEB_HTTP_PORT: 19090
+      NIFI_REGISTRY_DB_CLASS: 'org.h2.Driver'
+      NIFI_REGISTRY_DB_USER: 'nifireg'
+      NIFI_REGISTRY_DB_PASS: 'nifireg'
+      NIFI_REGISTRY_DB_DIR: '/opt/nifi-registry/nifi-registry-current/database'
+      NIFI_REGISTRY_FLOW_PROVIDER: file
+      NIFI_REGISTRY_FLOW_STORAGE_DIR: '/opt/nifi-registry/nifi-registry-current/flow_storage'
+      NIFI_REGISTRY_BUNDLE_PROVIDER: file
+      NIFI_REGISTRY_BUNDLE_STORAGE_DIR: './extension_bundles'
+      LOG_LEVEL: INFO
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {% if NIFI_REGISTRY_volume_map_data %}
+      - ./container-volume/nifi_registry/database:/opt/nifi-registry/nifi-registry-current/database
+      - ./container-volume/nifi_registry/flow_storage:/opt/nifi-registry/nifi-registry-current/flow_storage
+    {% endif -%}   {#  NIFI_REGISTRY_volume_map_data #}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    restart: {{container_restart_policy}}
+  {% endif %}   {#  NIFI_REGISTRY_enable  #}
+
+  {%if NIFI_TOOLKIT_enable | default(false) %}
+  #  ================================== NiFi Toolkit ========================================== #
+  nifi-toolkit:
+    image: apache/nifi-toolkit:{{__NIFI_TOOLKIT_version}}
+    container_name: nifi-toolkit
+    hostname: nifi-toolkit
+    labels:
+      com.platys.name: 'nifi-toolkit'
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        while [ 1 -eq 1 ];do sleep 60;done
+    restart: {{container_restart_policy}}
+  {% endif %}   {#  NIFI_TOOLKIT_enable  #}
+
+  {%if MONITOFI_enable | default(false) %}
+  #  ================================== MonitoFi ========================================== #
+  monitofi:
+    image: dtushar/monitofi:{{__MONITOFI_version}}
+    container_name: monitofi
+    hostname: monitofi
+    environment:
+      INFLUXDB_SERVER: influxdb
+      ENDPOINT_LIST: 'controller/cluster,flow/cluster/summary,flow/process-groups/root,flow/status,counters,system-diagnostics'
+      SLEEP_INTERVAL: 300
+      API_URL: 'http://nifi-1:8080/nifi-api/'
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -4550,7 +4831,7 @@ services:
     <<: *logging
     {% endif -%}   {#  LOKI_collect_docker_logs #}
     restart: {{container_restart_policy}}
-  {% endif %}   {#  NIFI_REGISTRY_enable  #}
+  {% endif %}   {#  MONITOFI_enable  #}
 {% endif %}   {#  NIFI_enable  #}
 
 {%if STREAMPIPES_enable | default(false) %}
@@ -4737,6 +5018,34 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {#  STREAMPIPES_enable #}
 
+{%if CONDUIT_enable | default(false) %}
+  #  ================================== Conduit ========================================== #
+  conduit:
+    image: ghcr.io/conduitio/conduit:{{__CONDUIT_version}}
+    container_name: conduit
+    hostname: conduit
+    labels:
+      com.platys.name: 'conduit'
+      com.platys.webui.title: "Conduit UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28269"
+    ports:
+      - "28269:8080"
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  CONDUIT_enable  #}
+
 {%if NODERED_enable | default(false) %}
   #  ================================== Node-RED ========================================== #
   nodered-1:
@@ -4822,6 +5131,8 @@ services:
 
       - SPRING_CLOUD_DATAFLOW_APPLICATIONPROPERTIES_STREAM_SPRING_KAFKA_STREAMS_PROPERTIES_METRICS_RECORDING_LEVEL=DEBUG
 
+      - SPRING_CLOUD_DATAFLOW_APPLICATIONPROPERTIES_TASK_SPRING_CLOUD_TASK_CLOSECONTEXTENABLED=true
+
       - SPRING_CLOUD_SKIPPER_CLIENT_SERVER_URI=http://spring-skipper-server:7577/api
 
       - SPRING_DATASOURCE_URL=jdbc:mysql://spring-dataflow-mysql:3306/dataflow
@@ -4834,11 +5145,10 @@ services:
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
-    depends_on:
-      - kafka{{dataCenter}}-1
-    entrypoint: "./wait-for-it.sh -t 180 spring-skipper-server:7577 -- java -jar /maven/spring-cloud-dataflow-server.jar"
+    entrypoint: "/usr/src/app/wait-for-it.sh -t 180 spring-skipper-server:7577 -- /cnb/process/web"
     volumes:
       - ./data-transfer:/data-transfer
+      - ./scripts/docker/wait-for-it.sh:/usr/src/app/wait-for-it.sh
 #      - ${HOST_MOUNT_PATH:-.}:${DOCKER_MOUNT_PATH:-/root/scdf}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
@@ -4854,6 +5164,7 @@ services:
     container_name: spring-skipper-server
     hostname: spring-skipper-server
     labels:
+      com.platys.name: 'spring-dataflow'
       com.platys.restapi.title: "Spring Cloud Skipper Server REST API"
       com.platys.restapi.url: "http://${PUBLIC_IP}:7577/api"
     ports:
@@ -4867,9 +5178,13 @@ services:
       - SPRING_DATASOURCE_PASSWORD=rootpw
       - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.mariadb.jdbc.Driver
       - LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_CLOUD_SKIPPER_SERVER_DEPLOYER=ERROR
-    entrypoint: "./wait-for-it.sh spring-dataflow-mysql:3306 -- java -jar /maven/spring-cloud-skipper-server.jar"
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    entrypoint: "/usr/src/app/wait-for-it.sh spring-dataflow-mysql:3306 -- /cnb/process/web"
     volumes:
       - ./data-transfer:/data-transfer
+      - ./scripts/docker/wait-for-it.sh:/usr/src/app/wait-for-it.sh
 #      - ${HOST_MOUNT_PATH:-.}:${DOCKER_MOUNT_PATH:-/root/scdf}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
@@ -4885,13 +5200,334 @@ services:
     container_name: spring-dataflow-mysql
     hostname: spring-dataflow-mysql
     labels:
-      com.platys.name: 'spring-dataflow'
+      com.platys.name: 'mysql'
     environment:
       MYSQL_DATABASE: dataflow
       MYSQL_USER: root
       MYSQL_ROOT_PASSWORD: rootpw
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
     expose:
       - 3306
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  SPRING_DATAFLOW_enable #}
+
+{%if AIRBYTE_enable | default(false) %}
+  #  ================================== Airbyte ========================================== #
+
+  airbyte-init:
+    image: airbyte/init:{{__AIRBYTE_version}}
+    container_name: airbyte-init
+    hostname: airbyte-init
+    labels:
+      com.platys.name: 'airbyte'
+    environment:
+      - LOCAL_ROOT=/tmp/airbyte_local
+      - HACK_LOCAL_ROOT_PARENT=/tmp
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./tmp:/local_parent
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    command: /bin/sh -c "./scripts/create_mount_directories.sh /local_parent /tmp tmp/airbyte_local"
+
+  airbyte-bootloader:
+    image: airbyte/bootloader:{{__AIRBYTE_version}}
+    container_name: airbyte-bootloader
+    hostname: airbyte-bootloader
+    labels:
+      com.platys.name: 'airbyte'
+    environment:
+      - AIRBYTE_VERSION={{__AIRBYTE_version}}
+      - CONFIG_DATABASE_PASSWORD=${CONFIG_DATABASE_PASSWORD:-}
+      - CONFIG_DATABASE_URL=${CONFIG_DATABASE_URL:-}
+      - CONFIG_DATABASE_USER=${CONFIG_DATABASE_USER:-}
+      - DATABASE_PASSWORD={{AIRBYTE_database_password}}
+      - DATABASE_URL=jdbc:postgresql://{{AIRBYTE_database_host}}:{{AIRBYTE_database_port}}/{{AIRBYTE_database_db}}
+      - DATABASE_USER={{AIRBYTE_database_user}}
+      - LOG_LEVEL={{AIRBYTE_log_level}}
+#      - RUN_DATABASE_MIGRATION_ON_STARTUP=
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+
+  airbyte-db:
+    image: airbyte/db:{{__AIRBYTE_version}}
+    container_name: airbyte-db
+    hostname: airbyte-db
+    labels:
+      com.platys.name: 'airbyte'
+    environment:
+      - CONFIG_DATABASE_PASSWORD=${CONFIG_DATABASE_PASSWORD:-}
+      - CONFIG_DATABASE_URL=${CONFIG_DATABASE_URL:-}
+      - CONFIG_DATABASE_USER=${CONFIG_DATABASE_USER:-}
+      - DATABASE_PASSWORD={{AIRBYTE_database_password}}
+      - DATABASE_URL=jdbc:postgresql://{{AIRBYTE_database_host}}:{{AIRBYTE_database_port}}/{{AIRBYTE_database_db}}
+      - DATABASE_USER={{AIRBYTE_database_user}}
+      - POSTGRES_PASSWORD={{AIRBYTE_database_password}}
+      - POSTGRES_USER={{AIRBYTE_database_user}}
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if AIRBYTE_volume_map_data %}
+      - airbyte-db-vol:/var/lib/postgresql/data
+    {% endif -%}   {#  AIRBYTE_volume_map_data #}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    restart: {{container_restart_policy}}
+
+  airbyte-scheduler:
+    image: airbyte/scheduler:{{__AIRBYTE_version}}
+    container_name: airbyte-scheduler
+    hostname: airbyte-scheduler
+    labels:
+      com.platys.name: 'airbyte'
+    environment:
+      - AIRBYTE_ROLE=${AIRBYTE_ROLE:-}
+      - AIRBYTE_VERSION={{__AIRBYTE_version}}
+      - CONFIG_DATABASE_PASSWORD=${CONFIG_DATABASE_PASSWORD:-}
+      - CONFIG_DATABASE_URL=${CONFIG_DATABASE_URL:-}
+      - CONFIG_DATABASE_USER=${CONFIG_DATABASE_USER:-}
+#      - CONFIG_ROOT=/data
+      - DATABASE_PASSWORD={{AIRBYTE_database_password}}
+      - DATABASE_URL=jdbc:postgresql://{{AIRBYTE_database_host}}:{{AIRBYTE_database_port}}/{{AIRBYTE_database_db}}
+      - DATABASE_USER={{AIRBYTE_database_user}}
+      - INTERNAL_API_HOST=airbyte-server:8001
+      - JOB_MAIN_CONTAINER_CPU_LIMIT=''
+      - JOB_MAIN_CONTAINER_CPU_REQUEST=''
+      - JOB_MAIN_CONTAINER_MEMORY_LIMIT=''
+      - JOB_MAIN_CONTAINER_MEMORY_REQUEST=''
+      - LOCAL_ROOT=/tmp/airbyte_local
+      - LOCAL_DOCKER_MOUNT=/tmp/airbyte_local
+      - LOG_LEVEL={{AIRBYTE_log_level}}
+      - NEW_SCHEDULER="false"
+#      - SECRET_PERSISTENCE=${SECRET_PERSISTENCE}
+      - SYNC_JOB_MAX_ATTEMPTS=3
+      - SYNC_JOB_MAX_TIMEOUT_DAYS=3
+      - SUBMITTER_NUM_THREADS=10
+      - TEMPORAL_HOST=airbyte-temporal:7233
+      - TRACKING_STRATEGY=segment
+      - WEBAPP_URL=http://localhost:28271/
+      - WORKER_ENVIRONMENT=docker
+      - WORKSPACE_DOCKER_MOUNT=airbyte_workspace
+      - WORKSPACE_ROOT=/tmp/workspace
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - airbyte-workspace-vol:/tmp/workspace
+      - /tmp/airbyte_local:/tmp/airbyte_local
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    restart: {{container_restart_policy}}
+
+  airbyte-worker:
+    image: airbyte/worker:{{__AIRBYTE_version}}
+    container_name: airbyte-worker
+    hostname: airbyte-worker
+    labels:
+      com.platys.name: 'airbyte'
+    environment:
+      - AIRBYTE_VERSION={{__AIRBYTE_version}}
+#      - AUTO_DISABLE_FAILING_CONNECTIONS=${AUTO_DISABLE_FAILING_CONNECTIONS}
+      - CONFIG_DATABASE_PASSWORD=${CONFIG_DATABASE_PASSWORD:-}
+      - CONFIG_DATABASE_URL=${CONFIG_DATABASE_URL:-}
+      - CONFIG_DATABASE_USER=${CONFIG_DATABASE_USER:-}
+#      - CONFIG_ROOT=/data
+      - DATABASE_PASSWORD={{AIRBYTE_database_password}}
+      - DATABASE_URL=jdbc:postgresql://{{AIRBYTE_database_host}}:{{AIRBYTE_database_port}}/{{AIRBYTE_database_db}}
+      - DATABASE_USER={{AIRBYTE_database_user}}
+      - JOB_MAIN_CONTAINER_CPU_LIMIT=''
+      - JOB_MAIN_CONTAINER_CPU_REQUEST=''
+      - JOB_MAIN_CONTAINER_MEMORY_LIMIT=''
+      - JOB_MAIN_CONTAINER_MEMORY_REQUEST=''
+      - LOCAL_ROOT=/tmp/airbyte_local
+      - LOCAL_DOCKER_MOUNT=/tmp/airbyte_local
+      - LOG_LEVEL=INFO
+      - MAX_CHECK_WORKERS=5
+      - MAX_DISCOVER_WORKERS=5
+      - MAX_SPEC_WORKERS=5
+      - MAX_SYNC_WORKERS=5
+#      - SECRET_PERSISTENCE=${SECRET_PERSISTENCE}
+      - SYNC_JOB_MAX_ATTEMPTS=3
+      - SYNC_JOB_MAX_TIMEOUT_DAYS=3
+      - TEMPORAL_HOST=airbyte-temporal:7233
+      - TRACKING_STRATEGY=segment
+      - WEBAPP_URL=http://localhost:28271/
+      - WORKER_ENVIRONMENT=docker
+      - WORKSPACE_DOCKER_MOUNT=airbyte_workspace
+      - WORKSPACE_ROOT=/tmp/workspace
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - airbyte-workspace-vol:/tmp/workspace
+      - /tmp/airbyte_local:/tmp/airbyte_local
+      - /var/run/docker.sock:/var/run/docker.sock
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    restart: {{container_restart_policy}}
+
+  airbyte-server:
+    image: airbyte/server:{{__AIRBYTE_version}}
+    container_name: airbyte-server
+    hostname: airbyte-server
+    labels:
+      com.platys.name: 'airbyte'
+      com.platys.restapi.title: "Airbyte REST API"
+      com.platys.restapi.url: "http://${PUBLIC_IP}:28270/api/v1"
+    ports:
+      - 28270:8001
+    environment:
+      - AIRBYTE_ROLE=${AIRBYTE_ROLE:-}
+      - AIRBYTE_VERSION={{__AIRBYTE_version}}
+      - CONFIG_DATABASE_PASSWORD=${CONFIG_DATABASE_PASSWORD:-}
+      - CONFIG_DATABASE_URL=${CONFIG_DATABASE_URL:-}
+      - CONFIG_DATABASE_USER=${CONFIG_DATABASE_USER:-}
+      - CONFIGS_DATABASE_MINIMUM_FLYWAY_MIGRATION_VERSION={{AIRBYTE_database_minimum_flyway_migration_version}}
+#      - CONFIG_ROOT=/data
+      - DATABASE_PASSWORD={{AIRBYTE_database_password}}
+      - DATABASE_URL=jdbc:postgresql://{{AIRBYTE_database_host}}:{{AIRBYTE_database_port}}/{{AIRBYTE_database_db}}
+      - DATABASE_USER={{AIRBYTE_database_user}}
+      - JOB_MAIN_CONTAINER_CPU_LIMIT=''
+      - JOB_MAIN_CONTAINER_CPU_REQUEST=''
+      - JOB_MAIN_CONTAINER_MEMORY_LIMIT=''
+      - JOB_MAIN_CONTAINER_MEMORY_REQUEST=''
+      - JOBS_DATABASE_MINIMUM_FLYWAY_MIGRATION_VERSION={{AIRBYTE_database_minimum_flyway_migration_version}}
+      - LOG_LEVEL={{AIRBYTE_log_level}}
+      - NEW_SCHEDULER="false"
+#      - SECRET_PERSISTENCE=${SECRET_PERSISTENCE}
+      - TEMPORAL_HOST=airbyte-temporal:7233
+      - TRACKING_STRATEGY=segment
+      - WEBAPP_URL=http://localhost:28271/
+      - WORKER_ENVIRONMENT=docker
+      - WORKSPACE_ROOT=/tmp/workspace
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - airbyte-workspace-vol:/tmp/workspace
+      - /tmp/airbyte_local:/tmp/airbyte_local
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    restart: {{container_restart_policy}}
+
+  airbyte-webapp:
+    image: airbyte/webapp:{{__AIRBYTE_version}}
+    container_name: airbyte-webapp
+    hostname: airbyte-webapp
+    labels:
+      com.platys.name: 'airbyte'
+      com.platys.webui.title: "Airbyte UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28271"
+    ports:
+      - 28271:80
+    environment:
+      - AIRBYTE_ROLE=${AIRBYTE_ROLE:-}
+      - AIRBYTE_VERSION={{__AIRBYTE_version}}
+      - API_URL=/api/v1/
+      - FULLSTORY=${FULLSTORY:-}
+      - INTERNAL_API_HOST=airbyte-server:8001
+      - IS_DEMO=${IS_DEMO:-}
+      - OPENREPLAY=${OPENREPLAY:-}
+      - PAPERCUPS_STORYTIME=${PAPERCUPS_STORYTIME:-}
+      - TRACKING_STRATEGY=segment
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    restart: {{container_restart_policy}}
+
+  airbyte-temporal:
+    image: airbyte/temporal:{{__AIRBYTE_version}}
+    container_name: airbyte-temporal
+    hostname: airbyte-temporal
+    labels:
+      com.platys.name: 'airbyte'
+      com.platys.restapi.title: "Airbyte Temporal"
+      com.platys.restapi.url: "http://${PUBLIC_IP}:28272"
+    ports:
+      - 28272:7233
+    environment:
+      - DB=postgresql
+      - DB_PORT={{AIRBYTE_database_port}}
+      - DYNAMIC_CONFIG_FILE_PATH=config/dynamicconfig/development.yaml
+      - LOG_LEVEL={{AIRBYTE_log_level}}
+      - POSTGRES_PWD={{AIRBYTE_database_password}}
+      - POSTGRES_SEEDS={{AIRBYTE_database_host}}
+      - POSTGRES_USER={{AIRBYTE_database_user}}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./conf/airbyte/temporal/dynamicconfig:/etc/temporal/config/dynamicconfig
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    restart: {{container_restart_policy}}
+
 {% endif %}   {#  SPRING_DATAFLOW_enable #}
 
 {%if AIRFLOW_enable | default(false) %}
@@ -5156,10 +5792,16 @@ services:
       ZEPPELIN_USER_USERNAME: {{ZEPPELIN_user_username}}
       ZEPPELIN_USER_PASSWORD: {{ZEPPELIN_user_password}}
       # set spark-master for Zeppelin interpreter
+
+  {%if ZEPPELIN_use_local_spark | default(false) %}
+      ZEPPELIN_SPARK_MASTER: "local[*]"
+  {% else %}
       ZEPPELIN_SPARK_MASTER: "spark://spark-master:7077"
+  {% endif -%}   {#  ZEPPELIN_use_local_spark #}
+      ZEPPELIN_NOTEBOOK_DIR: '{{ZEPPELIN_notebook_dir}}'
       ZEPPELIN_NOTEBOOK_CRON_ENABLE: '{{ZEPPELIN_notebook_cron_enable}}'
       PYSPARK_PYTHON: "python3"
-      SPARK_SUBMIT_OPTIONS: "{{ZEPPELIN_spark_submit_options}} --conf spark.ui.port=4050 --conf spark.driver.host=${DOCKER_HOST_IP} --conf spark.driver.port=5050 --conf spark.driver.bindAddress=0.0.0.0 --conf spark.blockManager.port=6060 --conf spark.driver.extraJavaOptions=-Dcom.amazonaws.services.s3.enableV4 --conf spark.executor.extraJavaOptions=-Dcom.amazonaws.services.s3.enableV4"
+      SPARK_SUBMIT_OPTIONS: "{{ZEPPELIN_spark_submit_options}} --conf spark.ui.port=4050 --conf spark.driver.host=zeppelin --conf spark.driver.port=5050 --conf spark.driver.bindAddress=0.0.0.0 --conf spark.blockManager.port=6060 --conf spark.driver.extraJavaOptions=-Dcom.amazonaws.services.s3.enableV4 --conf spark.executor.extraJavaOptions=-Dcom.amazonaws.services.s3.enableV4"
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -5168,7 +5810,7 @@ services:
       - ./plugins/spark/jars:/extra-jars
       - ./container-volume/spark/logs/:/var/log/spark/logs
     {% if ZEPPELIN_volume_map_data %}
-      - ./container-volume/spark/notebooks:/zeppelin/notebooks
+      - ./container-volume/spark/notebooks:/opt/zeppelin/{{ZEPPELIN_notebook_dir}}
     {% endif -%}   {#  ZEPPELIN_volume_map_data #}
       - './conf/s3cfg:/root/.s3cfg.template'
     {%if use_timezone | default(false) %}
@@ -6024,9 +6666,9 @@ services:
 {% endif %}   {#  TIPBOARD_enable #}
 
 {% if CHARTBOARD_enable | default(false) %}
-  #  ================================== Tiboard Dashboard ========================================== #
+  #  ================================== Chartboard Dashboard ========================================== #
   chartboard:
-    image: trivadis/chartboard:{{__TIPBOARD_version}}
+    image: trivadis/chartboard:{{__CHARTBOARD_version}}
     hostname: chartboard
     container_name: chartboard
     labels:
@@ -6053,6 +6695,151 @@ services:
     {% endif -%}   {#  LOKI_collect_docker_logs #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  CHARTBOARD_enable #}
+
+{% if RETOOL_enable | default(false) %}
+  #  ================================== Retool ========================================== #
+  retool-api:
+    image: tryretool/backend:{{__RETOOL_version}}
+    hostname: retool-api
+    container_name: retool-api
+    labels:
+      com.platys.name: "retool"
+      com.platys.webui.title: "ReTool API"
+      com.platys.webui.url: "http://${PUBLIC_IP}:3006"
+    ports:
+      - 3006:3000
+    environment:
+      SERVICE_TYPE: MAIN_BACKEND
+      DB_CONNECTOR_HOST: http://retool-db-connector
+      DB_CONNECTOR_PORT: 3002
+      DB_SSH_CONNECTOR_HOST: http://retool-db-ssh-connector
+      DB_SSH_CONNECTOR_PORT: 3002
+      NODE_ENV: production
+      JWT_SECRET: abc123!
+      POSTGRES_DB: retooldb
+      POSTGRES_USER: retool
+      POSTGRES_HOST: postgresql
+      POSTGRES_PORT: 5432
+      POSTGRES_PASSWORD: abc123!
+      ENCRYPTION_KEY: abc123!
+      LICENSE_KEY: LOCAL-ONLY-TRIAL
+      COOKIE_INSECURE: "true"
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./scripts/docker/wait-for-it.sh:/usr/src/app/wait-for-it.sh
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    command: bash -c "/usr/src/app/wait-for-it.sh postgresql:5432; ./docker_scripts/start_api.sh"
+    restart: {{container_restart_policy}}
+
+  retool-jobs-runner:
+    image: tryretool/backend:{{__RETOOL_version}}
+    hostname: retool-jobs-runner
+    container_name: retool-jobs-runner
+    labels:
+      com.platys.name: "retool"
+    environment:
+      SERVICE_TYPE: JOBS_RUNNER
+      NODE_ENV: production
+      JWT_SECRET: abc123!
+      POSTGRES_DB: retooldb
+      POSTGRES_USER: retool
+      POSTGRES_HOST: postgresql
+      POSTGRES_PORT: 5432
+      POSTGRES_PASSWORD: abc123!
+      ENCRYPTION_KEY: abc123!
+      LICENSE_KEY: LOCAL-ONLY-TRIAL
+      COOKIE_INSECURE: "true"
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./scripts/docker/wait-for-it.sh:/usr/src/app/wait-for-it.sh
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    command: bash -c "chmod -R +x ./docker_scripts; sync; /usr/src/app/wait-for-it.sh postgresql:5432; ./docker_scripts/start_api.sh"
+    restart: {{container_restart_policy}}
+
+  retool-db-connector:
+    image: tryretool/backend:{{__RETOOL_version}}
+    hostname: retool-db-connector
+    container_name: retool-db-connector
+    labels:
+      com.platys.name: "retool"
+    environment:
+      SERVICE_TYPE: DB_CONNECTOR_SERVICE
+      NODE_ENV: production
+      JWT_SECRET: abc123!
+      POSTGRES_DB: retooldb
+      POSTGRES_USER: retool
+      POSTGRES_HOST: postgresql
+      POSTGRES_PORT: 5432
+      POSTGRES_PASSWORD: abc123!
+      ENCRYPTION_KEY: abc123!
+      LICENSE_KEY: LOCAL-ONLY-TRIAL
+      COOKIE_INSECURE: "true"
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    command: bash -c "./retool_backend"
+    restart: {{container_restart_policy}}
+
+  retool-db-ssh-connector:
+    image: tryretool/backend:{{__RETOOL_version}}
+    hostname: retool-db-ssh-connector
+    container_name: retool-db-ssh-connector
+    labels:
+      com.platys.name: "retool"
+    environment:
+      SERVICE_TYPE: DB_SSH_CONNECTOR_SERVICE
+      NODE_ENV: production
+      JWT_SECRET: abc123!
+      POSTGRES_DB: retooldb
+      POSTGRES_USER: retool
+      POSTGRES_HOST: postgresql
+      POSTGRES_PORT: 5432
+      POSTGRES_PASSWORD: abc123!
+      ENCRYPTION_KEY: abc123!
+      LICENSE_KEY: LOCAL-ONLY-TRIAL
+      COOKIE_INSECURE: "true"
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    command: bash -c "./docker_scripts/generate_key_pair.sh; ./retool_backend"
+    restart: {{container_restart_policy}}
+{% endif %}   {#  RETOOL_enable #}
 
 {% if MEMCACHED_enable | default(false) %}
   #  ================================== Memcached ========================================== #
@@ -6213,21 +7000,28 @@ services:
 
 {% if CASSANDRA_enable | default(false) %}
   #  ================================== Cassandra ========================================== #
-  cassandra-1:
+  {% for num in range(CASSANDRA_nodes| default(1) ) %}
+    {% set external_port = 29042 + loop.index - 1 %}
+    {% set external_jmx_port = 7199 + loop.index - 1 %}
+    {% set external_thrift_port = 9160 + loop.index - 1 %}
+  cassandra-{{loop.index}}:
     image: cassandra:{{__CASSANDRA_version}}
-    container_name: cassandra-1
-    hostname: cassandra-1
+    container_name: cassandra-{{loop.index}}
+    hostname: cassandra-{{loop.index}}
     labels:
       com.platys.name: "cassandra"
     ports:
-      - 29042:9042
-      - 7199:7199
-      - 9160:9160
+      - {{external_port}}:9042
+      - {{external_jmx_port}}:7199
+      - {{external_thrift_port}}:9160
     environment:
-      - CASSANDRA_SEEDS=cassandra-1
       - CASSANDRA_CLUSTER_NAME="Test Cluster"
       - CASSANDRA_DC=se1
+    {% if loop.index > 1 %}
+      - CASSANDRA_SEEDS=cassandra-1
+    {% endif %}
       - CASSANDRA_ENDPOINT_SNITCH=GossipingPropertyFileSnitch
+      - CASSANDRA_NUM_TOKENS=128
       - LOCAL_JMX=no
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
@@ -6236,6 +7030,9 @@ services:
       - ./data-transfer:/data-transfer
       - ./conf/cassandra/jmxremote.access:/usr/lib/jvm/java-8-openjdk-amd64/jre/lib/management/jmxremote.access
       - ./conf/cassandra/jmxremote.password:/etc/cassandra/jmxremote.password
+    {% if CASSANDRA_volume_map_data %}
+      - "./container-volume/cassandra/data/cassandra-{{loop.index}}:/var/lib/cassandra"
+    {% endif %}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -6244,13 +7041,14 @@ services:
     <<: *logging
     {% endif -%}   {#  LOKI_collect_docker_logs #}
     restart: {{container_restart_policy}}
+  {% endfor %}
 
   cassandra-web:
     image: trivadis/cassandra-web
     container_name: cassandra-web
     hostname: cassandra-web
     labels:
-      com.platys.name: "cassandra"
+      com.platys.name: "cassandra-web"
       com.platys.webui.title: "Cassandra Web UI"
       com.platys.webui.url: "http://${PUBLIC_IP}:28120"
     ports:
@@ -6537,7 +7335,7 @@ services:
       xpack.security.enabled: "false"
       xpack.monitoring.enabled: "false"
       http.cors.enabled: "true"
-      http.cors.allow-origin: "http://dejavu:1358,http://dataplatform:28125,http://analyticsplatform:28125,http://${PUBLIC_IP}:28125,http://${DOCKER_HOST_IP}:28125,http://127.0.0.1:1358"
+      http.cors.allow-origin: "http://${DOCKER_HOST_IP}:28275,http://${PUBLIC_IP}:28275,http://dejavu:1358,http://dataplatform:28125,http://dataplatform:28125,http://${PUBLIC_IP}:28125,http://${DOCKER_HOST_IP}:28125,http://127.0.0.1:1358"
       http.cors.allow-headers: "X-Requested-With,X-Auth-Token,Content-Type,Content-Length,Authorization"
       http.cors.allow-credentials: "true"
       ES_JAVA_OPTS: -Xms512m -Xmx512m
@@ -6637,6 +7435,34 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {#  ELASTICHQ_enable #}
 
+{% if ELASTICVUE_enable | default(false) %}
+  #  ================================== ElasticVue ========================================== #
+  elasticvue:
+    image: cars10/elasticvue:{{__ELASTICVUE_version}}
+    container_name: elasticvue
+    hostname: elasticvue
+    labels:
+      com.platys.name: "elasticvue"
+      com.platys.webui.title: "ElasticVue UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28275"
+    ports:
+      - "28275:8080"
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  ELASTICVUE_enable #}
+
 {% if KIBANA_enable | default(false) %}
   #  ================================== Kibana ========================================== #
   kibana:
@@ -6676,11 +7502,115 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {#  KIBANA_enable #}
 {# #}
+
+{% if OPENSEARCH_enable | default(false) %}
+  #  ================================== OpenSearch ========================================== #
+  {% set ns = namespace(opensearchHosts='') %}
+  {% for num in range(OPENSEARCH_nodes | default(1) ) %}
+    {% if loop.first %}
+        {% set ns.opensearchHosts = 'opensearch-' ~ loop.index %}
+    {% else %}
+        {% set ns.opensearchHosts = ns.opensearchHosts ~ ',' ~ 'opensearch-' ~ loop.index %}
+    {% endif %}
+  {% endfor %}
+  {% for num in range(OPENSEARCH_nodes | default(1) ) %}
+    {% set external_port = 29200 + loop.index - 1 %}
+    {% set external_perf_port = 29600 + loop.index - 1 %}
+  opensearch-{{loop.index}}:
+    image: opensearchproject/opensearch:{{__OPENSEARCH_version}}
+    hostname: opensearch-{{loop.index}}
+    container_name: opensearch-{{loop.index}}
+    labels:
+      com.platys.name: "opensearch"
+      com.platys.restapi.title: "OpenSearch REST API"
+      com.platys.restapi.url: "http://${PUBLIC_IP}:{{external_port}}"
+      com.platys.manual.step.msgs: "sudo sysctl -w vm.max_map_count=262144"
+    ports:
+      - "{{external_port}}:9200"
+      - "{{external_perf_port}}:9600"
+    environment:
+      - cluster.name=opensearch-cluster
+      - node.name=opensearch-{{loop.index}}
+      {% if OPENSEARCH_nodes > 1 %}
+      - discovery.seed_hosts={{ns.opensearchHosts}}
+      - cluster.initial_master_nodes={{ns.opensearchHosts}}
+      {% else %}
+      - discovery.type=single-node
+      - "DISABLE_INSTALL_DEMO_CONFIG=true"   # disables execution of install_demo_configuration.sh bundled with security plugin, which installs demo certificates and security configurations to OpenSearch
+      - "DISABLE_SECURITY_PLUGIN=true"   #  disables security plugin entirely in OpenSearch by setting plugins.security.disabled: true in opensearch.yml
+      {% endif %}
+      - "bootstrap.memory_lock=true" # along with the memlock settings below, disables swapping
+      - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m" # minimum and maximum Java heap size, recommend setting both to 50% of system RAM
+      - "http.cors.enabled=true"
+      - http.cors.allow-origin="http://${DOCKER_HOST_IP}:28275,http://${PUBLIC_IP}:28275,http://dejavu:1358,http://dataplatform:28125,http://dataplatform:28125,http://${PUBLIC_IP}:28125,http://${DOCKER_HOST_IP}:28125,http://127.0.0.1:1358"
+      - http.cors.allow-headers="X-Requested-With,X-Auth-Token,Content-Type,Content-Length,Authorization"
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536 # maximum number of open files for the OpenSearch user, set to at least 65536 on modern systems
+        hard: 65536
+    volumes:
+      - ./data-transfer:/data-transfer
+    {% if OPENSEARCH_volume_map_data %}
+      - ./container-volumes/opensearch-{{loop.index}}/data:/usr/share/opensearch/data
+    {% endif -%}   {#  OPENSEARCH_volume_map_data #}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    restart: {{container_restart_policy}}
+  {% endfor %}
+{% endif %}   {#  OPENSEARCH_enable #}
+
+{% if OPENSEARCH_DASHBOARDS_enable | default(false) %}
+  #  ================================== OpenSearch Dashboards ========================================== #
+  opensearch-dashboards:
+    image: opensearchproject/opensearch-dashboards:{{__OPENSEARCH_DASHBOARDS_version}}
+    hostname: opensearch-dashboards
+    container_name: opensearch-dashboards
+    labels:
+      com.platys.name: "opensearch-dashboards"
+      com.platys.webui.title: "OpenSearch Dashboards"
+      com.platys.webui.url: "http://${PUBLIC_IP}:5603"
+    ports:
+      - 5603:5601
+    expose:
+      - "5601"
+    environment:
+      {% if OPENSEARCH_nodes > 1 %}
+      - 'OPENSEARCH_HOSTS=["https://opensearch-1:9200","https://opensearch-2:9200"]'
+      {% else %}
+      - 'OPENSEARCH_HOSTS=["http://opensearch-1:9200"]'
+      - "DISABLE_SECURITY_DASHBOARDS_PLUGIN=true"   # disables security dashboards plugin in OpenSearch Dashboards
+      {% endif %}
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  OPENSEARCH_DASHBOARDS_enable #}
+
 {# #}
 {% if NEO4J_enable | default(false) %}
   #  ================================== Neo4J ========================================== #
   neo4j-1:
-    image: neo4j:{{__NEO4J_version}}
+    image: neo4j:{{__NEO4J_version}}{{ '-enterprise' if (NEO4J_edition | lower) == 'enterprise'}}
     hostname: neo4j-1
     container_name: neo4j-1
     labels:
@@ -6691,17 +7621,42 @@ services:
       - "7474:7474"
       - "7687:7687"
     environment:
+    {% if (NEO4J_edition | lower) == 'enterprise'  %}
       - NEO4J_ACCEPT_LICENSE_AGREEMENT=yes
-      - NEO4J_HEAP_MEMORY=2048
-      - NEO4J_CACHE_MEMORY=1G
+    {% endif -%}   {#  use_timezone #}
       - NEO4J_AUTH=neo4j/{{admin_password}}
+      - NEO4JLABS_PLUGINS=[{{NEO4J_plugins.split(",") | map("to_json") | join(',')}}]
+    {% if NEO4J_dbms_memory_pagecache_size is defined and NEO4J_dbms_memory_pagecache_size | length %}
+      - NEO4J_dbms_memory_pagecache_size={{NEO4J_dbms_memory_pagecache_size}}
+    {% endif -%}   {#  NEO4J_dbms_memory_pagecache_size #}
+    {% if NEO4J_dbms_memory_pagecache_size is defined and NEO4J_dbms_memory_pagecache_size | length %}
+      - NEO4J_dbms_memory_heap_max__size={{NEO4J_dbms_memory_pagecache_size}}
+    {% endif -%}   {#  NEO4J_dbms_memory_pagecache_size #}
+      - NEO4J_dbms_logs_debug_level={{NEO4J_dbms_logs_debug_level}}
+      - EXTENSION_SCRIPT={{NEO4J_extension_script}}
+    {% if KAFKA_enable or external['KAFKA_enable'] | default(false) %}
+      - NEO4J_kafka_bootstrap_servers="{{ns.bootstrapServers}}"
+      - NEO4J_kafka_acks={{NEO4J_kafka_acks}}
+      - NEO4J_kafka_streams_log_compaction_strategy='compact'
+    {% if NEO4J_kafka_transactional_id is defined and NEO4J_kafka_transactional_id | length %}
+      - NEO4J_kafka_transactional_id='{{NEO4J_kafka_transactional_id}}'
+    {% endif -%}   {#  NEO4J_dbms_memory_pagecache_size #}
+    {% if NEO4J_streams_enabled is defined and NEO4J_streams_enabledj | length %}
+      - NEO4J_streams_source_enabled='{{NEO4J_streams_enabledj}}'
+    {% endif -%}   {#  NEO4J_streams_enabled #}
+      - NEO4J_streams_source_topic_nodes_{{NEO4J_topic_name}}={{NEO4J_streams_source_topic_nodes}}
+      - NEO4J_streams_source_topic_relationships_{{NEO4J_topic_name}}={{NEO4J_streams_source_topic_relationships}}
+      - NEO4J_streams_source_schema_polling_interval=10000
+    {% endif -%}   {#  KAFKA_enable #}
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
-#      - "./conf/neo4j/neo4j.conf:/conf/neo4j.conf"
-      - "./plugins/neo4j/:/plugins"
+      - "./init/neo4j:/init"
+    {% if not ( NEO4J_plugins is defined and NEO4J_plugins | length) %}
+      - "./plugins/neo4j/:/plugins:rw"
+    {% endif %}
     {% if NEO4J_volume_map_data %}
       - "./container-volume/neo4j/data:/data"
     {% endif %}
@@ -6717,6 +7672,35 @@ services:
     {% endif -%}   {#  LOKI_collect_docker_logs #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  NEO4J_enable #}
+
+{% if QUINE_enable | default(false) %}
+  #  ================================== Quine ========================================== #
+  quine-1:
+    image: neo4j:{{__QUINE_version}}
+    hostname: quine-1
+    container_name: quine-1
+    labels:
+      com.platys.name: "quine"
+      com.platys.webui.title: "Quine UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28268"
+    ports:
+      - "28268:8080"
+    environment:
+      - DUMMY=xb
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  QUINE_enable #}
 
 {% if DGRAPH_enable | default(false) %}
   #  ================================== Dgraph ========================================== #
@@ -7813,6 +8797,7 @@ services:
     {% if ORACLE_XE_app_user is defined and ORACLE_XE_app_user | length %}
       APP_USER: {{ORACLE_XE_app_user}}
       APP_USER_PASSWORD: {ORACLE_XE_app_user_password}}
+      TARGET_PDB: {{ORACLE_XE_target_pdb}}
     {% endif -%}   {#  ORACLE_XE_app_user #}
       ORACLE_CHARACTERSET: AL32UTF8
     {%if use_timezone | default(false) %}
@@ -7833,6 +8818,30 @@ services:
     {% endif -%}   {#  LOKI_collect_docker_logs #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  ORACLE_XE_enable #}
+
+{% if ORACLE_SQLCL_enable | default(false) %}
+  #  ================================== Oracle SQLcl ========================================== #
+  oracle-sqlcl:
+    image: trivadis/oracle-sqlcl:{{__ORACLE_SQLCL_version}}
+    container_name: oracle-sqlcl
+    hostname: oracle-sqlcl
+    labels:
+      com.platys.name: "oracle-sqlcl"
+    environment:
+      ORACLE_HOST: oracledb-xe
+      ORACLE_PORT: 1521
+      ORACLE_SERVICE: XEPDB1
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    command: tail -f /dev/null
+    restart: {{container_restart_policy}}
+{% endif %}   {#  ORACLE_SQLCL_enable #}
 
 {% if ORACLE_REST_DATA_SERVICE_enable | default(false) %}
   #  ================================== Oracle REST Data Service (ORDS) ========================================== #
@@ -7896,7 +8905,11 @@ services:
 {% if SQLSERVER_enable | default(false) %}
   #  ================================== SQL Server ========================================== #
   sqlserver:
+  {% if SQLSERVER_provision_adventure_works | default(false) %}
+    image: chriseaton/adventureworks:{{SQLSERVER_provision_adventure_works_edition}}
+  {% else %}
     image: mcr.microsoft.com/mssql/server:{{__SQLSERVER_version}}
+  {% endif -%}   {#  SQLSERVER_provision_adventure_works #}
     hostname: sqlserver
     container_name: sqlserver
     labels:
@@ -7959,6 +8972,12 @@ services:
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
+    {%if POSTGRESQL_wal_level is defined and POSTGRESQL_wal_level and POSTGRESQL_wal_level | length | default(false) %}
+    command:
+      - "postgres"
+      - "-c"
+      - "wal_level={{POSTGRESQL_wal_level | lower }}"
+    {% endif -%}   {#  POSTGRESQL_wal_level #}
     {%if LOKI_collect_docker_logs | default(false) %}
     <<: *logging
     {% endif -%}   {#  LOKI_collect_docker_logs #}
@@ -8171,6 +9190,38 @@ services:
     {% endif -%}   {#  LOKI_collect_docker_logs #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  SQLPAD_enable #}
+
+{% if NOCODB_enable | default(false) %}
+  #  ================================== NocoDB ========================================== #
+  nocodb:
+    image: nocodb/nocodb:{{__NOCODB_version}}
+    container_name: nocodb
+    hostname: nocodb
+    labels:
+      com.platys.name: "nocodb"
+      com.platys.webui.title: "NocoDB UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28276"
+    ports:
+      - "28276:8080"
+    environment:
+      NC_DB: 'pg://postgresql:5432?u=postgres&p=abc123!&d=postgres'
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      {% if NOCODB_volume_map_data | default(false) %}
+      - ./container-volumes/nocodb/data:/usr/app/data
+      {% endif %}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  NOCODB_enable #}
 
 {% if QUIX_enable | default(false) %}
   #  ================================== Quix ========================================== #
@@ -8438,6 +9489,10 @@ services:
       S3_AWS_SECRET_KEY: {{s3SecretAccessKey}}
       S3_PATH_STYLE_ACCESS: '{{s3PathStyleAccess}}'
   {% endif %}
+  {%if external['ADLS_enable'] | default(false) %}
+      ADLS_STORAGE_ACCOUNT: {{adlsStorageAccount | default(omit) }}
+      ADLS_ACCESS_KEY: {{adlsAccessKey}}
+  {% endif -%}   {#  external['ADLS_enable'] #}
   {% if TRINO_kafka_table_names is defined and TRINO_kafka_table_names|length and (KAFKA_enable or external['KAFKA_enable']) | default(false)  %}
       KAFKA_TABLE_NAMES: {{TRINO_kafka_table_names}}
   {% endif %}
@@ -8468,6 +9523,9 @@ services:
   {% endif %}
   {%if MINIO_enable or external['S3_enable'] | default(false) %}
       - './conf/{{conf_dir}}/catalog/minio.properties:{{trino_etc_dir}}/catalog/minio.properties'
+  {% endif %}
+  {%if external['ADLS_enable'] | default(false) %}
+      - './conf/{{conf_dir}}/catalog/adls.properties:{{trino_etc_dir}}/catalog/adls.properties'
   {% endif %}
   {% if TRINO_kafka_table_names is defined and TRINO_kafka_table_names|length and (KAFKA_enable or external['KAFKA_enable']) | default(false)  %}
       - './conf/{{conf_dir}}/catalog/kafka.properties:{{trino_etc_dir}}/catalog/kafka.properties'
@@ -8516,6 +9574,10 @@ services:
       S3_AWS_SECRET_KEY: {{s3SecretAccessKey}}
       S3_PATH_STYLE_ACCESS: '{{s3PathStyleAccess}}'
   {% endif %}
+  {%if external['ADLS_enable'] | default(false) %}
+      ADLS_STORAGE_ACCOUNT: {{adlsStorageAccount | default(omit) }}
+      ADLS_ACCESS_KEY: {{adlsAccessKey}}
+  {% endif -%}   {#  external['ADLS_enable'] #}
   {% if (KAFKA_enable or external['KAFKA_enable']) | default(false) %}
       KAFKA_TABLE_NAMES: {{TRINO_kafka_table_names}}
   {% endif %}
@@ -8532,6 +9594,9 @@ services:
       - ./conf/{{conf_dir}}/cluster/node.properties:{{trino_etc_dir}}/node.properties
   {%if MINIO_enable or external['S3_enable'] | default(false) %}
       - './conf/{{conf_dir}}/catalog/minio.properties:{{trino_etc_dir}}/catalog/minio.properties'
+  {% endif %}
+  {%if external['ADLS_enable'] | default(false) %}
+      - './conf/{{conf_dir}}/catalog/adls.properties:{{trino_etc_dir}}/catalog/adls.properties'
   {% endif %}
   {%if KAFKA_enable or external['KAFKA_enable'] | default(false) %}
       - './conf/{{conf_dir}}/catalog/kafka.properties:{{trino_etc_dir}}/catalog/kafka.properties'
@@ -8563,6 +9628,8 @@ services:
   {% endif -%}   {#  TRINO_edition #}
     hostname: trino-cli
     container_name: trino-cli
+    labels:
+      com.platys.name: "trino"
     {%if use_timezone | default(false) %}
     environment:
       TZ: {{use_timezone}}
@@ -8879,7 +9946,9 @@ services:
       MINIO_ROOT_USER: {{MINIO_access_key}}
       MINIO_ROOT_PASSWORD: {{MINIO_secret_key}}
       MINIO_REGION_NAME: {{s3DefaultRegion if s3DefaultRegion is defined and s3DefaultRegion else omit}}
-      MINIO_BROWSER: "{{MINIO_browser_enable | default(true) }}"
+    {%if not MINIO_browser_enable | default(false) %}
+      MINIO_BROWSER: "off"
+    {% endif -%}   {#  MINIO_browser_enable #}
       #MINIO_PUBLIC_IPS: {{serviceName}}
       #MINIO_DOMAIN: minio.io
       #MINIO_DEFAULT_BUCKETS: 'admin-bucket,{{MINIO_default_buckets}}'
@@ -8918,7 +9987,7 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
-      - ./conf/minio/config.json:/root/.mc/config.json
+#      - ./conf/minio/config.json:/root/.mc/config.json
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -8928,6 +9997,7 @@ services:
       - -c
       - |
         sleep 10
+        mc alias set minio-1 http://minio-1:9000 {{MINIO_access_key}} {{MINIO_secret_key}}
         mc mb --ignore-existing minio-1/admin-bucket
     {% if MLFLOW_SERVER_enable | default(false) %}
         mc mb --ignore-existing minio-1/mlruns
@@ -8957,7 +10027,7 @@ services:
     ports:
       - "28193:9090"
     environment:
-      CONSOLE_MINIO_SERVER: "http://minio-1:9090"
+      CONSOLE_MINIO_SERVER: "http://minio-1:9000"
       CONSOLE_PBKDF_PASSPHRASE: abc123!
       CONSOLE_PBKDF_SALT: abc123!
     {%if use_timezone | default(false) %}
@@ -9112,12 +10182,12 @@ services:
       AWS_SECRET_ACCESS_KEY: ${PLATYS_AWS_SECRET_ACCESS_KEY:-{{MINIO_secret_key}}}
       AWS_ENDPOINT: {{ (s3Endpoint | replace('http://','')) if s3Endpoint is defined and s3Endpoint else omit}}
       AWS_DEFAULT_REGION: {{s3DefaultRegion if s3DefaultRegion is defined and s3DefaultRegion else omit}}
-    {%if use_timezone | default(false) %}
+    {% if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
-      - './conf/s3cfg:/root/.s3cfg.template'
+      - './conf/s3cfg:/root/.s3cfg'
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -9129,8 +10199,61 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {#  AWSCLI_enable #}
 
+{% if AZURECLI_enable | default(false) %}
+  #  ================================== Azure CLI ========================================== #
+  azurecli:
+    image: mcr.microsoft.com/azure-cli:{{__AZURECLI_version}}
+    container_name: azurecli
+    hostname: azurecli
+    labels:
+      com.platys.name: "azurecli"
+    {% if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./container-volume/azurecli:/root
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    command: tail -f /dev/null
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  AZURECLI_enable #}
 
-  {% if LAKEFS_enable | default(false) %}
+{% if AZURE_STORAGE_EXPLORER_enable | default(false) %}
+  #  ================================== Azure Storage Explorer ========================================== #
+  azure-storage-explorer:
+    image: sebagomez/azurestorageexplorer:{{__AZURE_STORAGE_EXPLORER_version}}
+    container_name: azure-storage-explorer
+    hostname: azure-storage-explorer
+    labels:
+      com.platys.name: "azure-storage-explorer"
+      com.platys.webui.title: "S3 Manager UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28279"
+    ports:
+      - 28279:80
+    {% if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  AZURE_STORAGE_EXPLORER_enable #}
+
+{% if LAKEFS_enable | default(false) %}
   #  ================================== LakeFS ========================================== #
   lakefs:
     image: treeverse/lakefs:{{__LAKEFS_version}}
@@ -9151,7 +10274,7 @@ services:
       LAKEFS_BLOCKSTORE_S3_REGION: {{s3DefaultRegion if s3DefaultRegion is defined and s3DefaultRegion else omit}}
       LAKEFS_BLOCKSTORE_S3_FORCE_PATH_STYLE: '{{s3PathStyleAccess}}'
       LAKEFS_BLOCKSTORE_S3_CREDENTIALS_ACCESS_KEY_ID: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
-      LAKEFS_BLOCKSTORE_S3_CREDENTIALS_ACCESS_SECRET_KEY: ${PLATYS_AWS_SECRET_ACCESS_KEY:-{{MINIO_secret_key}}}
+      LAKEFS_BLOCKSTORE_S3_CREDENTIALS_SECRET_ACCESS_KEY: ${PLATYS_AWS_SECRET_ACCESS_KEY:-{{MINIO_secret_key}}}
     {% endif -%}   {#  LAKEFS_blockstore_type #}
       LAKEFS_AUTH_ENCRYPT_SECRET_KEY: ${LAKEFS_AUTH_ENCRYPT_SECRET_KEY:-some random secret string}
       LAKEFS_DATABASE_CONNECTION_STRING: "postgres://lakefs:lakefs@postgresql/lakefs?sslmode=disable"
@@ -9532,8 +10655,8 @@ services:
     environment:
 #      - PUBLICHOST="192.168.73.86"
       - PUBLICHOST=ftp
-      - FTP_USER_NAME=orderproc
-      - FTP_USER_PASS=orderproc
+      - FTP_USER_NAME={{FTP_username}}
+      - FTP_USER_PASS={{FTP_password}}
       - FTP_USER_HOME=/home/ftp-data
       - FTP_MAX_CLIENTS=9
     {%if use_timezone | default(false) %}
@@ -9566,7 +10689,7 @@ services:
       - "5800:5800"
       - "5900:5900"
     environment:
-      - VNC_PASSWORD=admin123
+      - VNC_PASSWORD={{admin_password}}
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -9766,6 +10889,36 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {#  PENTHAO_enable #}
 
+{% if DBT_enable | default(false) %}
+  #  ================================== DBT (Data Build Tool) ========================================== #
+  dbt-cli:
+    image: xemuliam/dbt:{{__DBT_version}}
+    container_name: dbt-cli
+    hostname: dbt-cli
+    labels:
+      com.platys.name: "dbt"
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./data-transfer/dbt:/usr/app
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        while [ 1 -eq 1 ];do sleep 60;done
+    restart: {{container_restart_policy}}
+{% endif %}   {#  DBT_enable #}
+
 {% if CODE_SERVER_enable | default(false) %}
   #  ================================== Code-Server IDE (VS Code in Browser) ================= #
   code-server:
@@ -9798,6 +10951,48 @@ services:
     {% endif -%}   {#  LOKI_collect_docker_logs #}
     restart: unless-stopped
 {% endif %}   {# CODE_SERVER_enable #}
+
+{% if MOCK_SERVER_enable | default(false) %}
+  #  ================================== MockServer ========================================== #
+  mockserver:
+    image: mockserver/mockserver:{{__MOCK_SERVER_version}}
+    container_name: mockserver
+    hostname: mockserver
+    labels:
+      com.platys.name: "mockserver"
+      com.platys.webui.title: "MockServer UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28273/mockserver/dashboard"
+    ports:
+      - 28273:1090
+    environment:
+      MOCKSERVER_SERVER_PORT: 1090
+      MOCKSERVER_LOG_LEVEL: {{MOCK_SERVER_log_level | default(DEBUG)}}
+    {% if MOCK_SERVER_persist_expectations | default(false) %}
+      MOCKSERVER_PERSIST_EXPECTATIONS: {{MOCK_SERVER_persist_expectations}}
+      MOCKSERVER_PERSISTED_EXPECTATIONS_PATH: {{MOCK_SERVER_persisted_expecations_path}}
+    {% endif -%}   {#  MOCK_SERVER_persist_expectations #}
+    {% if MOCK_SERVER_initialization_json_file is defined and MOCK_SERVER_initialization_json_file|length %}
+      MOCKSERVER_INITIALIZATION_JSON_PATH: /config/{{MOCK_SERVER_initialization_json_file}}
+    {% endif -%}   {#  MOCK_SERVER_initialization_json_file #}
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - /var/run/docker.sock:/var/run/docker.sock
+    {% if MOCK_SERVER_initialization_json_file is defined and MOCK_SERVER_initialization_json_file|length %}
+      - /scripts/mockserver/:/config
+    {% endif -%}   {#  MOCK_SERVER_initialization_json_file #}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    command: --admin-password '$$2y$$05$$NrPTXkUOIHTTbdHUqdAZVuSbncaZ9frWZYXDbA4v/WYqY0nAY1Sui'
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    restart: {{container_restart_policy}}
+{% endif %}   {# MOCK_SERVER_enable #}
 
 {% if EXCALIDRAW_enable | default(false) %}
   #  ================================== Excalidraw ================= #
@@ -10171,7 +11366,7 @@ services:
       # CASSANDRA_PASSWORD: cassandra
     {% endif -%}   {#  ZIPKIN_storage_type #}
     {%if ZIPKIN_collect_kafka and KAFKA_enable | default(false) %}
-      KAFKA_BOOTSTRAP_SERVERS: kafka-1:19092,kafka-2:19093
+      KAFKA_BOOTSTRAP_SERVERS: "{{ns.bootstrapServers}}"
     {% endif -%}   {#  KAFKA_enable #}
       #SELF_TRACING_ENABLED: true
       #JAVA_OPTS: '-Xms128m -Xmx128m -XX:+ExitOnOutOfMemoryError'
@@ -10699,7 +11894,9 @@ services:
       com.platys.name: "watchtower"
     volumes:
       - ./data-transfer:/data-transfer
+    {%if WATCHTOWER_map_config_json %}
       - ${HOME}/.docker/config.json:/config.json
+    {% endif -%}
       - /var/run/docker.sock:/var/run/docker.sock
     command: --cleanup --label-enable --interval 60 --trace --debug
     {%if LOKI_collect_docker_logs | default(false) %}
@@ -10711,7 +11908,7 @@ services:
 {% if PROVISIONING_DATA_enable | default(false) %}
   #  ================================== data-provisioning ========================================== #
   data-provisioning:
-    image: trivadis/platys-modern-data-platform-data:latest
+    image: trivadis/platys-modern-data-platform-data:{{__PROVISIONING_DATA_version}}
     container_name: data-provisioning
     hostname: data-provisioning
     labels:
@@ -10719,3 +11916,13 @@ services:
     volumes:
       - ./data-transfer:/data-transfer
 {% endif %}   {# PROVISIONING_DATA_enable #}
+
+volumes:
+  data-transfer-vol:
+    name: data_transfer_vol
+{%if AIRBYTE_volume_map_data %}
+  airbyte-workspace-vol:
+    name: airbyte_workspace_vol
+  airbyte-db-vol:
+    name: airbyte_db_vol
+{% endif %}

@@ -1,4 +1,4 @@
-# `modern-data-platform` - Port Mappings - 1.14.0
+# `modern-data-platform` - Port Mappings - 1.15.0
 
 This table reserves the external ports for the various services. Not all services have to be used in the platform at a given time. But by reserving, we can assure that there are no conflicts if a service is added at a later time.
 
@@ -38,12 +38,13 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 3002 | 3000 | wetty (dc2 |
 3005 | 3000 | marquez-web |
 3010 | 3000 | postman |
+3006 | 3000 | retool-api |
 3030 | 3030 | lenses |
 3100 | 3100 | loki |
 3200 | 3200 | tempo |
 3306 | 3306 | mysql |
 3307 | 3306 | datahub-mysql |
-3838 | 3838 | shiny-server | 
+3838 | 3838 | shiny-server |
 4000 | 4000 | graphql-mesh |
 4004 | 4004 | log4brains |
 4040 | 4040 | spark-master (ui) |
@@ -72,13 +73,14 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 5434 | 5432 | marquez-db |
 5601 | 5601 | kibana |
 5602 | 5601 | datahub-kibana |
+5603 | 5601 | opensearch-dashboards |
 5672 | 5672 | activemq |
 5673 | 5672 | rabbitmq (amqp) |
-5701 | 5701 | hazelcast	-1 | 
-5705 | 5701 | zeebe-1 | 
+5701 | 5701 | hazelcast	-1 |
+5705 | 5701 | zeebe-1 |
 5778 | 5778 | jaeger (config) |
-5800 | 5800 | filezilla | 
-5801 | 5800 | firefox | 
+5800 | 5800 | filezilla |
+5801 | 5800 | firefox |
 5820 | 5820 | stardog-1 |
 5900 | 5900 | filezilla |  
 6060 | 6060 | zeppelin |
@@ -99,6 +101,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 7199 | 7199 | cassandra-1 |
 7200 | 7199 | cassandra-2 |
 7201 | 7199 | cassandra-3 |
+7202 | 7199 | cassandra-4 |
+7203 | 7199 | cassandra-5 |
 7474 | 7474 | neo4j-1 |
 7475 | 7474 | neo4j-2 |
 7476 | 7474 | neo4j-3 |
@@ -119,7 +123,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 8083 | 8083 | connect-1 |
 8084 | 8084 | connect-2 |
 8085 | 8085 | connect-3 |
-8086 | 8086 | influxdb | 
+8086 | 8086 | influxdb |
 8088 | 8088 | ksqldb-server-1 |
 8089 | 8088 | ksqldb-server-2 |
 8090 | 8088 | ksqldb-server-3 |
@@ -153,9 +157,11 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 9160 | 9160 | cassandra-1 |
 9161 | 9160 | cassandra-2 |
 9162 | 9160 | cassandra-3 |
+9163 | 9160 | cassandra-4 |
+9164 | 9160 | cassandra-5 |
 9083 | 9083 | hive-metastore |
-9021 | 9021 | control-center (dc1) | 
-9022 | 9021 | control-center (dc2) | 
+9021 | 9021 | control-center (dc1) |
+9022 | 9021 | control-center (dc2) |
 9090 | 9090 | prometheus-1 |
 9091 | 9091 | prometheus-pushgateway |
 9092 | 9092 | kafka-1     |
@@ -191,7 +197,9 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 10000 | 10000 | hive-server |
 10001 | 10001 | hive-server |
 10002 | 10002 | hive-server |
-10005 | 10000 | nifi |
+10005 | 10000 | nifi-1 |
+10006 | 10000 | nifi-2 |
+10007 | 10000 | nifi-3 |
 11211 | 11211 | memcached |
 11212 | 11211 | ignite-1 |
 13133 | 13133 | otel-collector |
@@ -206,7 +214,9 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 17687 | 7687 | amundsen-neo4j |
 17475 | 7474 | datahub-neo4j |
 17688 | 7687 | datahub-neo4j |
-18080 | 18080 | nifi-1 |
+18080 | 8080 | nifi-1 |
+18081 | 8080 | nifi-2 |
+18082 | 8080 | nifi-3 |
 18088 | 8088 | resourcemanager |
 18042 | 8042 | nodemanager |
 18083 | 8083 | replicator-1 |
@@ -223,7 +233,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 18633 | 18633 | streamsets-edge-1 |
 19000 | 9000 | yb-tserver-1 |
 19042 | 9042 | cassandra-atlas |
-19043 | 9042 | cassandra-atlas | 
+19043 | 9042 | cassandra-atlas |
 19090 | 19090 | nifi-registry |
 19160 | 9160 | cassandra-atlas |
 19200 | 9200 | elasticsearch-atlas |
@@ -237,9 +247,9 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 19097 | 19097 | kafka-6 (docker-host)   |
 19098 | 19098 | kafka-7 (docker-host)   |
 19099 | 19099 | kafka-8 (docker-host)   |
-19630 | 19630 | streamsets-transformer-1 | 
-19631 | 19630 | streamsets-transformer-1 | 
-19632 | 19630 | streamsets-transformer-1 | 
+19630 | 19630 | streamsets-transformer-1 |
+19631 | 19630 | streamsets-transformer-1 |
+19632 | 19630 | streamsets-transformer-1 |
 19999 | 9999 | influxdb2 |
 21000 | 21000 | atlas |
 26500 | 26500 | zeebe-1 |
@@ -252,8 +262,10 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28085 | 8080 | azkarra-worker-1 |
 28888 | 8888 | jupyter |
 29042 | 9042 | cassandra-1 |
-29043 | 9042 | cassandra-1 |
-29044 | 9042 | cassandra-1 |
+29043 | 9042 | cassandra-2 |
+29044 | 9042 | cassandra-3 |
+29045 | 9042 | cassandra-4 |
+29046 | 9042 | cassandra-5 |
 29092 | 29092 | kafka-1 (docker-host)   |
 29093 | 29093 | kafka-2 (docker-host    |
 29094 | 29094 | kafka-3 (docker-host)   |
@@ -262,6 +274,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 29097 | 29097 | kafka-6 (docker-host)   |
 29098 | 29098 | kafka-7 (docker-host)   |
 29099 | 29099 | kafka-8 (docker-host)   |
+29200 | 9200 | opensearch-1 |
+29600 | 9600 | opensearch-1 |
 31010 | 31010 | dremio |
 39092 | 29092 | kafka-1 (localhost)   |
 39093 | 29093 | kafka-2 (localhost    |
@@ -317,14 +331,14 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28135 | 8000 | hivemq4-1 |
 28136 | 80 | mqtt-ui |
 28137 | 9000 | portainer |
-28138 | 8080 | cadvisor | 
+28138 | 8080 | cadvisor |
 28139 | 8080 | airflow |
 28140 | 8080 | code-server |
 28141 | 8000 | kafka-topics-ui |
 28142 | 8080 | datahub-gms |
 28143 | 9001 | datahub-frontend-ember |
 28144 | 9002 | datahub-frontend |
-28145 | 9091 | datahub-mae-consumer | 
+28145 | 9091 | datahub-mae-consumer |
 28146 | 9092 | datahub-mce-consumer |
 28150 | 8888 | druid-router |
 28150 | 8888 | druid-sandbox |
@@ -415,6 +429,18 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28264 | 8090 | optimize |
 28265 | 80 | tempo |
 28267 | 16686 | tempo (jaeger ui) |
+28268 | 8080 | quine-1 |
+28269 | 8080 | conduit |
+28270 | 8001 | airbyte-server |
+28271 | 80 | airbyte-webapp |
+28272 | 7233 | airbyte-temporal |
+28273 | 1090 | mockserver |
+28274 | 8080 | kafka-webviewer |
+28275 | 8080 | elasticvue |
+28276 | 8080 | nocodb |
+28277 | 8080 | zilla |
+28278 | 9090 | zilla |
+28279 | 80 | azure-storage-explorer |
 
 ## Ports > 28500
 

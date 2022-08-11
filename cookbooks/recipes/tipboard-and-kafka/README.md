@@ -13,7 +13,7 @@ This recipe will show how to use Tipboard with Kafka to stream data to the dashb
 First [initialise a platys-supported data platform](../documentation/getting-started.md) with the following services enabled
 
 ```
-platys init --enable-services TIPBOARD,KAFKA,KSQLDB,AKHQ,KCAT -s trivadis/platys-modern-data-platform -w 1.14.0
+platys init --enable-services TIPBOARD,KAFKA,KSQLDB,AKHQ,KCAT -n cookbook-platform -s trivadis/platys-modern-data-platform -w 1.14.0
 ```
 
 edit the `config.yml` and add the connector to the following property
@@ -82,15 +82,18 @@ layout:
 
 ## Create a Kafka topic and simulate values
 
+Create a Kafka topic
+
 ```bash
-docker exec -ti kafka-1 kafka-topics --bootstrap-server kafka-1:19092 --create --topic sensor-value --replication-factor 3 --partitions 3
+docker exec -ti kafka-1 kafka-topics --bootstrap-server kafka-1:19092 --create --topic sensor-readings --replication-factor 3 --partitions 3
 ```
 
+Create the simulator definition
 
 ```bash
-mkdir conf
+mkdir simulator-conf
 
-nano conf/devices-def.json
+nano simulator-conf/devices-def.json
 ```
 
 ```json
@@ -98,7 +101,7 @@ nano conf/devices-def.json
     {
         "type":"simple",
         "uuid":"",
-        "topic":"device/{$uuid}",
+        "topic":"sensor-readings",
         "sampling":{"type":"fixed", "interval":1000},
         "copy":10,
         "sensors":[
@@ -112,9 +115,10 @@ nano conf/devices-def.json
 ]
 ```
 
+Run the simulator
 
 ```bash
-docker run -v $PWD/conf/devices-def.json:/conf/devices-def.json trivadis/iot-simulator -dt MQTT -u tcp://dataplatform:28100 -t iot/ -cf /conf/devices-def.json
+docker run --network cookbook-platform -v $PWD/simulator-conf/devices-def.json:/conf/devices-def.json trivadis/iot-simulator -dt KAFKA -u kafka-1:19092 -t iot/ -cf /conf/devices-def.json
 ```
 
 

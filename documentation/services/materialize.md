@@ -13,5 +13,10 @@ platys gen
 
 ## How to use it?
 
+You can connect via `mzcli` (enable it using `MATERIALIZE_CLI_enable`)
+
+```bash
+docker exec -ti mzcli mzcli -h materialize-1
+```
 
 

@@ -1,0 +1,1 @@
+Contains the data of opensearch service, if flag OPENSEARCH_volume_map_data is set to true.
