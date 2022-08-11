@@ -13,7 +13,7 @@ platys gen
 
 ## How to use it?
 
-Navigate to <http://dataplatform:28273>.
+Navigate to <http://dataplatform:28273/mockserver/dashboard>.
 
 
 ### Setting expectations using Json Config File
