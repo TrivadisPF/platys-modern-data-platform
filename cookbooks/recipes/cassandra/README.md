@@ -6,13 +6,13 @@ This recipe will show how to use Casandra
 
 First [initialise a platys-supported data platform](../documentation/getting-started.md) with the following services enabled
 
-```
-platys init --enable-services CASSANDRA -s trivadis/platys-modern-data-platform -w 1.8.0
+```bash
+platys init --enable-services CASSANDRA -s trivadis/platys-modern-data-platform -w 1.15.0
 ```
 
 Now generate and start the data platform. 
 
-```
+```bash
 platys gen
 
 docker-compose up -d
@@ -22,7 +22,7 @@ docker-compose up -d
 
 You can find the `cqlsh` command line utility inside the Cassandra docker container running as part of the platform. Connect via SSH onto the Docker Host and run the following docker exec command
 
-```
+```bash
 docker exec -ti cassandra-1 cqlsh
 ```
 
@@ -30,7 +30,7 @@ Alternatively you can also use the Cassandra Web UI on <http://analyticsplatform
 
 Create a keyspace for the IoT data:
 
-```
+```sql
 DROP KEYSPACE IF EXISTS iot_v10;
 
 CREATE KEYSPACE iot_v10
@@ -39,13 +39,14 @@ WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 3};
 
 now switch to the new keyspace
 
+```sql
+USE iot_v10;
 ```
-USE iot_v10;use ```
 
 And create the `iot_sensor` table
 
 
-```
+```sql
 -- gateways storage
 DROP TABLE IF EXISTS iot_sensor;
 CREATE TABLE IF NOT EXISTS iot_sensor (id UUID,
@@ -57,7 +58,7 @@ CREATE TABLE IF NOT EXISTS iot_sensor (id UUID,
 							PRIMARY KEY (id));
 ```
 
-```
+```sql
 INSERT INTO iot_sensor (id, sensor_key, sensor_topic_name, sensor_type, name, place) VALUES (3248240c-4725-49d3-8da6-9850bb69f2a0, 'st-1', '/environmentalSensor/stuttgart/1', 'environmental', 'Stuttgart-1', 'Stuttgart Server Room');
 
 INSERT INTO iot_sensor (id, sensor_key, sensor_topic_name, sensor_type, name, place) VALUES (6cb83f1d-49cc-45d8-b2d2-3fdd7b30a76c, 'zh-1', 'ultrasonicSensor', 'distance', 'Zurich-1', 'Zurich IT');
@@ -66,7 +67,7 @@ INSERT INTO iot_sensor (id, sensor_key, sensor_topic_name, sensor_type, name, pl
 
 And create the `iot_timeseries` table
 
-```
+```sql
 -- timeseries by reading_type
 DROP TABLE iot_timeseries;
 CREATE TABLE IF NOT EXISTS iot_timeseries (
@@ -81,10 +82,7 @@ CREATE TABLE IF NOT EXISTS iot_timeseries (
 ```
 
 
-```
-
-
-
+```sql
 INSERT INTO iot_v10.iot_timeseries (sensor_id, bucket_id, reading_time_id, reading_type, reading_value)
 VALUES (3248240c-4725-49d3-8da6-9850bb69f2a0, '2020-09', toTimeStamp(now()), 'TEMP', 24.1);
 
@@ -94,11 +92,10 @@ VALUES (3248240c-4725-49d3-8da6-9850bb69f2a0, '2020-09', toTimeStamp(now()), 'TE
 ```
 
 
-```
+```sql
 INSERT INTO iot_v10.iot_timeseries (sensor_id, bucket_id, reading_time_id, reading_type, reading_value)
 VALUES (6cb83f1d-49cc-45d8-b2d2-3fdd7b30a76c, '2020-09', toTimeStamp(now()), 'TEMP', 22.2);
 
 INSERT INTO iot_v10.iot_timeseries (sensor_id, bucket_id, reading_time_id, reading_type, reading_value)
 VALUES (6cb83f1d-49cc-45d8-b2d2-3fdd7b30a76c, '2020-09', toTimeStamp(now()), 'HUM', 45);
-
 ```
