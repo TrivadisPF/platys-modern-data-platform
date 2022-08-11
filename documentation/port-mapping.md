@@ -258,8 +258,10 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28085 | 8080 | azkarra-worker-1 |
 28888 | 8888 | jupyter |
 29042 | 9042 | cassandra-1 |
-29043 | 9042 | cassandra-1 |
-29044 | 9042 | cassandra-1 |
+29043 | 9042 | cassandra-2 |
+29044 | 9042 | cassandra-3 |
+29045 | 9042 | cassandra-4 |
+29046 | 9042 | cassandra-5 |
 29092 | 29092 | kafka-1 (docker-host)   |
 29093 | 29093 | kafka-2 (docker-host    |
 29094 | 29094 | kafka-3 (docker-host)   |

@@ -7000,21 +7000,26 @@ services:
 
 {% if CASSANDRA_enable | default(false) %}
   #  ================================== Cassandra ========================================== #
-  cassandra-1:
+  {% for num in range(CASSANDRA_nodes| default(1) ) %}
+    {% set external_port = 29042 + loop.index - 1 %}
+  cassandra-{{loop.index}}:
     image: cassandra:{{__CASSANDRA_version}}
-    container_name: cassandra-1
-    hostname: cassandra-1
+    container_name: cassandra-{{loop.index}}
+    hostname: cassandra-{{loop.index}}
     labels:
       com.platys.name: "cassandra"
     ports:
-      - 29042:9042
+      - {{external_port}}:9042
       - 7199:7199
       - 9160:9160
     environment:
+    {% if loop.index > 1 %}
       - CASSANDRA_SEEDS=cassandra-1
+    {% endif %}
       - CASSANDRA_CLUSTER_NAME="Test Cluster"
       - CASSANDRA_DC=se1
       - CASSANDRA_ENDPOINT_SNITCH=GossipingPropertyFileSnitch
+      - CASSANDRA_NUM_TOKENS: 128
       - LOCAL_JMX=no
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
@@ -7024,7 +7029,7 @@ services:
       - ./conf/cassandra/jmxremote.access:/usr/lib/jvm/java-8-openjdk-amd64/jre/lib/management/jmxremote.access
       - ./conf/cassandra/jmxremote.password:/etc/cassandra/jmxremote.password
     {% if CASSANDRA_volume_map_data %}
-      - "./container-volume/cassandra/data/cassandra-1:/var/lib/cassandra"
+      - "./container-volume/cassandra/data/cassandra-{{loop.index}}:/var/lib/cassandra"
     {% endif %}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
@@ -7034,7 +7039,8 @@ services:
     <<: *logging
     {% endif -%}   {#  LOKI_collect_docker_logs #}
     restart: {{container_restart_policy}}
-
+  {% endfor %}
+  
   cassandra-web:
     image: trivadis/cassandra-web
     container_name: cassandra-web

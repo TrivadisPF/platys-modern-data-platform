@@ -65,6 +65,7 @@ The Modern Data Platform version 1.15.0 contains the following bug fixes and enh
  * Option for installing Adventureworks demo database with SQL Server
  * Externalize version of the container used when `PROVISIONING_DATA_enable` is activated
  * Support external property file for configuration values in `streamsets`
+ * Support for Cassandra cluster
 
 ### Bug Fixes
 
