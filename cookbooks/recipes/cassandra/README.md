@@ -1,3 +1,9 @@
+---
+technoglogies:      cassandra
+version:				1.15.0
+validated-at:			11.08.2022
+---
+
 # IoT Case with Cassandra
 
 This recipe will show how to use Casandra 
@@ -26,7 +32,7 @@ You can find the `cqlsh` command line utility inside the Cassandra docker contai
 docker exec -ti cassandra-1 cqlsh
 ```
 
-Alternatively you can also use the Cassandra Web UI on <http://analyticsplatform:28120/>.
+Alternatively you can also use the Cassandra Web UI on <http://dataplatform:28120/>.
 
 Create a keyspace for the IoT data:
 
