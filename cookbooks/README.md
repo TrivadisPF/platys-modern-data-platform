@@ -8,8 +8,8 @@ Inhere we are documenting cookbooks on how to use the platform:
    * [Trino, Spark and Delta Lake (Spark 2.4.7 & Delta Lake 0.6.1)](./recipes/delta-lake-and-trino-spark2.4/README.md) - `1.11.0`
    * [Trino, Spark and Delta Lake (Spark 3.0.1 & Delta Lake 0.7.0)](./recipes/delta-lake-and-trino-spark3.0/README.md) - `1.11.0`
    * [Querying S3 data (MinIO) using MinIO](./recipes/querying-minio-with-trino/README.md) - `1.11.0`
-   * [Querying Azure Data Lake Storage Gen2 data (ADLS)](./recipes/querying-adls-with-trino/README.md) - `1.15.0`
-   * [Querying PostgreSQL data (MinIO) using MinIO](./recipes/querying-postgresql-with-trino/README.md) - `1.11.0`
+   * [Querying Azure Data Lake Storage Gen2 data (ADLS) from Trino](./recipes/querying-adls-with-trino/README.md) - `1.15.0`
+   * [Querying data in Postgresql from Trino](./recipes/querying-postgresql-with-trino/README.md) - `1.11.0`
    * [Querying data in Kafka from Trino (formerly PrestoSQL)](./recipes/querying-kafka-with-trino/README.md) - `1.14.0`
    * [Querying HDFS data using Trino](./recipes/querying-hdfs-with-presto/README.md) - `1.11.0`
    * Joining data between RDBMS and MinIO
@@ -72,7 +72,7 @@ Inhere we are documenting cookbooks on how to use the platform:
    * [Using public Oracle XE image](./recipes/using-public-oracle-xe-image/README.md) - `1.13.0`    
 
  * **Neo4J**
-     * [Working with Neo4J](./recipes/working-with-neo4j/README.md) - `1.13.0`    
+     * [Working with Neo4J](./recipes/working-with-neo4j/README.md) - `1.15.0`    
 
  * **Tipboard**
    * [ Working with Tipboard and Kafka](./recipes/tipboard-and-kafka/README.md) - `1.14.0`    

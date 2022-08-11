@@ -27,7 +27,7 @@ The Modern Data Platform version 1.15.0 contains the following bug fixes and enh
 
 ### New Cookbook Recipes
 
- *
+ * [Querying data in Azure Data Lake Storage Gen2 from Trino](../cookbooks/recipes/querying-adls-with-trino)
 
 ### Version upgrades
 
