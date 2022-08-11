@@ -64,12 +64,13 @@ CREATE TABLE IF NOT EXISTS iot_sensor (id UUID,
 							PRIMARY KEY (id));
 ```
 
+Insert some data
+
 ```sql
 INSERT INTO iot_sensor (id, sensor_key, sensor_topic_name, sensor_type, name, place) VALUES (3248240c-4725-49d3-8da6-9850bb69f2a0, 'st-1', '/environmentalSensor/stuttgart/1', 'environmental', 'Stuttgart-1', 'Stuttgart Server Room');
 
 INSERT INTO iot_sensor (id, sensor_key, sensor_topic_name, sensor_type, name, place) VALUES (6cb83f1d-49cc-45d8-b2d2-3fdd7b30a76c, 'zh-1', 'ultrasonicSensor', 'distance', 'Zurich-1', 'Zurich IT');
 ```
-
 
 And create the `iot_timeseries` table
 
@@ -87,6 +88,7 @@ CREATE TABLE IF NOT EXISTS iot_timeseries (
     AND COMPACT STORAGE;
 ```
 
+Insert some data
 
 ```sql
 INSERT INTO iot_v10.iot_timeseries (sensor_id, bucket_id, reading_time_id, reading_type, reading_value)
