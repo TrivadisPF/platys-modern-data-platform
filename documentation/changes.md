@@ -26,7 +26,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  
 ### Enhancements
 
- * 
+ * make `spark.sql.warehouse.dir` configurable in `config.yml`
  
 ## What's new in 1.15.0
 
