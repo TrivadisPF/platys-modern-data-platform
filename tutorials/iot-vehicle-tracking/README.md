@@ -1,6 +1,6 @@
 # IoT Vehicle Tracking
 
-In this demo we will be ingesting IoT data into a Kafka topic from which it will be analysed using Stream Analytics. To make it a bit more realistic, the data is not directly sent to Kafka from the IoT devices (vehicles) but first sent through an MQTT broker (IoT gateway). 
+In this tutorial we will be ingesting IoT data into a Kafka topic from which it will be analysed with Stream Analytics using ksqlDB and Kafka Streams. The data is not directly sent to Kafka from the IoT devices (vehicles) but first sent through an MQTT broker (IoT gateway). 
 
 The following diagram shows the setup of the data flow which will be implemented step by step. Of course we will not be using real-life data, but have a program simulating trucks and their driving behaviour.
 
