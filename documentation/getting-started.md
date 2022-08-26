@@ -13,7 +13,7 @@ Make sure that you have already installed the [Docker Engine](https://docs.docke
 
 First create a directory, which will hold the `platys` configuration as well as the generated artefacts:
 
-```
+```bash
 mkdir platys-demo-platform
 cd platys-demo-platform
 ```
@@ -24,7 +24,7 @@ We specify the platform stack name `trivadis/platys-modern-data-platform` to use
 
 With the `-n` option we give the platform a meaningful name. It will be used as the name of the docker network, so it is important that it is unique, if you use multiple platforms on the same machine.
 
-```
+```bash
 platys init -n demo-platform --stack trivadis/platys-modern-data-platform --stack-version 1.16.0 --structure flat
 ```
 
