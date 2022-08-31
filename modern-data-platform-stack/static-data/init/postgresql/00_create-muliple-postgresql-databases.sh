@@ -52,7 +52,11 @@ if [ -n "$POSTGRES_MULTIPLE_DATABASES" ]; then
 	IFS=', ' read -r -a addl_roles <<< "$POSTGRES_MULTIPLE_ADDL_ROLES"	
 	for index in ${!databases[@]}; do
         if [[ $index < ${#databases[*]} && $index < ${#users[*]} && $index < ${#passwords[*]} ]] ; then
+			if [ -n "$POSTGRES_MULTIPLE_ADDL_ROLES" ]; then        
               create_user_and_database "${databases[index]//[\'\"\`]/}" "${users[index]//[\'\"\`]/}" "${passwords[index]//[\'\"\`]/}" "${addl_roles[index]//[\'\"\`]/}"
+            else
+              create_user_and_database "${databases[index]//[\'\"\`]/}" "${users[index]//[\'\"\`]/}" "${passwords[index]//[\'\"\`]/}" ""
+			fi
         else
             echo "DATABASE '${databases[index]}' OR USER '${users[index]}' EMPTY"
         fi
