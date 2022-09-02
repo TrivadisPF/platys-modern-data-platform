@@ -266,7 +266,7 @@ The simulator can produce data to various targets, such as **Kafka**, **MQTT** o
 Now let's produce the truck events to the MQTT broker running on port 1883. In a terminal window run the following command:
 
 ``` bash
-docker run --network host --rm trivadis/iot-truck-simulator '-s' 'MQTT' '-h' $DOCKER_HOST_IP '-p' '1883' '-f' 'JSON' '-vf' '1-49'
+docker run --network tutorial-platform --rm trivadis/iot-truck-simulator '-s' 'MQTT' '-h' 'mosquitto-1' '-p' '1883' '-f' 'JSON' '-vf' '1-49'
 ```
 
 Leave this running in the terminal window. 
