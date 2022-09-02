@@ -34,6 +34,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * make `spark.sql.warehouse.dir` configurable in `config.yml`
  * added first tutorials showing more complete walk-through of using Playts
  * allow to add roles when specifying multiple databases and users with PostgreSQL
+ * allow to specify that the Starburstdata license file should be mapped into the containers, when `TRINO_edition` is set to `starburstdata`
  
 ## What's new in 1.15.0
 
