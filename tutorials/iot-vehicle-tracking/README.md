@@ -272,8 +272,7 @@ docker run --network host --rm trivadis/iot-truck-simulator '-s' 'MQTT' '-h' $DO
 Leave this running in the terminal window. 
 
 ---
-**Note:** You can shortcut this workshop here by skipping step 1 and publishing directly to Kafka instead of MQTT. In that case perform use the following command instead of the one below `docker run trivadis/iot-truck-simulator '-s' 'KAFKA' '-h' $DOCKER_HOST_IP '-p' '9092' '-f' 'JSON' '-vf' '1-49'` and skip to [Step 2](https://github.com/gschmutz/event-driven-microservices-workshop/tree/main/09-vehicle-tracking-application#step-2---using-ksql-to-refine-the-data).
-
+**Note:** You can shortcut this workshop here by skipping step 1 and publishing directly to Kafka instead of MQTT. In that case skip to [Step 2](https://github.com/gschmutz/event-driven-microservices-workshop/tree/main/09-vehicle-tracking-application#step-2---using-ksql-to-refine-the-data) and use the following command instead of the one above `docker run trivadis/iot-truck-simulator '-s' 'KAFKA' '-h' $DOCKER_HOST_IP '-p' '9092' '-f' 'JSON' '-vf' '1-49'` after you have created the necessary kafka topic. 
 ---	
 
 ## Step 1 - Consume Vehicle Tracking messages from MQTT and send to Kafka
