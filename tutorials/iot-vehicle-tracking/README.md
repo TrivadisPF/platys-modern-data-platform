@@ -296,7 +296,7 @@ There two options for consuming from MQTT
 To start consuming using through a command line, perform the following docker command:
 
 ``` bash
-docker run -it --rm efrecon/mqtt-client sub -h $DOCKER_HOST_IP -t "truck/+/position" -v
+docker run --network tutorial-platform -it --rm efrecon/mqtt-client sub -h mosquitto-1 -t "truck/+/position" -v
 ```
 
 The consumed messages will show up in the terminal.
