@@ -406,7 +406,7 @@ Show the available Kafka topics
 show topics;
 ```
 
-Let's consume the data from the `truck_position` topic, assuming the truck simulator and the MQTT connector is still running.
+Let's consume the data from the `vehicle_tracking_sysA` topic, assuming the truck simulator and the MQTT connector is still running.
 
 ```sql
 print 'vehicle_tracking_sysA';
@@ -518,7 +518,7 @@ PARTITION BY truckId
 EMIT CHANGES;
 ```
 
-To check that the refined topic does in fact hold Avro formatted data, let's just do a normal kcat on the `truck_position_refined` topic
+To check that the refined topic does in fact hold Avro formatted data, let's just do a normal kcat on the `vehicle_tracking_refined` topic
 
 ``` bash
 docker exec -ti kcat kcat -b kafka-1 -t vehicle_tracking_refined
@@ -532,14 +532,14 @@ WX�$343671958179690963
 1598125263176886����
                              Normal��Q��C@�p=
 דW�$343671958179690963
-% Reached end of topic truck_position_refined [0] at offset 367
+% Reached end of topic vehicle_tracking_refined [0] at offset 367
 159812526333671�ߩ�2Unsafe following distance�Q���B@���(\?W�$343671958179690963
-% Reached end of topic truck_position_refined [5] at offset 353
-% Reached end of topic truck_position_refined [2] at offset 324
+% Reached end of topic vehicle_tracking_refined [5] at offset 353
+% Reached end of topic vehicle_tracking_refined [2] at offset 324
 1598125263526101����
                               Normal=
 ףpE@R����V�$343671958179690963
-% Reached end of topic truck_position_refined [7] at offset 355
+% Reached end of topic vehicle_tracking_refined [7] at offset 355
 ```
 
 we can use the `-s` and `-r` option to specify the Avro Serde and the URL of the schema registry and the output is readable:
