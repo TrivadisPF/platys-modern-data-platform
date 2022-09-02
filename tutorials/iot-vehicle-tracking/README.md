@@ -330,7 +330,7 @@ There are multiple Kafka Connectors available for MQTT. We can either use the on
 The Confluent MQTT Connector was downloaded when running the Compose stack. You can check that the connector is installed by calling the REST API of the Kafka Connector cluster:
 
 ```bash
-curl -XGET http://dataplatform:8083/connector-plugins | jq
+curl -XGET http://$DOCKER_HOST_IP:8083/connector-plugins | jq
 ```
 
 Before we start the connector, let's use a Kafka console listener to consume from the target topic `vehicle_tracking_sysA`. We can use the [`kcat`](https://github.com/edenhill/kcat) utility (formerly kcat`kcat`), which you can either install locally or use the one provided with the Compose stack: 
