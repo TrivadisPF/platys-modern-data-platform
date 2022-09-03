@@ -8,7 +8,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
 
 ### New Services
 
- *
+ * Kong
 
 ### New Cookbook Recipes
 
@@ -27,7 +27,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
 
 ### Breaking Changes
 
- *
+ * if markdown viewer cannot run on port 80 (`MARKDOWN_VIEWER_use_port_80` is set to `false`), port 8008 is used and no longer port 8000
  
 ### Enhancements
 

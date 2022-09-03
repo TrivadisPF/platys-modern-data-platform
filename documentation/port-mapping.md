@@ -110,7 +110,9 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 7687 | 7687 | neo4j-1 |
 7688 | 7687 | neo4j-2 |
 7689 | 7687 | neo4j-3 |
-8000 | 80 | markdown-viewer |
+8000 | 8000 | kong (proxy) |
+8001 | 8001 | kong (admin api) |
+8008 | 80 | markdown-viewer |
 8024 | 8024 | axon-server |
 8047 | 8047 | drill |
 8048 | 8048 | kafka-eagle |
@@ -130,6 +132,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 8124 | 8124 | axon-server |
 8161 | 8161 | activemq |
 8200 | 8200 | vault |
+8443 | 8443 | kong (proxy ssl) |
+8444 | 8444 | kong (admin api ssl) |
 8787 | 8787 | r-studio |
 8812 | 8812 | questdb |
 8888 | 8888 | hue |
