@@ -282,6 +282,8 @@ networks:
 {% set __HASURA_version = HASURA_version | default('latest') -%}
 {% set __GRAPHQL_MESH_version = GRAPHQL_MESH_version | default('latest') -%}
 
+{% set __KONG_version = KONG_version | default('latest') -%}
+
 {% set __NUCLIO_version = NUCLIO_version | default('latest') -%}
 
 {% set __MOSQUITTO_version = MOSQUITTO_version | default('latest') -%}
@@ -553,6 +555,7 @@ networks:
   {% set DRILL_enable = false -%}
   {% set HASURA_enable = false -%}
   {% set GRAPHQL_MESH_enable = false -%}
+  {% set KONG_enable = false -%}  
   {% set NUCLIO_enable = false -%}
   {% set HIVEMQ3_enable = false -%}
   {% set HIVEMQ4_enable = false -%}
@@ -9941,6 +9944,130 @@ services:
     {% endif -%}   {#  LOKI_collect_docker_logs #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  GRAPHQL_MESH_enable #}
+
+{% if KONG_enable | default(false) %}
+  #  ================================== Kong ========================================== #
+  kong-migrations:
+    image: kong:{{__KONG_version}}
+    container_name: kong-migrations
+    hostname: kong-migrations
+    labels:
+      com.platys.name: "kong"
+    command: kong migrations bootstrap
+    profiles: ["database"]
+    environment:
+      KONG_DATABASE: {{KONG_database_type | default('off')}}
+      KONG_PG_DATABASE: kong
+      KONG_PG_HOST: kong-db
+      KONG_PG_USER: kong
+      KONG_PG_PASSWORD_FILE: /run/secrets/kong_postgres_password
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    secrets:
+      - kong_postgres_password
+    restart: on-failure
+
+  kong-migrations-up:
+    image: kong:{{__KONG_version}}
+    container_name: kong-migrations-up
+    hostname: kong-migrations-up
+    labels:
+      com.platys.name: "kong"
+    command: kong migrations up && kong migrations finish
+    profiles: ["database"]
+    environment:
+      KONG_DATABASE: {{KONG_database_type | default('off')}}
+      KONG_PG_DATABASE: kongdb
+      KONG_PG_HOST: kong-db
+      KONG_PG_USER: kong
+      KONG_PG_PASSWORD_FILE: /run/secrets/kong_postgres_password
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    secrets:
+      - kong_postgres_password
+    restart: on-failure
+
+  kong:
+    image: kong:{{__KONG_version}}
+    container_name: kong-migrations-up
+    hostname: kong-migrations-up
+    labels:
+      com.platys.name: "kong"
+      com.platys.webui.title: "Kong UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28177"
+    user: "${KONG_USER:-kong}"
+    ports:
+      # The following two environment variables default to an insecure value (0.0.0.0)
+      # according to the CIS Security test.
+      - "${KONG_INBOUND_PROXY_LISTEN:-0.0.0.0}:8000:8000/tcp"
+      - "${KONG_INBOUND_SSL_PROXY_LISTEN:-0.0.0.0}:8443:8443/tcp"
+      # Making them mandatory but undefined, like so would be backwards-breaking:
+      # - "${KONG_INBOUND_PROXY_LISTEN?Missing inbound proxy host}:8000:8000/tcp"
+      # - "${KONG_INBOUND_SSL_PROXY_LISTEN?Missing inbound proxy ssl host}:8443:8443/tcp"
+      # Alternative is deactivating check 5.13 in the security bench, if we consider Kong's own config to be enough security here
+
+      - "127.0.0.1:8001:8001/tcp"
+      - "127.0.0.1:8444:8444/tcp"
+    environment:
+      KONG_DATABASE: {{KONG_database_type | default('off')}}
+      KONG_PG_DATABASE: kongdb
+      KONG_PG_HOST: kong-db
+      KONG_PG_USER: kong
+      KONG_PG_PASSWORD_FILE: /run/secrets/kong_postgres_password
+      KONG_ADMIN_ACCESS_LOG: /dev/stdout
+      KONG_ADMIN_ERROR_LOG: /dev/stderr
+      KONG_PROXY_LISTEN: "${KONG_PROXY_LISTEN:-0.0.0.0:8000}"
+      KONG_ADMIN_LISTEN: "${KONG_ADMIN_LISTEN:-0.0.0.0:8001}"
+      KONG_PROXY_ACCESS_LOG: /dev/stdout
+      KONG_PROXY_ERROR_LOG: /dev/stderr
+      KONG_PREFIX: ${KONG_PREFIX:-/var/run/kong}
+      KONG_DECLARATIVE_CONFIG: "/opt/kong/kong.yaml"
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./container-volume/kong:/var/run/kong
+#      - kong_tmp_vol:/tmp
+      - ./conf/kong/:/opt/kong
+    read_only: true
+    secrets:
+      - kong_postgres_password
+    security_opt:
+      - no-new-privileges
+    restart: {{container_restart_policy}}
+
+  kong-db:
+    image: postgres:9.5
+    container_name: kong-db
+    hostname: kong-dbp
+    labels:
+      com.platys.name: "postgresql"
+    profiles: ["database"]
+    environment:
+      POSTGRES_DB: kongdb
+      POSTGRES_USER: kong
+      POSTGRES_PASSWORD_FILE: /run/secrets/kong_postgres_password
+    volumes:
+      - ./container-volume/kong/data:/var/lib/postgresql/data
+    secrets:
+      - kong_postgres_password
+    stdin_open: true
+    tty: true
+    restart: {{container_restart_policy}}
+
+{% endif %}   {#  KONG_enable #}
 
 {% if NUCLIO_enable | default(false) %}
   #  ================================== Nuclio Dashboard ========================================== #
