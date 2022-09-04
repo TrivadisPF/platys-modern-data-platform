@@ -10020,9 +10020,9 @@ services:
       com.platys.name: "postgresql"
     profiles: ["database"]
     environment:
-      POSTGRES_DB: kongdb
-      POSTGRES_USER: kong
-      POSTGRES_PASSWORD_FILE: /run/secrets/kong_postgres_password
+      - POSTGRES_DB=kongdb
+      - POSTGRES_USER=kong
+      - POSTGRES_PASSWORD_FILE=/run/secrets/kong_postgres_password
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -10048,11 +10048,18 @@ services:
     command: kong migrations bootstrap
     profiles: ["database"]
     environment:
-      KONG_DATABASE: "'" ~ {{KONG_database_type | default(off)}} ~ "'"
-      KONG_PG_DATABASE: kong
-      KONG_PG_HOST: kong-db
-      KONG_PG_USER: kong
-      KONG_PG_PASSWORD_FILE: /run/secrets/kong_postgres_password
+  {%if not KONG_use_db | default(false) %}
+      - KONG_DATABASE='off'
+  {% else -%}   {#  KONG_database_type = 'postgres' #}
+      KONG_DATABASE: {{KONG_database_type | default('off') }}
+    {%if KONG_db_type == 'postgres' | default(false) %}
+      - KONG_DATABASE='postgres'
+      - KONG_PG_DATABASE=kongdb
+      - KONG_PG_HOST=kong-db
+      - KONG_PG_USER=kong
+      - KONG_PG_PASSWORD_FILE= /run/secrets/kong_postgres_password
+    {% endif -%}   {#  KONG_database_type = 'postgres' #}
+  {% endif -%}   {# KONG_use #}
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -10078,11 +10085,18 @@ services:
     command: kong migrations up && kong migrations finish
     profiles: ["database"]
     environment:
-      KONG_DATABASE: "'" ~ {{KONG_database_type | default(off)}} ~ "'"
-      KONG_PG_DATABASE: kongdb
-      KONG_PG_HOST: kong-db
-      KONG_PG_USER: kong
-      KONG_PG_PASSWORD_FILE: /run/secrets/kong_postgres_password
+  {%if not KONG_use_db | default(false) %}
+      - KONG_DATABASE='off'
+  {% else -%}   {#  KONG_database_type = 'postgres' #}
+      KONG_DATABASE: {{KONG_database_type | default('off') }}
+    {%if KONG_db_type == 'postgres' | default(false) %}
+      - KONG_DATABASE='postgres'
+      - KONG_PG_DATABASE=kongdb
+      - KONG_PG_HOST=kong-db
+      - KONG_PG_USER=kong
+      - KONG_PG_PASSWORD_FILE= /run/secrets/kong_postgres_password
+    {% endif -%}   {#  KONG_database_type = 'postgres' #}
+  {% endif -%}   {# KONG_use #}
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
