@@ -9947,60 +9947,6 @@ services:
 
 {% if KONG_enable | default(false) %}
   #  ================================== Kong ========================================== #
-  kong-migrations:
-    image: kong:{{__KONG_version}}
-    container_name: kong-migrations
-    hostname: kong-migrations
-    labels:
-      com.platys.name: "kong"
-    command: kong migrations bootstrap
-    profiles: ["database"]
-    environment:
-      KONG_DATABASE: {{KONG_database_type | default('off')}}
-      KONG_PG_DATABASE: kong
-      KONG_PG_HOST: kong-db
-      KONG_PG_USER: kong
-      KONG_PG_PASSWORD_FILE: /run/secrets/kong_postgres_password
-    volumes:
-      - ./data-transfer:/data-transfer
-    {%if use_timezone | default(false) %}
-      - "./etc/timezone:/etc/timezone:ro"
-      - "./etc/localtime:/etc/localtime:ro"
-    {% endif -%}   {#  use_timezone #}
-    {%if LOKI_collect_docker_logs | default(false) %}
-    <<: *logging
-    {% endif -%}   {#  LOKI_collect_docker_logs #}
-    secrets:
-      - kong_postgres_password
-    restart: on-failure
-
-  kong-migrations-up:
-    image: kong:{{__KONG_version}}
-    container_name: kong-migrations-up
-    hostname: kong-migrations-up
-    labels:
-      com.platys.name: "kong"
-    command: kong migrations up && kong migrations finish
-    profiles: ["database"]
-    environment:
-      KONG_DATABASE: {{KONG_database_type | default('off')}}
-      KONG_PG_DATABASE: kongdb
-      KONG_PG_HOST: kong-db
-      KONG_PG_USER: kong
-      KONG_PG_PASSWORD_FILE: /run/secrets/kong_postgres_password
-    volumes:
-      - ./data-transfer:/data-transfer
-    {%if use_timezone | default(false) %}
-      - "./etc/timezone:/etc/timezone:ro"
-      - "./etc/localtime:/etc/localtime:ro"
-    {% endif -%}   {#  use_timezone #}
-    {%if LOKI_collect_docker_logs | default(false) %}
-    <<: *logging
-    {% endif -%}   {#  LOKI_collect_docker_logs #}
-    secrets:
-      - kong_postgres_password
-    restart: on-failure
-
   kong:
     image: kong:{{__KONG_version}}
     container_name: kong-migrations-up
@@ -10036,11 +9982,18 @@ services:
       KONG_PROXY_ERROR_LOG: /dev/stderr
       KONG_PREFIX: ${KONG_PREFIX:-/var/run/kong}
       KONG_DECLARATIVE_CONFIG: "/opt/kong/kong.yaml"
+      {%if use_timezone | default(false) %}
+        - TZ={{use_timezone}}
+      {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
       - ./container-volume/kong:/var/run/kong
 #      - kong_tmp_vol:/tmp
       - ./conf/kong/:/opt/kong
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
     read_only: true
     secrets:
       - kong_postgres_password
@@ -10048,6 +10001,7 @@ services:
       - no-new-privileges
     restart: {{container_restart_policy}}
 
+  {%if KONG_database_type = 'postgres' | default(false) %}
   kong-db:
     image: postgres:9.5
     container_name: kong-db
@@ -10059,14 +10013,82 @@ services:
       POSTGRES_DB: kongdb
       POSTGRES_USER: kong
       POSTGRES_PASSWORD_FILE: /run/secrets/kong_postgres_password
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
     volumes:
+      - ./data-transfer:/data-transfer
       - ./container-volume/kong/data:/var/lib/postgresql/data
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
     secrets:
       - kong_postgres_password
     stdin_open: true
     tty: true
     restart: {{container_restart_policy}}
 
+  kong-migrations:
+    image: kong:{{__KONG_version}}
+    container_name: kong-migrations
+    hostname: kong-migrations
+    labels:
+      com.platys.name: "kong"
+    command: kong migrations bootstrap
+    profiles: ["database"]
+    environment:
+      KONG_DATABASE: {{KONG_database_type | default('off')}}
+      KONG_PG_DATABASE: kong
+      KONG_PG_HOST: kong-db
+      KONG_PG_USER: kong
+      KONG_PG_PASSWORD_FILE: /run/secrets/kong_postgres_password
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    secrets:
+      - kong_postgres_password
+    restart: on-failure
+
+  kong-migrations-up:
+    image: kong:{{__KONG_version}}
+    container_name: kong-migrations-up
+    hostname: kong-migrations-up
+    labels:
+      com.platys.name: "kong"
+    command: kong migrations up && kong migrations finish
+    profiles: ["database"]
+    environment:
+      KONG_DATABASE: {{KONG_database_type | default('off')}}
+      KONG_PG_DATABASE: kongdb
+      KONG_PG_HOST: kong-db
+      KONG_PG_USER: kong
+      KONG_PG_PASSWORD_FILE: /run/secrets/kong_postgres_password
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    secrets:
+      - kong_postgres_password
+    restart: on-failure
+  {% endif -%}   {#  KONG_database_type = 'postgres' #}
 {% endif %}   {#  KONG_enable #}
 
 {% if NUCLIO_enable | default(false) %}
