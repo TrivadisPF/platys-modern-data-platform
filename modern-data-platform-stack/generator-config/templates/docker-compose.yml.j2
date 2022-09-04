@@ -9972,13 +9972,18 @@ services:
       - 8444:8444
       - 8002:8002
     environment:
+  {%if not KONG_use_db | default(false) %}
+      KONG_DATABASE: 'off'
+  {% else -%}   {#  KONG_database_type = 'postgres' #}
       KONG_DATABASE: {{KONG_database_type | default('off') }}
-  {%if KONG_database_type == 'postgres' | default(false) %}
+    {%if KONG_db_type == 'postgres' | default(false) %}
+      KONG_DATABASE: 'postgres'
       KONG_PG_DATABASE: kongdb
       KONG_PG_HOST: kong-db
       KONG_PG_USER: kong
       KONG_PG_PASSWORD_FILE: /run/secrets/kong_postgres_password
-  {% endif -%}   {#  KONG_database_type = 'postgres' #}
+    {% endif -%}   {#  KONG_database_type = 'postgres' #}
+  {% endif -%}   {# KONG_use #}
       KONG_DECLARATIVE_CONFIG: "/opt/kong/kong.yaml"
       KONG_ADMIN_ACCESS_LOG: /dev/stdout
       KONG_PROXY_ACCESS_LOG: /dev/stdout
