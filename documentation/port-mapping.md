@@ -112,6 +112,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 7689 | 7687 | neo4j-3 |
 8000 | 8000 | kong (proxy) |
 8001 | 8001 | kong (admin api) |
+8002 | 8002 | kong (admin gui) |
 8008 | 80 | markdown-viewer |
 8024 | 8024 | axon-server |
 8047 | 8047 | drill |
