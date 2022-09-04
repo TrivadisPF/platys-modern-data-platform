@@ -283,6 +283,7 @@ networks:
 {% set __GRAPHQL_MESH_version = GRAPHQL_MESH_version | default('latest') -%}
 
 {% set __KONG_version = KONG_version | default('latest') -%}
+{% set __KONG_DECK_version = KONG_DECK_version | default('latest') -%}
 
 {% set __NUCLIO_version = NUCLIO_version | default('latest') -%}
 
@@ -9947,17 +9948,17 @@ services:
 
 {% if KONG_enable | default(false) %}
   #  ================================== Kong Gateway ========================================== #
-  kong:
-    image: kong:{{__KONG_version}}
-    container_name: kong
-    hostname: kong
+  kong-gateway:
+    image: kong/kong-gateway:{{__KONG_version}}
+    container_name: kong-gateway
+    hostname: kong-gateway
     labels:
       com.platys.name: "kong-gateway"
       com.platys.webui.title: "Kong API Gateway Admin GUI"
       com.platys.webui.url: "http://${PUBLIC_IP}:8002"
       com.platys.restapi.title: "Kong API Gateway Admin API"
       com.platys.restapi.url: "http://${PUBLIC_IP}:8001"
-    user: "${KONG_USER:-kong}"
+#    user: "${KONG_USER:-kong}"
     ports:
       # The following two environment variables default to an insecure value (0.0.0.0)
       # according to the CIS Security test.
@@ -9971,6 +9972,7 @@ services:
       - 8444:8444
       - 8002:8002
     environment:
+      - KONG_LOG_LEVEL={{KONG_log_level | default('info')}}
   {%if not KONG_use_db | default(false) %}
       - KONG_DATABASE=off
   {% else -%}   {#  KONG_database_type = 'postgres' #}
@@ -9983,14 +9985,15 @@ services:
       - KONG_PG_PASSWORD_FILE= /run/secrets/kong_postgres_password
     {% endif -%}   {#  KONG_database_type = 'postgres' #}
   {% endif -%}   {# KONG_use #}
-      - KONG_DECLARATIVE_CONFIG="/opt/kong/kong.yaml"
+#      - KONG_DECLARATIVE_CONFIG="/kong/kong.yaml"
       - KONG_ADMIN_ACCESS_LOG=/dev/stdout
       - KONG_PROXY_ACCESS_LOG=/dev/stdout
       - KONG_ADMIN_ERROR_LOG=/dev/stderr
       - KONG_PROXY_ERROR_LOG=/dev/stderr
       - KONG_PROXY_LISTEN=0.0.0.0:8000
       - KONG_ADMIN_LISTEN=0.0.0.0:8001
-      - KONG_ADMIN_GUI=0.0.0.0:8002
+      - KONG_ADMIN_GUI_LISTEN=0.0.0.0:8002
+      - KONG_ADMIN_GUI_URL=http://0.0.0.0:8002
 #      KONG_PREFIX: ${KONG_PREFIX:-/var/run/kong}
       - KONG_LICENSE_DATA={{KONG_license_data}}
     {%if use_timezone | default(false) %}
@@ -10000,7 +10003,7 @@ services:
       - ./data-transfer:/data-transfer
 #      - ./container-volume/kong:/var/run/kong
 #      - kong_tmp_vol:/tmp
-      - ./conf/kong:/opt/kong
+#      - ./custom-conf/kong:/kong
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -10113,7 +10116,37 @@ services:
       - kong_postgres_password
     restart: on-failure
   {% endif -%}   {#  KONG_database_type = 'postgres' #}
+
+  {% if KONG_DECK_enable) | default(false) %}
+  #  ================================== Kong decK  ========================================== #
+  kong-deck:
+    image: kong/deck:{{__KONG_DECK_version}}
+    container_name: kong-deck
+    hostname: kong-deck
+    labels:
+      com.platys.name: "kong-deck"
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        while [ 1 -eq 1 ];do sleep 60;done
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    restart: {{container_restart_policy}}
+  {% endif %}   {# KONG_DECK_enable #}
 {% endif %}   {#  KONG_enable #}
+
 
 {% if NUCLIO_enable | default(false) %}
   #  ================================== Nuclio Dashboard ========================================== #
