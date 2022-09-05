@@ -13,4 +13,6 @@ platys gen
 
 ## How to use it?
 
-docker exec -ti kong-deck 
+```bash
+docker exec -ti kong-deck deck
+```
