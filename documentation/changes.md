@@ -26,6 +26,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Update `Trino` to `394`
  * Update `Starburst Enterprise` to `393-e.1`
  * Update `Jikkou` to `0.12.2`
+ * Update `Hasura` to `v2.11.1`
 
 ### Breaking Changes
 
