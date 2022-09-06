@@ -91,6 +91,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 6381 | 6379 | redis-replica-1 |
 6382 | 6379 | redis-replica-1 |
 6385 | 6379 | redash-redis |
+6386 | 6379 | tyk-redis |
 6831 | 6831 | jaeger (udp) |
 6832 | 6832 | jaeger (udp) |
 6875 | 6875 | materialize-1 |
@@ -446,6 +447,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28277 | 8080 | zilla |
 28278 | 9090 | zilla |
 28279 | 80 | azure-storage-explorer |
+28280 | 8080 | tyk-gateway |
 
 ## Ports > 28500
 
