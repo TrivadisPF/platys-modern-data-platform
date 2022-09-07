@@ -282,6 +282,9 @@ networks:
 {% set __HASURA_version = HASURA_version | default('latest') -%}
 {% set __GRAPHQL_MESH_version = GRAPHQL_MESH_version | default('latest') -%}
 
+{% set __TYK_version = TYK_version | default('latest') -%}
+{% set __TYK_PUMP_version = TYK_PUMP_version | default('latest') -%}
+
 {% set __KONG_version = KONG_version | default('latest') -%}
 {% set __KONG_DECK_version = KONG_DECK_version | default('latest') -%}
 
@@ -9952,7 +9955,7 @@ services:
 {% if TYK_enable | default(false) %}
   #  ================================== Tyk Gateway ========================================== #
   tyk-gateway:
-    image: docker.tyk.io/tyk-gateway/tyk-gateway:v4.1.0
+    image: docker.tyk.io/tyk-gateway/tyk-gateway:{{__TYK_version}}
     container_name: tyk-gateway
     hostname: tyk-gateway
     labels:
@@ -9962,7 +9965,23 @@ services:
     ports:
       - 28280:8080
     environment:
+      - TYK_GW_LISTENPORT=8080
       - TYK_GW_SECRET={{TYK_secret}}
+    {%if TYK_edition == 'pro' | default(false) %}
+      - TYK_GW_POLICIES_POLICYSOURCE=service
+      - TYK_GW_POLICIES_POLICYCONNECTIONSTRING=http://tyk-dashboard:3000
+      - TYK_GW_POLICIES_POLICYRECORDNAME=tyk_policies
+      - TYK_GW_POLICIES_ALLOWEXPLICITPOLICYID=true
+      - TYK_GW_USEDBAPPCONFIGS=true
+      - TYK_GW_DBAPPCONFOPTIONS_CONNECTIONSTRING=http://tyk-dashboard:3000
+      - TYK_GW_DBAPPCONFOPTIONS_NODEISSEGMENTED=false
+      - TYK_GW_DBAPPCONFOPTIONS_TAGS=
+      - TYK_GW_DISABLEDASHBOARDZEROCONF=false
+      - TYK_GW_STORAGE_TYPE=redis
+      - TYK_GW_STORAGE_ADDRS=tyk-redis:6379
+      - TYK_GW_ENABLEANALYTICS=true
+      - TYK_GW_ANALYTICSCONFIG_TYPE=mongo
+    {% endif -%}   {#  use_tTYK_editionimezone #}
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -10003,6 +10022,113 @@ services:
     <<: *logging
     {% endif -%}   {#  LOKI_collect_docker_logs #}
     restart: {{container_restart_policy}}
+
+  {% if TYK_PUMP_enable | default(false) %}
+  tyk-pump:
+    image: tykio/tyk-pump-docker-pub:{{__TYP_PUMP_version}}
+    container_name: tyk-pump
+    hostname: tyk-pump
+    envionment:
+      - TYK_PMP_OMITCONFIGFILE=true
+      - TYK_PMP_ANALYTICSSTORAGETYPE=redis
+      - TYK_PMP_ANALYTICSSTORAGECONFIG_TYPE=redis
+      - TYK_PMP_ANALYTICSSTORAGECONFIG_ADDRS=tyk-redis:6379
+      - TYK_PMP_ANALYTICSSTORAGECONFIG_USERNAME=
+      - TYK_PMP_ANALYTICSSTORAGECONFIG_PASSWORD=
+      - TYK_PMP_ANALYTICSSTORAGECONFIG_DATABASE=0
+      - TYK_PMP_ANALYTICSSTORAGECONFIG_MAXIDLE=100
+      - TYK_PMP_ANALYTICSSTORAGECONFIG_MAXACTIVE=100
+      - TYK_PMP_ANALYTICSSTORAGECONFIG_ENABLECLUSTER=false
+      - TYK_PMP_PURGEDELAY=2
+      - TYK_PMP_DONTPURGEUPTIMEDATA=false
+    {%if TYK_PUMP_backend_type == 'postgres' | default(false) %}
+      - TYK_PMP_PUMPS_MAIN_TYPE=SQL
+      - TYK_PMP_PUMPS_MAIN_META_TYPE=postgres
+      - TYK_PMP_PUMPS_MAIN_META_CONNECTIONSTRING=user=default password=topsecretpassword host=tyk-postgres port=5432 database=tyk_analytics
+      - TYK_PMP_PUMPS_MAINAGG_TYPE=sql_aggregate
+      - TYK_PMP_PUMPS_MAINAGG_META_TYPE=postgres
+      - TYK_PMP_PUMPS_MAINAGG_META_CONNECTIONSTRING=user=default password=topsecretpassword host=tyk-postgres port=5432 database=tyk_analytics
+      - TYK_PMP_UPTIMEPUMPCONFIG_UPTIMETYPE=sql
+      - TYK_PMP_UPTIMEPUMPCONFIG_TYPE=postgres
+      - TYK_PMP_UPTIMEPUMPCONFIG_CONNECTIONSTRING=user=default password=topsecretpassword host=tyk-postgres port=5432 database=tyk_analytics
+    {% endif -%}   {#  use_timezone #}
+    {%if TYK_PUMP_backend_type == 'mongo' | default(false) %}
+      - TYK_PMP_PUMPS_MAIN_TYPE=mongo
+      - TYK_PMP_PUMPS_MAIN_META_COLLECTIONNAME=tyk_analytics
+      - TYK_PMP_PUMPS_MAIN_META_MONGOURL=mongodb://tyk-mongo:27017/tyk_analytics
+      - TYK_PMP_PUMPS_MAIN_META_MAXINSERTBATCHSIZEBYTES=80000
+      - TYK_PMP_PUMPS_MAIN_META_MAXDOCUMENTSIZEBYTES=20112
+      - TYK_PMP_PUMPS_MAINAGG_TYPE=mongo-pump-aggregate
+      - TYK_PMP_PUMPS_MAINAGG_META_MONGOURL=mongodb://tyk-mongo:27017/tyk_analytics
+      - TYK_PMP_PUMPS_MAINAGG_META_USEMIXEDCOLLECTION=true
+      - TYK_PMP_UPTIMEPUMPCONFIG_COLLECTIONNAME=tyk_uptime_analytics
+      - TYK_PMP_UPTIMEPUMPCONFIG_MONGOURL=mongodb://tyk-mongo:27017/tyk_analytics
+      - TYK_PMP_UPTIMEPUMPCONFIG_MAXINSERTBATCHSIZEBYTES=500000
+      - TYK_PMP_UPTIMEPUMPCONFIG_MAXDOCUMENTSIZEBYTES=200000
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./confs/pump.env
+      - ./confs/pump.mongo.env
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    restart: {{container_restart_policy}}
+  {% endif %}   {#  TYK_PUMP_enable #}
+
+  {%if TYK_edition == 'pro' | default(false) %}
+  tyk-dashboard:
+    image: tykio/tyk-dashboard:{{__TYK_version}}
+    container_name: tyk-dashboard
+    hostname: tyk-dashboard
+    labels:
+      com.platys.name: "tyk-dashboard"
+      com.platys.webui.title: "Tyk Dashboard UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28281"
+    ports:
+      - "28281:3000"
+    environment:
+      - TYK_DB_LICENSEKEY=${TYK_DB_LICENSEKEY}
+      - TYK_DB_STORAGE_MAIN_TYPE=mongo
+      - TYK_DB_STORAGE_MAIN_CONNECTIONSTRING=mongodb://tyk-mongo:27017/tyk_analytics
+    env_file:
+      - ./conf/tyk/tyk_analytics.env
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    restart: {{container_restart_policy}}
+
+  tyk-mongo:
+    image: mongo:4.0
+    container_name: tyk-mongo
+    hostname: tyk-mongo
+    labels:
+      com.platys.name: "mongo"
+    ports:
+      - "27020:27017"
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    command: ["mongod", "--smallfiles"]
+    restart: {{container_restart_policy}}
+  {% endif %}   {#  TYK_edition == 'pro' #}
+
 {% endif %}   {#  TYK_enable #}
 
 {% if KONG_enable | default(false) %}
