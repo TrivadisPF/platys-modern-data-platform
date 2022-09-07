@@ -9905,6 +9905,7 @@ services:
       - '28177:8080'
     environment:
       HASURA_GRAPHQL_DATABASE_URL: postgres://demo:abc123!@postgresql:5432/demodb
+      PG_DATABASE_URL: postgres://demo:abc123!@postgresql:5432/demodb
       HASURA_GRAPHQL_ENABLE_CONSOLE: "true" # set to "false" to disable console
       HASURA_GRAPHQL_DEV_MODE: "true"
       HASURA_GRAPHQL_ENABLED_LOG_TYPES: startup, http-log, webhook-log, websocket-log, query-log
@@ -9971,6 +9972,22 @@ services:
     environment:
       - TYK_GW_LISTENPORT=8080
       - TYK_GW_SECRET={{TYK_secret}}
+    {%if TYK_edition == 'pro' | default(false) %}
+      - TYK_GW_NODESECRET={{TYK_secret}}
+      - TYK_GW_POLICIES_POLICYSOURCE=service
+      - TYK_GW_POLICIES_POLICYCONNECTIONSTRING=http://tyk-dashboard:3000
+      - TYK_GW_POLICIES_POLICYRECORDNAME=tyk_policies
+      - TYK_GW_POLICIES_ALLOWEXPLICITPOLICYID=true
+      - TYK_GW_USEDBAPPCONFIGS=true
+      - TYK_GW_DBAPPCONFOPTIONS_CONNECTIONSTRING=http://tyk-dashboard:3000
+      - TYK_GW_DBAPPCONFOPTIONS_NODEISSEGMENTED=false
+      - TYK_GW_DBAPPCONFOPTIONS_TAGS=
+      - TYK_GW_DISABLEDASHBOARDZEROCONF=false
+      - TYK_GW_STORAGE_TYPE=redis
+      - TYK_GW_STORAGE_ADDRS=tyk-redis:6379
+      - TYK_GW_ENABLEANALYTICS=true
+      - TYK_GW_ANALYTICSCONFIG_TYPE=mongo
+    {% endif -%}   {#  TYK_edition #}
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
