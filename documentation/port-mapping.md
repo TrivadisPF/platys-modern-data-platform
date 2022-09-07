@@ -449,6 +449,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28278 | 9090 | zilla |
 28279 | 80 | azure-storage-explorer |
 28280 | 8080 | tyk-gateway |
+28281 | 3000 | tyk-dashboard |
 
 ## Ports > 28500
 
