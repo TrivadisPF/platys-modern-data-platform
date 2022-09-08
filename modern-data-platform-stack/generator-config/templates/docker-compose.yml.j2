@@ -3335,13 +3335,15 @@ services:
     env_file:
       - ./conf/hadoop.env
     environment:
-      CORE_CONF_fs_defaultFS: "hdfs://namenode:9000"
       HIVE_SITE_CONF_javax_jdo_option_ConnectionURL: "jdbc:postgresql://hive-metastore/metastore"
       SERVICE_PRECONDITION: "hive-metastore:9083"
+  {%if HADOOP_enable | default(false) %}
+      CORE_CONF_fs_defaultFS: "hdfs://namenode:9000"
       MAPRED_CONF_yarn_app_mapreduce_am_env: HADOOP_MAPRED_HOME=/opt/hadoop-{{__HADOOP_version}}/
       MAPRED_CONF_mapreduce_map_env: HADOOP_MAPRED_HOME=/opt/hadoop-{{__HADOOP_version}}/
       MAPRED_CONF_mapreduce_reduce_env: HADOOP_MAPRED_HOME=/opt/hadoop-{{__HADOOP_version}}/
-  {%if MINIO_enable or external['S3_enable'] | default(false) %}
+  {%elif MINIO_enable or external['S3_enable'] | default(false) %}
+      CORE_CONF_fs_defaultFS: s3a://admin-bucket
       CORE_CONF_fs_s3a_endpoint: '{{s3Endpoint | default(omit) }}'
       CORE_CONF_fs_s3a_path_style_access: '{{s3PathStyleAccess}}'
       HIVE_SITE_CONF_fs_s3a_endpoint: {{s3Endpoint | default(omit) }}
@@ -3349,7 +3351,9 @@ services:
       HIVE_SITE_CONF_fs_s3a_secret_key: {{s3SecretAccessKey}}
       HIVE_SITE_CONF_fs_s3a_path_style_access: '{{s3PathStyleAccess}}'
       HIVE_SITE_CONF_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
-  {% endif -%}    {#  MINIO_enable #}
+  {% else %}
+      CORE_CONF_fs_defaultFS: file:///tmp
+  {% endif -%}    {#  HADOOP_enable #}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
