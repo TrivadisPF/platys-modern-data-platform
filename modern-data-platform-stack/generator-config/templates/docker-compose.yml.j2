@@ -9904,12 +9904,18 @@ services:
     ports:
       - '28177:8080'
     environment:
-      HASURA_GRAPHQL_DATABASE_URL: postgres://demo:abc123!@postgresql:5432/demodb
-      PG_DATABASE_URL: postgres://demo:abc123!@postgresql:5432/demodb
+      # postgresql database where the business data is held
+      HASURA_GRAPHQL_DATABASE_URL: postgres://{{HASURA_postgres_user}}:{{HASURA_postgres_password}}@postgresql:5432/{{HASURA_postgres_database}}
+      # for metadata storage
+      HASURA_GRAPHQL_METADATA_DATABASE_URL: postgres://{{HASURA_postgres_meta_user}}:{{HASURA_postgres_meta_password}}@postgresql:5432/{{HASURA_postgres_meta_database}}
+      HASURA_GRAPHQL_ADMIN_SECRET: {{HASURA_admin_secret if HASURA_admin_secret is defined and HASURA_admin_secret else omit}}
       HASURA_GRAPHQL_ENABLE_CONSOLE: "true" # set to "false" to disable console
       HASURA_GRAPHQL_DEV_MODE: "true"
+      HASURA_GRAPHQL_ENABLE_CONSOLE: "true"
+      HASURA_GRAPHQL_LOG_LEVEL: {{HASURA_log_level}}
       HASURA_GRAPHQL_ENABLED_LOG_TYPES: startup, http-log, webhook-log, websocket-log, query-log
       HASURA_GRAPHQL_LIVE_QUERIES_MULTIPLEXED_REFETCH_INTERVAL: 1000
+      HASURA_GRAPHQL_PRO_KEY: {{HASURA_pro_key if HASURA_pro_key is defined and HASURA_pro_key else omit}}
       ## uncomment next line to set an admin secret
       # HASURA_GRAPHQL_ADMIN_SECRET: myadminsecretkey
     {%if use_timezone | default(false) %}
