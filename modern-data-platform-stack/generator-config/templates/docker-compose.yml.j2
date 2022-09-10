@@ -8935,9 +8935,9 @@ services:
     ports:
       - 3306:3306
     environment:
-      - MYSQL_DATABASE=sample
-      - MYSQL_USER=sample
-      - MYSQL_PASSWORD=sample
+      - MYSQL_DATABASE={{MYSQL_database}}
+      - MYSQL_USER={{MYSQL_user}}
+      - MYSQL_PASSWORD={{MYSQL_password}}
       - MYSQL_ROOT_PASSWORD=manager
       - MYSQL_LOG_CONSOLE=true
     {%if use_timezone | default(false) %}
@@ -9556,6 +9556,11 @@ services:
       POSTGRESQL_USER: {{POSTGRESQL_user | default('demo') }}
       POSTGRESQL_PASSWORD: {{POSTGRESQL_password | default('abc123!') }}
   {% endif %}
+  {% if MYSQL_enable | default(false) %}
+      MYSQL_DATABASE: {{MYSQL_database | default('demodb') }}
+      MYSQL_USER: {{MYSQL_user | default('demo') }}
+      MYSQL_PASSWORD: {{MYSQL_password | default('abc123!') }}
+  {% endif %}
   {% if ORACLE_EE_enable or ORACLE_XE_enable | default(false) %}
       ORACLE_USER: {{TRINO_oracle_user | default('demo') }}
       ORACLE_PASSWORD: {{TRINO_oracle_password | default('abc123!') }}
@@ -9594,6 +9599,9 @@ services:
   {% endif %}
   {% if POSTGRESQL_enable | default(false) %}
       - './conf/{{conf_dir}}/catalog/postgresql.properties:{{trino_etc_dir}}/catalog/postgresql.properties'
+  {% endif %}
+  {% if MYSQL_enable | default(false) %}
+      - './conf/{{conf_dir}}/catalog/mysql.properties:{{trino_etc_dir}}/catalog/mysql.properties'
   {% endif %}
   {% if ORACLE_EE_enable or ORACLE_XE_enable | default(false) %}
       - './conf/{{conf_dir}}/catalog/oracle.properties:{{trino_etc_dir}}/catalog/oracle.properties'
@@ -9685,6 +9693,9 @@ services:
   {% if POSTGRESQL_enable | default(false) %}
       - './conf/{{conf_dir}}/catalog/postgresql.properties:{{trino_etc_dir}}/catalog/postgresql.properties'
   {% endif %}
+  {% if MYSQL_enable | default(false) %}
+      - './conf/{{conf_dir}}/catalog/mysql.properties:{{trino_etc_dir}}/catalog/mysql.properties'
+  {% endif %}  
   {% if ORACLE_EE_enable or ORACLE_XE_enable | default(false) %}
       - './conf/{{conf_dir}}/catalog/oracle.properties:{{trino_etc_dir}}/catalog/oracle.properties'
   {% endif %}
