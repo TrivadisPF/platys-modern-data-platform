@@ -40,7 +40,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * added first tutorials showing more complete walk-through of using Playts
  * allow to add roles when specifying multiple databases and users with PostgreSQL
  * allow to specify that the Starburstdata license file should be mapped into the containers, when `TRINO_edition` is set to `starburstdata`. This enables the additional security features, more connectors, a cost-based query optimizer and much more.
- * added catalog for `iceberg`, `delta-lake`, `elasticsearch`, `mongo`, `mysql`, `pinot` and `druid` to trino/starburst
+ * added catalog for `iceberg`, `delta-lake`, `elasticsearch`, `mongo`, `mysql`, `sqlserver`, `pinot` and `druid` to trino/starburst
  
 ## What's new in 1.15.0
 
