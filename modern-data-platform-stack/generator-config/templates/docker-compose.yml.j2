@@ -10246,6 +10246,7 @@ services:
       - 8002:8002
     environment:
       - KONG_LOG_LEVEL={{KONG_log_level | default('info')}}
+      - KONG_PLUGINS={{KONG_plugins}}
   {%if not KONG_use_db | default(false) %}
       - KONG_DATABASE=off
   {% else -%}   {#  KONG_db_type = 'postgres' #}
@@ -10257,7 +10258,7 @@ services:
       - KONG_PG_PASSWORD_FILE= /run/secrets/kong_postgres_password
     {% endif -%}   {#  KONG_db_type = 'postgres' #}
   {% endif -%}   {# KONG_use #}
-#      - KONG_DECLARATIVE_CONFIG="/kong/kong.yaml"
+      - KONG_DECLARATIVE_CONFIG={{'/kong' if KONG_use_declarative_config else omit}}
       - KONG_ADMIN_ACCESS_LOG=/dev/stdout
       - KONG_PROXY_ACCESS_LOG=/dev/stdout
       - KONG_ADMIN_ERROR_LOG=/dev/stderr
@@ -10275,7 +10276,9 @@ services:
       - ./data-transfer:/data-transfer
 #      - ./container-volume/kong:/var/run/kong
 #      - kong_tmp_vol:/tmp
-#      - ./custom-conf/kong:/kong
+    {%if KONG_use_declarative_config | default(false) %}
+      - ./custom-conf/kong:/kong
+    {% endif -%}   {#  use_timezone #}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
