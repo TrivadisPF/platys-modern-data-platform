@@ -93,6 +93,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 6385 | 6379 | redash-redis |
 6386 | 6379 | tyk-redis |
 6831 | 6831 | jaeger (udp) |
+6749 | 6749 | curity |
 6832 | 6832 | jaeger (udp) |
 6875 | 6875 | materialize-1 |
 7000 | 7000 | yb-master |
@@ -136,6 +137,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 8200 | 8200 | vault |
 8443 | 8443 | kong (proxy ssl) |
 8444 | 8444 | kong (admin api ssl) |
+8446 | 8443 | curity |
 8787 | 8787 | r-studio |
 8812 | 8812 | questdb |
 8888 | 8888 | hue |

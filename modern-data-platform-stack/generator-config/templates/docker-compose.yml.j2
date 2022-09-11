@@ -10409,6 +10409,36 @@ services:
   {% endif %}   {# KONG_DECK_enable #}
 {% endif %}   {#  KONG_enable #}
 
+{% if CURITY_enable | default(false) %}
+  #  ================================== Curity Identity Server ========================================== #
+  curity:
+    image: curity.azurecr.io/curity/idsvr:7.2.0{{__CURITY_version}}
+    container_name: curity
+    hostname: curity
+    labels:
+      com.platys.name: "curity"
+      com.platys.webui.title: "Curity UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:8070"
+    ports:
+      - 6749:6749
+      - 8443:8443
+    environment:
+      - PASSWORD='{{CURITY_password}}'
+      - LOGGING_LEVEL='{{CURITY_login_level}}'
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  CURITY_enable #}
 
 {% if NUCLIO_enable | default(false) %}
   #  ================================== Nuclio Dashboard ========================================== #
