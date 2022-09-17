@@ -5889,10 +5889,12 @@ services:
     ports:
       - "28888:8888"
     environment:
-      JUPYTER_ENABLE_LAB: "true"
-      JUPYTER_TOKEN: "{{admin_password}}"
-      GRANT_SUDO: "true"
-      TINI_SUBREAPER: "true"
+      JUPYTER_ENABLE_LAB: "yes"
+      JUPYTER_TOKEN: "{{JUPYTER_token}}"
+      NB_USER: "{{JUPYTER_user}}"
+      GRANT_SUDO: "yes"
+      NOTEBOOK_ARGS: {{JUPYTER_notebook_args if JUPYTER_notebook_args is defined else omit}}
+      DOCKER_STACKS_JUPYTER_CMD: {{JUPYTER_startup_cmd if JUPYTER_startup_cmd is defined else omit}}
     {%if MINIO_enable or external['S3_enable'] | default(false) %}
       CORE_CONF_fs_s3a_endpoint: '{{s3Endpoint | default(omit) }}'
       CORE_CONF_fs_s3a_path_style_access: '{{s3PathStyleAccess}}'
@@ -5933,15 +5935,19 @@ services:
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
-    {% if JUPYTER_python_packages is defined and JUPYTER_python_packages|length  %}
     command:
       # In the command section, $ are replaced with $$ to avoid the error 'Invalid interpolation format for "command" option'
       - bash
       - -c
       - |
+    {% if JUPYTER_python_packages is defined and JUPYTER_python_packages|length  %}
         pip install {{JUPYTER_python_packages}}
-        start-notebook.sh
     {% endif -%}   {#  JUPYTER_python_packages #}
+    {% if JUPYTER_tokenless %}
+        start-notebook.sh --LabApp.token=''
+    {% elase -%}
+        start-notebook.sh
+    {% endif -%}   {#  JUPYTER_tokenless #}
     {%if LOKI_collect_docker_logs | default(false) %}
     <<: *logging
     {% endif -%}   {#  LOKI_collect_docker_logs #}
