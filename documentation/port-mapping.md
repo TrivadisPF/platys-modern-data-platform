@@ -452,6 +452,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28279 | 80 | azure-storage-explorer |
 28280 | 8080 | tyk-gateway |
 28281 | 3000 | tyk-dashboard |
+28282 | 80 | kafka-connector-board |
 
 ## Ports > 28500
 
