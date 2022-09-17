@@ -13,4 +13,4 @@ platys gen
 
 ## How to use it?
 
-Navigate to <http://dataplatform:28888>
+Navigate to <http://dataplatform:28888>. The token for the login has either be specified in the `config.yml` (`JUPYTER_token`) or if not set, the generated token can be retrieved from the log (`docker logs -f jupyter`). 
