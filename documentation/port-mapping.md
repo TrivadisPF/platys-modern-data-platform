@@ -458,6 +458,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28280 | 8080 | tyk-gateway |
 28281 | 3000 | tyk-dashboard |
 28282 | 80 | kafka-connector-board |
+28283 | 3000 | kpow |
 
 ## Ports > 28500
 

@@ -52,6 +52,7 @@ networks:
 {% set __KOUNCIL_version = KOUNCIL_version | default('latest') -%}
 {% set __KAFKA_MAGIC_version = KAFKA_MAGIC_version | default('latest') -%}
 {% set __KAFKA_WEBVIEW_version = KAFKA_WEBVIEW_version | default('latest') -%}
+{% set __KPOW_version = KPOW_version | default('latest') -%}
 {% set __KAFKA_CONNECTOR_BOARD_version = KAFKA_CONNECTOR_BOARD_version | default('latest') -%}
 {% set __STREAMS_EXPLORER_version = STREAMS_EXPLORER_version | default('latest') -%}
 {% set __KAFKA_LAG_EXPORTER_version = KAFKA_LAG_EXPORTER_version | default('latest') -%}
@@ -478,6 +479,7 @@ networks:
   {% set EFAK_enable = false -%}
   {% set KAFKA_LAG_EXPORTER_enable = false -%}
   {% set KAFKA_WEBVIEW_enable = false -%}
+  {% set KPOW_enable = false -%}
   {% set KAFKA_CONNECTOR_BOARD_enable = false -%}
   {% set ZILLA_enable = false -%}
   {% set REMORA_enable = false -%}
@@ -2406,6 +2408,58 @@ services:
     {% endif -%}   {#  LOKI_collect_docker_logs #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  KAFKA_enable and KAFKA_WEBVIEW_enable #}
+
+{% if ((KAFKA_enable or external['KAFKA_enable']) and KPOW_enable) | default(false) %}
+  #  ================================== kpow ========================================== #
+  kpow:
+    image: operatr/kpow:{{__KPOW_version}}
+    container_name: kpow
+    hostname: kpow
+    labels:
+      com.platys.name: "kpow"
+      com.platys.webui.title: 'kpow UI'
+      com.platys.webui.url: "http://${PUBLIC_IP}:28283"
+    ports:
+      - 28283:3000
+    environment:
+      PORT: 3000
+      ENVIRONMENT_NAME: 'platys-stack'
+      BOOTSTRAP: '{{ns.bootstrapServers}}'
+      ALLOW_TOPIC_CREATE: True
+      ALLOW_TOPIC_DELETE: True
+      ALLOW_TOPIC_EDIT: True
+      ALLOW_TOPIC_INSPECT: True
+      ALLOW_TOPIC_PRODUCE: true
+      CONNECT_REST_URL:
+    {% if ( KAFKA_CONNECT_enable or KAFKA_KSQLDB_use_embedded_connect ) | default(false) %}
+      CONNECT_REST_URL: {{ns1.connectServersInternalUrl.split(',')[0]}}
+    {% endif -%}   {#  KAFKA_CONNECT_enable #}
+    {% if (SCHEMA_REGISTRY_enable or external['SCHEMA_REGISTRY_enable']) | default(false) %}
+      SCHEMA_REGISTRY_URL: '{{ns.schemaRegistryUrlExternal}}'
+      {% if schemaRegistryUsername is defined and schemaRegistryUsername|length %}
+      SCHEMA_REGISTRY_USER: "{{schemaRegistryUsername}}"
+      SCHEMA_REGISTRY_PASSWORD: "{{schemaRegistryPassword}}"
+      {% endif %}
+    {% endif -%}   {#  SCHEMA_REGISTRY_enable #}
+      LICENSE_ID: {{KPOW_license_id if KPOW_license_id is defined and KPOW_license_id | length else omit}}
+      LICENSE_CODE: {{KPOW_license_code if KPOW_license_code is defined and KPOW_license_code | length else omit}}
+      LICENSEE: {{KPOW_licensee if KPOW_licensee is defined and KPOW_licensee | length else omit}}
+      LICENSE_EXPIRY: {{KPOW_license_expiry if KPOW_license_expiry is defined and KPOW_license_expiry | length else omit}}
+      LICENSE_SIGNATURE: {{KPOW_license_signature if KPOW_license_signature is defined and KPOW_license_signature | length else omit}}
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  KAFKA_enable and KPOW_enable #}
 
 {% if ((KAFKA_enable or external['KAFKA_enable']) and KAFKA_CONNECTOR_BOARD_enable) | default(false) %}
   #  ================================== Kafka Connector Board ========================================== #
