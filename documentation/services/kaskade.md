@@ -13,4 +13,8 @@ platys gen
 
 ## How to use it?
 
+```
+docker exec -ti kaskade kaskade
+```
+
 
