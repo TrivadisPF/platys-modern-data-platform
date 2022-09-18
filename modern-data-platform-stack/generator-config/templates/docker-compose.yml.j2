@@ -2427,7 +2427,18 @@ services:
       com.platys.webui.url: "http://${PUBLIC_IP}:28283"
     ports:
       - 28283:3000
+    {% if KPOW_use_external_license_info %}
+    env_file:
+      - ./licenses/kpow/kpow-license.env
+    {% endif -%}   {#  KPOW_use_external_license_info #}
     environment:
+    {% if not KPOW_use_external_license_info %}
+      LICENSE_ID: {{KPOW_license_id if KPOW_license_id is defined and KPOW_license_id | length else omit}}
+      LICENSE_CODE: {{KPOW_license_code if KPOW_license_code is defined and KPOW_license_code | length else omit}}
+      LICENSEE: {{KPOW_licensee if KPOW_licensee is defined and KPOW_licensee | length else omit}}
+      LICENSE_EXPIRY: {{KPOW_license_expiry if KPOW_license_expiry is defined and KPOW_license_expiry | length else omit}}
+      LICENSE_SIGNATURE: {{KPOW_license_signature if KPOW_license_signature is defined and KPOW_license_signature | length else omit}}
+    {% endif -%}   {#  KPOW_use_external_license_info #}
       PORT: 3000
       ENVIRONMENT_NAME: 'platys-stack'
       BOOTSTRAP: '{{ns.bootstrapServers}}'
@@ -2436,9 +2447,10 @@ services:
       ALLOW_TOPIC_EDIT: True
       ALLOW_TOPIC_INSPECT: True
       ALLOW_TOPIC_PRODUCE: true
-      CONNECT_REST_URL:
+      ALLOW_GROUP_EDIT: True
     {% if ( KAFKA_CONNECT_enable or KAFKA_KSQLDB_use_embedded_connect ) | default(false) %}
       CONNECT_REST_URL: {{ns1.connectServersInternalUrl.split(',')[0]}}
+      ALLOW_CONNECT_EDIT: True
     {% endif -%}   {#  KAFKA_CONNECT_enable #}
     {% if (SCHEMA_REGISTRY_enable or external['SCHEMA_REGISTRY_enable']) | default(false) %}
       SCHEMA_REGISTRY_URL: '{{ns.schemaRegistryUrlExternal}}'
@@ -2446,12 +2458,8 @@ services:
       SCHEMA_REGISTRY_USER: "{{schemaRegistryUsername}}"
       SCHEMA_REGISTRY_PASSWORD: "{{schemaRegistryPassword}}"
       {% endif %}
+      ALLOW_SCHEMA_EDIT: true
     {% endif -%}   {#  SCHEMA_REGISTRY_enable #}
-      LICENSE_ID: {{KPOW_license_id if KPOW_license_id is defined and KPOW_license_id | length else omit}}
-      LICENSE_CODE: {{KPOW_license_code if KPOW_license_code is defined and KPOW_license_code | length else omit}}
-      LICENSEE: {{KPOW_licensee if KPOW_licensee is defined and KPOW_licensee | length else omit}}
-      LICENSE_EXPIRY: {{KPOW_license_expiry if KPOW_license_expiry is defined and KPOW_license_expiry | length else omit}}
-      LICENSE_SIGNATURE: {{KPOW_license_signature if KPOW_license_signature is defined and KPOW_license_signature | length else omit}}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
