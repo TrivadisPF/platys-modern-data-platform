@@ -3988,20 +3988,24 @@ services:
         - "28145:9091"
     environment:
       - MAE_CONSUMER_ENABLED=true
+      - PE_CONSUMER_ENABLED=true
       - KAFKA_BOOTSTRAP_SERVER=kafka-1:19092
       - KAFKA_SCHEMAREGISTRY_URL='{{ns.schemaRegistryUrl}}'
       - ELASTICSEARCH_HOST=datahub-elasticsearch
       - ELASTICSEARCH_PORT=9200
+      - GRAPH_SERVICE_IMPL={{DATAHUB_graph_service_impl}}
+    {%if (DATAHUB_graph_service_impl | lower) == 'neo4j'  | default(true) %}
       - NEO4J_HOST=datahub-neo4j:7474
       - NEO4J_URI=bolt://${PUBLIC_IP}:17688
       - NEO4J_USERNAME=neo4j
       - NEO4J_PASSWORD=abc123!
+    {% endif -%}   {#  DATAHUB_graph_service_impl #}
       - GMS_HOST=datahub-gms
       - GMS_PORT=8080
-      - GRAPH_SERVICE_IMPL=neo4j
       - ENTITY_REGISTRY_CONFIG_PATH=/datahub/datahub-mae-consumer/resources/entity-registry.yml
       - KAFKA_TOPIC_NAME=MetadataAuditEvent_v4
       - DATAHUB_USAGE_EVENT_NAME=DataHubUsageEvent_v1
+      - DATAHUB_ANALYTICS_ENABLED=true
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
