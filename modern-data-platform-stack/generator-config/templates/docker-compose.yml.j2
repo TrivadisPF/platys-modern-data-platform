@@ -3877,7 +3877,7 @@ services:
     environment:
       - DATAHUB_GMS_HOST=datahub-gms
       - DATAHUB_GMS_PORT=8080
-      - DATAHUB_SECRET=abc123!
+      - DATAHUB_SECRET={{DATAHUB_secret | default('abc123!abc123!')}}
       - DATAHUB_APP_VERSION=1.0
       - DATAHUB_PLAY_MEM_BUFFER_SIZE=10MB
     {%if use_timezone | default(false) %}
@@ -3929,6 +3929,9 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
+    {%if DATAHUB_map_user_props | default(false) %}
+      - ./security/datahub/user.props:/datahub-frontend/conf/user.props
+    {% endif -%}   {#  DATAHUB_map_user_props #}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
