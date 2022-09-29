@@ -6176,12 +6176,20 @@ services:
       - ./data-transfer:/data-transfer
       - "/var/run/docker.sock:/var/run/docker.sock:rw"
       - ./conf/jupyterhub/jupyterhub_config.py:/srv/jupyterhub/jupyterhub_config.py
+      - ./custom-conf/jupyterhub/userlist:/srv/jupyterhub/userlist
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
     command:
-      jupyterhub -f /srv/jupyterhub/jupyterhub_config.py
+      # In the command section, $ are replaced with $$ to avoid the error 'Invalid interpolation format for "command" option'
+      - bash
+      - -c
+      - |
+    {% if JUPYTERHUB_python_packages is defined and JUPYTERHUB_python_packages|length  %}
+        pip install {{JUPYTERHUB_python_packages}}
+    {% endif -%}   {#  JUPYTERHUB_python_packages #}
+        jupyterhub -f /srv/jupyterhub/jupyterhub_config.py
     {%if LOKI_collect_docker_logs | default(false) %}
     <<: *logging
     {% endif -%}   {#  LOKI_collect_docker_logs #}
