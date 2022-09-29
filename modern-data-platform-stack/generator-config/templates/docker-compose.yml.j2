@@ -6102,6 +6102,35 @@ services:
 
 {% endif %}   {#  JUPYTER_enable  #}
 
+{%if JUPYTERHUB_enable | default(false) %}
+  #  ================================== JupyterHub ========================================== #
+  jupyterhub:
+    image: jupyterhub/jupyterhub:{{__JUPYTERHUB_version}}
+    container_name: jupyterhub
+    hostname: jupyterhub
+    labels:
+      com.platys.name: 'jupyterhub'
+      com.platys.webui.title: "JupyterHub UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28284"
+    ports:
+      - "28284:8000"
+    environment:
+      JUPYTER_ENABLE_LAB: "'yes'"
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  JUPYTERHUB_enable  #}
+
 {%if RSTUDIO_enable | default(false) %}
   #  ================================== RStudio ========================================== #
   rstudio:

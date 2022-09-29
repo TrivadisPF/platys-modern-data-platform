@@ -16,6 +16,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Kafka Connector Board
  * Kaskade
  * kpow
+ * JupyterHub
 
 ### New Cookbook Recipes
 

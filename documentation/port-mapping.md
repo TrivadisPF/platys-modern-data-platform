@@ -459,6 +459,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28281 | 3000 | tyk-dashboard |
 28282 | 80 | kafka-connector-board |
 28283 | 3000 | kpow |
+28284 | 8000 | jupyterhub |
 
 ## Ports > 28500
 
