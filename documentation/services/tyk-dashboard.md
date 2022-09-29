@@ -11,7 +11,7 @@ Tyk Dashboard is part of the Professional license and not open source.
 ## How to enable?
 
 ```
-platys init --enable-services TYK TYK_DASHBOARD
+platys init --enable-services TYK,TYK_DASHBOARD
 platys gen
 ```
 

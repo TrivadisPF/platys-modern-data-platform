@@ -460,6 +460,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28282 | 80 | kafka-connector-board |
 28283 | 3000 | kpow |
 28284 | 8000 | jupyterhub |
+28285 | 80 | conduktor-platform |
 
 ## Ports > 28500
 

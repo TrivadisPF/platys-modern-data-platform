@@ -7,7 +7,7 @@ Traffic analytics are captured by the Tyk Gateway nodes and then temporarily sto
 ## How to enable?
 
 ```
-platys init --enable-services TYK TYK_PUMP
+platys init --enable-services TYK,TYK_PUMP
 platys gen
 ```
 
