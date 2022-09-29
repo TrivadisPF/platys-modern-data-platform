@@ -6115,16 +6115,21 @@ services:
     ports:
       - "28284:8000"
     environment:
-      JUPYTER_ENABLE_LAB: "'yes'"
+      DOCKER_NETWORK_NAME: ${DOCKER_NETWORK_NAME}
+      DOCKER_NOTEBOOK_IMAGE: ${DOCKER_NOTEBOOK_IMAGE}
+      DOCKER_NOTEBOOK_DIR: ${DOCKER_NOTEBOOK_DIR}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
+      - "/var/run/docker.sock:/var/run/docker.sock:rw"
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
+    command:
+      jupyterhub
     {%if LOKI_collect_docker_logs | default(false) %}
     <<: *logging
     {% endif -%}   {#  LOKI_collect_docker_logs #}
