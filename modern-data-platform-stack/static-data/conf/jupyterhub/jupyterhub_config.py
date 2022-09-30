@@ -11,7 +11,11 @@ c = get_config()
 # configuration parameter.
 
 # Spawn single-user servers as Docker containers
-c.JupyterHub.spawner_class = 'dockerspawner.DockerSpawner'
+c.JupyterHub.spawner_class = "docker"
+
+# delete containers when the stop
+c.DockerSpawner.remove = True
+
 # Spawn containers from this image
 c.DockerSpawner.container_image = os.environ['DOCKER_NOTEBOOK_IMAGE']
 # JupyterHub requires a single-user instance of the Notebook server, so we
@@ -43,18 +47,27 @@ c.DockerSpawner.remove_containers = True
 # For debugging arguments passed to spawned containers
 c.DockerSpawner.debug = True
 
-# User containers will access hub by container name on the Docker network
-c.JupyterHub.hub_ip = 'jupyterhub'
+# we need the hub to listen on all ips when it is in a container
+c.JupyterHub.hub_ip = '0.0.0.0'
 c.JupyterHub.hub_port = 8080
+# the hostname/ip that should be used to connect to the hub
+# this is usually the hub container's name
+c.JupyterHub.hub_connect_ip = 'jupyterhub'
 
 # TLS config
-c.JupyterHub.port = 443
-c.JupyterHub.ssl_key = os.environ['SSL_KEY']
-c.JupyterHub.ssl_cert = os.environ['SSL_CERT']
+# c.JupyterHub.port = 443
+# c.JupyterHub.ssl_key = os.environ['SSL_KEY']
+# c.JupyterHub.ssl_cert = os.environ['SSL_CERT']
+
+# Dummy Authenticator 
+from jupyterhub.auth import DummyAuthenticator
+
+c.JupyterHub.authenticator_class = DummyAuthenticator
+c.DummyAuthenticator.password = "abc123!"
 
 # Authenticate users with GitHub OAuth
-c.JupyterHub.authenticator_class = 'oauthenticator.GitHubOAuthenticator'
-c.GitHubOAuthenticator.oauth_callback_url = os.environ['OAUTH_CALLBACK_URL']
+#c.JupyterHub.authenticator_class = 'oauthenticator.GitHubOAuthenticator'
+#c.GitHubOAuthenticator.oauth_callback_url = os.environ['OAUTH_CALLBACK_URL']
 
 # Persist hub data on volume mounted inside container
 data_dir = os.environ.get('DATA_VOLUME_CONTAINER', '/data')
