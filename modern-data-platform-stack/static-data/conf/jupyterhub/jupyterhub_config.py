@@ -72,8 +72,8 @@ c.DummyAuthenticator.password = "abc123!"
 # Persist hub data on volume mounted inside container
 data_dir = os.environ.get('DATA_VOLUME_CONTAINER', '/data')
 
-c.JupyterHub.cookie_secret_file = os.path.join(data_dir,
-    'jupyterhub_cookie_secret')
+#c.JupyterHub.cookie_secret_file = os.path.join(data_dir,
+#    'jupyterhub_cookie_secret')
 
 c.JupyterHub.db_url = 'postgresql://postgres:{password}@{host}/{db}'.format(
     host=os.environ['POSTGRES_HOST'],
