@@ -34,6 +34,8 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Update `Starburst Enterprise` to `397-e`
  * Update `Jikkou` to `0.12.2`
  * Update `Hasura` to `v2.11.1`
+ * Update `Confluent Platform` to `7.2.2`
+ * Update `ksqldb` to `0.28.2`
 
 ### Breaking Changes
 
