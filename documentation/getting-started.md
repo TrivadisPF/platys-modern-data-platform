@@ -287,11 +287,9 @@ Now the Platform is ready to be started. Before doing that, you have to create s
 * `DOCKER_HOST_IP` - the IP address of the network interface of the Docker Host
 * `PUBLIC_IP` - the IP address of the public network interface of the Docker Host (different to `DOCKER_HOST_IP` if in a public cloud environment
 
-You can set these environment variables persistently on the machine (`/etc/environment`) or user (`~/.pam_environment` or `~/.profile`) level. 
+See [here](./setup-environment-variables.md) for how to setup these variables.
 
-Another option is to use the `.env` file in the folder where the `docker-compose.yml` file is located. All environment variables set in there are used when the docker compose environment is started. 
-
-Now let's start the platform. In a terminal window, execute 
+Having the environment variables in place, let's start the platform. In a terminal window, execute 
 
 ```
 docker-compose up -d
