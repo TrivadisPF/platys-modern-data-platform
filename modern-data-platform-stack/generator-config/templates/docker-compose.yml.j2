@@ -1151,13 +1151,13 @@ services:
       - {{connect_external_port}}:{{connect_port}}
     {% endif %}
     environment:
-      KSQL_LOG4J_OPTS: "-Dlog4j.configuration=file:/opt/app/log4j/log4j.properties"
     {% if ( KAFKA_KSQLDB_edition | lower) == 'cp'  | default(false) %}
       KSQL_LOG4J_ROOT_LOGLEVEL: "INFO"
       KSQL_LOG4J_LOGGERS: "org.apache.kafka.connect.runtime.rest=WARN,org.reflections=ERROR"
       KSQL_LOG4J_PROCESSING_LOG_TOPIC: '{{KAFKA_KSQLDB_log_topic}}'
       KSQL_LOG4J_PROCESSING_LOG_BROKERLIST: '{{ns.bootstrapServers}}'
     {% else %}
+      KSQL_LOG4J_OPTS: "-Dlog4j.configuration=file:/opt/app/log4j/log4j.properties"
       KSQL_LOG4J_LOGGERS: "org.apache.kafka.connect.runtime.rest=WARN,org.reflections=ERROR"
       KSQL_LOG4J_PROCESSING_LOG_TOPIC: '{{KAFKA_KSQLDB_log_topic}}'
       KSQL_LOG4J_PROCESSING_LOG_BROKERLIST: '{{ns.bootstrapServers}}'
@@ -1252,7 +1252,9 @@ services:
     volumes:
       - ./data-transfer:/data-transfer
       - ./plugins/ksqldb:/etc/ksqldb/ext
+    {% if ( KAFKA_KSQLDB_edition | lower) == 'oss'  | default(false) %}
       - ./conf/ksqldb/etc/log4j.properties:/opt/app/log4j/log4j.properties
+    {% endif -%}   {#  KAFKA_KSQLDB_edition = 'oss' #}
       - ./plugins/kafka-connect/connectors:/etc/kafka-connect/addl-plugins
       - ./plugins/kafka-connect/jars:/etc/kafka-connect/jars
       - ./plugins/opentelemetry/agents:/otel
