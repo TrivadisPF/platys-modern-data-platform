@@ -21,7 +21,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
 
 ### New Cookbook Recipes
 
- *
+ * [Handle Serialization Errors in ksqlDB](../cookbooks/recipes/ksqldb-handle-deserializaion-error/README.md) 
 
 ### New Tutorial
 
@@ -36,6 +36,10 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Update `Hasura` to `v2.11.1`
  * Update `Confluent Platform` to `7.2.2`
  * Update `ksqldb` to `0.28.2`
+
+### Bug Fixes
+
+ * ksqlDB processing log now also works with the open source edition (`      KAFKA_KSQLDB_edition: 'oss'`).
 
 ### Breaking Changes
 

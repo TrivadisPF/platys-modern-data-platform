@@ -56,6 +56,7 @@ Inhere we are documenting cookbooks on how to use the platform:
  * **ksqlDB**
    * [Connecting through ksqlDB CLI](./recipes/connecting-through-ksqldb-cli/README.md)    
    * [Custom UDF and ksqlDB](./recipes/custom-udf-and-ksqldb/README.md)    
+   * [Handle Serialization Errors in ksqlDB](./recipes/ksqldb-handle-deserializaion-error/README.md)    
 
  * **Kafka Connect**
    * [Using additional Kafka Connect Connector](./recipes/using-additional-kafka-connect-connector/README.md)
