@@ -212,10 +212,8 @@ platys list_services --stack trivadis/platys-modern-data-platform --stack-versio
 Now we are ready to generate the platform. In the `platys-demo-platform` folder, run the following command:
 
 ```
-platys gen -c ${PWD}/config.yml
+platys gen
 ```
-
-**Note:** Usage of `-c ${PWD}/config.yml` is only necessary with Platys CLI Version 2.4.1 and will be fixed with this issue: https://github.com/TrivadisPF/platys/issues/52
 
 and you should see an output similar to this
 
