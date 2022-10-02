@@ -10647,35 +10647,6 @@ services:
     restart: on-failure
   {% endif -%}   {#  KONG_db_type = 'postgres' #}
 
-  {% if KONGA_enable | default(false) %}
-  #  ================================== Konga  ========================================== #
-  konga:
-    image: pantsel/konga:{{__KONGA_version}}
-    container_name: konga
-    hostname: konga
-    labels:
-      com.platys.name: "konga"
-      com.platys.webui.title: "Konga Admin GUI"
-      com.platys.webui.url: "http://${PUBLIC_IP}:1337"
-    ports:
-      - "1337:1337/tcp"
-    environment:
-      NODE_ENV: production
-    {%if use_timezone | default(false) %}
-      - TZ={{use_timezone}}
-    {% endif -%}   {#  use_timezone #}
-    volumes:
-      - ./data-transfer:/data-transfer
-    {% if KONGA_volume_map_data %}
-      - "./container-volume/konga:/app/kongadata"
-    {% endif %}
-    {%if use_timezone | default(false) %}
-      - "./etc/timezone:/etc/timezone:ro"
-      - "./etc/localtime:/etc/localtime:ro"
-    {% endif -%}   {#  use_timezone #}
-    restart: {{container_restart_policy}}
-  {% endif %}   {# KONGA_enable #}
-
   {% if KONG_DECK_enable | default(false) %}
   #  ================================== Kong decK  ========================================== #
   kong-deck:
@@ -10704,6 +10675,35 @@ services:
     {% endif -%}   {#  LOKI_collect_docker_logs #}
     restart: {{container_restart_policy}}
   {% endif %}   {# KONG_DECK_enable #}
+
+  {% if KONGA_enable | default(false) %}
+  #  ================================== Konga  ========================================== #
+  konga:
+    image: pantsel/konga:{{__KONGA_version}}
+    container_name: konga
+    hostname: konga
+    labels:
+      com.platys.name: "konga"
+      com.platys.webui.title: "Konga Admin GUI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:1337"
+    ports:
+      - "1337:1337/tcp"
+    environment:
+      NODE_ENV: production
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {% if KONGA_volume_map_data %}
+      - "./container-volume/konga:/app/kongadata"
+    {% endif %}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+  {% endif %}   {# KONGA_enable #}
 {% endif %}   {#  KONG_enable #}
 
 {% if CURITY_enable | default(false) %}
