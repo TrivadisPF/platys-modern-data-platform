@@ -1,0 +1,1 @@
+Contains the data of azurecli service, if flag AZURE_CLI_volume_map_data is set to true.

@@ -1,4 +1,4 @@
-# `modern-data-platform` - Port Mappings - 1.15.0
+# `modern-data-platform` - Port Mappings - 1.16.0
 
 This table reserves the external ports for the various services. Not all services have to be used in the platform at a given time. But by reserving, we can assure that there are no conflicts if a service is added at a later time.
 
@@ -8,6 +8,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 --------------------|------------------|-----------------------|
 21 | 21 | ftp |
 80 | 80 | markdown-viewer or firefox |
+1337 | 1337 | konga | 
 1433 | 1433 | sqlserver |
 1521 | 1521 | oracledb-ee |
 1522 | 1521 | oracledb-xe |
