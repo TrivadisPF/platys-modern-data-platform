@@ -12,6 +12,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Kong decK
  * Konga
  * Kong Map
+ * Kong Admin UI
  * Tyk API Gateway
  * Tyk Dashboard
  * Tyk Pump

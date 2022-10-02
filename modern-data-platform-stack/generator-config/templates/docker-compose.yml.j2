@@ -295,6 +295,7 @@ networks:
 {% set __KONG_version = KONG_version | default('latest') -%}
 {% set __KONG_DECK_version = KONG_DECK_version | default('latest') -%}
 {% set __KONGA_version = KONGA_version | default('latest') -%}
+{% set __KONG_ADMIN_UI_version = KONG_ADMIN_UI_version | default('latest') -%}
 {% set __KONG_MAP_version = KONG_MAP_version | default('latest') -%}
 
 {% set __NUCLIO_version = NUCLIO_version | default('latest') -%}
@@ -580,6 +581,7 @@ networks:
   {% set KONG_enable = false -%}
   {% set KONG_DECK_enable = false -%}
   {% set KONGA_enable = false -%}
+  {% set KONG_ADMIN_UI_enable = false -%}
   {% set KONG_MAP_enable = false -%}
   {% set NUCLIO_enable = false -%}
   {% set HIVEMQ3_enable = false -%}
@@ -10721,6 +10723,32 @@ services:
     {% endif -%}   {#  use_timezone #}
     restart: {{container_restart_policy}}
   {% endif %}   {# KONGA_enable #}
+
+  {% if KONG_ADMIN_UI_enable | default(false) %}
+  #  ================================== Kong Admin UI ========================================== #
+  kong-admin-ui:
+    image: pocketdigi/kong-admin-ui:{{__KONG_ADMIN_UI_version}}
+    container_name: kong-admin-ui
+    hostname: kong-admin-ui
+    labels:
+      com.platys.name: "kong-admin-ui"
+      com.platys.webui.title: "Konga Admin UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28286"
+    ports:
+      - "28286:80"
+    environment:
+      - KONG_DATABASE={{KONG_db_type}}
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+  {% endif %}   {# KONG_ADMIN_UI_enable #}
 
   {% if KONG_MAP_enable | default(false) %}
   #  ================================== KongMap  ========================================== #

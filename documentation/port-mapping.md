@@ -463,6 +463,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28283 | 3000 | kpow |
 28284 | 8000 | jupyterhub |
 28285 | 80 | conduktor-platform |
+28286 | 80 | kong-admin-ui |
 
 ## Ports > 28500
 
