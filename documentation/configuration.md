@@ -857,7 +857,11 @@ For each service there might be some other settings, such as controlling the num
 | `KONG_use_declarative_config`                             	| `false` 	| 1.16.0 	| Map declarative configuration into the `/kong` folder. If enabled, place config file(s) into `custom-conf/kong/`. |
 | `KONG_use_db`                             	| `false` 	| 1.16.0 	| Should a database be used as a backend or should it run db-less? |
 | `KONG_db_type`                             	| `postgres` 	| 1.16.0 	| The database backend to use for Kong, either ``postgres` for Postgresql database. |
-| `KONG_license_data`                             	| `` 	| 1.16.0 	| The enterprise license, if you want to run the enterprise subscription. |
+| `KONG_log_level`                             	| `info` 	| 1.16.0 	| The log level to use for Kong service. |
+| `KONG_volume_map_working`                             	| `false` 	| 1.16.0 	| Volume map working directory folder into the Kong service.      |
+| `KONG_volume_map_data`                             	| `false` 	| 1.16.0 	| Volume map data folder into the Kong service.      |
+| `KONG_license_data`  
+                           	| `` 	| 1.16.0 	| The enterprise license, if you want to run the enterprise subscription. |
 | `KONG_plugins`                             	| `` 	| 1.16.0 	| A list of custom plugins to enable. |
 | [**_Kong Deck_**](./services/kong-deck.md)   &nbsp;&nbsp;&nbsp;&nbsp;![x86-64](./images/x86-64.png)                     	|         	|       	|                                                                                                                                                                                     	|             	|                                	|
 | `KONG_DECK_enable`                             	| `false` 	| 1.16.0 	| Generate Kong Deck service                                                                                                                                             	|

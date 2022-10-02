@@ -10527,7 +10527,7 @@ services:
       - KONG_ADMIN_GUI_LISTEN=0.0.0.0:8002
       - KONG_ADMIN_GUI_URL=http://${PUBLIC_IP}:8002
       - KONG_ADMIN_API_URI=http://${PUBLIC_IP}:8001
-#      KONG_PREFIX: ${KONG_PREFIX:-/var/run/kong}
+      - KONG_PREFIX=/var/run/kong
       - KONG_LICENSE_DATA={{KONG_license_data}}
       #- KONG_ENFORCE_RBAC=
     {%if use_timezone | default(false) %}
@@ -10535,7 +10535,9 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
-#      - ./container-volume/kong:/var/run/kong
+    {% if KONG_volume_map_working %}
+      - ./container-volume/kong:/var/run/kong
+    {% endif -%}   {#  KONG_volume_map_working #}
 #      - kong_tmp_vol:/tmp
     {%if KONG_use_declarative_config | default(false) %}
       - ./custom-conf/kong:/kong
@@ -10567,7 +10569,9 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
+    {% if KONG_volume_map_data %}
       - ./container-volume/kong/data:/var/lib/postgresql/data
+    {% endif -%}   {#  KONG_volume_map_data #}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"

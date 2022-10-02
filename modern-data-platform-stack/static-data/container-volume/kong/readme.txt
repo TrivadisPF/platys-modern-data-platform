@@ -1,1 +1,0 @@
-Contains the data of kong service
