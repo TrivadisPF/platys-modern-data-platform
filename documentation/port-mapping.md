@@ -133,6 +133,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 8088 | 8088 | ksqldb-server-1 |
 8089 | 8088 | ksqldb-server-2 |
 8090 | 8088 | ksqldb-server-3 |
+8100 | 8100 | kong-map |
 8124 | 8124 | axon-server |
 8161 | 8161 | activemq |
 8200 | 8200 | vault |

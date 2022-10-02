@@ -10704,6 +10704,33 @@ services:
     {% endif -%}   {#  use_timezone #}
     restart: {{container_restart_policy}}
   {% endif %}   {# KONGA_enable #}
+
+  {% if KONG_MAP_enable | default(false) %}
+  #  ================================== KongMap  ========================================== #
+  kong-map:
+    image: yesinteractive/kongmap:{{__KONG_MAP_version}}
+    container_name: kong-map
+    hostname: kong-map
+    labels:
+      com.platys.name: "kong-map"
+      com.platys.webui.title: "Kong Map GUI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:8100"
+    ports:
+      - "8100:8100"
+    environment:
+      KONGMAP_CUSTERS_JSON: '{  "my enterprise cluster": {    "kong_admin_api_url": "http://kong-gateway:8001",    "kong_edit_config": "true",   "kong_ent": "true",    "kong_ent_token": "admin",    "kong_ent_token_name": "kong-admin-token",    "kong_ent_manager_url": "http://kong-gateway:8002"  }}'
+      KONGMAP_URL: http://${PUBLIC_IP}:8100
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+  {% endif %}   {# KONG_MAP_enable #}
 {% endif %}   {#  KONG_enable #}
 
 {% if CURITY_enable | default(false) %}
