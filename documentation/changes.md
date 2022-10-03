@@ -25,6 +25,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
 ### New Cookbook Recipes
 
  * [Handle Serialization Errors in ksqlDB](../cookbooks/recipes/ksqldb-handle-deserializaion-error/README.md) 
+ * [Using Jupyter notebook with Spark and Avro](../cookbooks/recipes/jupyter-spark/README.md)
 
 ### New Tutorial
 

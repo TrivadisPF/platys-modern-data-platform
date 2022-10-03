@@ -80,3 +80,6 @@ Inhere we are documenting cookbooks on how to use the platform:
 
  * **Architecture Decision Records (ADR)**
    * [Creating and visualizing ADRs with log4brains](./recipes/creating-adr-with-log4brains/README.md) - `1.12.0`    
+
+ * **Jupyter**
+   * [Using Jupyter notebook with Spark and Avro](./recipes/jupyter-spark/README.md) - `1.16.0` 

@@ -4,7 +4,7 @@ version:				1.16.0
 validated-at:			3.10.2022
 ---
 
-# Using Jupyter with Spark and Avro
+# Using Jupyter notebook with Spark and Avro
 
 This recipe will show how to use Jupyter with the local Spark engine and working with Avro data. By that we also show how to specify an additional dependency (to Avro).
 
