@@ -10492,10 +10492,10 @@ services:
 {% if KONG_enable | default(false) %}
   #  ================================== Kong Gateway ========================================== #
   {% for num in range(KONG_nodes| default(1) ) %}
-  kong-gateway:
+  kong-gateway-{{loop.index}}:
     image: kong/kong-gateway:{{__KONG_version}}
-    container_name: kong-gateway
-    hostname: kong-gateway
+    container_name: kong-gateway-{{loop.index}}
+    hostname: kong-gateway-{{loop.index}}
     labels:
       com.platys.name: "kong-gateway"
       com.platys.webui.title: "Kong API Gateway Admin GUI"
@@ -10503,6 +10503,7 @@ services:
       com.platys.restapi.title: "Kong API Gateway Admin API"
       com.platys.restapi.url: "http://${PUBLIC_IP}:8001"
 #    user: "${KONG_USER:-kong}"
+    {% if loop.index == 1 %}
     ports:
       # The following two environment variables default to an insecure value (0.0.0.0)
       # according to the CIS Security test.
@@ -10515,6 +10516,7 @@ services:
       - 8001:8001
       - 8444:8444
       - 8002:8002
+    {% endif -%}  {# loop.index == 1 #}
     environment:
       - KONG_LOG_LEVEL={{KONG_log_level | default('info')}}
       - KONG_PLUGINS={{KONG_plugins}}
