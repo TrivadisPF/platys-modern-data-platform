@@ -78,7 +78,7 @@ Streamsets: `RelativeAnchorTimeWithoutHeader`
 Dev Simulator Properties (only the ones which have to change from the defaults):
 
 * **Files**
-  * **Files Directory:** `/data-transfer/data`
+  * **Files Directory:** `/data-transfer/cookbook-data`
   * **File Name Pattern:** `relative-anchor-without-header.csv`
   * **Different Record Types?:** `false`
 * **Event Time**
@@ -106,7 +106,7 @@ Streamsets: `RelativeAnchorTimeWithoutHeaderMillisec`
 Dev Simulator Properties (only the ones which have to change from the defaults):
 
 * **Files**
-  * **Files Directory:** `/data-transfer/data`
+  * **Files Directory:** `/data-transfer/cookbook-data`
   * **File Name Pattern:** `relative-anchor-without-header-millisec.csv`
   * **Different Record Types?:** `false`
 * **Event Time**
@@ -134,7 +134,7 @@ Streamsets: `RelativeAnchorTimeWithoutHeaderMillisecDecimals`
 Dev Simulator Properties (only the ones which have to change from the defaults):
 
 * **Files**
-  * **Files Directory:** `/data-transfer/data`
+  * **Files Directory:** `/data-transfer/cookbook-data`
   * **File Name Pattern:** `relative-anchor-without-header-millisec.csv`
   * **Different Record Types?:** `false`
 * **Event Time**
@@ -164,7 +164,7 @@ Streamsets: `RelativeAnchorTimeWithHeader`
 Dev Simulator Properties (only the ones which have to change from the defaults):
 
 * **Files**
-  * **Files Directory:** `/data-transfer/data`
+  * **Files Directory:** `/data-transfer/cookbook-data`
   * **File Name Pattern:** `relative-anchor-with-header.csv`
   * **Different Record Types?:** `false` 
 * **Event Time**
@@ -193,7 +193,7 @@ Streamsets: `RelativeAnchorTimeWithHeader`
 Dev Simulator Properties (only the ones which have to change from the defaults):
 
 * **Files**
-  * **Files Directory:** `/data-transfer/data`
+  * **Files Directory:** `/data-transfer/cookbook-data`
   * **File Name Pattern:** `relative-anchor-with-header-and-empty-values.csv`
   * **Different Record Types?:** `false` 
 * **Event Time**
@@ -227,7 +227,7 @@ Streamsets: `RelativePrevEventTimeWithHeader`
 Dev Simulator Properties (only the ones which have to change from the defaults):
 
 * **Files**
-  * **Files Directory:** `/data-transfer/data`
+  * **Files Directory:** `/data-transfer/cookbook-data`
   * **File Name Pattern:** `relative-previous-event-with-header.csv `
   * **Different Record Types?:** `false` 
 * **Event Time**
@@ -258,7 +258,7 @@ Streamsets: `RelativeAnchorTimeWithoutHeaderMultiTypeOneFile `
 Dev Simulator Properties (only the ones which have to change from the defaults):
 
 * **Files**
-  * **Files Directory:** `/data-transfer/data`
+  * **Files Directory:** `/data-transfer/cookbook-data`
   * **File Name Pattern:** `relative-anchor-without-header-with-muliple-types-one-file.csv`
   * **Different Record Types?:** `true` 
 * **Event Time**
@@ -293,7 +293,7 @@ Streamsets: `RelativeAnchorTimeWithHeaderMultiTypeOneFile `
 Dev Simulator Properties (only the ones which have to change from the defaults):
 
 * **Files**
-  * **Files Directory:** `/data-transfer/data`
+  * **Files Directory:** `/data-transfer/cookbook-data`
   * **File Name Pattern:** `relative-anchor-with-header-with-muliple-types-one-file.csv`
   * **Different Record Types?:** `true` 
 * **Event Time**
@@ -334,7 +334,7 @@ Streamsets: `RelativeAnchorTimeWithHeaderMultiTypeMultiFile`
 Dev Simulator Properties (only the ones which have to change from the defaults):
 
 * **Files**
-  * **Files Directory:** `/data-transfer/data`
+  * **Files Directory:** `/data-transfer/cookbook-data`
   * **File Name Pattern:** `relative-anchor-with-header-with-muliple-types-file*.csv`
   * **Different Record Types?:** `true` 
   
@@ -372,7 +372,7 @@ Streamsets: `AbsoluteTimeWithoutHeader`
 Dev Simulator Properties (only the ones which have to change from the defaults):
 
 * **Files**
-  * **Files Directory:** `/data-transfer/data`
+  * **Files Directory:** `/data-transfer/cookbook-data`
   * **File Name Pattern:** `absolute-without-header.csv`
   * **Different Record Types?:** `false`
   
@@ -404,7 +404,7 @@ Streamsets: `AbsoluteTimeWithoutHeader`
 Dev Simulator Properties (only the ones which have to change from the defaults):
 
 * **Files**
-  * **Files Directory:** `/data-transfer/data`
+  * **Files Directory:** `/data-transfer/cookbook-data`
   * **File Name Pattern:** `absolute-millisecond-without-header.csv`
   * **Different Record Types?:** `false`
   
