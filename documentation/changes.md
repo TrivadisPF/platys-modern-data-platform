@@ -40,6 +40,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Update `Hasura` to `v2.11.1`
  * Update `Confluent Platform` to `7.2.2`
  * Update `ksqldb` to `0.28.2`
+ * Update `datastax` to `6.8.28`
 
 ### Bug Fixes
 
