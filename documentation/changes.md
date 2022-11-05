@@ -42,6 +42,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Update `ksqldb` to `0.28.2`
  * Update `datastax` to `6.8.28`
  * Update `datastax-opscenter` to `6.8.19`
+ * Update `minio` to `RELEASE.2022-10-29T06-21-33Z`
 
 ### Bug Fixes
 
