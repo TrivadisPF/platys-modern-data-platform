@@ -43,6 +43,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Update `datastax` to `6.8.28`
  * Update `datastax-opscenter` to `6.8.19`
  * Update `minio` to `RELEASE.2022-10-29T06-21-33Z`
+ * Update `confluent platform` to `7.3.0`
 
 ### Bug Fixes
 
