@@ -7,7 +7,7 @@ A web interface for Apache Cassandra-
 ## How to enable?
 
 ```
-platys init --enable-services CASSANDRA
+platys init --enable-services CASSANDRA CASSANDRA_WEB
 platys gen
 ```
 
