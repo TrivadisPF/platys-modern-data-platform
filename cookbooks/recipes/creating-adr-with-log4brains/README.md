@@ -4,9 +4,9 @@ version:				1.16.0
 validated-at:			15.11.2022
 ---
 
-# Creating and visualizing ADRs with log4brains
+# Creating and visualising ADRs with log4brains
 
-This recipe will show how to create and visualize Architecture Decision Records (ADR) using [log4brains](https://github.com/thomvaill/log4brains). 
+This recipe will show how to create and visualise Architecture Decision Records (ADR) using [log4brains](https://github.com/thomvaill/log4brains). 
 
 If you want to know more on the concept of Architecture Decision Records (ADRs), there is a [Trivadis Platform Factory whitepaper](https://tvdit.sharepoint.com/:b:/r/sites/PlatformFactoryPublic/Shared%20Documents/Architecture%20Blueprints/Modern%20Data%20Architecture/wp-architecture-decision-record-v1.0d.pdf?csf=1&web=1&e=0BP76w) available (currently only in german). 
 
@@ -88,7 +88,7 @@ docker@ubuntu:~/platys-cookbook/adr$ tree
 
 With the init 2 sample ADRs were automatically created. They can be removed later.
 
-Now with the ADR project being initialized, can restart the `log4brains` container
+Now with the ADR project being initialised, can restart the `log4brains` container
 
 ```
 docker restart log4brains
