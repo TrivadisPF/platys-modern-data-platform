@@ -711,12 +711,14 @@ networks:
     {% set s3AccessKey = '${PLATYS_AWS_ACCESS_KEY:?PLATYS_AWS_ACCESS_KEY must be set either in .env or as an environment variable}' %}
     {% set s3SecretAccessKey = '${PLATYS_AWS_SECRET_ACCESS_KEY:?PLATYS_AWS_SECRET_ACCESS_KEY must be set either in .env or as an environment variable}' %}
     {% set s3DefaultRegion = external['S3_default_region'] %}
+    {% set s3AdminBucketName = external['S3_admin_bucket_name'] %}
 {% else %}
     {% set s3Endpoint = 'http://minio-1:9000' %}
     {% set s3PathStyleAccess = 'true' %}
     {% set s3AccessKey = MINIO_access_key %}
     {% set s3SecretAccessKey = MINIO_secret_key %}
     {% set s3DefaultRegion = 'us-east-1' %}
+    {% set s3AdminBucketName = 'admin-bucket' %}
 {% endif %}   {# external['s3Endpoint'] #}
 
 {% if (external['ADLS_enable']) | default(false) %}
@@ -3058,8 +3060,8 @@ services:
       CORE_CONF_fs_defaultFS: hdfs://namenode:9000
       SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined else 'hdfs://namenode:9000/user/hive/warehouse'}}
   {%elif MINIO_enable or external['S3_enable'] | default(false) %}
-      CORE_CONF_fs_defaultFS: s3a://admin-bucket
-      SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined else 's3a://admin-bucket/hive/warehouse'}}
+      CORE_CONF_fs_defaultFS: s3a://{{s3AdminBucketName}}
+      SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined else 's3a://{{s3AdminBucketName}}/hive/warehouse'}}
   {% else %}
       CORE_CONF_fs_defaultFS: file:///tmp
       SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined else 'file:///hive/warehouse'}}
@@ -3134,8 +3136,8 @@ services:
       CORE_CONF_fs_defaultFS: hdfs://namenode:9000
       SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: hdfs://namenode:9000/user/hive/warehouse
   {%elif MINIO_enable or external['S3_enable'] | default(false) %}
-      CORE_CONF_fs_defaultFS: s3a://admin-bucket
-      SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: s3a://admin-bucket/hive/warehouse
+      CORE_CONF_fs_defaultFS: s3a://{{s3AdminBucketName}}
+      SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: s3a://{{s3AdminBucketName}}/hive/warehouse
   {% else %}
       CORE_CONF_fs_defaultFS: file:///tmp
       SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: file:///hive/warehouse
@@ -3198,8 +3200,8 @@ services:
       CORE_CONF_fs_defaultFS: hdfs://namenode:9000
       SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: hdfs://namenode:9000/user/hive/warehouse
   {%elif MINIO_enable or external['S3_enable'] | default(false) %}
-      CORE_CONF_fs_defaultFS: s3a://admin-bucket
-      SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: s3a://admin-bucket/hive/warehouse
+      CORE_CONF_fs_defaultFS: s3a://{{s3AdminBucketName}}
+      SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: s3a://{{s3AdminBucketName}}/hive/warehouse
   {% else %}
       CORE_CONF_fs_defaultFS: file:///tmp
       SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: file:///hive/warehouse
@@ -3264,8 +3266,8 @@ services:
       CORE_CONF_fs_defaultFS: hdfs://namenode:9000
       SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: hdfs://namenode:9000/user/hive/warehouse
   {%elif MINIO_enable or external['S3_enable'] | default(false) %}
-      CORE_CONF_fs_defaultFS: s3a://admin-bucket
-      SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: s3a://admin-bucket/hive/warehouse
+      CORE_CONF_fs_defaultFS: s3a://{{s3AdminBucketName}}
+      SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: s3a://{{s3AdminBucketName}}/hive/warehouse
   {% else %}
       CORE_CONF_fs_defaultFS: file:///tmp
       SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: file:///hive/warehouse
@@ -3337,8 +3339,8 @@ services:
       CORE_CONF_fs_defaultFS: hdfs://namenode:9000
       SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: hdfs://namenode:9000/user/hive/warehouse
   {%elif MINIO_enable or external['S3_enable'] | default(false) %}
-      CORE_CONF_fs_defaultFS: s3a://admin-bucket
-      SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: s3a://admin-bucket/hive/warehouse
+      CORE_CONF_fs_defaultFS: s3a://{{s3AdminBucketName}}
+      SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: s3a://{{s3AdminBucketName}}/hive/warehouse
   {% else %}
       CORE_CONF_fs_defaultFS: file:///tmp
       SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: file:///hive/warehouse
@@ -3530,7 +3532,7 @@ services:
       MAPRED_CONF_mapreduce_map_env: HADOOP_MAPRED_HOME=/opt/hadoop-{{__HADOOP_version}}/
       MAPRED_CONF_mapreduce_reduce_env: HADOOP_MAPRED_HOME=/opt/hadoop-{{__HADOOP_version}}/
   {%elif MINIO_enable or external['S3_enable'] | default(false) %}
-      CORE_CONF_fs_defaultFS: s3a://admin-bucket
+      CORE_CONF_fs_defaultFS: s3a://{{s3AdminBucketName}}
       CORE_CONF_fs_s3a_endpoint: '{{s3Endpoint | default(omit) }}'
       CORE_CONF_fs_s3a_path_style_access: '{{s3PathStyleAccess}}'
       HIVE_SITE_CONF_fs_s3a_endpoint: {{s3Endpoint | default(omit) }}
@@ -3573,7 +3575,7 @@ services:
       CORE_CONF_fs_defaultFS: hdfs://namenode:9000
       HIVE_SITE_CONF_hive_metastore_dir: hdfs://namenode:9000/user/hive/warehouse
   {%elif MINIO_enable or external['S3_enable'] | default(false) %}
-      CORE_CONF_fs_defaultFS: s3a://admin-bucket
+      CORE_CONF_fs_defaultFS: s3a://{{s3AdminBucketName}}
       CORE_CONF_fs_s3a_endpoint: '{{s3Endpoint | default(omit) }}'
       CORE_CONF_fs_s3a_path_style_access: '{{s3PathStyleAccess}}'
       HIVE_SITE_CONF_fs_s3a_endpoint: {{s3Endpoint | default(omit) }}
@@ -6024,8 +6026,8 @@ services:
       CORE_CONF_fs_defaultFS: hdfs://namenode:9000
       SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: hdfs://namenode:9000/user/hive/warehouse
   {%elif MINIO_enable or external['S3_enable'] | default(false) %}
-      CORE_CONF_fs_defaultFS: s3a://admin-bucket
-      SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: s3a://admin-bucket/hive/warehouse
+      CORE_CONF_fs_defaultFS: s3a://{{s3AdminBucketName}}
+      SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: s3a://{{s3AdminBucketName}}/hive/warehouse
   {% else %}
       CORE_CONF_fs_defaultFS: file:///tmp
       SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: file:///hive/warehouse
@@ -10887,7 +10889,7 @@ services:
     {% endif -%}   {#  MINIO_browser_enable #}
       #MINIO_PUBLIC_IPS: {{serviceName}}
       #MINIO_DOMAIN: minio.io
-      #MINIO_DEFAULT_BUCKETS: 'admin-bucket,{{MINIO_default_buckets}}'
+      #MINIO_DEFAULT_BUCKETS: '{{s3AdminBucketName}},{{MINIO_default_buckets}}'
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -10934,7 +10936,7 @@ services:
       - |
         sleep 10
         mc alias set minio-1 http://minio-1:9000 {{MINIO_access_key}} {{MINIO_secret_key}}
-        mc mb --ignore-existing minio-1/admin-bucket
+        mc mb --ignore-existing minio-1/{{s3AdminBucketName}}
     {% if MLFLOW_SERVER_enable | default(false) %}
         mc mb --ignore-existing minio-1/mlruns
     {% endif %}   {#  MLFLOW_SERVER_enable #}
