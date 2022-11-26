@@ -260,7 +260,7 @@ Dev Simulator Properties (only the ones which have to change from the defaults):
 * **Data Format**
   * **Header Line:** `No Header Line`
 
-The output on `kcat` should show 3 events
+The output on `kcat` should show these events
 
 ```bash
 {"0":"1","1":"10","2":"1","EventTimestamp":1669478407184,"EventTimestampString":"16:00:07","StartEventTimestampString":"16:00:16"}
@@ -273,12 +273,13 @@ The output on `kcat` should show 3 events
 
 ## Using Relative from Anchor Time with Fast Forward and skip
 
-When using the **Relative form Anchor Time with Fast Forward** mode, the anchor is representing the start of the simulation and all the timestamp of the rows of the input file(s) are relative to that anchor. The fast forward parameter represents the time-span to move the start-time from the anchor. 
+When using the **Relative from Anchor Time with Fast Forward** mode, the anchor is representing the start of the simulation and all the timestamp of the rows of the input file(s) are relative to that anchor. The fast forward parameter represents the time-span to move the start-time from the anchor. 
 
 The following diagram represents the data of the input files shown below and a fast forward by a time span of 10 seconds.
 
 ![](./images/relative-anchor-time-fast-forward-and-skip.png)
 
+The output on `kcat` should show these events
 
 ```bash
 {"0":"10","1":"10","2":"3","EventTimestamp":1669478519769,"EventTimestampString":"16:01:59","StartEventTimestampString":"16:01:59"}
@@ -288,9 +289,15 @@ The following diagram represents the data of the input files shown below and a f
   
 ## Using Relative from Previous Event 
 
+When using the **Relative from Previous event** mode, the the timestamp of the row is relative to the timestamp of the previous row. 
+
+The following diagram represents the data of the input files shown.
+
 ![](./images/relative-from-previous-event.png)
 
 ### File with header
+
+The following examples shows the simulator used for a file with a header row and where the timestamps are relative to the timestamp of the previous row.
 
 Input File: `relative-previous-event-with-header.csv`
 
@@ -319,9 +326,21 @@ Dev Simulator Properties (only the ones which have to change from the defaults):
 * **Data Format**
   * **Header Line:** `With Header Line`
 
+The output on `kcat` should show these events
+
+```bash
+{"time":"1","id":"10","value":"1","EventTimestamp":1669493024797,"EventTimestampString":"20:03:44","StartEventTimestampString":"20:03:43"}
+{"time":"4","id":"10","value":"2","EventTimestamp":1669493028797,"EventTimestampString":"20:03:48","StartEventTimestampString":"20:03:43"}
+{"time":"5","id":"10","value":"3","EventTimestamp":1669493033797,"EventTimestampString":"20:03:53","StartEventTimestampString":"20:03:43"}
+{"time":"5","id":"10","value":"4","EventTimestamp":1669493038797,"EventTimestampString":"20:03:58","StartEventTimestampString":"20:03:43"}
+{"time":"5","id":"10","value":"5","EventTimestamp":1669493043797,"EventTimestampString":"20:04:03","StartEventTimestampString":"20:03:43"}
+```  
+
 ## Using Relative from Anchor - with multiple record types in same file
 
-### without header
+### File without header
+
+The following examples shows the simulator used for a file with a header row and where the timestamps are relative to the timestamp of the previous row.
 
 `relative-anchor-without-header-with-muliple-types-one-file.csv`
 
@@ -354,6 +373,17 @@ Dev Simulator Properties (only the ones which have to change from the defaults):
   * **Descriminator field:** `/1`
 * **Data Format**
   * **Header Line:** `No Header Line`
+
+The output on `kcat` should show these events
+
+```bash
+{"time":"0","descriminator":"A","id":"10","value":"1","EventTimestamp":1669492131592,"EventTimestampString":"19:48:51","StartEventTimestampString":"19:48:51","type":"A"}
+{"time":"5","descriminator":"A","id":"10","value":"2","EventTimestamp":1669492136592,"EventTimestampString":"19:48:56","StartEventTimestampString":"19:48:51","type":"A"}
+{"time":"10","descriminator":"A","id":"10","value":"3","EventTimestamp":1669492141592,"EventTimestampString":"19:49:01","StartEventTimestampString":"19:48:51","type":"A"}
+{"time":"11","descriminator":"B","id":"10","value":"4","EventTimestamp":1669492142592,"EventTimestampString":"19:49:02","StartEventTimestampString":"19:48:51","type":"B"}
+{"time":"15","descriminator":"B","id":"10","value":"5","EventTimestamp":1669492146592,"EventTimestampString":"19:49:06","StartEventTimestampString":"19:48:51","type":"B"}
+{"time":"17","descriminator":"A","id":"10","value":"3","EventTimestamp":1669492148592,"EventTimestampString":"19:49:08","StartEventTimestampString":"19:48:51","type":"A"}
+```
 
 ### with header
 
@@ -390,9 +420,15 @@ Dev Simulator Properties (only the ones which have to change from the defaults):
 * **Data Format**
   * **Header Line:** `With Header Line`
 
+The output on `kcat` should show these events
+
+```bash
+
+```
+
 ## Using Relative from Anchor - with multiple record types in file per type
 
-### with header
+### File with header
 
 `relative-anchor-with-header-with-muliple-types-fileA.csv`
 
@@ -434,9 +470,13 @@ Dev Simulator Properties (only the ones which have to change from the defaults):
 * **Data Format**
   * **Header Line:** `With Header Line`
 
+The output on `kcat` should show these events
+
 ## Using Absolute with Start Timestamp
 
 When using the **Absolute with Start Timestamp** mode, a start time is specified from where the is representing the start of the simulation and all the timestamp of the rows of the input file(s) are relative to that anchor.  The following diagram represents the data of the input files shown below.
+
+The following diagram represents the data of the input files shown.
 
 ![](./images/absolute-with-starttimestamp.png)
 
@@ -470,6 +510,8 @@ Dev Simulator Properties (only the ones which have to change from the defaults):
   
 * **Data Format**
   * **Header Line:** `No Header Line`
+
+The output on `kcat` should show these events
 
 ```bash
 {"0":"2021-11-16T09:00:01+0100","1":"10","2":"1","EventTimestamp":1637049601000,"EventTimestampString":"08:00:01","StartEventTimestampString":"08:00:00"}
@@ -520,9 +562,15 @@ Dev Simulator Properties (only the ones which have to change from the defaults):
 * **Data Format**
   * **Header Line:** `No Header Line`  
 
+The output on `kcat` should show these events
   
 ## Using Absolute with Start Timestamp after first event
 
+When using the **Absolute with Start Timestamp** mode with a timestamp which is later than the first event, then all the rows with a timestamp lower/earlier than this timestamp will be skipped. 
+
+The following diagram represents the data of the input files shown.
+
+![](./images/absolute-with-starttimestamp-later-first-event.png)
 
 `absolute-without-header.csv`
 
