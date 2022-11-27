@@ -45,9 +45,9 @@ Download the data and unpack into `data-transfer` folder
 
 ```
 cd data-transfer
-wget https://github.com/TrivadisPF/platys-modern-data-platform/raw/master/cookbooks/recipes/using-dev-simulator-origin/data.tar.gz
+wget https://github.com/TrivadisPF/platys-modern-data-platform/raw/master/cookbooks/recipes/using-dev-simulator-origin/cookbook-data.tar.gz
 
-tar -xvzf data.tar.gz
+tar -xvzf cookbook-data.tar.gz
 rm data.tar.gz
 ```
 
