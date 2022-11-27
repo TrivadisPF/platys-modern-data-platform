@@ -72,7 +72,7 @@ data_dir = os.environ.get('DATA_VOLUME_CONTAINER', '/data')
 #c.JupyterHub.cookie_secret_file = os.path.join(data_dir,
 #    'jupyterhub_cookie_secret')
 
-if os.environ['JUPYTERHUB_USE_POSTGRES'].lower() == "true":
+if os.environ['JUPYTERHUB_USE_POSTGRES'].lower() == "yes":
 	c.JupyterHub.db_url = 'postgresql://{username}:{password}@{host}/{db}'.format(
     	host=os.environ['POSTGRES_HOST'],
     	password=os.environ['POSTGRES_PASSWORD'],
