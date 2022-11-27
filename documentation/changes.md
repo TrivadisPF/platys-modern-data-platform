@@ -22,10 +22,11 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * JupyterHub
  * Conduktor Platform
 
-### New Cookbook Recipes
+### New/Updated Cookbook Recipes
 
  * [Handle Serialization Errors in ksqlDB](../cookbooks/recipes/ksqldb-handle-deserializaion-error/README.md) 
  * [Using Jupyter notebook with Spark and Avro](../cookbooks/recipes/jupyter-spark/README.md)
+ * [Using Dev Simulator Origin to simulate streaming data](../cookbooks/recipes/using-dev-simulator-origin/README.md) - updated with diagrams and additional samples
 
 ### New Tutorial
 
