@@ -59,11 +59,8 @@ c.JupyterHub.hub_connect_ip = 'jupyterhub'
 # c.JupyterHub.ssl_key = os.environ['SSL_KEY']
 # c.JupyterHub.ssl_cert = os.environ['SSL_CERT']
 
-# Dummy Authenticator 
-from jupyterhub.auth import DummyAuthenticator
-
-c.JupyterHub.authenticator_class = DummyAuthenticator
-c.DummyAuthenticator.password = "abc123!"
+c.JupyterHub.authenticator_class = os.environ['JUPYTERHUB_AUTHENTICATOR_CLASS']
+c.DummyAuthenticator.password = os.environ['JUPYTERHUB_PASSWORD']
 
 # Authenticate users with GitHub OAuth
 #c.JupyterHub.authenticator_class = 'oauthenticator.GitHubOAuthenticator'
