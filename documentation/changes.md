@@ -49,7 +49,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Update `kapacitor` to `1.6`
  * Update `chronograf` to `1.10`
  * Update `telegraf` to `1.24.3`
- * 
+
 ### Bug Fixes
 
  * ksqlDB processing log now also works with the open source edition (`      KAFKA_KSQLDB_edition: 'oss'`).
