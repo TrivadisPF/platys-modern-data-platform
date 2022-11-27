@@ -73,11 +73,11 @@ data_dir = os.environ.get('DATA_VOLUME_CONTAINER', '/data')
 #    'jupyterhub_cookie_secret')
 
 if os.environ['JUPYTERHUB_USE_POSTGRES'].lower == "true":
-	c.JupyterHub.db_url = 'postgresql://postgres:{password}@{host}/{db}'.format(
+	c.JupyterHub.db_url = 'postgresql://{username}:{password}@{host}/{db}'.format(
     	host=os.environ['POSTGRES_HOST'],
     	password=os.environ['POSTGRES_PASSWORD'],
     	db=os.environ['POSTGRES_DB'],
-
+    	username=os.environ['POSTGRES_USERNAME'],
 
 # Whitlelist users and admins
 c.Authenticator.allowed_users = whitelist = set()
