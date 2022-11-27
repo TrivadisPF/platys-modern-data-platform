@@ -78,7 +78,8 @@ if os.environ['JUPYTERHUB_USE_POSTGRES'].lower == "true":
     	password=os.environ['POSTGRES_PASSWORD'],
     	db=os.environ['POSTGRES_DB'],
     	username=os.environ['POSTGRES_USERNAME'],
-
+		)
+		
 # Whitlelist users and admins
 c.Authenticator.allowed_users = whitelist = set()
 c.Authenticator.admin_users = admin = set()
