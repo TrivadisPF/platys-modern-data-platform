@@ -1,5 +1,5 @@
 ---
-technoglogies:      jupyter,spark,avri
+technoglogies:      jupyter,spark,avro
 version:				1.16.0
 validated-at:			3.10.2022
 ---
