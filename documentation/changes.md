@@ -49,6 +49,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Update `kapacitor` to `1.6`
  * Update `chronograf` to `1.10`
  * Update `telegraf` to `1.24.3`
+ * Update `burrow` to `v1.5.0`
 
 ### Bug Fixes
 
@@ -57,6 +58,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
 ### Breaking Changes
 
  * if markdown viewer cannot run on port 80 (`MARKDOWN_VIEWER_use_port_80` is set to `false`), port 8008 is used and no longer port 8000
+ * Burrow changed to use image from LinkedIn and no longer the one from Trivadis
  
 ### Enhancements
 
