@@ -7337,7 +7337,7 @@ services:
     {% set external_jmx_port = 7199 + loop.index - 1 %}
     {% set external_thrift_port = 9160 + loop.index - 1 %}
   cassandra-{{loop.index}}:
-    image: cassandra:{{__CASSANDRA_version}}
+    image: bitnami/cassandra:{{__CASSANDRA_version}}
     container_name: cassandra-{{loop.index}}
     hostname: cassandra-{{loop.index}}
     labels:
@@ -7348,10 +7348,12 @@ services:
       - {{external_thrift_port}}:9160
     environment:
       - CASSANDRA_CLUSTER_NAME="Test Cluster"
-      - CASSANDRA_DC=se1
+      - CASSANDRA_DATACENTER=se1
     {% if loop.index > 1 %}
       - CASSANDRA_SEEDS=cassandra-1
+      - CASSANDRA_PASSWORD_SEEDER=yes
     {% endif %}
+      - CASSANDRA_PASSWORD=cassandra
       - CASSANDRA_ENDPOINT_SNITCH=GossipingPropertyFileSnitch
       - CASSANDRA_NUM_TOKENS=128
       - LOCAL_JMX={{CASSANDRA_local_jmx}}
