@@ -464,6 +464,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28284 | 8000 | jupyterhub |
 28285 | 80 | conduktor-platform |
 28286 | 80 | kong-admin-ui |
+28287 | 8181 | iceberg-rest |
 
 ## Ports > 28500
 
