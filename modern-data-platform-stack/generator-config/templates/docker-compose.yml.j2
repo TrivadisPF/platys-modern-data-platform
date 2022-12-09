@@ -2509,9 +2509,11 @@ services:
       com.platys.webui.title: 'Conduktor Platform UI'
       com.platys.webui.url: "http://${PUBLIC_IP}:28285"
     ports:
-      - 28285:80
+      - 28285:8080
     environment:
-      - CDK_IN_CONF_FILE="/opt/conduktor/platform-config.yaml"
+      - CDK_LISTENING_PORT=8080
+      - CDK_IN_CONF_FILE="/etc/platform-config.yaml"
+      - EMBEDDED_POSTGRES="true"
       - KAFKA_BOOTSTRAP_SERVER={{ns.bootstrapServers}}
       - LICENSE_KEY={{CONDUKTOR_PLATFORM_license_key}}
       - ORGANISATION_NAME={{CONDUKTOR_PLATFORM_organisation_name}}
@@ -2525,7 +2527,7 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
-      - ./conf/conduktor-platform/platform-config-no-license.yaml:/opt/conduktor/platform-config.yaml:ro
+      - ./conf/conduktor-platform/platform-config-no-license.yaml:/etc/platform-config.yaml:ro
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
