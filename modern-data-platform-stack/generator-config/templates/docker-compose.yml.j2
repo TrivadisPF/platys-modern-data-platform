@@ -2511,23 +2511,27 @@ services:
     ports:
       - 28285:8080
     environment:
+      - CDK_ORGANIZATION_NAME={{CONDUKTOR_PLATFORM_organisation_name}}
       - CDK_LISTENING_PORT=8080
+      - CDK_DATABASE_HOST=postgresql
+      - CDK_DATABASE_PORT=5432
+      - CDK_DATABASE_NAME=postgres
+      - CDK_DATABASE_USERNAME=postgres
+      - CDK_DATABASE_PASSWORD=abc123!
       - CDK_IN_CONF_FILE="/etc/platform-config.yaml"
-      - EMBEDDED_POSTGRES="true"
       - KAFKA_BOOTSTRAP_SERVER={{ns.bootstrapServers}}
       - LICENSE_KEY={{CONDUKTOR_PLATFORM_license_key}}
-      - ORGANISATION_NAME={{CONDUKTOR_PLATFORM_organisation_name}}
       - ADMIN_EMAIL={{CONDUKTOR_PLATFORM_admin_email}}
       - ADMIN_PSW={{CONDUKTOR_PLATFORM_admin_psw}}
     {% if (SCHEMA_REGISTRY_enable or external['SCHEMA_REGISTRY_enable']) | default(false) %}
-      - SR_SERVER={{ns.schemaRegistryUrlExternal}}
+      - SCHEMA_REGISTRY_URL={{ns.schemaRegistryUrlExternal}}
     {% endif -%}   {#  SCHEMA_REGISTRY_enable #}
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
-      - ./conf/conduktor-platform/platform-config-no-license.yaml:/etc/platform-config.yaml:ro
+      - ./conf/conduktor-platform/platform-config-no-license.yaml:/etc/platform-config.yaml
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"

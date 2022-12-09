@@ -6,17 +6,32 @@ clusters:
     name: My Local Kafka Cluster
     color: "#0013E7"
     ignoreUntrustedCertificate: false
-    bootstrapServers: "$KAFKA_BOOTSTRAP_SERVER"
-    properties:
+    bootstrapServers: "${KAFKA_BOOTSTRAP_SERVER:-localhost:9092}"
+    properties: |
+      client.id=conduktor
+      default.api.timeout.ms=5000
+      request.timeout.ms=5000
     schemaRegistry:
-      url: "$SR_SERVER"
+      url: "${SCHEMA_REGISTRY_URL:-http://localhost:8081}"
       ignoreUntrustedCertificate: false
-      properties:
-    labels: {}
+      properties: |
+        acks=all
+        client.id=conduktor
+        default.api.timeout.ms=5000
+        request.timeout.ms=5000
+    kafkaConnects:
+      - url: "${KAFKA_CONNECT_URL:-http://localhost:8083}"
+        id: kafka-connect
+        name: kafkConnect
+      security:        
+
+    labels:
+      env: default
+
 
 auth:
-  demo-users:
+  local-users:
     - email: "${ADMIN_EMAIL}"
       password: "${ADMIN_PSW}"
-      groups:
-        - ADMIN
+
+license: ${CDK_LICENSE:-~} # Fallback to null (~)
