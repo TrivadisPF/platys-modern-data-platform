@@ -52,6 +52,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Update `burrow` to `v1.5.0`
  * Update `graphdb` to `10.1.1`
  * Update `nifi` to `1.19.0`
+ * Update `jikkou` to `0.13.0`
 
 ### Bug Fixes
 
