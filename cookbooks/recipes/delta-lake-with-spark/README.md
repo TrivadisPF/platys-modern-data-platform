@@ -13,7 +13,7 @@ This recipe will show how to use a Spark cluster together with the [Delta Lake](
 First [initialise a platys-supported data platform](../documentation/getting-started.md) with the following services enabled
 
 ```
-platys init --enable-services SPARK,ZEPPELIN,MINIO,PROVISIONING_DATA -s trivadis/platys-modern-data-platform -w 1.16.0
+platys init --enable-services SPARK,ZEPPELIN,MINIO,AWSCLI,PROVISIONING_DATA -s trivadis/platys-modern-data-platform -w 1.16.0
 ```
 
 Before we can generate the platform, we need to extend the `config.yml`:
@@ -21,13 +21,13 @@ Before we can generate the platform, we need to extend the `config.yml`:
 First let's specify the Spark Base version to use
 
 ```
-	SPARK_base_version: 3.1
+      SPARK_base_version: 3.1
 ```
 
 now add the delta jar to `SPARK_jars_packages`
 
 ```
-    SPARK_jars_packages: 'io.delta:delta-core_2.12:1.0.1'
+      SPARK_jars_packages: 'io.delta:delta-core_2.12:1.0.1'
 ```
 
 Make sure that you use the right version according to [the compatibility table in the Delta Lake documentation](https://docs.delta.io/latest/releases.html). We are using `1.0.1` because of using Spark `3.1.x`.
