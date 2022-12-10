@@ -54,7 +54,8 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Update `graphdb` to `10.1.1`
  * Update `nifi` to `1.19.0`
  * Update `jikkou` to `0.13.0`
-
+ * Update `spark` to `3.2.3
+  
 ### Bug Fixes
 
  * ksqlDB processing log now also works with the open source edition (`      KAFKA_KSQLDB_edition: 'oss'`).
