@@ -30,6 +30,9 @@ Inhere we are documenting cookbooks on how to use the platform:
    * [Spark with external S3](./recipes/spark-with-external-s3/README.md)
    * [Spark with PostgreSQL](./recipes/spark-with-postgresql/README.md) - `1.15.0`
 
+ * **Delta Lake Storage Format**
+   * [Spark with Delta Lake](./recipes/delta-lake-with-spark/README.md) - `1.16.0`
+
  * **Hadoop HDFS**
    * [Querying HDFS data using Presto](./recipes/querying-hdfs-with-presto/README.md)
    * [Using HDFS data with Spark Data Frame](./recipes/using-hdfs-with-spark/README.md)

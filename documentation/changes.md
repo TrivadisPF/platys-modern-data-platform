@@ -27,6 +27,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * [Handle Serialization Errors in ksqlDB](../cookbooks/recipes/ksqldb-handle-deserializaion-error/README.md) 
  * [Using Jupyter notebook with Spark and Avro](../cookbooks/recipes/jupyter-spark/README.md)
  * [Using Dev Simulator Origin to simulate streaming data](../cookbooks/recipes/using-dev-simulator-origin/README.md) - updated with diagrams and additional samples
+ * [Spark with Delta Lake](../cookbooks/recipes/delta-lake-with-spark/README.md) 
 
 ### New Tutorial
 
