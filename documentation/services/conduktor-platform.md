@@ -12,3 +12,5 @@ platys gen
 ## How to use it?
 
 Navigate to <http://dataplatform:28285>.
+
+Login with the credentials configured in `config.yml` (defaults to `admin@platys.io`/`abc123!`).
