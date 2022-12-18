@@ -18,19 +18,30 @@ platys init --enable-services SPARK,ZEPPELIN,MINIO,AWSCLI,PROVISIONING_DATA -s t
 
 Before we can generate the platform, we need to extend the `config.yml`:
 
-First let's specify the Spark Base version to use
+First let's specify the Spark Base version to use and then add the delta jar to `SPARK_jars_packages`
+
+Make sure that you use the right version according to [the compatibility table in the Delta Lake documentation](https://docs.delta.io/latest/releases.html).
+
+* for Spark 3.1.x
 
 ```
       SPARK_base_version: 3.1
-```
-
-now add the delta jar to `SPARK_jars_packages`
-
-```
       SPARK_jars_packages: 'io.delta:delta-core_2.12:1.0.1'
 ```
 
-Make sure that you use the right version according to [the compatibility table in the Delta Lake documentation](https://docs.delta.io/latest/releases.html). We are using `1.0.1` because of using Spark `3.1.x`.
+* for Spark 3.2.x
+
+```
+      SPARK_base_version: 3.2
+      SPARK_jars_packages: 'io.delta:delta-core_2.12:2.0.1'
+```
+
+* for Spark 3.3.x
+
+```
+      SPARK_base_version: 3.3
+      SPARK_jars_packages: 'io.delta:delta-core_2.12:2.2.0'
+```
 
 Now let's add the two configuration settings for Delta Lake:
 
