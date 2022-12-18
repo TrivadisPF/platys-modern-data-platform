@@ -235,6 +235,8 @@ networks:
 
 {% set __QUINE_version = QUINE_version | default('latest') -%}
 
+{% set __MEMGRAPH_PLATFORM_version = MEMGRAPH_PLATFORM_version | default('latest') -%}
+
 {% set __DGRAPH_version = DGRAPH_version | default('latest') -%}
 
 {% set __STARDOG_version = STARDOG_version | default('latest') -%}
@@ -561,6 +563,7 @@ networks:
   {% set IGNITE_enable = false -%}
   {% set NEO4J_enable = false -%}
   {% set QUINE_enable = false -%}
+  {% set MEMGRAPH_PLATFORM_enable = false -%}
   {% set DGRAPH_enable = false -%}
   {% set STARDOG_enable = false -%}
   {% set STARDOG_STUDIO_enable = false -%}
@@ -8073,6 +8076,37 @@ services:
     {% endif -%}   {#  LOKI_collect_docker_logs #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  QUINE_enable #}
+
+{% if MEMGRAPH_PLATFORM_enable | default(false) %}
+  #  ================================== Memgraph Platform ========================================== #
+  memgraph-platform:
+    image: memgraph/memgraph-platform:{{__MEMGRAPH_PLATFORM_version}}
+    hostname: memgraph-platform
+    container_name: memgraph-platform
+    labels:
+      com.platys.name: "memgraph-platform"
+      com.platys.webui.title: "Memgraph Lab UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28288"
+    ports:
+      - "7690:7687"
+      - "28288:3000"
+      - "7444:7444"
+    environment:
+      - MEMGRAPH="--log-level=TRACE"
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  MEMGRPAH_PLATFORM_enable #}
 
 {% if DGRAPH_enable | default(false) %}
   #  ================================== Dgraph ========================================== #

@@ -106,6 +106,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 7201 | 7199 | cassandra-3 |
 7202 | 7199 | cassandra-4 |
 7203 | 7199 | cassandra-5 |
+7444 | 7444 | memgraph-platform |
 7474 | 7474 | neo4j-1 |
 7475 | 7474 | neo4j-2 |
 7476 | 7474 | neo4j-3 |
@@ -113,6 +114,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 7687 | 7687 | neo4j-1 |
 7688 | 7687 | neo4j-2 |
 7689 | 7687 | neo4j-3 |
+7690 | 7687 | memgraph-platform |
 8000 | 8000 | kong (proxy) |
 8001 | 8001 | kong (admin api) |
 8002 | 8002 | kong (admin gui) |
@@ -465,6 +467,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28285 | 80 | conduktor-platform |
 28286 | 80 | kong-admin-ui |
 28287 | 8181 | iceberg-rest |
+28288 | 3000 | memgraph-platform |
 
 ## Ports > 28500
 
