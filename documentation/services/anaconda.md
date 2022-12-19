@@ -2,7 +2,7 @@
 
 Anaconda Distribution is a Python/R data science distribution and a collection of over 7,500+ open-source packages, which includes a package and environment manager. Anaconda Distribution is platform-agnostic, so you can use it whether you are on Windows, macOS, or Linux. It’s also is free to install and offers free community support.
 
-**[Website](https://www.anaconda.com/)** | **[Documentation](https://docs.anaconda.com/anaconda/user-guide/tasks/docker/a)** | **[GitHub](https://github.com/jupyter/notebook)**
+**[Website](https://www.anaconda.com/)** | **[Documentation](https://docs.anaconda.com/#)** | **[GitHub](https://github.com/jupyter/notebook)**
 
 ## How to enable?
 
