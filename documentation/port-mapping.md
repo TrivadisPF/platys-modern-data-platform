@@ -280,6 +280,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28082 | 8080 | trino-1 |
 28085 | 8080 | azkarra-worker-1 |
 28888 | 8888 | jupyter |
+28889 | 8888 | anaconda |
 29042 | 9042 | cassandra-1 |
 29043 | 9042 | cassandra-2 |
 29044 | 9042 | cassandra-3 |

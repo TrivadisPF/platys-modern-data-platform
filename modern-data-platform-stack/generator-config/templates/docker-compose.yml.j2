@@ -190,6 +190,8 @@ networks:
 
 {% set __JUPYTERHUB_version = JUPYTERHUB_version | default('latest') -%}
 
+{% set __ANACONDA_version = ANACONDA_version | default('latest') -%}
+
 {% set __RSTUDIO_version = RSTUDIO_version | default('latest') -%}
 {% set __SHINY_SERVER_version = SHINY_SERVER_version | default('latest') -%}
 
@@ -6262,6 +6264,47 @@ services:
         pip install {{JUPYTERHUB_python_packages}}
     {% endif -%}   {#  JUPYTERHUB_python_packages #}
         jupyterhub -f /srv/jupyterhub/jupyterhub_config.py
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  JUPYTERHUB_enable  #}
+
+{%if ANACONDA_enable | default(false) %}
+  #  ================================== Anaconda ========================================== #
+  anaconda:
+    image: continuumio/anaconda3:{{__ANACONDA_version}}
+    container_name: anaconda
+    hostname: anaconda
+    labels:
+      com.platys.name: 'anaconda'
+      com.platys.webui.title: "Anaconda Jupyter UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28889"
+    ports:
+      - "28889:8888"
+    environment:
+      JUPYTER_TOKEN: {{ANACONDA_JUPYTER_token if ANACONDA_JUPYTER_token is defined and ANACONDA_JUPYTER_token | length else omit}}
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {% if ANACONDA_volume_map_notebooks | default(false) %}
+      - ./container-volumes/anaconda/notebooks:/opt/notebooks
+    {% endif -%}   {#  ANACONDA_volume_map_notebooks #}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    command:
+      # In the command section, $ are replaced with $$ to avoid the error 'Invalid interpolation format for "command" option'
+      - bash
+      - -c
+      - |
+    {% if JUPYTERHUB_python_packages is defined and JUPYTERHUB_python_packages|length  %}
+        pip install {{JUPYTERHUB_python_packages}}
+    {% endif -%}   {#  JUPYTERHUB_python_packages #}
+        "/opt/conda/bin/conda install jupyter -y --quiet && mkdir -p /opt/notebooks && /opt/conda/bin/jupyter notebook --notebook-dir=/opt/notebooks --ip='0.0.0.0' --port=8888 --no-browser --allow-root"
     {%if LOKI_collect_docker_logs | default(false) %}
     <<: *logging
     {% endif -%}   {#  LOKI_collect_docker_logs #}
