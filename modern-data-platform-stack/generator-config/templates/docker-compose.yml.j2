@@ -235,6 +235,7 @@ networks:
 
 {% set __QUINE_version = QUINE_version | default('latest') -%}
 
+{% set __MEMGRAPH_version = MEMGRAPH_version | default('latest') -%}
 {% set __MEMGRAPH_PLATFORM_version = MEMGRAPH_PLATFORM_version | default('latest') -%}
 
 {% set __DGRAPH_version = DGRAPH_version | default('latest') -%}
@@ -563,7 +564,7 @@ networks:
   {% set IGNITE_enable = false -%}
   {% set NEO4J_enable = false -%}
   {% set QUINE_enable = false -%}
-  {% set MEMGRAPH_PLATFORM_enable = false -%}
+  {% set MEMGRAPH_enable = false -%}
   {% set DGRAPH_enable = false -%}
   {% set STARDOG_enable = false -%}
   {% set STARDOG_STUDIO_enable = false -%}
@@ -8077,19 +8078,29 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {#  QUINE_enable #}
 
-{% if MEMGRAPH_PLATFORM_enable | default(false) %}
-  #  ================================== Memgraph Platform ========================================== #
-  memgraph-platform:
+{% if MEMGRAPH_enable | default(false) %}
+  #  ================================== Memgraph ========================================== #
+  memgraph:
+  {% if (MEMGRAPH_edition | lower) == 'platform'  %}
     image: memgraph/memgraph-platform:{{__MEMGRAPH_PLATFORM_version}}
-    hostname: memgraph-platform
-    container_name: memgraph-platform
+  {% elif (MEMGRAPH_edition | lower) == 'standalone' and not MEMGRAPH_with_mage | default(false) %}
+    image: memgraph/memgraph:{{__MEMGRAPH_version}}
+  {% elif (MEMGRAPH_edition | lower) == 'standalone' and  MEMGRAPH_with_mage | default(false) %}
+    image: memgraph/memgraph-mage:{{__MEMGRAPH_MAGE_version}}-memgraph{{__MEMGRAPH_version}}
+  {% endif %}
+    hostname: memgraph
+    container_name: memgraph
     labels:
-      com.platys.name: "memgraph-platform"
+      com.platys.name: "memgraph"
+  {% if (MEMGRAPH_edition | lower) == 'platform'  %}
       com.platys.webui.title: "Memgraph Lab UI"
       com.platys.webui.url: "http://${PUBLIC_IP}:28288"
+  {% endif %}
     ports:
       - "7690:7687"
+  {% if (MEMGRAPH_edition | lower) == 'platform'  %}
       - "28288:3000"
+  {% endif %}
       - "7444:7444"
     environment:
       - MEMGRAPH="--log-level=TRACE"
@@ -8102,11 +8113,12 @@ services:
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
+    entrypoint: ["/usr/bin/supervisord"]
     {%if LOKI_collect_docker_logs | default(false) %}
     <<: *logging
     {% endif -%}   {#  LOKI_collect_docker_logs #}
     restart: {{container_restart_policy}}
-{% endif %}   {#  MEMGRPAH_PLATFORM_enable #}
+{% endif %}   {#  MEMGRPAH_enable #}
 
 {% if DGRAPH_enable | default(false) %}
   #  ================================== Dgraph ========================================== #
