@@ -8109,11 +8109,26 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
+    {% if MEMGRAPH_volume_map_data %}
+      - "./container-volume/memgraph/data:/var/lib/memgraph"
+    {% endif -%}   {#  MEMGRAPH_volume_map_data #}
+    {% if MEMGRAPH_volume_map_log %}
+      - "./container-volume/memgraph/log:/var/log/memgraph"
+    {% endif -%}   {#  MEMGRAPH_volume_map_log #}
+    {% if MEMGRAPH_volume_map_custom_conf %}
+      - "./custom-conf/memgraph/:/etc/memgraph"
+    {% endif -%}   {#  MEMGRAPH_volume_map_log #}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
+  {% if (MEMGRAPH_edition | lower) == 'platform'  %}
     entrypoint: ["/usr/bin/supervisord"]
+  {% elif (MEMGRAPH_edition | lower) == 'standalone' and  MEMGRAPH_with_mage | default(false) %}
+    entrypoint: ["/usr/lib/memgraph/memgraph", "--log-level=TRACE"]
+  {% elif (MEMGRAPH_edition | lower) == 'standalone' and not MEMGRAPH_with_mage | default(false) %}
+    entrypoint: ["/usr/lib/memgraph/memgraph", "--log-level=TRACE"]
+  {% endif %}
     {%if LOKI_collect_docker_logs | default(false) %}
     <<: *logging
     {% endif -%}   {#  LOKI_collect_docker_logs #}

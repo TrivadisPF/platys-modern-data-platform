@@ -21,7 +21,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * kpow
  * JupyterHub
  * Conduktor Platform
- * Memgraph Platform
+ * Memgraph
 
 ### New/Updated Cookbook Recipes
 
