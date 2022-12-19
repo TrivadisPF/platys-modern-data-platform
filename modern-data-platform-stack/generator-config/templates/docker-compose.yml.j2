@@ -42,10 +42,10 @@ networks:
 
 {% set __KAFKA_TOPICS_UI_version = KAFKA_TOPICS_UI_version | default('latest') -%}
 {% set __KAFKA_CONNECT_UI_version = KAFKA_CONNECT_UI_version | default('latest') -%}
-{% set __KAFKA_CMAK_version = KAFKA_CMAK_version | default('latest') -%}
+{% set __CMAK_version = CMAK_version | default('latest') -%}
 {% set __KAFKA_KAFDROP_version = KAFKA_KAFDROP_version | default('latest') -%}
 {% set __KAFKA_KADMIN_version = KAFKA_KADMIN_version | default('latest') -%}
-{% set __KAFKA_AKHQ_version = KAFKA_AKHQ_version | default('latest') -%}
+{% set __AKHQ_version = AKHQ_version | default('latest') -%}
 {% set __KAFKA_UI_version = KAFKA_UI_version | default('latest') -%}
 {% set __KAFKA_EFAK_version = KAFKA_EFAK_version | default('latest') -%}
 {% set __KOWL_version = KOWL_version | default('latest') -%}
@@ -2072,11 +2072,11 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {# KAFKA_enable and KAFKA_CONNECT_UI_enable #}
 
-{% if ((KAFKA_enable or external['KAFKA_enable']) and KAFKA_CMAK_enable) | default(false) %}
+{% if ((KAFKA_enable or external['KAFKA_enable']) and CMAK_enable) | default(false) %}
   #  ================================== Cluster Manager for Apache Kafka (CMAK) ========================================== #
   {% set externalPort = 28104 + dataCenterId %}
   cmak{{dataCenter}}:
-    image: trivadis/cmak:{{__KAFKA_CMAK_version}}
+    image: trivadis/cmak:{{__CMAK_version}}
     container_name: cmak{{dataCenter}}
     hostname: cmak{{dataCenter}}
     labels:
@@ -2088,9 +2088,9 @@ services:
     environment:
       ZK_HOSTS: 'zookeeper-1:2181'
       APPLICATION_SECRET: 'abc123!'
-      KAFKA_MANAGER_AUTH_ENABLED: {{KAFKA_CMAK_auth_enabled}}
-      KAFKA_MANAGER_USERNAME: {{KAFKA_CMAK_username}}
-      KAFKA_MANAGER_PASSWORD: {{KAFKA_CMAK_password}}
+      KAFKA_MANAGER_AUTH_ENABLED: {{CMAK_auth_enabled}}
+      KAFKA_MANAGER_USERNAME: {{CMAK_username}}
+      KAFKA_MANAGER_PASSWORD: {{CMAK_password}}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -2104,7 +2104,7 @@ services:
     <<: *logging
     {% endif -%}   {#  LOKI_collect_docker_logs #}
     restart: {{container_restart_policy}}
-{% endif %}   {#  KAFKA_enable and KAFKA_CMAK_enable #}
+{% endif %}   {#  KAFKA_enable and CMAK_enable #}
 
 
 {% if ((KAFKA_enable or external['KAFKA_enable']) and KAFKA_KAFDROP_enable) | default(false) %}
@@ -2182,11 +2182,11 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {#  KAFKA_enable and KAFKA_KADMIN_enable #}
 
-{% if ((KAFKA_enable or external['KAFKA_enable']) and KAFKA_AKHQ_enable) | default(false) %}
+{% if ((KAFKA_enable or external['KAFKA_enable']) and AKHQ_enable) | default(false) %}
   #  ================================== Apache Kafka HQ (AKHQ) ========================================== #
   {% set externalPort = 28107 + dataCenterId %}
   akhq{{dataCenter}}:
-    image: tchiotludo/akhq:{{__KAFKA_AKHQ_version}}
+    image: tchiotludo/akhq:{{__AKHQ_version}}
     container_name: akhq{{dataCenter}}
     hostname: akhq{{dataCenter}}
     labels:
@@ -2198,10 +2198,10 @@ services:
     environment:
       AKHQ_CONFIGURATION: |
         akhq:
-    {% if KAFKA_AKHQ_read_only_mode | default(false) %}
+    {% if AKHQ_read_only_mode | default(false) %}
           security:
             default-group: reader
-    {% endif -%}   {#  KAFKA_AKHQ_read_only_mode #}
+    {% endif -%}   {#  AKHQ_read_only_mode #}
           connections:
             docker-kafka-server:
               properties:
