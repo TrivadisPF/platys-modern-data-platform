@@ -59,6 +59,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 4053 | 4053 | zeppelin (spark ui) |
 4054 | 4054 | zeppelin (spark ui) |
 4317 | 4317 | otel-collector |
+4466 | 4466 | curity |
 5000 | 5000 | amundsenfrontend |
 5001 | 5000 | amundsensearch |
 5002 | 5000 | amundsenmetadata |
