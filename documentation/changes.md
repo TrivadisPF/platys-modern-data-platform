@@ -66,6 +66,10 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
 
  * if markdown viewer cannot run on port 80 (`MARKDOWN_VIEWER_use_port_80` is set to `false`), port 8008 is used and no longer port 8000
  * Burrow changed to use image from LinkedIn and no longer the one from Trivadis
+ * Change `KAFKA_CMAK_xxxxx` to `CMAK_xxxxx`
+ * Change `KAFKA_AKHQ_xxxxx` to `AKHQ_xxxxx`
+ * Change `KAFKA_KAFDROP_xxxxx` to `KAFDROP_xxxxx`
+ * Change `KAFKA_KADMIN_xxxxx` to `KADMIN_xxxxx`
  
 ### Enhancements
 
