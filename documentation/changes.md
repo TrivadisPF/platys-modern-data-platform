@@ -70,6 +70,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Change `KAFKA_AKHQ_xxxxx` to `AKHQ_xxxxx`
  * Change `KAFKA_KAFDROP_xxxxx` to `KAFDROP_xxxxx`
  * Change `KAFKA_KADMIN_xxxxx` to `KADMIN_xxxxx`
+ * Change `KAFKA_EFAK_xxxxx` to `EFAK_xxxxx` 
  
 ### Enhancements
 
