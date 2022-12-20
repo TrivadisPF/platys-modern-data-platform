@@ -59,6 +59,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Update `jikkou` to `0.13.0`
  * Update `spark` to `3.2.3`
  * Update `materialize` to `v0.37.1`
+ * Update `neo4j` to `
   
 ### Bug Fixes
 
