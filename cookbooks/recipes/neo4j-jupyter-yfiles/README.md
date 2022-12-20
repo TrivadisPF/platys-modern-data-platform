@@ -50,7 +50,11 @@ Now load the movie graph by executing
 :PLAY movie graph
 ```
 
-on the resulting cell, navigate to page **2/8** and click on the play icon in the Cypher statement to execute it. The movie database is loaded into Neo4j.
+on the resulting cell, navigate to page **2/8** and click on the play icon in the Cypher statement to execute it. 
+
+![](./images/neo4j-movie-graph.png)
+
+The movie database is loaded into Neo4j.
 
 ## Using yFiles Graph from Jupyter
 
@@ -90,3 +94,7 @@ w = GraphWidget(graph = result.graph())
 
 w.show()
 ```
+
+you should see the following output in Jupyter
+
+![](./images/jupyter-yfiles-graph.png)
