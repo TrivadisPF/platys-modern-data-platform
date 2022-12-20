@@ -31,6 +31,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * [Using Jupyter notebook with Spark and Avro](../cookbooks/recipes/jupyter-spark/README.md)
  * [Using Dev Simulator Origin to simulate streaming data](../cookbooks/recipes/using-dev-simulator-origin/README.md) - updated with diagrams and additional samples
  * [Spark with Delta Lake](../cookbooks/recipes/delta-lake-with-spark/README.md) 
+ * [Neo4J and yFiles graphs for Jupyter](../cookbooks/recipes/neo4j-jupyter-yfiles/README.md)
 
 ### New Tutorial
 
@@ -59,7 +60,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Update `jikkou` to `0.13.0`
  * Update `spark` to `3.2.3`
  * Update `materialize` to `v0.37.1`
- * Update `neo4j` to `
+ * Update `neo4j` to `5.3.0`
   
 ### Bug Fixes
 

@@ -76,7 +76,8 @@ Inhere we are documenting cookbooks on how to use the platform:
    * [Using public Oracle XE image](./recipes/using-public-oracle-xe-image/README.md) - `1.13.0`    
 
  * **Neo4J**
-     * [Working with Neo4J](./recipes/working-with-neo4j/README.md) - `1.15.0`    
+     * [Working with Neo4J](./recipes/working-with-neo4j/README.md) - `1.15.0`  
+     * [Neo4J and yFiles graphs for Jupyter](./recipes/neo4j-jupyter-yfiles/README.md) - `1.16.0`   
 
  * **Tipboard**
    * [ Working with Tipboard and Kafka](./recipes/tipboard-and-kafka/README.md) - `1.14.0`    
