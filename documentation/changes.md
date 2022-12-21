@@ -24,6 +24,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Memgraph
  * Curity
  * Anaconda
+ * Redpanda Console (previously kowl, old version of kowl still supported)
 
 ### New/Updated Cookbook Recipes
 

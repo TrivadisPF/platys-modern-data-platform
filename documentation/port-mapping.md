@@ -470,6 +470,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28286 | 80 | kong-admin-ui |
 28287 | 8181 | iceberg-rest |
 28288 | 3000 | memgraph-platform |
+28289 | 8080 | redpanda-console |
 
 ## Ports > 28500
 

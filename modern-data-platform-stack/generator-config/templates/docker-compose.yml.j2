@@ -49,6 +49,7 @@ networks:
 {% set __KAFKA_UI_version = KAFKA_UI_version | default('latest') -%}
 {% set __EFAK_version = EFAK_version | default('latest') -%}
 {% set __KOWL_version = KOWL_version | default('latest') -%}
+{% set __REDPANDA_CONSOLE_version = REDPANDA_CONSOLE_version | default('latest') -%}
 {% set __KOUNCIL_version = KOUNCIL_version | default('latest') -%}
 {% set __KAFKA_MAGIC_version = KAFKA_MAGIC_version | default('latest') -%}
 {% set __KAFKA_WEBVIEW_version = KAFKA_WEBVIEW_version | default('latest') -%}
@@ -503,6 +504,7 @@ networks:
   {% set KAFKA_UI_enable = false -%}
   {% set EFAK_enable = false -%}
   {% set KOWL_enable = false -%}
+  {% set REDPANDA_CONSOLE_enable = false -%}
   {% set KOUNCIL_enable = false -%}
   {% set KAFKA_MAGIC_enable = false -%}
   {% set EFAK_enable = false -%}
@@ -2376,6 +2378,62 @@ services:
     {% endif -%}   {#  LOKI_collect_docker_logs #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  KAFKA_enable and KOWL_enable #}
+
+{% if ((KAFKA_enable or external['KAFKA_enable']) and  REDPANDA_CONSOLE_enable) | default(false) %}
+  #  ================================== Redpanda Console ========================================== #
+  redpanda-console:
+    image: docker.redpanda.com/vectorized/console:{{__ REDPANDA_CONSOLE_version}}
+    container_name: redpanda-console
+    hostname: redpanda-console
+    labels:
+      com.platys.name: "redpanda-console"
+      com.platys.webui.title: 'Redpanda Console UI'
+      com.platys.webui.url: "http://${PUBLIC_IP}:28289"
+    ports:
+      - 28289:8080
+    environment:
+      # config according to: https://github.com/cloudhut/kowl/blob/master/docs/config/kowl.yaml
+      KAFKA_BROKERS: '{{ns.bootstrapServers}}'
+    {% if external['KAFKA_enable'] and external['KAFKA_sasl_mechanism'] is defined and external['KAFKA_sasl_mechanism'] | length %}
+      KAFKA_TLS_ENABLED: 'true'
+      KAFKA_SASL_ENABLED: 'true'
+      KAFKA_SASL_MECHANISM: 'SCRAM-SHA-256'
+      KAFKA_SASL_USERNAME: {{kafkaUsername}}
+      KAFKA_SASL_PASSWORD: {{kafkaPassword}}
+    {% endif -%}   {#  external['KAFKA_sasl_mechanism'] is defined #}
+    {% if ( SCHEMA_REGISTRY_enable or external['SCHEMA_REGISTRY_enable']) | default(false) %}
+      KAFKA_SCHEMAREGISTRY_ENABLED: 'True'
+      KAFKA_SCHEMAREGISTRY_URLS: '{{ns.schemaRegistryUrlExternal}}'
+      {% if schemaRegistryUsername is defined and schemaRegistryUsername|length %}
+      KAFKA_SCHEMAREGISTRY_USERNAME: "{{schemaRegistryUsername}}"
+      KAFKA_SCHEMAREGISTRY_PASSWORD: "{{schemaRegistryPassword}}"
+      {% endif -%}   {#  schemaRegistryUsername is defined #}
+    {% endif -%}   {#  SCHEMA_REGISTRY_enable #}
+    {% if ( KAFKA_CONNECT_enable or KAFKA_KSQLDB_use_embedded_connect) | default(false) %}
+      CONNECT_ENABLED: 'True'
+      CONNECT_CLUSTERS_NAME: '{{ns1.connectClusterName}}'
+      CONNECT_CLUSTERS_URL: '{{ns1.connectServersInternalUrl.split(',')[0]}}'
+    {% endif -%}   {#  KAFKA_CONNECT_enable #}
+    {% if REDPANDA_CONSOLE_edition == 'enterprise' %}
+      REDPANDA_LICENSE_FILEPATH: /etc/console-mounts/redpanda.license
+    {% endif -%}   {#  REDPANDA_CONSOLE_edition #}
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {% if REDPANDA_CONSOLE_edition == 'enterprise' %}
+      - ./licenses/redpanda/redpanda.license/:/etc/console-mounts/redpanda.license
+    {% endif -%}   {#  REDPANDA_CONSOLE_edition #}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  KAFKA_enable and REDPANDA_CONSOLE_enable #}
 
 {% if ((KAFKA_enable or external['KAFKA_enable']) and KOUNCIL_enable) | default(false) %}
   #  ================================== Kouncil ========================================== #
