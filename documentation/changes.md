@@ -62,6 +62,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Update `spark` to `3.2.3`
  * Update `materialize` to `v0.37.1`
  * Update `neo4j` to `5.3.0`
+ * Update `eventstoredb` to `22.10.0-buster-slim`
   
 ### Bug Fixes
 
