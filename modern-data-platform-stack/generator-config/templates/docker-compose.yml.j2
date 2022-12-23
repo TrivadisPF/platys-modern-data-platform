@@ -163,7 +163,7 @@ networks:
 
 {% set __AIRBYTE_version = AIRBYTE_version | default('latest') -%}
 
-{% set __AIRFLOW_version = AIRFLOW_version | default('latest') -%}
+{% set __AIRFLOW_version = {{"slim" if AIRFLOW_use_slim_image }} ~ AIRFLOW_version {{"python" if AIRFLOW_python_version is defined and AIRFLOW_python_version | length }} ~ {{AIRFLOW_python_version}} | default('latest') -%}
 
 {%if (JUPYTER_edition | lower) == 'minimal' | default(false) %}
   {% set __JUPYTER_version = JUPYTER_MINIMAL_version | default('latest') -%}
@@ -5921,6 +5921,7 @@ services:
       - AIRFLOW__CORE__LOAD_EXAMPLES='{{AIRFLOW_provision_examples}}'
       - AIRFLOW__API__AUTH_BACKENDS='airflow.api.auth.backend.basic_auth'
       - _PIP_ADDITIONAL_REQUIREMENTS={{AIRFLOW_additional_requirements}}
+      - AIRFLOW__SCHEDULER__DAG_DIR_LIST_INTERVAL={{AIRFLOW_dag_dir_list_interval}}
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -6131,6 +6132,7 @@ services:
     restart: {{container_restart_policy}}
 
   airflow-cli:
+    image: apache/airflow:{{__AIRFLOW_version}}
     container_name: airflow-cli
     hostname: airflow-cli
     labels:
@@ -6165,7 +6167,7 @@ services:
     <<: *logging
     {% endif -%}   {#  LOKI_collect_docker_logs #}
     restart: {{container_restart_policy}}
-    
+
 {% endif %}   {#  AIRFLOW_enable  #}
 
 {%if ZEPPELIN_enable | default(false) %}
