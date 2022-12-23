@@ -56,7 +56,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Update `chronograf` to `1.10`
  * Update `telegraf` to `1.24.3`
  * Update `burrow` to `v1.5.0`
- * Update `graphdb` to `10.1.1`
+ * Update `graphdb` to `10.1.2`
  * Update `nifi` to `1.19.0`
  * Update `jikkou` to `0.13.0`
  * Update `spark` to `3.2.3`
@@ -75,6 +75,25 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Update `memchached` to `1.6.17`
  * Update `mongodb` to `6.0`
  * Update `solr` to `9.1`
+ * Update `quine` to `1.4.2`
+ * Update `dgraph` to `v22.0.2`
+ * Update `stardog` to `8.2.0-java11-preview`
+ * Update `kudu` to `1.16`
+ * Update `druid` to `24.0.2`
+ * Update `prometheus` to `v2.41.0` and `gateway` to `v1.5.1` and `node-exporter` to `v1.5.0`
+ * Update `tile38` to `1.30.1`
+ * Update `yugabyte` to `2.8.11.0-b6`
+ * Update `hazelcast` to `5.2.1`
+ * Update `ignite` to `2.14.0`
+ * Update `axon-server` to `4.6.7
+ * Update `drill` to `1.20.2`
+ * Update `hasura` to `v2.16.1`
+ * Update `cedalo-management-center` to `2.5.8`
+ * Update `lakefs` to `0.88.0`
+ * Update `vault` to `1.12.2`
+ * Update `portainer` to `2.16.2-alpine`
+ * Update `watchtower` to `1.5.1`
+ * Updata `ahana` to `0.278`
   
 ### Bug Fixes
 
