@@ -13,4 +13,6 @@ platys gen
 
 ## How to use it?
 
-Navigate to <http://dataplatform:28139>
+Navigate to <http://dataplatform:28139>.
+
+Login with user `airflow` and password `abc123!`.

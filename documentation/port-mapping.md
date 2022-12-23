@@ -73,6 +73,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 5432 | 5432 | postgresql |
 5433 | 5432 | timescaledb |
 5434 | 5432 | marquez-db |
+5555 | 5555 | airflow-flower |
 5601 | 5601 | kibana |
 5602 | 5601 | datahub-kibana |
 5603 | 5601 | opensearch-dashboards |

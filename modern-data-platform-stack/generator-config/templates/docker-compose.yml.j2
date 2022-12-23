@@ -5897,7 +5897,7 @@ services:
   {% endif -%}
   #  ================================== Airflow ========================================== #
   airflow:
-    image: bitnami/airflow:{{__AIRFLOW_version}}
+    image: apache/airflow:{{__AIRFLOW_version}}
     container_name: airflow
     hostname: airflow
     labels:
@@ -5908,31 +5908,29 @@ services:
       com.platys.restapi.url: "http://${PUBLIC_IP}:28139/api/experimental/"
     ports:
       - "28139:8080"
+    command: webserver
     environment:
-      - AIRFLOW_DATABASE_NAME=bitnami_airflow
-      - AIRFLOW_DATABASE_USERNAME=bn_airflow
-      - AIRFLOW_DATABASE_PASSWORD=abc123!
-      - AIRFLOW_DATABASE_HOST=airflow-db
-      - AIRFLOW_DATABASE_PORT_NUMBER=5432
-      - REDIS_HOST=airflow-redis
-      - REDIS_PORT_NUMBER=6379
-      - AIRFLOW_EXECUTOR={{airflow_executor}}
-      - AIRFLOW_FERNET_KEY=46BKJoQYlPPOexq0OhDZnIlNepKFf87WFwLbfzqDDho=
-      - AIRFLOW_HOME=/opt/bitnami/airflow
-      - AIRFLOW_LOAD_EXAMPLES={{ 'yes' if (AIRFLOW_provision_examples ) else 'no' }}
-      - AIRFLOW_PASSWORD=abc123!
-      - AIRFLOW_USERNAME=airflow
-      - PYTHONPATH=/bitnami/python
+      - AIRFLOW__CORE__EXECUTOR={{airflow_executor}}
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:abc123!@airflow-db/airflowdb
+      # For backward compatibility, with Airflow <2.3
+      - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:abc123!@airflow-db/airflowdb
+      - AIRFLOW__CELERY__RESULT_BACKEND=db+postgresql://airflow:abc123!@airflow-db/airflowdb
+      - AIRFLOW__CELERY__BROKER_URL=redis://:@airflow-redis:6379/0
+      - AIRFLOW__CORE__FERNET_KEY= ''
+      - AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION='true'
+      - AIRFLOW__CORE__LOAD_EXAMPLES='{{AIRFLOW_provision_examples}}'
+      - AIRFLOW__API__AUTH_BACKENDS='airflow.api.auth.backend.basic_auth'
+      - _PIP_ADDITIONAL_REQUIREMENTS={{AIRFLOW_additional_requirements}}
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
-      - ./scripts/airflow/dags:/opt/bitnami/airflow/dags:Z
-      - ./plugins/airflow/:/opt/bitnami/airflow/plugins:Z
-    {%if AIRFLOW_volume_map_python | default(false) %}
-      - ./scripts/airflow/python:/bitnami/python:Z
-    {% endif -%}   {#  AIRFLOW_volume_map_python #}
+      - ./scripts/airflow/dags:/opt/airflow/dags:Z
+      - ./plugins/airflow/:/opt/airflow/plugins:Z
+    {% if AIRFLOW_volume_map_logs %}
+      - ./container-volume/airflow/logs/webserver:/opt/airflow/logs:Z
+    {% endif -%}   {#  AIRFLOW_volume_map_logs #}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -5943,37 +5941,34 @@ services:
     restart: {{container_restart_policy}}
 
   airflow-scheduler:
-    image: bitnami/airflow-scheduler:{{__AIRFLOW_version}}
+    image: apache/airflow:{{__AIRFLOW_version}}
     container_name: airflow-scheduler
     hostname: airflow-scheduler
     labels:
       com.platys.name: 'airflow'
+    command: scheduler
     environment:
-      - AIRFLOW_DATABASE_NAME=bitnami_airflow
-      - AIRFLOW_DATABASE_USERNAME=bn_airflow
-      - AIRFLOW_DATABASE_PASSWORD=abc123!
-      - AIRFLOW_DATABASE_HOST=airflow-db
-      - AIRFLOW_DATABASE_PORT_NUMBER=5432
-      - REDIS_HOST=airflow-redis
-      - REDIS_PORT_NUMBER=6379
-      - AIRFLOW_EXECUTOR={{airflow_executor}}
-      - AIRFLOW_WEBSERVER_HOST=airflow
-      - AIRFLOW_WEBSERVER_PORT_NUMBER=8080
-      - AIRFLOW_LOAD_EXAMPLES={{ 'yes' if (AIRFLOW_provision_examples ) else 'no' }}
-      - AIRFLOW_HOME=/opt/bitnami/airflow
-      - AIRFLOW_FERNET_KEY=46BKJoQYlPPOexq0OhDZnIlNepKFf87WFwLbfzqDDho=
-      - PYTHONPATH=/bitnami/python
+      - AIRFLOW__CORE__EXECUTOR={{airflow_executor}}
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:abc123!@airflow-db/airflowdb
+      # For backward compatibility, with Airflow <2.3
+      - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:abc123!@airflow-db/airflowdb
+      - AIRFLOW__CELERY__RESULT_BACKEND=db+postgresql://airflow:abc123!@airflow-db/airflowdb
+      - AIRFLOW__CELERY__BROKER_URL=redis://:@airflow-redis:6379/0
+      - AIRFLOW__CORE__FERNET_KEY= ''
+      - AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION='true'
+      - AIRFLOW__CORE__LOAD_EXAMPLES='{{AIRFLOW_provision_examples}}'
+      - AIRFLOW__API__AUTH_BACKENDS='airflow.api.auth.backend.basic_auth'
+      - _PIP_ADDITIONAL_REQUIREMENTS={{AIRFLOW_additional_requirements}}
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
-      - ./scripts/airflow/dags:/opt/bitnami/airflow/dags:Z
-      - ./plugins/airflow/:/opt/bitnami/airflow/plugins:Z
-    {%if AIRFLOW_volume_map_python | default(false) %}
-      - ./scripts/airflow/python-requirements:/bitnami/python-requirements:Z
-      - ./scripts/airflow/python:/bitnami/python:Z
-    {% endif -%}   {#  AIRFLOW_volume_map_python #}
+      - ./scripts/airflow/dags:/opt/airflow/dags:Z
+      - ./plugins/airflow/:/opt/airflow/plugins:Z
+    {% if AIRFLOW_volume_map_logs %}
+      - ./container-volume/airflow/logs/scheduler:/opt/airflow/logs:Z
+    {% endif -%}   {#  AIRFLOW_volume_map_logs #}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -5985,37 +5980,72 @@ services:
 
   {% if (AIRFLOW_executor | lower) == 'celery'  %}
   airflow-worker-1:
-    image: bitnami/airflow-worker:{{__AIRFLOW_version}}
+    image: apache/airflow:{{__AIRFLOW_version}}
     container_name: airflow-worker-1
     hostname: airflow-worker-1
     labels:
       com.platys.name: 'airflow'
+    command: celery worker
     environment:
-      - AIRFLOW_DATABASE_NAME=bitnami_airflow
-      - AIRFLOW_DATABASE_USERNAME=bn_airflow
-      - AIRFLOW_DATABASE_PASSWORD=abc123!
-      - AIRFLOW_DATABASE_HOST=airflow-db
-      - AIRFLOW_DATABASE_PORT_NUMBER=5432
-      - REDIS_HOST=airflow-redis
-      - REDIS_PORT_NUMBER=6379
-      - AIRFLOW_EXECUTOR={{airflow_executor}}
-      - AIRFLOW_WEBSERVER_HOST=airflow
-      - AIRFLOW_WEBSERVER_PORT_NUMBER=8080
-      - AIRFLOW_LOAD_EXAMPLES={{ 'yes' if (AIRFLOW_provision_examples ) else 'no' }}
-      - AIRFLOW_HOME=/opt/bitnami/airflow
-      - AIRFLOW_FERNET_KEY=46BKJoQYlPPOexq0OhDZnIlNepKFf87WFwLbfzqDDho=
-      - PYTHONPATH=/bitnami/python
+      - AIRFLOW__CORE__EXECUTOR={{airflow_executor}}
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:abc123!@airflow-db/airflowdb
+      # For backward compatibility, with Airflow <2.3
+      - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:abc123!@airflow-db/airflowdb
+      - AIRFLOW__CELERY__RESULT_BACKEND=db+postgresql://airflow:abc123!@airflow-db/airflowdb
+      - AIRFLOW__CELERY__BROKER_URL=redis://:@airflow-redis:6379/0
+      - AIRFLOW__CORE__FERNET_KEY= ''
+      - AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION='true'
+      - AIRFLOW__CORE__LOAD_EXAMPLES='{{AIRFLOW_provision_examples}}'
+      - AIRFLOW__API__AUTH_BACKENDS='airflow.api.auth.backend.basic_auth'
+      - _PIP_ADDITIONAL_REQUIREMENTS={{AIRFLOW_additional_requirements}}
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
-      - ./scripts/airflow/dags:/opt/bitnami/airflow/dags:Z
-      - ./plugins/airflow/:/opt/bitnami/airflow/plugins:Z
-    {%if AIRFLOW_volume_map_python | default(false) %}
-      - ./scripts/airflow/python-requirements:/bitnami/python-requirements:Z
-      - ./scripts/airflow/python:/bitnami/python:Z
-    {% endif -%}   {#  AIRFLOW_volume_map_python #}
+      - ./scripts/airflow/dags:/opt/airflow/dags:Z
+      - ./plugins/airflow/:/opt/airflow/plugins:Z
+    {% if AIRFLOW_volume_map_logs %}
+      - ./container-volume/airflow/logs/scheduler:/opt/airflow/logs:Z
+    {% endif -%}   {#  AIRFLOW_volume_map_logs #}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    restart: {{container_restart_policy}}
+
+  airflow-triggerer:
+    image: apache/airflow:{{__AIRFLOW_version}}
+    container_name: airflow-triggerer
+    hostname: airflow-triggerer
+    labels:
+      com.platys.name: 'airflow'
+    command: triggerer
+    environment:
+      - AIRFLOW__CORE__EXECUTOR={{airflow_executor}}
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:abc123!@airflow-db/airflowdb
+      # For backward compatibility, with Airflow <2.3
+      - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:abc123!@airflow-db/airflowdb
+      - AIRFLOW__CELERY__RESULT_BACKEND=db+postgresql://airflow:abc123!@airflow-db/airflowdb
+      - AIRFLOW__CELERY__BROKER_URL=redis://:@airflow-redis:6379/0
+      - AIRFLOW__CORE__FERNET_KEY= ''
+      - AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION='true'
+      - AIRFLOW__CORE__LOAD_EXAMPLES='{{AIRFLOW_provision_examples}}'
+      - AIRFLOW__API__AUTH_BACKENDS='airflow.api.auth.backend.basic_auth'
+      - _PIP_ADDITIONAL_REQUIREMENTS={{AIRFLOW_additional_requirements}}
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./scripts/airflow/dags:/opt/airflow/dags:Z
+      - ./plugins/airflow/:/opt/airflow/plugins:Z
+    {% if AIRFLOW_volume_map_logs %}
+      - ./container-volume/airflow/logs/triggerer:/opt/airflow/logs:Z
+    {% endif -%}   {#  AIRFLOW_volume_map_logs #}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -6026,7 +6056,7 @@ services:
     restart: {{container_restart_policy}}
 
   airflow-redis:
-    image: bitnami/redis:6.0
+    image: redis:latest
     container_name: airflow-redis
     hostname: airflow-redis
     labels:
@@ -6046,18 +6076,19 @@ services:
     <<: *logging
     {% endif -%}   {#  LOKI_collect_docker_logs #}
     restart: {{container_restart_policy}}
-  {% endif %}  {#  AIRFLOW_executor  #}
 
-  airflow-db:
-    image: 'bitnami/postgresql:10'
-    container_name: airflow-db
-    hostname: airflow-db
+  airflow-flower:
+    image: redis:latest
+    container_name: airflow-redis
+    hostname: airflow-redis
     labels:
       com.platys.name: 'airflow'
+      com.platys.webui.title: "Airflow Flower UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:5555"
+    ports:
+      - 5555:5555
+    command: celery flower
     environment:
-      - POSTGRESQL_DATABASE=bitnami_airflow
-      - POSTGRESQL_USERNAME=bn_airflow
-      - POSTGRESQL_PASSWORD=abc123!
       - ALLOW_EMPTY_PASSWORD=yes
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
@@ -6073,6 +6104,68 @@ services:
     {% endif -%}   {#  LOKI_collect_docker_logs #}
     restart: {{container_restart_policy}}
 
+  {% endif %}  {#  AIRFLOW_executor  #}
+
+  airflow-db:
+    image: 'postgres:13'
+    container_name: airflow-db
+    hostname: airflow-db
+    labels:
+      com.platys.name: 'airflow'
+    environment:
+      - POSTGRES_DB=airflowdb
+      - POSTGRES_USER=bn_airflow
+      - POSTGRES_PASSWORD=abc123!
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    restart: {{container_restart_policy}}
+
+  airflow-cli:
+    container_name: airflow-cli
+    hostname: airflow-cli
+    labels:
+      com.platys.name: 'airflow'
+    command:
+      - bash
+      - -c
+      - airflow
+    environment:
+      - AIRFLOW__CORE__EXECUTOR={{airflow_executor}}
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:abc123!@airflow-db/airflowdb
+      # For backward compatibility, with Airflow <2.3
+      - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:abc123!@airflow-db/airflowdb
+      - AIRFLOW__CELERY__RESULT_BACKEND=db+postgresql://airflow:abc123!@airflow-db/airflowdb
+      - AIRFLOW__CELERY__BROKER_URL=redis://:@airflow-redis:6379/0
+      - AIRFLOW__CORE__FERNET_KEY= ''
+      - AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION='true'
+      - AIRFLOW__CORE__LOAD_EXAMPLES='{{AIRFLOW_provision_examples}}'
+      - AIRFLOW__API__AUTH_BACKENDS='airflow.api.auth.backend.basic_auth'
+      - _PIP_ADDITIONAL_REQUIREMENTS={{AIRFLOW_additional_requirements}}
+      - CONNECTION_CHECK_MAX_COUNT="0"
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    restart: {{container_restart_policy}}
+    
 {% endif %}   {#  AIRFLOW_enable  #}
 
 {%if ZEPPELIN_enable | default(false) %}
