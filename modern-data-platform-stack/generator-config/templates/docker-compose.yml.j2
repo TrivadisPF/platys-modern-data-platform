@@ -5912,15 +5912,7 @@ services:
       com.platys.restapi.url: "http://${PUBLIC_IP}:28139/api/v1/dags"
     ports:
       - "28139:8080"
-    command:
-      - bash
-      - -c
-      - |
-        /usr/src/app/wait-for-it.sh -t 180 airflow-db:5432
-        airflow db init
-        airflow db upgrade
-        airflow users create -r Admin -u {{AIRFLOW_admin_username}} -p {{AIRFLOW_admin_password}} -e airflow-admin@gmail.com -f Admin -l User
-        airflow webserver
+    command: webserver
     environment:
       - AIRFLOW__CORE__EXECUTOR={{airflow_executor}}
       - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:abc123!@airflow-db/airflowdb
@@ -6282,7 +6274,7 @@ services:
     {% endif -%}   {#  use_timezone #}
     {%if LOKI_collect_docker_logs | default(false) %}
     <<: *logging
-    {% endif -%}   {#  LOKI_collect_docker_logs #}      
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
     user: "0:0"
 
 {% endif %}   {#  AIRFLOW_enable  #}
