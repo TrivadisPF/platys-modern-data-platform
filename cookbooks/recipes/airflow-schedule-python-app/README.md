@@ -4,7 +4,7 @@ version:				1.16.0
 validated-at:			20.12.2022
 ---
 
-# Schedule and Run Simple Python Application
+# Schedule and Run Simple Python Application with Airflow
 
 This recipe will show how to use ...
 

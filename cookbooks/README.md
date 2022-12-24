@@ -2,7 +2,7 @@
 Inhere we are documenting cookbooks on how to use the platform:
 
  * **Airflow**
-   * [Schedule and Run Simple Python Application](./recipes/airflow-schedule-python-app/README.md) - `1.12.0`
+   * [Schedule and Run Simple Python Application with Airflow](./recipes/airflow-schedule-python-app/README.md) - `1.16.0`
 
  * **Trino (Formerly Presto SQL)**
    * [Trino, Spark and Delta Lake (Spark 2.4.7 & Delta Lake 0.6.1)](./recipes/delta-lake-and-trino-spark2.4/README.md) - `1.11.0`
