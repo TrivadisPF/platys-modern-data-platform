@@ -414,9 +414,9 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28226 | 9000 | questdb |
 28227 | 8080 | debezium-ui |
 28228 | 9998 | tikka-server |
-28229 | 5000 | mlflow-server |
-28230 | 8080 | optuna-dashboard |
-28231 | 80 | excalidraw |
+28229 | 5000 | mlflow-tracking-server |
+28230 | 8080 | mlflow-artifacts-server |
+28231 | 8080 | optuna-dashboard |
 28232 | 8080 | reaper (app UI) |
 28233 | 8081 | reaper (admin UI) |
 28234 | 8080 | kie-server (drools) |
@@ -472,6 +472,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28287 | 8181 | iceberg-rest |
 28288 | 3000 | memgraph-platform |
 28289 | 8080 | redpanda-console |
+28290 | 80 | excalidraw |
+
 
 ## Ports > 28500
 
