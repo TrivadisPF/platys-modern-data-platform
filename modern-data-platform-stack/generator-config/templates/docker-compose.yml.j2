@@ -6426,7 +6426,7 @@ services:
       AWS_DEFAULT_REGION: {{s3DefaultRegion if s3DefaultRegion is defined and s3DefaultRegion else omit}}
       {%if MLFLOW_SERVER_enable | default(false) %}
       MLFLOW_S3_ENDPOINT_URL: {{s3Endpoint | default(omit) }}
-      MLFLOW_TRACKING_URI: http://mlflow-server:5000
+      MLFLOW_TRACKING_URI: http://mlflow-tracking-server:5000
       {% endif %}
     {% endif -%}     {#  MINIO_enable  #}
     {%if use_timezone | default(false) %}
@@ -6669,8 +6669,8 @@ services:
   #  ================================== MLflow Server ========================================== #
   mlflow-tracking-server:
     image: ghcr.io/mlflow/mlflow:{{__MLFLOW_SERVER_version}}
-    container_name: mlflow-server
-    hostname: mlflow-server
+    container_name: mlflow-tracking-server
+    hostname: mlflow-tracking-server
     labels:
       com.platys.name: 'mlflow'
       com.platys.webui.title: "MLflow Tracking Server UI"
@@ -6709,8 +6709,8 @@ services:
 
   mlflow-artifacts-server:
     image: ghcr.io/mlflow/mlflow:{{__MLFLOW_SERVER_version}}
-    container_name: mlflow-server
-    hostname: mlflow-server
+    container_name: mlflow-artifacts-server
+    hostname: mlflow-artifacts-server
     labels:
       com.platys.name: 'mlflow'
       com.platys.webui.title: "MLflow Artifacts Server UI"
@@ -6723,7 +6723,7 @@ services:
       MLFLOW_PORT: 5500
       MLFLOW_ARTIFACTS_DESTINATION: '{{MLFOW_SERVER_artifact_root | default ('/mlruns')}}'
       MLFLOW_GUNICORN_OPTS: "--log-level debug"
-      MLFLOW_ARTIFACTS_ONLY: true
+      MLFLOW_ARTIFACTS_ONLY: "true"
     {%if MINIO_enable or external['S3_enable'] | default(false) %}
       MLFLOW_S3_ENDPOINT_URL: {{s3Endpoint if s3Endpoint is defined and s3Endpoint else omit}}
       MLFLOW_S3_UPLOAD_EXTRA_ARGS: "{}"
