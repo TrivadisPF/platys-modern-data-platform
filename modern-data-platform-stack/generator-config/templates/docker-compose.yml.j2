@@ -6746,6 +6746,8 @@ services:
     <<: *logging
     {% endif -%}   {#  LOKI_collect_docker_logs #}
     restart: {{container_restart_policy}}
+
+
 {% endif %}   {#  MLFLOW_SERVER_enable  #}
 
 {% if (OPTUNA_enable) | default(false) %}
@@ -13230,8 +13232,12 @@ services:
     hostname: python-1
     labels:
       com.platys.name: "python"
-    {%if use_timezone | default(false) %}
     environment:
+      DUMMY: xb
+    {%if MLFLOW_SERVER_enable | default(false) %}
+      MLFLOW_TRACKING_URI: http://mlflow-tracking-server:5000
+    {% endif %}
+    {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
