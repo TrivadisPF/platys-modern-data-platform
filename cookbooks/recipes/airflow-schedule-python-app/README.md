@@ -1,12 +1,12 @@
 ---
 technologies:       airflow,python
 version:				1.16.0
-validated-at:			20.12.2022
+validated-at:			24.12.2022
 ---
 
 # Schedule and Run Simple Python Application with Airflow
 
-This recipe will show how to use ...
+This recipe will show how to use the [Apache Airflow](https://airflow.apache.org/) job orchestration engine with the [Bash Operator](https://airflow.apache.org/docs/apache-airflow/stable/_api/airflow/operators/bash/index.html#airflow.operators.bash.BashOperator) and [Python Operator](https://airflow.apache.org/docs/apache-airflow/stable/howto/operator/python.html).
 
 ## Initialise data platform
 
