@@ -1,4 +1,4 @@
-# Iceberg Rest
+# Apache Iceberg REST Catalog API
 
 The Iceberg REST Catalog
 
