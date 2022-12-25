@@ -88,3 +88,6 @@ Inhere we are documenting cookbooks on how to use the platform:
  * **Jupyter**
    * [Using Jupyter notebook with Spark and Avro](./recipes/jupyter-spark/README.md) - `1.16.0` 
    * [Using JupyterHub](./recipes/using-jupyter-hub/README.md) - `1.16.0` 
+
+ * **MLflow**
+   * [Using MLflow from Jupyter](./recipes/using-mflow-from-jupyter/README.md) - `1.16.0` 
