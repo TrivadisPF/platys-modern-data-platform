@@ -6,7 +6,7 @@ validated-at:			25.12.2022
 
 # Using MLflow from Jupyter
 
-This recipe will show how to use ...
+This recipe will show how to use MLflow from Jupyter. We will be using the [Elastic Net example](https://github.com/mlflow/mlflow/tree/master/examples/sklearn_elasticnet_wine) from the MLFlow [Tutorials and Examples](https://mlflow.org/docs/latest/tutorials-and-examples/index.html) page.
 
 ## Initialise data platform
 
