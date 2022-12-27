@@ -3129,7 +3129,7 @@ services:
     env_file:
       - ./conf/hadoop.env
     environment:
-  {%if MINIO_enable or external['S3_enable'] | default(false) %}
+    {%if MINIO_enable or external['S3_enable'] | default(false) %}
       CORE_CONF_fs_s3a_endpoint: '{{s3Endpoint | default(omit) }}'
       CORE_CONF_fs_s3a_path_style_access: '{{s3PathStyleAccess}}'
       HIVE_SITE_CONF_fs_s3a_endpoint: '{{s3Endpoint | default(omit) }}'
@@ -3140,7 +3140,7 @@ services:
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_endpoint: '{{s3Endpoint | default(omit) }}'
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_path_style_access: '{{s3PathStyleAccess}}'
-  {% endif %}
+    {% endif %}
       SPARK_PUBLIC_DNS: ${PUBLIC_IP}
       SPARK_MASTER_OPTS: '{{SPARK_master_opts if SPARK_master_opts is defined and SPARK_master_opts else omit }}'
       INIT_DAEMON_STEP: setup_spark
@@ -3150,21 +3150,21 @@ services:
       SPARK_DEFAULTS_CONF_spark_jars_excludes: {{SPARK_jars_excludes}}
       SPARK_DEFAULTS_CONF_spark_jars: {{SPARK_jars}}
       SPARK_DEFAULTS_CONF_spark_jars_ivySettings: {{SPARK_jars_ivySettings}}
-  {%if (SPARK_catalog | lower) == 'in-memory' | default(false) %}
+    {%if (SPARK_catalog | lower) == 'in-memory' | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalogImplementation: in-memory
-  {% else %}
+    {% else %}
       SPARK_DEFAULTS_CONF_spark_sql_catalogImplementation: hive
-  {% endif -%}   {#  SPARK_catalog #}
-  {%if HADOOP_enable | default(false) %}
+    {% endif -%}   {#  SPARK_catalog #}
+    {%if HADOOP_enable | default(false) %}
       CORE_CONF_fs_defaultFS: hdfs://namenode:9000
       SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined else 'hdfs://namenode:9000/user/hive/warehouse'}}
-  {%elif MINIO_enable or external['S3_enable'] | default(false) %}
+    {%elif MINIO_enable or external['S3_enable'] | default(false) %}
       CORE_CONF_fs_defaultFS: s3a://{{s3AdminBucketName}}
       SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined else 's3a://{{s3AdminBucketName}}/hive/warehouse'}}
-  {% else %}
+    {% else %}
       CORE_CONF_fs_defaultFS: file:///tmp
       SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined else 'file:///hive/warehouse'}}
-  {% endif -%}   {#  HADOOP_enable #}
+    {% endif -%}   {#  HADOOP_enable #}
       SPARK_DEFAULTS_CONF_spark_yarn_dist_files: '/spark/conf/hive-site.xml'
       SPARK_DEFAULTS_CONF_spark_driver_extraJavaOptions: {{SPARK_driver_extraJavaOptions}}
       SPARK_DEFAULTS_CONF_spark_executor_extraJavaOptions: {{SPARK_executor_extraJavaOptions}}
@@ -3172,6 +3172,10 @@ services:
       SPARK_DEFAULTS_CONF_spark_executor_memory: {{SPARK_executor_memory if SPARK_executor_memory is defined and SPARK_executor_memory else omit }}
       SPARK_DEFAULTS_CONF_spark_sql_extensions: {{SPARK_sql_extensions if SPARK_sql_extensions is defined and SPARK_sql_extensions else omit }}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: {{SPARK_sql_catalog_spark_catalog if SPARK_sql_catalog_spark_catalog is defined and SPARK_sql_catalog_spark_catalog else omit }}
+    {%if DATAHUB_enable | default(false) %}
+      SPARK_DEFAULTS_CONF_spark_extraListeners: 'datahub.spark.DatahubSparkListener'
+      SPARK_DEFAULTS_CONF_spark_datahub_rest_server: 'http://datahub-gms:8080'
+    {% endif -%}   {#  DATAHUB_enable #}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -3250,6 +3254,10 @@ services:
       SPARK_DEFAULTS_CONF_spark_executor_memory: {{SPARK_executor_memory if SPARK_executor_memory is defined and SPARK_executor_memory else omit }}
       SPARK_DEFAULTS_CONF_spark_sql_extensions: {{SPARK_sql_extensions if SPARK_sql_extensions is defined and SPARK_sql_extensions else omit }}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: {{SPARK_sql_catalog_spark_catalog if SPARK_sql_catalog_spark_catalog is defined and SPARK_sql_catalog_spark_catalog else omit }}
+    {%if DATAHUB_enable | default(false) %}
+      SPARK_DEFAULTS_CONF_spark_extraListeners: 'datahub.spark.DatahubSparkListener'
+      SPARK_DEFAULTS_CONF_spark_datahub_rest_server: 'http://datahub-gms:8080'
+    {% endif -%}   {#  DATAHUB_enable #}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -3457,6 +3465,10 @@ services:
       SPARK_DEFAULTS_CONF_spark_executor_memory: {{SPARK_executor_memory if SPARK_executor_memory is defined and SPARK_executor_memory else omit }}
       SPARK_DEFAULTS_CONF_spark_sql_extensions: {{SPARK_sql_extensions if SPARK_sql_extensions is defined and SPARK_sql_extensions else omit }}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: {{SPARK_sql_catalog_spark_catalog if SPARK_sql_catalog_spark_catalog is defined and SPARK_sql_catalog_spark_catalog else omit }}
+    {%if DATAHUB_enable | default(false) %}
+      SPARK_DEFAULTS_CONF_spark_extraListeners: 'datahub.spark.DatahubSparkListener'
+      SPARK_DEFAULTS_CONF_spark_datahub_rest_server: 'http://datahub-gms:8080'
+    {% endif -%}   {#  DATAHUB_enable #}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -6325,6 +6337,10 @@ services:
       SPARK_DEFAULTS_CONF_spark_jars_excludes: {{SPARK_jars_excludes}}
       SPARK_DEFAULTS_CONF_spark_jars: {{SPARK_jars}}
       SPARK_DEFAULTS_CONF_spark_jars_ivySettings: {{SPARK_jars_ivySettings}}
+    {%if DATAHUB_enable | default(false) %}
+      SPARK_DEFAULTS_CONF_spark_extraListeners: 'datahub.spark.DatahubSparkListener'
+      SPARK_DEFAULTS_CONF_spark_datahub_rest_server: 'http://datahub-gms:8080'
+    {% endif -%}   {#  DATAHUB_enable #}
   {%if (SPARK_catalog | lower) == 'in-memory' | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalogImplementation: in-memory
   {% else %}
