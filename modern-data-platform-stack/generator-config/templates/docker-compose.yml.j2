@@ -2529,7 +2529,7 @@ services:
 {% if ((KAFKA_enable or external['KAFKA_enable']) and KPOW_enable) | default(false) %}
   #  ================================== kpow ========================================== #
   kpow:
-    image: operatr/kpow:{{__KPOW_version}}
+    image: factorhouse/kpow-{{KPOW_edition | lower}}:{{__KPOW_version}}
     container_name: kpow
     hostname: kpow
     labels:
@@ -2543,24 +2543,36 @@ services:
       - ./licenses/kpow/kpow-license.env
     {% endif -%}   {#  KPOW_use_external_license_info #}
     environment:
-    {% if not KPOW_use_external_license_info %}
+      - PORT=3000
+      - ENVIRONMENT_NAME=platys-stack
+      - BOOTSTRAP={{ns.bootstrapServers}}
+    {% if (KPOW_edition | lower) == 'se' OR (KPOW_edition | lower) == 'ee' %}
+      {% if not KPOW_use_external_license_info %}
       - LICENSE_ID='{{KPOW_license_id if KPOW_license_id is defined and KPOW_license_id | length else omit}}'
       - LICENSE_CODE='{{KPOW_license_code if KPOW_license_code is defined and KPOW_license_code | length else omit}}'
       - LICENSEE='{{KPOW_licensee if KPOW_licensee is defined and KPOW_licensee | length else omit}}'
       - LICENSE_EXPIRY='{{KPOW_license_expiry if KPOW_license_expiry is defined and KPOW_license_expiry | length else omit}}'
       - LICENSE_SIGNATURE='{{KPOW_license_signature if KPOW_license_signature is defined and KPOW_license_signature | length else omit}}'
-    {% endif -%}   {#  KPOW_use_external_license_info #}
-      - PORT=3000
-      - ENVIRONMENT_NAME=platys-stack
-      - BOOTSTRAP={{ns.bootstrapServers}}
+      {% endif -%}   {#  KPOW_use_external_license_info #}
       - ALLOW_TOPIC_CREATE=true
       - ALLOW_TOPIC_DELETE=true
+      - ALLOW_TOPIC_TRUNCATE=true
       - ALLOW_TOPIC_EDIT=true
       - ALLOW_TOPIC_INSPECT=true
       - ALLOW_TOPIC_PRODUCE=true
       - ALLOW_GROUP_EDIT=true
+      - ALLOW_BROKER_EDIT=true
+      - ALLOW_ACL_EDIT=true
+      - ALLOW_SCHEMA_CREATE=true
+      - ALLOW_SCHEMA_EDIT=true
+      - ALLOW_CONNECT_CREATE=true
+      - ALLOW_CONNECT_EDIT=true
+      - ALLOW_CONNECT_INSPECT=true
+      - ALLOW_BULK_ACTION=true
+    {% endif -%}   {#  KPOW_edition = se or ee #}
     {% if ( KAFKA_CONNECT_enable or KAFKA_KSQLDB_use_embedded_connect ) | default(false) %}
       - CONNECT_REST_URL={{ns1.connectServersInternalUrl.split(',')[0]}}
+#      - CONNECT_AWS_REGION=
       - ALLOW_CONNECT_EDIT=true
     {% endif -%}   {#  KAFKA_CONNECT_enable #}
     {% if (SCHEMA_REGISTRY_enable or external['SCHEMA_REGISTRY_enable']) | default(false) %}
@@ -2569,7 +2581,6 @@ services:
       - SCHEMA_REGISTRY_USER={{schemaRegistryUsername}}
       - SCHEMA_REGISTRY_PASSWORD={{schemaRegistryPassword}}
       {% endif %}
-      - ALLOW_SCHEMA_EDIT=true
     {% endif -%}   {#  SCHEMA_REGISTRY_enable #}
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
