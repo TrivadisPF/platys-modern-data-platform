@@ -238,6 +238,8 @@ networks:
 
 {% set __SOLR_version = SOLR_version | default('latest') -%}
 
+{% set __JANUSGRAPH_version = JANUSGRAPH_version | default('latest') -%}
+
 {% set __NEO4J_version = NEO4J_version | default('latest') -%}
 
 {% set __QUINE_version = QUINE_version | default('latest') -%}
@@ -573,6 +575,7 @@ networks:
   {% set DRUID_enable = false -%}
   {% set PINOT_enable = false -%}
   {% set IGNITE_enable = false -%}
+  {% set JANUSGRAPH_enable = false -%}
   {% set NEO4J_enable = false -%}
   {% set QUINE_enable = false -%}
   {% set MEMGRAPH_enable = false -%}
@@ -8358,6 +8361,37 @@ services:
     {% endif -%}   {#  LOKI_collect_docker_logs #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  OPENSEARCH_DASHBOARDS_enable #}
+
+{% if JANUSGRAPH_enable | default(false) %}
+  #  ================================== JanusGraph ========================================== #
+  janusgraph-1:
+    image: janusgraph/janusgraph:{{__JANUSGRAPH_version}}
+    hostname: janusgraph-1
+    container_name: janusgraph-1
+    labels:
+      com.platys.name: "janusgraph"
+    ports:
+      - "8182:8182"
+    environment:
+      - JANUS_PROPS_TEMPLATE={{JANUSGRAPH_props_template}}
+      - JANUS_INITDB_DIR=/docker-entrypoint-initdb.d
+      - janusgraph.storage.hostname=cassandra-1
+      - janusgraph.index.search.hostname=elasticsearch-1
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./init/janusgraph:/docker-entrypoint-initdb.d/
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  JANUSGRAPH_enable #}
 
 {# #}
 {% if NEO4J_enable | default(false) %}

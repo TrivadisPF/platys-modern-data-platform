@@ -1,0 +1,1 @@
+Place a gremlin scripts here to initialise the graph.

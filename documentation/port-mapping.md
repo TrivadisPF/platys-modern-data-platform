@@ -140,6 +140,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 8100 | 8100 | kong-map |
 8124 | 8124 | axon-server |
 8161 | 8161 | activemq |
+8182 | 8182 | janusgraph |
 8200 | 8200 | vault |
 8443 | 8443 | kong (proxy ssl) |
 8444 | 8444 | kong (admin api ssl) |
