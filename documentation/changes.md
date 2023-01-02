@@ -44,8 +44,8 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
 ### Version upgrades
 
  * Update `DataHub` to `v0.9.5`
- * Update `Trino` to `403`
- * Update `Starburst Enterprise` to `402-e.2`
+ * Update `Trino` to `405`
+ * Update `Starburst Enterprise` to `405-e`
  * Update `Jikkou` to `0.12.2`
  * Update `Hasura` to `v2.11.1`
  * Update `Confluent Platform` to `7.2.2`
