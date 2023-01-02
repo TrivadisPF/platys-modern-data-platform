@@ -46,24 +46,24 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Update `DataHub` to `v0.9.5`
  * Update `Trino` to `405`
  * Update `Starburst Enterprise` to `405-e`
- * Update `Jikkou` to `0.12.2`
- * Update `Hasura` to `v2.11.1`
- * Update `Confluent Platform` to `7.2.2`
+ * Update `Jikkou` to `0.14.0`
+ * Update `Hasura` to `v2.16.1`
+ * Update `Confluent Platform` to `7.3.1`
  * Update `ksqldb` to `0.28.2`
  * Update `datastax` to `6.8.28`
  * Update `datastax-opscenter` to `6.8.19`
- * Update `minio` to `RELEASE.2022-10-29T06-21-33Z`
+ * Update `minio` to `RELEASE.2022-12-12T19-27-27Z`
  * Update `confluent platform` to `7.3.0`
- * Update `influxdb2` to `2.5.1`
+ * Update `influxdb2` to `2.6.1`
  * Update `kapacitor` to `1.6`
  * Update `chronograf` to `1.10`
  * Update `telegraf` to `1.24.3`
  * Update `burrow` to `v1.5.0`
  * Update `graphdb` to `10.1.2`
- * Update `nifi` to `1.19.0`
+ * Update `nifi` to `1.19.1`
  * Update `jikkou` to `0.13.0`
- * Update `spark` to `3.2.3`
- * Update `materialize` to `v0.37.1`
+ * Update `spark` to `3.1.3`, `3.2.3` and `3.3.1`
+ * Update `materialize` to `v0.38.0`
  * Update `neo4j` to `5.3.0`
  * Update `eventstoredb` to `22.10.0-buster-slim`
  * Update `flink` to `1.16.0-scala_2.12`
@@ -96,7 +96,11 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Update `vault` to `1.12.2`
  * Update `portainer` to `2.16.2-alpine`
  * Update `watchtower` to `1.5.1`
- * Updata `ahana` to `0.278`
+ * Update `ahana` to `0.278`
+ * Update `apicurio-schema-registry` to `2.4.1.Final`
+ * Update `debezium-server` to `2.0.1.Final`
+ * Update `Amundsen Frontend` to `4.2.0` and `Amundsen Search` to `4.0.2` and `Amundsen Metadata` to `3.11.0`
+ * Update `nodered` to `2.2.3`
   
 ### Bug Fixes
 
