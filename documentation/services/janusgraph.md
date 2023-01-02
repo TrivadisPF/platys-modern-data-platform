@@ -11,14 +11,16 @@ platys gen
 
 ## How to use it?
 
-How to start a gremlin console:
+### Using the Gremlin Console
+
+To start a gremlin console
 
 ```bash
 docker-compose -f docker-compose.yml run --rm \
     -e GREMLIN_REMOTE_HOSTS=janusgraph-1 janusgraph-1 ./bin/gremlin.sh
 ```
 
-## Initialize a Graph
+### Initialise JanusGraph
 
 When the container is started it will execute files with the extension `.groovy` that are found in `./init/janusgraph/` with the Gremlin Console. These scripts are only executed after the JanusGraph Server instance was started. So, they can connect to it and execute Gremlin traversals.
 
