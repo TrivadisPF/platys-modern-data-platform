@@ -12,3 +12,9 @@ platys gen
 ```
 
 ## How to use it?
+
+To connect with the Cassandra CLI
+
+```bash
+docker exec -ti cassandra-1 cqlsh -u cassandra -p cassandra
+```
