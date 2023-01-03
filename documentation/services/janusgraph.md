@@ -20,10 +20,12 @@ docker-compose -f docker-compose.yml run --rm \
     -e GREMLIN_REMOTE_HOSTS=janusgraph-1 janusgraph-1 ./bin/gremlin.sh    
 ```
 
+```groovy
 :remote connect tinkerpop.server conf/remote.yaml
 g = traversal().withRemote('conf/remote-graph.properties')
 g.addV('demigod').property('name', 'hercules').iterate()    
-
+g.V()
+```
 
 ### Initialise JanusGraph
 
