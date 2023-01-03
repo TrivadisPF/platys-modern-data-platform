@@ -34,6 +34,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 2184 | 2184 | zookeeper-4 |
 2185 | 2185 | zookeeper-5 |
 2186 | 2186 | zookeeper-6 |
+2424 | 2424 | arcadedb |
+2480 | 2480 | arcadedb |
 3000 | 3000 | grafana |
 3001 | 3000 | wetty (dc1) |
 3002 | 3000 | wetty (dc2 |

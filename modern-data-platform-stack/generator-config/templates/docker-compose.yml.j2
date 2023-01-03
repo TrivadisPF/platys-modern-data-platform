@@ -256,6 +256,8 @@ networks:
 {% set __MEMGRAPH_MAGE_version = MEMGRAPH_MAGE_version | default('latest') -%}
 {% set __MEMGRAPH_PLATFORM_version = MEMGRAPH_PLATFORM_version | default('latest') -%}
 
+{% set __ARCADEDB_version = ARCADEDB_version | default('latest') -%}
+
 {% set __DGRAPH_version = DGRAPH_version | default('latest') -%}
 
 {% set __STARDOG_version = STARDOG_version | default('latest') -%}
@@ -589,6 +591,7 @@ networks:
   {% set NEO4J_enable = false -%}
   {% set QUINE_enable = false -%}
   {% set MEMGRAPH_enable = false -%}
+  {% set ARCADEDB_enable = false -%}
   {% set DGRAPH_enable = false -%}
   {% set STARDOG_enable = false -%}
   {% set STARDOG_STUDIO_enable = false -%}
@@ -8643,6 +8646,37 @@ services:
     {% endif -%}   {#  LOKI_collect_docker_logs #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  MEMGRPAH_enable #}
+
+{% if ARCADEDB_enable | default(false) %}
+  #  ================================== ArcadeDB ========================================== #
+  arcadedb:
+    image: arcadedata/arcadedb:{{__ARCADEDB_version}}
+    hostname: arcadedb
+    container_name: arcadedb
+    labels:
+      com.platys.name: "arcadedb"
+      com.platys.webui.title: "ArcadeDB Studio UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:2480s"
+    ports:
+      - "2480:2480"
+      - "2424:2424"
+    environment:
+      - JAVA_OPTS="-Darcadedb.server.rootPassword=playwithdata -Darcadedb.server.defaultDatabases=Imported[root]{import:https://github.com/ArcadeData/arcadedb-datasets/raw/main/orientdb/OpenBeer.gz}"
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./init/janusgraph:/docker-entrypoint-initdb.d/
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  ARCADEDB_enable #}
 
 {% if DGRAPH_enable | default(false) %}
   #  ================================== Dgraph ========================================== #
