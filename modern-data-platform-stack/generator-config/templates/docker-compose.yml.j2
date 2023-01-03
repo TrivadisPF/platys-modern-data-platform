@@ -8381,6 +8381,7 @@ services:
       - JANUS_PROPS_TEMPLATE={{JANUSGRAPH_props_template}}
       - JANUS_INITDB_DIR=/docker-entrypoint-initdb.d
       - janusgraph.storage.hostname=cassandra-1
+      - janusgraph.storage.cql.local-datacenter=se1
       - janusgraph.storage.username=cassandra
       - janusgraph.storage.password=cassandra
       - janusgraph.index.search.hostname=elasticsearch-1
@@ -8398,13 +8399,14 @@ services:
     <<: *logging
     {% endif -%}   {#  LOKI_collect_docker_logs #}
     restart: {{container_restart_policy}}
+{% endif %}   {#  JANUSGRAPH_enable #}
 
   gremlin-console:
     image: janusgraph/janusgraph:{{__JANUSGRAPH_version}}
     container_name: gremlin-console
     hostname: gremlin-console
     labels:
-      com.platys.name: "janusgraph"
+      com.platys.name: "gremlin-console"
     environment:
       GREMLIN_REMOTE_HOSTS: janusgraph
     {% if use_timezone | default(false) %}
