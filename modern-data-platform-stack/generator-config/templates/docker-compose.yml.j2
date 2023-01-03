@@ -128,7 +128,14 @@ networks:
 {% set __DATASTAX_version = DATASTAX_version | default('latest') -%}
 {% set __DATASTAX_OPSCENTER_version = DATASTAX_OPSCENTER_version | default('latest') -%}
 
-{% set __ELASTICSEARCH_version = ELASTICSEARCH_version | default('latest') -%}
+{% if (ELASTICSEARCH_major_version | lower) == '7'  %}
+  {% set __ELASTICSEARCH_version = ELASTICSEARCH_7_version  -%}
+  {% set __KIBANA_version = KIBANA_7_version | default('latest') -%}
+{% elif (ELASTICSEARCH_major_version | lower) == '8'  %}
+  {% set __ELASTICSEARCH_version = ELASTICSEARCH_8_version  -%}
+  {% set __KIBANA_version = KIBANA_8_version | default('latest') -%}
+{% endif -%}
+
 {% set __DEJAVU_version = DEJAVU_version | default('latest') -%}
 {% set __CEREBRO_version = CEREBRO_version | default('latest') -%}
 {% set __ELASTICSEARCHHQ_version = ELASTICSEARCHHQ_version | default('latest') -%}
@@ -214,8 +221,6 @@ networks:
 {% set __TEMPO_version = TEMPO_version | default('latest') -%}
 
 {% set __GRAFANA_version = GRAFANA_version | default('latest') -%}
-
-{% set __KIBANA_version = KIBANA_version | default('latest') -%}
 
 {% set __METABASE_version = METABASE_version | default('latest') -%}
 {% set __SUPERSET_version = SUPERSET_version | default('latest') -%}
@@ -8222,7 +8227,7 @@ services:
 {% if KIBANA_enable | default(false) %}
   #  ================================== Kibana ========================================== #
   kibana:
-    image: {{ 'kibana' if (KIBANA_edition | lower) == 'oss' else 'docker.elastic.co/kibana/kibana' }}:{{__KIBANA_version}}
+    image: {{ 'kibana' if (ELASTICSEARCH_edition | lower) == 'oss' else 'docker.elastic.co/kibana/kibana' }}:{{__KIBANA_version}}
     hostname: kibana
     container_name: kibana
     labels:
