@@ -474,6 +474,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28288 | 3000 | memgraph-platform |
 28289 | 8080 | redpanda-console |
 28290 | 80 | excalidraw |
+28291 | 8200 | invana-engine |
+28292 | 8300 | invana-studio |
 
 
 ## Ports > 28500

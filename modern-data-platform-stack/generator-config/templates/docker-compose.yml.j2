@@ -245,6 +245,9 @@ networks:
 
 {% set __JANUSGRAPH_version = JANUSGRAPH_version | default('latest') -%}
 
+{% set __INVANA_ENGINE_version = INVANA_ENGINE_version | default('latest') -%}
+{% set __INVANA_STUDIO_version = INVANA_STUDIO_version | default('latest') -%}
+
 {% set __NEO4J_version = NEO4J_version | default('latest') -%}
 
 {% set __QUINE_version = QUINE_version | default('latest') -%}
@@ -581,6 +584,8 @@ networks:
   {% set PINOT_enable = false -%}
   {% set IGNITE_enable = false -%}
   {% set JANUSGRAPH_enable = false -%}
+  {% set INVANA_ENGINE_enable = false -%}
+  {% set INVANA_STUDIO_enable = false -%}
   {% set NEO4J_enable = false -%}
   {% set QUINE_enable = false -%}
   {% set MEMGRAPH_enable = false -%}
@@ -8426,6 +8431,63 @@ services:
     {% endif -%}   {#  LOKI_collect_docker_logs #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  GREMLIN_CONSOLE_enable #}
+
+{% if INVANA_ENGINE_enable | default(false) %}
+  #  ================================== Invana Engine ========================================== #
+  invana-engine:
+    image: invanalabs/invana-engine:{{__INVANA_ENGINE_version}}
+    container_name: invana-engine
+    hostname: invana-engine
+    labels:
+      com.platys.name: "invana-engine"
+    ports:
+      - "28291:8200"
+    environment:
+      GREMLIN_SERVER_URL: 'ws://janusgraph:8182/gremlin'
+    {% if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    command: tail -f /dev/null
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  INVANA_ENGINE_enable #}
+
+{% if INVANA_STUDIO_enable | default(false) %}
+  #  ================================== Invana Studio ========================================== #
+  invana-studio:
+    image: invanalabs/invana-studio:{{__INVANA_STUDIO_version}}
+    container_name: invana-engine
+    hostname: invana-engine
+    labels:
+      com.platys.name: "invana-studio"
+      com.platys.webui.title: "Invana Studio UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28292"
+    ports:
+      - "28292:8300"
+    {% if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    command: tail -f /dev/null
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  INVANA_STUDIO_enable #}
 
 {# #}
 {% if NEO4J_enable | default(false) %}
