@@ -75,7 +75,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Update `minio` to `RELEASE.2022-12-12T19-27-27Z`
  * Update `grafana` to `9.3.2`
  * Update `kibana` to `8.5.3`
- * Update `elasticsearch` to `8.5.3`
+ * Update `elasticsearch` to `7.17.8` and `8.5.3`
  * Update `memchached` to `1.6.17`
  * Update `mongodb` to `6.0`
  * Update `solr` to `9.1`
@@ -118,6 +118,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Change `KAFKA_KADMIN_xxxxx` to `KADMIN_xxxxx`
  * Change `KAFKA_EFAK_xxxxx` to `EFAK_xxxxx` 
  * Change the docker image for Airflow from the Bitnami to the official Apache one
+ * Support the two major versions 7 and 8 of Elasticsearch
  
 ### Enhancements
 
