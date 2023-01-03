@@ -27,6 +27,8 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Redpanda Console (previously kowl, old version of kowl still supported)
  * Iceberg REST Catalog API
  * JanusGraph
+ * Gremlin Console
+ * Invana Engine and Invana Studio
 
 ### New/Updated Cookbook Recipes
 
