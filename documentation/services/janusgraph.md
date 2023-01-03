@@ -17,8 +17,13 @@ To start a gremlin console
 
 ```bash
 docker-compose -f docker-compose.yml run --rm \
-    -e GREMLIN_REMOTE_HOSTS=janusgraph-1 janusgraph-1 ./bin/gremlin.sh
+    -e GREMLIN_REMOTE_HOSTS=janusgraph-1 janusgraph-1 ./bin/gremlin.sh    
 ```
+
+:remote connect tinkerpop.server conf/remote.yaml
+g = traversal().withRemote('conf/remote-graph.properties')
+g.addV('demigod').property('name', 'hercules').iterate()    
+
 
 ### Initialise JanusGraph
 

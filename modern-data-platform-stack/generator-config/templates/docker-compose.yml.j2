@@ -8364,10 +8364,10 @@ services:
 
 {% if JANUSGRAPH_enable | default(false) %}
   #  ================================== JanusGraph ========================================== #
-  janusgraph-1:
+  janusgraph:
     image: janusgraph/janusgraph:{{__JANUSGRAPH_version}}
-    hostname: janusgraph-1
-    container_name: janusgraph-1
+    hostname: janusgraph
+    container_name: janusgraph
     labels:
       com.platys.name: "janusgraph"
     ports:
@@ -8389,6 +8389,29 @@ services:
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    restart: {{container_restart_policy}}
+
+  gremlin-console:
+    image: janusgraph/janusgraph:{{__JANUSGRAPH_version}}
+    container_name: gremlin-console
+    hostname: gremlin-console
+    labels:
+      com.platys.name: "janusgraph"
+    environment:
+      GREMLIN_REMOTE_HOSTS: janusgraph
+    {% if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    command: tail -f /dev/null
     {%if LOKI_collect_docker_logs | default(false) %}
     <<: *logging
     {% endif -%}   {#  LOKI_collect_docker_logs #}
