@@ -35,7 +35,10 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 2185 | 2185 | zookeeper-5 |
 2186 | 2186 | zookeeper-6 |
 2424 | 2424 | arcadedb |
-2480 | 2480 | arcadedb |
+2480 | 5432 | arcadedb (posgresql port) |
+2481 | 6379 | arcadedb (redis port) |
+2482 | 2480 | arcadedb (mongodb port) |
+2483 | 27017 | arcadedb |
 3000 | 3000 | grafana |
 3001 | 3000 | wetty (dc1) |
 3002 | 3000 | wetty (dc2 |
