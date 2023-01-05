@@ -30,6 +30,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Gremlin Console
  * Invana Engine and Invana Studio
  * ArcadeDB
+ * Spring Boot Admin Server
 
 ### New/Updated Cookbook Recipes
 

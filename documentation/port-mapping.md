@@ -481,6 +481,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28290 | 80 | excalidraw |
 28291 | 8200 | invana-engine |
 28292 | 8300 | invana-studio |
+28293 | 8080 | spring-boot-admin |
 
 
 ## Ports > 28500
