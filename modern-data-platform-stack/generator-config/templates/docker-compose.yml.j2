@@ -2628,12 +2628,12 @@ services:
     environment:
       - RUN_MODE=nano
       - CDK_LISTENING_PORT=8080
-      - CONSOLE_ENABLED="true"
-      - TESTING_ENABLED="true"
-      - MONITORING_ENABLED="true"
-      - DATA_MASKING_ENABLED="false"
-      - SCANNER_ENABLED="false"
-      - GOVERNANCE_ENABLED="false"
+      - CONSOLE_ENABLED=true
+      - TESTING_ENABLED=true
+      - MONITORING_ENABLED=true
+      - DATA_MASKING_ENABLED=false
+      - SCANNER_ENABLED=false
+      - GOVERNANCE_ENABLED=false
     {% if (CONDUKTOR_PLATFORM_use_external_postgres or external['CONDUKTOR_PLATFORM_use_external_postgres']) | default(false) %}
       - EMBEDDED_POSTGRES="false"
       - CDK_DATABASE_HOST={{CONDUKTOR_PLATFORM_postgres_host}}
@@ -2651,6 +2651,9 @@ services:
     {% if (SCHEMA_REGISTRY_enable or external['SCHEMA_REGISTRY_enable']) | default(false) %}
       - SCHEMA_REGISTRY_URL={{ns.schemaRegistryUrl}}
     {% endif -%}   {#  SCHEMA_REGISTRY_enable #}
+    {% if ( KAFKA_CONNECT_enable ) | default(false) %}
+       KAFKA_CONNECT_URL={{ns1.connectServersInternalUrl.split(',')[0]}}
+    {% endif -%}   {#  KAFKA_CONNECT_enable #}
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
