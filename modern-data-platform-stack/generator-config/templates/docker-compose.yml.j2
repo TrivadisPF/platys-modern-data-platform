@@ -117,6 +117,9 @@ networks:
 {% set __MARQUEZ_version = MARQUEZ_version | default('latest') -%}
 {% set __MARQUEZ_WEB_version = MARQUEZ_WEB_version | default('latest') -%}
 
+{% set __CKAN_version = CKAN_version | default('latest') -%}
+{% set __CKAN_DATAPUSHER_version = CKAN_DATAPUSHER_version | default('latest') -%}
+
 {% if (CASSANDRA_major_version | lower) == '3'  %}
   {% set __CASSANDRA_version = CASSANDRA_3_version  -%}
 {% elif (CASSANDRA_major_version | lower) == '4'  %}
@@ -544,6 +547,7 @@ networks:
   {% set DATAHUB_enable = false -%}
   {% set AMUNDSEN_enable = false -%}
   {% set MARQUEZ_enable = false -%}
+  {% set CKAN_enable = false -%}
   {% set HUE_enable = false -%}
   {% set STREAMSETS_enable = false -%}
   {% set STREAMSETS_TRANSFORMER_enable = false -%}
@@ -4819,6 +4823,168 @@ services:
     entrypoint: ["/usr/src/app/wait-for-it.sh", "marquez:5000", "--", "./seed-db.sh"]
   {% endif %}   {# MARQUEZ_provision_marquez_sample_data #}
 {% endif %}   {#  MARQUEZ_enable #}
+
+{% if CKAN_enable  | default(false) %}
+  #  ================================== CKAN ========================================== #
+  ckan:
+    image: ghcr.io/keitaroinc/ckan:{{__CKAN_version}}
+    container_name: ckan
+    hostname: ckan
+    labels:
+      com.platys.name: "ckan"
+      com.platys.webui.title: "CKAN UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28294"
+    ports:
+      - "28294:5000"
+    environment:
+      - CKAN_SITE_ID=default
+      - CKAN_PORT=5000
+      - CKAN__PLUGINS=envvars image_view text_view recline_view datastore datapusher
+      - CKAN__STORAGE_PATH=/srv/app/data
+      - CKAN__WEBASSETS__PATH=/srv/app/data/webassets
+      - CKAN_SYSADMIN_NAME=sysadmin
+      - CKAN_SYSADMIN_PASSWORD=abc123!
+      - CKAN_SYSADMIN_EMAIL=sysadmin@ckantest.com
+      - CKAN_SMTP_SERVER=smtp.corporateict.domain:25
+      - CKAN_SMTP_STARTTLS=True
+      - CKAN_SMTP_USER=user
+      - CKAN_SMTP_PASSWORD=password
+      - CKAN_SMTP_MAIL_FROM=ckan@localhost
+      - CKAN__DATAPUSHER__URL=http://ckan-datapusher:8000
+      - CKAN__DATAPUSHER__CALLBACK_URL_BASE=http://ckan:5000/
+      - CKAN_VERSION=2.9.7
+      - CKAN_CORE_NAME=ckan
+      - CKAN_SQLALCHEMY_URL=postgresql://ckan:${POSTGRES_PASSWORD}@db/ckan
+      - CKAN_DATASTORE_WRITE_URL=postgresql://ckan:${POSTGRES_PASSWORD}@db/datastore
+      - CKAN_DATASTORE_READ_URL=postgresql://datastore_ro:${DATASTORE_READONLY_PASSWORD}@db/datastore
+      - CKAN_SOLR_URL=http://ckan-solr:8983/solr/ckan
+      - CKAN_REDIS_URL=redis://ckan-redis:6379/1
+      - CKAN_SITE_URL=http://${PUBLIC_IP}:28294
+      - CKAN_MAX_UPLOAD_SIZE_MB=10
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - DS_RO_PASS=${DATASTORE_READONLY_PASSWORD}
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    restart: {{container_restart_policy}}
+
+  ckan-datapusher:
+    image: ghcr.io/keitaroinc/datapusher:{{__CKAN_DATAPUSHER_version}}
+    container_name: ckan-datapusher
+    hostname: ckan-datapusher
+    labels:
+      com.platys.name: "ckan"
+    ports:
+      - "28295:8000"
+    environment:
+      - MAINTENANCE_MODE=false
+      - DATAPUSHER_MAX_CONTENT_LENGTH=${DATAPUSHER_MAX_CONTENT_LENGTH}
+      - DATAPUSHER_CHUNK_SIZE=${DATAPUSHER_CHUNK_SIZE}
+      - DATAPUSHER_CHUNK_INSERT_ROWS=${DATAPUSHER_CHUNK_INSERT_ROWS}
+      - DATAPUSHER_DOWNLOAD_TIMEOUT=${DATAPUSHER_DOWNLOAD_TIMEOUT}
+      - DATAPUSHER_SSL_VERIFY=${DATA_PUSHER_SSL_VERIFY}
+      - DATAPUSHER_REWRITE_RESOURCES=${DATAPUSHER_REWRITE_RESOURCES}
+      - DATAPUSHER_REWRITE_URL=${DATAPUSHER_REWRITE_URL}
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    restart: {{container_restart_policy}}
+
+  ckan-db:
+    image: postgis/postgis:14-master
+    container_name: ckan-db
+    hostname: ckan-db
+    labels:
+      com.platys.name: "ckan"
+    ports:
+      - "28295:8000"
+    environment:
+      - DS_RO_PASS=datastore
+      - POSTGRES_DB=ckan
+      - POSTGRES_USER=ckan
+      - POSTGRES_PASSWORD=abc123!
+      - PGDATA=/var/lib/postgresql/data/db
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./init/ckan/postgis:/docker-entrypoint-initdb.d/
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    restart: {{container_restart_policy}}
+
+  ckan-solr:
+    image: solr:8.11.1
+    container_name: solr
+    hostname: solr
+    labels:
+      com.platys.name: "solr"
+      com.platys.webui.title: "SolR UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:8983"
+    ports:
+      - "8983:8983"
+    environment:
+      - CKAN_CORE_NAME=ckan
+      - CKAN_VERSION=2.9.7
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./init/ckan/solr:/docker-entrypoint-initdb.d/ckan_init_solr.sh
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    restart: {{container_restart_policy}}
+
+  ckan-redis:
+    image: redis:${REDIS_VERSION}
+    container_name: ckan-redis
+    hostname: ckan-redis
+    {%if use_timezone | default(false) %}
+    environment:
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    restart: {{container_restart_policy}}
+
+{% endif %}   {#  CKAN_enable #}
 
 {% if (HUE_enable) | default(false) %}
   #  ================================== Apache Hue ========================================== #
