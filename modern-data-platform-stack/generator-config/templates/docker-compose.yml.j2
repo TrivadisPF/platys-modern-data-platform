@@ -4854,15 +4854,15 @@ services:
       - CKAN__DATAPUSHER__CALLBACK_URL_BASE=http://ckan:5000/
       - CKAN_VERSION=2.9.7
       - CKAN_CORE_NAME=ckan
-      - CKAN_SQLALCHEMY_URL=postgresql://ckan:${POSTGRES_PASSWORD}@db/ckan
-      - CKAN_DATASTORE_WRITE_URL=postgresql://ckan:${POSTGRES_PASSWORD}@db/datastore
-      - CKAN_DATASTORE_READ_URL=postgresql://datastore_ro:${DATASTORE_READONLY_PASSWORD}@db/datastore
+      - CKAN_SQLALCHEMY_URL=postgresql://ckan:{{CKAN_postgres_password}}@db/ckan
+      - CKAN_DATASTORE_WRITE_URL=postgresql://ckan:{{CKAN_postgres_password}}@db/datastore
+      - CKAN_DATASTORE_READ_URL=postgresql://datastore_ro:{{CKAN_postgres_readonly_password}}@db/datastore
       - CKAN_SOLR_URL=http://ckan-solr:8983/solr/ckan
       - CKAN_REDIS_URL=redis://ckan-redis:6379/1
       - CKAN_SITE_URL=http://${PUBLIC_IP}:28294
       - CKAN_MAX_UPLOAD_SIZE_MB=10
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - DS_RO_PASS=${DATASTORE_READONLY_PASSWORD}
+      - POSTGRES_PASSWORD={{CKAN_postgres_password}}
+      - DS_RO_PASS={{CKAN_postgres_readonly_password}}
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -4887,13 +4887,13 @@ services:
       - "28295:8000"
     environment:
       - MAINTENANCE_MODE=false
-      - DATAPUSHER_MAX_CONTENT_LENGTH=${DATAPUSHER_MAX_CONTENT_LENGTH}
-      - DATAPUSHER_CHUNK_SIZE=${DATAPUSHER_CHUNK_SIZE}
-      - DATAPUSHER_CHUNK_INSERT_ROWS=${DATAPUSHER_CHUNK_INSERT_ROWS}
-      - DATAPUSHER_DOWNLOAD_TIMEOUT=${DATAPUSHER_DOWNLOAD_TIMEOUT}
-      - DATAPUSHER_SSL_VERIFY=${DATA_PUSHER_SSL_VERIFY}
-      - DATAPUSHER_REWRITE_RESOURCES=${DATAPUSHER_REWRITE_RESOURCES}
-      - DATAPUSHER_REWRITE_URL=${DATAPUSHER_REWRITE_URL}
+      - DATAPUSHER_MAX_CONTENT_LENGTH=10485760
+      - DATAPUSHER_CHUNK_SIZE=16384
+      - DATAPUSHER_CHUNK_INSERT_ROWS=250
+      - DATAPUSHER_DOWNLOAD_TIMEOUT=30
+      - DATAPUSHER_SSL_VERIFY=false
+      - DATAPUSHER_REWRITE_RESOURCES=true
+      - DATAPUSHER_REWRITE_URL=http://ckan:5000
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -4920,7 +4920,7 @@ services:
       - DS_RO_PASS=datastore
       - POSTGRES_DB=ckan
       - POSTGRES_USER=ckan
-      - POSTGRES_PASSWORD=abc123!
+      - POSTGRES_PASSWORD={{CKAN_postgres_password}}
       - PGDATA=/var/lib/postgresql/data/db
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
@@ -4966,7 +4966,7 @@ services:
     restart: {{container_restart_policy}}
 
   ckan-redis:
-    image: redis:${REDIS_VERSION}
+    image: redis:6.0.7
     container_name: ckan-redis
     hostname: ckan-redis
     {%if use_timezone | default(false) %}
