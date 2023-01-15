@@ -31,6 +31,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Invana Engine and Invana Studio
  * ArcadeDB
  * Spring Boot Admin Server
+ * CKAN
 
 ### New/Updated Cookbook Recipes
 
@@ -106,7 +107,8 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Update `debezium-server` to `2.0.1.Final`
  * Update `Amundsen Frontend` to `4.2.0` and `Amundsen Search` to `4.0.2` and `Amundsen Metadata` to `3.11.0`
  * Update `nodered` to `2.2.3`
- * Update `dataiku-dss` to `11.2.0
+ * Update `dataiku-dss` to `11.2.0`
+ * Update `postgres` to `15`
   
 ### Bug Fixes
 
