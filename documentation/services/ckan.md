@@ -12,3 +12,8 @@ platys gen
 ## How to use it?
 
 Navigate to <http://dataplatform:28294>.
+
+### Using CLI
+
+```bash
+docker exec -ti ckan ckan -c /srv/app/production.ini 

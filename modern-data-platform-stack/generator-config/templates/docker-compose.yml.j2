@@ -4827,7 +4827,7 @@ services:
 {% if CKAN_enable  | default(false) %}
   #  ================================== CKAN ========================================== #
   ckan:
-    image: ghcr.io/keitaroinc/ckan:{{__CKAN_version}}
+    image: ckan/ckan-base:{{__CKAN_version}}
     container_name: ckan
     hostname: ckan
     labels:
@@ -4839,35 +4839,57 @@ services:
     environment:
       - CKAN_SITE_ID=default
       - CKAN_PORT=5000
-      - CKAN__PLUGINS=envvars image_view text_view recline_view datastore datapusher
-      - CKAN__STORAGE_PATH=/srv/app/data
-      - CKAN__WEBASSETS__PATH=/srv/app/data/webassets
+#      - CKAN_SITE_URL=http://${PUBLIC_IP}:28294
+      - CKAN_SITE_URL=http://ckan:5000
       - CKAN_SYSADMIN_NAME=sysadmin
       - CKAN_SYSADMIN_PASSWORD=abc123!
       - CKAN_SYSADMIN_EMAIL=sysadmin@ckantest.com
+      - CKAN__STORAGE_PATH=/var/lib/ckan
       - CKAN_SMTP_SERVER=smtp.corporateict.domain:25
       - CKAN_SMTP_STARTTLS=True
       - CKAN_SMTP_USER=user
       - CKAN_SMTP_PASSWORD=password
       - CKAN_SMTP_MAIL_FROM=ckan@localhost
-      - CKAN__DATAPUSHER__URL=http://ckan-datapusher:8000
+      - CKAN_REDIS_URL=redis://ckan-redis:6379/1
+      - TEST_CKAN_REDIS_URL=redis://redis:6379/1
+      - POSTGRES_USER=ckan
+      - POSTGRES_PASSWORD={{CKAN_postgres_password}}
+      - DATASTORE_READONLY_PASSWORD={{CKAN_postgres_readonly_password}}
+      - CKAN__PLUGINS=envvars image_view text_view recline_view datastore datapusher
+
+      - CKAN__HARVEST__MQ__TYPE=redis
+      - CKAN__HARVEST__MQ__HOSTNAME=redis
+      - CKAN__HARVEST__MQ__PORT=6379
+      - CKAN__HARVEST__MQ__REDIS_DB=1
+
+      - CKAN__WEBASSETS__PATH=/srv/app/data/webassets
+      - CKAN__DATAPUSHER__URL=http://ckan-datapusher:8800
       - CKAN__DATAPUSHER__CALLBACK_URL_BASE=http://ckan:5000/
-      - CKAN_VERSION=2.9.7
+
+      - CKAN_VERSION={{__CKAN_version}}
       - CKAN_CORE_NAME=ckan
       - CKAN_SQLALCHEMY_URL=postgresql://ckan:{{CKAN_postgres_password}}@ckan-db/ckan
       - CKAN_DATASTORE_WRITE_URL=postgresql://ckan:{{CKAN_postgres_password}}@ckan-db/datastore
       - CKAN_DATASTORE_READ_URL=postgresql://datastore_ro:{{CKAN_postgres_readonly_password}}@ckan-db/datastore
       - CKAN_SOLR_URL=http://ckan-solr:8983/solr/ckan
-      - CKAN_REDIS_URL=redis://ckan-redis:6379/1
-      - CKAN_SITE_URL=http://${PUBLIC_IP}:28294
       - CKAN_MAX_UPLOAD_SIZE_MB=10
-      - POSTGRES_PASSWORD={{CKAN_postgres_password}}
-      - DS_RO_PASS={{CKAN_postgres_readonly_password}}
+    {%if CKAN_use_s3_store and (MINIO_enable or external['S3_enable']) | default(false) %}
+      # S3/MINIO settings
+      - CKANEXT__S3FILESTORE__AWS_ACCESS_KEY_ID={{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
+      - CKANEXT__S3FILESTORE__AWS_SECRET_ACCESS_KEY={{s3SecretAccessKey}}
+      - CKANEXT__S3FILESTORE__AWS_BUCKET_NAME={{CKAN_s3_store_bucket_name}}
+      - CKANEXT__S3FILESTORE__HOST_NAME={{s3Endpoint | default(omit) }}
+      - CKANEXT__S3FILESTORE__REGION_NAME={{s3DefaultRegion | default(omit) }}
+      - CKANEXT__S3FILESTORE__SIGNATURE_VERSION=s3v4
+    {% endif %}
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
+    {%if CKAN_volume_map_storage | default(false) %}
+      - ./container-volume/ckan/storage:/var/lib/ckan
+    {% endif -%}   {#  CKAN_volume_map_storage #}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -4878,13 +4900,13 @@ services:
     restart: {{container_restart_policy}}
 
   ckan-datapusher:
-    image: ghcr.io/keitaroinc/datapusher:{{__CKAN_DATAPUSHER_version}}
+    image: ckan/datapusher:{{__CKAN_DATAPUSHER_version}}
     container_name: ckan-datapusher
     hostname: ckan-datapusher
     labels:
-      com.platys.name: "ckan"
+      com.platys.name: "ckan-datapusher"
     ports:
-      - "28295:8000"
+      - "28295:8800"
     environment:
       - MAINTENANCE_MODE=false
       - DATAPUSHER_MAX_CONTENT_LENGTH=10485760
@@ -4915,9 +4937,9 @@ services:
     labels:
       com.platys.name: "ckan"
     environment:
-      - DS_RO_PASS={{CKAN_postgres_readonly_password}}
-      - POSTGRES_DB=ckan
-      - POSTGRES_USER=ckan
+      - DATASTORE_READONLY_PASSWORD={{CKAN_postgres_readonly_password}}
+      - POSTGRES_DB={{CKAN_postgres_db}}
+      - POSTGRES_USER={{CKAN_postgres_user}}
       - POSTGRES_PASSWORD={{CKAN_postgres_password}}
       - PGDATA=/var/lib/postgresql/data/db
     {%if use_timezone | default(false) %}
@@ -4943,7 +4965,7 @@ services:
       com.platys.name: "ckan"
     environment:
       - CKAN_CORE_NAME=ckan
-      - CKAN_VERSION=2.9.7
+      - CKAN_VERSION={{__CKAN_version}}
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -4960,7 +4982,7 @@ services:
     restart: {{container_restart_policy}}
 
   ckan-redis:
-    image: redis:6.0.7
+    image: redis:6
     container_name: ckan-redis
     hostname: ckan-redis
     {%if use_timezone | default(false) %}

@@ -483,7 +483,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28292 | 8300 | invana-studio |
 28293 | 8080 | spring-boot-admin |
 28294 | 5000 | ckan |
-28295 | 8000 | ckan-datapusher |
+28295 | 8800 | ckan-datapusher |
 
 
 ## Ports > 28500
