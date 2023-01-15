@@ -4827,7 +4827,7 @@ services:
 {% if CKAN_enable  | default(false) %}
   #  ================================== CKAN ========================================== #
   ckan:
-    image: ckan/ckan-base:{{__CKAN_version}}
+    image: ckan/ckan-base:{{__CKAN_version}}{{'-dev' if CKAN_use_dev_edition}}
     container_name: ckan
     hostname: ckan
     labels:
@@ -4901,6 +4901,7 @@ services:
     {% endif -%}   {#  LOKI_collect_docker_logs #}
     restart: {{container_restart_policy}}
 
+  {% if CKAN_DATAPUSHER_enable  | default(false) %}
   ckan-datapusher:
     image: ckan/ckan-base-datapusher:{{__CKAN_DATAPUSHER_version}}
     container_name: ckan-datapusher
@@ -4931,6 +4932,7 @@ services:
     <<: *logging
     {% endif -%}   {#  LOKI_collect_docker_logs #}
     restart: {{container_restart_policy}}
+  {% endif -%}   {#  CKAN_DATAPUSHER_enable #}
 
   ckan-db:
     image: postgis/postgis:14-master
