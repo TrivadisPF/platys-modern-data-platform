@@ -4842,7 +4842,7 @@ services:
 #      - CKAN_SITE_URL=http://${PUBLIC_IP}:28294
       - CKAN_SITE_URL=http://ckan:5000
       - CKAN_SYSADMIN_NAME=sysadmin
-      - CKAN_SYSADMIN_PASSWORD=abc123!
+      - CKAN_SYSADMIN_PASSWORD={{CKAN_sysadmin_password}}
       - CKAN_SYSADMIN_EMAIL=sysadmin@ckantest.com
       - CKAN__STORAGE_PATH=/var/lib/ckan
       - CKAN_SMTP_SERVER=smtp.corporateict.domain:25
@@ -4884,6 +4884,8 @@ services:
     {% endif %}
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
+    {% else %}
+      - TZ=UTC
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
@@ -4959,8 +4961,8 @@ services:
 
   ckan-solr:
     image: solr:8.11.1
-    container_name: solr
-    hostname: solr
+    container_name: ckan-solr
+    hostname: ckan-solr
     labels:
       com.platys.name: "ckan"
     environment:
@@ -4985,6 +4987,8 @@ services:
     image: redis:6
     container_name: ckan-redis
     hostname: ckan-redis
+    labels:
+      com.platys.name: "ckan"
     {%if use_timezone | default(false) %}
     environment:
       - TZ={{use_timezone}}
