@@ -8472,12 +8472,12 @@ services:
 
 {% if OPENSEARCH_enable | default(false) %}
   #  ================================== OpenSearch ========================================== #
-  {% set ns = namespace(opensearchHosts='') %}
+  {% set nsOS = namespace(opensearchHosts='') %}
   {% for num in range(OPENSEARCH_nodes | default(1) ) %}
     {% if loop.first %}
-        {% set ns.opensearchHosts = 'opensearch-' ~ loop.index %}
+        {% set nsOS.opensearchHosts = 'opensearch-' ~ loop.index %}
     {% else %}
-        {% set ns.opensearchHosts = ns.opensearchHosts ~ ',' ~ 'opensearch-' ~ loop.index %}
+        {% set nsOS.opensearchHosts = nsOS.opensearchHosts ~ ',' ~ 'opensearch-' ~ loop.index %}
     {% endif %}
   {% endfor %}
   {% for num in range(OPENSEARCH_nodes | default(1) ) %}
@@ -8499,8 +8499,8 @@ services:
       - cluster.name=opensearch-cluster
       - node.name=opensearch-{{loop.index}}
       {% if OPENSEARCH_nodes > 1 %}
-      - discovery.seed_hosts={{ns.opensearchHosts}}
-      - cluster.initial_master_nodes={{ns.opensearchHosts}}
+      - discovery.seed_hosts={{nsOS.opensearchHosts}}
+      - cluster.initial_master_nodes={{nsOS.opensearchHosts}}
       {% else %}
       - discovery.type=single-node
       - "DISABLE_INSTALL_DEMO_CONFIG=true"   # disables execution of install_demo_configuration.sh bundled with security plugin, which installs demo certificates and security configurations to OpenSearch
