@@ -4039,6 +4039,8 @@ services:
       - KAFKA_SCHEMAREGISTRY_URL={{ns.schemaRegistryUrl}}
       - ELASTICSEARCH_HOST=datahub-elasticsearch
       - ELASTICSEARCH_PORT=9200
+      - ELASTICSEARCH_INDEX_BUILDER_SETTINGS_REINDEX=true
+      - ELASTICSEARCH_INDEX_BUILDER_MAPPINGS_REINDEX=true
       - JAVA_OPTS=-Xms1g -Xmx1g
       - ENTITY_REGISTRY_CONFIG_PATH=/datahub/datahub-gms/resources/entity-registry.yml
       - METADATA_AUDIT_EVENT_NAME=MetadataAuditEvent_v4
@@ -4135,6 +4137,8 @@ services:
       - DATAHUB_TRACKING_TOPIC=DataHubUsageEvent_v1
       - ELASTIC_CLIENT_HOST=datahub-elasticsearch
       - ELASTIC_CLIENT_PORT=9200
+      - ELASTICSEARCH_INDEX_BUILDER_SETTINGS_REINDEX=true
+      - ELASTICSEARCH_INDEX_BUILDER_MAPPINGS_REINDEX=true
       - METADATA_SERVICE_AUTH_ENABLED=false
       - DATAHUB_ANALYTICS_ENABLED={{DATAHUB_use_analytics | lower}}
       - DATAHUB_AKKA_MAX_HEADER_COUNT=64
@@ -4211,6 +4215,8 @@ services:
       - KAFKA_SCHEMAREGISTRY_URL='{{ns.schemaRegistryUrl}}'
       - ELASTICSEARCH_HOST=datahub-elasticsearch
       - ELASTICSEARCH_PORT=9200
+      - ELASTICSEARCH_INDEX_BUILDER_SETTINGS_REINDEX=true
+      - ELASTICSEARCH_INDEX_BUILDER_MAPPINGS_REINDEX=true
       - GRAPH_SERVICE_IMPL={{DATAHUB_graph_service_impl}}
     {%if (DATAHUB_graph_service_impl | lower) == 'neo4j'  | default(true) %}
       - NEO4J_HOST=datahub-neo4j:7474
@@ -4889,6 +4895,7 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
+      - ./plugins/ckan/extensions:/srv/app/src
     {%if CKAN_volume_map_storage | default(false) %}
       - ./container-volume/ckan/storage:/var/lib/ckan
     {% endif -%}   {#  CKAN_volume_map_storage #}
@@ -11831,6 +11838,7 @@ services:
     volumes:
       - ./data-transfer:/data-transfer
 #      - ./conf/minio/config.json:/root/.mc/config.json
+      - ./scripts/docker/wait-for-it.sh:/usr/src/app/wait-for-it.sh
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -11839,7 +11847,7 @@ services:
       - /bin/sh
       - -c
       - |
-        sleep 10
+        /usr/src/app/wait-for-it.sh -t 180 minio-1:9000
         mc alias set minio-1 http://minio-1:9000 {{MINIO_access_key}} {{MINIO_secret_key}}
         mc mb --ignore-existing minio-1/{{s3AdminBucketName}}
     {% if MLFLOW_SERVER_enable | default(false) %}
