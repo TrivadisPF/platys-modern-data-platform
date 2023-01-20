@@ -77,7 +77,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Update `marquez` and `marquez-web` to `0.29.0`
  * Update `airbyte` to `0.40.28`
  * Update `mlflow-server` to `2.1.0`
- * Update `minio` to `RELEASE.2022-12-12T19-27-27Z`
+ * Update `minio` to `RELEASE.2023-01-20T02-05-44Z`
  * Update `grafana` to `9.3.2`
  * Update `kibana` to `8.5.3`
  * Update `elasticsearch` to `7.17.8` and `8.5.3`
