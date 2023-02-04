@@ -17,3 +17,4 @@ Navigate to <http://dataplatform:28294>.
 
 ```bash
 docker exec -ti ckan ckan -c /srv/app/production.ini 
+```
