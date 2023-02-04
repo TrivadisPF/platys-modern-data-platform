@@ -84,7 +84,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Update `memchached` to `1.6.17`
  * Update `mongodb` to `6.0`
  * Update `solr` to `9.1`
- * Update `quine` to `1.4.2`
+ * Update `quine` to `1.5.1`
  * Update `dgraph` to `v22.0.2`
  * Update `stardog` to `8.2.0-java11-preview`
  * Update `kudu` to `1.16`
