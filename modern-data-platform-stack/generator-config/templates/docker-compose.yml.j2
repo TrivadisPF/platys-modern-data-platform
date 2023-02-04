@@ -8854,11 +8854,41 @@ services:
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
-    command: [ '-w', '-c', '/benthos/benthos.yaml' ]
+    command: [ '-w', '-c', '/benthos.yaml', '-w' ]
     {%if LOKI_collect_docker_logs | default(false) %}
     <<: *logging
     {% endif -%}   {#  LOKI_collect_docker_logs #}
     restart: {{container_restart_policy}}
+
+  {% if BENTHOS_SERVER_enable | default(false) %}
+  benthos-server:
+    image: jeffail/benthos:{{__BENTHOS_version}}
+    hostname: benthos-server
+    container_name: benthos-server
+    labels:
+      com.platys.name: "benthos"
+      com.platys.webui.title: "Benthos Server UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:4196"
+    ports:
+      - "4196:4196"
+    environment:
+      - DUMMY=xb
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./scripts/benthos:/benthos
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    command: ['blobl', 'server', '--no-open', '--host', '0.0.0.0', '--port', '4196']
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    restart: {{container_restart_policy}}
+  {% endif %}   {#  BENTHOS_SERVER_enable #}
 {% endif %}   {#  BENTHOS_enable #}
 
 {% if MEMGRAPH_enable | default(false) %}
