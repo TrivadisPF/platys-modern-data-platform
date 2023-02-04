@@ -32,6 +32,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * ArcadeDB
  * Spring Boot Admin Server
  * CKAN
+ * Benthos
 
 ### New/Updated Cookbook Recipes
 

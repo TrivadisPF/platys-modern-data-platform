@@ -255,6 +255,8 @@ networks:
 
 {% set __QUINE_version = QUINE_version | default('latest') -%}
 
+{% set __BENTHOS_version = BENTHOS_version | default('latest') -%}
+
 {% set __MEMGRAPH_version = MEMGRAPH_version | default('latest') -%}
 {% set __MEMGRAPH_MAGE_version = MEMGRAPH_MAGE_version | default('latest') -%}
 {% set __MEMGRAPH_PLATFORM_version = MEMGRAPH_PLATFORM_version | default('latest') -%}
@@ -594,6 +596,7 @@ networks:
   {% set INVANA_STUDIO_enable = false -%}
   {% set NEO4J_enable = false -%}
   {% set QUINE_enable = false -%}
+  {% set BENTHOS_enable = false -%}
   {% set MEMGRAPH_enable = false -%}
   {% set ARCADEDB_enable = false -%}
   {% set DGRAPH_enable = false -%}
@@ -8826,6 +8829,37 @@ services:
     {% endif -%}   {#  LOKI_collect_docker_logs #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  QUINE_enable #}
+
+{% if BENTHOS_enable | default(false) %}
+  #  ================================== Benthos ========================================== #
+  benthos-1:
+    image: jeffail/benthos:{{__BENTHOS_version}}
+    hostname: benthos-1
+    container_name: benthos-1
+    labels:
+      com.platys.name: "benthos"
+      com.platys.webui.title: "Benthos UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:4195"
+    ports:
+      - "4195:4195"
+    environment:
+      - DUMMY=xb
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./scripts/
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    command: [ '-w', '-c', '/benthos.yaml' ]
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  BENTHOS_enable #}
 
 {% if MEMGRAPH_enable | default(false) %}
   #  ================================== Memgraph ========================================== #

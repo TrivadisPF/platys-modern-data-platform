@@ -1,0 +1,1 @@
+Place benthos config files (*.yaml) here.
