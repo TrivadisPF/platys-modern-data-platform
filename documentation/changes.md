@@ -73,7 +73,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Update `materialize` to `v0.38.0`
  * Update `neo4j` to `5.3.0`
  * Update `eventstoredb` to `22.10.0-buster-slim`
- * Update `flink` to `1.16.0-scala_2.12`
+ * Update `flink` to `1.16.1-scala_2.12`
  * Update `tika-server` to `2.6.0.0-full`
  * Update `marquez` and `marquez-web` to `0.29.0`
  * Update `airbyte` to `0.40.28`
