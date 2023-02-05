@@ -102,6 +102,8 @@ networks:
 
 {% set __AVRO_TOOLS_version = AVRO_TOOLS_version | default('latest') -%}
 
+{% set __OPENLDAP_version = OPENLDAP_version | default('latest') -%}
+
 {% set __RANGER_version = RANGER_version | default('latest') -%}
 {% set __RANGER_postgresql_version = RANGER_postgresql_version | default('latest') -%}
 
@@ -3827,6 +3829,37 @@ services:
     {% endif -%}   {#  LOKI_collect_docker_logs #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  AVRO_TOOLS_enable #}
+
+{% if OPENLDAP_enable  | default(false) %}
+  #  ================================== LDAP ========================================== #
+  openldap:
+    image: osixia/openldap:{{__OPENLDAP_version}}
+    hostname: openldap
+    container_name: openldap
+    labels:
+      com.platys.name: "openldap"
+    environment:
+      LDAP_ORGANISATION: "PlatysPlatform"
+      LDAP_DOMAIN: "platysplatform.io"
+      LDAP_BASE_DN: "dc=platysplatform,dc=io"
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./security/openldap/:/container/service/slapd/assets/config/bootstrap/ldif/custom
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    entrypoint: "tail -f /dev/null"
+    tty: true
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    command: "--copy-service --loglevel debug"
+    restart: {{container_restart_policy}}
+{% endif %}   {#  LDAP_ENABLE #}
 
 {% if RANGER_enable  | default(false) %}
   #  ================================== Apache Ranger ========================================== #
