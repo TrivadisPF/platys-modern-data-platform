@@ -33,7 +33,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Spring Boot Admin Server
  * CKAN
  * Benthos
- * OpenLDAP
+ * OpenLDAP + phpLDAPadmin
 
 ### New/Updated Cookbook Recipes
 
