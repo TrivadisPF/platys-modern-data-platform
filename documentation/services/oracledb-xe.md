@@ -11,10 +11,6 @@ platys init --enable-services ORACLE_XE
 platys gen
 ```
 
-## How to use it?
-
-Navigate to <http://dataplatform:28152>
-
 ### Connect through JDBC
 
 * **JDBC Url:**  	`jdbc:oracle:thin:@dataplatform:1522/XEPDB1`
