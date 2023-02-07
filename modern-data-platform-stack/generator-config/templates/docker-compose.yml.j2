@@ -5977,43 +5977,6 @@ services:
     {% endif -%}   {#  LOKI_collect_docker_logs #}
     restart: {{container_restart_policy}}
 
-  airbyte-cron:
-    image: airbyte/cron:{{__AIRBYTE_version}}
-    container_name: airbyte-cron
-    hostname: airbyte-cron
-    labels:
-      com.platys.name: 'airbyte'
-    environment:
-      - AIRBYTE_VERSION={{__AIRBYTE_version}}
-      - CONFIGS_DATABASE_MINIMUM_FLYWAY_MIGRATION_VERSION={{AIRBYTE_database_minimum_flyway_migration_version}}
-      - DATABASE_PASSWORD={{AIRBYTE_database_password}}
-      - DATABASE_URL=jdbc:postgresql://{{AIRBYTE_database_host}}:{{AIRBYTE_database_port}}/{{AIRBYTE_database_db}}
-      - DATABASE_USER={{AIRBYTE_database_user}}
-      - DEPLOYMENT_MODE=${DEPLOYMENT_MODE}
-      - LOG_LEVEL={{AIRBYTE_log_level}}
-      - REMOTE_CONNECTOR_CATALOG_URL=
-      - TEMPORAL_HISTORY_RETENTION_IN_DAYS=
-      - UPDATE_DEFINITIONS_CRON_ENABLED=
-      - WORKSPACE_ROOT=/tmp/workspace
-      - MICRONAUT_ENVIRONMENTS=control-plane
-    {%if use_timezone | default(false) %}
-      - TZ={{use_timezone}}
-    {% endif -%}   {#  use_timezone #}
-    volumes:
-      - ./data-transfer:/data-transfer
-    {%if AIRBYTE_volume_map_data %}
-      - airbyte-workspace-vol:/tmp/workspace
-    {% endif -%}   {#  AIRBYTE_volume_map_data #}
-      - /tmp/airbyte_local:/tmp/airbyte_local
-    {%if use_timezone | default(false) %}
-      - "./etc/timezone:/etc/timezone:ro"
-      - "./etc/localtime:/etc/localtime:ro"
-    {% endif -%}   {#  use_timezone #}
-    {%if LOKI_collect_docker_logs | default(false) %}
-    <<: *logging
-    {% endif -%}   {#  LOKI_collect_docker_logs #}
-    restart: {{container_restart_policy}}
-
   airbyte-worker:
     image: airbyte/worker:{{__AIRBYTE_version}}
     container_name: airbyte-worker
@@ -6041,6 +6004,7 @@ services:
       - LOCAL_DOCKER_MOUNT=/tmp/airbyte_local
       - LOCAL_ROOT=/tmp/airbyte_local
       - LOG_LEVEL={{AIRBYTE_log_level}}
+      - LOG_CONNECTOR_MESSAGES=
       - MAX_CHECK_WORKERS=5
       - MAX_DISCOVER_WORKERS=5
       - MAX_SPEC_WORKERS=5
@@ -6206,6 +6170,43 @@ services:
     {% endif -%}   {#  use_timezone #}    volumes:
       - ./data-transfer:/data-transfer
       - ./conf/airbyte/temporal/dynamicconfig:/etc/temporal/config/dynamicconfig
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    restart: {{container_restart_policy}}
+
+  airbyte-cron:
+    image: airbyte/cron:{{__AIRBYTE_version}}
+    container_name: airbyte-cron
+    hostname: airbyte-cron
+    labels:
+      com.platys.name: 'airbyte'
+    environment:
+      - AIRBYTE_VERSION={{__AIRBYTE_version}}
+      - CONFIGS_DATABASE_MINIMUM_FLYWAY_MIGRATION_VERSION={{AIRBYTE_configs_database_minimum_flyway_migration_version}}
+      - DATABASE_PASSWORD={{AIRBYTE_database_password}}
+      - DATABASE_URL=jdbc:postgresql://{{AIRBYTE_database_host}}:{{AIRBYTE_database_port}}/{{AIRBYTE_database_db}}
+      - DATABASE_USER={{AIRBYTE_database_user}}
+      - DEPLOYMENT_MODE=${DEPLOYMENT_MODE}
+      - LOG_LEVEL={{AIRBYTE_log_level}}
+      - REMOTE_CONNECTOR_CATALOG_URL=
+      - TEMPORAL_HISTORY_RETENTION_IN_DAYS=
+      - UPDATE_DEFINITIONS_CRON_ENABLED=
+      - WORKSPACE_ROOT=/tmp/workspace
+      - MICRONAUT_ENVIRONMENTS=control-plane
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if AIRBYTE_volume_map_data %}
+      - airbyte-workspace-vol:/tmp/workspace
+    {% endif -%}   {#  AIRBYTE_volume_map_data #}
+      - /tmp/airbyte_local:/tmp/airbyte_local
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
