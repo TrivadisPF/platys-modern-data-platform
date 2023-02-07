@@ -34,6 +34,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 2184 | 2184 | zookeeper-4 |
 2185 | 2185 | zookeeper-5 |
 2186 | 2186 | zookeeper-6 |
+2222 | 22 | sftp |
 2424 | 2424 | arcadedb |
 2480 | 5432 | arcadedb (postgresql port) |
 2481 | 6379 | arcadedb (redis port) |
