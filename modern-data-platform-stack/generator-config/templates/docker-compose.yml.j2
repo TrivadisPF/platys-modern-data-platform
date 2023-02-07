@@ -362,7 +362,9 @@ networks:
 {% set __RABBITMQ_version = RABBITMQ_version | default('latest') -%}
 
 {% set __FTP_PUREFTPD_version = FTP_PUREFTPD_version | default('latest') -%}
-{% set __FTP_FILEZILLA_version = FTP_FILEZILLA_version | default('latest') -%}
+{% set __SFTP_version = SFTP_version | default('latest') -%}
+
+{% set __FILEZILLA_version = FILEZILLA_version | default('latest') -%}
 
 {% set __CAMUNDA_BPM_PLATFORM_version = CAMUNDA_BPM_PLATFORM_version | default('latest') -%}
 {% set __CAMUNDA_OPTIMIZE_version = CAMUNDA_OPTIMIZE_version | default('latest') -%}
@@ -12694,14 +12696,45 @@ services:
     <<: *logging
     {% endif -%}   {#  LOKI_collect_docker_logs #}
     restart: {{container_restart_policy}}
+{% endif %}   {#  FTP_enable #}
 
+{% if SFTP_enable | default(false) %}
+  #  ================================== SFTP Server ========================================== #
+  sftp:
+    image: atmoz/sftp:{{__SFTP_version}}
+    container_name: sftp
+    hostname: sftp
+    labels:
+      com.platys.name: "sftp"
+    environment:
+#      - PUBLICHOST="192.168.73.86"
+      - PUBLICHOST=ftp
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    ports:
+      - "22:22"
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    command: foo:pass:1001
+    restart: {{container_restart_policy}}
+{% endif %}   {#  FTP_enable #}
+
+{% if FILEZILLA_enable | default(false) %}
   #  ================================== Filezilla ========================================== #
   filezilla:
-    image: jlesage/filezilla:{{__FTP_FILEZILLA_version}}
+    image: jlesage/filezilla:{{__FILEZILLA_version}}
     container_name: filezilla
     hostname: filezilla
     labels:
-      com.platys.name: "pure-ftp"
+      com.platys.name: "filezilla"
       com.platys.webui.title: "Filezilla UI"
       com.platys.webui.url: "http://${PUBLIC_IP}:5800"
     ports:
@@ -12725,7 +12758,7 @@ services:
     <<: *logging
     {% endif -%}   {#  LOKI_collect_docker_logs #}
     restart: {{container_restart_policy}}
-{% endif %}   {#  FTP_enable #}
+{% endif %}   {#  FILEZILLA_enable #}
 
 {% if CAMUNDA_BPM_PLATFORM_enable | default(false) %}
   #  ================================== Camunda Optimize ========================================== #

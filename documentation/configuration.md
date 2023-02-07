@@ -914,6 +914,12 @@ For each service there might be some other settings, such as controlling the num
 | `FTP_enable`                                   	| `false` 	| 1.0.0 	| Generate FTP service                                                                                                                                                                	|             	|                                	|
 | `FTP_username`                                   	| `ftp` 	| 1.15.0 	| The username of the user on the FTP Server |             	|                                	|
 | `FTP_username`                                   	| `abc123!` 	| 1.15.0 	| The password of the user on the FTP Server |             	|                                	|
+| [**_SFTP_**](./services/sftp.md)  &nbsp;&nbsp;&nbsp;&nbsp;![x86-64](./images/x86-64.png)                                    	|         	|       	|                                                                                                                                                                                     	|      
+| `SFTP_enable`                                   	| `false` 	| 1.16.0 	| Generate SFTP service                                                                                                                                                                	|             	|                                	|
+| `SFTP_username`                                   	| `ftp` 	| 1.16.0 	| The username of the user on the SFTP Server |             	|                                	|
+| `SFTP_username`                                   	| `abc123!` 	| 1.16.0 	| The password of the user on the SFTP Server |             	|                                	|
+| [**_FileZilla_**](./services/filezilla.md)  &nbsp;&nbsp;&nbsp;&nbsp;![x86-64](./images/x86-64.png)                                    	|         	|       	|                                                                                                                                                                                     	|      
+| `FILEZILLA_enable`                                   	| `false` 	| 1.16.0 	| Generate FileZilla service                                                                                                                                                                	|             	|                                	|
 
 ### Process Orchestration
 
