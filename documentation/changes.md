@@ -77,7 +77,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Update `flink` to `1.16.1-scala_2.12`
  * Update `tika-server` to `2.6.0.0-full`
  * Update `marquez` and `marquez-web` to `0.29.0`
- * Update `airbyte` to `0.40.28`
+ * Update `airbyte` to `0.40.33`
  * Update `mlflow-server` to `2.1.0`
  * Update `minio` to `RELEASE.2023-01-20T02-05-44Z`
  * Update `grafana` to `9.3.2`
