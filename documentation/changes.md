@@ -69,7 +69,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Update `telegraf` to `1.24.3`
  * Update `burrow` to `v1.5.0`
  * Update `graphdb` to `10.1.2`
- * Update `nifi` to `1.19.1`
+ * Update `nifi` to `1.20.0`
  * Update `jikkou` to `0.13.0`
  * Update `spark` to `3.1.3`, `3.2.3` and `3.3.1`
  * Update `materialize` to `v0.38.0`
