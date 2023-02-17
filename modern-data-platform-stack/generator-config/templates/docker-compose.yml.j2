@@ -79,16 +79,19 @@ networks:
 {% elif (SPARK_base_version | lower) == '3.1'  %}
   {% set __SPARK_version = SPARK_3_1_version ~ "-hadoop3.2" -%}
   {% set __LIVY_version = LIVY_version ~ "-spark" ~ SPARK_3_1_version.split(".")[0]  ~ "." ~ SPARK_3_1_version.split(".")[1] -%}
-  {% set SPARK_table_format_package = ("io.delta:delta-core_2.12:1.0.1" if SPARK_with_table_format == 'delta' else "org.apache.iceberg:iceberg-spark-runtime-3.1_2.12:0.14.0") -%}
+  {% set SPARK_table_format_package = ("io.delta:delta-core_2.12:1.0.1" if SPARK_table_format_type == 'delta' else "org.apache.iceberg:iceberg-spark-runtime-3.1_2.12:0.14.0") -%}
 {% elif (SPARK_base_version | lower) == '3.2'  %}
   {% set __SPARK_version = SPARK_3_2_version ~ "-hadoop3.2" -%}
   {% set __LIVY_version = LIVY_version ~ "-spark" ~ SPARK_3_2_version.split(".")[0]  ~ "." ~ SPARK_3_2_version.split(".")[1] -%}
+  {% set SPARK_table_format_package = ("io.delta:delta-core_2.12:1.0.1" if SPARK_table_format_type == 'delta' else "org.apache.iceberg:iceberg-spark-runtime-3.1_2.12:0.14.0") -%}
 {% elif (SPARK_base_version | lower) == '3.3'  %}
   {% set __SPARK_version = SPARK_3_3_version ~ "-hadoop3.3" -%}
   {% set __LIVY_version = LIVY_version ~ "-spark" ~ SPARK_3_3_version.split(".")[0]  ~ "." ~ SPARK_3_3_version.split(".")[1] -%}
+  {% set SPARK_table_format_package = ("io.delta:delta-core_2.12:1.0.1" if SPARK_table_format_type == 'delta' else "org.apache.iceberg:iceberg-spark-runtime-3.1_2.12:0.14.0") -%}
 {% else -%}
   {% set __SPARK_version = SPARK_2_4_version ~ "-hadoop2.8" -%}
   {% set __LIVY_version = LIVY_version ~ "-spark" ~ SPARK_2_4_version.split(".")[0]  ~ "." ~ SPARK_2_4_version.split(".")[1]  -%}
+  {% set SPARK_table_format_package = ("io.delta:delta-core_2.12:1.0.1" if SPARK_table_format_type == 'delta' else "org.apache.iceberg:iceberg-spark-runtime-3.1_2.12:0.14.0") -%}
 {% endif -%}
 {% set __ZEPPELIN_version = ZEPPELIN_version ~ "-spark" ~ __SPARK_version -%}
 
@@ -3212,7 +3215,7 @@ services:
       SPARK_DEFAULTS_CONF_spark_executor_extraJavaOptions: {{SPARK_executor_extraJavaOptions}}
       SPARK_DEFAULTS_CONF_spark_cores_max: {{SPARK_cores_max if SPARK_cores_max is defined and SPARK_cores_max else omit }}
       SPARK_DEFAULTS_CONF_spark_executor_memory: {{SPARK_executor_memory if SPARK_executor_memory is defined and SPARK_executor_memory else omit }}
-      SPARK_DEFAULTS_CONF_spark_sql_extensions: {{SPARK_sql_extensions if SPARK_sql_extensions is defined and SPARK_sql_extensions else omit }}
+#      SPARK_DEFAULTS_CONF_spark_sql_extensions: {{SPARK_sql_extensions if SPARK_sql_extensions is defined and SPARK_sql_extensions else omit }}
 #      SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: {{SPARK_sql_catalog_spark_catalog if SPARK_sql_catalog_spark_catalog is defined and SPARK_sql_catalog_spark_catalog else omit }}
     {%if SPARK_table_format_type == 'iceberg' | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.ApacheIceberg.spark.SparkSessionCatalog
@@ -3223,7 +3226,8 @@ services:
     {%elif SPARK_table_format_type == 'delta' | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.spark.sql.delta.catalog.DeltaCatalog
       SPARK_DEFAULTS_CONF_spark_sql_extensions: io.delta.sql.DeltaSparkSessionExtension
-    {% endif -%}   {#  SPARK_with_table_format #}
+    {%elif SPARK_table_format_type == 'hudi' | default(false) %}
+    {% endif -%}   {#  SPARK_table_format_type #}
     {%if DATAHUB_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_extraListeners: 'datahub.spark.DatahubSparkListener'
       SPARK_DEFAULTS_CONF_spark_datahub_rest_server: 'http://datahub-gms:8080'
