@@ -3295,11 +3295,6 @@ services:
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_endpoint: {{s3Endpoint | default(omit) }}
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_path_style_access: '{{s3PathStyleAccess}}'
   {% endif -%}    {#  MINIO_enable #}
-      SPARK_DEFAULTS_CONF_spark_jars_repositories: {{SPARK_jars_repositories}}
-      SPARK_DEFAULTS_CONF_spark_jars_packages: {{SPARK_jars_packages}}
-      SPARK_DEFAULTS_CONF_spark_jars_excludes: {{SPARK_jars_excludes}}
-      SPARK_DEFAULTS_CONF_spark_jars: {{SPARK_jars}}
-      SPARK_DEFAULTS_CONF_spark_jars_ivySettings: {{SPARK_jars_ivySettings}}
   {%if (SPARK_catalog | lower) == 'in-memory' | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalogImplementation: in-memory
   {% else %}
@@ -3320,12 +3315,29 @@ services:
       SPARK_DEFAULTS_CONF_spark_executor_extraJavaOptions: {{SPARK_executor_extraJavaOptions}}
       SPARK_DEFAULTS_CONF_spark_cores_max: {{SPARK_cores_max if SPARK_cores_max is defined and SPARK_cores_max else omit }}
       SPARK_DEFAULTS_CONF_spark_executor_memory: {{SPARK_executor_memory if SPARK_executor_memory is defined and SPARK_executor_memory else omit }}
-      SPARK_DEFAULTS_CONF_spark_sql_extensions: {{SPARK_sql_extensions if SPARK_sql_extensions is defined and SPARK_sql_extensions else omit }}
-      SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: {{SPARK_sql_catalog_spark_catalog if SPARK_sql_catalog_spark_catalog is defined and SPARK_sql_catalog_spark_catalog else omit }}
     {%if DATAHUB_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_extraListeners: 'datahub.spark.DatahubSparkListener'
       SPARK_DEFAULTS_CONF_spark_datahub_rest_server: 'http://datahub-gms:8080'
     {% endif -%}   {#  DATAHUB_enable #}
+    {%if SPARK_table_format_type == 'iceberg' | default(false) %}
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.ApacheIceberg.spark.SparkSessionCatalog
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog_type: hive
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_iceberg: org.apache.ApacheIceberg.spark.SparkCatalog
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_iceberg_type: hadoop
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_iceberg_warehouse: /warehouse
+    {%elif SPARK_table_format_type == 'delta' | default(false) %}
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.spark.sql.delta.catalog.DeltaCatalog
+      SPARK_DEFAULTS_CONF_spark_sql_extensions: io.delta.sql.DeltaSparkSessionExtension
+    {%elif SPARK_table_format_type == 'hudi' | default(false) %}
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.spark.sql.hudi.catalog.HoodieCatalog
+      SPARK_DEFAULTS_CONF_spark_sql_extensions: org.apache.spark.sql.hudi.HoodieSparkSessionExtension
+      SPARK_DEFAULTS_CONF_spark_serializer: org.apache.spark.serializer.KryoSerializer
+    {% endif -%}   {#  SPARK_table_format_type #}
+      SPARK_DEFAULTS_CONF_spark_jars_repositories: {{SPARK_jars_repositories}}
+      SPARK_DEFAULTS_CONF_spark_jars_packages: {{SPARK_jars_packages}}{{';' if SPARK_jars_packages | length}}{{SPARK_table_format_package | default('')}}
+      SPARK_DEFAULTS_CONF_spark_jars_excludes: {{SPARK_jars_excludes}}
+      SPARK_DEFAULTS_CONF_spark_jars: {{SPARK_jars}}
+      SPARK_DEFAULTS_CONF_spark_jars_ivySettings: {{SPARK_jars_ivySettings}}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -3390,8 +3402,20 @@ services:
       SPARK_DEFAULTS_CONF_spark_executor_extraJavaOptions: {{SPARK_executor_extraJavaOptions}}
       SPARK_DEFAULTS_CONF_spark_cores_max: {{SPARK_cores_max if SPARK_cores_max is defined and SPARK_cores_max else omit }}
       SPARK_DEFAULTS_CONF_spark_executor_memory: {{SPARK_executor_memory if SPARK_executor_memory is defined and SPARK_executor_memory else omit }}
-      SPARK_DEFAULTS_CONF_spark_sql_extensions: {{SPARK_sql_extensions if SPARK_sql_extensions is defined and SPARK_sql_extensions else omit }}
-      SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: {{SPARK_sql_catalog_spark_catalog if SPARK_sql_catalog_spark_catalog is defined and SPARK_sql_catalog_spark_catalog else omit }}
+  {%if SPARK_table_format_type == 'iceberg' | default(false) %}
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.ApacheIceberg.spark.SparkSessionCatalog
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog_type: hive
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_iceberg: org.apache.ApacheIceberg.spark.SparkCatalog
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_iceberg_type: hadoop
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_iceberg_warehouse: /warehouse
+  {%elif SPARK_table_format_type == 'delta' | default(false) %}
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.spark.sql.delta.catalog.DeltaCatalog
+      SPARK_DEFAULTS_CONF_spark_sql_extensions: io.delta.sql.DeltaSparkSessionExtension
+  {%elif SPARK_table_format_type == 'hudi' | default(false) %}
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.spark.sql.hudi.catalog.HoodieCatalog
+      SPARK_DEFAULTS_CONF_spark_sql_extensions: org.apache.spark.sql.hudi.HoodieSparkSessionExtension
+      SPARK_DEFAULTS_CONF_spark_serializer: org.apache.spark.serializer.KryoSerializer
+  {% endif -%}   {#  SPARK_table_format_type #}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -3493,6 +3517,7 @@ services:
       - ./conf/hadoop.env
     environment:
       SPARK_MASTER: spark://spark-master:7077
+      DEPLOY_MODE: client
   {%if MINIO_enable or external['S3_enable'] | default(false) %}
       CORE_CONF_fs_s3a_endpoint: 'http://minio:9000'
       CORE_CONF_fs_s3a_path_style_access: 'true'
@@ -3505,12 +3530,6 @@ services:
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_endpoint: http://minio:9000
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_path_style_access: 'true'
   {% endif -%}    {#  MINIO_enable #}
-      DEPLOY_MODE: client
-      SPARK_DEFAULTS_CONF_spark_jars_repositories: {{SPARK_jars_repositories}}
-      SPARK_DEFAULTS_CONF_spark_jars_packages: {{SPARK_jars_packages}}
-      SPARK_DEFAULTS_CONF_spark_jars_excludes: {{SPARK_jars_excludes}}
-      SPARK_DEFAULTS_CONF_spark_jars: {{SPARK_jars}}
-      SPARK_DEFAULTS_CONF_spark_jars_ivySettings: {{SPARK_jars_ivySettings}}
   {%if (SPARK_catalog | lower) == 'in-memory' | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalogImplementation: in-memory
   {% else %}
@@ -3531,12 +3550,29 @@ services:
       SPARK_DEFAULTS_CONF_spark_executor_extraJavaOptions: {{SPARK_executor_extraJavaOptions}}
       SPARK_DEFAULTS_CONF_spark_cores_max: {{SPARK_cores_max if SPARK_cores_max is defined and SPARK_cores_max else omit }}
       SPARK_DEFAULTS_CONF_spark_executor_memory: {{SPARK_executor_memory if SPARK_executor_memory is defined and SPARK_executor_memory else omit }}
-      SPARK_DEFAULTS_CONF_spark_sql_extensions: {{SPARK_sql_extensions if SPARK_sql_extensions is defined and SPARK_sql_extensions else omit }}
-      SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: {{SPARK_sql_catalog_spark_catalog if SPARK_sql_catalog_spark_catalog is defined and SPARK_sql_catalog_spark_catalog else omit }}
-    {%if DATAHUB_enable | default(false) %}
+  {%if DATAHUB_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_extraListeners: 'datahub.spark.DatahubSparkListener'
       SPARK_DEFAULTS_CONF_spark_datahub_rest_server: 'http://datahub-gms:8080'
-    {% endif -%}   {#  DATAHUB_enable #}
+  {% endif -%}   {#  DATAHUB_enable #}
+  {%if SPARK_table_format_type == 'iceberg' | default(false) %}
+        SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.ApacheIceberg.spark.SparkSessionCatalog
+        SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog_type: hive
+        SPARK_DEFAULTS_CONF_spark_sql_catalog_iceberg: org.apache.ApacheIceberg.spark.SparkCatalog
+        SPARK_DEFAULTS_CONF_spark_sql_catalog_iceberg_type: hadoop
+        SPARK_DEFAULTS_CONF_spark_sql_catalog_iceberg_warehouse: /warehouse
+  {%elif SPARK_table_format_type == 'delta' | default(false) %}
+        SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.spark.sql.delta.catalog.DeltaCatalog
+        SPARK_DEFAULTS_CONF_spark_sql_extensions: io.delta.sql.DeltaSparkSessionExtension
+  {%elif SPARK_table_format_type == 'hudi' | default(false) %}
+        SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.spark.sql.hudi.catalog.HoodieCatalog
+        SPARK_DEFAULTS_CONF_spark_sql_extensions: org.apache.spark.sql.hudi.HoodieSparkSessionExtension
+        SPARK_DEFAULTS_CONF_spark_serializer: org.apache.spark.serializer.KryoSerializer
+  {% endif -%}   {#  SPARK_table_format_type #}
+      SPARK_DEFAULTS_CONF_spark_jars_repositories: {{SPARK_jars_repositories}}
+      SPARK_DEFAULTS_CONF_spark_jars_packages: {{SPARK_jars_packages}}{{';' if SPARK_jars_packages | length}}{{SPARK_table_format_package | default('')}}
+      SPARK_DEFAULTS_CONF_spark_jars_excludes: {{SPARK_jars_excludes}}
+      SPARK_DEFAULTS_CONF_spark_jars: {{SPARK_jars}}
+      SPARK_DEFAULTS_CONF_spark_jars_ivySettings: {{SPARK_jars_ivySettings}}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -6689,10 +6725,22 @@ services:
     {% endif %}
       SPARK_DEFAULTS_CONF_spark_cores_max: {{ZEPPELIN_spark_cores_max if ZEPPELIN_spark_cores_max is defined and ZEPPELIN_spark_cores_max else omit }}
       SPARK_DEFAULTS_CONF_spark_executor_memory: {{ZEPPELIN_spark_executor_memory if ZEPPELIN_spark_executor_memory is defined and ZEPPELIN_spark_executor_memory else omit }}
-      SPARK_DEFAULTS_CONF_spark_sql_extensions: {{SPARK_sql_extensions if SPARK_sql_extensions is defined and SPARK_sql_extensions else omit }}
-      SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: {{SPARK_sql_catalog_spark_catalog if SPARK_sql_catalog_spark_catalog is defined and SPARK_sql_catalog_spark_catalog else omit }}
+    {%if SPARK_table_format_type == 'iceberg' | default(false) %}
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.ApacheIceberg.spark.SparkSessionCatalog
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog_type: hive
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_iceberg: org.apache.ApacheIceberg.spark.SparkCatalog
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_iceberg_type: hadoop
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_iceberg_warehouse: /warehouse
+    {%elif SPARK_table_format_type == 'delta' | default(false) %}
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.spark.sql.delta.catalog.DeltaCatalog
+      SPARK_DEFAULTS_CONF_spark_sql_extensions: io.delta.sql.DeltaSparkSessionExtension
+    {%elif SPARK_table_format_type == 'hudi' | default(false) %}
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.spark.sql.hudi.catalog.HoodieCatalog
+      SPARK_DEFAULTS_CONF_spark_sql_extensions: org.apache.spark.sql.hudi.HoodieSparkSessionExtension
+      SPARK_DEFAULTS_CONF_spark_serializer: org.apache.spark.serializer.KryoSerializer
+    {% endif -%}   {#  SPARK_table_format_type #}
       SPARK_DEFAULTS_CONF_spark_jars_repositories: {{SPARK_jars_repositories}}
-      SPARK_DEFAULTS_CONF_spark_jars_packages: {{SPARK_jars_packages}}
+      SPARK_DEFAULTS_CONF_spark_jars_packages: {{SPARK_jars_packages}}{{';' if SPARK_jars_packages | length}}{{SPARK_table_format_package | default('')}}
       SPARK_DEFAULTS_CONF_spark_jars_excludes: {{SPARK_jars_excludes}}
       SPARK_DEFAULTS_CONF_spark_jars: {{SPARK_jars}}
       SPARK_DEFAULTS_CONF_spark_jars_ivySettings: {{SPARK_jars_ivySettings}}
