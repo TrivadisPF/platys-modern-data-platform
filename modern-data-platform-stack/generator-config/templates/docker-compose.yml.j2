@@ -79,19 +79,19 @@ networks:
 {% elif (SPARK_base_version | lower) == '3.1'  %}
   {% set __SPARK_version = SPARK_3_1_version ~ "-hadoop3.2" -%}
   {% set __LIVY_version = LIVY_version ~ "-spark" ~ SPARK_3_1_version.split(".")[0]  ~ "." ~ SPARK_3_1_version.split(".")[1] -%}
-  {% set SPARK_table_format_package = ("io.delta:delta-core_2.12:1.0.1" if SPARK_table_format_type == 'delta' else "org.apache.iceberg:iceberg-spark-runtime-3.1_2.12:0.14.0" if SPARK_table_format_type == 'iceberg' else "org.apache.hudi:hudi-spark3.1-bundle_2.12:0.12.2" ) -%}
+  {% set SPARK_table_format_package = ("io.delta:delta-core_2.12:1.0.1" if SPARK_table_format_type == 'delta' else "org.apache.iceberg:iceberg-spark-runtime-3.1_2.12:1.1.0" if SPARK_table_format_type == 'iceberg' else "org.apache.hudi:hudi-spark3.1-bundle_2.12:0.12.2" ) -%}
 {% elif (SPARK_base_version | lower) == '3.2'  %}
   {% set __SPARK_version = SPARK_3_2_version ~ "-hadoop3.2" -%}
   {% set __LIVY_version = LIVY_version ~ "-spark" ~ SPARK_3_2_version.split(".")[0]  ~ "." ~ SPARK_3_2_version.split(".")[1] -%}
-  {% set SPARK_table_format_package = ("io.delta:delta-core_2.12:1.0.1" if SPARK_table_format_type == 'delta' else "org.apache.iceberg:iceberg-spark-runtime-3.1_2.12:0.14.0" if SPARK_table_format_type == 'iceberg' else "org.apache.hudi:hudi-spark3.2-bundle_2.12:0.12.2") -%}
+  {% set SPARK_table_format_package = ("io.delta:delta-core_2.12:2.0.2" if SPARK_table_format_type == 'delta' else "org.apache.iceberg:iceberg-spark-runtime-3.2_2.12:1.1.0" if SPARK_table_format_type == 'iceberg' else "org.apache.hudi:hudi-spark3.2-bundle_2.12:0.12.2") -%}
 {% elif (SPARK_base_version | lower) == '3.3'  %}
   {% set __SPARK_version = SPARK_3_3_version ~ "-hadoop3.3" -%}
   {% set __LIVY_version = LIVY_version ~ "-spark" ~ SPARK_3_3_version.split(".")[0]  ~ "." ~ SPARK_3_3_version.split(".")[1] -%}
-  {% set SPARK_table_format_package = ("io.delta:delta-core_2.12:1.0.1" if SPARK_table_format_type == 'delta' else "org.apache.iceberg:iceberg-spark-runtime-3.1_2.12:0.14.0") if SPARK_table_format_type == 'iceberg' else "org.apache.hudi:hudi-spark3.3-bundle_2.12:0.12.2" -%}
+  {% set SPARK_table_format_package = ("io.delta:delta-core_2.12:2.2.0" if SPARK_table_format_type == 'delta' else "org.apache.iceberg:iceberg-spark-runtime-3.3_2.12:1.1.0") if SPARK_table_format_type == 'iceberg' else "org.apache.hudi:hudi-spark3.3-bundle_2.12:0.12.2" -%}
 {% else -%}
   {% set __SPARK_version = SPARK_2_4_version ~ "-hadoop2.8" -%}
   {% set __LIVY_version = LIVY_version ~ "-spark" ~ SPARK_2_4_version.split(".")[0]  ~ "." ~ SPARK_2_4_version.split(".")[1]  -%}
-  {% set SPARK_table_format_package = ("io.delta:delta-core_2.12:1.0.1" if SPARK_table_format_type == 'delta' else "org.apache.iceberg:iceberg-spark-runtime-3.1_2.12:0.14.0")  if SPARK_table_format_type == 'iceberg' else "org.apache.hudi:hudi-spark2.4-bundle_2.12:0.12.2" -%}
+  {% set SPARK_table_format_package = ("io.delta:delta-core_2.12:0.6.1" if SPARK_table_format_type == 'delta' else "org.apache.iceberg:iceberg-spark-2:0.13.2")  if SPARK_table_format_type == 'iceberg' else "org.apache.hudi:hudi-spark2.4-bundle_2.12:0.12.2" -%}
 {% endif -%}
 {% set __ZEPPELIN_version = ZEPPELIN_version ~ "-spark" ~ __SPARK_version -%}
 
@@ -3183,6 +3183,10 @@ services:
     env_file:
       - ./conf/hadoop.env
     environment:
+      SPARK_PUBLIC_DNS: ${PUBLIC_IP}
+      SPARK_MASTER_OPTS: '{{SPARK_master_opts if SPARK_master_opts is defined and SPARK_master_opts else omit }}'
+      INIT_DAEMON_STEP: setup_spark
+      MASTER: spark://spark-master:7077
     {%if MINIO_enable or external['S3_enable'] | default(false) %}
       CORE_CONF_fs_s3a_endpoint: '{{s3Endpoint | default(omit) }}'
       CORE_CONF_fs_s3a_path_style_access: '{{s3PathStyleAccess}}'
@@ -3217,6 +3221,10 @@ services:
       SPARK_DEFAULTS_CONF_spark_executor_memory: {{SPARK_executor_memory if SPARK_executor_memory is defined and SPARK_executor_memory else omit }}
 #      SPARK_DEFAULTS_CONF_spark_sql_extensions: {{SPARK_sql_extensions if SPARK_sql_extensions is defined and SPARK_sql_extensions else omit }}
 #      SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: {{SPARK_sql_catalog_spark_catalog if SPARK_sql_catalog_spark_catalog is defined and SPARK_sql_catalog_spark_catalog else omit }}
+    {%if DATAHUB_enable | default(false) %}
+      SPARK_DEFAULTS_CONF_spark_extraListeners: 'datahub.spark.DatahubSparkListener'
+      SPARK_DEFAULTS_CONF_spark_datahub_rest_server: 'http://datahub-gms:8080'
+    {% endif -%}   {#  DATAHUB_enable #}
     {%if SPARK_table_format_type == 'iceberg' | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.ApacheIceberg.spark.SparkSessionCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog_type: hive
@@ -3231,14 +3239,6 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_extensions: org.apache.spark.sql.hudi.HoodieSparkSessionExtension
       SPARK_DEFAULTS_CONF_spark_serializer: org.apache.spark.serializer.KryoSerializer
     {% endif -%}   {#  SPARK_table_format_type #}
-    {%if DATAHUB_enable | default(false) %}
-      SPARK_DEFAULTS_CONF_spark_extraListeners: 'datahub.spark.DatahubSparkListener'
-      SPARK_DEFAULTS_CONF_spark_datahub_rest_server: 'http://datahub-gms:8080'
-    {% endif -%}   {#  DATAHUB_enable #}
-      SPARK_PUBLIC_DNS: ${PUBLIC_IP}
-      SPARK_MASTER_OPTS: '{{SPARK_master_opts if SPARK_master_opts is defined and SPARK_master_opts else omit }}'
-      INIT_DAEMON_STEP: setup_spark
-      MASTER: spark://spark-master:7077
       SPARK_DEFAULTS_CONF_spark_jars_repositories: {{SPARK_jars_repositories}}
       SPARK_DEFAULTS_CONF_spark_jars_packages: {{SPARK_jars_packages}}{{';' if SPARK_jars_packages | length}}{{SPARK_table_format_package | default('')}}
       SPARK_DEFAULTS_CONF_spark_jars_excludes: {{SPARK_jars_excludes}}
