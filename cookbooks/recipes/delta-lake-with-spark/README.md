@@ -1,7 +1,7 @@
 ---
 technoglogies:      spark,delta-lake
 version:				1.16.0
-validated-at:			10.12.2022
+validated-at:			18.02.2023
 ---
 
 # Spark with Delta Lake
@@ -18,37 +18,14 @@ platys init --enable-services SPARK,ZEPPELIN,MINIO,AWSCLI,PROVISIONING_DATA -s t
 
 Before we can generate the platform, we need to extend the `config.yml`:
 
-First let's specify the Spark Base version to use and then add the delta jar to `SPARK_jars_packages`
-
-Make sure that you use the right version according to [the compatibility table in the Delta Lake documentation](https://docs.delta.io/latest/releases.html).
-
-* for Spark 3.1.x
+Specify the table format to use as Delta.
 
 ```
-      SPARK_base_version: 3.1
-      SPARK_jars_packages: 'io.delta:delta-core_2.12:1.0.1'
+      SPARK_table_format_type: 'delta'
 ```
 
-* for Spark 3.2.x
+Platys automatically makes sure that the right version according to [the compatibility table in the Delta Lake documentation](https://docs.delta.io/latest/releases.html) is used.
 
-```
-      SPARK_base_version: 3.2
-      SPARK_jars_packages: 'io.delta:delta-core_2.12:2.0.1'
-```
-
-* for Spark 3.3.x
-
-```
-      SPARK_base_version: 3.3
-      SPARK_jars_packages: 'io.delta:delta-core_2.12:2.2.0'
-```
-
-Now let's add the two configuration settings for Delta Lake:
-
-```
-      SPARK_sql_extensions: 'io.delta.sql.DeltaSparkSessionExtension'
-      SPARK_sql_catalog_spark_catalog: 'org.apache.spark.sql.delta.catalog.DeltaCatalog'
-```
 
 Now set an environment variable to the home folder of the dataplatform and generate and then start the data platform.
 
