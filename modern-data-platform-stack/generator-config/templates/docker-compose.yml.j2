@@ -12384,17 +12384,21 @@ services:
     {%elif LAKEFS_blockstore_type == 's3' %}
       LAKEFS_BLOCKSTORE_S3_ENDPOINT: {{ (s3Endpoint | replace('http://','')) if s3Endpoint is defined and s3Endpoint else omit}}
       LAKEFS_BLOCKSTORE_S3_REGION: {{s3DefaultRegion if s3DefaultRegion is defined and s3DefaultRegion else omit}}
+      LAKEFS_BLOCKSTORE_S3_DISCOVER_BUCKET_REGION: 'false'
       LAKEFS_BLOCKSTORE_S3_FORCE_PATH_STYLE: '{{s3PathStyleAccess}}'
       LAKEFS_BLOCKSTORE_S3_CREDENTIALS_ACCESS_KEY_ID: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
       LAKEFS_BLOCKSTORE_S3_CREDENTIALS_SECRET_ACCESS_KEY: ${PLATYS_AWS_SECRET_ACCESS_KEY:-{{MINIO_secret_key}}}
     {% endif -%}   {#  LAKEFS_blockstore_type #}
       LAKEFS_AUTH_ENCRYPT_SECRET_KEY: ${LAKEFS_AUTH_ENCRYPT_SECRET_KEY:-some random secret string}
       LAKEFS_DATABASE_TYPE: postgres
-      LAKEFS_DATABASE_CONNECTION_STRING: "postgres://{{POSTGRESQL_user}}:{{POSTGRESQL_password}}@postgresql:5432/{{POSTGRESQL_database}}"
+      LAKEFS_DATABASE_POSTGRES_CONNECTION_STRING: "postgres://{{POSTGRESQL_user}}:{{POSTGRESQL_password}}@postgresql:5432/{{POSTGRESQL_database}}"
       LAKEFS_GATEWAYS_S3_DOMAIN_NAME: ${LAKEFS_GATEWAYS_S3_DOMAIN_NAME:-s3.local.lakefs.io:8000}
       LAKEFS_LOGGING_LEVEL: {{LAKEFS_logging_level | default(INFO) }}
       LAKEFS_STATS_ENABLED: 'true'
       LAKEFS_COMMITTED_LOCAL_CACHE_DIR: ${LAKEFS_COMMITTED_LOCAL_CACHE_DIR:-/home/lakefs/.local_tier}
+      LAKECTL_CREDENTIALS_ACCESS_KEY_ID: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
+      LAKECTL_CREDENTIALS_SECRET_ACCESS_KEY: ${PLATYS_AWS_SECRET_ACCESS_KEY:-{{MINIO_secret_key}}}
+      LAKECTL_SERVER_ENDPOINT_URL: http://lakefs:8000
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
