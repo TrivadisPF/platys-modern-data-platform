@@ -388,7 +388,7 @@ networks:
 {% set __AWSCLI_version = AWSCLI_version | default('latest') -%}
 {% set __AZURECLI_version = AZURECLI_version | default('latest') -%}
 {% set __AZURE_STORAGE_EXPLORER_version = AZURE_STORAGE_EXPLORER_version | default('latest') -%}
-{% set __ICEBERG_REST_version = ICEBERG_REST_version | default('latest') -%}
+{% set __ICEBERG_REST_CATALOG_version = ICEBERG_REST_CATALOG_version | default('latest') -%}
 
 {% set __LAKEFS_version = LAKEFS_version | default('latest') -%}
 
@@ -12174,29 +12174,38 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {#  ADMINIO_UI_enable #}
 
-{% if ICEBERG_REST_enable | default(false) %}
-  #  ================================== Iceberg REST API ========================================== #
-  iceberg-rest:
-    image: tabulario/iceberg-rest:{{__ICEBERG_REST_version}}
-    container_name: iceberg-rest
-    hostname: iceberg-rest
+{% if ICEBERG_REST_CATALOG_enable | default(false) %}
+  #  ================================== Iceberg REST Catalog ========================================== #
+  iceberg-rest-catalog:
+    image: tabulario/iceberg-rest:{{__ICEBERG_REST_CATALOG_version}}
+    container_name: iceberg-rest-catalog
+    hostname: iceberg-rest-catalog
     labels:
-      com.platys.name: "iceberg-rest"
-      com.platys.restapi.title: "Iceberg REST API"
+      com.platys.name: "iceberg-rest-catalog"
+      com.platys.restapi.title: "Iceberg REST Catalog"
       com.platys.restapi.url: "http://${PUBLIC_IP}:28287"
     ports:
       - 28287:8181
     environment:
+      CATALOG_IO__IMPL: org.apache.iceberg.aws.s3.S3FileIO
       AWS_ACCESS_KEY_ID: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
       AWS_SECRET_ACCESS_KEY: ${PLATYS_AWS_SECRET_ACCESS_KEY:-{{MINIO_secret_key}}}
       AWS_REGION: {{s3DefaultRegion if s3DefaultRegion is defined and s3DefaultRegion else omit}}
       CATALOG_S3_ENDPOINT: {{ (s3Endpoint | replace('http://','')) if s3Endpoint is defined and s3Endpoint else omit}}
-      CATALOG_WAREHOUSE: s3a://warehouse/wh/
-      CATALOG_IO__IMPL: org.apache.iceberg.aws.s3.S3FileIO
+      CATALOG_WAREHOUSE: {{ICEBERG_REST_CATALOG_warehouse_dir if ICEBERG_REST_CATALOG_warehouse_dir is defined and ICEBERG_REST_CATALOG_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
+    {%if (ICEBERG_REST_CATALOG_type | lower) =='jdbc'  | default(false) %}
       CATALOG_CATALOG__IMPL: org.apache.iceberg.jdbc.JdbcCatalog      # org.apache.iceberg.nessie.NessieCatalog
       CATALOG_URI: jdbc:sqlite:file:/tmp/iceberg_rest_mode=memory
-#      JDBC_user
-#      JDBC_password:
+      CATALOG_JDBC_USERNAME: user
+      CATALOG_JDBC_PASSWORD: password
+    {%elif (ICEBERG_REST_CATALOG_type | lower) =='hive'  | default(false) %}
+      CATALOG_CATALOG__IMPL: org.apache.iceberg.hive.HiveCatalog      #
+      CATALOG_URI: jdbc:sqlite:file:/tmp/iceberg_rest_mode=memory
+    {%elif (ICEBERG_REST_CATALOG_type | lower) =='nessie'  | default(false) %}
+      CATALOG_CATALOG__IMPL: org.apache.iceberg.nessie.NessieCatalog
+      CATALOG_URI: http://nessie:19120/api/v1
+      CATALOG_REF: main
+    {% endif -%}   {#  ICEBERG_REST_CATALOG_type #}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -12210,7 +12219,7 @@ services:
     <<: *logging
     {% endif -%}   {#  LOKI_collect_docker_logs #}
     restart: {{container_restart_policy}}
-{% endif %}   {#  ICEBERG_REST_enable #}
+{% endif %}   {#  ICEBERG_REST_CATALOG_enable #}
 
 {% if FILESTASH_enable | default(false) %}
   #  ================================== Filestash ========================================== #
@@ -12436,7 +12445,7 @@ services:
     labels:
       com.platys.name: "nessie"
       com.platys.webui.title: "Nessie UI"
-      com.platys.webui.url: "http://${PUBLIC_IP}:19120"
+      com.platys.webui.url: "http://${PUBLIC_IP}:19120/api/v1"
     ports:
       - 19120:19120
     environment:
