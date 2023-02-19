@@ -25,7 +25,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Curity
  * Anaconda
  * Redpanda Console (previously kowl, old version of kowl still supported)
- * Iceberg REST Catalog API
+ * Iceberg REST Catalog
  * JanusGraph
  * Gremlin Console
  * Invana Engine and Invana Studio

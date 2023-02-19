@@ -1,6 +1,6 @@
-# Apache Iceberg REST Catalog API
+# Apache Iceberg REST Catalog
 
-The Iceberg REST Catalog
+The Iceberg REST Catalog.
 
 **[Website](https://iceberg.apache.org/)** | **[Documentation](https://tabular.io/blog/rest-catalog-docker/)** | **[GitHub](https://github.com/apache/iceberg)**
 
