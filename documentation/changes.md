@@ -103,7 +103,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Update `drill` to `1.20.2`
  * Update `hasura` to `v2.16.1`
  * Update `cedalo-management-center` to `2.5.8`
- * Update `lakefs` to `0.88.0`
+ * Update `lakefs` to `0.93.0`
  * Update `vault` to `1.12.2`
  * Update `portainer` to `2.16.2-alpine`
  * Update `watchtower` to `1.5.1`
