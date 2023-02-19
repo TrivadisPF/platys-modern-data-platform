@@ -3226,7 +3226,6 @@ services:
       SPARK_DEFAULTS_CONF_spark_datahub_rest_server: 'http://datahub-gms:8080'
     {% endif -%}   {#  DATAHUB_enable #}
     {%if SPARK_table_format_type == 'iceberg' | default(false) %}
-#      {% set icebergWarehouse = 's3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse' %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog_type: hive
       SPARK_DEFAULTS_CONF_spark_sql_extensions: org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions
@@ -3329,7 +3328,7 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalog_iceberg: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_iceberg_type: hive
       SPARK_DEFAULTS_CONF_spark_sql_catalog_iceberg_uri: thrift://hive-metastore:9083
-      SPARK_DEFAULTS_CONF_spark_sql_catalog_iceberg_warehouse: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined else 's3a://{{s3AdminBucketName}}/hive/warehouse'}}
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_iceberg_warehouse: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined and SPARK_sql_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
       SPARK_DEFAULTS_CONF_spark_sql_defaultCatalog: iceberg
     {%elif SPARK_table_format_type == 'delta' | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.spark.sql.delta.catalog.DeltaCatalog
@@ -3415,7 +3414,7 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalog_iceberg: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_iceberg_type: hive
       SPARK_DEFAULTS_CONF_spark_sql_catalog_iceberg_uri: thrift://hive-metastore:9083
-      SPARK_DEFAULTS_CONF_spark_sql_catalog_iceberg_warehouse: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined else 's3a://{{s3AdminBucketName}}/hive/warehouse'}}
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_iceberg_warehouse: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined and SPARK_sql_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
       SPARK_DEFAULTS_CONF_spark_sql_defaultCatalog: iceberg
   {%elif SPARK_table_format_type == 'delta' | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.spark.sql.delta.catalog.DeltaCatalog
@@ -3570,7 +3569,7 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalog_iceberg: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_iceberg_type: hive
       SPARK_DEFAULTS_CONF_spark_sql_catalog_iceberg_uri: thrift://hive-metastore:9083
-      SPARK_DEFAULTS_CONF_spark_sql_catalog_iceberg_warehouse: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined else 's3a://{{s3AdminBucketName}}/hive/warehouse'}}
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_iceberg_warehouse: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined and SPARK_sql_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
       SPARK_DEFAULTS_CONF_spark_sql_defaultCatalog: iceberg
   {%elif SPARK_table_format_type == 'delta' | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.spark.sql.delta.catalog.DeltaCatalog
@@ -6744,7 +6743,7 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalog_iceberg: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_iceberg_type: hive
       SPARK_DEFAULTS_CONF_spark_sql_catalog_iceberg_uri: thrift://hive-metastore:9083
-      SPARK_DEFAULTS_CONF_spark_sql_catalog_iceberg_warehouse: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined else 's3a://{{s3AdminBucketName}}/hive/warehouse'}}
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_iceberg_warehouse: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined and SPARK_sql_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
       SPARK_DEFAULTS_CONF_spark_sql_defaultCatalog: iceberg
     {%elif SPARK_table_format_type == 'delta' | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.spark.sql.delta.catalog.DeltaCatalog
@@ -8373,6 +8372,8 @@ services:
     ports:
       - {{external_port}}:27017
     environment:
+      - MONGO_INITDB_ROOT_USERNAME={{MONGO_root_username}}
+      - MONGO_INITDB_ROOT_PASSWORD={{MONGO_root_password}}
       - MONGO_INITDB_DATABASE=sample
       - MONGO_INITDB_USERNAME=admin
       - MONGO_INITDB_PASSWORD=admin
@@ -12188,7 +12189,11 @@ services:
       AWS_REGION: {{s3DefaultRegion if s3DefaultRegion is defined and s3DefaultRegion else omit}}
       CATALOG_S3_ENDPOINT: {{ (s3Endpoint | replace('http://','')) if s3Endpoint is defined and s3Endpoint else omit}}
       CATALOG_WAREHOUSE: s3a://warehouse/wh/
-      CATALOG_CATALOG__IMPL: org.apache.iceberg.aws.s3.S3FileIO
+      CATALOG_IO__IMPL: org.apache.iceberg.aws.s3.S3FileIO
+      CATALOG_CATALOG__IMPL: org.apache.iceberg.jdbc.JdbcCatalog      # org.apache.iceberg.nessie.NessieCatalog
+      CATALOG_URI: jdbc:sqlite:file:/tmp/iceberg_rest_mode=memory
+#      JDBC_user
+#      JDBC_password:
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
