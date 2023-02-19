@@ -818,6 +818,9 @@ For each service there might be some other settings, such as controlling the num
 | `LAKEFS_enable`                                 	| `false` 	| 1.12.0 	| Generate LakeFS service                                                                                                                                                              	|    
 | `LAKEFS_blockstore_type`                                 	| `s3` 	| 1.13.0 	| Block adapter to use, one of [`local`, `s3`, `gs`, `azure`, `mem`]. This controls where the underlying data will be stored.                                                                                                                                                             	|     
 | `LAKEFS_logging_level`                                 	| `INFO` 	| 1.13.0 	| Logging level to output, one of [`DEBUG`, `INFO`, `WARN`, `ERROR`, `NONE`].                                                                                                                                                             	|  
+| [**_ProjectNessie_**](./services/nessie.md)   &nbsp;&nbsp;&nbsp;&nbsp;![x86-64](./images/x86-64.png)                        	|         	|
+| `NESSIE_enable`                                 	| `false` 	| 1.16.0 	| Generate Nessie service                                                                                                                                                              	|    
+| `NESSIE_store_type`                                 	| `in-memory` 	| 1.16.0 	| Storage adapter to use for Nessie, one of [`in-memory` or `postgresql` or `mongodb`]. This controls where the underlying data will be stored.                                                                                                                                                             	|     
 
 ### Query Engines
 
