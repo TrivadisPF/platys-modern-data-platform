@@ -392,6 +392,8 @@ networks:
 
 {% set __LAKEFS_version = LAKEFS_version | default('latest') -%}
 
+{% set __NESSIE_version = NESSIE_version | default('latest') -%}
+
 {% set __DBT_version = DBT_version | default('latest') -%}
 
 {% set __CODE_SERVER_version = CODE_SERVER_version | default('latest') -%}
@@ -664,6 +666,7 @@ networks:
   {% set MINIO_MC_enable = false -%}
   {% set MINIO_CONSOLE_enable = false -%}
   {% set LAKEFS_enable = false -%}
+  {% set NESSIE_enable = false -%}
   {% set ADMINIO_UI_enable = false -%}
   {% set ADMINIO_API_enable = false -%}
   {% set FILESTASH_enable = false -%}
@@ -12423,6 +12426,47 @@ services:
     {% endif -%}   {#  LOKI_collect_docker_logs #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  LAKEFS_enable #}
+
+{% if NESSIE_enable | default(false) %}
+  #  ================================== Project Nessie ========================================== #
+  nessie:
+    image: projectnessie/nessie:{{__NESSIE_version}}
+    container_name: nessie
+    hostname: nessie
+    labels:
+      com.platys.name: "nessie"
+      com.platys.webui.title: "Nessie UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:19120"
+    ports:
+      - 19120:19120
+    environment:
+    {%if NESSIE_store_type == 'in-memory' %}
+      nessie.version.store.type: INMEMORY
+    {%elif NESSIE_store_type == 'mongodb' %}
+      nessie.version.store.type: MONGO
+      quarkus.mongodb.database: nessie
+      quarkus.mongodb.connection-string: mongodb://{{MONGO_root_username}}:{{MONGO_root_password}}@mongo:27017
+    {%elif NESSIE_store_type == 'postgresql' %}
+      nessie.version.store.type: TRANSACTIONAL
+      quarkus.datasource.db-kind: postgresql
+      quarkus.datasource.username: {{POSTGRESQL_user}}
+      quarkus.datasource.password: {{POSTGRESQL_password}}
+      quarkus.datasource.jdbc.url: jdbc:postgresql://posgresql:5432/{{POSTGRESQL_database}}
+    {% endif -%}   {#  NESSIE_store_type #}
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  NESSIE_enable #}
 
 {% if MOSQUITTO_enable | default(false) %}
   #  ================================== Mosquitto ========================================== #
