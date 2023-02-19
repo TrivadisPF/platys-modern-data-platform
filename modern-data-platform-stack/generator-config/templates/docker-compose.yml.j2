@@ -12408,7 +12408,14 @@ services:
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
-    entrypoint: ["/app/wait-for", "postgresql:5432", "--", "/app/lakefs", "run"]
+    entrypoint: ["/app/wait-for", "postgresql:5432", "--", "/bin/sh", "-c"]
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+        - |
+          lakefs setup --local-settings --user-name docker --access-key-id {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }} --secret-access-key ${PLATYS_AWS_SECRET_ACCESS_KEY:-{{MINIO_secret_key}}} || true
+          lakefs run --local-settings &
+          wait-for -t 60 lakefs:8000 -- lakectl repo create lakefs://example s3://example || true
+          wait
     {%if LOKI_collect_docker_logs | default(false) %}
     <<: *logging
     {% endif -%}   {#  LOKI_collect_docker_logs #}
