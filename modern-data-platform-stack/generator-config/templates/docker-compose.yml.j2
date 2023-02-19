@@ -12441,20 +12441,22 @@ services:
       - 19120:19120
     environment:
     {%if NESSIE_store_type == 'in-memory' %}
-      nessie.version.store.type: INMEMORY
+      - nessie.version.store.type=INMEMORY
     {%elif NESSIE_store_type == 'mongodb' %}
-      nessie.version.store.type: MONGO
-      quarkus.mongodb.database: nessie
-      quarkus.mongodb.connection-string: mongodb://{{MONGO_root_username}}:{{MONGO_root_password}}@mongo:27017
+      - nessie.version.store.type=MONGO
+      - quarkus.mongodb.database=nessie
+      - quarkus.mongodb.connection-string=mongodb://{{MONGO_root_username}}:{{MONGO_root_password}}@mongo:27017
     {%elif NESSIE_store_type == 'postgresql' %}
-      nessie.version.store.type: TRANSACTIONAL
-      quarkus.datasource.db-kind: postgresql
-      quarkus.datasource.username: {{POSTGRESQL_user}}
-      quarkus.datasource.password: {{POSTGRESQL_password}}
-      quarkus.datasource.jdbc.url: jdbc:postgresql://posgresql:5432/{{POSTGRESQL_database}}
+      - nessie.version.store.type=TRANSACTIONAL
+      - quarkus.datasource.db-kind=postgresql
+      - quarkus.datasource.username={{POSTGRESQL_user}}
+      - quarkus.datasource.password={{POSTGRESQL_password}}
+      - quarkus.datasource.jdbc.url=jdbc:postgresql://posgresql:5432/{{POSTGRESQL_database}}
     {% endif -%}   {#  NESSIE_store_type #}
+      - nessie.server.authentication.enabled=false
+      - quarkus.oidc.enabled=true=false
     {%if use_timezone | default(false) %}
-      TZ: {{use_timezone}}
+      - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
