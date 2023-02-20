@@ -1,7 +1,7 @@
 ---
-technoglogies:    	spark, hive-metastore
-version:			1.15.0
-validated-at:		22.04.2022
+technologies:		spark, hive-metastore
+version:			1.16.0
+validated-at:		20.02.2023
 ---
 
 
@@ -13,21 +13,21 @@ This recipe will show how to use Hive Metastore with Spark.
 
 First [initialise a platys-supported data platform](../documentation/getting-started.md) with the following services enabled
 
-```
+```bash
 platys init --enable-services SPARK,HIVE_METASTORE,MINIO,PROVISIONING_DATA -s trivadis/platys-modern-data-platform -w 1.15.0
 ```
 
 Add the following properties to the generated `config.yml` file:
 
-```
-	  SPARK_catalog: hive
+```bash
+SPARK_catalog: hive
 
-    SPARK_base_version: 3.2
+SPARK_base_version: 3.2
 ```
 
 Now generate and start the data platform.
 
-```
+```bash
 platys gen
 
 docker-compose up -d
@@ -37,7 +37,7 @@ docker-compose up -d
 
 Connect to Hive Metastore Service and create a table:
 
-```
+```bash
 docker exec -ti hive-metastore hive
 ```
 
