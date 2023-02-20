@@ -30,8 +30,11 @@ Inhere we are documenting cookbooks on how to use the platform:
    * [Spark with external S3](./recipes/spark-with-external-s3/README.md)
    * [Spark with PostgreSQL](./recipes/spark-with-postgresql/README.md) - `1.15.0`
 
- * **Delta Lake Storage Format**
+ * **Delta Lake Table Format**
    * [Spark with Delta Lake](./recipes/delta-lake-with-spark/README.md) - `1.16.0`
+
+ * **Iceberg Table Format**
+   * [Spark with Iceberg](./recipes/iceberg-with-spark/README.md) - `1.16.0`
 
  * **Hadoop HDFS**
    * [Querying HDFS data using Presto](./recipes/querying-hdfs-with-presto/README.md)
@@ -51,7 +54,7 @@ Inhere we are documenting cookbooks on how to use the platform:
 
  * **Kafka**
    * [Simulated Multi-DC Setup on one machine](./recipes/simulated-multi-dc-setup/README.md) - `1.14.0`  
-   * [Automate managment of Kafka topics on the platform](./recipes/jikkou-automate-kafka-topics-management/README.md) - `1.14.0`
+   * [Automate management of Kafka topics on the platform](./recipes/jikkou-automate-kafka-topics-management/README.md) - `1.14.0`
 
  * **Confluent Enterprise Platform**
    * [Using Confluent Enterprise Tiered Storage](./recipes/confluent-tiered-storage/README.md) - `1.13.0`
