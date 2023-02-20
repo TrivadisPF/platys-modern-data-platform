@@ -1,7 +1,7 @@
 ---
-technoglogies:      spark,delta-lake
+technologies:       spark,delta-lake
 version:				1.16.0
-validated-at:			18.02.2023
+validated-at:			20.02.2023
 ---
 
 # Spark with Delta Lake
