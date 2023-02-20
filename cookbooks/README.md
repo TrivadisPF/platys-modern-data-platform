@@ -51,6 +51,9 @@ Inhere we are documenting cookbooks on how to use the platform:
  * **StreamSets DataOps Platform**
    * [Creating a self-managed StreamSets DataOps Environment using Platys](./recipes/streamsets-dataops-creating-environment/README.md) - `1.14.0`
 
+ * **StreamSets Transformer**
+   * [Using StreamSets Transformer to transform CSV to Parquet & Delta Lake](./recipes/streamsets-transformer-transform-csv-to-deltalake/README.md) - `1.16.0`    
+
  * **Kafka**
    * [Simulated Multi-DC Setup on one machine](./recipes/simulated-multi-dc-setup/README.md) - `1.14.0`  
    * [Automate management of Kafka topics on the platform](./recipes/jikkou-automate-kafka-topics-management/README.md) - `1.14.0`

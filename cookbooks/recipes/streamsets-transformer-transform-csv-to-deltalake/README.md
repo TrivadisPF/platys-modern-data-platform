@@ -1,3 +1,9 @@
+---
+technologies:       streamsets-transformer
+version:				1.16.0
+validated-at:			20.02.2023
+---
+
 # Using StreamSets Transformer to transform CSV to Parquet & Delta Lake
 
 This tutorial will show how to use StreamSets Transformer to read CSV files and transform it to Parquet, removing all the Null years. 
@@ -6,14 +12,20 @@ This tutorial will show how to use StreamSets Transformer to read CSV files and 
 
 First [initialise a platys-supported data platform](../../getting-started.md) with the following services enabled in the `config.yml`
 
-```
-      HIVE_METASTORE_enable: true
-      MINIO_enable: true
-      AWSCLI_enable: true
-      SPARK_TRANSFORMER_enable: true
+```bash
+platys init --enable-services STREAMSETS_TRANSFORMER,MINIO,HIVE_METASTORE,AWSCLI,PROVISIONING_DATA -s trivadis/platys-modern-data-platform -w 1.16.0
 ```
 
-Now generate and start the data platform. 
+Now set an environment variable to the home folder of the dataplatform and generate and then start the data platform.
+
+```bash
+export DATAPLATFORM_HOME=${PWD}
+
+platys gen
+
+docker-compose up -d
+```
+
 
 ## Create Data in Minio
 
@@ -22,21 +34,21 @@ docker exec -ti awscli s3cmd mb s3://flight-bucket
 ```
 
 ```
-docker exec -ti awscli s3cmd put /data-transfer/samples/flight-data/flights_2018_4_1.csv s3://flight-bucket/raw/flights/flights_2018_4_1.csv
+docker exec -ti awscli s3cmd put /data-transfer/flight-data/flights-small/flights_2008_4_1.csv s3://flight-bucket/raw/flights/flights_2008_4_1.csv
 
-docker exec -ti awscli s3cmd put /data-transfer/samples/flight-data/flights_2018_4_2.csv s3://flight-bucket/raw/flights/flights_2018_4_2.csv
+docker exec -ti awscli s3cmd put /data-transfer/flight-data/flights-small/flights_2008_4_2.csv s3://flight-bucket/raw/flights/flights_2008_4_2.csv
 
 
-docker exec -ti awscli s3cmd put /data-transfer/samples/flight-data/airports.csv s3://flight-bucket/raw/airports/airports.csv
+docker exec -ti awscli s3cmd put /data-transfer/flight-data/airports.csv s3://flight-bucket/raw/airports/airports.csv
 
-docker exec -ti awscli s3cmd put /data-transfer/samples/flight-data/carriers.csv s3://flight-bucket/raw/carriers/carriers.csv
+docker exec -ti awscli s3cmd put /data-transfer/flight-data/carriers.csv s3://flight-bucket/raw/carriers/carriers.csv
 
-docker exec -ti awscli s3cmd put /data-transfer/samples/flight-data/plane-data.csv s3://flight-bucket/raw/plane-data/plane-data.csv
+docker exec -ti awscli s3cmd put /data-transfer/flight-data/plane-data.csv s3://flight-bucket/raw/plane-data/plane-data.csv
 ```
 
 ## StreamSets Transformer
 
-Navigate to <http://dataplatform:19630>
+Navigate to <http://dataplatform:19630> and create a new pipeline
 
 Add an **S3** origin
  
@@ -48,7 +60,7 @@ Add an **S3** origin
    * **Object Name Pattern**: `flights*.csv`
  * Advanced Tab:
    * **Additional Configuration**:
-     * `fs.s3a.endpoint` : `http://minio:9000`
+     * `fs.s3a.endpoint` : `http://minio-1:9000`
      * `fs.s3a.path.style.access` : `true`
  * Data Format Tab:
    * **DataFormat**: `Delimited`
@@ -248,7 +260,7 @@ Add a **S3** destination
    * **Bucket**: `s3a://flight-bucket/refined/flights/`
  * Advanced Tab:
    * **Additional Configuration**:
-     * `fs.s3a.endpoint` : `http://minio:9000`
+     * `fs.s3a.endpoint` : `http://minio-1:9000`
      * `fs.s3a.path.style.access` : `true`
  * Data Format Tab:
    * **DataFormat**: `Parquet`

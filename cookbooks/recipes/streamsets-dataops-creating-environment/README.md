@@ -1,5 +1,5 @@
 ---
-technoglogies:      streamsets
+technologies:      	streamsets
 version:				1.14.0
 validated-at:			19.2.2022
 ---
