@@ -43,6 +43,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * [Using Jupyter notebook with Spark and Avro](../cookbooks/recipes/jupyter-spark/README.md)
  * [Using Dev Simulator Origin to simulate streaming data](../cookbooks/recipes/using-dev-simulator-origin/README.md) - updated with diagrams and additional samples
  * [Spark with Delta Lake](../cookbooks/recipes/delta-lake-with-spark/README.md) 
+ * [Spark with Iceberg](../cookbooks/recipes/iceberg-with-spark/README.md) 
  * [Neo4J and yFiles graphs for Jupyter](../cookbooks/recipes/neo4j-jupyter-yfiles/README.md)
  * [Schedule and Run Simple Python Application with Airflow](../cookbooks/recipes/airflow-schedule-python-app/README.md) - updated to show the new support of Airflow
  * [Using MLflow from Jupyter](../cookbooks/recipes/using-mflow-from-jupyter/README.md)
