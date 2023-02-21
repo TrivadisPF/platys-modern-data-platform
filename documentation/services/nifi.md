@@ -18,3 +18,6 @@ Navigate to <http://dataplatform:18080/nifi>
 Login with User `nifi` and password `1234567890ACD`.
 
 
+### Installing JDBC Driver
+
+If you want to use one of the Database Processors, you need to install a JDBC Driver for the database. Download it into `./plugins/nifi/jars` of your Platys stack and specify the folder `/extra-jars` folder when creating the Controller service in Apache NiFi.
