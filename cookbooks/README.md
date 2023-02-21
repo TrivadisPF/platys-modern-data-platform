@@ -46,7 +46,7 @@ Inhere we are documenting cookbooks on how to use the platform:
  * **StreamSets Data Collector**
    * [Consume a binary file and send it as Kafka message](./recipes/streamsets-binary-file-to-kafka/README.md)
    * [Using Dev Simulator Origin to simulate streaming data](./recipes/using-dev-simulator-origin/README.md) - `1.12.0`
-   * [Loading Streamsets Pipeline(s) upon start of container](./recipes/streamsets-loading-pipelines/README.md) - `1.14.0`
+   * [Loading StreamSets Pipeline(s) upon start of container](./recipes/streamsets-loading-pipelines/README.md) - `1.14.0`
 
  * **StreamSets DataOps Platform**
    * [Creating a self-managed StreamSets DataOps Environment using Platys](./recipes/streamsets-dataops-creating-environment/README.md) - `1.14.0`
@@ -74,7 +74,7 @@ Inhere we are documenting cookbooks on how to use the platform:
    * [Apicurio Registry with SQL Storage (PostgreSQL)](./recipes/apicurio-with-database-storage/README.md) - `1.14.0`
 
  * **Jikkou**
-   * [Automate managment of Kafka topics on the platform](./recipes/jikkou-automate-kafka-topics-management/README.md)    
+   * [Automate management of Kafka topics on the platform](./recipes/jikkou-automate-kafka-topics-management/README.md)    
 
  * **Oracle RDBMS**
    * [Using private (Trivadis) Oracle EE image](./recipes/using-private-oracle-ee-image/README.md) - `1.13.0`    
