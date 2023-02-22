@@ -864,6 +864,8 @@ For each service there might be some other settings, such as controlling the num
 | `HASURA_pro_key`                                  	| `` 	| 1.16.0 	| The pro key to enable Hasura EE. |    
 | [**_GraphQL Mesh_**](./services/graphql-mesh.md)  &nbsp;&nbsp;&nbsp;&nbsp;![x86-64](./images/x86-64.png)                             	|         	|       	|                                                                                                                                                                                     	|          
 | `GRAPHQL_MESH_enable`                                  	| `false` 	| 1.11.0 	| Enable Hasura GraphQL Mesh service.                                                                                                                                                        	|          
+| [**_Directus_**](./services/directus.md)  &nbsp;&nbsp;&nbsp;&nbsp;![x86-64](./images/x86-64.png)                             	|         	|       	|                                                                                                                                                                                     	|          
+| `DIRECTUS_enable`                                  	| `false` 	| 1.16.0 	| Enable Directus service.                                                                                                                                                        	|      
 
 ### Analytical Engines
 

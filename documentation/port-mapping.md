@@ -135,6 +135,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 8048 | 8048 | kafka-eagle |
 8050 | 8050 | kudu-tserver-1 |
 8051 | 8051 | kudo-master-1 |
+8055 | 8055 | directus |
 8070 | 8070 | nuclio |
 8080 | 8080 | spark-master |
 8081 | 8081 / 8080 | schema-registry-1 / apicurio-registry-1    |

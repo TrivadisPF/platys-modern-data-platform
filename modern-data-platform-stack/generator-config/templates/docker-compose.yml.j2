@@ -345,6 +345,7 @@ networks:
 
 {% set __HASURA_version = HASURA_version | default('latest') -%}
 {% set __GRAPHQL_MESH_version = GRAPHQL_MESH_version | default('latest') -%}
+{% set __DIRECTUS_version = DIRECTUS_version | default('latest') -%}
 
 {% set __TYK_version = TYK_version | default('latest') -%}
 {% set __TYK_PUMP_version = TYK_PUMP_version | default('latest') -%}
@@ -647,6 +648,7 @@ networks:
   {% set DRILL_enable = false -%}
   {% set HASURA_enable = false -%}
   {% set GRAPHQL_MESH_enable = false -%}
+  {% set DIRECTUS_enable = false -%}
   {% set TYK_enable = false -%}
   {% set TYK_PUMP_enable = false -%}
   {% set TYK_DASHBOARD_enable = false -%}
@@ -11464,6 +11466,55 @@ services:
     {% endif -%}   {#  LOKI_collect_docker_logs #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  GRAPHQL_MESH_enable #}
+
+{% if DIRECTUS_enable | default(false) %}
+  #  ================================== Hasura ========================================== #
+  directus:
+    image: ghcr.io/directus/directus:{{__HASURA_version}}
+    container_name: directus
+    hostname: directus
+    labels:
+      com.platys.name: "directus"
+      com.platys.webui.title: "Directus UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:8055"
+    ports:
+      - 8055:8055
+    environment:
+      KEY: '255d861b-5ea1-5996-9aa3-922530ec40b1'
+      SECRET: '6116487b-cda1-52c2-b5b5-c8022c45e263'
+
+      DB_CLIENT: 'pg'
+      DB_HOST: 'postgresql'
+      DB_PORT: '5432'
+      DB_DATABASE: 'postgres'
+      DB_USER: 'postgres'
+      DB_PASSWORD: 'abc123!'
+
+      CACHE_ENABLED: 'true'
+      CACHE_STORE: 'redis'
+      CACHE_REDIS: 'redis://directus-cache:6379'
+
+      ADMIN_EMAIL: 'admin@example.com'
+      ADMIN_PASSWORD: 'd1r3ctu5'
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    restart: {{container_restart_policy}}
+
+  directus-cache:
+    image: redis:6
+    container_name: directus-cache
+    hostname: directus-cache
+{% endif %}   {#  DIRECTUS_enable #}
 
 {% if TYK_enable | default(false) %}
   #  ================================== Tyk Gateway ========================================== #
