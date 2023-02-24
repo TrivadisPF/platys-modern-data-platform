@@ -11072,7 +11072,7 @@ services:
       - './conf/{{conf_dir}}/catalog/druid.properties:{{trino_etc_dir}}/catalog/druid.properties'
   {% endif %}
   {% if TRINO_event_listener is defined and TRINO_event_listener | length | default(false) %}
-      - ./conf/trino/{{TRINO_event_listener}}.properties:/etc/trino/{{TRINO_event_listener}}.properties
+      - ./conf/trino/{{TRINO_event_listener}}.properties:{{trino_etc_dir}}/{{TRINO_event_listener}}.properties
       - ./plugins/trino/{{TRINO_event_listener}}/:/usr/lib/trino/plugin/{{TRINO_event_listener}}/
   {% endif %}
   {% if (TRINO_edition | lower) == 'starburstdata' and TRINO_starburstdata_use_license is defined and TRINO_starburstdata_use_license | default(false) %}
@@ -11080,8 +11080,10 @@ services:
   {% endif %}
       - ./security/{{conf_dir}}/password-authenticator.properties:{{trino_etc_dir}}/password-authenticator.properties
       - ./security/{{conf_dir}}/password.db:{{trino_etc_dir}}/password.db
+      - ./security/{{conf_dir}}/access-control.properties:{{trino_etc_dir}}/access-control.properties
+      - ./security/{{conf_dir}}/group-provider.properties:{{trino_etc_dir}}/group-provider.properties
       - ./security/{{conf_dir}}/certs:{{trino_etc_dir}}/certs
-      - ./custom-conf/{{conf_dir}}/rules.json:/certs/trino.pem:etc/tino/rules.json
+      - ./custom-conf/{{conf_dir}}/security:{{trino_etc_dir}}/security
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -11222,7 +11224,7 @@ services:
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
-      - ./security/{{conf_dir}}/certs:{{trino_etc_dir}}/certs      
+      - ./security/{{conf_dir}}/certs:{{trino_etc_dir}}/certs
     {% endif -%}   {#  use_timezone #}
     tty: true
     {%if LOKI_collect_docker_logs | default(false) %}
