@@ -291,6 +291,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28080 | 8080 | zeppelin |
 28081 | 8080 | presto-1 |
 28082 | 8080 | trino-1 |
+28083 | 8443 | trino-1 (tls) |
 28085 | 8080 | azkarra-worker-1 |
 28888 | 8888 | jupyter |
 28889 | 8888 | anaconda |
