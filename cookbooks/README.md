@@ -12,7 +12,7 @@ Inhere we are documenting cookbooks on how to use the platform:
    * [Querying data in Postgresql from Trino](./recipes/querying-postgresql-with-trino/README.md) - `1.11.0`
    * [Querying data in Kafka from Trino (formerly PrestoSQL)](./recipes/querying-kafka-with-trino/README.md) - `1.14.0`
    * [Querying HDFS data using Trino](./recipes/querying-hdfs-with-presto/README.md) - `1.11.0`
-   * Joining data between RDBMS and MinIO
+   * [Trino Security](./recipes/trino-security/README.md) - `1.16.0`
 
  * **MQTT**
    * [Using Confluent MQTT Proxy](./recipes/using-mqtt-proxy/README.md)

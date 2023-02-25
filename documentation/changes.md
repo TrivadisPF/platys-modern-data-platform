@@ -48,6 +48,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * [Neo4J and yFiles graphs for Jupyter](../cookbooks/recipes/neo4j-jupyter-yfiles/README.md)
  * [Schedule and Run Simple Python Application with Airflow](../cookbooks/recipes/airflow-schedule-python-app/README.md) - updated to show the new support of Airflow
  * [Using MLflow from Jupyter](../cookbooks/recipes/using-mflow-from-jupyter/README.md)
+ * [Trino Security](./cookbooks/recipes/trino-security/README.md)
 
 ### New Tutorial
 
