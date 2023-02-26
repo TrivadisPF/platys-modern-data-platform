@@ -49,17 +49,20 @@ cd $DATAPLATFORM_HOME
 touch custom-conf/trino/security/password.db
 ```
 
-Now add or update the password for a user (replace `<new-user>` by the username):
+Now add or update the password for a user (replace `<new-user>` by the username). 
 
 ```bash
 htpasswd -B -C 10 custom-conf/trino/security/password.db <new-user>
 ```
 
-### Create Custom Certificates (not needed)
+### Create Custom Certificates (optional)
 
-You can create your own certificate and add it to a keystore.
+You can create your own certificate and add it to a keystore. For that you need to enable `TRINO_auth_use_custom_certs` and then create the self-signed certificate and add it to the keystore using these commands
+
 
 ```bash
+cd $DATAPLATFORM/custom-conf/trino
+
 keytool -genkeypair -alias trino -keyalg RSA -keystore certs/keystore.jks \
 -dname "CN=coordinator, OU=datalake, O=dataco, L=Sydney, ST=NSW, C=AU" \
 -ext san=dns:coordinator,dns:coordinator.presto,dns:coordinator.presto.svc,dns:coordinator.presto.svc.cluster.local,dns:coordinator-headless,dns:coordinator-headless.presto,dns:coordinator-headless.presto.svc,dns:coordinator-headless.presto.svc.cluster.local,dns:localhost,dns:trino-proxy,ip:127.0.0.1,ip:192.168.64.5,ip:192.168.64.6 \
