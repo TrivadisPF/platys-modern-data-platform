@@ -11217,6 +11217,18 @@ services:
   {% if (TRINO_edition | lower) == 'starburstdata' and TRINO_starburstdata_use_license is defined and TRINO_starburstdata_use_license | default(false) %}
       - ./licenses/starburstdata/starburstdata.license:/etc/starburst/starburstdata.license
   {% endif %}
+  {% if TRINO_auth_enabled | default(false) %}
+      - ./security/{{conf_dir}}/password-authenticator.properties:{{trino_etc_dir}}/password-authenticator.properties
+      - ./{{'custom-conf' if TRINO_auth_use_custom_password_file else 'security' }}/{{conf_dir}}/{{'security/' if TRINO_auth_use_custom_password_file}}password.db:{{trino_etc_dir}}/password.db
+      - ./{{'custom-conf' if TRINO_auth_use_custom_certs else 'security' }}/{{conf_dir}}/certs:{{trino_etc_dir}}/certs
+  {% endif %}
+  {% if TRINO_auth_with_groups | default(false) %}
+      - ./security/{{conf_dir}}/group-provider.properties:{{trino_etc_dir}}/group-provider.properties
+  {% endif %}
+  {% if TRINO_access_control_enabled | default(false) %}
+      - ./security/{{conf_dir}}/access-control.properties:{{trino_etc_dir}}/access-control.properties
+  {% endif %}
+      - ./custom-conf/{{conf_dir}}/security:{{trino_etc_dir}}/security  
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
