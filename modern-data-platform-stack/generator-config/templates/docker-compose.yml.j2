@@ -11034,8 +11034,13 @@ services:
   {% endif %}
   {%if MINIO_enable or external['S3_enable'] | default(false) %}
       - './conf/{{conf_dir}}/catalog/minio.properties:{{trino_etc_dir}}/catalog/minio.properties'
+    {%if SPARK_table_format_type == 'iceberg' | default(false) %}
       - './conf/{{conf_dir}}/catalog/iceberg.properties:{{trino_etc_dir}}/catalog/iceberg.properties'
+    {%elif SPARK_table_format_type == 'delta' | default(false) %}
       - './conf/{{conf_dir}}/catalog/delta.properties:{{trino_etc_dir}}/catalog/delta.properties'
+    {%elif SPARK_table_format_type == 'hudi' | default(false) %}
+      - './conf/{{conf_dir}}/catalog/hudi.properties:{{trino_etc_dir}}/catalog/hudi.properties'
+    {% endif %}
   {% endif %}
   {%if external['ADLS_enable'] | default(false) %}
       - './conf/{{conf_dir}}/catalog/adls.properties:{{trino_etc_dir}}/catalog/adls.properties'
@@ -11168,8 +11173,13 @@ services:
       - ./conf/{{conf_dir}}/cluster/node.properties:{{trino_etc_dir}}/node.properties
   {%if MINIO_enable or external['S3_enable'] | default(false) %}
       - './conf/{{conf_dir}}/catalog/minio.properties:{{trino_etc_dir}}/catalog/minio.properties'
+    {%if SPARK_table_format_type == 'iceberg' | default(false) %}
       - './conf/{{conf_dir}}/catalog/iceberg.properties:{{trino_etc_dir}}/catalog/iceberg.properties'
+    {%elif SPARK_table_format_type == 'delta' | default(false) %}
       - './conf/{{conf_dir}}/catalog/delta.properties:{{trino_etc_dir}}/catalog/delta.properties'
+    {%elif SPARK_table_format_type == 'hudi' | default(false) %}
+      - './conf/{{conf_dir}}/catalog/hudi.properties:{{trino_etc_dir}}/catalog/hudi.properties'
+    {% endif %}
   {% endif %}
   {%if external['ADLS_enable'] | default(false) %}
       - './conf/{{conf_dir}}/catalog/adls.properties:{{trino_etc_dir}}/catalog/adls.properties'
@@ -11228,7 +11238,7 @@ services:
   {% if TRINO_access_control_enabled | default(false) %}
       - ./security/{{conf_dir}}/access-control.properties:{{trino_etc_dir}}/access-control.properties
   {% endif %}
-      - ./custom-conf/{{conf_dir}}/security:{{trino_etc_dir}}/security  
+      - ./custom-conf/{{conf_dir}}/security:{{trino_etc_dir}}/security
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
