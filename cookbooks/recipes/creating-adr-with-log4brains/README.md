@@ -63,7 +63,7 @@ if you want to use the docker image instead of the local log4brains installation
 
 ```
 cd adr
-docker run -ti -v ${PWD}:/workdir thomvaill/log4brains log4brains init
+docker run -ti -v ${PWD}:/workdir thomvaill/log4brains init
 ```
 
 Answer the question asked by the tool as shown below
