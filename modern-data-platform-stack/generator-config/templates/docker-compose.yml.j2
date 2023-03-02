@@ -4584,12 +4584,53 @@ services:
     restart: {{container_restart_policy}}
   {% endif -%}   {#  DATAHUB_use_kibana #}
 
-  # This "container" is a workaround to pre-create search indices
+  datahub-upgrade:
+    image: acryldata/datahub-upgrade:{{__DATAHUB_version}}
+    hostname: datahub-upgrade
+    container_name: datahub-upgrade
+    labels:
+      datahub_setup_job: true
+      com.platys.name: "datahub"
+    depends_on:
+      - datahub-mysql
+    environment:
+      - EBEAN_DATASOURCE_USERNAME=datahub
+      - EBEAN_DATASOURCE_PASSWORD=datahub
+      - EBEAN_DATASOURCE_HOST=datahub-mysql:3306
+      - EBEAN_DATASOURCE_URL=jdbc:mysql://datahub-mysql:3306/datahub?verifyServerCertificate=false&useSSL=true&useUnicode=yes&characterEncoding=UTF-8&enabledTLSProtocols=TLSv1.2
+      - EBEAN_DATASOURCE_DRIVER=com.mysql.jdbc.Driver
+      - KAFKA_BOOTSTRAP_SERVER=kafka-1:19092
+      - KAFKA_SCHEMAREGISTRY_URL='{{ns.schemaRegistryUrl}}'
+      - ELASTICSEARCH_HOST=datahub-elasticsearch
+      - ELASTICSEARCH_PORT=9200
+      - ELASTICSEARCH_INDEX_BUILDER_MAPPINGS_REINDEX=true
+      - ELASTICSEARCH_INDEX_BUILDER_SETTINGS_REINDEX=true
+      - ELASTICSEARCH_BUILD_INDICES_CLONE_INDICES=false
+      - GRAPH_SERVICE_IMPL={{DATAHUB_graph_service_impl}}
+      {%if (DATAHUB_graph_service_impl | lower) == 'neo4j'  | default(true) %}
+      - NEO4J_HOST=datahub-neo4j:7474
+      - NEO4J_URI=bolt://${PUBLIC_IP}:17688
+      - NEO4J_USERNAME=neo4j
+      - NEO4J_PASSWORD=abc123!
+      {% endif -%}   {#  DATAHUB_graph_service_impl #}
+      - DATAHUB_GMS_HOST=datahub-gms
+      - DATAHUB_GMS_PORT=8080
+      - ENTITY_REGISTRY_CONFIG_PATH=/datahub/datahub-gms/resources/entity-registry.yml
+    command:
+      - -u
+      - SystemUpdate
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+      
   datahub-mysql-setup:
     image: acryldata/datahub-mysql-setup:head
     hostname: datahub-mysql-setup
     container_name: datahub-mysql-setup
     labels:
+      datahub_setup_job: true
       com.platys.name: "datahub"
     depends_on:
       - datahub-mysql
@@ -4609,12 +4650,12 @@ services:
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
 
-  # This "container" is a workaround to pre-create search indices
   datahub-elasticsearch-setup:
     image: linkedin/datahub-elasticsearch-setup:{{__DATAHUB_version}}
     hostname: datahub-elasticsearch-setup
     container_name: datahub-elasticsearch-setup
     labels:
+      datahub_setup_job: true
       com.platys.name: "datahub"
     depends_on:
       - datahub-elasticsearch
@@ -4633,7 +4674,6 @@ services:
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
 
-  # This "container" is a workaround to pre-create topics
   kafka-setup:
     image: linkedin/datahub-kafka-setup:{{__DATAHUB_version}}
     hostname: kafka-setup
