@@ -133,7 +133,8 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Change `KAFKA_EFAK_xxxxx` to `EFAK_xxxxx` 
  * Change the docker image for Airflow from the Bitnami to the official Apache one
  * Support the two major versions 7 and 8 of Elasticsearch
- 
+ * Ember Frontend for Datahub removed (as React is the new standard UI)
+
 ### Enhancements
 
  * make `spark.sql.warehouse.dir` configurable in `config.yml`

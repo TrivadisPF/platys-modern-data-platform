@@ -4192,6 +4192,46 @@ services:
 
 {% if DATAHUB_enable  | default(false) %}
   #  ================================== Datahub ========================================== #
+  datahub-frontend-react:
+    image: linkedin/datahub-frontend-react:{{__DATAHUB_version}}
+    hostname: datahub-frontend-react
+    container_name: datahub-frontend-react
+    labels:
+      com.platys.name: "datahub"
+      com.platys.webui.title: "DataHub UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28144"
+    depends_on:
+      - datahub-gms
+    ports:
+      - "28144:9002"
+    environment:
+      - DATAHUB_GMS_HOST=datahub-gms
+      - DATAHUB_GMS_PORT=8080
+      - DATAHUB_SECRET={{DATAHUB_secret | default('abc123!abc123!')}}
+      - DATAHUB_APP_VERSION=1.0
+      - DATAHUB_PLAY_MEM_BUFFER_SIZE=10MB
+      - JAVA_OPTS=-Xms512m -Xmx512m -Dhttp.port=9002 -Dconfig.file=datahub-frontend/conf/application.conf -Djava.security.auth.login.config=datahub-frontend/conf/jaas.conf -Dlogback.configurationFile=datahub-frontend/conf/logback.xml -Dlogback.debug=false -Dpidfile.path=/dev/null
+      - KAFKA_BOOTSTRAP_SERVER=kafka-1:19092
+      - DATAHUB_TRACKING_TOPIC=DataHubUsageEvent_v1
+      - ELASTIC_CLIENT_HOST=datahub-elasticsearch
+      - ELASTIC_CLIENT_PORT=9200
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if DATAHUB_map_user_props | default(false) %}
+      - ./security/datahub/user.props:/datahub-frontend/conf/user.props
+    {% endif -%}   {#  DATAHUB_map_user_props #}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    restart: {{container_restart_policy}}
+
   datahub-gms:
     image: linkedin/datahub-gms:{{__DATAHUB_version}}
     hostname: datahub-gms
@@ -4211,31 +4251,31 @@ services:
     ports:
       - "28142:8080"
     environment:
-      - DATASET_ENABLE_SCSI=false
-      - EBEAN_DATASOURCE_USERNAME=datahub
-      - EBEAN_DATASOURCE_PASSWORD=datahub
+      - DATAHUB_TELEMETRY_ENABLED={{DATAHUB_telemetry_enabled | default(false)}}
+      - DATAHUB_UPGRADE_HISTORY_KAFKA_CONSUMER_GROUP_ID=generic-duhe-consumer-job-client-gms
+      - EBEAN_DATASOURCE_DRIVER=com.mysql.jdbc.Driver
       - EBEAN_DATASOURCE_HOST=datahub-mysql:3306
       - EBEAN_DATASOURCE_URL=jdbc:mysql://datahub-mysql:3306/datahub?verifyServerCertificate=false&useSSL=true&useUnicode=yes&characterEncoding=UTF-8&enabledTLSProtocols=TLSv1.2
-      - EBEAN_DATASOURCE_DRIVER=com.mysql.jdbc.Driver
-      - KAFKA_BOOTSTRAP_SERVER=kafka-1:19092
-      - KAFKA_SCHEMAREGISTRY_URL={{ns.schemaRegistryUrl}}
+      - EBEAN_DATASOURCE_USERNAME=datahub
+      - EBEAN_DATASOURCE_PASSWORD=datahub
       - ELASTICSEARCH_HOST=datahub-elasticsearch
-      - ELASTICSEARCH_PORT=9200
       - ELASTICSEARCH_INDEX_BUILDER_SETTINGS_REINDEX=true
       - ELASTICSEARCH_INDEX_BUILDER_MAPPINGS_REINDEX=true
-      - JAVA_OPTS=-Xms1g -Xmx1g
+      - ELASTICSEARCH_PORT=9200
       - ENTITY_REGISTRY_CONFIG_PATH=/datahub/datahub-gms/resources/entity-registry.yml
-      - METADATA_AUDIT_EVENT_NAME=MetadataAuditEvent_v4
-      - METADATA_CHANGE_EVENT_NAME=MetadataChangeEvent_v4
-      - FAILED_METADATA_CHANGE_EVENT_NAME=FailedMetadataChangeEvent_v4
-      - AUTH_POLICIES_ENABLED={{DATAHUB_auth_policies_enabled | lower}}
+      - ENTITY_SERVICE_ENABLE_RETENTION=true
+      - ES_BULK_REFRESH_POLICY=WAIT_UNTIL
       - GRAPH_SERVICE_IMPL={{DATAHUB_graph_service_impl}}
+      - GRAPH_SERVICE_DIFF_MODE_ENABLED={{DATAHUB_graph_service_diff_mode_enabled | default(false)}}
     {%if (DATAHUB_graph_service_impl | lower) == 'neo4j'  | default(true) %}
       - NEO4J_HOST=http://datahub-neo4j:7474
       - NEO4J_URI=bolt://${PUBLIC_IP}:17688
       - NEO4J_USERNAME=neo4j
       - NEO4J_PASSWORD=abc123!
     {% endif -%}   {#  DATAHUB_graph_service_impl #}
+      - JAVA_OPTS=-Xms1g -Xmx1g
+      - KAFKA_BOOTSTRAP_SERVER=kafka-1:19092
+      - KAFKA_SCHEMAREGISTRY_URL={{ns.schemaRegistryUrl}}
     {%if not DATAHUB_mae_consumer_standalone | default(true) %}
       - MAE_CONSUMER_ENABLED=true
     {% endif -%}   {#  not DATAHUB_mae_consumer_standalone #}
@@ -4243,9 +4283,10 @@ services:
       - MCE_CONSUMER_ENABLED=true
     {% endif -%}   {#  not DATAHUB_mce_consumer_standalone #}
       - PE_CONSUMER_ENABLED=true
-      - UI_INGESTION_ENABLED=true
-      - UI_INGESTION_DEFAULT_CLI_VERSION=0.8.35
-      - DATAHUB_ANALYTICS_ENABLED={{DATAHUB_use_analytics | lower}}
+      - UI_INGESTION_ENABLED={{DATAHUB_ui_ingestion_enabled | default(false)}}
+      - UI_INGESTION_DEFAULT_CLI_VERSION={{__DATAHUB_version}}
+      - AUTH_POLICIES_ENABLED={{DATAHUB_auth_policies_enabled | default(false)}}
+      - DATAHUB_ANALYTICS_ENABLED={{DATAHUB_analytics_enabled | default(false)}}
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -4259,89 +4300,6 @@ services:
     <<: *logging
     {% endif -%}   {#  LOKI_collect_docker_logs #}
     restart: {{container_restart_policy}}
-
-  {%if DATAHUB_use_ember_ui | default(false) %}
-  datahub-frontend-ember:
-    image: linkedin/datahub-frontend:{{__DATAHUB_version}}
-    hostname: datahub-frontend-ember
-    container_name: datahub-frontend-ember
-    labels:
-      com.platys.name: "datahub"
-      com.platys.webui.title: "DataHub UI"
-      com.platys.webui.url: "http://${PUBLIC_IP}:28143"
-    depends_on:
-      - datahub-gms
-    ports:
-      - "28143:9001"
-    environment:
-      - DATAHUB_GMS_HOST=datahub-gms
-      - DATAHUB_GMS_PORT=8080
-      - DATAHUB_SECRET={{DATAHUB_secret | default('abc123!abc123!')}}
-      - DATAHUB_APP_VERSION=1.0
-      - DATAHUB_PLAY_MEM_BUFFER_SIZE=10MB
-    {%if use_timezone | default(false) %}
-      - TZ={{use_timezone}}
-    {% endif -%}   {#  use_timezone #}
-    volumes:
-      - ./data-transfer:/data-transfer
-    {%if use_timezone | default(false) %}
-      - "./etc/timezone:/etc/timezone:ro"
-      - "./etc/localtime:/etc/localtime:ro"
-    {% endif -%}   {#  use_timezone #}
-    {%if LOKI_collect_docker_logs | default(false) %}
-    <<: *logging
-    {% endif -%}   {#  LOKI_collect_docker_logs #}
-    restart: {{container_restart_policy}}
-  {% endif -%}   {#  DATAHUB_use_ember_ui #}
-
-  {%if DATAHUB_use_react_ui | default(false) %}
-  datahub-frontend-react:
-    image: linkedin/datahub-frontend-react:{{__DATAHUB_version}}
-    hostname: datahub-frontend-react
-    container_name: datahub-frontend-react
-    labels:
-      com.platys.name: "datahub"
-      com.platys.webui.title: "DataHub UI"
-      com.platys.webui.url: "http://${PUBLIC_IP}:28144"
-    depends_on:
-      - datahub-gms
-    ports:
-      - "28144:9002"
-    environment:
-      - PORT=9092
-      - DATAHUB_GMS_HOST=datahub-gms
-      - DATAHUB_GMS_PORT=8080
-      - DATAHUB_SECRET={{DATAHUB_secret | default('abc123!abc123!')}}
-      - DATAHUB_APP_VERSION=1.0
-      - DATAHUB_PLAY_MEM_BUFFER_SIZE=10MB
-      - JAVA_OPTS=-Xms512m -Xmx512m -Dhttp.port=9002 -Dconfig.file=datahub-frontend/conf/application.conf -Djava.security.auth.login.config=datahub-frontend/conf/jaas.conf -Dlogback.configurationFile=datahub-frontend/conf/logback.xml -Dlogback.debug=false -Dpidfile.path=/dev/null
-      - KAFKA_BOOTSTRAP_SERVER=kafka-1:19092
-      - DATAHUB_TRACKING_TOPIC=DataHubUsageEvent_v1
-      - ELASTIC_CLIENT_HOST=datahub-elasticsearch
-      - ELASTIC_CLIENT_PORT=9200
-      - ELASTICSEARCH_INDEX_BUILDER_SETTINGS_REINDEX=true
-      - ELASTICSEARCH_INDEX_BUILDER_MAPPINGS_REINDEX=true
-      - METADATA_SERVICE_AUTH_ENABLED=false
-      - DATAHUB_ANALYTICS_ENABLED={{DATAHUB_use_analytics | lower}}
-      - DATAHUB_AKKA_MAX_HEADER_COUNT=64
-      - DATAHUB_AKKA_MAX_HEADER_VALUE_LENGTH=8k
-    {%if use_timezone | default(false) %}
-      - TZ={{use_timezone}}
-    {% endif -%}   {#  use_timezone #}
-    volumes:
-      - ./data-transfer:/data-transfer
-    {%if DATAHUB_map_user_props | default(false) %}
-      - ./security/datahub/user.props:/datahub-frontend/conf/user.props
-    {% endif -%}   {#  DATAHUB_map_user_props #}
-    {%if use_timezone | default(false) %}
-      - "./etc/timezone:/etc/timezone:ro"
-      - "./etc/localtime:/etc/localtime:ro"
-    {% endif -%}   {#  use_timezone #}
-    {%if LOKI_collect_docker_logs | default(false) %}
-    <<: *logging
-    {% endif -%}   {#  LOKI_collect_docker_logs #}
-    restart: {{container_restart_policy}}
-  {% endif -%}   {#  DATAHUB_use_react_ui #}
 
   {%if DATAHUB_ACTIONS_enable | default(false) %}
   datahub-actions:
@@ -4353,13 +4311,14 @@ services:
     environment:
       - DATAHUB_GMS_HOST=datahub-gms
       - DATAHUB_GMS_PORT=8080
-      - KAFKA_BOOTSTRAP_SERVER=kafka-1:19092
-      - SCHEMA_REGISTRY_URL=http://schema-registry-1:8081
-      - METADATA_AUDIT_EVENT_NAME=MetadataAuditEvent_v4
-      - METADATA_CHANGE_LOG_VERSIONED_TOPIC_NAME=MetadataChangeLog_Versioned_v1
+      - DATAHUB_GMS_PROTOCOL=http
       - DATAHUB_SYSTEM_CLIENT_ID=__datahub_system
       - DATAHUB_SYSTEM_CLIENT_SECRET=JohnSnowKnowsNothing
+      - KAFKA_BOOTSTRAP_SERVER=kafka-1:19092
       - KAFKA_PROPERTIES_SECURITY_PROTOCOL=PLAINTEXT
+      - METADATA_AUDIT_EVENT_NAME=MetadataAuditEvent_v4
+      - METADATA_CHANGE_LOG_VERSIONED_TOPIC_NAME=MetadataChangeLog_Versioned_v1
+      - SCHEMA_REGISTRY_URL=http://schema-registry-1:8081
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -4391,14 +4350,16 @@ services:
     ports:
         - "28145:9091"
     environment:
+      - DATAHUB_UPGRADE_HISTORY_KAFKA_CONSUMER_GROUP_ID=generic-duhe-consumer-job-client-mcl
+      - DATAHUB_GMS_HOST=datahub-gms
+      - DATAHUB_GMS_PORT=8080
       - MAE_CONSUMER_ENABLED=true
       - PE_CONSUMER_ENABLED=true
       - KAFKA_BOOTSTRAP_SERVER=kafka-1:19092
       - KAFKA_SCHEMAREGISTRY_URL='{{ns.schemaRegistryUrl}}'
       - ELASTICSEARCH_HOST=datahub-elasticsearch
       - ELASTICSEARCH_PORT=9200
-      - ELASTICSEARCH_INDEX_BUILDER_SETTINGS_REINDEX=true
-      - ELASTICSEARCH_INDEX_BUILDER_MAPPINGS_REINDEX=true
+      - ES_BULK_REFRESH_POLICY=WAIT_UNTIL
       - GRAPH_SERVICE_IMPL={{DATAHUB_graph_service_impl}}
     {%if (DATAHUB_graph_service_impl | lower) == 'neo4j'  | default(true) %}
       - NEO4J_HOST=datahub-neo4j:7474
@@ -4406,12 +4367,10 @@ services:
       - NEO4J_USERNAME=neo4j
       - NEO4J_PASSWORD=abc123!
     {% endif -%}   {#  DATAHUB_graph_service_impl #}
-      - DATAHUB_GMS_HOST=datahub-gms
-      - DATAHUB_GMS_PORT=8080
       - ENTITY_REGISTRY_CONFIG_PATH=/datahub/datahub-mae-consumer/resources/entity-registry.yml
       - METADATA_AUDIT_EVENT_NAME=MetadataAuditEvent_v4
       - DATAHUB_USAGE_EVENT_NAME=DataHubUsageEvent_v1
-      - DATAHUB_ANALYTICS_ENABLED=true
+      - DATAHUB_ANALYTICS_ENABLED={{DATAHUB_analytics_enabled | default(false)}}
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -4442,13 +4401,37 @@ services:
     ports:
         - "28146:9090"
     environment:
+      - DATAHUB_TELEMETRY_ENABLED={{DATAHUB_telemetry_enabled | default(false)}}
+      - GRAPH_SERVICE_IMPL={{DATAHUB_graph_service_impl}}
+      - GRAPH_SERVICE_DIFF_MODE_ENABLED={{DATAHUB_graph_service_diff_mode_enabled | default(false)}}
+    {%if (DATAHUB_graph_service_impl | lower) == 'neo4j'  | default(true) %}
+      - NEO4J_HOST=datahub-neo4j:7474
+      - NEO4J_URI=bolt://${PUBLIC_IP}:17688
+      - NEO4J_USERNAME=neo4j
+      - NEO4J_PASSWORD=abc123!
+    {% endif -%}   {#  DATAHUB_graph_service_impl #}
+      - DATAHUB_UPGRADE_HISTORY_KAFKA_CONSUMER_GROUP_ID=generic-duhe-consumer-job-client-mcp
       - MCE_CONSUMER_ENABLED=true
+      - EBEAN_DATASOURCE_DRIVER=com.mysql.jdbc.Driver
+      - EBEAN_DATASOURCE_HOST=datahub-mysql:3306
+      - EBEAN_DATASOURCE_URL=jdbc:mysql://datahub-mysql:3306/datahub?verifyServerCertificate=false&useSSL=true&useUnicode=yes&characterEncoding=UTF-8&enabledTLSProtocols=TLSv1.2
+      - EBEAN_DATASOURCE_USERNAME=datahub
+      - EBEAN_DATASOURCE_PASSWORD=datahub
       - KAFKA_BOOTSTRAP_SERVER=kafka-1:19092
       - KAFKA_SCHEMAREGISTRY_URL='{{ns.schemaRegistryUrl}}'
-      - DATAHUB_GMS_HOST=datahub-gms
-      - DATAHUB_GMS_PORT=8080
-      - METADATA_CHANGE_EVENT_NAME=MetadataChangeEvent_v4
-      - FAILED_METADATA_CHANGE_EVENT_NAME=FailedMetadataChangeEvent_v4
+      - ELASTICSEARCH_HOST=datahub-elasticsearch
+      - ELASTICSEARCH_PORT=9200
+      - ES_BULK_REFRESH_POLICY=WAIT_UNTIL
+      - JAVA_OPTS=-Xms1g -Xmx1g
+      - ENTITY_REGISTRY_CONFIG_PATH=/datahub/datahub-gms/resources/entity-registry.yml
+      - DATAHUB_SYSTEM_CLIENT_ID=__datahub_system
+      - DATAHUB_SYSTEM_CLIENT_SECRET=JohnSnowKnowsNothing
+      - ENTITY_SERVICE_ENABLE_RETENTION=true
+#      - DATAHUB_GMS_HOST=datahub-gms
+#      - DATAHUB_GMS_PORT=8080
+      - MAE_CONSUMER_ENABLED=false
+      - PE_CONSUMER_ENABLED=false
+      - UI_INGESTION_ENABLED=false
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -4490,7 +4473,7 @@ services:
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
-    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_bin
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_bin --default-authentication-plugin=mysql_native_password
     {%if LOKI_collect_docker_logs | default(false) %}
     <<: *logging
     {% endif -%}   {#  LOKI_collect_docker_logs #}
@@ -4498,7 +4481,7 @@ services:
 
   {%if (DATAHUB_graph_service_impl | lower) == 'neo4j'  | default(true) %}
   datahub-neo4j:
-    image: neo4j:4.0.6
+    image: neo4j:4.4.9-community
     hostname: datahub-neo4j
     container_name: datahub-neo4j
     labels:
@@ -4531,7 +4514,7 @@ services:
   {% endif -%}   {#  DATAHUB_graph_service_impl #}
 
   datahub-elasticsearch:
-    image: elasticsearch:7.9.3
+    image: elasticsearch:7.10.1
     container_name: datahub-elasticsearch
     hostname: datahub-elasticsearch
     labels:
@@ -4543,7 +4526,7 @@ services:
     environment:
       - discovery.type=single-node
       - xpack.security.enabled=false
-      - "ES_JAVA_OPTS=-Xms256m -Xmx256m -Dlog4j2.formatMsgNoLookups=true"
+      - ES_JAVA_OPTS=-Xms256m -Xmx512m -Dlog4j2.formatMsgNoLookups=true
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -4554,6 +4537,7 @@ services:
       - CMD-SHELL
       - curl -sS --fail 'http://localhost:9200/_cluster/health?wait_for_status=yellow&timeout=0s'
         || exit 1
+    mem_limit: 1g
     volumes:
       - ./data-transfer:/data-transfer
     {% if DATAHUB_volume_map_data %}
@@ -4638,7 +4622,6 @@ services:
       - ELASTICSEARCH_HOST=datahub-elasticsearch
       - ELASTICSEARCH_PORT=9200
       - ELASTICSEARCH_PROTOCOL=http
-      - DATAHUB_ANALYTICS_ENABLED={{DATAHUB_use_analytics}}
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -4657,11 +4640,9 @@ services:
     labels:
       com.platys.name: "datahub"
     environment:
-      # The following settings are listed here only to satisfy the image's requirements.
-      # We override the image's `command` anyways, hence this container will not start a broker.
-      - KAFKA_ZOOKEEPER_CONNECT=zookeeper-1:2181
+      - DATAHUB_PRECREATE_TOPICS={{DATAHUB_precreate_topics| default(false)}}
       - KAFKA_BOOTSTRAP_SERVER=kafka-1:19092
-      - DATAHUB_ANALYTICS_ENABLED={{DATAHUB_use_analytics}}
+      - KAFKA_ZOOKEEPER_CONNECT=zookeeper-1:2181
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
