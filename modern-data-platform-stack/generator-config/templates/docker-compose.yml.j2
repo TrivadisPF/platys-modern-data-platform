@@ -4283,10 +4283,10 @@ services:
       - MCE_CONSUMER_ENABLED=true
     {% endif -%}   {#  not DATAHUB_mce_consumer_standalone #}
       - PE_CONSUMER_ENABLED=true
-      - UI_INGESTION_ENABLED={{DATAHUB_ui_ingestion_enabled | default(false)}}
+      - UI_INGESTION_ENABLED={{DATAHUB_ui_ingestion_enabled | lower | default(false)}}
       - UI_INGESTION_DEFAULT_CLI_VERSION={{__DATAHUB_version}}
-      - AUTH_POLICIES_ENABLED={{DATAHUB_auth_policies_enabled | default(false)}}
-      - DATAHUB_ANALYTICS_ENABLED={{DATAHUB_analytics_enabled | default(false)}}
+      - AUTH_POLICIES_ENABLED={{DATAHUB_auth_policies_enabled | lower | default(false)}}
+      - DATAHUB_ANALYTICS_ENABLED={{DATAHUB_analytics_enabled | lower | default(false)}}
       - METADATA_SERVICE_AUTH_ENABLED=false
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
@@ -4371,7 +4371,7 @@ services:
       - ENTITY_REGISTRY_CONFIG_PATH=/datahub/datahub-mae-consumer/resources/entity-registry.yml
       - METADATA_AUDIT_EVENT_NAME=MetadataAuditEvent_v4
       - DATAHUB_USAGE_EVENT_NAME=DataHubUsageEvent_v1
-      - DATAHUB_ANALYTICS_ENABLED={{DATAHUB_analytics_enabled | default(false)}}
+      - DATAHUB_ANALYTICS_ENABLED={{DATAHUB_analytics_enabled | lower | default(false)}}
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -4402,9 +4402,9 @@ services:
     ports:
         - "28146:9090"
     environment:
-      - DATAHUB_TELEMETRY_ENABLED={{DATAHUB_telemetry_enabled | default(false)}}
+      - DATAHUB_TELEMETRY_ENABLED={{DATAHUB_telemetry_enabled | lower | default(false)}}
       - GRAPH_SERVICE_IMPL={{DATAHUB_graph_service_impl}}
-      - GRAPH_SERVICE_DIFF_MODE_ENABLED={{DATAHUB_graph_service_diff_mode_enabled | default(false)}}
+      - GRAPH_SERVICE_DIFF_MODE_ENABLED={{DATAHUB_graph_service_diff_mode_enabled | lower | default(false)}}
     {%if (DATAHUB_graph_service_impl | lower) == 'neo4j'  | default(true) %}
       - NEO4J_HOST=datahub-neo4j:7474
       - NEO4J_URI=bolt://${PUBLIC_IP}:17688
@@ -4601,7 +4601,7 @@ services:
       - EBEAN_DATASOURCE_URL=jdbc:mysql://datahub-mysql:3306/datahub?verifyServerCertificate=false&useSSL=true&useUnicode=yes&characterEncoding=UTF-8&enabledTLSProtocols=TLSv1.2
       - EBEAN_DATASOURCE_DRIVER=com.mysql.jdbc.Driver
       - KAFKA_BOOTSTRAP_SERVER=kafka-1:19092
-      - KAFKA_SCHEMAREGISTRY_URL='{{ns.schemaRegistryUrl}}'
+      - KAFKA_SCHEMAREGISTRY_URL={{ns.schemaRegistryUrl}}
       - ELASTICSEARCH_HOST=datahub-elasticsearch
       - ELASTICSEARCH_PORT=9200
       - ELASTICSEARCH_INDEX_BUILDER_MAPPINGS_REINDEX=true
@@ -4665,7 +4665,7 @@ services:
       - ELASTICSEARCH_HOST=datahub-elasticsearch
       - ELASTICSEARCH_PORT=9200
       - ELASTICSEARCH_PROTOCOL=http
-      - DATAHUB_ANALYTICS_ENABLED={{DATAHUB_analytics_enabled | default(false)}}
+      - DATAHUB_ANALYTICS_ENABLED={{DATAHUB_analytics_enabled | lower | default(false)}}
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -4676,14 +4676,14 @@ services:
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
 
-  kafka-setup:
+  datahub-kafka-setup:
     image: linkedin/datahub-kafka-setup:{{__DATAHUB_version}}
-    hostname: kafka-setup
-    container_name: kafka-setup
+    hostname: datahub-kafka-setup
+    container_name: datahub-kafka-setup
     labels:
       com.platys.name: "datahub"
     environment:
-      - DATAHUB_PRECREATE_TOPICS={{DATAHUB_precreate_topics| default(false)}}
+      - DATAHUB_PRECREATE_TOPICS={{DATAHUB_precreate_topics| lower | default(false)}}
       - KAFKA_BOOTSTRAP_SERVER=kafka-1:19092
       - KAFKA_ZOOKEEPER_CONNECT=zookeeper-1:2181
     {%if use_timezone | default(false) %}
