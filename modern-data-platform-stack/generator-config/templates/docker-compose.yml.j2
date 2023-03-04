@@ -5566,14 +5566,33 @@ services:
     user: "root"
     environment:
       NIFI_REGISTRY_WEB_HTTP_PORT: 19090
+      NIFI_REGISTRY_DB_URL: ''
       NIFI_REGISTRY_DB_CLASS: 'org.h2.Driver'
+      NIFI_REGISTRY_DB_DIR: '/opt/nifi-registry/nifi-registry-current/database'
       NIFI_REGISTRY_DB_USER: 'nifireg'
       NIFI_REGISTRY_DB_PASS: 'nifireg'
-      NIFI_REGISTRY_DB_DIR: '/opt/nifi-registry/nifi-registry-current/database'
-      NIFI_REGISTRY_FLOW_PROVIDER: file
+      NIFI_REGISTRY_FLOW_PROVIDER: {{NIFI_REGISTRY_flow_provider | lower}}
+    {% if NIFI_REGISTRY_flow_provider == 'file' | default(false) %}
       NIFI_REGISTRY_FLOW_STORAGE_DIR: '/opt/nifi-registry/nifi-registry-current/flow_storage'
-      NIFI_REGISTRY_BUNDLE_PROVIDER: file
+    {% elif NIFI_REGISTRY_flow_provider == 'git' | default(false) %}
+      NIFI_REGISTRY_FLOW_STORAGE_DIR: '/opt/nifi-registry/nifi-registry-current/flow_storage'
+      NIFI_REGISTRY_GIT_REMOTE: {{NIFI_REGISTRY_git_remote | omit }}
+      NIFI_REGISTRY_GIT_USER: {{NIFI_REGISTRY_git_user | omit }}
+      NIFI_REGISTRY_GIT_PASSWORD: {{NIFI_REGISTRY_git_password | omit }}
+      NIFI_REGISTRY_GIT_REPO: {{NIFI_REGISTRY_git_repo | omit }}
+    {% endif -%}   {#  NIFI_REGISTRY_flow_provider #}
+      NIFI_REGISTRY_BUNDLE_PROVIDER: {{NIFI_REGISTRY_bundle_provider | lower}}
+    {% if NIFI_REGISTRY_BUNDLE_PROVIDER == 'file' | default(false) %}
       NIFI_REGISTRY_BUNDLE_STORAGE_DIR: './extension_bundles'
+    {% elif NIFI_REGISTRY_BUNDLE_PROVIDER == 's3' | default(false) %}
+      NIFI_REGISTRY_S3_REGION: {{s3DefaultRegion if s3DefaultRegion is defined and s3DefaultRegion else omit}}
+      NIFI_REGISTRY_S3_BUCKET_NAME: {{NIFI_REGISTRY_s3_bucket_name}}
+      NIFI_REGISTRY_S3_KEY_PREFIX: {{NIFI_REGISTRY_s3_key_prefix}}
+      NIFI_REGISTRY_S3_CREDENTIALS_PROVIDER: STATIC
+      NIFI_REGISTRY_S3_ACCESS_KEY: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
+      NIFI_REGISTRY_S3_SECRET_ACCESS_KEY: {{s3SecretAccessKey}}
+      NIFI_REGISTRY_S3_ENDPOINT_URL: '{{s3Endpoint | default(omit) }}'
+    {% endif -%}   {#  NIFI_REGISTRY_BUNDLE_PROVIDER #}
       LOG_LEVEL: INFO
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
