@@ -5551,10 +5551,11 @@ services:
       AUTH: tls
       KEYSTORE_PATH: /opt/certs/keystore.jks
       KEYSTORE_TYPE: JKS
-      KEYSTORE_PASSWORD: 'PTz7kFl1rzX4wUtcDlurwV6gjm7vID9Ibgbe71N355w'
+      KEYSTORE_PASSWORD: {{NIFI_keystore_password if NIFI_keystore_password is defined and NIFI_keystore_password != None else 'PTz7kFl1rzX4wUtcDlurwV6gjm7vID9Ibgbe71N355w' }}
+      KEY_PASSWORD: {{NIFI_key_password if NIFI_key_password is defined and NIFI_key_password != None else omit }}
       TRUSTSTORE_PATH: /opt/certs/truststore.jks
       TRUSTSTORE_TYPE: JKS
-      TRUSTSTORE_PASSWORD: 'h8I20cJyr50rFwzJRZkBcodLM8ifnDqQK2kORds8TLk'
+      TRUSTSTORE_PASSWORD: {{NIFI_truststore_password if NIFI_truststore_password is defined and NIFI_truststore_password != None else 'h8I20cJyr50rFwzJRZkBcodLM8ifnDqQK2kORds8TLk' }}
       NIFI_SECURITY_USER_AUTHORIZER: single-user-authorizer
       NIFI_SECURITY_USER_LOGIN_IDENTITY_PROVIDER: single-user-provider
     {% else %}
@@ -5575,11 +5576,11 @@ services:
       - ./data-transfer:/data-transfer
       - ./plugins/nifi/jars/:/extra-jars/
     {%if NIFI_run_secure  | default(false) %}
-      - ./conf/nifi/keystore.jks:/opt/certs/keystore.jks
-      - ./conf/nifi/truststore.jks:/opt/certs/truststore.jks
+      - ./{{'custom-conf/nifi/security' if NIFI_use_custom_certs is defined and NIFI_use_custom_certs else 'security/nifi'}}/keystore.jks:/opt/certs/keystore.jks
+      - ./{{'custom-conf/nifi/security' if NIFI_use_custom_certs is defined and NIFI_use_custom_certs else 'security/nifi'}}/truststore.jks:/opt/certs/truststore.jks
     {% endif -%}   {#  NIFI_run_unsecure #}
     {% if NIFI_volume_map_custom_config %}
-      - ./custom-conf/nifi/nifi.properties:/opt/nifi/nifi-current/conf/nifi.properties
+      - ./custom-conf/nifi/config/nifi.properties:/opt/nifi/nifi-current/conf/nifi.properties
     {% endif %}
     {% if NIFI_volume_map_data %}
       - ./container-volume/nifi-{{loop.index}}/database_repository:/opt/nifi/nifi-current/database_repository
@@ -5666,8 +5667,8 @@ services:
     volumes:
       - ./data-transfer:/data-transfer
     {%if NIFI_REGISTRY_run_secure  | default(false) %}
-      - ./conf/nifi/keystore.jks:/opt/certs/keystore.jks
-      - ./conf/nifi/truststore.jks:/opt/certs/truststore.jks
+      - ./{{'custom-conf/nifi/security' if NIFI_REGISTRY_use_custom_certs is defined and NIFI_use_custom_certs else 'security/nifi'}}/keystore.jks:/opt/certs/keystore.jks
+      - ./{{'custom-conf/nifi/security' if NIFI_REGISTRY_use_custom_certs is defined and NIFI_use_custom_certs else 'security/nifi'}}/truststore.jks:/opt/certs/truststore.jks
     {% endif -%}   {#  NIFI_REGISTRY_run_secure #}
     {% if NIFI_REGISTRY_volume_map_data %}
       - ./container-volume/nifi_registry/database:/opt/nifi-registry/nifi-registry-current/database
@@ -5702,6 +5703,7 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
+      - ./security/nifi:
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
