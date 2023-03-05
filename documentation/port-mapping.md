@@ -491,6 +491,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28294 | 5000 | ckan |
 28295 | 8800 | ckan-datapusher |
 28296 | 443 | phpldapadmin |
+28297 | 80 | ldap-user-manager |
 
 ## Ports > 28500
 

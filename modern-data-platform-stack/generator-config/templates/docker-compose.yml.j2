@@ -116,6 +116,7 @@ networks:
 
 {% set __OPENLDAP_version = OPENLDAP_version | default('latest') -%}
 {% set __PHP_LDAP_ADMIN_version = PHP_LDAP_ADMIN_version | default('latest') -%}
+{% set __LDAP_USER_MANAGER_version = LDAP_USER_MANAGER_version | default('latest') -%}
 
 {% set __RANGER_version = RANGER_version | default('latest') -%}
 {% set __RANGER_postgresql_version = RANGER_postgresql_version | default('latest') -%}
@@ -563,6 +564,9 @@ networks:
   {% set TIKA_enable = false -%}
   {% set HIVE_enable = false -%}
   {% set AVRO_TOOLS_enable = false -%}
+  {% set OPENLDAP_enable = false -%}
+  {% set PHP_LDAP_ADMIN_enable = false -%}
+  {% set LDAP_USER_MANAGER_enable = false -%}
   {% set RANGER_enable = false -%}
   {% set RANGER_POSTGRES_enable = false -%}
   {% set ATLAS_enable = false -%}
@@ -3957,10 +3961,18 @@ services:
     container_name: openldap
     labels:
       com.platys.name: "openldap"
+    ports:
+      - 389:389
+      - 636:636
     environment:
       LDAP_ORGANISATION: "PlatysPlatform"
       LDAP_DOMAIN: "platysplatform.io"
       LDAP_BASE_DN: "dc=platysplatform,dc=io"
+      LDAP_ADMIN_PASSWORD: abc123!
+      LDAP_CONFIG_PASSWORD: abc123!
+      LDAP_RFC2307BIS_SCHEMA: "true"
+      LDAP_REMOVE_CONFIG_AFTER_SETUP: "true"
+      LDAP_TLS_VERIFY_CLIENT: never
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -3978,18 +3990,18 @@ services:
     restart: {{container_restart_policy}}
 
   {% if PHP_LDAP_ADMIN_enable  | default(false) %}
-  phpldapadmin:
+  php-ldap-admin:
     image: osixia/phpldapadmin:{{__PHP_LDAP_ADMIN_version}}
-    hostname: phpldapadmin
-    container_name: phpldapadmin
+    hostname: php-ldap-admin
+    container_name: php-ldap-admin
     labels:
-      com.platys.name: "phpldapadmin"
+      com.platys.name: "php-ldap-admin"
       com.platys.webui.title: "phpLDAPadmin UI"
       com.platys.webui.url: "https://${PUBLIC_IP}:28296"
     ports:
       - "28296:443"
     environment:
-      PHPLDAPADMIN_LDAP_HOSTS: {{PHP_LDAP_ADMIN_ldap_hosts}}
+      PHPLDAPADMIN_LDAP_HOSTS: {{PHP_LDAP_ADMIN_ldap_host}}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -4004,6 +4016,43 @@ services:
     {% endif -%}   {#  LOKI_collect_docker_logs #}
     restart: {{container_restart_policy}}
   {% endif %}   {#  PHP_LDAP_ADMIN_enable #}
+
+  {% if LDAP_USER_MANAGER_enable  | default(false) %}
+  ldap-user-manager:
+    image: wheelybird/ldap-user-manager:{{__LDAP_USER_MANAGER_version}}
+    hostname: ldap-user-manager
+    container_name: ldap-user-manager
+    labels:
+      com.platys.name: "ldap-user-manager"
+      com.platys.webui.title: "LDAP User Manager UI"
+      com.platys.webui.url: "https://${PUBLIC_IP}:28297"
+    ports:
+      - "28297:80"
+    environment:
+      - LDAP_URI=ldap://{{LDAP_USER_MANAGER_ldap_host}}
+      - LDAP_BASE_DN=dc=platysplatform,dc=io
+      - LDAP_REQUIRE_STARTTLS=FALSE
+      - LDAP_ADMINS_GROUP=admins
+      - LDAP_ADMIN_BIND_DN=cn=admin,dc=platysplatform,dc=io
+      - LDAP_ADMIN_BIND_PWD=admin
+      - LDAP_IGNORE_CERT_ERRORS=true
+      - NO_HTTPS=TRUE
+      - PASSWORD_HASH=SSHA
+      - SERVER_HOSTNAME=${PUBLIC_IP}:28297
+     {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    restart: {{container_restart_policy}}
+  {% endif %}   {#  LDAP_USER_MANAGER_enable #}
 
 {% endif %}   {#  LDAP_ENABLE #}
 
