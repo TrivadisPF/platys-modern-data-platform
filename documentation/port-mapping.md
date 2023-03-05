@@ -103,7 +103,6 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 6382 | 6379 | redis-replica-1 |
 6385 | 6379 | redash-redis |
 6386 | 6379 | tyk-redis |
-6443 | 443 | phpldapadmin |
 6831 | 6831 | jaeger (udp) |
 6749 | 6749 | curity |
 6832 | 6832 | jaeger (udp) |
@@ -491,7 +490,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28293 | 8080 | spring-boot-admin |
 28294 | 5000 | ckan |
 28295 | 8800 | ckan-datapusher |
-
+28296 | 443 | phpldapadmin |
 
 ## Ports > 28500
 
