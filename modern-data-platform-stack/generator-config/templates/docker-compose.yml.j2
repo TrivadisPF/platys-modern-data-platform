@@ -5498,7 +5498,7 @@ services:
     {%if NIFI_run_secure  | default(false) %}
       NIFI_WEB_HTTPS_PORT: '{{externalPort}}'
       NIFI_WEB_HTTPS_HOST: nifi-{{loop.index}}
-      NIFI_WEB_PROXY_HOST: '${PUBLIC_IP}:{{externalPort}},${DOCKER_HOST_IP}{{externalPort}}'
+      NIFI_WEB_PROXY_HOST: '${PUBLIC_IP}:{{externalPort}},${DOCKER_HOST_IP}:{{externalPort}}'
       AUTH: tls
       KEYSTORE_PATH: /opt/certs/keystore.jks
       KEYSTORE_TYPE: JKS
@@ -5562,11 +5562,27 @@ services:
       com.platys.name: 'nifi-registry'
       com.platys.webui.title: "NiFi Registry UI"
       com.platys.webui.url: "http://${PUBLIC_IP}:19090/nifi-registry"
+      com.platys.restapi.title: "NiFi Registry REST API"
+      com.platys.restapi.url: "http://${PUBLIC_IP}:19090/nifi-registry-api/about"
     ports:
       - 19090:19090
     user: "root"
     environment:
+    {%if NIFI_REGISTRY_run_secure  | default(false) %}
+      NIFI_REGISTRY_WEB_HTTPS_PORT: 19090
+      NIFI_REGISTRY_WEB_HTTPS_HOST: nifi-registry
+      NIFI_REGISTRY_WEB_PROXY_HOST: '${PUBLIC_IP}:19090,${DOCKER_HOST_IP}:19090'
+      AUTH: tls
+      KEYSTORE_PATH: /opt/certs/keystore.jks
+      KEYSTORE_TYPE: JKS
+      KEYSTORE_PASSWORD: 'PTz7kFl1rzX4wUtcDlurwV6gjm7vID9Ibgbe71N355w'
+      TRUSTSTORE_PATH: /opt/certs/truststore.jks
+      TRUSTSTORE_TYPE: JKS
+      TRUSTSTORE_PASSWORD: 'h8I20cJyr50rFwzJRZkBcodLM8ifnDqQK2kORds8TLk'
+      INITIAL_ADMIN_IDENTITY: '{{NIFI_username}}'
+    {% else %}
       NIFI_REGISTRY_WEB_HTTP_PORT: 19090
+    {% endif -%}   {#  NIFI_run_unsecure #}
       NIFI_REGISTRY_DB_URL: ''
       NIFI_REGISTRY_DB_CLASS: 'org.h2.Driver'
       NIFI_REGISTRY_DB_DIR: '/opt/nifi-registry/nifi-registry-current/database'
