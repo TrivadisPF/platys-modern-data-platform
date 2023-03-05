@@ -5574,13 +5574,13 @@ services:
       NIFI_REGISTRY_DB_PASS: 'nifireg'
       NIFI_REGISTRY_FLOW_PROVIDER: {{NIFI_REGISTRY_flow_provider | lower}}
     {% if NIFI_REGISTRY_flow_provider == 'file' | default(false) %}
-      NIFI_REGISTRY_FLOW_STORAGE_DIR: '/opt/nifi-registry/nifi-registry-current/flow_storage'
+      NIFI_REGISTRY_FLOW_STORAGE_DIR: '/opt/nifi-registry/nifi-registry-current/file-flow_storage'
     {% elif NIFI_REGISTRY_flow_provider == 'git' | default(false) %}
-      NIFI_REGISTRY_FLOW_STORAGE_DIR: '/opt/nifi-registry/nifi-registry-current/flow_storage'
-      NIFI_REGISTRY_GIT_REMOTE: {{NIFI_REGISTRY_git_remote | omit }}
-      NIFI_REGISTRY_GIT_USER: {{NIFI_REGISTRY_git_user | omit }}
-      NIFI_REGISTRY_GIT_PASSWORD: {{NIFI_REGISTRY_git_password | omit }}
-      NIFI_REGISTRY_GIT_REPO: {{NIFI_REGISTRY_git_repo | omit }}
+      NIFI_REGISTRY_FLOW_STORAGE_DIR: '/opt/nifi-registry/nifi-registry-current/git_flow_storage'
+      NIFI_REGISTRY_GIT_REMOTE: {{NIFI_REGISTRY_git_remote | default(omit) }}
+      NIFI_REGISTRY_GIT_USER: {{NIFI_REGISTRY_git_user | default(omit) }}
+      NIFI_REGISTRY_GIT_PASSWORD: {{NIFI_REGISTRY_git_password | default(omit) }}
+      NIFI_REGISTRY_GIT_REPO: {{NIFI_REGISTRY_git_repo | default(omit) }}
     {% endif -%}   {#  NIFI_REGISTRY_flow_provider #}
       NIFI_REGISTRY_BUNDLE_PROVIDER: {{NIFI_REGISTRY_bundle_provider | lower}}
     {% if NIFI_REGISTRY_BUNDLE_PROVIDER == 'file' | default(false) %}
@@ -5602,8 +5602,13 @@ services:
       - ./data-transfer:/data-transfer
     {% if NIFI_REGISTRY_volume_map_data %}
       - ./container-volume/nifi_registry/database:/opt/nifi-registry/nifi-registry-current/database
-      - ./container-volume/nifi_registry/flow_storage:/opt/nifi-registry/nifi-registry-current/flow_storage
+      {% if NIFI_REGISTRY_flow_provider == 'file' | default(false) %}
+      - ./container-volume/nifi_registry/file_flow_storage:/opt/nifi-registry/nifi-registry-current/file_flow_storage
+      {% endif -%}   {#  NIFI_REGISTRY_flow_provider #}
     {% endif -%}   {#  NIFI_REGISTRY_volume_map_data #}
+    {% if NIFI_REGISTRY_flow_provider == 'git' | default(false) %}
+      - .{{NIFI_REGISTRY_git_folder_on_dockerhost}}:/opt/nifi-registry/nifi-registry-current/git_flow_storage
+    {% endif -%}   {#  NIFI_REGISTRY_flow_provider #}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
