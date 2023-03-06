@@ -1,0 +1,1 @@
+Contains the flow_storage folder of nifi-registry service, if flag NIFI_REGISTRY_volume_map_flow_storage is set to true.

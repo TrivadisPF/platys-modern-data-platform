@@ -1,1 +1,0 @@
-Contains the flow_storage folder of nidi-registry service, if flag NIFI_REGISTRY_volume_map_data is set to true.
