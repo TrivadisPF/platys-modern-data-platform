@@ -13,3 +13,4 @@ platys gen
 
 ## How to use it?
 
+Navigate to <http://dataplatform:28298> to view the Thriftserver UI.

@@ -492,6 +492,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28295 | 8800 | ckan-datapusher |
 28296 | 443 | phpldapadmin |
 28297 | 80 | ldap-user-manager |
+28298 | 4040 | spark-thriftserver (Spark UI) |
+
 
 ## Ports > 28500
 
