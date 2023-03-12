@@ -31,6 +31,6 @@ and connect to Spark Thrift Server (enter blank for username and password)
 
 ### Connect with JDBC
 
-Download Hive JDBC Driver 2.3.7 from [here](https://repo1.maven.org/maven2/org/apache/hive/hive-jdbc/2.3.7/hive-jdbc-2.3.7.jar).
+Download Hive JDBC Driver 3.1.2 (standalone) from [here](https://repo.maven.apache.org/maven2/org/apache/hive/hive-jdbc/3.1.2/hive-jdbc-3.1.2-standalone.jar).
 
-Use `jdbc:hive2://dataplatform:28118` for the JDBC URL.
+Use `jdbc:hive2://dataplatform:28118` (external) or `jdbc:hive2://spark-thriftserver:10000` (internal) for the JDBC URL and use `org.apache.hive.jdbc.HiveDriver` for the class name. 
