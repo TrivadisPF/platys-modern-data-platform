@@ -14,3 +14,23 @@ platys gen
 ## How to use it?
 
 Navigate to <http://dataplatform:28298> to view the Thriftserver UI.
+
+### Connect with Beeline
+
+Start beeline
+
+```bash
+docker exec -ti spark-thriftserver /spark/bin/beeline
+```
+
+and connect to Spark Thrift Server (enter blank for username and password)
+
+```bash
+!connect jdbc:hive2://spark-thriftserver:10000
+```
+
+### Connect with JDBC
+
+Download Hive JDBC Driver 2.3.7 from [here](https://repo1.maven.org/maven2/org/apache/hive/hive-jdbc/2.3.7/hive-jdbc-2.3.7.jar).
+
+Use `jdbc:hive2://dataplatform:28118` for the JDBC URL.
