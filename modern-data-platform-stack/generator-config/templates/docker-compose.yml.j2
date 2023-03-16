@@ -5567,9 +5567,11 @@ services:
     {%if MINIO_enable or external['S3_enable'] | default(false) %}
       S3_ENDPOINT: '{{s3Endpoint | default(omit) }}'
       S3_PATH_STYLE_ACCESS: '{{s3PathStyleAccess}}'
-      S3_ACCESS_KEY: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
-      S3_SECRET_ACCESS_KEY: {{s3SecretAccessKey}}
       S3_REGION: {{s3DefaultRegion if s3DefaultRegion is defined and s3DefaultRegion else omit}}
+      {%if MINIO_enable or external['S3_enable'] | default(false) %}
+      PLATYS_AWS_ACCESS_KEY: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
+      PLATYS_AWS_SECRET_ACCESS_KEY: {{s3SecretAccessKey}}
+      {% endif -%}    {#  MINIO_enable #}
     {% endif -%}    {#  MINIO_enable #}
       NIFI_REMOTE_INPUT_SOCKET_PORT: '{{externalRemotePort}}'
       NIFI_REMOTE_INPUT_HOST: nifi-{{loop.index}}
@@ -5582,6 +5584,7 @@ services:
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
+    env_file: .env
     volumes:
       - ./data-transfer:/data-transfer
       - ./plugins/nifi/jars/:/extra-jars/
