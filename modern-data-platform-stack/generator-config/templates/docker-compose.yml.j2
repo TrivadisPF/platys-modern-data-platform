@@ -5604,7 +5604,7 @@ services:
       - ./container-volume/nifi-{{loop.index}}/logs:/opt/nifi/nifi-current/logs
     {% endif %}
     {%if MINIO_enable or external['S3_enable'] | default(false) %}
-      - ./security/nifi/s3-credentials.properties:/opt/nifi/nifi-current/s3-credentials.properties
+      - ./security/nifi/s3-credentials.properties:/tmp/s3-credentials.properties.templ
     {% endif -%}    {#  MINIO_enable #}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
@@ -5613,6 +5613,15 @@ services:
     {%if LOKI_collect_docker_logs | default(false) %}
     <<: *logging
     {% endif -%}   {#  LOKI_collect_docker_logs #}
+    entrypoint:
+      # We override the entrypoint from the docker image and therefore have to run ../scripts/start.sh from the NiFi docker image
+      - bash
+      - -c
+      - |
+    {%if MINIO_enable or external['S3_enable'] | default(false) %}
+        eval "echo \"$(cat s3-credentials.properties.templ)\"" >> s3-credentials.properties
+    {% endif -%}   {#  MINIO_enable or external S3 #}
+        ../scripts/start.sh
     restart: {{container_restart_policy}}
   {% endfor %}
 
