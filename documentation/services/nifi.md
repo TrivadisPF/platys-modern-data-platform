@@ -24,7 +24,7 @@ If you want to use one of the Database Processors, you need to install a JDBC Dr
 
 ### AWS (S3) Credentials
 
-Platys automatically creates the file `s3-credentials.properties` in the `nifi-1` container with the AWS credentials configured for either Minio or External S3. It is meant to be used as the **Credentials File** in either one of the AWS/S3 related processors or the [AWSCredentialsProviderControllerService](https://nifi.apache.org/docs/nifi-docs/components/org.apache.nifi/nifi-aws-nar/latest/org.apache.nifi.processors.aws.credentials.provider.service.AWSCredentialsProviderControllerService/index.html).
+Platys automatically creates the file `/opt/nifi/nifi-current/s3-credentials.properties` in the `nifi-1` container with the AWS credentials configured for either Minio or External S3. It is meant to be used as the **Credentials File** in either one of the AWS/S3 related processors or the [AWSCredentialsProviderControllerService](https://nifi.apache.org/docs/nifi-docs/components/org.apache.nifi/nifi-aws-nar/latest/org.apache.nifi.processors.aws.credentials.provider.service.AWSCredentialsProviderControllerService/index.html).
 
 Platys also injects the following environment variables into the `nifi-1` container.
 
