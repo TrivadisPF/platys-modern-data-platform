@@ -84,21 +84,21 @@ networks:
   {% set __SPARK_version = SPARK_3_1_version ~ "-hadoop3.2" -%}
   {% set __LIVY_version = LIVY_version ~ "-spark" ~ SPARK_3_1_version.split(".")[0]  ~ "." ~ SPARK_3_1_version.split(".")[1] -%}
 #  {% set __SPARK_table_format_package = ("io.delta:delta-core_2.12:1.0.1" if SPARK_table_format_type == 'delta' else "org.apache.iceberg:iceberg-spark-runtime-3.1_2.12:1.1.0" if SPARK_table_format_type == 'iceberg' else "org.apache.hudi:hudi-spark3.1-bundle_2.12:0.13.0" if SPARK_table_format_type == 'hudi') -%}
-  {% set __SPARK_delta_dep = "io.delta:delta-core_2.12:1.0.1" -%}
+  {% set __SPARK_delta_dep = "io.delta:delta-core_2.12:1.0.1,io.delta:delta-storage:1.0.1" -%}
   {% set __SPARK_iceberg_dep = "org.apache.iceberg:iceberg-spark-runtime-3.1_2.12:1.1.0" -%}
   {% set __SPARK_hudi_dep ="org.apache.hudi:hudi-spark3.1-bundle_2.12:0.13.0" -%}
 {% elif (SPARK_base_version | lower) == '3.2'  %}
   {% set __SPARK_version = SPARK_3_2_version ~ "-hadoop3.2" -%}
   {% set __LIVY_version = LIVY_version ~ "-spark" ~ SPARK_3_2_version.split(".")[0]  ~ "." ~ SPARK_3_2_version.split(".")[1] -%}
 #  {% set __SPARK_table_format_package = ("io.delta:delta-core_2.12:2.0.2" if SPARK_table_format_type == 'delta' else "org.apache.iceberg:iceberg-spark-runtime-3.2_2.12:1.1.0" if SPARK_table_format_type == 'iceberg' else "org.apache.hudi:hudi-spark3.2-bundle_2.12:0.13.0" if SPARK_table_format_type == 'hudi') -%}
-  {% set __SPARK_delta_dep = "io.delta:delta-core_2.12:2.0.2" -%}
+  {% set __SPARK_delta_dep = "io.delta:delta-core_2.12:2.0.2,io.delta:delta-storage:2.0.2" -%}
   {% set __SPARK_iceberg_dep = "org.apache.iceberg:iceberg-spark-runtime-3.2_2.12:1.1.0" -%}
   {% set __SPARK_hudi_dep ="org.apache.hudi:hudi-spark3.2-bundle_2.12:0.13.0" -%}
 {% elif (SPARK_base_version | lower) == '3.3'  %}
   {% set __SPARK_version = SPARK_3_3_version ~ "-hadoop3.3" -%}
   {% set __LIVY_version = LIVY_version ~ "-spark" ~ SPARK_3_3_version.split(".")[0]  ~ "." ~ SPARK_3_3_version.split(".")[1] -%}
 #  {% set __SPARK_table_format_package = ("io.delta:delta-core_2.12:2.2.0" if SPARK_table_format_type == 'delta' else "org.apache.iceberg:iceberg-spark-runtime-3.3_2.12:1.1.0" if SPARK_table_format_type == 'iceberg' else "org.apache.hudi:hudi-spark3.3-bundle_2.12:0.13.0" if SPARK_table_format_type == 'hudi') -%}
-  {% set __SPARK_delta_dep = "io.delta:delta-core_2.12:2.2.0" -%}
+  {% set __SPARK_delta_dep = "io.delta:delta-core_2.12:2.2.0,io.delta:delta-storage:2.2.0" -%}
   {% set __SPARK_iceberg_dep = "org.apache.iceberg:iceberg-spark-runtime-3.3_2.12:1.1.0" -%}
   {% set __SPARK_hudi_dep ="org.apache.hudi:hudi-spark3.3-bundle_2.12:0.13.0" -%}
 {% else -%}
@@ -109,6 +109,8 @@ networks:
   {% set __SPARK_iceberg_dep = "org.apache.iceberg:iceberg-spark-2:0.13.2" -%}
   {% set __SPARK_hudi_dep ="org.apache.hudi:hudi-spark2.4-bundle_2.12:0.13.0" -%}
 {% endif -%}
+
+{% set __SPARK_table_format_package = "" %}
 
 {%if DATAHUB_enable | default(false) %}
   {% set SPARK_datahub_package="io.acryl:datahub-spark-lineage:0.10.0" %}
@@ -3232,6 +3234,7 @@ services:
       SPARK_MASTER_OPTS: '{{SPARK_master_opts if SPARK_master_opts is defined and SPARK_master_opts else omit }}'
       INIT_DAEMON_STEP: setup_spark
       MASTER: spark://spark-master:7077
+      SPARK_DOWNLOAD_JARS_PACKAGES: {{__SPARK_delta_dep}},{{__SPARK_iceberg_dep}},{{__SPARK_hudi_dep}}
     {%if MINIO_enable or external['S3_enable'] | default(false) %}
       CORE_CONF_fs_s3a_endpoint: '{{s3Endpoint | default(omit) }}'
       CORE_CONF_fs_s3a_path_style_access: '{{s3PathStyleAccess}}'
@@ -3307,7 +3310,6 @@ services:
     {%if LOKI_collect_docker_logs | default(false) %}
     <<: *logging
     {% endif -%}   {#  LOKI_collect_docker_logs #}
-    entrypoint: ["/usr/src/app/docker-maven-download.sh", "central", "{{__SPARK_delta_dep}}", "/spark/jars", "--", "entrypoint.sh"]
     restart: {{container_restart_policy}}
 
   {% for num in range(SPARK_workers | default(1) ) %}
@@ -3333,6 +3335,7 @@ services:
       SPARK_WORKER_MEMORY: '{{SPARK_worker_memory if SPARK_worker_memory is defined and SPARK_worker_memory else omit }}'
       SPARK_WORKER_OPTS: '{{SPARK_worker_opts if SPARK_worker_opts is defined and SPARK_worker_opts else omit }}'
       SPARK_PUBLIC_DNS: ${PUBLIC_IP}
+      SPARK_DOWNLOAD_JARS_PACKAGES: {{__SPARK_delta_dep}},{{__SPARK_iceberg_dep}},{{__SPARK_hudi_dep}}
   {%if MINIO_enable or external['S3_enable'] | default(false) %}
       CORE_CONF_fs_s3a_endpoint: '{{s3Endpoint | default(omit) }}'
       CORE_CONF_fs_s3a_path_style_access: '{{s3PathStyleAccess}}'
@@ -3425,6 +3428,7 @@ services:
     ports:
       - 28117:18080
     environment:
+      SPARK_DOWNLOAD_JARS_PACKAGES: {{__SPARK_delta_dep}},{{__SPARK_iceberg_dep}},{{__SPARK_hudi_dep}}
       SPARK_DEFAULTS_CONF_spark_jars_repositories: {{SPARK_jars_repositories}}
       SPARK_DEFAULTS_CONF_spark_jars_packages: "{{SPARK_jars_packages}}{{',' if SPARK_jars_packages | length}}{{__SPARK_table_format_package | default('')}}{{',' if __SPARK_table_format_package | length}}{{SPARK_datahub_package | default('')}}"
       SPARK_DEFAULTS_CONF_spark_jars_excludes: {{SPARK_jars_excludes}}
@@ -3508,6 +3512,7 @@ services:
       - ./conf/hadoop.env
     environment:
       SPARK_MASTER: spark://spark-master:7077
+      SPARK_DOWNLOAD_JARS_PACKAGES: {{__SPARK_delta_dep}},{{__SPARK_iceberg_dep}},{{__SPARK_hudi_dep}}
   {%if MINIO_enable or external['S3_enable'] | default(false) %}
       CORE_CONF_fs_s3a_endpoint: '{{s3Endpoint | default(omit) }}'
       CORE_CONF_fs_s3a_path_style_access: '{{s3PathStyleAccess}}'
@@ -3604,6 +3609,7 @@ services:
     environment:
       SPARK_MASTER: spark://spark-master:7077
       DEPLOY_MODE: client
+      SPARK_DOWNLOAD_JARS_PACKAGES: {{__SPARK_delta_dep}},{{__SPARK_iceberg_dep}},{{__SPARK_hudi_dep}}
   {%if MINIO_enable or external['S3_enable'] | default(false) %}
       CORE_CONF_fs_s3a_endpoint: 'http://minio:9000'
       CORE_CONF_fs_s3a_path_style_access: 'true'
@@ -6977,6 +6983,7 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_extensions: org.apache.spark.sql.hudi.HoodieSparkSessionExtension
       SPARK_DEFAULTS_CONF_spark_serializer: org.apache.spark.serializer.KryoSerializer
     {% endif -%}   {#  SPARK_table_format_type #}
+      SPARK_DOWNLOAD_JARS_PACKAGES: {{__SPARK_delta_dep}},{{__SPARK_iceberg_dep}},{{__SPARK_hudi_dep}}
       SPARK_DEFAULTS_CONF_spark_jars_repositories: {{SPARK_jars_repositories}}
       SPARK_DEFAULTS_CONF_spark_jars_packages: "{{SPARK_jars_packages}}{{',' if SPARK_jars_packages | length}}{{__SPARK_table_format_package | default('')}}{{',' if __SPARK_table_format_package | length}}{{SPARK_datahub_package | default('')}}"
       SPARK_DEFAULTS_CONF_spark_jars_excludes: {{SPARK_jars_excludes}}
