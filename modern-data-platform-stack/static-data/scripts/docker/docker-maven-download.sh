@@ -25,7 +25,8 @@ maven_dep() {
     local MAVEN_DEP_DESTINATION="$3"
     local MD5_CHECKSUM="$4"
 
-    local DOWNLOAD_PATH=${MVN_COORD//://}
+    local GROUP_TMP=$(echo $MVN_COORD | cut -d: -f1)
+    local GROUP=${GROUP_TMP//.//}
     local PACKAGE=$(echo $MVN_COORD | cut -d: -f2)
     local VERSION=$(echo $MVN_COORD | cut -d: -f3)
 
@@ -35,7 +36,7 @@ maven_dep() {
     DOWNLOAD_FILE="$DOWNLOAD_FILE_TMP_PATH/$FILE"
     test -d $DOWNLOAD_FILE_TMP_PATH || mkdir -p $DOWNLOAD_FILE_TMP_PATH
 
-    curl -sfSL -o "$DOWNLOAD_FILE" "$REPO/$DOWNLOAD_PATH/$FILE"
+    curl -sfSL -o "$DOWNLOAD_FILE" "$REPO/$GROUP/$PACKAGE/$VERSION/$FILE"
     # echo "$MD5_CHECKSUM  $DOWNLOAD_FILE" | md5sum -c -
     mv "$DOWNLOAD_FILE" $MAVEN_DEP_DESTINATION
 }
