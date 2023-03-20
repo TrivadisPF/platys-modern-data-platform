@@ -17,42 +17,35 @@ set -e
 MAVEN_REPO_CENTRAL=${MAVEN_REPO_CENTRAL:-"https://repo1.maven.org/maven2"}
 MAVEN_REPO_INCUBATOR=${MAVEN_REPO_INCUBATOR:-"https://repo1.maven.org/maven2"}
 MAVEN_REPO_CONFLUENT=${MAVEN_REPO_CONFLUENT:-"https://packages.confluent.io/maven"}
-MAVEN_DEP_DESTINATION=${MAVEN_DEP_DESTINATION}
+#MAVEN_DEP_DESTINATION=${MAVEN_DEP_DESTINATION}
 
 maven_dep() {
     local REPO="$1"
-    local GROUP="$2"
-    local PACKAGE="$3"
-    local VERSION="$4"
-    local FILE="$5"
-    local MD5_CHECKSUM="$6"
+    local MVN_COORD="$2"
+    local MAVEN_DEP_DESTINATION="$3"
+    local MD5_CHECKSUM="$4"
+
+    local DOWNLOAD_PATH=${MVN_COORD//://}
+    local PACKAGE=$(echo $MVN_COORD | cut -d: -f2)
+    local VERSION=$(echo $MVN_COORD | cut -d: -f3)
+
+    local FILE="$PACKAGE-$VERSION.jar"
 
     DOWNLOAD_FILE_TMP_PATH="/tmp/maven_dep/${PACKAGE}"
     DOWNLOAD_FILE="$DOWNLOAD_FILE_TMP_PATH/$FILE"
     test -d $DOWNLOAD_FILE_TMP_PATH || mkdir -p $DOWNLOAD_FILE_TMP_PATH
 
-    curl -sfSL -o "$DOWNLOAD_FILE" "$REPO/$GROUP/$PACKAGE/$VERSION/$FILE"
+    curl -sfSL -o "$DOWNLOAD_FILE" "$REPO/$DOWNLOAD_PATH/$FILE"
     # echo "$MD5_CHECKSUM  $DOWNLOAD_FILE" | md5sum -c -
+    mv "$DOWNLOAD_FILE" $MAVEN_DEP_DESTINATION
 }
 
 maven_central_dep() {
-    maven_dep $MAVEN_REPO_CENTRAL $1 $2 $3 "$2-$3.jar" $4
-    mv "$DOWNLOAD_FILE" $MAVEN_DEP_DESTINATION
+    maven_dep $MAVEN_REPO_CENTRAL $1 $2 $3 $4
 }
 
 maven_confluent_dep() {
-    maven_dep $MAVEN_REPO_CONFLUENT "io/confluent" $1 $2 "$1-$2.jar" $3
-    mv "$DOWNLOAD_FILE" $MAVEN_DEP_DESTINATION
-}
-
-maven_debezium_plugin() {
-    maven_dep $MAVEN_REPO_CENTRAL "io/debezium" "debezium-connector-$1" $2 "debezium-connector-$1-$2-plugin.tar.gz" $3
-    tar -xzf "$DOWNLOAD_FILE" -C "$MAVEN_DEP_DESTINATION" && rm "$DOWNLOAD_FILE"
-}
-
-maven_debezium_incubator_plugin() {
-    maven_dep $MAVEN_REPO_INCUBATOR "io/debezium" "debezium-connector-$1" $2 "debezium-connector-$1-$2-plugin.tar.gz" $3
-    tar -xzf "$DOWNLOAD_FILE" -C "$MAVEN_DEP_DESTINATION" && rm "$DOWNLOAD_FILE"
+    maven_dep $MAVEN_REPO_CONFLUENT $1 $2 $3 $4
 }
 
 case $1 in
@@ -62,10 +55,5 @@ case $1 in
     "confluent" ) shift
             maven_confluent_dep ${@}
             ;;
-    "debezium" ) shift
-            maven_debezium_plugin ${@}
-            ;;
-    "debezium-incubator" ) shift
-            maven_debezium_incubator_plugin ${@}
-            ;;
+
 esac
