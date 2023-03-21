@@ -5552,7 +5552,7 @@ services:
     {% set externalRemotePort = 10005 + loop.index-1 %}
     {% set clusterPort = 11005 + loop.index-1 %}
   nifi-{{loop.index}}:
-    image: apache/nifi:{{__NIFI_version}}
+    image: {{'trivadis/apache-nifi' if NIFI_python_enabled else 'apache/nifi'}}:{{__NIFI_version}}{{NIFI_python_version if NIFI_python_enabled}
     container_name: nifi-{{loop.index}}
     hostname: nifi-{{loop.index}}
     labels:
@@ -5637,9 +5637,9 @@ services:
     {%if MINIO_enable or external['S3_enable'] | default(false) %}
       - ./security/nifi/s3-credentials.properties:/tmp/s3-credentials.properties.templ
     {% endif -%}    {#  MINIO_enable #}
-    {%if NIFI_provide_python_venv  | default(false) %}
-      - ./plugins/nifi/venv:/opt/nifi/nifi-current/venv
-    {% endif -%}    {#  NIFI_provide_python_venv #}
+    {%if NIFI_python_provide_requirements_file  | default(false) %}
+      - ./custom-conf/nifi/requirements.txt:/opt/nifi/nifi-current/requirements.txt
+    {% endif -%}    {#  NIFI_python_provide_requirements_file #}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -5655,9 +5655,9 @@ services:
     {%if MINIO_enable or external['S3_enable'] | default(false) %}
         eval "echo \"$(cat /tmp/s3-credentials.properties.templ)\"" >> s3-credentials.properties
     {% endif -%}   {#  MINIO_enable or external S3 #}
-    {%if NIFI_provide_python_venv  | default(false) %}
-        source /opt/nifi/nifi-current/venv/bin/activate
-    {% endif -%}   {#  NIFI_provide_python_venv #}
+    {%if NIFI_python_provide_requirements_file  | default(false) %}
+        pip install -r /opt/nifi/nifi-current/requirements.txt
+    {% endif -%}   {#  NIFI_python_provide_requirements_file #}
         ../scripts/start.sh
     restart: {{container_restart_policy}}
   {% endfor %}
