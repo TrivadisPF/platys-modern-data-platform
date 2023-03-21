@@ -5637,6 +5637,9 @@ services:
     {%if MINIO_enable or external['S3_enable'] | default(false) %}
       - ./security/nifi/s3-credentials.properties:/tmp/s3-credentials.properties.templ
     {% endif -%}    {#  MINIO_enable #}
+    {%if NIFI_provide_python_venv  | default(false) %}
+      - ./plugins/nifi/venv:/opt/nifi/nifi-current/venv
+    {% endif -%}    {#  NIFI_provide_python_venv #}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -5652,6 +5655,9 @@ services:
     {%if MINIO_enable or external['S3_enable'] | default(false) %}
         eval "echo \"$(cat /tmp/s3-credentials.properties.templ)\"" >> s3-credentials.properties
     {% endif -%}   {#  MINIO_enable or external S3 #}
+    {%if NIFI_provide_python_venv  | default(false) %}
+        source /opt/nifi/nifi-current/venv/bin/activate
+    {% endif -%}   {#  NIFI_provide_python_venv #}
         ../scripts/start.sh
     restart: {{container_restart_policy}}
   {% endfor %}
