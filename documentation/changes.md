@@ -40,6 +40,8 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
 
 ### New/Updated Cookbook Recipes
 
+ * [NiFi ExecuteScript Processor with Python](../cookbooks/recipes/nifi-execute-processor-with-python/README.md)
+ * [NiFi Registry with Git Flow Persistence Provider](../cookbooks/recipes/nifi-registry-with-git/README.md)
  * [Handle Serialization Errors in ksqlDB](../cookbooks/recipes/ksqldb-handle-deserializaion-error/README.md) 
  * [Using Jupyter notebook with Spark and Avro](../cookbooks/recipes/jupyter-spark/README.md)
  * [Using Dev Simulator Origin to simulate streaming data](../cookbooks/recipes/using-dev-simulator-origin/README.md) - updated with diagrams and additional samples

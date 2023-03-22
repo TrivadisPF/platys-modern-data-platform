@@ -5,7 +5,7 @@ validated-at:			6.3.2023
 ---
 
 
-# NiFi with Python
+# NiFi ExecuteScript Processor with Python
 
 This recipe will show how to use NiFi with Python. 
 

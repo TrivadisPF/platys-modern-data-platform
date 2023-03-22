@@ -43,6 +43,10 @@ Inhere we are documenting cookbooks on how to use the platform:
  * **Livy**
    * [Submit Spark Application over Livy](./recipes/run-spark-simple-app-scala-livy/README.md)
 
+ * **Apache NiFi**
+   * [NiFi ExecuteScript Processor with Python](./recipes/nifi-execute-processor-with-python/README.md) - `1.16.0`
+   * [NiFi Registry with Git Flow Persistence Provider](./recipes/nifi-registry-with-git/README.md) - `1.16.0`
+
  * **StreamSets Data Collector**
    * [Consume a binary file and send it as Kafka message](./recipes/streamsets-binary-file-to-kafka/README.md)
    * [Using Dev Simulator Origin to simulate streaming data](./recipes/using-dev-simulator-origin/README.md) - `1.12.0`
