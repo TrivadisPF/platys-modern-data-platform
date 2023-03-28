@@ -1,0 +1,1 @@
+Contains the data of filebrowser service, if flag FILEBROWSER_volume_map_data is set to true.

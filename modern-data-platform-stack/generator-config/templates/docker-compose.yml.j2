@@ -13602,23 +13602,28 @@ services:
 
 {% if FILE_BROWSER_enable | default(false) %}
   #  ================================== File Browser ================= #
-  file-browser:
-    image: filebrowser/filebrowser:{{__FILE_BROWSER_version}}
-    container_name: file-browser
-    hostname: file-browser
+  filebrowser:
+    image: hurlenko/filebrowser:{{__FILE_BROWSER_version}}
+    container_name: filebrowser
+    hostname: filebrowser
     labels:
-      com.platys.name: "file-browser"
+      com.platys.name: "filebrowser"
       com.platys.webui.title: "File Browser UI"
-      com.platys.webui.url: "http://${PUBLIC_IP}:28178"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28178/filebrowser"
     ports:
-      - 28178:80
-    {%if use_timezone | default(false) %}
+      - 28178:8080
     environment:
+      - FB_BASEURL=/filebrowser
+      - FB_USERNAME={{FILE_BROWSER_username}}
+      - FB_PASSWORD={{FILE_BROWSER_password}}
+    {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
-      - ./data-transfer:/srv
-      - ./conf/filebrowser/filebrowser.json:/.filebrowser.json
+      - ./data-transfer:/data
+    {% if FILE_BROWSER_volume_map_data %}
+      - ./container-volume/filebrowser/data:/config
+    {% endif -%}   {#  FILE_BROWSER_volume_map_data #}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -13626,7 +13631,7 @@ services:
     {%if LOKI_collect_docker_logs | default(false) %}
     <<: *logging
     {% endif -%}   {#  LOKI_collect_docker_logs #}
-#    user: "{{uid | default(1000)}}"
+    user: "{{uid | default(1000)}}:{{uid | default(1000)}}"
     restart: unless-stopped
 {% endif %}   {# FILE_BROWSER_enable #}
 
