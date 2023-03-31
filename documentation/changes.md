@@ -119,6 +119,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Update `nodered` to `2.2.3`
  * Update `dataiku-dss` to `11.2.0`
  * Update `postgres` to `15`
+ * Update `Airflow` to `2.5.2`
   
 ### Bug Fixes
 
