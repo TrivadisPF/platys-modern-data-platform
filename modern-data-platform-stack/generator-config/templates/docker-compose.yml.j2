@@ -6652,10 +6652,12 @@ services:
     restart: {{container_restart_policy}}
 
   {% if (AIRFLOW_executor | lower) == 'celery'  %}
-  airflow-worker-1:
+    {% for num in range(AIRFLOW_workers | default(1) ) %}
+
+  airflow-worker-{{loop.index}}:
     image: apache/airflow:{{__AIRFLOW_version}}
-    container_name: airflow-worker-1
-    hostname: airflow-worker-1
+    container_name: airflow-worker-{{loop.index}}
+    hostname: airflow-worker-{{loop.index}}
     labels:
       com.platys.name: 'airflow'
     command:
@@ -6700,6 +6702,7 @@ services:
     {% endif -%}   {#  LOKI_collect_docker_logs #}
     user: "${AIRFLOW_UID:-50000}:0"
     restart: {{container_restart_policy}}
+    {% endfor %}    
 
   airflow-triggerer:
     image: apache/airflow:{{__AIRFLOW_version}}
