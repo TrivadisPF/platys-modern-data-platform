@@ -137,6 +137,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Change the docker image for Airflow from the Bitnami to the official Apache one
  * Support the two major versions 7 and 8 of Elasticsearch
  * Ember Frontend for Datahub removed (as React is the new standard UI)
+ * Rename `SPARK_THRIFT_enable` to `SPARK_THRIFTSERVER_enable`
 
 ### Enhancements
 
