@@ -3496,7 +3496,7 @@ services:
     restart: {{container_restart_policy}}
   {% endif %}   {#  SPARK_HISTORY_enable #}
 
-  {% if SPARK_THRIFT_enable | default(false) %}
+  {% if SPARK_THRIFTSERVER_enable | default(false) %}
   spark-thriftserver:
     image: trivadis/apache-spark-thriftserver:{{__SPARK_version}}
     container_name: spark-thriftserver
@@ -3564,8 +3564,8 @@ services:
       SPARK_DEFAULTS_CONF_spark_yarn_dist_files: '/spark/conf/hive-site.xml'
       SPARK_DEFAULTS_CONF_spark_driver_extraJavaOptions: {{SPARK_driver_extraJavaOptions}}
       SPARK_DEFAULTS_CONF_spark_executor_extraJavaOptions: {{SPARK_executor_extraJavaOptions}}
-      SPARK_DEFAULTS_CONF_spark_cores_max: {{SPARK_cores_max if SPARK_cores_max is defined and SPARK_cores_max else omit }}
-      SPARK_DEFAULTS_CONF_spark_executor_memory: {{SPARK_executor_memory if SPARK_executor_memory is defined and SPARK_executor_memory else omit }}
+      SPARK_DEFAULTS_CONF_spark_cores_max: {{SPARK_THRIFTSERVER_cores_max if SPARK_THRIFTSERVER_cores_max is defined and SPARK_THRIFTSERVER_cores_max else omit }}
+      SPARK_DEFAULTS_CONF_spark_executor_memory: {{SPARK_THRIFTSERVER_executor_memory if SPARK_THRIFTSERVER_cores_max is defined and SPARK_THRIFTSERVER_cores_max else omit }}
       SPARK_DEFAULTS_CONF_spark_jars_repositories: {{SPARK_jars_repositories}}
       SPARK_DEFAULTS_CONF_spark_jars_packages: "{{SPARK_jars_packages}}{{',' if SPARK_jars_packages | length}}{{__SPARK_table_format_package | default('')}}{{',' if __SPARK_table_format_package | length}}{{SPARK_datahub_package | default('')}}"
       SPARK_DEFAULTS_CONF_spark_jars_excludes: {{SPARK_jars_excludes}}
@@ -3588,7 +3588,7 @@ services:
     <<: *logging
     {% endif -%}   {#  LOKI_collect_docker_logs #}
     restart: {{container_restart_policy}}
-  {% endif %}   {#  SPARK_THRIFT_enable #}
+  {% endif %}   {#  SPARK_THRIFTSERVER_enable #}
 
 {% endif %}   {#  SPARK_enable #}
 
@@ -6702,7 +6702,7 @@ services:
     {% endif -%}   {#  LOKI_collect_docker_logs #}
     user: "${AIRFLOW_UID:-50000}:0"
     restart: {{container_restart_policy}}
-    {% endfor %}    
+    {% endfor %}
 
   airflow-triggerer:
     image: apache/airflow:{{__AIRFLOW_version}}
