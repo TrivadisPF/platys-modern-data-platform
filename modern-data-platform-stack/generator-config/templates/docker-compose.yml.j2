@@ -266,6 +266,7 @@ networks:
 {% set __CHARTBOARD_version = CHARTBOARD_version | default('latest') -%}
 
 {% set __RETOOL_version = RETOOL_version | default('latest') -%}
+{% set __BASEROW_version = BASEROW_version | default('latest') -%}
 
 {% set __MEMCACHED_version = MEMCACHED_version | default('latest') -%}
 
@@ -2331,7 +2332,7 @@ services:
     <<: *logging
     {% endif -%}   {#  LOKI_collect_docker_logs #}
     restart: {{container_restart_policy}}
-{% endif %}   {#  KAFKA_enable and KAFKA_KAFKAHQ_enable #}
+{% endif %}   {#  KAFKA_enable and AKHQ_enable #}
 
 {% if ((KAFKA_enable or external['KAFKA_enable']) and KAFKA_UI_enable) | default(false) %}
   #  ================================== Kafka UI ========================================== #
@@ -8098,7 +8099,7 @@ services:
     container_name: retool-api
     labels:
       com.platys.name: "retool"
-      com.platys.webui.title: "ReTool API"
+      com.platys.webui.title: "ReTool UI"
       com.platys.webui.url: "http://${PUBLIC_IP}:3006"
     ports:
       - 3006:3000
@@ -8234,6 +8235,39 @@ services:
     command: bash -c "./docker_scripts/generate_key_pair.sh; ./retool_backend"
     restart: {{container_restart_policy}}
 {% endif %}   {#  RETOOL_enable #}
+
+{% if BASEROW_enable | default(false) %}
+  #  ================================== Baserow ========================================== #
+  baserow:
+    image: baserow/baserow:{{__BASEROW_version}}
+    hostname: baserow
+    container_name: baserow
+    labels:
+      com.platys.name: "baserow"
+      com.platys.webui.title: "Baserow UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28299"
+    ports:
+      - "28299:80"
+      - "28300:443"
+    environment:
+      BASEROW_PUBLIC_URL: 'http://${PUBLIC_IP}'
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {% if BASEROW_volume_map_data %}
+      - ./container-volume/baserow/data:/baserow/data
+    {% endif -%}   {#  use_timezone #}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  BASEROW_enable #}
 
 {% if MEMCACHED_enable | default(false) %}
   #  ================================== Memcached ========================================== #
