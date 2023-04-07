@@ -495,6 +495,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28298 | 4040 | spark-thriftserver (Spark UI) |
 28299 | 80 | baserow |
 28300 | 443 | baserow |
+28301 | 10001 | querybook |
 
 
 ## Ports > 28500

@@ -344,6 +344,7 @@ networks:
 {% set __ADMINER_version = ADMINER_version | default('latest') -%}
 {% set __CLOUDBEAVER_version = CLOUDBEAVER_version | default('latest') -%}
 {% set __SQLPAD_version = SQLPAD_version | default('latest') -%}
+{% set __QUERYBOOK_version = QUERYBOOK_version | default('latest') -%}
 {% set __NOCODB_version = NOCODB_version | default('latest') -%}
 {% set __QUIX_version = QUIX_version | default('latest') -%}
 
@@ -618,6 +619,8 @@ networks:
   {% set REDASH_enable = false -%}
   {% set SMASHING_enable = false -%}
   {% set TIPBOARD_enable = false -%}
+  {% set CHARTBOARD_enable = false -%}
+  {% set BASEROW_enable = false -%}
   {% set REDIS_INSIGHT_enable = false -%}
   {% set REDIS_COMMANDER_enable = false -%}
   {% set MONGO_enable = false -%}
@@ -658,6 +661,7 @@ networks:
   {% set ADMINER_enable = false -%}
   {% set CLOUDBEAVER_enable = false -%}
   {% set SQLPAD_enable = false -%}
+  {% set QUERYBOOK_enable = false -%}
   {% set NOCODB_enable = false -%}
   {% set QUIX_enable = false -%}
   {% set AXON_enable = false -%}
@@ -8250,7 +8254,7 @@ services:
       - "28299:80"
       - "28300:443"
     environment:
-      BASEROW_PUBLIC_URL: 'http://${PUBLIC_IP}'
+      BASEROW_PUBLIC_URL: 'http://${PUBLIC_IP}:28299'
     {% if not BASEROW_volume_map_data %}
       DISABLE_VOLUME_CHECK: true
     {% endif -%}   {#  BASEROW_volume_map_data #}
@@ -10912,6 +10916,175 @@ services:
     {% endif -%}   {#  LOKI_collect_docker_logs #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  SQLPAD_enable #}
+
+{% if QUERYBOOK_enable | default(false) %}
+  #  ================================== Querybook ========================================== #
+  querybook-web:
+    image: querybook/querybook:{{__QUERYBOOK_version}}
+    container_name: querybook-web
+    hostname: querybook-web
+    labels:
+      com.platys.name: "querybook"
+      com.platys.webui.title: "Querybook UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28301"
+    ports:
+      - "28301:10001"
+    environment:
+      PORT: 10001
+      APIPORT: 3000
+      HOT_RELOAD: true
+      FLASK_SECRET_KEY: SOME_RANDOM_SECRET_KEY
+      DATABASE_CONN: mysql+pymysql://test:passw0rd@querybook-mysql:3306/querybook2?charset=utf8mb4
+      REDIS_URL: redis://querybook-redis:6379/0
+      ELASTICSEARCH_HOST: querybook-elasticsearch:9200
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    command: ./querybook/scripts/docker_run_interactive ./querybook/scripts/runservice web --debug --webpack ${PORT-10001}
+    restart: {{container_restart_policy}}
+
+  querybook-worker:
+    image: querybook/querybook:{{__QUERYBOOK_version}}
+    container_name: querybook-worker
+    hostname: querybook-worker
+    labels:
+      com.platys.name: "querybook"
+    environment:
+      FLASK_SECRET_KEY: SOME_RANDOM_SECRET_KEY
+      DATABASE_CONN: mysql+pymysql://test:passw0rd@querybook-mysql:3306/querybook2?charset=utf8mb4
+      REDIS_URL: redis://querybook-redis:6379/0
+      ELASTICSEARCH_HOST: querybook-elasticsearch:9200
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    tty: true
+    stdin_open: true
+    command: './querybook/scripts/runservice worker -c 5'
+    restart: {{container_restart_policy}}
+
+  querybook-scheduler:
+    image: querybook/querybook:{{__QUERYBOOK_version}}
+    container_name: querybook-scheduler
+    hostname: querybook-scheduler
+    labels:
+      com.platys.name: "querybook"
+    environment:
+      FLASK_SECRET_KEY: SOME_RANDOM_SECRET_KEY
+      DATABASE_CONN: mysql+pymysql://test:passw0rd@querybook-mysql:3306/querybook2?charset=utf8mb4
+      REDIS_URL: redis://querybook-redis:6379/0
+      ELASTICSEARCH_HOST: querybook-elasticsearch:9200
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    tty: true
+    stdin_open: true
+    command: './querybook/scripts/docker_run_interactive ./querybook/scripts/runservice scheduler'
+    restart: {{container_restart_policy}}
+
+  querybook-redis:
+    image: redis:5.0.9
+    container_name: querybook-redis
+    hostname: querybook-redis
+    labels:
+      com.platys.name: "redis"
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    command: ['redis-server', '--appendonly', 'yes']
+    restart: {{container_restart_policy}}
+
+  querybook-mysql:
+    image: mysql:8.0
+    container_name: querybook-mysql
+    hostname: querybook-mysql
+    labels:
+      com.platys.name: "mysql"
+    environment:
+      MYSQL_HOST: querybook-mysql:3306
+      MYSQL_DATABASE: querybook2
+      MYSQL_USER: test
+      MYSQL_PASSWORD: passw0rd
+      # Password for root access
+      MYSQL_ROOT_PASSWORD: hunter2
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    command: ['--character-set-server=utf8mb4', '--collation-server=utf8mb4_unicode_ci']
+    restart: {{container_restart_policy}}
+
+  querybook-elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.16.2
+    container_name: querybook-elasticsearch
+    hostname: querybook-elasticsearch
+    labels:
+      com.platys.name: "elasticsearch"
+    environment:
+      cluster.name: docker-cluster
+      bootstrap.memory_lock: 'true'
+      discovery.type: single-node
+      ES_JAVA_OPTS: -Xms750m -Xmx750m
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    command: ['--character-set-server=utf8mb4', '--collation-server=utf8mb4_unicode_ci']
+    restart: {{container_restart_policy}}
+
+{% endif %}   {#  QUERYBOOK_enable #}
 
 {% if NOCODB_enable | default(false) %}
   #  ================================== NocoDB ========================================== #
