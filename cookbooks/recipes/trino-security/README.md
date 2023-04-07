@@ -6,7 +6,7 @@ validated-at:			25.02.2023
 
 # Trino Security
 
-This recipe will show how to use [Trino](trion.io) with [security enabled](https://trino.io/docs/current/security/overview.html). We will first enable [TLS and HTTPS](https://trino.io/docs/current/security/tls.html) with [Password File Authentication](https://trino.io/docs/current/security/password-file.html) and then in a second step we will also enable [File-based access control](https://trino.io/docs/current/security/file-system-access-control.html).
+This recipe will show how to use [Trino](http://trino.io) with [security enabled](https://trino.io/docs/current/security/overview.html). We will first enable [TLS and HTTPS](https://trino.io/docs/current/security/tls.html) with [Password File Authentication](https://trino.io/docs/current/security/password-file.html) and then in a second step we will also enable [File-based access control](https://trino.io/docs/current/security/file-system-access-control.html).
 
 ## Initialise data platform
 
