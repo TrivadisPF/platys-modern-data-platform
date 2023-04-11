@@ -7235,7 +7235,6 @@ services:
     ports:
       - "28889:8888"
     environment:
-      DUMMY: xb
       JUPYTER_TOKEN: {{ANACONDA_jupyter_token if ANACONDA_jupyter_token is defined and ANACONDA_jupyter_token | length else omit}}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
@@ -9247,9 +9246,8 @@ services:
       com.platys.webui.url: "http://${PUBLIC_IP}:28268"
     ports:
       - "28268:8080"
-    environment:
-      - DUMMY=xb
     {%if use_timezone | default(false) %}
+    environment:
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
@@ -9276,9 +9274,8 @@ services:
       com.platys.webui.url: "http://${PUBLIC_IP}:4195"
     ports:
       - "4195:4195"
-    environment:
-      - DUMMY=xb
     {%if use_timezone | default(false) %}
+    environment:
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
@@ -9305,9 +9302,8 @@ services:
       com.platys.webui.url: "http://${PUBLIC_IP}:4196"
     ports:
       - "4196:4196"
-    environment:
-      - DUMMY=xb
     {%if use_timezone | default(false) %}
+    environment:
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
@@ -11378,6 +11374,8 @@ services:
       - '28082:8080'
       - '28083:8443'
     environment:
+      # this is only generated to keep the structure valid if no other env variables are present
+      DUMMY: make-it-valid
   {% if (TRINO_edition | lower) == 'starburstdata' %}
       DATA_PRODUCT_ENABLED: '{{'true' if TRINO_starburstdata_enable_data_product is defined and TRINO_starburstdata_enable_data_product else 'false'}}'
   {% endif %}
@@ -11420,8 +11418,6 @@ services:
       ORACLE_USER: {{TRINO_oracle_user | default('demo') }}
       ORACLE_PASSWORD: {{TRINO_oracle_password | default('abc123!') }}
   {% endif %}
-      # this is only generated to keep the structure valid if no other env variables are present
-      IGNORE: ignore
   {% if TRINO_event_listener is defined and TRINO_event_listener | length | default(false) %}
       EVENT_LISTENER_CONFIG_FILES: /etc/trino/{{TRINO_event_listener}}.properties
   {% endif %}
@@ -11533,6 +11529,8 @@ services:
     hostname: trino-worker-{{loop.index}}
     container_name: trino-worker-{{loop.index}}
     environment:
+      # this is only generated to keep the structure valid if no other env variables are present
+      DUMMY: make-it-valid
   {%if MINIO_enable or external['S3_enable'] | default(false) %}
       S3_ENDPOINT: {{s3Endpoint | default(omit) }}
       S3_AWS_ACCESS_KEY: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
@@ -14592,7 +14590,7 @@ services:
     labels:
       com.platys.name: "python"
     environment:
-      DUMMY: xb
+      DUMMY: make-it-valid
     {%if MLFLOW_SERVER_enable | default(false) %}
       MLFLOW_TRACKING_URI: http://mlflow-tracking-server:5000
     {% endif %}
