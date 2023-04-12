@@ -3312,7 +3312,7 @@ services:
       - ./data-transfer:/data-transfer
       - ./plugins/spark/jars:/extra-jars
       - ./container-volume/spark/logs/:/var/log/spark/logs
-      - ./scripts/docker/docker-maven-download.sh:/usr/src/app/docker-maven-download.sh
+#      - ./scripts/docker/docker-maven-download.sh:/usr/src/app/docker-maven-download.sh
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -3757,6 +3757,41 @@ services:
     restart: always
   {% endfor %}
 
+  flink-sqlgateway:
+    image: flink:{{__FLINK_version}}
+    container_name: flink-sqlgateway
+    hostname: flink-sqlgateway
+    labels:
+      com.platys.name: 'flink'
+      com.platys.restapi.title: "Flink SQL Gateway REST API"
+      com.platys.restapi.url: "http://${PUBLIC_IP}:28238/v1/info"
+    ports:
+      - "28238:8083"
+    environment:
+      - |
+        FLINK_PROPERTIES=
+        jobmanager.rpc.address: flink-jobmanager
+        rest.address: flink-jobmanager
+        sql-gateway.endpoint.rest.address: 0.0.0.0
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    command:
+      - -c
+      - |
+        /docker-entrypoint.sh
+        /opt/flink/bin/sql-gateway.sh start-foreground
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    restart: always
+
   {% if FLINK_SQL_CLI_enable | default(false) %}
   flink-sql-cli:
     image: trivadis/flink-sql-cli:{{__FLINK_version}}
@@ -3791,9 +3826,9 @@ services:
     labels:
       com.platys.name: 'nussknacker'
       com.platys.webui.title: "Nussknacker UI"
-      com.platys.webui.url: "http://${PUBLIC_IP}:28238"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28302"
     ports:
-      - "28238:8080"
+      - "28302:8080"
     environment:
       #multiple, comma separated, config files can be used. They will be merged in order, via HOCON fallback mechanism
       #https://github.com/lightbend/config/blob/master/HOCON.md#config-object-merging-and-file-merging
