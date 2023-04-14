@@ -82,7 +82,7 @@ Inhere we are documenting cookbooks on how to use the platform:
 
  * **Oracle RDBMS**
    * [Using private (Trivadis) Oracle EE image](./recipes/using-private-oracle-ee-image/README.md) - `1.13.0`    
-   * [Using public Oracle XE image](./recipes/using-public-oracle-xe-image/README.md) - `1.13.0`    
+   * [Using public Oracle XE image](./recipes/using-public-oracle-xe-image/README.md) - `1.16.0`    
 
  * **Neo4J**
      * [Working with Neo4J](./recipes/working-with-neo4j/README.md) - `1.15.0`  
