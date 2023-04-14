@@ -13,7 +13,7 @@ platys gen
 
 ## Initialize database
 
-You can initialize the database automatically by putting the necessary scripts in `./init/oraclexe`:
+You can initialize the database automatically by putting the necessary scripts in `./init/oracle-xe`:
 
 To create more users, add a bash script, e.g. `01_create-user.sh`
 

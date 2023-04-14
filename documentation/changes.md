@@ -39,6 +39,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Directus
  * Baserow
  * Querybook
+ * Oracle Database Free
 
 ### New/Updated Cookbook Recipes
 
@@ -140,6 +141,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Support the two major versions 7 and 8 of Elasticsearch
  * Ember Frontend for Datahub removed (as React is the new standard UI)
  * Rename `SPARK_THRIFT_enable` to `SPARK_THRIFTSERVER_enable`
+ * Rename folder `./init/oraclexe` to `./init/oracle-xe`
 
 ### Enhancements
 
