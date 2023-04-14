@@ -47,6 +47,12 @@ CREATE TABLE person_t (
 
 ## How to use it?
 
+### Connect through SQL Plus
+
+```
+docker exec -ti oracledb-xe sqlplus user1/abc123!@//localhost/XEPDB1
+```
+
 ### Connect through JDBC
 
 * **JDBC Url:**  	`jdbc:oracle:thin:@dataplatform:1522/XEPDB1`
