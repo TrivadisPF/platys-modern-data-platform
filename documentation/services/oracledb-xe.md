@@ -11,6 +11,42 @@ platys init --enable-services ORACLE_XE
 platys gen
 ```
 
+## Initialize database
+
+You can initialize the database automatically by putting the necessary scripts in `./init/oraclexe`:
+
+To create more users, add a bash script, e.g. `01_create-user.sh`
+
+```bash
+#!/bin/bash
+#
+./createAppUser user1 abc123!
+./createAppUser user2 abc123!
+```
+
+to create schema objects, add an sql script, e.g. `02_create-user1-schema.sql`
+
+```sql
+CONNECT user1/abc123!@//localhost/XEPDB1
+
+DROP TABLE person_t IF EXISTS;
+
+CREATE TABLE person_t (
+	business_entity_id     	INTEGER     PRIMARY KEY,
+    person_type            	VARCHAR2(100),
+    name_style             	VARCHAR2(1),
+    title					VARCHAR2(20),
+    first_name             	VARCHAR2(100),
+    middle_name            	VARCHAR2(100),
+    last_name              	VARCHAR2(100),
+    email_promotion        	NUMBER(10),
+    demographics			VARCHAR2(2000),
+    created_date			TIMESTAMP,
+    modified_date         	TIMESTAMP);
+```     
+
+## How to use it?
+
 ### Connect through JDBC
 
 * **JDBC Url:**  	`jdbc:oracle:thin:@dataplatform:1522/XEPDB1`
