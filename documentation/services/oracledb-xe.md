@@ -50,7 +50,7 @@ CREATE TABLE person_t (
 ### Connect through SQL Plus
 
 ```
-docker exec -ti oracledb-xe sqlplus user1/abc123!@//localhost/XEPDB1
+docker exec -ti oracledb-xe sqlplus "user1/abc123!"@//localhost/XEPDB1
 ```
 
 ### Connect through JDBC
