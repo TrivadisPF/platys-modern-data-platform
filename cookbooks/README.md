@@ -61,6 +61,7 @@ Inhere we are documenting cookbooks on how to use the platform:
  * **Kafka**
    * [Simulated Multi-DC Setup on one machine](./recipes/simulated-multi-dc-setup/README.md) - `1.14.0`  
    * [Automate management of Kafka topics on the platform](./recipes/jikkou-automate-kafka-topics-management/README.md) - `1.14.0`
+   * [Azure Event Hub as external Kafka](./recipes/azure-event-hub-as-external-kafka/README.md) - `1.16.0`
 
  * **Confluent Enterprise Platform**
    * [Using Confluent Enterprise Tiered Storage](./recipes/confluent-tiered-storage/README.md) - `1.13.0`
