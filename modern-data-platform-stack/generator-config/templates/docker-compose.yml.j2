@@ -1142,7 +1142,7 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
-      - ./conf/kafka/config.properties:/config.properties
+      - ./conf/kafka/config.properties:/tmp/config.properties
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -1151,6 +1151,7 @@ services:
       - /bin/sh
       - -c
       - |
+        eval "echo \"$(cat /tmp/config.properties)\"" >> config.properties
         while [ 1 -eq 1 ];do sleep 60;done
     restart: {{container_restart_policy}}
 {% endif %} {# KAFKA_enable or external['KAFKA_enable'] #}
