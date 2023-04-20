@@ -323,6 +323,7 @@ The Modern Data Platform version 1.14.0 contains the following bug fixes and enh
  * Update `Thingsboard` to `3.3.3`
  * Update `RabbitMQ` to `3.9-management`
  * Update `Watchtower` to `1.4.0`
+ * Update `TimescaleDB` to `2.10.2-pg15`
 
 ### Breaking Changes
 
