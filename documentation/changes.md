@@ -111,7 +111,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Update `ignite` to `2.14.0`
  * Update `axon-server` to `4.6.7
  * Update `drill` to `1.20.2`
- * Update `hasura` to `v2.16.1`
+ * Update `hasura` to `v2.23.0`
  * Update `cedalo-management-center` to `2.5.8`
  * Update `lakefs` to `0.93.0`
  * Update `vault` to `1.12.2`
