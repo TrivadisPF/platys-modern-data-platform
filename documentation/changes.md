@@ -63,9 +63,9 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
 
 ### Version upgrades
 
- * Update `DataHub` to `v0.10.1`
- * Update `Trino` to `413`
- * Update `Starburst Enterprise` to `411-e`
+ * Update `DataHub` to `v0.10.2`
+ * Update `Trino` to `414`
+ * Update `Starburst Enterprise` to `412-e`
  * Update `dremio` to `24.0`
  * Update `Jikkou` to `0.14.0`
  * Update `Hasura` to `v2.16.1`
@@ -125,7 +125,8 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Update `dataiku-dss` to `11.2.0`
  * Update `postgres` to `15`
  * Update `Airflow` to `2.5.2`
-  
+ * Update `TimescaleDB` to `2.10.2-pg15`
+ *   
 ### Bug Fixes
 
  * ksqlDB processing log now also works with the open source edition (`      KAFKA_KSQLDB_edition: 'oss'`).
@@ -323,7 +324,6 @@ The Modern Data Platform version 1.14.0 contains the following bug fixes and enh
  * Update `Thingsboard` to `3.3.3`
  * Update `RabbitMQ` to `3.9-management`
  * Update `Watchtower` to `1.4.0`
- * Update `TimescaleDB` to `2.10.2-pg15`
 
 ### Breaking Changes
 
