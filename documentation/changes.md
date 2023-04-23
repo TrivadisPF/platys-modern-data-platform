@@ -75,10 +75,10 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Update `datastax-opscenter` to `6.8.19`
  * Update `minio` to `RELEASE.2023-02-17T17-52-43Z`
  * Update `confluent platform` to `7.3.0`
- * Update `influxdb2` to `2.6.1`
+ * Update `influxdb2` to `2.7`
  * Update `kapacitor` to `1.6`
  * Update `chronograf` to `1.10`
- * Update `telegraf` to `1.24.3`
+ * Update `telegraf` to `1.26`
  * Update `burrow` to `v1.5.0`
  * Update `graphdb` to `10.1.2`
  * Update `nifi` to `1.21.0`
@@ -94,8 +94,8 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Update `mlflow-server` to `2.1.0`
  * Update `minio` to `RELEASE.2023-01-20T02-05-44Z`
  * Update `grafana` to `9.3.2`
- * Update `kibana` to `8.5.3`
- * Update `elasticsearch` to `7.17.8` and `8.5.3`
+ * Update `kibana` to `7.17.9` and `8.7.0`
+ * Update `elasticsearch` to `7.17.9` and `8.7.0`
  * Update `memchached` to `1.6.17`
  * Update `mongodb` to `6.0`
  * Update `solr` to `9.1`
