@@ -93,7 +93,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Update `airbyte` to `0.40.33`
  * Update `mlflow-server` to `2.1.0`
  * Update `minio` to `RELEASE.2023-01-20T02-05-44Z`
- * Update `grafana` to `9.3.2`
+ * Update `grafana` to `9.3.11`
  * Update `kibana` to `7.17.9` and `8.7.0`
  * Update `elasticsearch` to `7.17.9` and `8.7.0`
  * Update `memchached` to `1.6.17`
