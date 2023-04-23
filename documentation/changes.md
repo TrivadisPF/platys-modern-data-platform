@@ -298,6 +298,7 @@ The Modern Data Platform version 1.14.0 contains the following bug fixes and enh
  * Update `Materialize` to `v0.19.0`
  * Update `kcat` to `1.7.1`
  * Update `Debezium` to `1.8.0.Final`
+ * Update `Cassandra` to `4.1`
  * Update `Datastax` to `6.8.19`
  * Update `Elasticsearch` to `7.17.0`
  * Update `Node-RED` to `2.2.0`
