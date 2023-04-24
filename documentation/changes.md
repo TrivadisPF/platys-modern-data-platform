@@ -73,8 +73,8 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Update `ksqldb` to `0.28.2`
  * Update `datastax` to `6.8.34`
  * Update `datastax-opscenter` to `6.8.26`
- * Update `minio` to `RELEASE.2023-02-17T17-52-43Z`
- * Update `confluent platform` to `7.3.0`
+ * Update `minio` to `RELEASE.2023-04-20T17-56-55Z`
+ * Update `confluent platform` to `7.3.3`
  * Update `influxdb2` to `2.7`
  * Update `kapacitor` to `1.6`
  * Update `chronograf` to `1.10`
@@ -89,7 +89,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Update `eventstoredb` to `22.10.0-buster-slim`
  * Update `flink` to `1.17-scala_2.12`
  * Update `tika-server` to `2.6.0.0-full`
- * Update `marquez` and `marquez-web` to `0.29.0`
+ * Update `marquez` and `marquez-web` to `0.33.0`
  * Update `airbyte` to `0.40.33`
  * Update `mlflow-server` to `2.1.0`
  * Update `minio` to `RELEASE.2023-01-20T02-05-44Z`
@@ -103,7 +103,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Update `dgraph` to `v22.0.2`
  * Update `stardog` to `8.2.0-java11-preview`
  * Update `kudu` to `1.16`
- * Update `druid` to `24.0.2`
+ * Update `druid` to `25.0.0`
  * Update `prometheus` to `v2.41.0` and `gateway` to `v1.5.1` and `node-exporter` to `v1.5.0`
  * Update `tile38` to `1.30.1`
  * Update `yugabyte` to `2.8.11.0-b6`
