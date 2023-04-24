@@ -14525,11 +14525,11 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - GF_INSTALL_PLUGINS={{GRAFANA_install_plugins}}
+      - GF_INSTALL_PLUGINS={{GRAFANA_install_plugins | default(omit)}}
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD={{admin_password}}
       - GF_USERS_ALLOW_SIGN_UP=false
-      - GF_FEATURE_TOGGLES_ENABLE={{GRAFANA_feature_toggles}}
+      - GF_FEATURE_TOGGLES_ENABLE={{GRAFANA_feature_toggles | default(omit) }}
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -14537,7 +14537,9 @@ services:
       - ./data-transfer:/data-transfer
       - ./scripts/grafana/dashboards:/etc/grafana/provisioning/dashboards
       - ./scripts/grafana/datasources:/etc/grafana/provisioning/datasources
+    {% if GRAFANA_install_plugins is defined and GRAFANA_install_plugins %}
       - ./plugins/grafana/plugins:/var/lib/grafana/plugins
+    {% endif -%}   {#  GRAFANA_install_plugins #}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
