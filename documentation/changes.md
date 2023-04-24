@@ -84,7 +84,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Update `nifi` to `1.21.0`
  * Update `jikkou` to `0.13.0`
  * Update `spark` to `3.1.3`, `3.2.3` and `3.3.1`
- * Update `materialize` to `v0.38.0`
+ * Update `materialize` to `v0.52.2`
  * Update `neo4j` to `5.7`
  * Update `eventstoredb` to `22.10.0-buster-slim`
  * Update `flink` to `1.17-scala_2.12`
@@ -96,37 +96,38 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Update `grafana` to `9.3.11`
  * Update `kibana` to `7.17.9` and `8.7.0`
  * Update `elasticsearch` to `7.17.9` and `8.7.0`
- * Update `memchached` to `1.6.17`
+ * Update `memchached` to `1.6.19`
  * Update `mongodb` to `6.0`
  * Update `solr` to `9.1`
  * Update `quine` to `1.5.1`
  * Update `dgraph` to `v22.0.2`
- * Update `stardog` to `8.2.0-java11-preview`
+ * Update `stardog` to `8.2.2-java11-preview`
  * Update `kudu` to `1.16`
  * Update `druid` to `25.0.0`
  * Update `prometheus` to `v2.41.0` and `gateway` to `v1.5.1` and `node-exporter` to `v1.5.0`
  * Update `tile38` to `1.30.1`
  * Update `yugabyte` to `2.8.11.0-b6`
- * Update `hazelcast` to `5.2.1`
+ * Update `hazelcast` to `5.2.3`
  * Update `ignite` to `2.14.0`
  * Update `axon-server` to `4.6.7
  * Update `drill` to `1.20.2`
  * Update `hasura` to `v2.23.0`
  * Update `cedalo-management-center` to `2.5.8`
- * Update `lakefs` to `0.93.0`
- * Update `vault` to `1.12.2`
+ * Update `lakefs` to `0.99.0`
+ * Update `vault` to `1.13.1`
  * Update `portainer` to `2.16.2-alpine`
  * Update `watchtower` to `1.5.1`
  * Update `ahana` to `0.278`
- * Update `apicurio-schema-registry` to `2.4.1.Final`
- * Update `debezium-server` to `2.0.1.Final`
+ * Update `apicurio-schema-registry` to `2.4.2.Final`
+ * Update `debezium-server` to `2.2.0-Final`
  * Update `Amundsen Frontend` to `4.2.0` and `Amundsen Search` to `4.0.2` and `Amundsen Metadata` to `3.11.0`
  * Update `nodered` to `2.2.3`
  * Update `dataiku-dss` to `11.2.0`
  * Update `postgres` to `15`
- * Update `Airflow` to `2.5.2`
+ * Update `Airflow` to `2.5.3`
  * Update `TimescaleDB` to `2.10.2-pg15`
- *   
+ * Update `Pinot` to `0.12.1`
+
 ### Bug Fixes
 
  * ksqlDB processing log now also works with the open source edition (`      KAFKA_KSQLDB_edition: 'oss'`).
