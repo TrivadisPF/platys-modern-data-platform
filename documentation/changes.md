@@ -71,8 +71,8 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Update `Hasura` to `v2.16.1`
  * Update `Confluent Platform` to `7.3.1`
  * Update `ksqldb` to `0.28.2`
- * Update `datastax` to `6.8.28`
- * Update `datastax-opscenter` to `6.8.19`
+ * Update `datastax` to `6.8.34`
+ * Update `datastax-opscenter` to `6.8.26`
  * Update `minio` to `RELEASE.2023-02-17T17-52-43Z`
  * Update `confluent platform` to `7.3.0`
  * Update `influxdb2` to `2.7`
@@ -414,7 +414,7 @@ The Modern Data Platform version 1.13.0 contains the following bug fixes and enh
  * Update `GraphDB` to `9.9.0`
  * Update `Druid` to `0.21.1`
  * Update `Solr` to `8.9`
- * Update `Redis` to `6.2`
+ * Update `Redis` to `7.0`
  * Update `Memcached` to `1.6.10`
  * Update `Grafana` to `8.2.0`
  * Update `QuestDB` to `6.0.4`
