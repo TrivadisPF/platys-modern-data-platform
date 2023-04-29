@@ -11608,7 +11608,7 @@ services:
   {% endif %}
   {% if TRINO_event_listener is defined and TRINO_event_listener | length | default(false) %}
       - ./conf/trino/{{TRINO_event_listener}}.properties:{{trino_etc_dir}}/{{TRINO_event_listener}}.properties
-      - ./plugins/trino/{{TRINO_event_listener}}/:/usr/lib/trino/plugin/{{TRINO_event_listener}}/
+      - ./plugins/trino/event-listener/:/usr/lib/trino/plugin/
   {% endif %}
   {% if (TRINO_edition | lower) == 'starburstdata' and TRINO_starburstdata_use_license is defined and TRINO_starburstdata_use_license | default(false) %}
       - ./licenses/starburstdata/starburstdata.license:/etc/starburst/starburstdata.license
@@ -11624,6 +11624,12 @@ services:
   {% if TRINO_access_control_enabled | default(false) %}
       - ./security/{{conf_dir}}/access-control.properties:{{trino_etc_dir}}/access-control.properties
   {% endif %}
+  {% for catalogName in (TRINO_additional_catalogs.split(',')) %}
+      - './custom-conf/{{conf_dir}}/catalog/{{catalogName}}.properties:{{trino_etc_dir}}/catalog/{{catalogName}}.properties'
+  {% endfor %}
+  {% for connectorName in (TRINO_additional_connectors.split(',')) %}
+      - ./plugins/{{conf_dir}}/connector/{{connectorName}}:/usr/lib/trino/plugin/{{connectorName}}
+  {% endfor %}
       - ./custom-conf/{{conf_dir}}/security:{{trino_etc_dir}}/security
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
