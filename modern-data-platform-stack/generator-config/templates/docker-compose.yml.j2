@@ -11773,6 +11773,16 @@ services:
   {% if TRINO_access_control_enabled | default(false) %}
       - ./security/{{conf_dir}}/access-control.properties:{{trino_etc_dir}}/access-control.properties
   {% endif %}
+  {% if TRINO_additional_catalogs is defined and TRINO_additional_catalogs | default(false) %}
+    {% for catalogName in (TRINO_additional_catalogs.split(',')) %}
+      - './custom-conf/{{conf_dir}}/catalog/{{catalogName}}.properties:{{trino_etc_dir}}/catalog/{{catalogName}}.properties'
+    {% endfor %}
+  {% endif %}
+  {% if TRINO_additional_connectors is defined and TRINO_additional_connectors | default(false) %}
+    {% for connectorName in (TRINO_additional_connectors.split(',')) %}
+      - ./plugins/{{conf_dir}}/connector/{{connectorName}}:/usr/lib/trino/plugin/{{connectorName}}
+    {% endfor %}
+  {% endif %}
       - ./custom-conf/{{conf_dir}}/security:{{trino_etc_dir}}/security
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
