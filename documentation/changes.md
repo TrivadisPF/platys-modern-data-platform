@@ -158,6 +158,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * added options to further configure AKHQ 
  * support Trino security with password file and access control file
  * support for multiple Airflow workers if `celery` executor mode is used
+ * support for custom Trino catalogs and connectors
  
 ## What's new in 1.15.0
 
