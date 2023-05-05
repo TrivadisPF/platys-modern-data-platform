@@ -54,6 +54,8 @@ docker-compose up -d
 
 Navigate to AKHQ to manage the Event Hub: <http://dataplatform:28107>
 
+To use the Kafka CLI's
+
 ```bash
 docker exec -ti kafka-cli kafka-topics --bootstrap-server XXXXXX.servicebus.windows.net:9093 --command-config config.properties --list
 ```
