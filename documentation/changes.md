@@ -69,7 +69,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Update `dremio` to `24.0`
  * Update `Jikkou` to `0.14.0`
  * Update `Hasura` to `v2.16.1`
- * Update `Confluent Platform` to `7.3.1`
+ * Update `Confluent Platform` to `7.4.0`
  * Update `ksqldb` to `0.28.2`
  * Update `datastax` to `6.8.34`
  * Update `datastax-opscenter` to `6.8.26`
