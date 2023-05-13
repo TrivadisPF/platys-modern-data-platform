@@ -41,6 +41,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Querybook
  * Oracle Database Free
  * Kafka CLI (Kafka software without a running broker)
+ * Kafkistry
 
 ### New/Updated Cookbook Recipes
 

@@ -55,6 +55,7 @@ networks:
 {% set __KAFKA_WEBVIEW_version = KAFKA_WEBVIEW_version | default('latest') -%}
 {% set __KPOW_version = KPOW_version | default('latest') -%}
 {% set __CONDUKTOR_PLATFORM_version = CONDUKTOR_PLATFORM_version | default('latest') -%}
+{% set __KAFKISTRY_version = KAFKISTRY_version | default('latest') -%}
 {% set __KAFKA_CONNECTOR_BOARD_version = KAFKA_CONNECTOR_BOARD_version | default('latest') -%}
 {% set __STREAMS_EXPLORER_version = STREAMS_EXPLORER_version | default('latest') -%}
 {% set __KAFKA_LAG_EXPORTER_version = KAFKA_LAG_EXPORTER_version | default('latest') -%}
@@ -574,6 +575,7 @@ networks:
   {% set KAFKA_WEBVIEW_enable = false -%}
   {% set KPOW_enable = false -%}
   {% set CONDUKTOR_PLATFORM_enable = false -%}
+  {% set KAFKISTRY_enable = false -%}
   {% set KAFKA_CONNECTOR_BOARD_enable = false -%}
   {% set ZILLA_enable = false -%}
   {% set REMORA_enable = false -%}
@@ -2780,6 +2782,43 @@ services:
     {% endif -%}   {#  LOKI_collect_docker_logs #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  KAFKA_enable and CONDUKTOR_PLATFORM_enable #}
+
+{% if ((KAFKA_enable or external['KAFKA_enable']) and KAFKISTRY_enable) | default(false) %}
+  #  ================================== Kafkistry ========================================== #
+  kafkistry:
+    image: infobip/kafkistry:{{__KAFKISTRY_version}}
+    container_name: kafkistry
+    hostname: kafkistry
+    labels:
+      com.platys.name: "kafkistry"
+      com.platys.webui.title: 'Kafkistry UI'
+      com.platys.webui.url: "http://${PUBLIC_IP}:28303"
+    ports:
+      - 28303:8080
+    environment:
+      - USERS_PASSWORDS=foo|bar|Admy|Adminsky|admin@kafkistry.local|ADMIN|"
+      - OWNER_GROUPSO="Test_Group|foo"
+      - GIT_COMMIT_TO_MASTER_BY_DEFAULT=true
+      - CONSUME_ENABLED=true
+      - OLDEST_RECORD_AGE_ENABLED=true
+      - SQL_ENABLED=true
+#      - GIT_REMOTE_SSH_URI=
+#      - GIT_SSH_PASSWORD=
+#      - ENABLED_CLUSTERS=
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  KAFKA_enable and KAFKISTRY_enable #}
 
 {% if ((KAFKA_enable or external['KAFKA_enable']) and KAFKA_CONNECTOR_BOARD_enable) | default(false) %}
   #  ================================== Kafka Connector Board ========================================== #

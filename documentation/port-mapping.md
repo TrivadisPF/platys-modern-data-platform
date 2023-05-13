@@ -498,7 +498,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28300 | 443 | baserow |
 28301 | 10001 | querybook |
 28302 | 8081 | nussknacker-designer |
-
+28303 | 8080 | kafkistry |
 
 ## Ports > 28500
 
