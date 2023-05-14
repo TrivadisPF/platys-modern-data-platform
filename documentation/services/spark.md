@@ -11,3 +11,6 @@ platys init --enable-services SPARK
 platys gen
 ```
 
+## How to use it?
+
+Navigate to <http://dataplatform:28304> to see the Spark Master UI.
