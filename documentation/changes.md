@@ -84,7 +84,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Update `graphdb` to `10.1.2`
  * Update `nifi` to `1.21.0`
  * Update `jikkou` to `0.13.0`
- * Update `spark` to `3.1.3`, `3.2.3` and `3.3.1`
+ * Update `spark` to `3.1.3`, `3.2.4` and `3.3.2` and `3.4.0`
  * Update `materialize` to `v0.52.2`
  * Update `neo4j` to `5.7`
  * Update `eventstoredb` to `22.10.0-buster-slim`
