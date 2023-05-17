@@ -3901,7 +3901,7 @@ services:
 
   {% if FLINK_SQL_CLI_enable | default(false) %}
   flink-sql-cli:
-    image: trivadis/flink-sql-cli:{{__FLINK_version}}
+    image: flink:{{__FLINK_version}}
     container_name: flink-sql-cli
     hostname: flink-sql-cli
     labels:
@@ -3910,11 +3910,7 @@ services:
       - |
         FLINK_PROPERTIES=
         jobmanager.rpc.address: jobmanager
-        taskmanager.numberOfTaskSlots: 2
-      - FLINK_JOBMANAGER_HOST=flink-jobmanager
-      - ZOOKEEPER_CONNECT=zookeeper-1
-      - KAFKA_BOOTSTRAP=kafka-1:19092
-      - MYSQL_HOST=mysql-1
+        rest.address: jobmanager
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -3927,6 +3923,7 @@ services:
     {%if LOKI_collect_docker_logs | default(false) %}
     <<: *logging
     {% endif -%}   {#  LOKI_collect_docker_logs #}
+    command: bin/sql-client.sh
     restart: always
   {% endif -%}   {#  FLINK_SQL_CLI_enable #}
 
