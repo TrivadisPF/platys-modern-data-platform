@@ -125,7 +125,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Update `nodered` to `2.2.3`
  * Update `dataiku-dss` to `11.2.0`
  * Update `postgres` to `15`
- * Update `Airflow` to `2.5.3`
+ * Update `Airflow` to `2.6.1` with default python `3.10`
  * Update `TimescaleDB` to `2.10.2-pg15`
  * Update `Pinot` to `0.12.1`
  * Update `Jupyter-spark` to `spark-3.3.2` and `spark-3.4.0`
