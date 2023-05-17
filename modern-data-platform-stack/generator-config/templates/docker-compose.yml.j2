@@ -119,8 +119,8 @@ networks:
 
 {% set __SPARK_table_format_package = "" %}
 
-{%if DATAHUB_enable | default(false) %}
-  {% set SPARK_datahub_package="io.acryl:datahub-spark-lineage:0.10.0" %}
+{%if (DATAHUB_enable or external['DATAHUB_enable']) | default(false) %}
+  {% set SPARK_datahub_package="io.acryl:datahub-spark-lineage:{{__DATAHUB_version}}" %}
 {% else -%}
   {% set SPARK_datahub_package="" %}
 {% endif -%}
@@ -476,12 +476,12 @@ networks:
 {% if AZKARRA_enable or PINOT_enable -%}
 # enforce some dependencies
   {% set KAFKA_enable = true -%}
-{% endif -%}   {# DATAHUB_enable  #}
+{% endif -%}   {# AZKARRA_enable  #}
 
 {% if (KAFKA_enable and not KAFKA_use_kraft_mode) or ATLAS_enable or DRILL_enable or PINOT_enable -%}
 # enforce some dependencies
   {% set ZOOKEEPER_enable = true -%}
-{% endif -%}   {# KAFKA_enable or ATLAS_enable or DATAHUB_enable #}
+{% endif -%}   {# KAFKA_enable or ATLAS_enable or DRILL_enable or PINOT_enable #}
 
 {% if (NIFI_enable and NIFI_create_cluster) -%}
 # enforce some dependencies
@@ -4403,7 +4403,7 @@ services:
 {% endif %}   {#  ATLAS_enable #}
 
 {% if DATAHUB_enable  | default(false) %}
-  #  ================================== Datahub ========================================== #
+  #  ================================== DataHub ========================================== #
   datahub-frontend:
     image: linkedin/datahub-frontend-react:{{__DATAHUB_version}}
     hostname: datahub-frontend
