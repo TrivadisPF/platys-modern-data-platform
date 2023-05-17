@@ -161,6 +161,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * support Trino security with password file and access control file
  * support for multiple Airflow workers if `celery` executor mode is used
  * support for custom Trino catalogs and connectors
+ * add concept of an environment to a platys stack, so that the same docker-compose can be run multiple time on different machines, but having a separate environment.
  
 ## What's new in 1.15.0
 
