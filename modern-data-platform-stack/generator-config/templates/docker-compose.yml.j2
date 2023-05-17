@@ -3806,16 +3806,24 @@ services:
       - |
         FLINK_PROPERTIES=
         jobmanager.rpc.address: flink-jobmanager
+        parallelism.default: 2
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
+    {%if FLINK_deploymen_mode == 'application' | default(false) %}
+      - /applications/flink:/opt/flink/usrlib
+    {% endif -%}   {#  FLINK_deploymen_mode #}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
+    {%if FLINK_deploymen_mode == 'session' | default(false) %}
     command: jobmanager
+    {%elif SFLINK_deploymen_mode == 'application'  | default(false) %}
+    command: standalone-job --job-classname com.job.ClassName [--job-id <job id>] [--fromSavepoint /path/to/savepoint [--allowNonRestoredState]] [job arguments]
+    {% endif -%}   {#  FLINK_deploymen_mode #}
     {%if LOKI_collect_docker_logs | default(false) %}
     <<: *logging
     {% endif -%}   {#  LOKI_collect_docker_logs #}
@@ -3834,11 +3842,15 @@ services:
         FLINK_PROPERTIES=
         jobmanager.rpc.address: flink-jobmanager
         taskmanager.numberOfTaskSlots: 2
+        parallelism.default: 2
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
+    {%if FLINK_deploymen_mode == 'application' | default(false) %}
+      - /applications/flink:/opt/flink/usrlib
+    {% endif -%}   {#  FLINK_deploymen_mode #}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -3850,6 +3862,7 @@ services:
     restart: always
   {% endfor %}
 
+  {% if FLINK_SQL_GATEWAY_enable | default(false) %}
   flink-sqlgateway:
     image: flink:{{__FLINK_version}}
     container_name: flink-sqlgateway
@@ -3884,6 +3897,7 @@ services:
     <<: *logging
     {% endif -%}   {#  LOKI_collect_docker_logs #}
     restart: always
+  {% endif -%}   {#  FLINK_SQL_GATEWAY_enable #}
 
   {% if FLINK_SQL_CLI_enable | default(false) %}
   flink-sql-cli:
@@ -3893,10 +3907,14 @@ services:
     labels:
       com.platys.name: 'flink'
     environment:
-      FLINK_JOBMANAGER_HOST: flink-jobmanager
-      ZOOKEEPER_CONNECT: zookeeper-1
-      KAFKA_BOOTSTRAP: kafka-1:19092
-      MYSQL_HOST: mysql-1
+      - |
+        FLINK_PROPERTIES=
+        jobmanager.rpc.address: jobmanager
+        taskmanager.numberOfTaskSlots: 2
+      - FLINK_JOBMANAGER_HOST=flink-jobmanager
+      - ZOOKEEPER_CONNECT=zookeeper-1
+      - KAFKA_BOOTSTRAP=kafka-1:19092
+      - MYSQL_HOST=mysql-1
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -3912,6 +3930,7 @@ services:
     restart: always
   {% endif -%}   {#  FLINK_SQL_CLI_enable #}
 
+  {% if FLINK_NUSSKNACKER_enable | default(false) %}
   nussknacker-designer:
     image: touk/nussknacker:{{__NUSSKNACKER_version}}
     container_name: nussknacker-designer
@@ -3933,6 +3952,8 @@ services:
       SCHEMA_REGISTRY_URL: '{{ns.schemaRegistryUrl}}'
       COUNTS_URL: http://influxdb-1:8086/query
       OPENAPI_SERVICE_URL: http://customerservice:5000
+  {% endif -%}   {#  FLINK_NUSSKNACKER_enable #}
+
 {% endif %}   {#  FLINK_enable #}
 
 {% if TIKA_enable | default(false) %}
