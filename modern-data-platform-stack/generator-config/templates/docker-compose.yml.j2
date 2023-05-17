@@ -843,6 +843,12 @@ networks:
   {% set adlsAccessKey = '${PLATYS_AZURE_ADLS_ACCESS_KEY:?PLATYS_AZURE_ADLS_ACCESS_KEY must be set either in .env or as an environment variable}' %}
 {% endif %}   {# external['s3Endpoint'] #}
 
+{% if (external['DATAHUB_enable']) | default(false) %}
+    {% set ns.gmsUrl = external['DATAHUB_gms_url'] %}
+{% else %}
+    {% set ns.gmsUrl = 'http://datahub-gms:8080' %}
+{% endif %}   {# external['DATAHUB_enable'] #}
+
 {#  ================================== Kafka Connect Settings ========================================== #}
 
 {% set ns1 = namespace(connectServersInternalUrl='') %}
@@ -3362,10 +3368,10 @@ services:
       SPARK_DEFAULTS_CONF_spark_executor_memory: {{SPARK_executor_memory if SPARK_executor_memory is defined and SPARK_executor_memory else omit }}
 #      SPARK_DEFAULTS_CONF_spark_sql_extensions: {{SPARK_sql_extensions if SPARK_sql_extensions is defined and SPARK_sql_extensions else omit }}
 #      SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: {{SPARK_sql_catalog_spark_catalog if SPARK_sql_catalog_spark_catalog is defined and SPARK_sql_catalog_spark_catalog else omit }}
-    {%if DATAHUB_enable | default(false) %}
+    {%if (DATAHUB_enable or external['DATAHUB_enable']) | default(false) %}
       SPARK_DEFAULTS_CONF_spark_extraListeners: 'datahub.spark.DatahubSparkListener'
-      SPARK_DEFAULTS_CONF_spark_datahub_rest_server: 'http://datahub-gms:8080'
-    {% endif -%}   {#  DATAHUB_enable #}
+      SPARK_DEFAULTS_CONF_spark_datahub_rest_server: {{ns.gmsUrl}}
+    {% endif -%}   {#  DATAHUB_enable or external['DATAHUB_enable'] #}
     {%if SPARK_table_format_type == 'iceberg' | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog_type: hive
@@ -3461,10 +3467,10 @@ services:
       SPARK_DEFAULTS_CONF_spark_executor_extraJavaOptions: {{SPARK_executor_extraJavaOptions}}
       SPARK_DEFAULTS_CONF_spark_cores_max: {{SPARK_cores_max if SPARK_cores_max is defined and SPARK_cores_max else omit }}
       SPARK_DEFAULTS_CONF_spark_executor_memory: {{SPARK_executor_memory if SPARK_executor_memory is defined and SPARK_executor_memory else omit }}
-    {%if DATAHUB_enable | default(false) %}
+    {%if (DATAHUB_enable or external['DATAHUB_enable']) | default(false) %}
       SPARK_DEFAULTS_CONF_spark_extraListeners: 'datahub.spark.DatahubSparkListener'
-      SPARK_DEFAULTS_CONF_spark_datahub_rest_server: 'http://datahub-gms:8080'
-    {% endif -%}   {#  DATAHUB_enable #}
+      SPARK_DEFAULTS_CONF_spark_datahub_rest_server: {{ns.gmsUrl}}
+    {% endif -%}   {#  DATAHUB_enable or external['DATAHUB_enable'] #}
     {%if SPARK_table_format_type == 'iceberg' | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_extensions: org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions
@@ -3551,10 +3557,10 @@ services:
       SPARK_DEFAULTS_CONF_spark_executor_extraJavaOptions: {{SPARK_executor_extraJavaOptions}}
       SPARK_DEFAULTS_CONF_spark_cores_max: {{SPARK_cores_max if SPARK_cores_max is defined and SPARK_cores_max else omit }}
       SPARK_DEFAULTS_CONF_spark_executor_memory: {{SPARK_executor_memory if SPARK_executor_memory is defined and SPARK_executor_memory else omit }}
-  {%if DATAHUB_enable | default(false) %}
+  {%if (DATAHUB_enable or external['DATAHUB_enable']) | default(false) %}
       SPARK_DEFAULTS_CONF_spark_extraListeners: 'datahub.spark.DatahubSparkListener'
-      SPARK_DEFAULTS_CONF_spark_datahub_rest_server: 'http://datahub-gms:8080'
-  {% endif -%}   {#  DATAHUB_enable #}
+      SPARK_DEFAULTS_CONF_spark_datahub_rest_server: {{ns.gmsUrl}}
+  {% endif -%}   {#  DATAHUB_enable or external['DATAHUB_enable'] #}
   {%if SPARK_table_format_type == 'iceberg' | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog_type: hive
@@ -3633,10 +3639,10 @@ services:
       CORE_CONF_fs_defaultFS: file:///tmp
       SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined else 'file:///hive/warehouse'}}
   {% endif -%}   {#  HADOOP_enable #}
-  {%if DATAHUB_enable | default(false) %}
+  {%if (DATAHUB_enable or external['DATAHUB_enable']) | default(false) %}
       SPARK_DEFAULTS_CONF_spark_extraListeners: 'datahub.spark.DatahubSparkListener'
-      SPARK_DEFAULTS_CONF_spark_datahub_rest_server: 'http://datahub-gms:8080'
-  {% endif -%}   {#  DATAHUB_enable #}
+      SPARK_DEFAULTS_CONF_spark_datahub_rest_server: {{ns.gmsUrl}}
+  {% endif -%}   {#  DATAHUB_enable or external['DATAHUB_enable'] #}
   {%if SPARK_table_format_type == 'iceberg' | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog_type: hive
@@ -3735,10 +3741,10 @@ services:
       SPARK_DEFAULTS_CONF_spark_executor_extraJavaOptions: {{SPARK_executor_extraJavaOptions}}
       SPARK_DEFAULTS_CONF_spark_cores_max: {{SPARK_cores_max if SPARK_cores_max is defined and SPARK_cores_max else omit }}
       SPARK_DEFAULTS_CONF_spark_executor_memory: {{SPARK_executor_memory if SPARK_executor_memory is defined and SPARK_executor_memory else omit }}
-  {%if DATAHUB_enable | default(false) %}
+  {%if (DATAHUB_enable or external['DATAHUB_enable']) | default(false) %}
       SPARK_DEFAULTS_CONF_spark_extraListeners: 'datahub.spark.DatahubSparkListener'
-      SPARK_DEFAULTS_CONF_spark_datahub_rest_server: 'http://datahub-gms:8080'
-  {% endif -%}   {#  DATAHUB_enable #}
+      SPARK_DEFAULTS_CONF_spark_datahub_rest_server: {{ns.gmsUrl}}
+  {% endif -%}   {#  DATAHUB_enable or external['DATAHUB_enable'] #}
   {%if SPARK_table_format_type == 'iceberg' | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog_type: hive
@@ -7126,10 +7132,10 @@ services:
       SPARK_DEFAULTS_CONF_spark_jars_excludes: {{SPARK_jars_excludes}}
       SPARK_DEFAULTS_CONF_spark_jars: {{SPARK_jars}}
       SPARK_DEFAULTS_CONF_spark_jars_ivySettings: {{SPARK_jars_ivySettings}}
-    {%if DATAHUB_enable | default(false) %}
+    {%if (DATAHUB_enable or external['DATAHUB_enable']) | default(false) %}
       SPARK_DEFAULTS_CONF_spark_extraListeners: 'datahub.spark.DatahubSparkListener'
-      SPARK_DEFAULTS_CONF_spark_datahub_rest_server: 'http://datahub-gms:8080'
-    {% endif -%}   {#  DATAHUB_enable #}
+      SPARK_DEFAULTS_CONF_spark_datahub_rest_server: {{ns.gmsUrl}}
+    {% endif -%}   {#  DATAHUB_enable or external['DATAHUB_enable'] #}
   {%if (SPARK_catalog | lower) == 'in-memory' | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalogImplementation: in-memory
   {% else %}
