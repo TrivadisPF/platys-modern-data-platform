@@ -3828,6 +3828,7 @@ services:
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
     {%if FLINK_deployment_mode == 'session' | default(false) %}
+    entrypoint: /docker-entrypoint-override.sh
     command: jobmanager
     {%elif FLINK_deployment_mode == 'application'  | default(false) %}
     command: standalone-job --job-classname com.job.ClassName [--job-id <job id>] [--fromSavepoint /path/to/savepoint [--allowNonRestoredState]] [job arguments]
@@ -3870,6 +3871,7 @@ services:
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
+    entrypoint: /docker-entrypoint-override.sh
     command: taskmanager
     {%if LOKI_collect_docker_logs | default(false) %}
     <<: *logging
@@ -3907,6 +3909,7 @@ services:
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
+    entrypoint: /docker-entrypoint-override.sh
     command: /opt/flink/bin/sql-gateway.sh start-foreground
     {%if LOKI_collect_docker_logs | default(false) %}
     <<: *logging
@@ -3928,7 +3931,7 @@ services:
         rest.address: flink-jobmanager
       - ENABLE_BUILT_IN_PLUGINS={{FLINK_enable_build_in_plugins if FLINK_enable_build_in_plugins is defined and FLINK_enable_build_in_plugins != None else omit}}
       - FLINK_INSTALL_JARS_PACKAGES={{FLINK_install_jars_packages}}
-    {%if use_timezone | default(false) %}
+      {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
@@ -3943,7 +3946,7 @@ services:
     {%if LOKI_collect_docker_logs | default(false) %}
     <<: *logging
     {% endif -%}   {#  LOKI_collect_docker_logs #}
-    entrypoint: tail -f /dev/null
+    entrypoint: bash -c "/docker-entrypoint-override.sh && tail -f /dev/null"
     restart: always
   {% endif -%}   {#  FLINK_SQL_CLI_enable #}
 
