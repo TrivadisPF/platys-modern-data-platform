@@ -3805,8 +3805,12 @@ services:
     environment:
       - |
         FLINK_PROPERTIES=
-        jobmanager.rpc.address: flink-jobmanager
-        parallelism.default: 2
+        jobmanager.rpc.address: jobmanager
+        taskmanager.numberOfTaskSlots: 2
+        execution.checkpointing.interval: 5000
+        state.backend: filesystem
+        state.checkpoints.dir: file:///tmp/flink-checkpoints-directory
+        state.savepoints.dir: file:///tmp/flink-savepoints-directory
       - ENABLE_BUILT_IN_PLUGINS={{FLINK_enable_build_in_plugins if FLINK_enable_build_in_plugins is defined and FLINK_enable_build_in_plugins != None else omit}}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
@@ -3841,9 +3845,12 @@ services:
     environment:
       - |
         FLINK_PROPERTIES=
-        jobmanager.rpc.address: flink-jobmanager
-        taskmanager.numberOfTaskSlots: 2
-        parallelism.default: 2
+        jobmanager.rpc.address: jobmanager
+        taskmanager.numberOfTaskSlots: 10
+        execution.checkpointing.interval: 5000
+        state.backend: filesystem
+        state.checkpoints.dir: file:///tmp/flink-checkpoints-directory
+        state.savepoints.dir: file:///tmp/flink-savepoints-directory
       - ENABLE_BUILT_IN_PLUGINS={{FLINK_enable_build_in_plugins if FLINK_enable_build_in_plugins is defined and FLINK_enable_build_in_plugins != None else omit}}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
@@ -3915,6 +3922,7 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
+#      - ./init/flink:/opt/sql-client/init
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
