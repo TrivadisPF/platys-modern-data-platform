@@ -129,6 +129,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Update `TimescaleDB` to `2.10.2-pg15`
  * Update `Pinot` to `0.12.1`
  * Update `Jupyter-spark` to `spark-3.3.2` and `spark-3.4.0`
+ * Update `Hue` to `4.11.0`
 
 ### Bug Fixes
 
