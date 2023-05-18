@@ -3805,18 +3805,21 @@ services:
     environment:
       - |
         FLINK_PROPERTIES=
-        jobmanager.rpc.address: jobmanager
+        jobmanager.rpc.address: flink-jobmanager
         taskmanager.numberOfTaskSlots: 2
         execution.checkpointing.interval: 5000
         state.backend: filesystem
         state.checkpoints.dir: file:///tmp/flink-checkpoints-directory
         state.savepoints.dir: file:///tmp/flink-savepoints-directory
       - ENABLE_BUILT_IN_PLUGINS={{FLINK_enable_build_in_plugins if FLINK_enable_build_in_plugins is defined and FLINK_enable_build_in_plugins != None else omit}}
+      - FLINK_INSTALL_JARS_PACKAGES={{FLINK_install_jars_packages}}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
+      - ./scripts/docker/maven-download.sh:/maven-download.sh
+      - ./scripts/flink/docker-entrypoint-override.sh:/docker-entrypoint-override.sh
     {%if FLINK_deployment_mode == 'application' | default(false) %}
       - /applications/flink:/opt/flink/usrlib
     {% endif -%}   {#  FLINK_deployment_mode #}
@@ -3845,18 +3848,21 @@ services:
     environment:
       - |
         FLINK_PROPERTIES=
-        jobmanager.rpc.address: jobmanager
+        jobmanager.rpc.address: flink-jobmanager
         taskmanager.numberOfTaskSlots: 10
         execution.checkpointing.interval: 5000
         state.backend: filesystem
         state.checkpoints.dir: file:///tmp/flink-checkpoints-directory
         state.savepoints.dir: file:///tmp/flink-savepoints-directory
       - ENABLE_BUILT_IN_PLUGINS={{FLINK_enable_build_in_plugins if FLINK_enable_build_in_plugins is defined and FLINK_enable_build_in_plugins != None else omit}}
+      - FLINK_INSTALL_JARS_PACKAGES={{FLINK_install_jars_packages}}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
+      - ./scripts/docker/maven-download.sh:/maven-download.sh
+      - ./scripts/flink/docker-entrypoint-override.sh:/docker-entrypoint-override.sh
     {%if FLINK_deployment_mode == 'application' | default(false) %}
       - /applications/flink:/opt/flink/usrlib
     {% endif -%}   {#  FLINK_deployment_mode #}
@@ -3888,11 +3894,15 @@ services:
         jobmanager.rpc.address: flink-jobmanager
         rest.address: flink-jobmanager
         sql-gateway.endpoint.rest.address: 0.0.0.0
+      - ENABLE_BUILT_IN_PLUGINS={{FLINK_enable_build_in_plugins if FLINK_enable_build_in_plugins is defined and FLINK_enable_build_in_plugins != None else omit}}
+      - FLINK_INSTALL_JARS_PACKAGES={{FLINK_install_jars_packages}}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
+      - ./scripts/docker/maven-download.sh:/maven-download.sh
+      - ./scripts/flink/docker-entrypoint-override.sh:/docker-entrypoint-override.sh
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -3917,11 +3927,14 @@ services:
         jobmanager.rpc.address: flink-jobmanager
         rest.address: flink-jobmanager
       - ENABLE_BUILT_IN_PLUGINS={{FLINK_enable_build_in_plugins if FLINK_enable_build_in_plugins is defined and FLINK_enable_build_in_plugins != None else omit}}
+      - FLINK_INSTALL_JARS_PACKAGES={{FLINK_install_jars_packages}}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
+      - ./scripts/docker/maven-download.sh:/maven-download.sh
+      - ./scripts/flink/docker-entrypoint-override.sh:/docker-entrypoint-override.sh
 #      - ./init/flink:/opt/sql-client/init
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
