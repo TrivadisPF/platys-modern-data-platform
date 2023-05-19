@@ -1,7 +1,9 @@
 #!/bin/bash
 
 #
-# Download Files from Internet (currently only Github releases are supported)
+# Download Files from Internet (currently only Github releases are supported).
+#
+#	- GitHub Release:	file-download.sh github "<owner>:<project>:<version>:<artefact-name>"
 #
 # Author: Guido Schmutz <https://github.com/gschmutz>
 #
