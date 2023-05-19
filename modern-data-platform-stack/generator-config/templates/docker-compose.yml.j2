@@ -3821,6 +3821,7 @@ services:
       - ./data-transfer:/data-transfer
       - ./scripts/docker/:/platys-scripts/
       - ./scripts/flink/docker-entrypoint-override.sh:/docker-entrypoint-override.sh
+      - flink-vol:/opt/flink
     {%if FLINK_deployment_mode == 'application' | default(false) %}
       - /applications/flink:/opt/flink/usrlib
     {% endif -%}   {#  FLINK_deployment_mode #}
@@ -7140,7 +7141,7 @@ services:
     env_file:
       - ./conf/hadoop.env
     environment:
-    {%if MINIO_enable or external['S3_enable'] | default(false) %}
+  {%if MINIO_enable or external['S3_enable'] | default(false) %}
       CORE_CONF_fs_s3a_endpoint: '{{s3Endpoint | default(omit) }}'
       CORE_CONF_fs_s3a_path_style_access: '{{s3PathStyleAccess}}'
       HIVE_SITE_CONF_fs_s3a_endpoint: {{s3Endpoint | default(omit) }}
@@ -7158,7 +7159,8 @@ services:
       AWS_SECRET_ACCESS_KEY: ${PLATYS_AWS_SECRET_ACCESS_KEY:-{{MINIO_secret_key}}}
       AWS_ENDPOINT: {{s3Endpoint if s3Endpoint is defined and s3Endpoint else omit}}
       AWS_DEFAULT_REGION: {{s3DefaultRegion if s3DefaultRegion is defined and s3DefaultRegion else omit}}
-    {% endif %}
+  {% endif %}   {#  MINIO_enable #}
+  {%if SPARK_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_cores_max: {{ZEPPELIN_spark_cores_max if ZEPPELIN_spark_cores_max is defined and ZEPPELIN_spark_cores_max else omit }}
       SPARK_DEFAULTS_CONF_spark_executor_memory: {{ZEPPELIN_spark_executor_memory if ZEPPELIN_spark_executor_memory is defined and ZEPPELIN_spark_executor_memory else omit }}
     {%if SPARK_table_format_type == 'iceberg' | default(false) %}
@@ -7189,11 +7191,21 @@ services:
       SPARK_DEFAULTS_CONF_spark_datahub_rest_server: {{ns.gmsUrl}}
       SPARK_DEFAULTS_CONF_spark_datahub_metadata_dataset_env: {{env}}
     {% endif -%}   {#  DATAHUB_enable or external['DATAHUB_enable'] #}
-  {%if (SPARK_catalog | lower) == 'in-memory' | default(false) %}
+    {%if (SPARK_catalog | lower) == 'in-memory' | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalogImplementation: in-memory
-  {% else %}
+      {% else %}
       SPARK_DEFAULTS_CONF_spark_sql_catalogImplementation: hive
-  {% endif -%}   {#  SPARK_catalog #}
+    {% endif -%}   {#  SPARK_catalog #}
+      SPARK_DEFAULTS_CONF_spark_yarn_dist_files: '/spark/conf/hive-site.xml'
+      SPARK_DEFAULTS_CONF_spark_driver_extraJavaOptions: {{SPARK_driver_extraJavaOptions}}
+      SPARK_DEFAULTS_CONF_spark_executor_extraJavaOptions: {{SPARK_executor_extraJavaOptions}}
+    {%if ZEPPELIN_use_local_spark | default(false) %}
+      ZEPPELIN_SPARK_MASTER: "local[*]"
+    {% else %}
+       ZEPPELIN_SPARK_MASTER: "spark://spark-master:7077"
+    {% endif -%}   {#  ZEPPELIN_use_local_spark #}
+  {% endif %}   {#  SPARK_enable #}
+
   {%if HADOOP_enable | default(false) %}
       CORE_CONF_fs_defaultFS: hdfs://namenode:9000
       SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined else 'hdfs://namenode:9000/user/hive/warehouse'}}
@@ -7204,9 +7216,6 @@ services:
       CORE_CONF_fs_defaultFS: file:///tmp
       SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined else 'file:///hive/warehouse'}}
   {% endif -%}   {#  HADOOP_enable #}
-      SPARK_DEFAULTS_CONF_spark_yarn_dist_files: '/spark/conf/hive-site.xml'
-      SPARK_DEFAULTS_CONF_spark_driver_extraJavaOptions: {{SPARK_driver_extraJavaOptions}}
-      SPARK_DEFAULTS_CONF_spark_executor_extraJavaOptions: {{SPARK_executor_extraJavaOptions}}
 
       ZEPPELIN_ADDR: "0.0.0.0"
       ZEPPELIN_PORT: "8080"
@@ -7219,33 +7228,35 @@ services:
       ZEPPELIN_USER_PASSWORD: {{ZEPPELIN_user_password}}
       # set spark-master for Zeppelin interpreter
 
-  {%if ZEPPELIN_use_local_spark | default(false) %}
-      ZEPPELIN_SPARK_MASTER: "local[*]"
-  {% else %}
-      ZEPPELIN_SPARK_MASTER: "spark://spark-master:7077"
-  {% endif -%}   {#  ZEPPELIN_use_local_spark #}
+  {%if FLINK_enable | default(false) %}
+      FLINK_HOME: opt/flink
+  {% endif -%}   {#  FLINK_enable #}
+
       ZEPPELIN_NOTEBOOK_DIR: '{{ZEPPELIN_notebook_dir}}'
       ZEPPELIN_NOTEBOOK_CRON_ENABLE: '{{ZEPPELIN_notebook_cron_enable}}'
       PYSPARK_PYTHON: "python3"
       SPARK_SUBMIT_OPTIONS: "{{ZEPPELIN_spark_submit_options}} --conf spark.ui.port=4050 --conf spark.driver.host=zeppelin --conf spark.driver.port=5050 --conf spark.driver.bindAddress=0.0.0.0 --conf spark.blockManager.port=6060 --conf spark.driver.extraJavaOptions=-Dcom.amazonaws.services.s3.enableV4 --conf spark.executor.extraJavaOptions=-Dcom.amazonaws.services.s3.enableV4"
-    {%if use_timezone | default(false) %}
+  {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
-    {% endif -%}   {#  use_timezone #}
+  {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
       - ./plugins/spark/jars:/extra-jars
       - ./container-volume/spark/logs/:/var/log/spark/logs
-    {% if ZEPPELIN_volume_map_data %}
+  {% if ZEPPELIN_volume_map_data %}
       - ./container-volume/spark/notebooks:/opt/zeppelin/{{ZEPPELIN_notebook_dir}}
-    {% endif -%}   {#  ZEPPELIN_volume_map_data #}
+  {% endif -%}   {#  ZEPPELIN_volume_map_data #}
       - './conf/awscli/s3cfg.template:/root/.s3cfg.template'
-    {%if use_timezone | default(false) %}
+  {%if FLINK_enable | default(false) %}
+      - flink-vol:/opt/flink:RO
+  {% endif -%}   {#  FLINK_enable #}
+  {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
-    {% endif -%}   {#  use_timezone #}
-    {%if LOKI_collect_docker_logs | default(false) %}
+  {% endif -%}   {#  use_timezone #}
+  {%if LOKI_collect_docker_logs | default(false) %}
     <<: *logging
-    {% endif -%}   {#  LOKI_collect_docker_logs #}
+  {% endif -%}   {#  LOKI_collect_docker_logs #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  ZEPPELIN_enable  #}
 
@@ -14981,6 +14992,9 @@ services:
 volumes:
   data-transfer-vol:
     name: data_transfer_vol
+{%if FLINK_enable %}
+  flink-vol:
+{% endif %}
 {%if AIRBYTE_volume_map_data %}
   airbyte-workspace-vol:
     name: airbyte_workspace_vol
