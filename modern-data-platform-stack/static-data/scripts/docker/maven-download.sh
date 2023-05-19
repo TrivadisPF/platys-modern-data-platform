@@ -32,9 +32,10 @@ maven_dep() {
       DOWNLOAD_FILE="$DOWNLOAD_FILE_TMP_PATH/$FILE"
       test -d $DOWNLOAD_FILE_TMP_PATH || mkdir -p $DOWNLOAD_FILE_TMP_PATH
 
-      echo "Downloading $REPO/$GROUP/$PACKAGE/$VERSION/$FILE ...."
-      curl -sfSL -o "$DOWNLOAD_FILE" "$REPO/$GROUP/$PACKAGE/$VERSION/$FILE"
-
+	  DOWNLOAD_URL="$REPO/$GROUP/$PACKAGE/$VERSION/$FILE"
+      echo "Downloading $DOWNLOAD_URL ...."
+      curl -sfSL -o "$DOWNLOAD_FILE" "$DOWNLOAD_URL"
+      
       mv "$DOWNLOAD_FILE" $MAVEN_DEP_DESTINATION
     done
 }
