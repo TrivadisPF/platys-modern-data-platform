@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 
-if [ ${FLINK_INSTALL_JARS_PACKAGES} ]
+if [ ${FLINK_INSTALL_MAVEN_DEP} ]
 then
-  /maven-download.sh central ${FLINK_INSTALL_JARS_PACKAGES} /opt/flink/lib
+  /maven-download.sh central ${FLINK_INSTALL_MAVEN_DEP} /opt/flink/lib
 fi
 
-if [ ${FLINK_INSTALL_ADDL_FILES} ]
+if [ ${FLINK_INSTALL_FILE_DEP} ]
 then
-  /file-download.sh github ${FLINK_INSTALL_ADDL_FILES} /opt/flink/lib
+  /file-download.sh github ${FLINK_INSTALL_FILE_DEP} /opt/flink/lib
 fi
 
 if [ -z ${FLINK_DO_NOT_START} ]; then

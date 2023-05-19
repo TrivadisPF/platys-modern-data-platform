@@ -3930,8 +3930,9 @@ services:
         jobmanager.rpc.address: flink-jobmanager
         rest.address: flink-jobmanager
       - ENABLE_BUILT_IN_PLUGINS={{FLINK_enable_build_in_plugins if FLINK_enable_build_in_plugins is defined and FLINK_enable_build_in_plugins != None else omit}}
-      - FLINK_INSTALL_JARS_PACKAGES={{FLINK_install_jars_packages}}
-      - FLINK_DO_NOT_START=yes
+      - FLINK_INSTALL_MAVEN_DEP={{FLINK_install_maven_dep}}
+      - FLINK_INSTALL_FILE_DEP={{FLINK_install_file_dep}}
+#      - FLINK_DO_NOT_START=yes
       {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -3949,6 +3950,7 @@ services:
     <<: *logging
     {% endif -%}   {#  LOKI_collect_docker_logs #}
     entrypoint: bash -c "/docker-entrypoint-override.sh && tail -f /dev/null"
+    command:  bin/sql-client.sh
     restart: always
   {% endif -%}   {#  FLINK_SQL_CLI_enable #}
 
