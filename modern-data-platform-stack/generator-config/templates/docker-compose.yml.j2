@@ -3951,8 +3951,10 @@ services:
     command:  bin/sql-client.sh
     restart: always
   {% endif -%}   {#  FLINK_SQL_CLI_enable #}
+{% endif %}   {#  FLINK_enable #}
 
-  {% if FLINK_NUSSKNACKER_enable | default(false) %}
+{% if NUSSKNACKER_enable | default(false) %}
+  #  ================================== Nussknacker ========================================== #
   nussknacker-designer:
     image: touk/nussknacker:{{__NUSSKNACKER_version}}
     container_name: nussknacker-designer
@@ -3968,15 +3970,14 @@ services:
       #https://github.com/lightbend/config/blob/master/HOCON.md#config-object-merging-and-file-merging
       CONFIG_FILE: /opt/nussknacker/conf/application.conf,/opt/nussknacker/conf/nussknacker.conf
       JDK_JAVA_OPTIONS: -Xmx256M
+      DEFAULT_SCENARIO_TYPE: ${DEFAULT_SCENARIO_TYPE-}
       FLINK_REST_URL: http://flink-jobmanager:8081
       FLINK_QUERYABLE_STATE_PROXY_URL: flink-taskmanager-1:9069
       KAFKA_ADDRESS: kafka-1:19092
       SCHEMA_REGISTRY_URL: '{{ns.schemaRegistryUrl}}'
       COUNTS_URL: http://influxdb-1:8086/query
       OPENAPI_SERVICE_URL: http://customerservice:5000
-  {% endif -%}   {#  FLINK_NUSSKNACKER_enable #}
-
-{% endif %}   {#  FLINK_enable #}
+{% endif -%}   {#  NUSSKNACKER_enable #}
 
 {% if TIKA_enable | default(false) %}
   #  ================================== Apache Tika Server ========================================== #
