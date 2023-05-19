@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #
-# Download Releases from Github
+# Download Files from Internet (currently only Github releases are supported)
 #
 # Author: Guido Schmutz <https://github.com/gschmutz>
 #
