@@ -16,5 +16,5 @@ platys gen
 To use the avro tool, once it is generated, just use the `docker exec` command:
 
 ```bash
-docker compose run avro-tools <command>
+docker compose run --rm avro-tools <command>
 ```
