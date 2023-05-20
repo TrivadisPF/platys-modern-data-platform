@@ -13,7 +13,7 @@ platys gen
 
 ## How to use?
 
-Connecting to one of the borkers (i.e. `kafka-1`)
+Connecting to one of the brokers (i.e. `kafka-1`)
 
 ```
 docker exec -ti kafka-1 bash
