@@ -16,5 +16,5 @@ platys gen
 To use the parquet tool, once it is generated, just use the `docker exec` command:
 
 ```bash
-docker exec -ti parquet-tools <command>
+docker compose run parquet-tools <command>
 ```
