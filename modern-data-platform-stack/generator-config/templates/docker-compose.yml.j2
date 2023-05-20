@@ -4169,6 +4169,32 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {#  AVRO_TOOLS_enable #}
 
+{% if PARQUET_TOOLS_enable  | default(false) %}
+  #  ================================== Apache Parquet Tools ========================================== #
+  parquet-tools:
+    image: trivadis/apache-parquet-tools:{{__PARQUET_TOOLS_version}}
+    hostname: parquet-tools
+    container_name: parquet-tools
+    labels:
+      com.platys.name: "parquet-tools"
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    entrypoint: "tail -f /dev/null"
+    tty: true
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  PARQUET_TOOLS_enable #}
+
 {% if OPENLDAP_enable  | default(false) %}
   #  ================================== LDAP ========================================== #
   openldap:
