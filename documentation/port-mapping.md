@@ -418,6 +418,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28210 | 9000 | pinot-controller |
 28211 | 8099 | pinot-broker-1 |
 28212 | 8098 | pinot-server-1 |
+28213 | 8098 | pinot-server-2 |
+28214 | 8098 | pinot-server-3 |
 28220 | 8000 | lakefs |
 28221 | 8081 | emqx-1 |
 28222 | 8083 | emqx-1 |

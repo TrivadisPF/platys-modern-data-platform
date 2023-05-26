@@ -10348,6 +10348,11 @@ services:
       com.platys.webui.url: "http://${PUBLIC_IP}:28210"
     ports:
       - "28210:9000"
+    environment:
+      JAVA_OPTS: "-Dplugins.dir=/opt/pinot/plugins -Xms1G -Xmx4G -XX:+UseG1GC -XX:MaxGCPauseMillis=200 -Xloggc:gc-pinot-controller.log"
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
     {% if PINOT_volume_map_data %}
@@ -10373,8 +10378,9 @@ services:
       - pinot-controller
     ports:
       - "28211:8099"
-    {%if use_timezone | default(false) %}
     environment:
+      JAVA_OPTS: "-Dplugins.dir=/opt/pinot/plugins -Xms4G -Xmx4G -XX:+UseG1GC -XX:MaxGCPauseMillis=200 -Xloggc:gc-pinot-broker.log"
+    {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
@@ -10390,6 +10396,7 @@ services:
     restart: {{container_restart_policy}}
 
   {% for num in range(PINOT_servers | default(1) ) %}
+    {% set external_port = 28212 + loop.index - 1 %}
   pinot-server-{{loop.index}}:
     image: apachepinot/pinot:{{__PINOT_version}}
     hostname: pinot-server-{{loop.index}}
@@ -10398,10 +10405,11 @@ services:
       com.platys.name: "pinot"
     depends_on:
       - pinot-controller
-#    ports:
-#      - "28212:8098"
-    {%if use_timezone | default(false) %}
+    ports:
+      - "{{external_port}}:8098"
     environment:
+      JAVA_OPTS: "-Dplugins.dir=/opt/pinot/plugins -Xms4G -Xmx16G -XX:+UseG1GC -XX:MaxGCPauseMillis=200 -Xloggc:gc-pinot-server.log"
+    {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
