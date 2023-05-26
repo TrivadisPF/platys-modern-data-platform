@@ -818,22 +818,28 @@ networks:
 
 {% if (external['S3_enable']) | default(false) %}
   {% if (external['S3_endpoint'] != None) | default(false) %}
-    {% set s3Endpoint = external['S3_endpoint'] %}
+    {% set s3EndpointStorage = external['S3_endpoint'] %}
   {% endif %}
-    {% set s3Endpoint = 's3.amazonaws.com' %}
+    {% set s3EndpointStorage = 's3.amazonaws.com' %}
     {% set s3PathStyleAccess = external['S3_path_style_access'] %}
     {% set s3AccessKey = '${PLATYS_AWS_ACCESS_KEY:?PLATYS_AWS_ACCESS_KEY must be set either in .env or as an environment variable}' %}
     {% set s3SecretAccessKey = '${PLATYS_AWS_SECRET_ACCESS_KEY:?PLATYS_AWS_SECRET_ACCESS_KEY must be set either in .env or as an environment variable}' %}
     {% set s3DefaultRegion = external['S3_default_region'] %}
     {% set s3AdminBucketName = external['S3_admin_bucket_name'] %}
 {% else %}
-    {% set s3Endpoint = 'http://minio-1:9000' %}
+    {% set s3EndpointStorage = 'http://minio-1:9000' %}
     {% set s3PathStyleAccess = 'true' %}
     {% set s3AccessKey = MINIO_access_key %}
     {% set s3SecretAccessKey = MINIO_secret_key %}
     {% set s3DefaultRegion = 'us-east-1' %}
     {% set s3AdminBucketName = 'admin-bucket' %}
 {% endif %}   {# external['s3Endpoint'] #}
+
+{% if LAKEFS_enable and LAKEFS_blockstore_type == 's3' | default(false) %}
+    {% set s3Endpoint = 'http://lakefs:8000' %}
+{% else %}
+    {% set s3Endpoint = s3EndpointStorage %}
+{% endif %}   {# LAKEFS_enable #}
 
 {% if (external['ADLS_enable']) | default(false) %}
   {% if (external['ADLS_storage_account'] != None) | default(false) %}
@@ -13235,7 +13241,7 @@ services:
     {%if LAKEFS_blockstore_type == 'local' %}
       LAKEFS_BLOCKSTORE_LOCAL_PATH: '/home/lakefs'
     {%elif LAKEFS_blockstore_type == 's3' %}
-      LAKEFS_BLOCKSTORE_S3_ENDPOINT: {{s3Endpoint if s3Endpoint is defined and s3Endpoint else omit}}
+      LAKEFS_BLOCKSTORE_S3_ENDPOINT: {{s3EndpointStorage if s3EndpointStorage is defined and s3EndpointStorage else omit}}
       LAKEFS_BLOCKSTORE_S3_REGION: {{s3DefaultRegion if s3DefaultRegion is defined and s3DefaultRegion else omit}}
       LAKEFS_BLOCKSTORE_S3_DISCOVER_BUCKET_REGION: 'false'
       LAKEFS_BLOCKSTORE_S3_FORCE_PATH_STYLE: '{{s3PathStyleAccess}}'
