@@ -13267,12 +13267,7 @@ services:
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
-    entrypoint:
-    {%if LAKEFS_blockstore_type == 'local' -%}
-      ["/bin/sh", "-c"]
-    {%elif LAKEFS_database_type == 'postgresql' -%}
-      ["/app/wait-for", "postgresql:5432", "--", "/bin/sh", "-c"]
-    {% endif -%}   {#  LAKEFS_database_type #}
+    entrypoint: [{{ '"/app/wait-for", "postgresql:5432", "--",' if LAKEFS_database_type == 'postgresql'}} "/bin/sh", "-c"]
     command:
         - |
           lakefs setup --local-settings --user-name docker --access-key-id {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }} --secret-access-key ${PLATYS_AWS_SECRET_ACCESS_KEY:-{{MINIO_secret_key}}} || true
