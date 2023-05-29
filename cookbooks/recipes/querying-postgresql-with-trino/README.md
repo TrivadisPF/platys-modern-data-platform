@@ -16,10 +16,13 @@ First [initialise a platys-supported data platform](../../getting-started.md) wi
 platys init --enable-services TRINO,POSTGRESQL,ADMINER,PROVISIONING_DATA -s trivadis/platys-modern-data-platform -w 1.11.0
 ```
 
-add the follwing property to `config.yml`
+add the following property to `config.yml` to configure to use the Trino (open source version) and to configure the connectivity to the Postgresql service:
 
 ```
 TRINO_edition: 'oss'
+TRINO_postgresql_database: 'demodb'
+TRINO_postgresql_user: 'demo'
+TRINO_postgresql_password: 'abc123!'
 ```
 
 Now set an environment variable to the home folder of the dataplatform and generate and then start the data platform. 

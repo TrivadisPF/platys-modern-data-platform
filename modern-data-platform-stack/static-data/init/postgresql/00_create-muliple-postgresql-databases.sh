@@ -16,7 +16,7 @@ containsElement () {
 }
 
 function create_user_and_database() {
-	local database=$1 user=$2 password=$3
+	local database=$1 user=$2 password=$3 addl_roles=$4
 	local query_users="select rolname from pg_roles;" query_databases="select datname from pg_database;"
 	local roles=$(echo "$query_users" | psql -tA)
 	local databases=$(echo "$query_databases" | psql -Aqt)
@@ -28,7 +28,7 @@ function create_user_and_database() {
     else
         echo "Create User '$user'.";
         psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" \
-            -c "CREATE USER $user WITH PASSWORD '$password'";
+            -c "CREATE USER $user WITH SUPERUSER PASSWORD '$password'";
     fi
     if [[ "$database_exist" == 1 ]]; then
         echo "Database '$database' exists. Skipping."
@@ -39,6 +39,9 @@ function create_user_and_database() {
     fi
     psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" \
         -c "GRANT ALL PRIVILEGES ON DATABASE $database TO $user;"
+        
+        psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" \
+        -c "ALTER USER $user WITH $addl_roles;"    
 }
 
 if [ -n "$POSTGRES_MULTIPLE_DATABASES" ]; then
@@ -46,9 +49,14 @@ if [ -n "$POSTGRES_MULTIPLE_DATABASES" ]; then
 	IFS=', ' read -r -a databases <<< "$POSTGRES_MULTIPLE_DATABASES"
 	IFS=', ' read -r -a users <<< "$POSTGRES_MULTIPLE_USERS"
 	IFS=', ' read -r -a passwords <<< "$POSTGRES_MULTIPLE_PASSWORDS"
+	IFS=', ' read -r -a addl_roles <<< "$POSTGRES_MULTIPLE_ADDL_ROLES"	
 	for index in ${!databases[@]}; do
         if [[ $index < ${#databases[*]} && $index < ${#users[*]} && $index < ${#passwords[*]} ]] ; then
-              create_user_and_database "${databases[index]//[\'\"\`]/}" "${users[index]//[\'\"\`]/}" "${passwords[index]//[\'\"\`]/}"
+			if [ -n "$POSTGRES_MULTIPLE_ADDL_ROLES" ]; then        
+              create_user_and_database "${databases[index]//[\'\"\`]/}" "${users[index]//[\'\"\`]/}" "${passwords[index]//[\'\"\`]/}" "${addl_roles[index]//[\'\"\`]/}"
+            else
+              create_user_and_database "${databases[index]//[\'\"\`]/}" "${users[index]//[\'\"\`]/}" "${passwords[index]//[\'\"\`]/}" ""
+			fi
         else
             echo "DATABASE '${databases[index]}' OR USER '${users[index]}' EMPTY"
         fi

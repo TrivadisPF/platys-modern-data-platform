@@ -86,7 +86,7 @@ FROM '/data-transfer/flight-data/airports.csv' DELIMITER ',' CSV HEADER;
 
 Navigate to Zeppelin <http://dataplatform:28080> and login as user `admin` with password `abc123!`.
 
-Create a new notebook and in a cell enter the following Spark code using the Python API. Replace again the `gschmutz` prefix in the bucket name:
+Create a new notebook and in a cell enter the following Spark code using the Python API. 
 
 ```scala
 val opts = Map(

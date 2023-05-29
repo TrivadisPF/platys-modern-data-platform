@@ -1,0 +1,1 @@
+Contains the data of arcaded service, if flag ARCADEDB_volume_map_data is set to true.

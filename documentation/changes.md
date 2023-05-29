@@ -2,6 +2,172 @@
 
 See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/platys/blob/master/documentation/upgrade-platform-stack.md) for how to upgrade to newer version.
 
+## What's new in 1.16.0
+
+The Modern Data Platform version 1.16.0 contains the following bug fixes and enhancements:
+
+### New Services
+
+ * Kong API Gateway
+ * Kong decK
+ * Konga
+ * Kong Map
+ * Kong Admin UI
+ * Tyk API Gateway
+ * Tyk Dashboard
+ * Tyk Pump
+ * Kafka Connector Board
+ * Kaskade
+ * kpow
+ * JupyterHub
+ * Conduktor Platform
+ * Memgraph
+ * Curity
+ * Anaconda
+ * Redpanda Console (previously kowl, old version of kowl still supported)
+ * Iceberg REST Catalog
+ * JanusGraph
+ * Gremlin Console
+ * Invana Engine and Invana Studio
+ * ArcadeDB
+ * Spring Boot Admin Server
+ * CKAN
+ * Benthos
+ * OpenLDAP + phpLDAPadmin + LDAP User Manager
+ * SFTP
+ * Project Nessie
+ * Directus
+ * Baserow
+ * Querybook
+ * Oracle Database Free
+ * Kafka CLI (Kafka software without a running broker)
+ * Kafkistry
+ * Parquet Tools
+ * SQL Chat
+
+### New/Updated Cookbook Recipes
+
+ * [NiFi ExecuteScript Processor with Python](../cookbooks/recipes/nifi-execute-processor-with-python/README.md)
+ * [NiFi Registry with Git Flow Persistence Provider](../cookbooks/recipes/nifi-registry-with-git/README.md)
+ * [Handle Serialization Errors in ksqlDB](../cookbooks/recipes/ksqldb-handle-deserializaion-error/README.md) 
+ * [Using Jupyter notebook with Spark and Avro](../cookbooks/recipes/jupyter-spark/README.md)
+ * [Using Dev Simulator Origin to simulate streaming data](../cookbooks/recipes/using-dev-simulator-origin/README.md) - updated with diagrams and additional samples
+ * [Spark with Delta Lake](../cookbooks/recipes/delta-lake-with-spark/README.md) 
+ * [Spark with Iceberg](../cookbooks/recipes/iceberg-with-spark/README.md) 
+ * [Neo4J and yFiles graphs for Jupyter](../cookbooks/recipes/neo4j-jupyter-yfiles/README.md)
+ * [Schedule and Run Simple Python Application with Airflow](../cookbooks/recipes/airflow-schedule-python-app/README.md) - updated to show the new support of Airflow
+ * [Using MLflow from Jupyter](../cookbooks/recipes/using-mflow-from-jupyter/README.md)
+ * [Trino Security](../cookbooks/recipes/trino-security/README.md)
+ * [Azure Event Hub as external Kafka](../cookbooks/recipes/azure-event-hub-as-external-kafka/README.md)
+
+### New Tutorial
+
+ * [IoT Vehicle Tracking](../tutorials/iot-vehicle-tracking/README.md)
+
+### Version upgrades
+
+ * Update `DataHub` to `v0.10.3`
+ * Update `Trino` to `418`
+ * Update `Starburst Enterprise` to `413-e`
+ * Update `dremio` to `24.0`
+ * Update `Jikkou` to `0.14.0`
+ * Update `Hasura` to `v2.16.1`
+ * Update `Confluent Platform` to `7.4.0`
+ * Update `ksqldb` to `0.28.2`
+ * Update `datastax` to `6.8.34`
+ * Update `datastax-opscenter` to `6.8.26`
+ * Update `minio` to `RELEASE.2023-04-20T17-56-55Z`
+ * Update `confluent platform` to `7.3.3`
+ * Update `influxdb2` to `2.7`
+ * Update `kapacitor` to `1.6`
+ * Update `chronograf` to `1.10`
+ * Update `telegraf` to `1.26`
+ * Update `burrow` to `v1.5.0`
+ * Update `graphdb` to `10.1.2`
+ * Update `nifi` to `1.21.0`
+ * Update `jikkou` to `0.13.0`
+ * Update `spark` to `3.1.3`, `3.2.4` and `3.3.2` and `3.4.0`
+ * Update `materialize` to `v0.52.2`
+ * Update `neo4j` to `5.7`
+ * Update `eventstoredb` to `22.10.0-buster-slim`
+ * Update `flink` to `1.17-scala_2.12`
+ * Update `tika-server` to `2.6.0.0-full`
+ * Update `marquez` and `marquez-web` to `0.33.0`
+ * Update `airbyte` to `0.40.33`
+ * Update `mlflow-server` to `2.1.0`
+ * Update `minio` to `RELEASE.2023-01-20T02-05-44Z`
+ * Update `grafana` to `9.3.11`
+ * Update `kibana` to `7.17.9` and `8.7.0`
+ * Update `elasticsearch` to `7.17.9` and `8.7.0`
+ * Update `memchached` to `1.6.19`
+ * Update `mongodb` to `6.0`
+ * Update `solr` to `9.1`
+ * Update `quine` to `1.5.1`
+ * Update `dgraph` to `v22.0.2`
+ * Update `stardog` to `8.2.2-java11-preview`
+ * Update `kudu` to `1.16`
+ * Update `druid` to `25.0.0`
+ * Update `prometheus` to `v2.41.0` and `gateway` to `v1.5.1` and `node-exporter` to `v1.5.0`
+ * Update `tile38` to `1.30.1`
+ * Update `yugabyte` to `2.8.11.0-b6`
+ * Update `hazelcast` to `5.2.3`
+ * Update `ignite` to `2.14.0`
+ * Update `axon-server` to `4.6.7
+ * Update `drill` to `1.20.2`
+ * Update `hasura` to `v2.23.0`
+ * Update `cedalo-management-center` to `2.5.8`
+ * Update `lakefs` to `0.101.0`
+ * Update `vault` to `1.13.1`
+ * Update `portainer` to `2.16.2-alpine`
+ * Update `watchtower` to `1.5.1`
+ * Update `ahana` to `0.278`
+ * Update `apicurio-schema-registry` to `2.4.2.Final`
+ * Update `debezium-server` to `2.2.0-Final`
+ * Update `Amundsen Frontend` to `4.2.0` and `Amundsen Search` to `4.0.2` and `Amundsen Metadata` to `3.11.0`
+ * Update `nodered` to `2.2.3`
+ * Update `dataiku-dss` to `11.2.0`
+ * Update `postgres` to `15`
+ * Update `Airflow` to `2.6.1` with default python `3.10`
+ * Update `TimescaleDB` to `2.10.2-pg15`
+ * Update `Pinot` to `0.12.1`
+ * Update `Jupyter-spark` to `spark-3.3.2` and `spark-3.4.0`
+ * Update `Hue` to `4.11.0`
+
+### Bug Fixes
+
+ * ksqlDB processing log now also works with the open source edition (`      KAFKA_KSQLDB_edition: 'oss'`).
+
+### Breaking Changes
+
+ * if markdown viewer cannot run on port 80 (`MARKDOWN_VIEWER_use_port_80` is set to `false`), port 8008 is used and no longer port 8000
+ * Burrow changed to use image from LinkedIn and no longer the one from Trivadis
+ * Change `KAFKA_CMAK_xxxxx` to `CMAK_xxxxx`
+ * Change `KAFKA_AKHQ_xxxxx` to `AKHQ_xxxxx`
+ * Change `KAFKA_KAFDROP_xxxxx` to `KAFDROP_xxxxx`
+ * Change `KAFKA_KADMIN_xxxxx` to `KADMIN_xxxxx`
+ * Change `KAFKA_EFAK_xxxxx` to `EFAK_xxxxx` 
+ * Change the docker image for Airflow from the Bitnami to the official Apache one
+ * Support the two major versions 7 and 8 of Elasticsearch
+ * Ember Frontend for Datahub removed (as React is the new standard UI)
+ * Rename `SPARK_THRIFT_enable` to `SPARK_THRIFTSERVER_enable`
+ * Rename folder `./init/oraclexe` to `./init/oracle-xe`
+ * Spark Master UI now runs on port `28304` and no longer on standard `8080`
+ * Change `FLINK_NUSSKNACKER_enable` to `NUSSKNACKER_enable`
+ * Change `MINIO_default_buckets` to `MINIO_buckets`
+
+### Enhancements
+
+ * make `spark.sql.warehouse.dir` configurable in `config.yml`
+ * added first tutorials showing more complete walk-through of using Platys
+ * allow to add roles when specifying multiple databases and users with PostgreSQL
+ * allow to specify that the Starburstdata license file should be mapped into the containers, when `TRINO_edition` is set to `starburstdata`. This enables the additional security features, more connectors, a cost-based query optimizer and much more.
+ * added catalog for `iceberg`, `delta-lake`, `elasticsearch`, `mongo`, `mysql`, `sqlserver`, `pinot` and `druid` to trino/starburst
+ * added options to further configure AKHQ 
+ * support Trino security with password file and access control file
+ * support for multiple Airflow workers if `celery` executor mode is used
+ * support for custom Trino catalogs and connectors
+ * add concept of an environment to a platys stack, so that the same docker-compose can be run multiple time on different machines, but having a separate environment.
+ 
 ## What's new in 1.15.0
 
 The Modern Data Platform version 1.15.0 contains the following bug fixes and enhancements:
@@ -143,6 +309,7 @@ The Modern Data Platform version 1.14.0 contains the following bug fixes and enh
  * Update `Materialize` to `v0.19.0`
  * Update `kcat` to `1.7.1`
  * Update `Debezium` to `1.8.0.Final`
+ * Update `Cassandra` to `4.1`
  * Update `Datastax` to `6.8.19`
  * Update `Elasticsearch` to `7.17.0`
  * Update `Node-RED` to `2.2.0`
@@ -258,7 +425,7 @@ The Modern Data Platform version 1.13.0 contains the following bug fixes and enh
  * Update `GraphDB` to `9.9.0`
  * Update `Druid` to `0.21.1`
  * Update `Solr` to `8.9`
- * Update `Redis` to `6.2`
+ * Update `Redis` to `7.0`
  * Update `Memcached` to `1.6.10`
  * Update `Grafana` to `8.2.0`
  * Update `QuestDB` to `6.0.4`

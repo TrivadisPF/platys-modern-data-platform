@@ -1,0 +1,1 @@
+Contains the data of baserow service, if flag BASEROW_volume_map_data is set to true.

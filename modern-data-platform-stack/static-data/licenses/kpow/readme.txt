@@ -1,0 +1,1 @@
+Place kpow's license information into a file here (named kpow-license.env).

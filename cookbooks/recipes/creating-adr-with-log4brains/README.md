@@ -1,12 +1,12 @@
 ---
 technoglogies:      log4brains,adr
-version:				1.12.0
-validated-at:			12.4.2021
+version:				1.16.0
+validated-at:			15.11.2022
 ---
 
-# Creating and visualizing ADRs with log4brains
+# Creating and visualising ADRs with log4brains
 
-This recipe will show how to create and visualize Architecture Decision Records (ADR) using [log4brains](https://github.com/thomvaill/log4brains). 
+This recipe will show how to create and visualise Architecture Decision Records (ADR) using [log4brains](https://github.com/thomvaill/log4brains). 
 
 If you want to know more on the concept of Architecture Decision Records (ADRs), there is a [Trivadis Platform Factory whitepaper](https://tvdit.sharepoint.com/:b:/r/sites/PlatformFactoryPublic/Shared%20Documents/Architecture%20Blueprints/Modern%20Data%20Architecture/wp-architecture-decision-record-v1.0d.pdf?csf=1&web=1&e=0BP76w) available (currently only in german). 
 
@@ -15,10 +15,10 @@ If you want to know more on the concept of Architecture Decision Records (ADRs),
 First [initialise a platys-supported data platform](../../getting-started.md) with the following services enabled 
 
 ```bash
-platys init --enable-services LOG4BRAINS,WETTY,MARKDOWN_VIEWER -s trivadis/platys-modern-data-platform -w 1.12.0
+platys init --enable-services LOG4BRAINS,WETTY,MARKDOWN_VIEWER -s trivadis/platys-modern-data-platform -w 1.16.0
 ```
 
-add the follwing property to the `config.yml`
+add the following property to the `config.yml`
 
 ```bash
 LOG4BRAINS_adr_source_dir: './adr'
@@ -38,7 +38,7 @@ platys gen
 docker-compose up -d
 ```
 
-For creating the ADR documents, you also need to installl log4brains locally (you need to have Node.js installed)
+For creating the ADR documents, you also may want to install log4brains locally (you need to have Node.js installed)
 
 ```
 npm install -g log4brains
@@ -47,7 +47,7 @@ npm install -g log4brains
 As an alternative you can also use the `log4brains` docker image and use a `docker run` for each of the commands (replace `<cmd>` by the log4brains command to use).
 
 ```
-docker run -ti -v ${PWD}:/opt/adr trivadis/log4brains log4brains <cmd>
+docker run -ti -v ${PWD}:/workdir thomvaill/log4brains <cmd>
 ```
 
 ## Create the log4brains ADR project 
@@ -63,14 +63,14 @@ if you want to use the docker image instead of the local log4brains installation
 
 ```
 cd adr
-docker run -ti -v ${PWD}:/opt/adr trivadis/log4brains log4brains init
+docker run -ti -v ${PWD}:/workdir thomvaill/log4brains init
 ```
 
 Answer the question asked by the tool as shown below
 
 ![Alt Image Text](./log4brains-init.png "Log4brains init")
 
-They can later be removed. We can see that the following folder structure has been created. 
+We can see that the following folder structure has been created. 
 
 ```
 docker@ubuntu:~/platys-cookbook/adr$ tree
@@ -88,7 +88,7 @@ docker@ubuntu:~/platys-cookbook/adr$ tree
 
 With the init 2 sample ADRs were automatically created. They can be removed later.
 
-Now with the ADR project being initialized, can restart the `log4brains` container
+Now with the ADR project being initialised, can restart the `log4brains` container
 
 ```
 docker restart log4brains
@@ -111,13 +111,13 @@ if you want to use the docker image instead of the local log4brains installation
 
 ```
 cd adr
-docker run -ti -v ${PWD}:/opt/adr trivadis/log4brains log4brains adr new
+docker run -ti -v ${PWD}:/workdir thomvaill/log4brains adr new
 ```
 
 Answer the questions asked by the tool, such as the title and if the ADR is a new one or should supersede an existing one.
 
 ```
-docker@ubuntu:~/platys-cookbook/adr$ docker run -ti -v ${PWD}:/opt/adr trivadis/log4brains log4brains adr new
+docker@ubuntu:~/platys-cookbook/adr$ docker run -ti -v ${PWD}:/workdir thomvaill/log4brains adr new
 
 ? Title of the solved problem and its solution? This is my first ADR
 
@@ -143,13 +143,13 @@ Navigate to the `adr` folder created above and run the `build` command
 
 ```
 cd adr
-docker run -ti -v ${PWD}:/opt/adr trivadis/log4brains log4brains build
+docker run -ti -v ${PWD}:/workdir thomvaill/log4brains build
 ```
 
 After a while you should see the following output
 
 ```
-docker@ubuntu:~/platys-cookbook/adr$ docker run -ti -v "${PWD}":/opt/adr trivadis/log4brains log4brains build
+docker@ubuntu:~/platys-cookbook/adr$ docker run -ti -v "${PWD}":/workdir thomvaill/log4brains build
 Building Log4brains...
 info  - Creating an optimized production build  
 info  - Collecting page data  

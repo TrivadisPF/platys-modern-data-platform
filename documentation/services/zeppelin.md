@@ -14,3 +14,17 @@ platys gen
 ## How to use it?
 
 Navigate to <http://dataplatform:28080>
+
+## Install `s3cmd`
+
+install `s3cmd`
+
+```bash
+pip install s3cmd
+```
+
+and configure it
+
+```bash
+s3cmd --no-ssl --access_key=$AWS_ACCESS_KEY_ID --secret_key=$AWS_SECRET_ACCESS_KEY --host-bucket=$AWS_ENDPOINT --host=$AWS_ENDPOINT  --bucket-location=$AWS_DEFAULT_REGION  --dump-config 2>&1 | tee .s3cfg
+```

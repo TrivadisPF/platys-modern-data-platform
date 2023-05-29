@@ -13,3 +13,14 @@ platys gen
 
 ### How to use it?
 
+You can use the command line tool to inspect zookeeper:
+
+```bash
+docker exec -ti zookeeper-1 bash
+```
+
+```bash
+/bin/zookeeper-shell localhost:2181 ls /brokers/ids/1
+
+/bin/zookeeper-shell localhost:2181 get /brokers/ids/1
+```

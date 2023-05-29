@@ -2,7 +2,7 @@
 
 A command-line tool to help you automate the management of the configurations that live on your Apache Kafka clusters. 
 
-**[Documentation](https://github.com/streamthoughts/jikkou)** | **[GitHub](https://github.com/streamthoughts/jikkou)**
+**[Website](https://streamthoughts.github.io/jikkou/)** | **[Documentation](https://streamthoughts.github.io/jikkou/docs/)** | **[GitHub](https://github.com/streamthoughts/jikkou)**
 
 ## How to enable?
 

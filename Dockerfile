@@ -32,6 +32,7 @@ COPY ./modern-data-platform-stack/static-data /opt/mdps-gen/static-data
 # copy documentation folder, cookbooks and README
 COPY ./documentation /opt/mdps-gen/static-data/artefacts/documentation
 COPY ./cookbooks /opt/mdps-gen/static-data/artefacts/cookbooks
+COPY ./tutorials /opt/mdps-gen/static-data/artefacts/tutorials
 COPY ./README.md /opt/mdps-gen/static-data/artefacts
 
 # copy remove all .md extensions in links inside *.md files, as for the markdown viewer used the links only work without the extensions

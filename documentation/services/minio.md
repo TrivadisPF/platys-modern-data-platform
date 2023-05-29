@@ -13,6 +13,8 @@ platys gen
 
 ## How to use it?
 
-Navigate to <http://dataplatform:9000>
+Navigate to <http://dataplatform:9000>.
+
+Login with username `V42FCGRVMK24JJ8DHUYG` and password `bKhWxVF3kQoLY9kFmt91l+tDrEoZjqnWXzY9Eza` (if left to defaults). 
 
 
