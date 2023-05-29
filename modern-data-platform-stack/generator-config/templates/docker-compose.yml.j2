@@ -351,6 +351,7 @@ networks:
 {% set __ADMINER_version = ADMINER_version | default('latest') -%}
 {% set __CLOUDBEAVER_version = CLOUDBEAVER_version | default('latest') -%}
 {% set __SQLPAD_version = SQLPAD_version | default('latest') -%}
+{% set __SQLCHAT_version = SQLCHAT_version | default('latest') -%}
 {% set __QUERYBOOK_version = QUERYBOOK_version | default('latest') -%}
 {% set __NOCODB_version = NOCODB_version | default('latest') -%}
 {% set __QUIX_version = QUIX_version | default('latest') -%}
@@ -670,6 +671,7 @@ networks:
   {% set ADMINER_enable = false -%}
   {% set CLOUDBEAVER_enable = false -%}
   {% set SQLPAD_enable = false -%}
+  {% set SQLCHAT_enable = false -%}
   {% set QUERYBOOK_enable = false -%}
   {% set NOCODB_enable = false -%}
   {% set QUIX_enable = false -%}
@@ -11213,6 +11215,38 @@ services:
     {% endif -%}   {#  LOKI_collect_docker_logs #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  SQLPAD_enable #}
+
+{% if SQLCHAT_enable | default(false) %}
+  #  ================================== SQLChat ========================================== #
+  sqlchat:
+    image: sqlchat/sqlchat:{{__SQLCHAT_version}}
+    container_name: sqlchat
+    hostname: sqlchat
+    labels:
+      com.platys.name: "sqlchat"
+      com.platys.webui.title: "SQL Chat UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28305"
+    ports:
+      - "28305:3000"
+    environment:
+      OPENAI_API_KEY: {{SQLCHAT_api_key}}
+      OPENAI_API_ENDPOINT: {{SQLCHAT_api_endpoint}}
+      NEXT_PUBLIC_DATABASE_LESS: {{SQLCHAT_database_less}}
+      DATABASE_URL: 'postgresql://postgresql:postgres@abc123!:5432/postgres?schema=postgres'
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  SQLCHAT_enable #}
 
 {% if QUERYBOOK_enable | default(false) %}
   #  ================================== Querybook ========================================== #

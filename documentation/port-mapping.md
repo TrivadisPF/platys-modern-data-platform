@@ -502,6 +502,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28302 | 8081 | nussknacker-designer |
 28303 | 8080 | kafkistry |
 28304 | 8080 | spark-master |
+28305 | 3000 | sqlchat |
 
 ## Ports > 28500
 
