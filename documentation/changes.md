@@ -13,6 +13,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
 ### Version upgrades
 
  * Update `zeebe` to `8.2.5`
+ * Update `druid` to `26.0.0`
  
 
 ## What's new in 1.16.0
