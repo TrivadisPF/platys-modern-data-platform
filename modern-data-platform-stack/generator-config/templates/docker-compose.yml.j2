@@ -159,6 +159,8 @@ networks:
 {% set __CKAN_version = CKAN_version | default('latest') -%}
 {% set __CKAN_DATAPUSHER_version = CKAN_DATAPUSHER_version | default('latest') -%}
 
+{% set __DATAVERSE_version = DATAVERSE_version | default('latest') -%}
+
 {% if (CASSANDRA_major_version | lower) == '3'  %}
   {% set __CASSANDRA_version = CASSANDRA_3_version  -%}
 {% elif (CASSANDRA_major_version | lower) == '4'  %}
@@ -602,6 +604,7 @@ networks:
   {% set AMUNDSEN_enable = false -%}
   {% set MARQUEZ_enable = false -%}
   {% set CKAN_enable = false -%}
+  {% set DATAVERSE_enable = false -%}
   {% set HUE_enable = false -%}
   {% set STREAMSETS_enable = false -%}
   {% set STREAMSETS_TRANSFORMER_enable = false -%}
@@ -5539,8 +5542,148 @@ services:
     restart: {{container_restart_policy}}
     healthcheck:
       test: ["CMD", "redis-cli", "-e", "QUIT"]
-
 {% endif %}   {#  CKAN_enable #}
+
+{% if DATAVERSE_enable  | default(false) %}
+  #  ================================== CKAN ========================================== #
+  dataverse:
+    image: coronawhy/dataverse:{{__DATAVERSE_version}}
+    container_name: dataverse
+    hostname: dataverse
+    labels:
+      com.platys.name: "dataverse"
+      com.platys.webui.title: "Dataverse UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28294"
+    ports:
+      - "4848:4848"
+      - "8080:8080"
+    environment:
+      - "CVM_SERVER_NAME=CESSDA" #Optional
+      - "WEBHOOK"
+      - "CESSDA"
+      - "CLARIN"
+      - "doi_authority"
+      - "doi_provider"
+      - "doi_username"
+      - "doi_password"
+      - "dataciterestapiurlstring"
+      - "baseurlstring"
+
+
+      - aws_bucket_name={{}}
+      - "aws_s3_profile"
+      - aws_endpoint_url='{{s3Endpoint | default(omit) }}'
+      - "system_email"
+      - "mailhost"
+      - "mailuser"
+      - "no_reply_email"
+      - "smtp_password"
+      - "smtp_port"
+      - "socket_port"
+      - "federated_json_file"
+      - "bucketname_1"
+      - "minio_label_1"
+      - "minio_bucket_1"
+      - "bucketname_2"
+      - "minio_profile_1"
+      - "minio_label_2"
+      - "minio_bucket_2"
+      - "minio_profile_2"
+      - DATAVERSE_DB_HOST=dataverse-postgresql
+      - DATAVERSE_DB_USER=dataverse
+      - DATAVERSE_DB_PASSWORD=abc123!
+      - DATAVERSE_DB_NAME=dataverse
+      - DATAVERSE_SERVICE_HOST=dataverse
+      - DATAVERSE_URL=dataverse:8080
+      - SOLR_SERVICE_HOST=dataverse-solr:8983
+      - SOLR_SERVICE_PORT=8983
+      - "CVM_SERVER_URL=https://ns.${traefikhost}"
+      - "LANG=en"
+      - "cvManager=http://"
+      - "BUNDLEPROPERTIES=Bundle.properties"
+      - "ADMIN_EMAIL=admin@localhost"
+      - "MAIL_SERVER=mailrelay"
+      - "SOLR_LOCATION=solr:8983"
+      - "INIT_SCRIPTS_FOLDER"
+      - "hostname"
+      - "MAINLANG"
+      - "POSTGRES_SERVER"
+      - "POSTGRES_PORT"
+      - "POSTGRES_DATABASE"
+      - "POSTGRES_USER"
+      - "POSTGRES_PASSWORD"
+      - "PGPASSWORD"
+      - "TWORAVENS_LOCATION=NOT INSTALLED"
+      - "RSERVE_HOST=localhost"
+      - "RSERVE_PORT=6311"
+      - "RSERVE_USER=rserve"
+      - "RSERVE_PASSWORD=rserve"
+      - "JVM_OPTS='-Xmx1g -Xms1g -XX:MaxPermSize=2g -XX:PermSize=2g'"
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if DATAVERSE_volume_map_data | default(false) %}
+      - ./container-volume/dataverse/data:/data
+    {% endif -%}   {#  DATAVERSE_volume_map_data #}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    restart: {{container_restart_policy}}
+
+  dataverse-postgresql:
+    image: postgres:13
+    container_name: dataverse-postgresql
+    hostname: dataverse-postgresql
+    labels:
+      com.platys.name: "postgresql"
+#    ports:
+#      - "5433:5432"
+    environment:
+      - LC_ALL=C.UTF-8
+      - POSTGRES_DB=dataverse
+      - POSTGRES_USER=dataverse
+      - POSTGRES_PASSWORD=abc123!
+      - POSTGRES_PORT=5432
+    volumes:
+#      - ${LOCAL_STORAGE}/database-data:/var/lib/postgresql/data/ # persist data even if container shuts down
+#      - ./triggers:/triggers
+
+  dataverse-solr:
+    image: solr:8.11.1
+    container_name: dataverse-solr
+    hostname: dataverse-solr
+    labels:
+      com.platys.name: "solr"
+    environment:
+      - SOLR_HOST=dataverse-solr
+      - SOLR_PORT=8083
+      - SOLR_JAVA_MEM="-Xms1g -Xmx1g"
+      - SOLR_OPTS="-Dlog4j2.formatMsgNoLookups=true"
+      - CKAN_VERSION={{__CKAN_version}}
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./init/ckan/solr:/docker-entrypoint-initdb.d/ckan_init_solr.sh
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    restart: {{container_restart_policy}}
+    healthcheck:
+      test: ["CMD", "wget", "-qO", "/dev/null", "http://localhost:8983/solr/"]
+
+{% endif %}   {#  DATAVERSE_enable #}
 
 {% if (HUE_enable) | default(false) %}
   #  ================================== Apache Hue ========================================== #
