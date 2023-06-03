@@ -7422,7 +7422,12 @@ services:
     {% else %}
       ZEPPELIN_SPARK_MASTER: "spark://spark-master:7077"
     {% endif -%}   {#  ZEPPELIN_use_local_spark #}
+      SPARK_HOME: /opt/spark
   {% endif -%}   {#  SPARK_enable #}
+
+  {%if FLINK_enable | default(false) %}
+      FLINK_HOME: /opt/flink
+  {% endif -%}   {#  FLINK_enable #}
 
   {%if HADOOP_enable | default(false) %}
       CORE_CONF_fs_defaultFS: hdfs://namenode:9000
@@ -7446,10 +7451,6 @@ services:
       ZEPPELIN_USER_PASSWORD: {{ZEPPELIN_user_password}}
       # set spark-master for Zeppelin interpreter
 
-  {%if FLINK_enable | default(false) %}
-      FLINK_HOME: /opt/flink
-  {% endif -%}   {#  FLINK_enable #}
-
       ZEPPELIN_NOTEBOOK_DIR: '{{ZEPPELIN_notebook_dir}}'
       ZEPPELIN_NOTEBOOK_CRON_ENABLE: '{{ZEPPELIN_notebook_cron_enable}}'
       PYSPARK_PYTHON: "python3"
@@ -7465,6 +7466,9 @@ services:
       - ./container-volume/spark/notebooks:/opt/zeppelin/{{ZEPPELIN_notebook_dir}}
   {% endif -%}   {#  ZEPPELIN_volume_map_data #}
       - './conf/awscli/s3cfg.template:/root/.s3cfg.template'
+  {%if SPARK_enable | default(false) %}
+      - spark-vol:/opt/spark:RO
+  {% endif -%}   {#  SPARK_enable #}
   {%if FLINK_enable | default(false) %}
       - flink-vol:/opt/flink:RO
   {% endif -%}   {#  FLINK_enable #}
