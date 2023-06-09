@@ -17,3 +17,6 @@ platys gen
 docker exec -ti lakectl lakectl
 ```
 
+```bash
+docker exec -ti lakectl lakectl branch list lakefs://example
+```
