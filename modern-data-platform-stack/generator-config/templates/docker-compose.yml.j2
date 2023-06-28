@@ -422,6 +422,7 @@ networks:
 {% set __MINIO_CONSOLE_version = MINIO_CONSOLE_version | default('latest') -%}
 {% set __ADMINIO_UI_version = ADMINIO_UI_version | default('latest') -%}
 {% set __ADMINIO_API_version = ADMINIO_API_version | default('latest') -%}
+{% set __MINIO_WEB_version = MINIO_WEB_version | default('latest') -%}
 {% set __S3MANAGER_version = S3MANAGER_version | default('latest') -%}
 {% set __FILESTASH_version = FILESTASH_version | default('latest') -%}
 {% set __AWSCLI_version = AWSCLI_version | default('latest') -%}
@@ -715,6 +716,7 @@ networks:
   {% set MINIO_enable = false -%}
   {% set MINIO_MC_enable = false -%}
   {% set MINIO_CONSOLE_enable = false -%}
+  {% set MINIO_WEB_enable = false -%}
   {% set LAKEFS_enable = false -%}
   {% set NESSIE_enable = false -%}
   {% set ADMINIO_UI_enable = false -%}
@@ -13252,6 +13254,44 @@ services:
     {% endif -%}   {#  LOKI_collect_docker_logs #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  ADMINIO_UI_enable #}
+
+{% if MINIO_WEB_enable | default(false) %}
+  #  ================================== Minio Web ========================================== #
+  minio-web:
+    image: e2fyi/minio-web:{{__MINIO_WEB_version}}
+    container_name: minio-web
+    hostname: minio-web
+    labels:
+      com.platys.name: "minio-web"
+      com.platys.restapi.title: "Minio Web"
+      com.platys.restapi.url: "http://${PUBLIC_IP}:28306"
+    ports:
+      - 28306:8080
+    environment:
+      MINIO_ENDPOINT: {{s3EndpointStorage}}
+      MINIO_ACCESS_KEY_ID: {{s3AccessKey}}
+      MINIO_SECRET_ACCESS_KEY: {{s3SecretAccessKey}}
+      MINIO_SECURE: false
+      MINIO_MD_TEMPLATE: assets/md-template.html
+      MINIO_REGION: {{s3DefaultRegion}}
+      EXT_BUCKETNAME: {{MINIO_WEB_bucket_name}}
+      EXT_PREFIX: {{MINIO_WEB_prefix}}
+      EXT_DEFAULT_HTML: index.html
+      EXT_FAVICON: assets/favicon.ico
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  MINIO_WEB_enable #}
 
 {% if ICEBERG_REST_CATALOG_enable | default(false) %}
   #  ================================== Iceberg REST Catalog ========================================== #

@@ -503,6 +503,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28303 | 8080 | kafkistry |
 28304 | 8080 | spark-master |
 28305 | 3000 | sqlchat |
+28306 | 8080 | minio-web |
 
 ## Ports > 28500
 
