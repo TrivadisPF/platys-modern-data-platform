@@ -2103,7 +2103,6 @@ services:
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
     command:
-      - "topics"
       - "apply"
       - "--files"
       - "/jikkou/"
@@ -2115,31 +2114,22 @@ services:
       - "{{label}}"
       {% endfor -%}
     {% endif -%}   {#  JIKKOU_set_labels #}
-    {% if JIKKOU_set_variables is defined and JIKKOU_set_variables %}
-      {% for var in JIKKOU_set_variables.split(",") %}
-      - "--set-var"
-      - "{{var}}"
+    {% if JIKKOU_set_values is defined and JIKKOU_set_values %}
+      {% for value in JIKKOU_set_values.split(",") %}
+      - "--set-value"
+      - "{{value}}"
       {% endfor -%}
-    {% endif -%}   {#  JIKKOU_set_variables #}
-    {% if JIKKOU_use_delete_config_orphans_option | default(true) %}
-      - "--delete-config-orphans"
-    {% endif -%}   {#  JIKKOU_use_verbose_option #}
-    {% if JIKKOU_use_delete_topic_orphans_option | default(true) %}
-      - "--delete-topic-orphans"
-    {% endif -%}   {#  JIKKOU_use_verbose_option #}
-    {% if JIKKOU_use_exclude_internals_option | default(true) %}
-      - "--exclude-internals"
-    {% endif -%}   {#  JIKKOU_use_verbose_option #}
+    {% endif -%}   {#  JIKKOU_set_values #}
     {% if JIKKOU_exclude_resources_regexp | default(true) %}
-      - "--exclude"
+      - "--selector"
       - {{JIKKOU_exclude_resources_regexp}}
     {% endif -%}   {#  JIKKOU_exclude_resources_regexp #}
     {% if JIKKOU_include_resources_regexp | default(true) %}
       - "--include"
       - {{JIKKOU_include_resources_regexp}}
     {% endif -%}   {#  JIKKOU_include_resources_regexp #}
-    {% if JIKKOU_use_verbose_option | default(false) %}
-      - "--verbose"
+    {% if JIKKOU_use_dryrun | default(false) %}
+      - "--dry-run"
     {% endif -%}   {#  JIKKOU_use_verbose_option #}
       - "--yes"
     {%if LOKI_collect_docker_logs | default(false) %}
