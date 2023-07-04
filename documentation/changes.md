@@ -19,6 +19,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Update `jikkou` to `0.21.0`
  * Update `minio` to `RELEASE.2023-06-29T05-12-28Z`
  * Update `nifi` to `1.22.0`
+ * Update `ksqldb` to `0.29.0`
 
 
 ## What's new in 1.16.0
