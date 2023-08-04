@@ -401,7 +401,8 @@ networks:
 
 {% set __THINGSBOARD_version = THINGSBOARD_version | default('latest') -%}
 
-{% set __ACTIVEMQ_version = ACTIVEMQ_version | default('latest') -%}
+{% set __ACTIVEMQ_CLASSIC_version = ACTIVEMQ_CLASSIC_version | default('latest') -%}
+{% set __ACTIVEMQ_ARTEMIS_version = ACTIVEMQ_ARTEMIS_version | default('latest') -%}
 {% set __RABBITMQ_version = RABBITMQ_version | default('latest') -%}
 
 {% set __FTP_PUREFTPD_version = FTP_PUREFTPD_version | default('latest') -%}
@@ -13864,7 +13865,11 @@ services:
 {% if ACTIVEMQ_enable | default(false) %}
   #  ================================== Active MQ ========================================== #
   activemq:
-    image: rmohr/activemq:{{__ACTIVEMQ_version}}
+  {% if (ACTIVEMQ_edition | lower) == 'classic' | default(false) -%}
+    image: mohr/activemq:{{__ACTIVEMQ_CLASSIC_version}}
+  {% elif (ACTIVEMQ_edition | lower) == 'artemis' | default(false)  -%}
+    image: apache/activemq-artemis:{{__ACTIVEMQ_ARTEMIS_version}}
+  {% endif -%}   {#  ACTIVEMQ_edition #}
     container_name: activemq
     labels:
       com.platys.name: "activemq"
@@ -13883,14 +13888,24 @@ services:
       - "61614:61614"
       # jms
       - "61616:61616"
-    {%if use_timezone | default(false) %}
     environment:
+      DUMMY: make-it-valid
+    {% if (ACTIVEMQ_edition | lower) == 'artemis' | default(false)  -%}
+      ANONYMOUS_LOGIN: yes
+      ARTEMIS_USER: artemis
+      ARTEMIS_PASSWORD: artemis
+    {% endif -%}   {#  use_timezone #}
+    {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
     {% if ACTIVEMQ_volume_map_data %}
+      {% if (ACTIVEMQ_edition | lower) == 'classic' | default(false) -%}
       - ./container-volume/activemq/data:/opt/activemq/data
+      {% elif (ACTIVEMQ_edition | lower) == 'artemis' | default(false)  -%}
+      - ./container-volume/activemq/data:/var/lib/artemis-instance
+      {% endif -%}   {#  ACTIVEMQ_edition #}
     {% endif -%}   {#  ACTIVEMQ_volume_map_data #}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
