@@ -21,6 +21,8 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Update `nifi` to `1.22.0`
  * Update `ksqldb` to `0.29.0`
  * Update `datahub` to `v0.10.5`
+ * Update `Confluent Platform` to `7.4.1`
+ * 
 
 ### Enhancements
 
