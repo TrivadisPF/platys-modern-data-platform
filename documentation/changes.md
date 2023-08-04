@@ -22,7 +22,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Update `ksqldb` to `0.29.0`
  * Update `datahub` to `v0.10.5`
  * Update `Confluent Platform` to `7.4.1`
- * 
+ * Update `portainer-ce` to `2.18.4-alpine`
 
 ### Enhancements
 
