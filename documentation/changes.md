@@ -27,6 +27,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
 ### Enhancements
 
  * support for configuring Airflow authentication backends via `AIRFLOW_auth_backends` config setting
+ * support ActiveMQ Artemis as an ActiveMQ edition
 
 ## What's new in 1.16.0
 
