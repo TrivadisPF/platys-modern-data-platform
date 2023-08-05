@@ -26,6 +26,7 @@ networks:
 {% set __ZOONAVIGATOR_API_version = ZOONAVIGATOR_API_version | default('latest') -%}
 {% set __KAFKA_KSQLDB_version = KAFKA_KSQLDB_version | default('latest') -%}
 {% set __MATERIALIZE_version = MATERIALIZE_version | default('latest') -%}
+{% set __HSTREAMDB_version = HSTREAMDB_version | default('latest') -%}
 {% set __AZKARRA_version = AZKARRA_version | default('latest') -%}
 
 {% set __SCHEMA_REGISTRY_UI_version = SCHEMA_REGISTRY_UI_version | default('latest') -%}
@@ -569,6 +570,8 @@ networks:
   {% set ZOOKEEPER_enable = false -%}
   {% set KAFKA_enable = false -%}
   {% set APICURIO_SCHEMA_REGISTRY_enable = false -%}
+  {% set MATERIALIZE_enable = false -%}
+  {% set HSTREAMDB_enable = false -%}
   {% set KAFKA_REPLICATOR_enable = false -%}
   {% set KAFKA_MM2_enable = false -%}
   {% set LENSES_BOX_enable = false -%}
@@ -1542,8 +1545,85 @@ services:
       - |
         while [ 1 -eq 1 ];do sleep 60;done
     restart: {{container_restart_policy}}
-  {% endif %}   {# MATERIALIZE_enable #}
-{% endif %}   {# MATERIALIZE_CLI_enable #}
+  {% endif %}   {# MATERIALIZE_CLI_enable #}
+{% endif %}   {# MATERIALIZE_enable #}
+
+{% if (HSTREAMDB_enable) | default(false) %}
+  #  ================================== HStreamDB ========================================== #
+  hserver-1:
+    image: hstreamdb/hstream:{{__HSTREAMDB_version}}
+    hostname: hserver-1
+    container_name: hserver-1
+    labels:
+      com.platys.name: "hstreamdb"
+    ports:
+      - "6570:6570"
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - /var/run/docker.sock:/var/run/docker.sock
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    command:
+      - bash
+      - "-c"
+      - |
+        set -e
+        /usr/local/script/wait-for-storage.sh hstore-1 6440 zookeeper-1 2181 600 \
+        /usr/local/bin/hstream-server \
+        --bind-address 0.0.0.0 --port 6570 \
+        --internal-port 6571 \
+        --server-id 100 \
+        --seed-nodes "$$(hostname -I | awk '{print $$1}'):6571" \
+        --advertised-address $$(hostname -I | awk '{print $$1}') \
+        --metastore-uri zk://zookeeper-1:2181 \
+        --store-config /data/store/logdevice.conf \
+        --store-admin-host hstore-1 --store-admin-port 6440 \
+        --store-log-level warning \
+        --io-tasks-path /tmp/io/tasks \
+        --io-tasks-network hstream-quickstart
+    restart: {{container_restart_policy}}
+
+  hstore-1:
+    image: hstreamdb/hstream:{{__HSTREAMDB_version}}
+    hostname: hstore-1
+    container_name: hstore-1
+    labels:
+      com.platys.name: "hstreamdb"
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    command:
+      - bash
+      - "-c"
+      - |
+        set -ex
+        # N.B. "enable-dscp-reflection=false" is required for linux kernel which
+        # doesn't support dscp reflection, e.g. centos7.
+        /usr/local/bin/ld-dev-cluster --root /data/store \
+        --use-tcp --tcp-host $$(hostname -I | awk '{print $$1}') \
+        --user-admin-port 6440 \
+        --param enable-dscp-reflection=false \
+        --no-interactive
+    restart: {{container_restart_policy}}
+
+{% endif %}   {# HSTOREDB_enable #}
 
 {% if (AZKARRA_enable) | default(false) %}
   #  ================================== Azkarra Streams ========================================== #
