@@ -5623,77 +5623,25 @@ services:
 {% if DATAVERSE_enable  | default(false) %}
   #  ================================== CKAN ========================================== #
   dataverse:
-    image: coronawhy/dataverse:{{__DATAVERSE_version}}
+    image: gdcc/dataverse:{{__DATAVERSE_version}}
     container_name: dataverse
-    hostname: dataverse
+    hostname: dataverse$
+    user: payara
     labels:
       com.platys.name: "dataverse"
       com.platys.webui.title: "Dataverse UI"
       com.platys.webui.url: "http://${PUBLIC_IP}:28294"
     ports:
-      - "4848:4848"
       - "8080:8080"
+      - "4848:4848"
+      - "9009:9009" # JDWP
+      - "8686:8686" # JMX
     environment:
-      - CVM_SERVER_NAME=CESSDA
-      - WEBHOOK=/opt/payara/triggers/external-services.py
-#      - CESSDA
-#      - CLARIN
-#      - "doi_authority"
-#      - "doi_provider"
-#      - "doi_username"
-#      - "doi_password"
-      - dataciterestapiurlstring="https://api.test.datacite.org"
-      - baseurlstring="https://mds.test.datacite.org"
-      - aws_bucket_name='dataverse-bucket'
-#      - aws_s3_profile=
-      - aws_endpoint_url='{{s3Endpoint | default(omit) }}'
-#      - "system_email"
-#      - "mailhost"
-#      - "mailuser"
-#      - "no_reply_email"
-#      - "smtp_password"
-#      - "smtp_port"
-#      - "socket_port"
-#      - "federated_json_file"
-#      - "bucketname_1=bucketname_1"
-#      - "minio_label_1=minio_label_1"
-#      - "minio_bucket_1=minio_bucket_1"
-#      - "bucketname_2=bucketname_2"
-#      - "minio_profile_1=minio_profile_1"
-#      - "minio_label_2=minio_label_2"
-#      - "minio_bucket_2=minio_bucket_2"
-#      - "minio_profile_2=minio_profile_2"
       - DATAVERSE_DB_HOST=dataverse-postgresql
       - DATAVERSE_DB_USER=dataverse
       - DATAVERSE_DB_PASSWORD=abc123!
-      - DATAVERSE_DB_NAME=dataverse
-      - DATAVERSE_SERVICE_HOST=${{DOCKER_HOST_IP}}
-      - DATAVERSE_URL=${{DOCKER_HOST_IP}}:8080
-      - SOLR_SERVICE_HOST=dataverse-solr:8983
-      - SOLR_SERVICE_PORT=8983
-      - CVM_SERVER_URL=http://${{DOCKER_HOST_IP}}
-      - LANG=en
-      - cvManager=http://
-      - BUNDLEPROPERTIES=Bundle.properties
-      - ADMIN_EMAIL=admin@localhost
-      - MAIL_SERVER=mailrelay
-      - SOLR_LOCATION=dataverse-solr:8983
-      - INIT_SCRIPTS_FOLDER=/opt/payara/init.d
-#      - "hostname"
-      - MAINLANG=en
-      - POSTGRES_SERVER=dataverse-postgresql
-      - POSTGRES_PORT=5432
-      - POSTGRES_DATABASE=dataverse
-      - POSTGRES_DB=dataverse
-      - POSTGRES_USER=dataverse
-      - POSTGRES_PASSWORD=abc123!
-      - PGPASSWORD=abc123!
-      - TWORAVENS_LOCATION=NOT INSTALLED
-      - RSERVE_HOST=${{DOCKER_HOST_IP}}
-      - RSERVE_PORT=6311
-      - RSERVE_USER=rserve
-      - RSERVE_PASSWORD=rserve
-      - JVM_OPTS='-Xmx1g -Xms1g -XX:MaxPermSize=2g -XX:PermSize=2g'
+      - ENABLE_JDWP=1
+      - DATAVERSE_FEATURE_API_BEARER_AUTH=1
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -5711,23 +5659,27 @@ services:
     {% endif -%}   {#  LOKI_collect_docker_logs #}
     restart: {{container_restart_policy}}
 
+  dev_bootstrap:
+    container_name: dev_bootstrap
+    hostname: dataverse$
+    image: gdcc/configbaker:unstable
+    command:
+      - bootstrap.sh
+      - dev
+    restart: "no"
+
   dataverse-postgresql:
     image: postgres:13
     container_name: dataverse-postgresql
     hostname: dataverse-postgresql
     labels:
       com.platys.name: "postgresql"
-#    ports:
-#      - "5433:5432"
     environment:
-      - LC_ALL=C.UTF-8
       - POSTGRES_DB=dataverse
       - POSTGRES_USER=dataverse
       - POSTGRES_PASSWORD=abc123!
       - POSTGRES_PORT=5432
-    volumes:
-#      - ${LOCAL_STORAGE}/database-data:/var/lib/postgresql/data/ # persist data even if container shuts down
-#      - ./triggers:/triggers
+    restart: {{container_restart_policy}}
 
   dataverse-solr:
     image: solr:8.11.1
@@ -5735,17 +5687,13 @@ services:
     hostname: dataverse-solr
     labels:
       com.platys.name: "solr"
-    environment:
-      - SOLR_HOST=dataverse-solr
-      - SOLR_PORT=8083
-      - SOLR_JAVA_MEM="-Xms1g -Xmx1g"
-      - SOLR_OPTS="-Dlog4j2.formatMsgNoLookups=true"
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
       - ./init/ckan/solr:/docker-entrypoint-initdb.d/ckan_init_solr.sh
+      - ./container-volume/dataverse/solr/conf:/solr-template
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -5753,9 +5701,22 @@ services:
     {%if LOKI_collect_docker_logs | default(false) %}
     <<: *logging
     {% endif -%}   {#  LOKI_collect_docker_logs #}
+    command:
+      - "solr-precreate"
+      - "collection1"
+      - "/template"
     restart: {{container_restart_policy}}
-    healthcheck:
-      test: ["CMD", "wget", "-qO", "/dev/null", "http://localhost:8983/solr/"]
+
+  dataverse_solr_initializer:
+    container_name: "dev_solr_initializer"
+    image: gdcc/configbaker:unstable
+    command:
+      - sh
+      - -c
+      - "fix-fs-perms.sh solr && cp -a /template/* /solr-template"
+    volumes:
+      - ./container-volume/dataverse/solr/conf:/solr-template
+    restart: {{container_restart_policy}}
 
 {% endif %}   {#  DATAVERSE_enable #}
 
