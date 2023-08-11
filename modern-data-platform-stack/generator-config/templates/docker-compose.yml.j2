@@ -11958,6 +11958,10 @@ services:
       ORACLE_PASSWORD: {{TRINO_oracle_password | default('abc123!') }}
   {% endif %}
   {% if TRINO_event_listeners is defined and TRINO_event_listeners | length | default(false) %}
+      EVENT_LISTENER_CONFIG_FILES: >
+      {% for eventListener in (TRINO_event_listeners.split(',')) -%}
+        /etc/trino/{{eventListener}}.properties {% if not loop.last %}, {% endif -%}
+      {% endfor -%}
   {% endif %}
   {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
@@ -12118,12 +12122,6 @@ services:
   {% if ORACLE_EE_enable or ORACLE_XE_enable | default(false) %}
       ORACLE_USER: {{TRINO_oracle_user | default('demo') }}
       ORACLE_PASSWORD: {{TRINO_oracle_password | default('abc123!') }}
-  {% endif %}
-  {% if TRINO_event_listeners is defined and TRINO_event_listeners | length | default(false) %}
-      EVENT_LISTENER_CONFIG_FILES: >
-      {% for eventListener in (TRINO_event_listeners.split(',')) -%}
-        /etc/trino/{{eventListener}}.properties {% if not loop.last %}, {% endif -%}
-      {% endfor -%}
   {% endif %}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
