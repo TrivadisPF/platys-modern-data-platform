@@ -16,7 +16,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
 
  * Update `zeebe` to `8.2.5`
  * Update `druid` to `26.0.0`
- * Update `trino` to `422`
+ * Update `trino` to `423`
  * Update `starbrustdata` to `420-e`
  * Update `jikkou` to `0.21.0`
  * Update `minio` to `RELEASE.2023-06-29T05-12-28Z`
