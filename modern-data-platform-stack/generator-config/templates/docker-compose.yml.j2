@@ -5625,7 +5625,7 @@ services:
   dataverse:
     image: gdcc/dataverse:{{__DATAVERSE_version}}
     container_name: dataverse
-    hostname: dataverse$
+    hostname: dataverse
     user: payara
     labels:
       com.platys.name: "dataverse"
@@ -5661,7 +5661,7 @@ services:
 
   dev_bootstrap:
     container_name: dev_bootstrap
-    hostname: dataverse$
+    hostname: dev_bootstrap
     image: gdcc/configbaker:unstable
     command:
       - bootstrap.sh
@@ -5692,7 +5692,7 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
-      - ./init/ckan/solr:/docker-entrypoint-initdb.d/ckan_init_solr.sh
+      - ./container-volume/dataverse/solr/data:/var/solr
       - ./container-volume/dataverse/solr/conf:/solr-template
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
@@ -5715,6 +5715,7 @@ services:
       - -c
       - "fix-fs-perms.sh solr && cp -a /template/* /solr-template"
     volumes:
+      - ./container-volume/dataverse/solr/data:/var/solr
       - ./container-volume/dataverse/solr/conf:/solr-template
     restart: {{container_restart_policy}}
 
