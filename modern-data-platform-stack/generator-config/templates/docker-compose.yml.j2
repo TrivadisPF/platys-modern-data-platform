@@ -11958,7 +11958,7 @@ services:
       ORACLE_PASSWORD: {{TRINO_oracle_password | default('abc123!') }}
   {% endif %}
   {% if TRINO_event_listener is defined and TRINO_event_listener | length | default(false) %}
-      EVENT_LISTENER_CONFIG_FILES: /etc/trino/{{TRINO_event_listener}}.properties
+      EVENT_LISTENER_CONFIG_FILES: {% for eventListener in (TRINO_event_listeners.split(',')) %-} /etc/trino/{{eventListener}}.properties {% endfor %}
   {% endif %}
   {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
@@ -12026,8 +12026,8 @@ services:
       - './conf/{{conf_dir}}/catalog/druid.properties:{{trino_etc_dir}}/catalog/druid.properties'
   {% endif %}
   {% if TRINO_event_listener is defined and TRINO_event_listener | length | default(false) %}
-      - ./conf/trino/{{TRINO_event_listener}}.properties:{{trino_etc_dir}}/{{TRINO_event_listener}}.properties
-      - ./plugins/trino/event-listener/:/usr/lib/trino/plugin/
+      - ./conf/trino/{{TRINO_event_listener}}.properties:{{trino_etc_dir}}/event-listener.properties
+      - ./plugins/trino/event-listener/{{TRINO_event_listener}}:/usr/lib/trino/plugin/{{TRINO_event_listener}}
   {% endif %}
   {% if (TRINO_edition | lower) == 'starburstdata' and TRINO_starburstdata_use_license is defined and TRINO_starburstdata_use_license | default(false) %}
       - ./licenses/starburstdata/starburstdata.license:/etc/starburst/starburstdata.license
