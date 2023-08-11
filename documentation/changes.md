@@ -32,6 +32,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
 
  * support for configuring Airflow authentication backends via `AIRFLOW_auth_backends` config setting
  * support ActiveMQ Artemis as an ActiveMQ edition
+ * add support for multiple trino event listener plugins (rename `TRINO_event_listener` to `TRINO_event_listeners`)
 
 ## What's new in 1.16.0
 
