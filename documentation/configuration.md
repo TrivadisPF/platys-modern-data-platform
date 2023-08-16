@@ -1127,6 +1127,7 @@ For each service there might be some other settings, such as controlling the num
 | `PYTHON_python_packages`                       	| `` 	| 1.16.0 	| Python packages to install, as a space separated list of packages: `<package-1> <package-2>`                                                                                                                                           	|             	|                                	|
 | [**_Nuclio FaaS_**](./services/nuclio.md)  &nbsp;&nbsp;&nbsp;&nbsp;![x86-64](./images/x86-64.png)                             	|         	|       	|                                                                                                                                                                                     	|  
 | `NUCLIO_enable`                                  	| `false` 	| 1.13.0 	| Enable Nuclio service.                                                                                                                                                        	|  
+| `NUCLIO_map_tmp_folder`                                  	| `false` 	| 1.17.0 	| Map local `/tmp` folder into container?                                                                                                                                                        	|  
 
 ### Container Management & Monitoring
 
