@@ -13149,6 +13149,11 @@ services:
       MINIO_REGION_NAME: {{s3DefaultRegion if s3DefaultRegion is defined and s3DefaultRegion else omit}}
       MINIO_DOMAIN: minio
       MINIO_SERVER_URL: "http://${PUBLIC_IP}:9000"
+    {% if (KAFKA_enable or external['KAFKA_enable']) and MINIO_audit_kafka_enable | default(false) %}
+      MINIO_AUDIT_KAFKA_ENABLE: 'on'
+      MINIO_AUDIT_KAFKA_BROKERS: '{{ns.bootstrapServers}}'
+      MINIO_AUDIT_KAFKA_TOPIC: '{{MINIO_audit_kafka_topic}}'
+    {% endif -%}   {#  MINIO_browser_enable #}
     {%if not MINIO_browser_enable | default(false) %}
       MINIO_BROWSER: "off"
     {% endif -%}   {#  MINIO_browser_enable #}
