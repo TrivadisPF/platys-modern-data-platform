@@ -168,6 +168,12 @@ networks:
   {% set __CASSANDRA_version = CASSANDRA_4_version  -%}
 {% endif -%}
 
+{% if (NEO4J_major_version | lower) == '4'  %}
+  {% set __NEO4J_version = NEO4J_4_version  -%}
+{% elif (NEO4J_major_version | lower) == '5'  %}
+  {% set __NEO4J_version = NEO4J_5_version  -%}
+{% endif -%}
+
 {% set __REAPER_version = REAPER_version | default('latest') -%}
 
 {% set __DATASTAX_version = DATASTAX_version | default('latest') -%}
@@ -9643,7 +9649,9 @@ services:
       - "7474:7474"
       - "7687:7687"
     environment:
+    {% if (NEO4J_major_version | lower) == '5' %}
       - NEO4J_server_config_strict__validation_enabled=false
+    {% endif -%}   {#  NEO4J_major_version #}
     {% if (NEO4J_edition | lower) == 'enterprise'  %}
       - NEO4J_ACCEPT_LICENSE_AGREEMENT=yes
     {% endif -%}   {#  use_timezone #}
