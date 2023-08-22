@@ -11,6 +11,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Minio Web
  * ActiveMQ Artemis
  * HStreamDB
+ * Kafka Init
 
 ### Version upgrades
 
