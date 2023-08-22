@@ -34,6 +34,11 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * support ActiveMQ Artemis as an ActiveMQ edition
  * add support for multiple trino event listener plugins (rename `TRINO_event_listener` to `TRINO_event_listeners`)
  * support for NEO4J major version 4 and 5 with `NEO4J_major_version` setting
+ * 
+
+### Breaking Changes
+
+ * Remove usage of `$PUBLIC_IP` from the labels section in the `docker-compose.yml` to make it more stable to changing the value of the environment variable with a stack running (`docker compose up -d` will cause less harm)
 
 ## What's new in 1.16.0
 
