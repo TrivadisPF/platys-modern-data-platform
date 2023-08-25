@@ -1159,7 +1159,38 @@ services:
   {% endfor %} {# for serviceName in (ns.serviceNames) #}
 {% endif %} {# KAFKA_enable #}
 
+{% if (KAFKA_enable or external['KAFKA_enable']) and KAFKA_INIT_enable | default(false) %}
+  #  ================================== Kafka Init ========================================== #
+  kafka-init:
+    image: trivadispf/kafka-init:{{__KAFKA_INIT_version}}
+    container_name: kafka-init
+    hostname: kafka-init
+    labels:
+      com.platys.name: "kafka"
+    depends_on:
+      kafka-1:
+        condition: service_started
+    environment:
+      BOOTSTRAP_SERVERS: '{{ns.bootstrapServers}}'
+      KAFKA_TIMEOUT: 120
+      KAFKA_EXPECTED_BROKERS: {{KAFKA_broker_nodes}}
+      KAFKA_DELETE_TOPIC_ENABLE: false
+      KAFKA_TOPIC_CONFIG: ''
+      KAFKA_CREATE_TOPICS: '{{KAFKA_INIT_topics}}'
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    init: true
+{% endif %} {# KAFKA_enable or external['KAFKA_enable'] and KAFKA_INIT #}
+
 {% if (KAFKA_enable or external['KAFKA_enable']) and KAFKA_CLI_enable | default(false) %}
+  #  ================================== Kafka CLI ========================================== #
   kafka-cli:
     image: confluentinc/cp-kafka:{{__CONFLUENT_PLATFORM_version}}
     container_name: kafka-cli
