@@ -452,6 +452,8 @@ networks:
 {% set __MOCK_SERVER_version = MOCK_SERVER_version | default('latest') -%}
 {% set __PORTAINER_version = PORTAINER_version | default('latest') -%}
 {% set __CADVISOR_version = CADVISOR_version | default('latest') -%}
+{% set __DOCKER_REGISTRY_version = DOCKER_REGISTRY_version | default('latest') -%}
+{% set __DOCKER_REGISTRY_UI_version = DOCKER_REGISTRY_UI_version | default('latest') -%}
 {% set __HAWTIO_version = HAWTIO_version | default('latest') -%}
 {% set __SPRING_BOOT_ADMIN_version = SPRING_BOOT_ADMIN_version | default('latest') -%}
 {% set __WETTY_version = WETTY_version | default('latest') -%}
@@ -748,6 +750,7 @@ networks:
   {% set FIREFOX_enable = false -%}
   {% set FILE_BROWSER_enable = false -%}
   {% set CADVISOR_enable = false -%}
+  {% set SCHEMA_REGISTRY_enable = false -%}
   {% set HAWTIO_enable = false -%}
   {% set SPRING_BOOT_ADMIN_enable = false -%}
   {% set WETTY_enable = false -%}
@@ -7033,7 +7036,7 @@ services:
     depends_on:
       airflow-worker-1:
         condition: service_started
-  {% endif %}      
+  {% endif %}
     command: webserver
     environment:
       - AIRFLOW__CORE__EXECUTOR={{airflow_executor}}
@@ -7079,6 +7082,14 @@ services:
     {% endif -%}   {#  LOKI_collect_docker_logs #}
     user: "${AIRFLOW_UID:-50000}:${AIRFLOW_GID:-50000}"
     restart: {{container_restart_policy}}
+
+  docker-proxy:
+    image: bobrik/socat
+    command: "TCP4-LISTEN:2375,fork,reuseaddr UNIX-CONNECT:/var/run/docker.sock"
+    ports:
+      - "2376:2375"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
 
   airflow-scheduler:
     image: apache/airflow:{{__AIRFLOW_version}}
@@ -15213,6 +15224,63 @@ services:
     {% endif -%}   {#  LOKI_collect_docker_logs #}
     restart: {{container_restart_policy}}
 {% endif %}   {# CADVISOR_enable #}
+
+{% if DOCKER_REGISTRY_enable | default(false) %}
+  #  ================================== Docker Registry ========================================== #
+  docker-registry:
+    image: registry:{{__DOCKER_REGISTRY_version}}
+    container_name: docker-registry
+    hostname: docker-registry
+    labels:
+      com.platys.name: "docker-registry"
+    ports:
+      - 5020:5000
+    environment:
+      REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY: /data
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {% if DOCKER_REGISTRY_volume_map_data %}
+      - ./container-volume/docker-registry/data:/var/lib/registry
+    {% endif -%}   {#  DOCKER_REGISTRY_volume_map_data #}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    restart: {{container_restart_policy}}
+
+  docker-registry-ui:
+    image: joxit/docker-registry-ui:{{__DOCKER_REGISTRY_UI_version}}
+    container_name: docker-registry-ui
+    hostname: docker-registry-ui
+    labels:
+      com.platys.name: "docker-registry-ui"
+      com.platys.webui.title: "Docker Registry UI"
+      com.platys.webui.url: "http://dataplatform:28307"
+    ports:
+      - 28307:80
+    environment:
+      REGISTRY_TITLE: "My Private Docker Registry"
+      REGISTRY_URL: http://docker-registry:5000
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    restart: {{container_restart_policy}}
+{% endif %}   {# DOCKER_REGISTRY_enable #}
 
 {% if HAWTIO_enable | default(false) %}
   #  ================================== Hawtio ========================================== #

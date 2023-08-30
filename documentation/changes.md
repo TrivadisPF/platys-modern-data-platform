@@ -12,6 +12,8 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * ActiveMQ Artemis
  * HStreamDB
  * Kafka Init
+ * Docker Registry
+ * Docker Registry UI
 
 ### Version upgrades
 

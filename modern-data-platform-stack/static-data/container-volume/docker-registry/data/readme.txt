@@ -1,0 +1,1 @@
+Contains the data of Docker Registry service, if flag DOCKER_REGISTRY_volume_map_data is set to true.
