@@ -7039,8 +7039,10 @@ services:
         condition: service_started
   {% endif %}
     command: webserver
+  {% if (AIRFLOW_volume_map_docker_daemon) %}
     group_add:
       - "$DOCKER_GROUP"
+  {% endif %}
     environment:
       - AIRFLOW__CORE__EXECUTOR={{airflow_executor}}
       - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:abc123!@airflow-db/airflowdb
@@ -7098,8 +7100,10 @@ services:
       - |
         /usr/src/app/wait-for-it.sh -t 180 airflow-db:5432
         airflow scheduler
+  {% if (AIRFLOW_volume_map_docker_daemon) %}
     group_add:
       - "$DOCKER_GROUP"
+  {% endif %}
     environment:
       - AIRFLOW__CORE__EXECUTOR={{airflow_executor}}
       - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:abc123!@airflow-db/airflowdb
@@ -7157,8 +7161,10 @@ services:
       - |
         /usr/src/app/wait-for-it.sh -t 180 airflow-db:5432
         airflow celery worker
+  {% if (AIRFLOW_volume_map_docker_daemon) %}
     group_add:
       - "$DOCKER_GROUP"
+  {% endif %}
     environment:
       - AIRFLOW__CORE__EXECUTOR={{airflow_executor}}
       - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:abc123!@airflow-db/airflowdb
@@ -7213,6 +7219,10 @@ services:
     labels:
       com.platys.name: 'airflow'
     command: triggerer
+  {% if (AIRFLOW_volume_map_docker_daemon) %}
+    group_add:
+      - "$DOCKER_GROUP"
+  {% endif %}    
     environment:
       - AIRFLOW__CORE__EXECUTOR={{airflow_executor}}
       - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:abc123!@airflow-db/airflowdb
