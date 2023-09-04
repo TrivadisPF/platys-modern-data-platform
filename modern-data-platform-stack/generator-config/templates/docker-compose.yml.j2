@@ -15242,17 +15242,28 @@ services:
     hostname: docker-registry
     labels:
       com.platys.name: "docker-registry"
+      com.platys.restui.title: 'Docker Registry REST API'
+      com.platys.restui.url: "http://dataplatform:5020/v2"
     ports:
       - 5020:5000
     environment:
-      REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY: /data
-      #REGISTRY_HTTP_SECRET: o43g2kjgn2iuhv2k4jn2f23f290qfghsdg
+      REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY: /var/lib/registry
+      REGISTRY_HTTP_ADDR: 0.0.0.0:5000
+      ENABLE_CORS: 'true^'
+      REGISTRY_HTTP_HEADERS_Access-Control-Allow-Origin: '["${PUBLIC_IP}:28307","${DOCKER_HOST_IP}:28307","http://schema-registry-ui:28307"]'
+      REGISTRY_HTTP_HEADERS_Access-Control-Allow-Methods: '[HEAD,GET,OPTIONS,DELETE]'
+      REGISTRY_HTTP_HEADERS_Access-Control-Allow-Credentials: '[true]'
+      REGISTRY_HTTP_HEADERS_Access-Control-Allow-Headers: '[Authorization,Accept,Cache-Control]'
+      REGISTRY_HTTP_HEADERS_Access-Control-Expose-Headers: '[Docker-Content-Digest]'
+      REGISTRY_STORAGE_DELETE_ENABLED: 'true'
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
+    {% if DOCKER_REGISTRY_volume_map_custom_config %}
       - ./conf/docker-registry/config.yml:/etc/docker/registry/config.yml
+    {% endif -%}   {#  DOCKER_REGISTRY_volume_map_data #}
     {% if DOCKER_REGISTRY_volume_map_data %}
       - ./container-volume/docker-registry/data:/var/lib/registry
     {% endif -%}   {#  DOCKER_REGISTRY_volume_map_data #}
@@ -15278,9 +15289,13 @@ services:
     depends_on:
      - docker-registry
     environment:
-      REGISTRY_TITLE: "My Private Docker Registry"
-      REGISTRY_URL: http://docker-registry:5000
       SINGLE_REGISTRY: true
+      REGISTRY_TITLE: "Private Docker Registry"
+      REGISTRY_URL: http://${PUBLIC_IP}:5020
+      DELETE_IMAGES: true
+      SHOW_CONTENT_DIGEST: true
+      REGISTRY_SECURED: false
+      CATALOG_ELEMENTS_LIMIT: 1000
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
