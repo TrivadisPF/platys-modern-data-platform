@@ -15251,6 +15251,7 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
+      - ./conf/docker-registry/config.yml:/etc/docker/registry/config.yml
     {% if DOCKER_REGISTRY_volume_map_data %}
       - ./container-volume/docker-registry/data:/var/lib/registry
     {% endif -%}   {#  DOCKER_REGISTRY_volume_map_data #}
@@ -15273,9 +15274,12 @@ services:
       com.platys.webui.url: "http://dataplatform:28307"
     ports:
       - 28307:80
+    depends_on:
+     - docker-registry
     environment:
       REGISTRY_TITLE: "My Private Docker Registry"
       REGISTRY_URL: http://docker-registry:5000
+      SINGLE_REGISTRY: true
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
