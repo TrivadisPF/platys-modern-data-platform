@@ -7039,6 +7039,8 @@ services:
         condition: service_started
   {% endif %}
     command: webserver
+    group_add:
+      - "$DOCKER_GROUP"
     environment:
       - AIRFLOW__CORE__EXECUTOR={{airflow_executor}}
       - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:abc123!@airflow-db/airflowdb
@@ -7084,14 +7086,6 @@ services:
     user: "${AIRFLOW_UID:-50000}:${AIRFLOW_GID:-50000}"
     restart: {{container_restart_policy}}
 
-  docker-proxy:
-    image: bobrik/socat
-    command: "TCP4-LISTEN:2375,fork,reuseaddr UNIX-CONNECT:/var/run/docker.sock"
-    ports:
-      - "2376:2375"
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-
   airflow-scheduler:
     image: apache/airflow:{{__AIRFLOW_version}}
     container_name: airflow-scheduler
@@ -7104,6 +7098,8 @@ services:
       - |
         /usr/src/app/wait-for-it.sh -t 180 airflow-db:5432
         airflow scheduler
+    group_add:
+      - "$DOCKER_GROUP"
     environment:
       - AIRFLOW__CORE__EXECUTOR={{airflow_executor}}
       - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:abc123!@airflow-db/airflowdb
@@ -7161,6 +7157,8 @@ services:
       - |
         /usr/src/app/wait-for-it.sh -t 180 airflow-db:5432
         airflow celery worker
+    group_add:
+      - "$DOCKER_GROUP"
     environment:
       - AIRFLOW__CORE__EXECUTOR={{airflow_executor}}
       - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:abc123!@airflow-db/airflowdb
