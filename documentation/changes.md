@@ -14,6 +14,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Kafka Init
  * Docker Registry
  * Docker Registry UI
+ * Splunk
 
 ### Version upgrades
 

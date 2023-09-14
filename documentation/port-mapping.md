@@ -507,6 +507,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28305 | 3000 | sqlchat |
 28306 | 8080 | minio-web |
 28307 | 80 | docker-registry-ui |
+28308 | 8000 | splunk |
 
 ## Ports > 28500
 

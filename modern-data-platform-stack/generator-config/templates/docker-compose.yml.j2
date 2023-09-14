@@ -190,6 +190,8 @@ networks:
 {% set __OPENSEARCH_version = OPENSEARCH_version | default('latest') -%}
 {% set __OPENSEARCH_DASHBOARDS_version = OPENSEARCH_DASHBOARDS_version | default('latest') -%}
 
+{% set __SPLUNK_version = SPLUNK_version | default('latest') -%}
+
 {% set __HUE_version = HUE_version | default('latest') -%}
 {% set __HUE_POSTGRES_version = HUE_POSTGRES_version | default('latest') -%}
 
@@ -656,6 +658,7 @@ networks:
   {% set ELASTICHQ_enable = false -%}
   {% set ELASTICVUE_enable = false -%}
   {% set KIBANA_enable = false -%}
+  {% set SPLUNK_enable = false -%}
   {% set INFLUXDB2_enable = false -%}
   {% set DRUID_enable = false -%}
   {% set PINOT_enable = false -%}
@@ -9593,6 +9596,40 @@ services:
     {% endif -%}   {#  LOKI_collect_docker_logs #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  OPENSEARCH_DASHBOARDS_enable #}
+
+{% if SPLUNK_enable | default(false) %}
+  #  ================================== Splunk ========================================== #
+  splunk:
+    image: splunk/splunk:{{__SPLUNK_version}}
+    hostname: splunk
+    container_name: splunk
+    labels:
+      com.platys.name: "splunk"
+      com.platys.webui.title: "Splunk UI"
+      com.platys.webui.url: "http://dataplatform:28308"
+    ports:
+      - "28308:8000"
+    environment:
+      - SPLUNK_START_ARGS=--accept-license
+    {% if (SPLUNK_edition | lower) == 'free'  %}
+      - SPLUNK_LICENSE_URI=Free
+    {% endif -%}   {#  SPLUNK_edition #}
+      - SPLUNK_PASSWORD=abc123!
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  SPLUNK_enable #}
+{# #}
 
 {% if JANUSGRAPH_enable | default(false) %}
   #  ================================== JanusGraph ========================================== #
