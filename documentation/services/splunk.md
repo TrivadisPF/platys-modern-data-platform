@@ -1,6 +1,6 @@
 # Splunk
 
-Neo4j gives developers and data scientists the most trusted and advanced tools to quickly build today’s intelligent applications and machine learning workflows. Available as a fully managed cloud service or self-hosted.
+Search, analysis and visualization for actionable insights from all of your data.
 
 **[Website](https://splunk.com/)** | **[Documentation](https://docs.splunk.com/Documentation)** | **[GitHub](https://github.com/splunk/docker-splunk)**
 
