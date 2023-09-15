@@ -508,6 +508,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28306 | 8080 | minio-web |
 28307 | 80 | docker-registry-ui |
 28308 | 8000 | splunk |
+28309 | 9097 | klaw-core |
+28310 | 9343 | klaw-cluster-api |
 
 ## Ports > 28500
 

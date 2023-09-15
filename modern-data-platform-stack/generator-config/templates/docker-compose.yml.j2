@@ -58,6 +58,7 @@ networks:
 {% set __KPOW_version = KPOW_version | default('latest') -%}
 {% set __CONDUKTOR_PLATFORM_version = CONDUKTOR_PLATFORM_version | default('latest') -%}
 {% set __KAFKISTRY_version = KAFKISTRY_version | default('latest') -%}
+{% set __KLAW_version = KLAW_version | default('latest') -%}
 {% set __KAFKA_CONNECTOR_BOARD_version = KAFKA_CONNECTOR_BOARD_version | default('latest') -%}
 {% set __STREAMS_EXPLORER_version = STREAMS_EXPLORER_version | default('latest') -%}
 {% set __KAFKA_LAG_EXPORTER_version = KAFKA_LAG_EXPORTER_version | default('latest') -%}
@@ -598,6 +599,7 @@ networks:
   {% set KPOW_enable = false -%}
   {% set CONDUKTOR_PLATFORM_enable = false -%}
   {% set KAFKISTRY_enable = false -%}
+  {% set KLAW_enable = false -%}
   {% set KAFKA_CONNECTOR_BOARD_enable = false -%}
   {% set ZILLA_enable = false -%}
   {% set REMORA_enable = false -%}
@@ -2965,6 +2967,63 @@ services:
     {% endif -%}   {#  LOKI_collect_docker_logs #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  KAFKA_enable and KAFKISTRY_enable #}
+
+{% if ((KAFKA_enable or external['KAFKA_enable']) and KLAW_enable) | default(false) %}
+  #  ================================== Kafkistry ========================================== #
+  klaw-core:
+    image: aivenoy/klaw-core:{{__KLAW_version}}
+    container_name: klaw-core
+    hostname: klaw-core
+    labels:
+      com.platys.name: "klaw"
+      com.platys.webui.title: 'Klaw UI'
+      com.platys.webui.url: "http://dataplatform:9097"
+    ports:
+      - 28309:9097
+    environment:
+      - KLAW_CLUSTERAPI_ACCESS_BASE64_SECRET=VGhpc0lzRXhhY3RseUEzMkNoYXJTdHJpbmdTZWNyZXQK
+      - SPRING_DATASOURCE_URL="jdbc:h2:file:/klaw/klawprodb;DB_CLOSE_ON_EXIT=FALSE;DB_CLOSE_DELAY=-1;MODE=MySQL;CASE_INSENSITIVE_IDENTIFIERS=TRUE;"
+      - KLAW_QUICKSTART_ENABLED=true
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    restart: {{container_restart_policy}}
+
+  klaw-cluster-api:
+    image: aivenoy/klaw-core:{{__KLAW_version}}
+    container_name: klaw-cluster-api
+    hostname: klaw-cluster-api
+    labels:
+      com.platys.name: "klaw"
+      com.platys.webui.title: 'Klaw UI'
+      com.platys.webui.url: "http://dataplatform:28310"
+    ports:
+      - 28310:9343
+    environment:
+      - KLAW_CLUSTERAPI_ACCESS_BASE64_SECRET=VGhpc0lzRXhhY3RseUEzMkNoYXJTdHJpbmdTZWNyZXQK
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if LOKI_collect_docker_logs | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  KAFKA_enable and KLAW_enable #}
 
 {% if ((KAFKA_enable or external['KAFKA_enable']) and KAFKA_CONNECTOR_BOARD_enable) | default(false) %}
   #  ================================== Kafka Connector Board ========================================== #
