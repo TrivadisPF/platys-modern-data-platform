@@ -6579,6 +6579,33 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {#  CONDUIT_enable  #}
 
+{%if FLUENTD_enable | default(false) %}
+  #  ================================== FluentD ========================================== #
+  fluentd:
+    image: fluent/fluentd:{{__FLUENTD_version}}
+    container_name: fluentd
+    hostname: fluentd
+    labels:
+      com.platys.name: 'fluentd'
+    ports:
+      - "24224:24224"
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./conf/fluentd:/fluentd/etc
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  LOKI_collect_docker_logs #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  FLUENTD_enable  #}
+
 {%if NODERED_enable | default(false) %}
   #  ================================== Node-RED ========================================== #
   nodered-1:

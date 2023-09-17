@@ -285,6 +285,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 19632 | 19630 | streamsets-transformer-1 |
 19999 | 9999 | influxdb2 |
 21000 | 21000 | atlas |
+24224 | 24224 | fluentd |
 26500 | 26500 | zeebe-1 |
 27017 | 27017 | mongodb-1 |
 27018 | 27017 | mongodb-2 |
