@@ -101,3 +101,7 @@ Inhere we are documenting cookbooks on how to use the platform:
 
  * **MLflow**
    * [Using MLflow from Jupyter](./recipes/using-mflow-from-jupyter/README.md) - `1.16.0` 
+
+ * **Docker Logging**
+   * [Collecting Docker Logs with Loki](./recipes/collecting-docker-logs-with-loki/README.md) - `1.17.0` 
+
