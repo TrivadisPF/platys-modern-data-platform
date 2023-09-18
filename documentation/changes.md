@@ -18,6 +18,10 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Klaw
  * FluentD
 
+### New/Updated Cookbook Recipes
+
+ * [Collecting Docker Logs with Loki](../cookbooks/recipes/collecting-docker-logs-with-loki/README.md)
+ 
 ### Version upgrades
 
  * Update `zeebe` to `8.2.5`
