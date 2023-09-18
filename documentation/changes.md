@@ -33,6 +33,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Update `portainer-ce` to `2.18.4-alpine`
  * Update `activemq-classic` to `5.18.2`
  * Update `materialize` to `v0.64.0`
+ * Update `grafana` to `10.1.1`
 
 ### Enhancements
 
