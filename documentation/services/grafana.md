@@ -13,5 +13,7 @@ platys gen
 
 ### How to use it?
 
-Navigate to <http://dataplatform:3000> and login with user `admin` and password `abc123!`. 
+Navigate to <http://dataplatform:3000> 
+
+Login with user `admin` and password `abc123!` (if `GRAFANA_auth_anonymous_enabled` is not set to `true`). 
 
