@@ -6584,7 +6584,7 @@ services:
 {%if FLUENTD_enable | default(false) %}
   #  ================================== FluentD ========================================== #
   fluentd:
-    image: trivaids/fluentd-with-plugins:{{__FLUENTD_version}}
+    image: trivaids/fluentd:{{__FLUENTD_version}}
     container_name: fluentd
     hostname: fluentd
     labels:
@@ -6601,7 +6601,9 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
+    {% if FLUENTD_conf_file is defined and FLUENTD_conf_file and FLUENTD_conf_file | length %}
       - ./conf/fluentd:/fluentd/etc
+    {% endif -%}   {#  FLUENTD_conf_file #}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
