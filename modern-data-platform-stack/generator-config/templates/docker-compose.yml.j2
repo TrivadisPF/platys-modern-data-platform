@@ -6593,9 +6593,21 @@ services:
       - "24224:24224"
     environment:
       FLUENTD_CONF: {{FLUENTD_conf_file if FLUENTD_conf_file is defined and FLUENTD_conf_file and FLUENTD_conf_file | length else omit}}
+    {% if ELASTICSEARCH_enable | default(false) %}
       ELASTICSEARCH_HOSTNAME: elasticsearch-1
       ELASTICSEARCH_PORT: 9200
       ELASTICSEARCH_SCHEME: http
+    {% endif -%}   {#  ELASTICSEARCH_enable #}
+    {%if MINIO_enable or external['S3_enable'] | default(false) %}
+      S3_ENDPOINT: '{{s3Endpoint | default(omit) }}'
+      S3_BUCKET_NAME: '{{FLUENTD_s3_bucket_name}}'
+      S3_BUCKET_REGION: '{{s3DefaultRegion if s3DefaultRegion is defined and s3DefaultRegion else omit}}'
+      S3_BUCKET_FILE_TYPE: '{{FLUENTD_s3_bucket_file_type}}'
+      S3_BUCKET_APP_NAME: 'platys'
+      S3_PATH_STYLE_ACCESS: '{{s3PathStyleAccess}}'
+      S3_ACCESS_KEY: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
+      S3_SECRET_ACCESS_KEY: {{s3SecretAccessKey}}
+    {% endif -%}   {#  MINIO_enable #}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
