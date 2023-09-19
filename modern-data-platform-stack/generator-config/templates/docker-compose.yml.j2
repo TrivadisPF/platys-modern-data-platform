@@ -463,6 +463,8 @@ networks:
 {% set __SPRING_BOOT_ADMIN_version = SPRING_BOOT_ADMIN_version | default('latest') -%}
 {% set __WETTY_version = WETTY_version | default('latest') -%}
 
+{% set __RANETO_version = RANETO_version | default('latest') -%}
+
 {% set __MARKDOWN_VIEWER_version = MARKDOWN_VIEWER_version | default('latest') -%}
 
 {% set __LOG4BRAINS_version = LOG4BRAINS_VIEWER_version | default('latest') -%}
@@ -762,6 +764,7 @@ networks:
   {% set HAWTIO_enable = false -%}
   {% set SPRING_BOOT_ADMIN_enable = false -%}
   {% set WETTY_enable = false -%}
+  {% set RANETO_enable = false -%}
   {% set MARKDOWN_VIEWER_enable = false -%}
   {% set LOG4BRAINS_enable = false -%}
   {% set SWAGGER_EDITOR_enable = false -%}
@@ -15641,6 +15644,32 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
 {% endif %}   {# PYTHON_enable #}
+
+{% if RANETO_enable | default(false) %}
+  #  ================================== Raneto ========================================== #
+  raneto:
+    image: lscr.io/linuxserver/raneto:{{__RANETO_version}}
+    container_name: raneto
+    hostname: raneto
+    labels:
+      com.platys.name: "raneto"
+      com.platys.webui.title: "Raneto UI"
+      com.platys.webui.url: "http://dataplatform:28311"
+    ports:
+      - "28311:3000"
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./container-volume/raneto/data:/config
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+{% endif %}   {# RANETO_enable #}
 
 {% if MARKDOWN_VIEWER_enable | default(false) %}
   #  ================================== markdown-viewer ========================================== #
