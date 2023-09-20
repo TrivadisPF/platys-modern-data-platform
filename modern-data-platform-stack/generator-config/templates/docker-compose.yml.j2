@@ -15707,7 +15707,11 @@ services:
 {% if MARKDOWN_VIEWER_enable | default(false) %}
   #  ================================== markdown-viewer ========================================== #
   markdown-viewer{{dataCenter}}:
+  {% if MARKDOWN_VIEWER_edition == 'markdown-madness' | default(false) %}
+    image: ldannyben/madness:{{__MARKDOWN_MADNESS_version}}
+  {% else -%}
     image: trivadis/markdown-web:{{__MARKDOWN_VIEWER_version}}
+  {% endif -%}   {# MARKDOWN_VIEWER_use_markdown_madness_impl #}
     container_name: markdown-viewer{{dataCenter}}
     hostname: markdown-viewer{{dataCenter}}
     labels:
@@ -15715,9 +15719,9 @@ services:
       com.platys.webui.title: "Markdown Viewer UI"
       com.platys.webui.url: "http://dataplatform:{{80 + (dataCenterId * 1) if (MARKDOWN_VIEWER_use_port_80 | default(true) )  else 8008 }}"
     ports:
-      - "{{80 + (dataCenterId * 1) if (MARKDOWN_VIEWER_use_port_80 | default(true) )  else 8008 }}:80"
+      - "{{80 + (dataCenterId * 1) if (MARKDOWN_VIEWER_use_port_80 | default(true) )  else 8008 }}:{{3000 if MARKDOWN_VIEWER_edition == 'markdown-madness' else 80}}"
     volumes:
-      - ./artefacts:/home/python/markdown
+      - ./artefacts:{{/docs if MARKDOWN_VIEWER_edition == 'markdown-madness' else /home/python/markdown}}
       - ./data-transfer:/data-transfer
     restart: {{container_restart_policy}}
 
