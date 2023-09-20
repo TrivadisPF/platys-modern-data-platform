@@ -15663,13 +15663,42 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
-      - ./container-volume/raneto/data:/config
+      - ./container-volume/raneto/config:/config
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
     restart: {{container_restart_policy}}
 {% endif %}   {# RANETO_enable #}
+
+{% if MARKDOWN_MADNESS_enable | default(false) %}
+  #  ================================== Markdown Madness Server ========================================== #
+  markdown-madness:
+    image: ldannyben/madness:{{__MARKDOWN_MADNESS_version}}
+    container_name: markdown-madness
+    hostname: markdown-madness
+    labels:
+      com.platys.name: "markdown-madness"
+      com.platys.webui.title: "Markdown Madness Server UI"
+      com.platys.webui.url: "http://dataplatform:28312"
+    ports:
+      - "28312:3000"
+    environment:
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {% if MARKDOWN_MADNESS_volume_map_data | default(false) %}
+      - ./container-volume/markdown-madness/docs:/docs
+    {% endif -%}   {#  use_timezone #}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    command: server
+    restart: {{container_restart_policy}}
+{% endif %}   {# MARKDOWN_MADNESS_enable #}
 
 {% if MARKDOWN_VIEWER_enable | default(false) %}
   #  ================================== markdown-viewer ========================================== #
