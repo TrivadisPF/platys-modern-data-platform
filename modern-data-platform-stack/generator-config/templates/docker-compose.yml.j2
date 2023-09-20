@@ -15722,7 +15722,13 @@ services:
       - "{{80 + (dataCenterId * 1) if (MARKDOWN_VIEWER_use_port_80 | default(true) )  else 8008 }}:{{3000 if MARKDOWN_VIEWER_edition == 'markdown-madness' else 80}}"
     volumes:
       - ./artefacts:{{"/docs" if MARKDOWN_VIEWER_edition == 'markdown-madness' else "/home/python/markdown"}}
+  {% if MARKDOWN_VIEWER_edition == 'markdown-madness' | default(false) %}
+      - ./conf/markdown-viewer/markdown-madness.yml:/docs/.madness.yml
+  {% endif -%}   {# MARKDOWN_VIEWER_use_markdown_madness_impl #}
       - ./data-transfer:/data-transfer
+  {% if MARKDOWN_VIEWER_edition == 'markdown-madness' | default(false) %}
+    command: server
+  {% endif -%}   {# MARKDOWN_VIEWER_use_markdown_madness_impl #}
     restart: {{container_restart_policy}}
 
   markdown-renderer{{dataCenter}}:
