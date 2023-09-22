@@ -18,6 +18,8 @@ platys gen
 
 ### How to use it?
 
-Navigate to <http://dataplatform:28313> 
+Navigate to <http://dataplatform:28313>
+
+Login as user `admin` with password `admin`. 
 
 
