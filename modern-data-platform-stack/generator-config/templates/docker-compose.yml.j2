@@ -6295,121 +6295,121 @@ services:
 {% endif %}   {#  NIFI_enable  #}
 
 {%if NIFI_REGISTRY_enable | default(false) %}
-#  ================================== NiFi Registry ========================================== #
-nifi-registry:
-  image: apache/nifi-registry:{{__NIFI_REGISTRY_version}}
-  container_name: nifi-registry
-  hostname: nifi-registry
-  labels:
-    com.platys.name: 'nifi-registry'
-    com.platys.webui.title: "NiFi Registry UI"
-    com.platys.webui.url: "http://dataplatform:19090/nifi-registry"
-    com.platys.restapi.title: "NiFi Registry REST API"
-    com.platys.restapi.url: "http://dataplatform:19090/nifi-registry-api/about"
-  ports:
-    - 19090:19090
-  user: "root"
-  environment:
-  {%if NIFI_REGISTRY_run_secure  | default(false) %}
-    NIFI_REGISTRY_WEB_HTTPS_PORT: 19090
-    NIFI_REGISTRY_WEB_HTTPS_HOST: nifi-registry
-    NIFI_REGISTRY_WEB_PROXY_HOST: '${PUBLIC_IP}:19090,${DOCKER_HOST_IP}:19090'
-    AUTH: tls
-    KEYSTORE_PATH: /opt/certs/keystore.jks
-    KEYSTORE_TYPE: JKS
-    KEYSTORE_PASSWORD: {{NIFI_keystore_password if NIFI_keystore_password is defined and NIFI_keystore_password | length else 'BWt7eLC4R53N4bIxdZEVPhAdkYlQ0Le8Tw0erGXpvI0' }}
-    KEY_PASSWORD: {{NIFI_key_password if NIFI_key_password is defined and NIFI_key_password | length else omit }}
-    TRUSTSTORE_PATH: /opt/certs/truststore.jks
-    TRUSTSTORE_TYPE: JKS
-    TRUSTSTORE_PASSWORD: {{NIFI_truststore_password if NIFI_truststore_password is defined and NIFI_truststore_password | length else 'PkhvPAirou5R/K9HQxVk99uT+hehM7SRURyFSbxTlTQ' }}
-    INITIAL_ADMIN_IDENTITY: '{{ NIFI_inital_admin_identitiy if NIFI_inital_admin_identitiy is defined and NIFI_inital_admin_identitiy | length else NIFI_username }}'
-  {% else %}
-    NIFI_REGISTRY_WEB_HTTP_PORT: 19090
-  {% endif -%}   {#  NIFI_run_unsecure #}
-    NIFI_REGISTRY_DB_URL: ''
-    NIFI_REGISTRY_DB_CLASS: 'org.h2.Driver'
-    NIFI_REGISTRY_DB_DIR: '/opt/nifi-registry/nifi-registry-current/database'
-    NIFI_REGISTRY_DB_USER: 'nifireg'
-    NIFI_REGISTRY_DB_PASS: 'nifireg'
-    NIFI_REGISTRY_FLOW_PROVIDER: {{NIFI_REGISTRY_flow_provider | lower}}
-  {% if NIFI_REGISTRY_flow_provider == 'file' | default(false) %}
-    NIFI_REGISTRY_FLOW_STORAGE_DIR: '/opt/nifi-registry/nifi-registry-current/file-flow_storage'
-  {% elif NIFI_REGISTRY_flow_provider == 'git' | default(false) %}
-    NIFI_REGISTRY_FLOW_STORAGE_DIR: '/opt/nifi-registry/nifi-registry-current/git_flow_storage'
-    NIFI_REGISTRY_GIT_REMOTE: {{NIFI_REGISTRY_git_remote if NIFI_REGISTRY_git_remote is defined and NIFI_REGISTRY_git_remote else omit}}
-    NIFI_REGISTRY_GIT_USER: {{NIFI_REGISTRY_git_user | default(omit) }}
-    NIFI_REGISTRY_GIT_PASSWORD: ${PLATYS_NIFI_REGISTRY_GIT_PASSWORD:-{{NIFI_REGISTRY_git_password}}}
-    NIFI_REGISTRY_GIT_REPO: {{NIFI_REGISTRY_git_repo if NIFI_REGISTRY_git_repo is defined and NIFI_REGISTRY_git_repo else omit}}
-  {% endif -%}   {#  NIFI_REGISTRY_flow_provider #}
-    NIFI_REGISTRY_BUNDLE_PROVIDER: {{NIFI_REGISTRY_bundle_provider | lower}}
-  {% if NIFI_REGISTRY_bundle_provider == 'file' | default(false) %}
-    NIFI_REGISTRY_BUNDLE_STORAGE_DIR: './extension_bundles'
-  {% elif NIFI_REGISTRY_bundle_provider == 's3' | default(false) %}
-    NIFI_REGISTRY_S3_REGION: {{s3DefaultRegion if s3DefaultRegion is defined and s3DefaultRegion else omit}}
-    NIFI_REGISTRY_S3_BUCKET_NAME: {{NIFI_REGISTRY_s3_bucket_name}}
-    NIFI_REGISTRY_S3_KEY_PREFIX: {{NIFI_REGISTRY_s3_key_prefix}}
-    NIFI_REGISTRY_S3_CREDENTIALS_PROVIDER: STATIC
-    NIFI_REGISTRY_S3_ACCESS_KEY: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
-    NIFI_REGISTRY_S3_SECRET_ACCESS_KEY: {{s3SecretAccessKey}}
-    NIFI_REGISTRY_S3_ENDPOINT_URL: '{{s3Endpoint | default(omit) }}'
-  {% endif -%}   {#  NIFI_REGISTRY_bundle_provider #}
-    LOG_LEVEL: INFO
-  {%if use_timezone | default(false) %}
-    TZ: {{use_timezone}}
-  {% endif -%}   {#  use_timezone #}
-  volumes:
-    - ./data-transfer:/data-transfer
-  {%if NIFI_REGISTRY_run_secure  | default(false) %}
-    - ./{{'custom-conf/nifi/security' if NIFI_REGISTRY_use_custom_certs is defined and NIFI_use_custom_certs else 'security/nifi'}}/keystore.jks:/opt/certs/keystore.jks
-    - ./{{'custom-conf/nifi/security' if NIFI_REGISTRY_use_custom_certs is defined and NIFI_use_custom_certs else 'security/nifi'}}/truststore.jks:/opt/certs/truststore.jks
-  {% endif -%}   {#  NIFI_REGISTRY_run_secure #}
-  {% if NIFI_REGISTRY_volume_map_data %}
-    - ./container-volume/nifi_registry/database:/opt/nifi-registry/nifi-registry-current/database
-  {% endif -%}   {#  NIFI_REGISTRY_volume_map_data #}
-  {% if NIFI_REGISTRY_volume_map_flow_storage %}
+  #  ================================== NiFi Registry ========================================== #
+  nifi-registry:
+    image: apache/nifi-registry:{{__NIFI_REGISTRY_version}}
+    container_name: nifi-registry
+    hostname: nifi-registry
+    labels:
+      com.platys.name: 'nifi-registry'
+      com.platys.webui.title: "NiFi Registry UI"
+      com.platys.webui.url: "http://dataplatform:19090/nifi-registry"
+      com.platys.restapi.title: "NiFi Registry REST API"
+      com.platys.restapi.url: "http://dataplatform:19090/nifi-registry-api/about"
+    ports:
+      - 19090:19090
+    user: "root"
+    environment:
+    {%if NIFI_REGISTRY_run_secure  | default(false) %}
+      NIFI_REGISTRY_WEB_HTTPS_PORT: 19090
+      NIFI_REGISTRY_WEB_HTTPS_HOST: nifi-registry
+      NIFI_REGISTRY_WEB_PROXY_HOST: '${PUBLIC_IP}:19090,${DOCKER_HOST_IP}:19090'
+      AUTH: tls
+      KEYSTORE_PATH: /opt/certs/keystore.jks
+      KEYSTORE_TYPE: JKS
+      KEYSTORE_PASSWORD: {{NIFI_keystore_password if NIFI_keystore_password is defined and NIFI_keystore_password | length else 'BWt7eLC4R53N4bIxdZEVPhAdkYlQ0Le8Tw0erGXpvI0' }}
+      KEY_PASSWORD: {{NIFI_key_password if NIFI_key_password is defined and NIFI_key_password | length else omit }}
+      TRUSTSTORE_PATH: /opt/certs/truststore.jks
+      TRUSTSTORE_TYPE: JKS
+      TRUSTSTORE_PASSWORD: {{NIFI_truststore_password if NIFI_truststore_password is defined and NIFI_truststore_password | length else 'PkhvPAirou5R/K9HQxVk99uT+hehM7SRURyFSbxTlTQ' }}
+      INITIAL_ADMIN_IDENTITY: '{{ NIFI_inital_admin_identitiy if NIFI_inital_admin_identitiy is defined and NIFI_inital_admin_identitiy | length else NIFI_username }}'
+    {% else %}
+      NIFI_REGISTRY_WEB_HTTP_PORT: 19090
+    {% endif -%}   {#  NIFI_run_unsecure #}
+      NIFI_REGISTRY_DB_URL: ''
+      NIFI_REGISTRY_DB_CLASS: 'org.h2.Driver'
+      NIFI_REGISTRY_DB_DIR: '/opt/nifi-registry/nifi-registry-current/database'
+      NIFI_REGISTRY_DB_USER: 'nifireg'
+      NIFI_REGISTRY_DB_PASS: 'nifireg'
+      NIFI_REGISTRY_FLOW_PROVIDER: {{NIFI_REGISTRY_flow_provider | lower}}
     {% if NIFI_REGISTRY_flow_provider == 'file' | default(false) %}
-    - {{NIFI_REGISTRY_flow_storage_folder_on_dockerhost}}:/opt/nifi-registry/nifi-registry-current/file_flow_storage
+      NIFI_REGISTRY_FLOW_STORAGE_DIR: '/opt/nifi-registry/nifi-registry-current/file-flow_storage'
     {% elif NIFI_REGISTRY_flow_provider == 'git' | default(false) %}
-    - {{NIFI_REGISTRY_flow_storage_folder_on_dockerhost}}:/opt/nifi-registry/nifi-registry-current/git_flow_storage
+      NIFI_REGISTRY_FLOW_STORAGE_DIR: '/opt/nifi-registry/nifi-registry-current/git_flow_storage'
+      NIFI_REGISTRY_GIT_REMOTE: {{NIFI_REGISTRY_git_remote if NIFI_REGISTRY_git_remote is defined and NIFI_REGISTRY_git_remote else omit}}
+      NIFI_REGISTRY_GIT_USER: {{NIFI_REGISTRY_git_user | default(omit) }}
+      NIFI_REGISTRY_GIT_PASSWORD: ${PLATYS_NIFI_REGISTRY_GIT_PASSWORD:-{{NIFI_REGISTRY_git_password}}}
+      NIFI_REGISTRY_GIT_REPO: {{NIFI_REGISTRY_git_repo if NIFI_REGISTRY_git_repo is defined and NIFI_REGISTRY_git_repo else omit}}
     {% endif -%}   {#  NIFI_REGISTRY_flow_provider #}
-  {% endif -%}   {#  NIFI_REGISTRY_volume_map_data #}
-  {%if use_timezone | default(false) %}
-    - "./etc/timezone:/etc/timezone:ro"
-    - "./etc/localtime:/etc/localtime:ro"
-  {% endif -%}   {#  use_timezone #}
-  {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki') | default(false) %}
-  <<: *logging
-  {% endif -%}   {#  logging_driver is defined ... #}
-  restart: {{container_restart_policy}}
+      NIFI_REGISTRY_BUNDLE_PROVIDER: {{NIFI_REGISTRY_bundle_provider | lower}}
+    {% if NIFI_REGISTRY_bundle_provider == 'file' | default(false) %}
+      NIFI_REGISTRY_BUNDLE_STORAGE_DIR: './extension_bundles'
+    {% elif NIFI_REGISTRY_bundle_provider == 's3' | default(false) %}
+      NIFI_REGISTRY_S3_REGION: {{s3DefaultRegion if s3DefaultRegion is defined and s3DefaultRegion else omit}}
+      NIFI_REGISTRY_S3_BUCKET_NAME: {{NIFI_REGISTRY_s3_bucket_name}}
+      NIFI_REGISTRY_S3_KEY_PREFIX: {{NIFI_REGISTRY_s3_key_prefix}}
+      NIFI_REGISTRY_S3_CREDENTIALS_PROVIDER: STATIC
+      NIFI_REGISTRY_S3_ACCESS_KEY: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
+      NIFI_REGISTRY_S3_SECRET_ACCESS_KEY: {{s3SecretAccessKey}}
+      NIFI_REGISTRY_S3_ENDPOINT_URL: '{{s3Endpoint | default(omit) }}'
+    {% endif -%}   {#  NIFI_REGISTRY_bundle_provider #}
+      LOG_LEVEL: INFO
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if NIFI_REGISTRY_run_secure  | default(false) %}
+      - ./{{'custom-conf/nifi/security' if NIFI_REGISTRY_use_custom_certs is defined and NIFI_use_custom_certs else 'security/nifi'}}/keystore.jks:/opt/certs/keystore.jks
+      - ./{{'custom-conf/nifi/security' if NIFI_REGISTRY_use_custom_certs is defined and NIFI_use_custom_certs else 'security/nifi'}}/truststore.jks:/opt/certs/truststore.jks
+    {% endif -%}   {#  NIFI_REGISTRY_run_secure #}
+    {% if NIFI_REGISTRY_volume_map_data %}
+      - ./container-volume/nifi_registry/database:/opt/nifi-registry/nifi-registry-current/database
+    {% endif -%}   {#  NIFI_REGISTRY_volume_map_data #}
+    {% if NIFI_REGISTRY_volume_map_flow_storage %}
+      {% if NIFI_REGISTRY_flow_provider == 'file' | default(false) %}
+      - {{NIFI_REGISTRY_flow_storage_folder_on_dockerhost}}:/opt/nifi-registry/nifi-registry-current/file_flow_storage
+      {% elif NIFI_REGISTRY_flow_provider == 'git' | default(false) %}
+      - {{NIFI_REGISTRY_flow_storage_folder_on_dockerhost}}:/opt/nifi-registry/nifi-registry-current/git_flow_storage
+      {% endif -%}   {#  NIFI_REGISTRY_flow_provider #}
+    {% endif -%}   {#  NIFI_REGISTRY_volume_map_data #}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
 {% endif %}   {#  NIFI_REGISTRY_enable  #}
 
 {%if NIFI_TOOLKIT_enable | default(false) %}
-#  ================================== NiFi Toolkit ========================================== #
-nifi-toolkit:
-  image: apache/nifi-toolkit:{{__NIFI_TOOLKIT_version}}
-  container_name: nifi-toolkit
-  hostname: nifi-toolkit
-  labels:
-    com.platys.name: 'nifi-toolkit'
-  {%if use_timezone | default(false) %}
-  environment:
-    TZ: {{use_timezone}}
-  {% endif -%}   {#  use_timezone #}
-  volumes:
-    - ./data-transfer:/data-transfer
-  {%if use_timezone | default(false) %}
-    - "./etc/timezone:/etc/timezone:ro"
-    - "./etc/localtime:/etc/localtime:ro"
-  {% endif -%}   {#  use_timezone #}
-  {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki') | default(false) %}
-  <<: *logging
-  {% endif -%}   {#  logging_driver is defined ... #}
-  entrypoint:
-    - /bin/sh
-    - -c
-    - |
-      while [ 1 -eq 1 ];do sleep 60;done
-  restart: {{container_restart_policy}}
+  #  ================================== NiFi Toolkit ========================================== #
+  nifi-toolkit:
+    image: apache/nifi-toolkit:{{__NIFI_TOOLKIT_version}}
+    container_name: nifi-toolkit
+    hostname: nifi-toolkit
+    labels:
+      com.platys.name: 'nifi-toolkit'
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        while [ 1 -eq 1 ];do sleep 60;done
+    restart: {{container_restart_policy}}
 {% endif %}   {#  NIFI_TOOLKIT_enable  #}
 
 {%if STREAMPIPES_enable | default(false) %}
