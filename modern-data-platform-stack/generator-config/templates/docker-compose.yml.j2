@@ -15826,13 +15826,21 @@ services:
     hostname: watchtower
     labels:
       com.platys.name: "watchtower"
+      com.platys.webui.title: "Watchtower Prometheus Endpoint"
+      com.platys.webui.url: "http://dataplatform:28314"
+    ports:
+      - 28314:8080
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
     {%if WATCHTOWER_map_config_json %}
-      - ${HOME}/.docker/config.json:/config.json
+      - /custom-conf/watchtower/config.json:/config.json
     {% endif -%}
       - /var/run/docker.sock:/var/run/docker.sock
-    command: --cleanup --label-enable --interval 60 --trace --debug
+    command: --cleanup --label-enable --interval 60 --trace --debug {{WATCHTOWER_watch_containers}}
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki') | default(false) %}
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
