@@ -513,6 +513,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28310 | 9343 | klaw-cluster-api |
 28311 | 3000 | raneto |
 28312 | 3000 | markdown-madness |
+28313 | 80 | kadeck |
 
 ## Ports > 28500
 

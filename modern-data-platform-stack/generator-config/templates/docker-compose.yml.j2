@@ -57,6 +57,7 @@ networks:
 {% set __KAFKA_WEBVIEW_version = KAFKA_WEBVIEW_version | default('latest') -%}
 {% set __KPOW_version = KPOW_version | default('latest') -%}
 {% set __CONDUKTOR_PLATFORM_version = CONDUKTOR_PLATFORM_version | default('latest') -%}
+{% set __KADECK_version = KADECK_version | default('latest') -%}
 {% set __KAFKISTRY_version = KAFKISTRY_version | default('latest') -%}
 {% set __KLAW_version = KLAW_version | default('latest') -%}
 {% set __KAFKA_CONNECTOR_BOARD_version = KAFKA_CONNECTOR_BOARD_version | default('latest') -%}
@@ -603,6 +604,7 @@ networks:
   {% set KAFKA_WEBVIEW_enable = false -%}
   {% set KPOW_enable = false -%}
   {% set CONDUKTOR_PLATFORM_enable = false -%}
+  {% set KADECK_enable = false -%}
   {% set KAFKISTRY_enable = false -%}
   {% set KLAW_enable = false -%}
   {% set KAFKA_CONNECTOR_BOARD_enable = false -%}
@@ -2947,6 +2949,41 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  KAFKA_enable and CONDUKTOR_PLATFORM_enable #}
+
+{% if ((KAFKA_enable or external['KAFKA_enable']) and KADECK_enable) | default(false) %}
+  #  ================================== kadeck ========================================== #
+  kadeck:
+    image: xeotek/kadeck:{{__KADECK_version}}
+    container_name: kadeck
+    hostname: kadeck
+    labels:
+      com.platys.name: "kadeck"
+      com.platys.webui.title: 'Kadeck UI'
+      com.platys.webui.url: "http://dataplatform:28313"
+    ports:
+      - 28313:80
+    environment:
+    {% if (KADECK_edition | lower) == 'free' %}
+      - xeotek_kadeck_free={{KADECK_free_email_address}}
+    {% endif -%}   {#  KADECK_edition = free #}
+    {% if (KADECK_edition | lower) == 'free' %}
+      - xeotek_kadeck_teamid={{KADECK_ee_team_id}}
+      - xeotek_kadeck_secret={{KADECK_ee_secret}}
+    {% endif -%}   {#  KADECK_edition = free #}
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  KAFKA_enable and KADECK_enable #}
 
 {% if ((KAFKA_enable or external['KAFKA_enable']) and KAFKISTRY_enable) | default(false) %}
   #  ================================== Kafkistry ========================================== #

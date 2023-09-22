@@ -19,6 +19,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * FluentD
  * Raneto
  * Markdown Madness
+ * Kadeck
 
 ### New/Updated Cookbook Recipes
 
