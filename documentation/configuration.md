@@ -1176,4 +1176,20 @@ For each service there might be some other settings, such as controlling the num
 | `DOCKER_REGISTRY_volume_map_custom_config`                             	| `false` 	| 1.17.0 	| Volume Map a custom `config.yml` file from `./custom-conf/docker-registry` into the `docker-registry` service.                                                                                                                                            	|
 | [**Watchtower**](./services/watchtower.md) &nbsp;&nbsp;&nbsp;&nbsp;![x86-64](./images/x86-64.png)  ![arm](./images/arm.png)                    	|         	|       	            	
 | `WATCHTOWER_enable` | `false` 	| 1.11.0 	| Generates the watchtower service, a container-based solution for automating Docker container base image updates. |
+| `WATCHTOWER_poll_interval` | `300` 	| 1.11.0 	| Poll interval (in seconds). This value controls how frequently watchtower will poll for new images. |
+| `WATCHTOWER_schedule` | `` 	| 1.17.0 	| [Cron expression](https://pkg.go.dev/github.com/robfig/cron@v1.2.0#hdr-CRON_Expression_Format) in 6 fields (rather than the traditional 5) which defines when and how often to check for new images (e.g. `0 0 4 * * *`). Either `WATCHTOWER_poll_interval ` or a schedule expression can be defined, but not both. |
+| `WATCHTOWER_watch_containers` | `` 	| 1.17.0 	| Containers to watch, a list of container names separated by a space (`kafka-1 kafka-2 kafka-3`). |
+| `WATCHTOWER_cleanup_enable` | `true` 	| 1.17.0 	| Remove old images after updating to prevent accumulation of orphaned images on the system.  |
+| `WATCHTOWER_no_restart_enable` | `false` 	| 1.17.0 	| Do not restart containers after restarting? By default the containers are restarted. Can be useful if containers are started by an external system.  |
+| `WATCHTOWER_rolling_restart_enable` | `false` 	| 1.17.0 	| Restart one image at time instead of stopping and starting all at once. Useful in conjunction with lifecycle hooks to implement zero-downtime deploy.  |
+| `WATCHTOWER_debug_enable` | `false` 	| 1.17.0 	| Enable debug mode with verbose logging?  |
+| `WATCHTOWER_trace_enable` | `false` 	| 1.17.0 	| Enable trace mode with verbose logging?  |
+| `WATCHTOWER_monitor_only_enable` | `false` 	| 1.17.0 	| Monitor only but do not update the containers?  |
+| `WATCHTOWER_label_enable` | `false` 	| 1.17.0 	| Update only containers that have the `com.centurylinklabs.watchtower.enable` label set to true. You can either set that label if it is supported by the `XXXX_watchtower_enable` config setting or by using the `docker-compose.override.yml` file. |
+| `WATCHTOWER_scope` | `` 	| 1.17.0 	| Update containers that have a `com.centurylinklabs.watchtower.scope` label set with the same value as the given argument. You can either set that label if it is supported by the `XXXX_watchtower_scope` config setting or by using the `docker-compose.override.yml` file. See here for [an example](https://containrrr.dev/watchtower/running-multiple-instances/) of this label. |
+| `WATCHTOWER_http_api_update_enable` | `false` 	| 1.17.0 	| Run Watchtower in HTTP API mode only allowing image updates to be triggered by an HTTP request? See [HTTP API](https://containrrr.dev/watchtower/http-api-mode/). |
+| `WATCHTOWER_http_api_token` | `` 	| 1.17.0 	| Sets the authentication token to HTTP API requests. |
+| `WATCHTOWER_http_api_period_polls_enable` | `false` 	| 1.17.0 	| Keep running periodic updates if the HTTP API mode is enabled? Otherwise the HTTP API would prevent periodic polls.  |
+| `WATCHTOWER_http_api_metrics_enable` | `false` 	| 1.17.0 	| Enables a metrics endpoint, exposing prometheus metrics via HTTP. See [Metrics](https://containrrr.dev/watchtower/metrics/). |
+| `WATCHTOWER_timeout` | `10` 	| 1.17.0 	| Timeout (in seconds) before the container is forcefully stopped. |
 | `WATCHTOWER_map_config_json` | `false` 	| 1.15.0 	| Map the `config.json` file from `$HOME/.docker/` folder into the `watchtower` container? |
