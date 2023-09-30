@@ -980,20 +980,20 @@ services:
     {% if KAFKA_jmx_monitoring_prometheus_enable %}
       EXTRA_ARGS: -javaagent:/usr/share/jmx-exporter/jmx_prometheus_javaagent-0.16.1.jar=1234:/usr/share/jmx-exporter/zookeeper.yml
     {% endif -%}
-    {% if KAFKA_sasl_mechanism == 'SCRAM' %}
+    {% if KAFKA_sasl_mechanism == 'SCRAM-SHA-256' %}
       KAFKA_OPTS: -Djava.security.auth.login.config=/etc/kafka/zookeeper_server_jaas.conf
                 -Dzookeeper.authProvider.1=org.apache.zookeeper.server.auth.SASLAuthenticationProvider
                 -Dzookeeper.allowSaslFailedClients=false
                 -Dzookeeper.requireClientAuthScheme=sasl
-    {% endif -%} {# KAFKA_sasl_mechanism = 'SCRAM' #}
+    {% endif -%} {# KAFKA_sasl_mechanism = 'SCRAM-SHA-256' #}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
-    {% if KAFKA_sasl_mechanism == 'SCRAM' %}
+    {% if KAFKA_sasl_mechanism == 'SCRAM-SHA-256' %}
       - ./security/zookeeper/sasl-scram/zookeeper.sasl.jaas.config:/etc/kafka/zookeeper_server_jaas.conf
-    {% endif -%} {# KAFKA_sasl_mechanism = 'SCRAM' #}
+    {% endif -%} {# KAFKA_sasl_mechanism = 'SCRAM-SHA-256' #}
     {% if ZOOKEEPER_volume_map_data %}
       - "./container-volume/zookeeper-{{loop.index}}/data:/var/lib/zookeeper/data"
       - "./container-volume/zookeeper-{{loop.index}}/log:/var/lib/zookeeper/log"
@@ -1123,11 +1123,11 @@ services:
     {% endif %}
       KAFKA_ADVERTISED_LISTENERS: 'LISTENER_INTERNAL://{{serviceName}}:1{{port}},LISTENER_LOCAL://localhost:3{{port}},LISTENER_DOCKERHOST://${DOCKER_HOST_IP:-127.0.0.1}:{{dockerHostPort}},LISTENER_EXTERNAL://${PUBLIC_IP:-127.0.0.1}:{{externalPort}}'
       KAFKA_REPLICA_SELECTOR_CLASS: {{KAFKA_replica_selector_class | default(omit)}}
-    {% if KAFKA_sasl_mechanism == 'SCRAM' %}
-      KAFKA_SASL_ENABLED_MECHANISMS: SCRAM-SHA-256
-      KAFKA_SASL_MECHANISM_INTER_BROKER_PROTOCOL: SCRAM-SHA-256
-      CONFLUENT_METRICS_REPORTER_SASL_MECHANISM: SCRAM-SHA-256
-      CONFLUENT_METRICS_REPORTER_SECURITY_PROTOCOL: SASL_PLAINTEXT
+    {% if KAFKA_sasl_mechanism == 'SCRAM-SHA-256' %}
+      KAFKA_SASL_ENABLED_MECHANISMS: {{KAFKA_sasl_mechanism}}
+      KAFKA_SASL_MECHANISM_INTER_BROKER_PROTOCOL: {{KAFKA_sasl_mechanism}}
+      CONFLUENT_METRICS_REPORTER_SASL_MECHANISM: {{KAFKA_sasl_mechanism}}
+      CONFLUENT_METRICS_REPORTER_SECURITY_PROTOCOL: {{KAFKA_security_protocol}}
       CONFLUENT_METRICS_REPORTER_SASL_JAAS_CONFIG: "{{ns.loginModule}} required \
                 username=\"client\" \
                 password=\"client-secret\";"
@@ -1199,7 +1199,7 @@ services:
     {% if KAFKA_use_kraft_mode %}
       - "./scripts/kafka/kraft/update_run.sh:/tmp/update_run.sh"
     {% endif %}
-    {% if KAFKA_sasl_mechanism == 'SCRAM' %}
+    {% if KAFKA_sasl_mechanism == 'SCRAM-SHA-256' %}
       - ./security/kafka/sasl-scram/kafka.jaas.conf:/etc/kafka/kafka_server_jaas.conf
       - ./security/kafka/sasl-scram/client.properties:/tmp/client.properties
     {% endif %}
@@ -1331,7 +1331,7 @@ services:
       CONNECT_LOG4J_APPENDER_STDOUT_LAYOUT_CONVERSIONPATTERN: "[%d] %p %X{connector.context}%m (%c:%L)%n"
       CONNECT_PLUGIN_PATH: "/usr/share/java,/etc/kafka-connect/addl-plugins,/etc/kafka-connect/cflthub-plugins"
       CONNECT_CONNECTOR_CLIENT_CONFIG_OVERRIDE_POLICY: 'All'
-    {%if KAFKA_sasl_mechanism == 'SCRAM' or (external['KAFKA_enable'] and external['KAFKA_sasl_mechanism'] is defined and external['KAFKA_sasl_mechanism']) | length %}
+    {%if KAFKA_sasl_mechanism == 'SCRAM-SHA-256' or (external['KAFKA_enable'] and external['KAFKA_sasl_mechanism'] is defined and external['KAFKA_sasl_mechanism']) | length %}
       CONNECT_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: "https"
       CONNECT_SECURITY_PROTOCOL: "{{ns.securityProtocol}}"
       CONNECT_SASL_MECHANISM: "{{ns.saslMechanism}}"
