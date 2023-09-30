@@ -778,12 +778,17 @@ networks:
 {#  ================================== Handling external services ========================================== #}
 
 {% set ns = namespace(bootstrapServers='') %}
+{% set ns = namespace(schemaRegistryUrl='') %}
+{% set ns = namespace(securityProtocol='') %}
+{% set ns = namespace(saslMechanism='') %}
 {% set ns = namespace(serviceNames='') %}
 {% set ns = namespace(ports='') %}
 {% set ns = namespace(portsJMX='') %}
 {% set ns = namespace(controllerQuorumVoters='') %}
 {% if (external['KAFKA_enable']) | default(false) %}
     {% set ns.bootstrapServers = external['KAFKA_bootstrap_servers'] %}
+    {% set ns.securityProtocol = external['KAFKA_security_protocol'] %}
+    {% set ns.saslMechanism = external['KAFKA_sasl_mechanism'] %}
     {% set ns.schemaRegistryUrl = external['SCHEMA_REGISTRY_url'] %}
   {% if external['KAFKA_sasl_username'] is defined and external['KAFKA_sasl_username'] | default(false) %}
     {% set kafkaUsername = external['KAFKA_sasl_username'] %}
@@ -793,7 +798,7 @@ networks:
     {% set kafkaPassword = '${PLATYS_KAFKA_PASSWORD:?PLATYS_KAFKA_PASSWORD must be set either in .env or as an environment variable}' %}
     {% set schemaRegistryUsername = '${PLATYS_SCHEMA_REGISTRY_USERNAME:?PLATYS_SCHEMA_REGISTRY_USERNAME must be set either in .env or as an environment variable}' %}
     {% set schemaRegistryPassword = '${PLATYS_SCHEMA_REGISTRY_PASSWORD:?PLATYS_SCHEMA_REGISTRY_PASSWORD must be set either in .env or as an environment variable}' %}
-{% else %}
+{% else %} {# not external['KAFKA_sasl_username'] #}
     {#% for datacenter in (DATA_CENTER.split(',') | default([]) ) %#}
       {% set dcName = dataCenter %}
       {% set basePort = 9092 + dataCenterId * KAFKA_broker_nodes %}
@@ -823,7 +828,9 @@ networks:
           {% set ns.portsJMX = ns.portsJMX ~ ',' ~ portJMX %}
         {% endif %}
       {% endfor %}
-    {#% endfor #}  {# datacenter in (KAFKA_datacenters.split(',') | default([]) ) #}
+      {#% endfor #}  {# datacenter in (KAFKA_datacenters.split(',') | default([]) ) #}
+      {% set ns.securityProtocol = {{KAFKA_security_protocol}} %}
+      {% set ns.saslMechanism = {{KAFKA_sasl_mechanism}} %}
 {% endif %}   {# external['KAFKA_enable'] #}
 
 {% if not (external['SCHEMA_REGISTRY_enable']) | default(false) %}
@@ -1322,21 +1329,21 @@ services:
       CONNECT_LOG4J_APPENDER_STDOUT_LAYOUT_CONVERSIONPATTERN: "[%d] %p %X{connector.context}%m (%c:%L)%n"
       CONNECT_PLUGIN_PATH: "/usr/share/java,/etc/kafka-connect/addl-plugins,/etc/kafka-connect/cflthub-plugins"
       CONNECT_CONNECTOR_CLIENT_CONFIG_OVERRIDE_POLICY: 'All'
-    {%if external['KAFKA_enable'] and external['KAFKA_sasl_mechanism'] is defined and external['KAFKA_sasl_mechanism'] | length %}
+    {%if KAFKA_sasl_mechanism == 'SCRAM' or (external['KAFKA_enable'] and external['KAFKA_sasl_mechanism'] is defined and external['KAFKA_sasl_mechanism']) | length %}
       CONNECT_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: "https"
-      CONNECT_SECURITY_PROTOCOL: "{{external['KAFKA_security_protocol']}}"
-      CONNECT_SASL_MECHANISM: "{{external['KAFKA_sasl_mechanism']}}"
-      CONNECT_SASL_JAAS_CONFIG: "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"{{kafkaUsername}}\" password=\"{{kafkaPassword}}\";"
+      CONNECT_SECURITY_PROTOCOL: "{{ns.securityProtocol}}"
+      CONNECT_SASL_MECHANISM: "{{ns.saslMechanism}}"
+      CONNECT_SASL_JAAS_CONFIG: "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"{{KAFKA_CONNECT_kafka_username}}\" password=\"{{KAFKA_CONNECT_kafka_password}}\";"
       #
       CONNECT_CONSUMER_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: "https"
-      CONNECT_CONSUMER_SECURITY_PROTOCOL: "{{external['KAFKA_security_protocol']}}"
-      CONNECT_CONSUMER_SASL_MECHANISM: "{{external['KAFKA_sasl_mechanism']}}"
-      CONNECT_CONSUMER_SASL_JAAS_CONFIG: "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"{{kafkaUsername}}\" password=\"{{kafkaPassword}}\";"
+      CONNECT_CONSUMER_SECURITY_PROTOCOL: "{{ns.securityProtocol}}"
+      CONNECT_CONSUMER_SASL_MECHANISM: "{{ns.saslMechanism}}"
+      CONNECT_CONSUMER_SASL_JAAS_CONFIG: "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"{{KAFKA_CONNECT_kafka_username}}\" password=\"{{KAFKA_CONNECT_kafka_password}}\";"
       #
       CONNECT_PRODUCER_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: "https"
-      CONNECT_PRODUCER_SECURITY_PROTOCOL: "{{external['KAFKA_security_protocol']}}"
-      CONNECT_PRODUCER_SASL_MECHANISM: "{{external['KAFKA_sasl_mechanism']}}"
-      CONNECT_PRODUCER_SASL_JAAS_CONFIG: "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"{{kafkaUsername}}\" password=\"{{kafkaPassword}}\";"
+      CONNECT_PRODUCER_SECURITY_PROTOCOL: "{{ns.securityProtocol}}"
+      CONNECT_PRODUCER_SASL_MECHANISM: "{{ns.saslMechanism}}"
+      CONNECT_PRODUCER_SASL_JAAS_CONFIG: "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"{{KAFKA_CONNECT_kafka_username}}\" password=\"{{KAFKA_CONNECT_kafka_password}}\";"
     {% endif -%}   {#  external['KAFKA_sasl_mechanism'] is defined #}
       #CLASSPATH: /usr/share/java/monitoring-interceptors/monitoring-interceptors-4.0.0.jar
       AWS_ACCESS_KEY_ID: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
