@@ -779,6 +779,7 @@ networks:
 
 {% set ns = namespace(bootstrapServers='') %}
 {% set ns = namespace(schemaRegistryUrl='') %}
+{% set ns = namespace(secureKafkaEnabled='') %}
 {% set ns = namespace(securityProtocol='') %}
 {% set ns = namespace(saslMechanism='') %}
 {% set ns = namespace(serviceNames='') %}
@@ -787,6 +788,7 @@ networks:
 {% set ns = namespace(controllerQuorumVoters='') %}
 {% if (external['KAFKA_enable']) | default(false) %}
     {% set ns.bootstrapServers = external['KAFKA_bootstrap_servers'] %}
+    {% set ns.secureKafkaEnabled = (external['KAFKA_security_protocol'] != 'PLAINTEXT') %}
     {% set ns.securityProtocol = external['KAFKA_security_protocol'] %}
     {% set ns.saslMechanism = external['KAFKA_sasl_mechanism'] %}
     {% set ns.loginModule = 'org.apache.kafka.common.security.plain.PlainLoginModule' %}
@@ -830,6 +832,7 @@ networks:
         {% endif %}
       {% endfor %}
       {#% endfor #}  {# datacenter in (KAFKA_datacenters.split(',') | default([]) ) #}
+      {% set ns.secureKafkaEnabled = (KAFKA_security_protocol != 'PLAINTEXT') %}
       {% set ns.securityProtocol = KAFKA_security_protocol %}
       {% set ns.saslMechanism = KAFKA_sasl_mechanism %}
       {% set ns.loginModule = 'org.apache.kafka.common.security.scram.ScramLoginModule' %}
@@ -1223,7 +1226,7 @@ services:
 {% if (KAFKA_enable or external['KAFKA_enable']) and KAFKA_INIT_enable | default(false) %}
   #  ================================== Kafka Init ========================================== #
   kafka-init:
-    image: trivadispf/kafka-init:{{__KAFKA_INIT_version}}
+    image: trivadis/kafka-init:{{__KAFKA_INIT_version}}
     container_name: kafka-init
     hostname: kafka-init
     labels:
@@ -1331,7 +1334,7 @@ services:
       CONNECT_LOG4J_APPENDER_STDOUT_LAYOUT_CONVERSIONPATTERN: "[%d] %p %X{connector.context}%m (%c:%L)%n"
       CONNECT_PLUGIN_PATH: "/usr/share/java,/etc/kafka-connect/addl-plugins,/etc/kafka-connect/cflthub-plugins"
       CONNECT_CONNECTOR_CLIENT_CONFIG_OVERRIDE_POLICY: 'All'
-    {%if KAFKA_sasl_mechanism == 'SCRAM-SHA-256' or (external['KAFKA_enable'] and external['KAFKA_sasl_mechanism'] is defined and external['KAFKA_sasl_mechanism']) | length %}
+    {% if ns.secureKafkaEnabled %}
       CONNECT_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: "https"
       CONNECT_SECURITY_PROTOCOL: "{{ns.securityProtocol}}"
       CONNECT_SASL_MECHANISM: "{{ns.saslMechanism}}"
