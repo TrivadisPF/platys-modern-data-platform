@@ -1070,7 +1070,6 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
   {% endif %}   {# ZOOKEEPER_NAVIGATOR_enable #}
-
 {% endif %}   {# zookeeper_enable or KAFKA_enable or ATLAS_enable #}
 
 {% if (KAFKA_enable) | default(false) %}
@@ -1222,6 +1221,25 @@ services:
     restart: {{container_restart_policy}}
   {% endfor %} {# for serviceName in (ns.serviceNames) #}
 {% endif %} {# KAFKA_enable #}
+
+{% if (KAFKA_enable and ns.secureKafkaEnabled) | default(false) %}
+  #  ================================== Kafka Sec(urity) Init ========================================== #
+  kafka-sec-init:
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: "kafka-sec-init"
+    depends_on:
+      - zookeeper-1
+    command: "bash -c 'echo Waiting for Zookeeper to be ready... && \
+                          cub zk-ready zookeeper-1:2181 120 && \
+  {% for user in KAFKA_initial_users.split(",") %}
+                          kafka-configs --zookeeper zookeeper-1:2181 --alter --add-config 'SCRAM-SHA-256=[password={{user.split(":")[1]}}],SCRAM-SHA-512=[password={{user.split(":")[1]}}]' --entity-type users --entity-name {{user.split(":")[0]}} && \
+  {% endfor -%}
+                      '"
+    environment:
+      KAFKA_BROKER_ID: ignored
+      KAFKA_ZOOKEEPER_CONNECT: ignored
+    init: true
+{% endif %} {# KAFKA_enable or external['KAFKA_enable'] and KAFKA_INIT #}
 
 {% if (KAFKA_enable or external['KAFKA_enable']) and KAFKA_INIT_enable | default(false) %}
   #  ================================== Kafka Init ========================================== #
