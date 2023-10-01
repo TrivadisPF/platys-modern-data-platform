@@ -1231,8 +1231,9 @@ services:
       - zookeeper-1
     command: "bash -c 'echo Waiting for Zookeeper to be ready... && \
                           cub zk-ready zookeeper-1:2181 120 && \
-  {%- for user in KAFKA_initial_users.split(",") -%}
+  {% for user in KAFKA_initial_users.split(",") %}
                           kafka-configs --zookeeper zookeeper-1:2181 --alter --add-config 'SCRAM-SHA-256=[password={{user.split(":")[1]}}],SCRAM-SHA-512=[password={{user.split(":")[1]}}]' --entity-type users --entity-name {{user.split(":")[0]}} {{ '&&' if not loop.last }} \
+
   {% endfor %}
                       '"
     environment:
