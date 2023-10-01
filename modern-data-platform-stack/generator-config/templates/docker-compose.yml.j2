@@ -836,6 +836,8 @@ networks:
       {% set ns.securityProtocol = KAFKA_security_protocol %}
       {% set ns.saslMechanism = KAFKA_sasl_mechanism %}
       {% set ns.loginModule = 'org.apache.kafka.common.security.scram.ScramLoginModule' %}
+      {% set ns.kafkaClientUsername = 'client' %}
+      {% set ns.kafkaClientPassword = 'client' %}
 {% endif %}   {# external['KAFKA_enable'] #}
 
 {% if not (external['SCHEMA_REGISTRY_enable']) | default(false) %}
@@ -2577,7 +2579,7 @@ services:
     {% if ns.secureKafkaEnabled %}
                 security.protocol: "{{ns.securityProtocol}}"
                 sasl.mechanism: "{{ns.saslMechanism}}"
-                sasl.jaas.config: "{{ns.loginModule}} required username=\"{{kafkaClientUsername}}\" password=\"{{kafkaClientPassword}}\";"
+                sasl.jaas.config: "{{ns.loginModule}} required username=\"{{ns.kafkaClientUsername}}\" password=\"{{ns.kafkaClientPassword}}\";"
     {% endif -%}   {#  ns.secureKafkaEnabled #}
     {% if (SCHEMA_REGISTRY_enable or external['SCHEMA_REGISTRY_enable']) | default(false) %}
               schema-registry:
@@ -2639,7 +2641,7 @@ services:
     {% if ns.secureKafkaEnabled %}
       KAFKA_CLUSTERS_0_PROPERTIES_SECURITY_PROTOCOL: "{{ns.securityProtocol}}"
       KAFKA_CLUSTERS_0_PROPERTIES_SASL_MECHANISM: "{{ns.saslMechanism}}"
-      KAFKA_CLUSTERS_0_PROPERTIES_SASL_JAAS_CONFIG: "{{ns.loginModule}} required username=\"{{kafkaClientUsername}}\" password=\"{{kafkaClientPassword}}\";"
+      KAFKA_CLUSTERS_0_PROPERTIES_SASL_JAAS_CONFIG: "{{ns.loginModule}} required username=\"{{ns.kafkaClientUsername}}\" password=\"{{ns.kafkaClientPassword}}\";"
       KAFKA_CLUSTERS_0_PROPERTIES_CLIENT_DNS_LOOKUP: use_all_dns_ips
       KAFKA_CLUSTERS_0_DISABLELOGDIRSCOLLECTION: 'true'
     {% endif -%}   {#  external['KAFKA_sasl_mechanism'] is defined #}
