@@ -1798,6 +1798,11 @@ services:
       KAFKA_REST_ACCESS_CONTROL_ALLOW_ORIGIN: "*"
       KAFKA_REST_ACCESS_CONTROL_ALLOW_METHODS: "GET,POST,PUT,DELETE"
       KAFKA_REST_ACCESS_CONTROL_ALLOW_HEADERS: "origin,content-type,accept,authorization"
+    {% if ns.secureKafkaEnabled %}
+      KAFKA_REST_CLIENT_SECURITY_PROTOCOL: "{{ns.securityProtocol}}"
+      KAFKA_REST_CLIENT_SASL_MECHANISM: "{{ns.saslMechanism}}"
+      KAFKA_REST_CLIENT_SASL_JAAS_CONFIG: "{{ns.loginModule}} required username=\"{{KAFKA_RESTPROXY_kafka_username}}\" password=\"{{KAFKA_RESTPROXY_kafka_password}}\";"
+    {% endif -%}   {#  ns.secureKafkaEnabled #}
     {% if KAFKA_jmx_monitoring_prometheus_enable %}
       KAFKAREST_OPTS: -javaagent:/usr/share/jmx-exporter/jmx_prometheus_javaagent-0.16.1.jar=1234:/usr/share/jmx-exporter/confluent_rest.yml
     {% endif -%}
@@ -2470,14 +2475,20 @@ services:
       SCHEMAREGISTRY_AUTH: '{{schemaRegistryUsername}}:{{schemaRegistryPassword}}'
       {% endif %}
       MESSAGE_FORMAT: AVRO
-      JVM_OPTS: "-Xms32M -Xmx64M"
+      JVM_OPTS: "-Xms32M -Xmx64M -Xss180K -XX:-TieredCompilation -XX:+UseStringDeduplication -noverify"
       SERVER_SERVLET_CONTEXTPATH: "/"
       SERVER_PORT: 9020
+    {% if ns.secureKafkaEnabled %}
+      KAFKA_PROPERTIES_FILE: "/tmp/client.properties"
+    {% endif -%}   {#  ns.secureKafkaEnabled #}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
+    {% if ns.secureKafkaEnabled %}
+      - ./security/kafka/sasl-scram/client.properties:/tmp/client.properties
+    {% endif %}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -2566,7 +2577,7 @@ services:
     {% if ns.secureKafkaEnabled %}
                 security.protocol: "{{ns.securityProtocol}}"
                 sasl.mechanism: "{{ns.saslMechanism}}"
-                sasl.jaas.config: "{{ns.loginModule}} required username=\"broker\" password=\"broker\";"
+                sasl.jaas.config: "{{ns.loginModule}} required username=\"{{kafkaClientUsername}}\" password=\"{{kafkaClientPassword}}\";"
     {% endif -%}   {#  ns.secureKafkaEnabled #}
     {% if (SCHEMA_REGISTRY_enable or external['SCHEMA_REGISTRY_enable']) | default(false) %}
               schema-registry:
@@ -2625,10 +2636,10 @@ services:
       KAFKA_CLUSTERS_0_JMXPORT: '9992'
     {% endif -%}   {#  external['KAFKA_enable'] #}
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: '{{ns.bootstrapServers}}'
-    {% if external['KAFKA_enable'] and external['KAFKA_sasl_mechanism'] is defined and external['KAFKA_sasl_mechanism'] | length %}
-      KAFKA_CLUSTERS_0_PROPERTIES_SECURITY_PROTOCOL: "{{external['KAFKA_security_protocol']}}"
-      KAFKA_CLUSTERS_0_PROPERTIES_SASL_MECHANISM: "{{external['KAFKA_sasl_mechanism']}}"
-      KAFKA_CLUSTERS_0_PROPERTIES_SASL_JAAS_CONFIG: "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"{{kafkaUsername}}\" password=\"{{kafkaPassword}}\";"
+    {% if ns.secureKafkaEnabled %}
+      KAFKA_CLUSTERS_0_PROPERTIES_SECURITY_PROTOCOL: "{{ns.securityProtocol}}"
+      KAFKA_CLUSTERS_0_PROPERTIES_SASL_MECHANISM: "{{ns.saslMechanism}}"
+      KAFKA_CLUSTERS_0_PROPERTIES_SASL_JAAS_CONFIG: "{{ns.loginModule}} required username=\"{{kafkaClientUsername}}\" password=\"{{kafkaClientPassword}}\";"
       KAFKA_CLUSTERS_0_PROPERTIES_CLIENT_DNS_LOOKUP: use_all_dns_ips
       KAFKA_CLUSTERS_0_DISABLELOGDIRSCOLLECTION: 'true'
     {% endif -%}   {#  external['KAFKA_sasl_mechanism'] is defined #}
