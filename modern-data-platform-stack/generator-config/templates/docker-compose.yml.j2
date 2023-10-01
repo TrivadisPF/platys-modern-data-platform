@@ -1368,7 +1368,7 @@ services:
       CONNECT_PRODUCER_SECURITY_PROTOCOL: "{{ns.securityProtocol}}"
       CONNECT_PRODUCER_SASL_MECHANISM: "{{ns.saslMechanism}}"
       CONNECT_PRODUCER_SASL_JAAS_CONFIG: "{{ns.loginModule}} required username=\"{{KAFKA_CONNECT_kafka_username}}\" password=\"{{KAFKA_CONNECT_kafka_password}}\";"
-    {% endif -%}   {#  external['KAFKA_sasl_mechanism'] is defined #}
+    {% endif -%}   {#  ns.secureKafkaEnabled #}
       #CLASSPATH: /usr/share/java/monitoring-interceptors/monitoring-interceptors-4.0.0.jar
       AWS_ACCESS_KEY_ID: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
       AWS_SECRET_ACCESS_KEY: {{s3SecretAccessKey}}
@@ -1487,12 +1487,20 @@ services:
       OTEL_RESOURCE_ATTRIBUTES: 'service.name=ksqldb'
       KSQL_OPTS: '-javaagent:/otel/opentelemetry-javaagent.jar -Dotel.exporter.otlp.endpoint=http://otel-collector:4317'
     {% endif -%}   {#  OTEL_COLLECTOR_enable #}
-    {% if external['KAFKA_enable'] and external['KAFKA_sasl_mechanism'] is defined and external['KAFKA_sasl_mechanism'] | length %}
+    {% if ns.secureKafkaEnabled %}
       KSQL_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: "https"
-      KSQL_SECURITY_PROTOCOL: "{{external['KAFKA_security_protocol']}}"
-      KSQL_SASL_MECHANISM: "{{external['KAFKA_sasl_mechanism']}}"
-      KSQL_SASL_JAAS_CONFIG: "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"{{kafkaUsername}}\" password=\"{{kafkaPassword}}\";"
-    {% endif -%}   {#  external['KAFKA_sasl_mechanism'] is defined #}
+      KSQL_SECURITY_PROTOCOL: "{{ns.securityProtocol}}"
+      KSQL_SASL_MECHANISM: "{{ns.saslMechanism}}"
+      KSQL_SASL_JAAS_CONFIG: "{{ns.loginModule}} required username=\"{{KSQLDB_kafka_username}}\" password=\"{{KSQLDB_kafka_password}}\";"
+      # producer
+      KSQL_PRODUCER_CONFLUENT_MONITORING_INTERCEPTOR_SECURITY_PROTOCOL: "{{ns.securityProtocol}}"
+      KSQL_PRODUCER_CONFLUENT_MONITORING_INTERCEPTOR_SASL_JAAS_CONFIG: "{{ns.loginModule} required username=\"{{KSQLDB_kafka_username}}\" password=\"{{KSQLDB_kafka_password}}\";"
+      KSQL_PRODUCER_CONFLUENT_MONITORING_INTERCEPTOR_SASL_MECHANISM: SCRAM-SHA-256
+      # consumer
+      KSQL_CONSUMER_CONFLUENT_MONITORING_INTERCEPTOR_SECURITY_PROTOCOL: "{{ns.securityProtocol}}"
+      KSQL_CONSUMER_CONFLUENT_MONITORING_INTERCEPTOR_SASL_JAAS_CONFIG: "{{ns.loginModule} required username=\"{{KSQLDB_kafka_username}}\" password=\"{{KSQLDB_kafka_password}}\";"
+      KSQL_CONSUMER_CONFLUENT_MONITORING_INTERCEPTOR_SASL_MECHANISM: SCRAM-SHA-256
+    {% endif -%}   {#  ns.secureKafkaEnabled #}
 
     {% if ( KAFKA_CONNECT_enable ) | default(false) %}
       KSQL_KSQL_CONNECT_URL: {{ns1.connectServersInternalUrl.split(',')[0]}}
@@ -1903,6 +1911,11 @@ services:
       SCHEMA_REGISTRY_ACCESS_CONTROL_ALLOW_METHODS: 'GET,POST,PUT,OPTIONS'
       SCHEMA_REGISTRY_LOG4J_ROOT_LOGLEVEL: "{{CONFLUENT_SCHEMA_REGISTRY_log4j_root_loglevel}}"
       SCHEMA_REGISTRY_DEBUG: "{{CONFLUENT_SCHEMA_REGISTRY_debug}}"
+    {% if ns.secureKafkaEnabled %}
+      SCHEMA_REGISTRY_KAFKASTORE_SECURITY_PROTOCOL: "{{ns.securityProtocol}}"
+      SCHEMA_REGISTRY_KAFKASTORE_SASL_MECHANISM: "{{ns.saslMechanism}}"
+      SCHEMA_REGISTRY_KAFKASTORE_SASL_JAAS_CONFIG: "{{ns.loginModule}} required username=\"{{SCHEMA_REGISTRY_kafka_username}}\" password=\"{{SCHEMA_REGISTRY_kafka_password}}\";"
+    {% endif -%}   {#  ns.secureKafkaEnabled #}
     {% if OTEL_COLLECTOR_enable | default(false) %}
       OTEL_RESOURCE_ATTRIBUTES: 'service.name=schema-registry'
       SCHEMA_REGISTRY_OPTS: '-javaagent:/otel/opentelemetry-javaagent.jar -Dotel.exporter.otlp.endpoint=http://otel-collector:4317'
