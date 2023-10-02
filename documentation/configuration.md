@@ -25,8 +25,10 @@ There are some overall settings which will control the behaviour for all or a gr
 |------------------------------------------------	|:-------:	|-------	|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------	|
 | `KAFKA_enable`                             	| `false` | 1.9.0 | Use external Kafka service, such as Confluent Cloud. Specify the cluster through the `KAFKA_bootstrap_servers` property.  |  
 | `KAFKA_bootstrap_servers`                             	| `` 	| 1.9.0 | A comma-separated list of host and port pairs that addresses the external Kafka brokers |  
-| `KAFKA_username`                             	| `` 	| 1.9.0 | Username to authenticate against the external Kafka cluster |  
-| `KAFKA_password`                             	| `` 	| 1.9.0 | Password to authenticate against the external Kafka cluster |  
+| `KAFKA_security_protocol`                             	| `` 	| 1.17.0 | The security protocol to use to connect to the external Kafka cluster. Either `PLAINTEXT`, `SASL_PLAINTEXT`, `SASL_SSL` or `SSL`. |  
+| `KAFKA_sasl_mechanism`                             	| `` 	| 1.17.0 | The SASL machanism to use to connect to the external Kafka cluster. |  
+| `KAFKA_sasl_username`                             	| `` 	| 1.17.0 | Username to use to authenticate against the external Kafka cluster. Can be left empty and defined using the `PLATYS_EXTERNAL_KAFKA_USERNAME` environment variable (e.g. in `.env`) |  
+| `KAFKA_sasl_password`                             	| `` 	| 1.17.0 | Password to use to authenticate against the external Kafka cluster. Can be left empty and defined using the `PLATYS_EXTERNAL_KAFKA_PASSWORD` environment variable (e.g. in `.env`) |  
 | `SCHEMA_REGISTRY_enable`                             	| `false` 	| 1.9.0 |  Use an external schema registry |  
 | `SCHEMA_REGISTRY_url`                             	| `` 	| 1.9.0 | The URL of the external schema registry |  
 | `S3_enable`                             	| `false` | 1.9.0 | Use external S3 service, such as AWS S3 cloud service or an on-premises S3 appliance. You have to configure two environment variables, `PLATYS_AWS_ACCESS_KEY` with the access key and `PLATYS_AWS_SECRET_ACCESS_KEY` with the access secret. This can be done on the on the docker host or in the `.env` file in the platform home (same folder where the `docker-compose.yml` is located). |  
