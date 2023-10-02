@@ -3359,11 +3359,17 @@ services:
       - 28256:9000
     environment:
       KAFKA_ENDPOINT: '{{ns.bootstrapServers}}'
+    {% if ns.secureKafkaEnabled %}
+      KAFKA_COMMAND_CONFIG: "/auth.properties"
+    {% endif -%}   {#  ns.secureKafkaEnabled #}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
+    {% if ns.secureKafkaEnabled %}
+      - ./security/remora/auth.properties:/auth.properties
+    {% endif -%}   {#  ns.secureKafkaEnabled #}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
