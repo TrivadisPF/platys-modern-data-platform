@@ -12476,6 +12476,11 @@ services:
       ADLS_ACCESS_KEY: {{adlsAccessKey}}
   {% endif -%}   {#  external['ADLS_enable'] #}
   {% if TRINO_kafka_table_names is defined and TRINO_kafka_table_names|length and (KAFKA_enable or external['KAFKA_enable']) | default(false)  %}
+      KAFKA_NODES: {{ns.bootstrapServers}}
+    {% if ns.secureKafkaEnabled %}
+      KAFKA_SECURITY_PROTOCOL: '{{ns.securityProtocol}}'
+      KAFKA_CONFIG_RESOURCES: '{{trino_etc_dir}}/kafka-configuration.properties'
+    {% endif -%}   {#  secureKafkaEnabled #}
       KAFKA_TABLE_NAMES: {{TRINO_kafka_table_names}}
       KAFKA_DEFAULT_SCHEMA: {{TRINO_kafka_default_schema}}
       KAFKA_TABLE_DESCRIPTOR_DIR: '{{trino_etc_dir}}/kafka/'
@@ -12532,6 +12537,9 @@ services:
   {% if TRINO_kafka_table_names is defined and TRINO_kafka_table_names|length and (KAFKA_enable or external['KAFKA_enable']) | default(false)  %}
       - './conf/{{conf_dir}}/catalog/kafka.properties:{{trino_etc_dir}}/catalog/kafka.properties'
       - './conf/{{conf_dir}}/kafka/:{{trino_etc_dir}}/kafka/'
+    {% if ns.secureKafkaEnabled %}
+      - './security/kafka/sasl-scram/client.properties:{{trino_etc_dir}}/kafka-configuration.properties'
+    {% endif %}
   {% endif %}
   {%if HADOOP_enable | default(false) %}
       - './conf/{{conf_dir}}/catalog/hdfs.properties:{{trino_etc_dir}}/catalog/hdfs.properties'
@@ -12641,6 +12649,11 @@ services:
       ADLS_ACCESS_KEY: {{adlsAccessKey}}
   {% endif -%}   {#  external['ADLS_enable'] #}
   {% if (KAFKA_enable or external['KAFKA_enable']) | default(false) %}
+      KAFKA_NODES: {{ns.bootstrapServers}}
+    {% if ns.secureKafkaEnabled %}
+      KAFKA_SECURITY_PROTOCOL: '{{ns.securityProtocol}}'
+      KAFKA_CONFIG_RESOURCES: '{{trino_etc_dir}}/kafka-configuration.properties'
+    {% endif -%}   {#  secureKafkaEnabled #}
       KAFKA_TABLE_NAMES: {{TRINO_kafka_table_names}}
       KAFKA_DEFAULT_SCHEMA: {{TRINO_kafka_default_schema}}
       KAFKA_TABLE_DESCRIPTOR_DIR: '{{trino_etc_dir}}/kafka/'
@@ -12687,6 +12700,9 @@ services:
   {%if KAFKA_enable or external['KAFKA_enable'] | default(false) %}
       - './conf/{{conf_dir}}/catalog/kafka.properties:{{trino_etc_dir}}/catalog/kafka.properties'
       - './conf/{{conf_dir}}/kafka/:{{trino_etc_dir}}/kafka/'
+    {% if ns.secureKafkaEnabled %}
+      - './security/kafka/sasl-scram/client.properties:{{trino_etc_dir}}/kafka-configuration.properties'
+    {% endif %}
   {% endif %}
   {%if HADOOP_enable | default(false) %}
       - './conf/{{conf_dir}}/catalog/hdfs.properties:{{trino_etc_dir}}/catalog/hdfs.properties'
@@ -13684,6 +13700,13 @@ services:
     {% if (KAFKA_enable or external['KAFKA_enable']) and MINIO_audit_kafka_enable | default(false) %}
       MINIO_AUDIT_KAFKA_ENABLE: 'on'
       MINIO_AUDIT_KAFKA_BROKERS: '{{ns.bootstrapServers}}'
+      MINIO_AUDIT_KAFKA_SASL
+    {% if ns.secureKafkaEnabled %}
+      MINIO_AUDIT_KAFKA_SASL: 'on'
+      MINIO_AUDIT_KAFKA_SASL_MECHANISM: '{{ns.saslMechanism}}'
+      MINIO_AUDIT_KAFKA_SASL_USERNAME: '{{KAFKA_RESTPROXY_kafka_username if KAFKA_RESTPROXY_kafka_username is defined and KAFKA_RESTPROXY_kafka_username | length else ns.kafkaClientUsername}}'
+      MINIO_AUDIT_KAFKA_SASL_PASSWORD: '{{KAFKA_RESTPROXY_kafka_password if KAFKA_RESTPROXY_kafka_password is defined and KAFKA_RESTPROXY_kafka_password | length else ns.kafkaClientPassword}}'
+    {% endif -%}   {#  ns.secureKafkaEnabled #}
       MINIO_AUDIT_KAFKA_TOPIC: '{{MINIO_audit_kafka_topic}}'
     {% endif -%}   {#  MINIO_browser_enable #}
     {%if not MINIO_browser_enable | default(false) %}
