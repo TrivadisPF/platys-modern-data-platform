@@ -29,13 +29,13 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
 
  * Update `zeebe` to `8.2.5`
  * Update `druid` to `26.0.0`
- * Update `trino` to `426`
- * Update `starbrustdata` to `420-e`
+ * Update `trino` to `427`
+ * Update `starbrustdata` to `426-e`
  * Update `jikkou` to `0.21.0`
  * Update `minio` to `RELEASE.2023-08-16T20-17-30Z`
  * Update `nifi` to `1.23.2`
  * Update `ksqldb` to `0.29.0`
- * Update `datahub` to `v0.10.5`
+ * Update `datahub` to `v0.11.0`
  * Update `Confluent Platform` to `7.5.0`
  * Update `portainer-ce` to `2.18.4-alpine`
  * Update `activemq-classic` to `5.18.2`
