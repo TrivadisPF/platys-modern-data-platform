@@ -775,7 +775,7 @@ networks:
   {% set SWAGGER_UI_enable = false -%}
 {% endif %}   {# PLATFORM_ARM_enable #}
 
-{#  ================================== Handling external services ========================================== #}
+{#  ================================== Kafka Settings ========================================== #}
 
 {% set ns = namespace(bootstrapServers='') %}
 {% set ns = namespace(schemaRegistryUrl='') %}
@@ -792,13 +792,18 @@ networks:
     {% set ns.securityProtocol = external['KAFKA_security_protocol'] %}
     {% set ns.saslMechanism = external['KAFKA_sasl_mechanism'] %}
     {% set ns.loginModule = 'org.apache.kafka.common.security.plain.PlainLoginModule' %}
-    {% set ns.schemaRegistryUrl = external['SCHEMA_REGISTRY_url'] %}
   {% if external['KAFKA_sasl_username'] is defined and external['KAFKA_sasl_username'] | default(false) %}
-    {% set kafkaUsername = external['KAFKA_sasl_username'] %}
+    {% set ns.kafkaClientUsername = external['KAFKA_sasl_username'] %}
   {% else %}
-    {% set kafkaUsername = '${PLATYS_KAFKA_USERNAME:?PLATYS_KAFKA_USERNAME must be set either in .env or as an environment variable}' %}
+    {% set ns.kafkaClientUsername = '${PLATYS_KAFKA_USERNAME:?PLATYS_KAFKA_USERNAME must be set either in .env or as an environment variable}' %}
   {% endif %}  {# KAFKA_sasl_username #}
-    {% set kafkaPassword = '${PLATYS_KAFKA_PASSWORD:?PLATYS_KAFKA_PASSWORD must be set either in .env or as an environment variable}' %}
+  {% if external['KAFKA_sasl_password'] is defined and external['KAFKA_sasl_password'] | default(false) %}
+    {% set ns.kafkaClientUsername = external['KAFKA_sasl_password'] %}
+  {% else %}
+    {% set ns.kafkaClientPassword = '${PLATYS_KAFKA_PASSWORD:?PLATYS_KAFKA_PASSWORD must be set either in .env or as an environment variable}' %}
+  {% endif %}  {# KAFKA_sasl_password #}
+
+    {% set ns.schemaRegistryUrl = external['SCHEMA_REGISTRY_url'] %}
     {% set schemaRegistryUsername = '${PLATYS_SCHEMA_REGISTRY_USERNAME:?PLATYS_SCHEMA_REGISTRY_USERNAME must be set either in .env or as an environment variable}' %}
     {% set schemaRegistryPassword = '${PLATYS_SCHEMA_REGISTRY_PASSWORD:?PLATYS_SCHEMA_REGISTRY_PASSWORD must be set either in .env or as an environment variable}' %}
 {% else %} {# not external['KAFKA_sasl_username'] #}
@@ -836,9 +841,11 @@ networks:
       {% set ns.securityProtocol = KAFKA_security_protocol %}
       {% set ns.saslMechanism = KAFKA_sasl_mechanism %}
       {% set ns.loginModule = 'org.apache.kafka.common.security.scram.ScramLoginModule' %}
-      {% set ns.kafkaClientUsername = 'client' %}
-      {% set ns.kafkaClientPassword = 'client-secret' %}
+      {% set ns.kafkaClientUsername = {{KAFKA_client_username}} %}
+      {% set ns.kafkaClientPassword = {{KAFKA_client_password}} %}
 {% endif %}   {# external['KAFKA_enable'] #}
+
+{#  ================================== Schema Registry Settings ========================================== #}
 
 {% if not (external['SCHEMA_REGISTRY_enable']) | default(false) %}
     {% if SCHEMA_REGISTRY_flavour is defined %}
@@ -863,44 +870,6 @@ networks:
 {% else -%}
     {% set ns.schemaRegistryUrlExternal = external['SCHEMA_REGISTRY_url'] %}
 {% endif %}   {# not external['SCHEMA_REGISTRY_enable'] #}
-
-{% if (external['S3_enable']) | default(false) %}
-  {% if (external['S3_endpoint'] != None) | default(false) %}
-    {% set s3EndpointStorage = external['S3_endpoint'] %}
-  {% endif %}
-    {% set s3EndpointStorage = 's3.amazonaws.com' %}
-    {% set s3PathStyleAccess = external['S3_path_style_access'] %}
-    {% set s3AccessKey = '${PLATYS_AWS_ACCESS_KEY:?PLATYS_AWS_ACCESS_KEY must be set either in .env or as an environment variable}' %}
-    {% set s3SecretAccessKey = '${PLATYS_AWS_SECRET_ACCESS_KEY:?PLATYS_AWS_SECRET_ACCESS_KEY must be set either in .env or as an environment variable}' %}
-    {% set s3DefaultRegion = external['S3_default_region'] %}
-    {% set s3AdminBucketName = external['S3_admin_bucket_name'] %}
-{% else %}
-    {% set s3EndpointStorage = 'http://minio-1:9000' %}
-    {% set s3PathStyleAccess = 'true' %}
-    {% set s3AccessKey = MINIO_access_key %}
-    {% set s3SecretAccessKey = MINIO_secret_key %}
-    {% set s3DefaultRegion = 'us-east-1' %}
-    {% set s3AdminBucketName = 'admin-bucket' %}
-{% endif %}   {# external['s3Endpoint'] #}
-
-{% if LAKEFS_enable and LAKEFS_blockstore_type == 's3' | default(false) %}
-    {% set s3Endpoint = 'http://lakefs:8000' %}
-{% else %}
-    {% set s3Endpoint = s3EndpointStorage %}
-{% endif %}   {# LAKEFS_enable #}
-
-{% if (external['ADLS_enable']) | default(false) %}
-  {% if (external['ADLS_storage_account'] != None) | default(false) %}
-    {% set adlsStorageAccount = external['ADLS_storage_account'] %}
-  {% endif %}
-  {% set adlsAccessKey = '${PLATYS_AZURE_ADLS_ACCESS_KEY:?PLATYS_AZURE_ADLS_ACCESS_KEY must be set either in .env or as an environment variable}' %}
-{% endif %}   {# external['s3Endpoint'] #}
-
-{% if (external['DATAHUB_enable']) | default(false) %}
-    {% set ns.gmsUrl = external['DATAHUB_gms_url'] %}
-{% else %}
-    {% set ns.gmsUrl = 'http://datahub-gms:8080' %}
-{% endif %}   {# external['DATAHUB_enable'] #}
 
 {#  ================================== Kafka Connect Settings ========================================== #}
 
@@ -934,6 +903,50 @@ networks:
     {% endif %}
   {% endfor %}
 {% endif %}   {# KAFKA_CONNECT_enable or KAFKA_KSQLDB_use_embedded_connect #}
+
+{#  ================================== S3 Settings ========================================== #}
+
+{% if (external['S3_enable']) | default(false) %}
+  {% if (external['S3_endpoint'] != None) | default(false) %}
+    {% set s3EndpointStorage = external['S3_endpoint'] %}
+  {% endif %}
+    {% set s3EndpointStorage = 's3.amazonaws.com' %}
+    {% set s3PathStyleAccess = external['S3_path_style_access'] %}
+    {% set s3AccessKey = '${PLATYS_AWS_ACCESS_KEY:?PLATYS_AWS_ACCESS_KEY must be set either in .env or as an environment variable}' %}
+    {% set s3SecretAccessKey = '${PLATYS_AWS_SECRET_ACCESS_KEY:?PLATYS_AWS_SECRET_ACCESS_KEY must be set either in .env or as an environment variable}' %}
+    {% set s3DefaultRegion = external['S3_default_region'] %}
+    {% set s3AdminBucketName = external['S3_admin_bucket_name'] %}
+{% else %}
+    {% set s3EndpointStorage = 'http://minio-1:9000' %}
+    {% set s3PathStyleAccess = 'true' %}
+    {% set s3AccessKey = MINIO_access_key %}
+    {% set s3SecretAccessKey = MINIO_secret_key %}
+    {% set s3DefaultRegion = 'us-east-1' %}
+    {% set s3AdminBucketName = 'admin-bucket' %}
+{% endif %}   {# external['s3Endpoint'] #}
+
+{% if LAKEFS_enable and LAKEFS_blockstore_type == 's3' | default(false) %}
+    {% set s3Endpoint = 'http://lakefs:8000' %}
+{% else %}
+    {% set s3Endpoint = s3EndpointStorage %}
+{% endif %}   {# LAKEFS_enable #}
+
+{#  ================================== ADLS Settings ========================================== #}
+
+{% if (external['ADLS_enable']) | default(false) %}
+  {% if (external['ADLS_storage_account'] != None) | default(false) %}
+    {% set adlsStorageAccount = external['ADLS_storage_account'] %}
+  {% endif %}
+  {% set adlsAccessKey = '${PLATYS_AZURE_ADLS_ACCESS_KEY:?PLATYS_AZURE_ADLS_ACCESS_KEY must be set either in .env or as an environment variable}' %}
+{% endif %}   {# external['s3Endpoint'] #}
+
+{#  ================================== Datahub Settings ========================================== #}
+
+{% if (external['DATAHUB_enable']) | default(false) %}
+    {% set ns.gmsUrl = external['DATAHUB_gms_url'] %}
+{% else %}
+    {% set ns.gmsUrl = 'http://datahub-gms:8080' %}
+{% endif %}   {# external['DATAHUB_enable'] #}
 
 {#  ================================== Extension Fields ========================================== #}
 
@@ -1287,7 +1300,7 @@ services:
     {% if external['KAFKA_enable'] and external['KAFKA_sasl_mechanism'] is defined and external['KAFKA_sasl_mechanism'] | length %}
       SECURITY_PROTOCOL: "{{ns.securityProtocol}}"
       SASL_MECHANISM: "{{ns.saslMechanism}}"
-      SASL_JAAS_CONFIG: "{{ns.loginModule}} required username=\"{{kafkaUsername}}\" password=\"{{kafkaPassword}}\";"
+      SASL_JAAS_CONFIG: "{{ns.loginModule}} required username=\"{{ns.kafkaClientUsername}}\" password=\"{{ns.kafkaClientPassword}}\";"
     {% endif -%}   {#  KAFKA_sasl_mechanism #}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
@@ -2723,8 +2736,8 @@ services:
     {% if external['KAFKA_enable'] and external['KAFKA_sasl_mechanism'] is defined and external['KAFKA_sasl_mechanism'] | length %}
       KAFKA_TLS_ENABLED: 'true'
       KAFKA_SASL_ENABLED: 'true'
-      KAFKA_SASL_USERNAME: {{kafkaUsername}}
-      KAFKA_SASL_PASSWORD: {{kafkaPassword}}
+      KAFKA_SASL_USERNAME: {{ns.kafkaClientUsername}}
+      KAFKA_SASL_PASSWORD: {{ns.kafkaClientPassword}}
     {% endif -%}   {#  external['KAFKA_sasl_mechanism'] is defined #}
     {% if ( SCHEMA_REGISTRY_enable or external['SCHEMA_REGISTRY_enable']) | default(false) %}
       KAFKA_SCHEMAREGISTRY_ENABLED: 'True'
@@ -2773,8 +2786,8 @@ services:
       KAFKA_TLS_ENABLED: 'true'
       KAFKA_SASL_ENABLED: 'true'
       KAFKA_SASL_MECHANISM: 'SCRAM-SHA-256'
-      KAFKA_SASL_USERNAME: {{kafkaUsername}}
-      KAFKA_SASL_PASSWORD: {{kafkaPassword}}
+      KAFKA_SASL_USERNAME: {{ns.kafkaClientUsername}}
+      KAFKA_SASL_PASSWORD: {{ns.kafkaClientPassword}}
     {% endif -%}   {#  external['KAFKA_sasl_mechanism'] is defined #}
     {% if ( SCHEMA_REGISTRY_enable or external['SCHEMA_REGISTRY_enable']) | default(false) %}
       KAFKA_SCHEMAREGISTRY_ENABLED: 'True'
