@@ -2717,7 +2717,7 @@ services:
       KAFKA_CLUSTERS_0_PROPERTIES_SASL_JAAS_CONFIG: "{{ns.loginModule}} required username=\"{{ns.kafkaClientUsername}}\" password=\"{{ns.kafkaClientPassword}}\";"
       KAFKA_CLUSTERS_0_PROPERTIES_CLIENT_DNS_LOOKUP: use_all_dns_ips
       KAFKA_CLUSTERS_0_DISABLELOGDIRSCOLLECTION: 'true'
-    {% endif -%}   {#  external['KAFKA_sasl_mechanism'] is defined #}
+    {% endif -%}   {#  ns.secureKafkaEnabled #}
     {% if (SCHEMA_REGISTRY_enable or external['SCHEMA_REGISTRY_enable']) | default(false) %}
       KAFKA_CLUSTERS_0_SCHEMAREGISTRY: '{{ns.schemaRegistryUrlExternal}}'
       {% if schemaRegistryUsername is defined and schemaRegistryUsername|length %}
@@ -2793,12 +2793,13 @@ services:
     environment:
       # config according to: https://github.com/cloudhut/kowl/blob/master/docs/config/kowl.yaml
       KAFKA_BROKERS: '{{ns.bootstrapServers}}'
-    {% if external['KAFKA_enable'] and external['KAFKA_sasl_mechanism'] is defined and external['KAFKA_sasl_mechanism'] | length %}
+    {% if ns.secureKafkaEnabled %}
       KAFKA_TLS_ENABLED: 'true'
       KAFKA_SASL_ENABLED: 'true'
+      KAFKA_SASL_MECHANISM: '{{ns.saslMechanism}}'
       KAFKA_SASL_USERNAME: {{ns.kafkaClientUsername}}
       KAFKA_SASL_PASSWORD: {{ns.kafkaClientPassword}}
-    {% endif -%}   {#  external['KAFKA_sasl_mechanism'] is defined #}
+    {% endif -%}   {#  secureKafkaEnabled #}
     {% if ( SCHEMA_REGISTRY_enable or external['SCHEMA_REGISTRY_enable']) | default(false) %}
       KAFKA_SCHEMAREGISTRY_ENABLED: 'True'
       KAFKA_SCHEMAREGISTRY_URLS: '{{ns.schemaRegistryUrlExternal}}'
@@ -2842,13 +2843,13 @@ services:
     environment:
       # config according to: https://github.com/cloudhut/kowl/blob/master/docs/config/kowl.yaml
       KAFKA_BROKERS: '{{ns.bootstrapServers}}'
-    {% if external['KAFKA_enable'] and external['KAFKA_sasl_mechanism'] is defined and external['KAFKA_sasl_mechanism'] | length %}
+    {% if ns.secureKafkaEnabled %}
       KAFKA_TLS_ENABLED: 'true'
       KAFKA_SASL_ENABLED: 'true'
-      KAFKA_SASL_MECHANISM: 'SCRAM-SHA-256'
+      KAFKA_SASL_MECHANISM: '{{ns.saslMechanism}}'
       KAFKA_SASL_USERNAME: {{ns.kafkaClientUsername}}
       KAFKA_SASL_PASSWORD: {{ns.kafkaClientPassword}}
-    {% endif -%}   {#  external['KAFKA_sasl_mechanism'] is defined #}
+    {% endif -%}   {#  ns.secureKafkaEnabled #}
     {% if ( SCHEMA_REGISTRY_enable or external['SCHEMA_REGISTRY_enable']) | default(false) %}
       KAFKA_SCHEMAREGISTRY_ENABLED: 'True'
       KAFKA_SCHEMAREGISTRY_URLS: '{{ns.schemaRegistryUrlExternal}}'
@@ -2897,6 +2898,9 @@ services:
       - 28253:8080
     environment:
       bootstrapServers: '{{ns.bootstrapServers}}'
+    {% if (SCHEMA_REGISTRY_enable or external['SCHEMA_REGISTRY_enable']) | default(false) %}
+      schemaRegistryUrl: '{{ns.schemaRegistryUrl}}'
+    {% endif -%}   {#  SCHEMA_REGISTRY_enable #}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -2990,6 +2994,11 @@ services:
       - PORT=3000
       - ENVIRONMENT_NAME=platys-stack
       - BOOTSTRAP={{ns.bootstrapServers}}
+    {% if ns.secureKafkaEnabled %}
+      - SECURITY_PROTOCOL='{{ns.securityProtocol}}'
+      - SASL_MECHANISM='{{ns.saslMechanism}}'
+      - SASL_JAAS_CONFIG='{{ns.loginModule}} required username=\"{{ns.kafkaClientUsername}}\" password=\"{{ns.kafkaClientPassword}}\";'
+    {% endif -%}   {#  secureKafkaEnabled #}
     {% if (KPOW_edition | lower) == 'ce' or (KPOW_edition | lower) == 'se' or (KPOW_edition | lower) == 'ee' %}
       {% if not KPOW_use_external_license_info %}
       - LICENSE_ID={{KPOW_license_id if KPOW_license_id is defined and KPOW_license_id | length else omit}}
@@ -3081,6 +3090,11 @@ services:
       - ORGANISATION_NAME={{CONDUKTOR_PLATFORM_organisation_name}}
       - ADMIN_EMAIL={{CONDUKTOR_PLATFORM_admin_email}}
       - ADMIN_PSW={{CONDUKTOR_PLATFORM_admin_psw}}
+    {% if ns.secureKafkaEnabled %}
+      - KAFKA_SECURITY_PROTOCOL="{{ns.securityProtocol}}"
+      - KAFKA_SASL_MECHANISM="{{ns.saslMechanism}}"
+      - KAFKA_SASL_JAAS_CONFIG="{{ns.loginModule}} required username=\"{{ns.kafkaClientUsername}}\" password=\"{{ns.kafkaClientPassword}}\";"
+    {% endif -%}   {#  ns.secureKafkaEnabled #}
     {% if (SCHEMA_REGISTRY_enable or external['SCHEMA_REGISTRY_enable']) | default(false) %}
       - SCHEMA_REGISTRY_URL={{ns.schemaRegistryUrl}}
     {% endif -%}   {#  SCHEMA_REGISTRY_enable #}
