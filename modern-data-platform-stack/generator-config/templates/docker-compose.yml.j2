@@ -4947,6 +4947,11 @@ services:
       - DATAHUB_PLAY_MEM_BUFFER_SIZE=10MB
       - JAVA_OPTS=-Xms512m -Xmx512m -Dhttp.port=9002 -Dconfig.file=datahub-frontend/conf/application.conf -Djava.security.auth.login.config=datahub-frontend/conf/jaas.conf -Dlogback.configurationFile=datahub-frontend/conf/logback.xml -Dlogback.debug=false -Dpidfile.path=/dev/null
       - KAFKA_BOOTSTRAP_SERVER=kafka-1:19092
+    {% if ns.secureKafkaEnabled %}
+      - SPRING_KAFKA_PROPERTIES_SECURITY_PROTOCOL='{{ns.securityProtocol}}'
+      - SPRING_KAFKA_PROPERTIES_SASL_MECHANISM='{{ns.saslMechanism}}'
+      - SPRING_KAFKA_PROPERTIES_SASL_JAAS_CONFIG='{{ns.loginModule}} required username=\"{{ns.kafkaClientUsername}}\" password=\"{{ns.kafkaClientPassword}}\";'
+    {% endif -%}   {#  secureKafkaEnabled #}
       - DATAHUB_TRACKING_TOPIC=DataHubUsageEvent_v1
       - ELASTIC_CLIENT_HOST=datahub-elasticsearch
       - ELASTIC_CLIENT_PORT=9200
@@ -5010,6 +5015,11 @@ services:
     {% endif -%}   {#  DATAHUB_graph_service_impl #}
       - JAVA_OPTS=-Xms1g -Xmx1g
       - KAFKA_BOOTSTRAP_SERVER=kafka-1:19092
+    {% if ns.secureKafkaEnabled %}
+      - SPRING_KAFKA_PROPERTIES_SECURITY_PROTOCOL='{{ns.securityProtocol}}'
+      - SPRING_KAFKA_PROPERTIES_SASL_MECHANISM='{{ns.saslMechanism}}'
+      - SPRING_KAFKA_PROPERTIES_SASL_JAAS_CONFIG='{{ns.loginModule}} required username=\"{{ns.kafkaClientUsername}}\" password=\"{{ns.kafkaClientPassword}}\";'
+    {% endif -%}   {#  secureKafkaEnabled #}
       - KAFKA_SCHEMAREGISTRY_URL={{ns.schemaRegistryUrl}}
     {%if not DATAHUB_mae_consumer_standalone | default(true) %}
       - MAE_CONSUMER_ENABLED=true
@@ -5051,7 +5061,11 @@ services:
       - DATAHUB_SYSTEM_CLIENT_ID=__datahub_system
       - DATAHUB_SYSTEM_CLIENT_SECRET=JohnSnowKnowsNothing
       - KAFKA_BOOTSTRAP_SERVER=kafka-1:19092
-      - KAFKA_PROPERTIES_SECURITY_PROTOCOL=PLAINTEXT
+    {% if ns.secureKafkaEnabled %}
+      - SPRING_KAFKA_PROPERTIES_SECURITY_PROTOCOL='{{ns.securityProtocol}}'
+      - SPRING_KAFKA_PROPERTIES_SASL_MECHANISM='{{ns.saslMechanism}}'
+      - SPRING_KAFKA_PROPERTIES_SASL_JAAS_CONFIG='{{ns.loginModule}} required username=\"{{ns.kafkaClientUsername}}\" password=\"{{ns.kafkaClientPassword}}\";'
+    {% endif -%}   {#  secureKafkaEnabled #}
       - METADATA_AUDIT_EVENT_NAME=MetadataAuditEvent_v4
       - METADATA_CHANGE_LOG_VERSIONED_TOPIC_NAME=MetadataChangeLog_Versioned_v1
       - SCHEMA_REGISTRY_URL=http://schema-registry-1:8081
@@ -5092,6 +5106,11 @@ services:
       - MAE_CONSUMER_ENABLED=true
       - PE_CONSUMER_ENABLED=true
       - KAFKA_BOOTSTRAP_SERVER=kafka-1:19092
+    {% if ns.secureKafkaEnabled %}
+      - SPRING_KAFKA_PROPERTIES_SECURITY_PROTOCOL='{{ns.securityProtocol}}'
+      - SPRING_KAFKA_PROPERTIES_SASL_MECHANISM='{{ns.saslMechanism}}'
+      - SPRING_KAFKA_PROPERTIES_SASL_JAAS_CONFIG='{{ns.loginModule}} required username=\"{{ns.kafkaClientUsername}}\" password=\"{{ns.kafkaClientPassword}}\";'
+    {% endif -%}   {#  secureKafkaEnabled #}
       - KAFKA_SCHEMAREGISTRY_URL='{{ns.schemaRegistryUrl}}'
       - ELASTICSEARCH_HOST=datahub-elasticsearch
       - ELASTICSEARCH_PORT=9200
@@ -5154,6 +5173,11 @@ services:
       - EBEAN_DATASOURCE_USERNAME=datahub
       - EBEAN_DATASOURCE_PASSWORD=datahub
       - KAFKA_BOOTSTRAP_SERVER=kafka-1:19092
+    {% if ns.secureKafkaEnabled %}
+      - SPRING_KAFKA_PROPERTIES_SECURITY_PROTOCOL='{{ns.securityProtocol}}'
+      - SPRING_KAFKA_PROPERTIES_SASL_MECHANISM='{{ns.saslMechanism}}'
+      - SPRING_KAFKA_PROPERTIES_SASL_JAAS_CONFIG='{{ns.loginModule}} required username=\"{{ns.kafkaClientUsername}}\" password=\"{{ns.kafkaClientPassword}}\";'
+    {% endif -%}   {#  secureKafkaEnabled #}
       - KAFKA_SCHEMAREGISTRY_URL='{{ns.schemaRegistryUrl}}'
       - ELASTICSEARCH_HOST=datahub-elasticsearch
       - ELASTICSEARCH_PORT=9200
@@ -5339,7 +5363,7 @@ services:
       - EBEAN_DATASOURCE_HOST=datahub-mysql:3306
       - EBEAN_DATASOURCE_URL=jdbc:mysql://datahub-mysql:3306/datahub?verifyServerCertificate=false&useSSL=true&useUnicode=yes&characterEncoding=UTF-8&enabledTLSProtocols=TLSv1.2
       - EBEAN_DATASOURCE_DRIVER=com.mysql.jdbc.Driver
-      - KAFKA_BOOTSTRAP_SERVER=kafka-1:19092
+      - KAFKA_BOOTSTRAP_SERVER={{ns.bootstrapServers}}
       - KAFKA_SCHEMAREGISTRY_URL={{ns.schemaRegistryUrl}}
       - ELASTICSEARCH_HOST=datahub-elasticsearch
       - ELASTICSEARCH_PORT=9200
@@ -5423,7 +5447,12 @@ services:
       com.platys.name: "datahub"
     environment:
       - DATAHUB_PRECREATE_TOPICS={{DATAHUB_precreate_topics| lower | default(false)}}
-      - KAFKA_BOOTSTRAP_SERVER=kafka-1:19092
+      - KAFKA_BOOTSTRAP_SERVER={{ns.bootstrapServers}}
+    {% if ns.secureKafkaEnabled %}
+      - SPRING_KAFKA_PROPERTIES_SECURITY_PROTOCOL='{{ns.securityProtocol}}'
+      - SPRING_KAFKA_PROPERTIES_SASL_MECHANISM='{{ns.saslMechanism}}'
+      - SPRING_KAFKA_PROPERTIES_SASL_JAAS_CONFIG='{{ns.loginModule}} required username=\"{{ns.kafkaClientUsername}}\" password=\"{{ns.kafkaClientPassword}}\";'
+    {% endif -%}   {#  secureKafkaEnabled #}
       - KAFKA_ZOOKEEPER_CONNECT=zookeeper-1:2181
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
@@ -14397,12 +14426,12 @@ services:
 
 {% if THINGSBOARD_enable | default(false) %}
   #  ================================== Cedalo Management Center ========================================== #
-  thingsbaord:
+  thingsboard:
     image: thingsboard/tb-postgres:{{__THINGSBOARD_version}}
-    container_name: thingsbaord
-    hostname: thingsbaord
+    container_name: thingsboard
+    hostname: thingsboard
     labels:
-      com.platys.name: "thingsbaord"
+      com.platys.name: "thingsboard"
       com.platys.webui.title: "Thingsboard UI"
       com.platys.webui.url: "http://dataplatform:28200"
     ports:
@@ -14411,7 +14440,12 @@ services:
       - "28202:5683/udp"
     environment:
       TB_QUEUE_TYPE: kafka
-      TB_KAFKA_SERVERS: kafka-1:19092
+      TB_KAFKA_SERVERS: {{ns.bootstrapServers}}
+    {% if ns.secureKafkaEnabled %}
+      - TB_QUEUE_KAFKA_CONFLUENT_SECURITY_PROTOCOL='{{ns.securityProtocol}}'
+      - TB_QUEUE_KAFKA_CONFLUENT_SASL_MECHANISM='{{ns.saslMechanism}}'
+      - TB_QUEUE_KAFKA_CONFLUENT_SASL_JAAS_CONFIG='{{ns.loginModule}} required username=\"{{ns.kafkaClientUsername}}\" password=\"{{ns.kafkaClientPassword}}\";'
+    {% endif -%}   {#  secureKafkaEnabled #}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
