@@ -1150,9 +1150,17 @@ services:
                 password=\"client-secret\";"
       KAFKA_OPTS: "-Djava.security.auth.login.config=/etc/kafka/kafka_server_jaas.conf"
     {% endif %}
-      KAFKA_ALLOW_EVERYONE_IF_NO_ACL_FOUND: "false"
+    {% if not KAFKA_authorizer_enable | default(false) %}
+      KAFKA_ALLOW_EVERYONE_IF_NO_ACL_FOUND: "{{KAFKA_allow_everyone_if_no_acl_found}}"
+      {% if not KAFKA_use_kraft_mode | default(false) %}
       KAFKA_AUTHORIZER_CLASS_NAME: "kafka.security.authorizer.AclAuthorizer"
-      KAFKA_SUPER_USERS: "User:broker"
+      {% else %}
+      KAFKA_AUTHORIZER_CLASS_NAME: "org.apache.kafka.metadata.authorizer.StandardAuthorizer"
+      {% endif %}
+      {% if KAFKA_superusers is defined and KAFKA_superusers and KAFKA_superusers | length | default(false) %}
+      KAFKA_SUPER_USERS: {% for user in KAFKA_superusers.split(',') -%}User:{{ n }}{% if not loop.last %},{% endif %} {%- endfor %}
+      {% endif %}
+    {% endif %} {# KAFKA_authorizer_enable #}
     {% if KAFKA_CCC_enable and (KAFKA_edition | lower) == 'enterprise' | default(false) %}
       KAFKA_METRIC_REPORTERS: io.confluent.metrics.reporter.ConfluentMetricsReporter
       KAFKA_CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: '{{ns.bootstrapServers}}'
