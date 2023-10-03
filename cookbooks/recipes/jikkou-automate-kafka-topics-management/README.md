@@ -4,7 +4,7 @@ version:				1.17.0
 validated-at:			3.10.2023
 ---
 
-# Automate management of Kafka topics on the platform
+# Automate management of Kafka topics using Jikkou
 
 This recipe will show how automate the management of Kafka topics using the [Jikkou tool](https://streamthoughts.github.io/jikkou/), which is part of the platform.
 
@@ -163,7 +163,7 @@ items:
       replicas: 3
       configMapRefs: [ "TopicConfig" ]
       configs:
-        cleanup.policy: compact
+        cleanup.policy: 'compact'
 ---
 apiVersion: "core.jikkou.io/v1beta2"
 kind: ConfigMap
@@ -171,7 +171,6 @@ metadata:
   name: 'TopicConfig'
 data:
   min.insync.replicas: 2
-  cleanup.policy: 'delete'
 ```
 
 With the file in place, execute once again
@@ -189,14 +188,14 @@ docker logs -f jikkou
 you should see an output similar to the one below
 
 ```bash
-EXECUTION in 193ms
+EXECUTION in 210ms
 ok : 0, created : 0, altered : 0, deleted : 0 failed : 0
-TASK [ADD] Add topic 'topic-1' (partitions=8, replicas=3, configs=[cleanup.policy=delete,min.insync.replicas=2]) - CHANGED
+TASK [ADD] Add topic 'topic-1' (partitions=8, replicas=3, configs=[min.insync.replicas=2]) - CHANGED *
 {
   "status" : "CHANGED",
   "changed" : true,
   "failed" : false,
-  "end" : 1696363123181,
+  "end" : 1696364135272,
   "data" : {
     "apiVersion" : "kafka.jikkou.io/v1beta2",
     "kind" : "KafkaTopicChange",
@@ -220,10 +219,6 @@ TASK [ADD] Add topic 'topic-1' (partitions=8, replicas=3, configs=[cleanup.polic
         "operation" : "ADD"
       },
       "configs" : {
-        "cleanup.policy" : {
-          "after" : "delete",
-          "operation" : "ADD"
-        },
         "min.insync.replicas" : {
           "after" : "2",
           "operation" : "ADD"
@@ -233,12 +228,12 @@ TASK [ADD] Add topic 'topic-1' (partitions=8, replicas=3, configs=[cleanup.polic
     }
   }
 }
-TASK [ADD] Add topic 'topic-2' (partitions=1, replicas=3, configs=[cleanup.policy=delete,min.insync.replicas=2]) - CHANGED
+TASK [ADD] Add topic 'topic-2' (partitions=1, replicas=3, configs=[cleanup.policy=compact,min.insync.replicas=2]) - CHANGED
 {
   "status" : "CHANGED",
   "changed" : true,
   "failed" : false,
-  "end" : 1696363123181,
+  "end" : 1696364135272,
   "data" : {
     "apiVersion" : "kafka.jikkou.io/v1beta2",
     "kind" : "KafkaTopicChange",
@@ -263,7 +258,7 @@ TASK [ADD] Add topic 'topic-2' (partitions=1, replicas=3, configs=[cleanup.polic
       },
       "configs" : {
         "cleanup.policy" : {
-          "after" : "delete",
+          "after" : "compact",
           "operation" : "ADD"
         },
         "min.insync.replicas" : {
@@ -275,7 +270,7 @@ TASK [ADD] Add topic 'topic-2' (partitions=1, replicas=3, configs=[cleanup.polic
     }
   }
 }
-EXECUTION in 1s 713ms
+EXECUTION in 1s 502ms
 ok : 0, created : 2, altered : 0, deleted : 0 failed : 0
 ```
 
@@ -302,6 +297,7 @@ items:
       replicas: 3
       configMapRefs: [ "TopicConfig" ]
       configs:
+        cleanup.policy: 'delete'
         retention.ms: -1
 
   - metadata:
@@ -311,7 +307,7 @@ items:
       replicas: 3
       configMapRefs: [ "TopicConfig" ]
       configs:
-        cleanup.policy: compact
+        cleanup.policy: 'compact'
 
   - metadata:
       name: 'topic-3'
@@ -325,7 +321,6 @@ metadata:
   name: 'TopicConfig'
 data:
   min.insync.replicas: 2
-  cleanup.policy: 'delete'
 ```
 
 Now perform again
@@ -337,12 +332,15 @@ docker-compose up -d
 and visit the log. You should see the following additional lines
 
 ```bash
+...
+EXECUTION in 1s 502ms
+ok : 0, created : 2, altered : 0, deleted : 0 failed : 0
 TASK [UPDATE] Update topic 'topic-1' (partitions=8, replicas=3, configs=[cleanup.policy=delete,min.insync.replicas=2,retention.ms=-1]) - CHANGED
 {
   "status" : "CHANGED",
   "changed" : true,
   "failed" : false,
-  "end" : 1696363379513,
+  "end" : 1696364213105,
   "data" : {
     "apiVersion" : "kafka.jikkou.io/v1beta2",
     "kind" : "KafkaTopicChange",
@@ -388,12 +386,12 @@ TASK [UPDATE] Update topic 'topic-1' (partitions=8, replicas=3, configs=[cleanup
     }
   }
 }
-TASK [NONE] Unchanged topic 'topic-2' (partitions=1, replicas=3, configs=[cleanup.policy=delete,min.insync.replicas=2]) - OK
+TASK [NONE] Unchanged topic 'topic-2' (partitions=1, replicas=3, configs=[cleanup.policy=compact,min.insync.replicas=2]) - OK
 {
   "status" : "OK",
   "changed" : false,
   "failed" : false,
-  "end" : 1696363379514,
+  "end" : 1696364213106,
   "data" : {
     "apiVersion" : "kafka.jikkou.io/v1beta2",
     "kind" : "KafkaTopicChange",
@@ -420,8 +418,8 @@ TASK [NONE] Unchanged topic 'topic-2' (partitions=1, replicas=3, configs=[cleanu
       },
       "configs" : {
         "cleanup.policy" : {
-          "before" : "delete",
-          "after" : "delete",
+          "before" : "compact",
+          "after" : "compact",
           "operation" : "NONE"
         },
         "min.insync.replicas" : {
@@ -439,7 +437,7 @@ TASK [ADD] Add topic 'topic-3' (partitions=8, replicas=3, configs=[]) - CHANGED 
   "status" : "CHANGED",
   "changed" : true,
   "failed" : false,
-  "end" : 1696363379901,
+  "end" : 1696364213505,
   "data" : {
     "apiVersion" : "kafka.jikkou.io/v1beta2",
     "kind" : "KafkaTopicChange",
@@ -467,7 +465,7 @@ TASK [ADD] Add topic 'topic-3' (partitions=8, replicas=3, configs=[]) - CHANGED 
     }
   }
 }
-EXECUTION in 808ms
+EXECUTION in 731ms
 ok : 1, created : 1, altered : 1, deleted : 0 failed : 0
 ```
 
