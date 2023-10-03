@@ -60,8 +60,9 @@ Inhere we are documenting cookbooks on how to use the platform:
 
  * **Kafka**
    * [Simulated Multi-DC Setup on one machine](./recipes/simulated-multi-dc-setup/README.md) - `1.14.0`  
-   * [Automate management of Kafka topics on the platform](./recipes/jikkou-automate-kafka-topics-management/README.md) - `1.14.0`
+   * [Automate management of Kafka topics using Jikkou](./recipes/jikkou-automate-kafka-topics-management/README.md) - `1.17.0`
    * [Azure Event Hub as external Kafka](./recipes/azure-event-hub-as-external-kafka/README.md) - `1.16.0`
+   * [SASL/SCRAM Authentication](./recipes/kafka-sasl-scram-authentication/README.md) - `1.17.0`
 
  * **Confluent Enterprise Platform**
    * [Using Confluent Enterprise Tiered Storage](./recipes/confluent-tiered-storage/README.md) - `1.13.0`
@@ -77,9 +78,6 @@ Inhere we are documenting cookbooks on how to use the platform:
 
  * **Apicurio Registry**
    * [Apicurio Registry with SQL Storage (PostgreSQL)](./recipes/apicurio-with-database-storage/README.md) - `1.14.0`
-
- * **Jikkou**
-   * [Automate management of Kafka topics on the platform](./recipes/jikkou-automate-kafka-topics-management/README.md)    
 
  * **Oracle RDBMS**
    * [Using private (Trivadis) Oracle EE image](./recipes/using-private-oracle-ee-image/README.md) - `1.13.0`    
