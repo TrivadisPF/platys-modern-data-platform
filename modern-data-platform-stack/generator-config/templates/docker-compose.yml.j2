@@ -1262,7 +1262,6 @@ services:
                           cub zk-ready zookeeper-1:2181 120 && \
   {% for user in KAFKA_initial_users.split(",") %}
                           kafka-configs --zookeeper zookeeper-1:2181 --alter --add-config 'SCRAM-SHA-256=[password={{user.split(":")[1]}}],SCRAM-SHA-512=[password={{user.split(":")[1]}}]' --entity-type users --entity-name {{user.split(":")[0]}} {{ '&&' if not loop.last }} \
-
   {% endfor %}
                       '"
     environment:
@@ -2392,9 +2391,9 @@ services:
     environment:
       JIKKOU_DEFAULT_KAFKA_BOOTSTRAP_SERVERS: '{{ns.bootstrapServers}}'
     {% if ns.secureKafkaEnabled %}
-      KAFKA_REST_CLIENT_SECURITY_PROTOCOL: "{{ns.securityProtocol}}"
-      KAFKA_REST_CLIENT_SASL_MECHANISM: "{{ns.saslMechanism}}"
-      KAFKA_REST_CLIENT_SASL_JAAS_CONFIG: "{{ns.loginModule}} required
+      JIKKOU_DEFAULT_KAFKA_SECURITY_PROTOCOL: "{{ns.securityProtocol}}"
+      JIKKOU_DEFAULT_KAFKA_SASL_MECHANISM: "{{ns.saslMechanism}}"
+      JIKKOU_DEFAULT_KAFKA_SASL_JAAS_CONFIG: "{{ns.loginModule}} required
                         username=\"{{KAFKA_RESTPROXY_kafka_username if KAFKA_RESTPROXY_kafka_username is defined and KAFKA_RESTPROXY_kafka_username | length else ns.kafkaClientUsername}}\"
                         password=\"{{KAFKA_RESTPROXY_kafka_password if KAFKA_RESTPROXY_kafka_password is defined and KAFKA_RESTPROXY_kafka_password | length else ns.kafkaClientPassword}}\";"
     {% endif -%}   {#  ns.secureKafkaEnabled #}
@@ -2418,7 +2417,8 @@ services:
     volumes:
       - ./data-transfer:/data-transfer
       - ./scripts/jikkou/:/jikkou
-#      - ./conf/jikkou/config:/etc/jikkou/config
+      - ./conf/jikkoug/application.conf:/root/.jikkou/application.conf
+      - ./conf/jikkou/config:/root/.jikkou/config
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
