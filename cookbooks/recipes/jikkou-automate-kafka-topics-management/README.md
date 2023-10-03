@@ -132,11 +132,35 @@ docker compose run -ti jikkou config view
 }
 ```
 
+## Check that the cluster is accessible
+
+```bash
+docker compose run -ti jikkou health get kafkabroker
+```
+
+```
+---
+name: "kafka"
+status: "UP"
+details:
+  resource: "urn:kafka:cluster:id:zqi-dDp2QfSKmvXnynNEUg"
+  brokers:
+  - id: "1"
+    host: "kafka-1"
+    port: 19092
+  - id: "2"
+    host: "kafka-2"
+    port: 19093
+  - id: "3"
+    host: "kafka-3"
+    port: 19094
+```    
+
 ## Automate initial Kafka topic creation
 
 In this recipe we will create to topics
 
- * `topic-1` - with 8 paritions, replication-factor 3 and min.insync.replicas = 2
+ * `topic-1` - with 8 partitions, replication-factor 3 and `min.insync.replicas` = 2
  * `topic-2` - with 1 partition, replication-factor 3 as a log-compacted topic
 
 In the `scripts/jikkou` folder, create a file named `kafka-topics.yml` and add the following content
@@ -469,6 +493,59 @@ EXECUTION in 731ms
 ok : 1, created : 1, altered : 1, deleted : 0 failed : 0
 ```
 
+## Describe the current state of the topics
 
+```bash
+docker compose run -ti jikkou get kafkatopics
+```
 
+```bash
+---
+apiVersion: "kafka.jikkou.io/v1beta2"
+kind: "KafkaTopic"
+metadata:
+  name: "topic-2"
+  labels: {}
+  annotations:
+    kafka.jikkou.io/cluster-id: "zqi-dDp2QfSKmvXnynNEUg"
+    jikkou.io/resource-generated: "2023-10-03T20:47:52.315457Z"
+spec:
+  partitions: 1
+  replicas: 3
+  configs:
+    cleanup.policy: "compact"
+    min.insync.replicas: "2"
+  configMapRefs: []
+---
+apiVersion: "kafka.jikkou.io/v1beta2"
+kind: "KafkaTopic"
+metadata:
+  name: "topic-3"
+  labels: {}
+  annotations:
+    kafka.jikkou.io/cluster-id: "zqi-dDp2QfSKmvXnynNEUg"
+    jikkou.io/resource-generated: "2023-10-03T20:47:52.315459Z"
+spec:
+  partitions: 8
+  replicas: 3
+  configs: {}
+  configMapRefs: []
+---
+apiVersion: "kafka.jikkou.io/v1beta2"
+kind: "KafkaTopic"
+metadata:
+  name: "topic-1"
+  labels: {}
+  annotations:
+    kafka.jikkou.io/cluster-id: "zqi-dDp2QfSKmvXnynNEUg"
+    jikkou.io/resource-generated: "2023-10-03T20:47:52.315459Z"
+spec:
+  partitions: 8
+  replicas: 3
+  configs:
+    cleanup.policy: "delete"
+    min.insync.replicas: "2"
+    retention.ms: "-1"
+  configMapRefs: []
+```  
 

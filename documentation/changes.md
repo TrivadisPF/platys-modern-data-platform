@@ -24,6 +24,8 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
 ### New/Updated Cookbook Recipes
 
  * [Collecting Docker Logs with Loki](../cookbooks/recipes/collecting-docker-logs-with-loki/README.md)
+ * [Kafka SASL/SCRAM Authentication](../cookbooks/recipes/kafka-sasl-scram-authentication/README.md)
+
  
 ### Version upgrades
 
