@@ -1251,8 +1251,11 @@ services:
 {% if (KAFKA_enable and ns.secureKafkaEnabled) | default(false) %}
   #  ================================== Kafka Sec(urity) Init ========================================== #
   kafka-sec-init:
-    image: confluentinc/cp-kafka:7.5.0
-    container_name: "kafka-sec-init"
+    image: confluentinc/cp-kafka:{{__CONFLUENT_PLATFORM_version}}
+    container_name: kafka-sec-init
+    hostname: kafka-sec-init
+    labels:
+      com.platys.name: "kafka"
     depends_on:
       - zookeeper-1
     command: "bash -c 'echo Waiting for Zookeeper to be ready... && \
@@ -2388,6 +2391,14 @@ services:
       com.platys.name: "jikkou"
     environment:
       JIKKOU_DEFAULT_KAFKA_BOOTSTRAP_SERVERS: '{{ns.bootstrapServers}}'
+    {% if ns.secureKafkaEnabled %}
+      KAFKA_REST_CLIENT_SECURITY_PROTOCOL: "{{ns.securityProtocol}}"
+      KAFKA_REST_CLIENT_SASL_MECHANISM: "{{ns.saslMechanism}}"
+      KAFKA_REST_CLIENT_SASL_JAAS_CONFIG: "{{ns.loginModule}} required
+                        username=\"{{KAFKA_RESTPROXY_kafka_username if KAFKA_RESTPROXY_kafka_username is defined and KAFKA_RESTPROXY_kafka_username | length else ns.kafkaClientUsername}}\"
+                        password=\"{{KAFKA_RESTPROXY_kafka_password if KAFKA_RESTPROXY_kafka_password is defined and KAFKA_RESTPROXY_kafka_password | length else ns.kafkaClientPassword}}\";"
+    {% endif -%}   {#  ns.secureKafkaEnabled #}
+      JIKKOU_DEFAULT_SCHEMA_REGISTRY_URL: ''
     {%if JIKKOU_kafka_brokers_wait_for_min_available_enabled | default(true) %}
       JIKKOU_KAFKA_BROKERS_WAIT_FOR_MIN_AVAILABLE: {{KAFKA_broker_nodes}}
     {% endif -%}   {#  JIKKOU_kafka_brokers_wait_for_min_available_enabled #}
@@ -2396,15 +2407,18 @@ services:
     {% else -%}
       JIKKOU_KAFKA_BROKERS_WAIT_FOR_ENABLED: 'false'
     {% endif -%}   {#  JIKKOU_kafka_brokers_wait_for_enabled #}
-      JIKKOU_KAFKA_BROKERS_WAIT_FOR_RETRY_BACKOFF_MS: {{JIKKOU_kafka_brokers_wait_for_retry_backoff_ms}}
-      JIKKOU_KAFKA_BROKERS_WAIT_FOR_TIMEOUT_MS: {{JIKKOU_kafka_brokers_wait_for_timeout_ms}}
+      JIKKOU_KAFKA_BROKERS_WAIT_FOR_RETRY_BACKOFF_MS: {{JIKKOU_kafka_brokers_wait_for_retry_backoff_ms | default(omit) }}
+      JIKKOU_KAFKA_BROKERS_WAIT_FOR_TIMEOUT_MS: {{JIKKOU_kafka_brokers_wait_for_timeout_ms |default(omit) }}
+      VALIDATION_DEFAULT_TOPIC_NAME_REGEX: {{JIKKOU_validation_default_topic_name_regex | default(omit) }}
+      VALIDATION_DEFAULT_TOPIC_MIN_NUM_PARTITIONS: {{JIKKOU_validation_default_topic_min_num_partitions | default(omit) }}
+      VALIDATION_DEFAULT_TOPIC_MIN_REPLICATION_FACTOR: {{JIKKOU_validation_default_topic_min_replication_factor | default(omit) }}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
       - ./scripts/jikkou/:/jikkou
-#      - ./conf/jikkou/config:/root/.jikkou/config
+#      - ./conf/jikkou/config:/etc/jikkou/config
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
