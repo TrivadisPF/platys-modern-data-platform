@@ -29,7 +29,7 @@ edit `config.yml` and add the following configuration setting after the `KAFKA_e
       KAFKA_client_password: 'client-secret'
       KAFKA_authorizer_enable: false
       KAFKA_allow_everyone_if_no_acl_found: false
-      KAFKA_super_users: 'broker'
+      KAFKA_super_users: 'broker,connect,client'
 
 ```
 
