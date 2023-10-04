@@ -1227,6 +1227,11 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
+    {% if KAFKA_additional_jars is defined and KAFKA_additional_jars | default(false) %}
+      {% for jarName in (KAFKA_additional_jars.split(',')) %}
+      - ./plugins/kafka/jars/{{jarName}}.jar:/usr/share/java/kafka/{{jarName}}.jar
+      {% endfor %}
+    {% endif %}
     {% if KAFKA_volume_map_data %}
       - "./container-volume/kafka-{{loop.index}}:/var/lib/kafka/data"
     {% endif %}
@@ -15154,7 +15159,7 @@ services:
       KC_METRICS_ENABLED: 'true'
       KC_FEATURES: '{{KEYCLOAK_features}}'
       KC_HTTPS_KEY_STORE_FILE: '/opt/keycloak/conf/server.keystore'
-      KC_HTTPS_KEY_STORE_PASSWORD: 'abc123!'
+      KC_HTTPS_KEY_STORE_PASSWORD: 'password'
     {%if (KEYCLOAK_db_vendor | lower) == 'postgres' | default(false) %}
       KC_DB_URL: jdbc:postgresql://postgres/keycloakdb
       KC_DB_USERNAME: keycloak
