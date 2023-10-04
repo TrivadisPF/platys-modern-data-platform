@@ -413,7 +413,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28202 | 5683 | thingsbaord (coap) |
 28203 | 8080 | microcks |
 28204 | 8080 | keycloak |
-28205 | 10000 | dataiku-dss |
+28205 | 8443 | keycloak (https) |
 28206 | 3000 | postgrest |
 28207 | 8080 | operate |
 28208 | 9000 | zeeqs |
@@ -515,6 +515,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28312 | 3000 | markdown-madness |
 28313 | 80 | kadeck |
 28314 | 8080 | watchtower |
+28315 | 10000 | dataiku-dss
 
 ## Ports > 28500
 

@@ -8299,9 +8299,9 @@ services:
     labels:
       com.platys.name: 'dataiku'
       com.platys.webui.title: "Dataiku DSS UI"
-      com.platys.webui.url: "http://dataplatform:28205"
+      com.platys.webui.url: "http://dataplatform:28315"
     ports:
-      - "28205:10000"
+      - "28315:10000"
     {%if use_timezone | default(false) %}
     environment:
       TZ: {{use_timezone}}
@@ -15141,18 +15141,20 @@ services:
     labels:
       com.platys.name: "keycloak"
       com.platys.webui.title: "Keycloak UI"
-      com.platys.webui.url: "http://dataplatform:28204"
+      com.platys.webui.url: "https://dataplatform:28205"
     ports:
       - "28204:8080"
+      - "28205:8443"
     environment:
       KEYCLOAK_ADMIN: "admin"
       KEYCLOAK_ADMIN_PASSWORD: "abc123!"
-      #KEYCLOAK_FRONTEND_URL: "http://${PUBLIC_IP}:28204/auth"
-      #KEYCLOAK_LOGLEVEL: "{{KEYCLOAK_loglevel}}"
+      KC_HTTP_ENABLED: 'true'
       KC_LOG_LEVEL: "INFO"
       KC_HEALTH_ENABLED: 'true'
-      KC_HTTP_ENABLED: 'true'
       KC_METRICS_ENABLED: 'true'
+      KC_FEATURES: '{{KEYCLOAK_features}}'
+      KC_HTTPS_KEY_STORE_FILE: '/opt/keycloak/conf/server.keystore'
+      KC_HTTPS_KEY_STORE_PASSWORD: 'abc123!'
     {%if (KEYCLOAK_db_vendor | lower) == 'postgres' | default(false) %}
       KC_DB_URL: jdbc:postgresql://postgres/keycloakdb
       KC_DB_USERNAME: keycloak
@@ -15170,6 +15172,7 @@ services:
     {% endif -%}   {#  KEYCLOAK_db_vendor #}
     volumes:
       - ./data-transfer:/data-transfer
+      - ./security/keycloak/server.keystore:/opt/keycloak/conf/server.keystore
     {% if (SCHEMA_REGISTRY_enable and SCHEMA_REGISTRY_flavour | lower) == 'apicurio' | default(false) %}
       - ./security/apicurio-registry/keycloak/apicurio-realm{{"-with-users" if APICURIO_auth_import_default_users}}.json:/opt/keycloak/data/import/apicurio-realm.json
     {% endif -%}

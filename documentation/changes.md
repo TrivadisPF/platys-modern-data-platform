@@ -59,7 +59,8 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
 
  * Remove usage of `$PUBLIC_IP` from the labels section in the `docker-compose.yml` to make it more stable to changing the value of the environment variable with a stack running (`docker compose up -d` will cause less harm)
  * Rename Trino configuration setting `TRINO_additional_connectors` to `TRINO_additional_plugins`
-#  * Keycloak is no longer using the "legacy" version but the new Quarkus-based one 
+ * Keycloak is no longer using the "legacy" version but the new Quarkus-based one 
+ * Dataiku now maps to port `28315` and no longer to `28205`
 
 ## What's new in 1.16.0
 
