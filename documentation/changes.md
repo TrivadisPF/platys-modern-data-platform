@@ -44,6 +44,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Update `materialize` to `v0.64.0`
  * Update `grafana` to `10.1.1`
  * Update `jikkou` to `latest`
+ * Update `keycloak` to `22.0.3`
 
 ### Enhancements
 
