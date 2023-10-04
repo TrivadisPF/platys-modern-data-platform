@@ -15145,32 +15145,28 @@ services:
     ports:
       - "28204:8080"
     environment:
-      KEYCLOAK_USER: "admin"
-      KEYCLOAK_PASSWORD: "abc123!"
-      KEYCLOAK_IMPORT: "{{KEYCLOAK_import_realms}}"
-      KEYCLOAK_FRONTEND_URL: "http://${PUBLIC_IP}:28204/auth"
-      KEYCLOAK_LOGLEVEL: "{{KEYCLOAK_loglevel}}"
-      ROOT_LOGLEVEL: "INFO"
+      KEYCLOAK_ADMIN: "admin"
+      KEYCLOAK_ADMIN_PASSWORD: "abc123!"
+      #KEYCLOAK_FRONTEND_URL: "http://${PUBLIC_IP}:28204/auth"
+      #KEYCLOAK_LOGLEVEL: "{{KEYCLOAK_loglevel}}"
+      KC_LOG_LEVEL: "INFO"
+      KC_HEALTH_ENABLED: 'true'
+      KC_HTTP_ENABLED: 'true'
+      KC_METRICS_ENABLED: 'true'
     {%if (KEYCLOAK_db_vendor | lower) == 'postgres' | default(false) %}
-      DB_VENDOR: postgres
-      DB_ADDR: postgresql
-      DB_DATABASE: keycloakdb
-      DB_USER: keycloak
-      DB_PASSWORD: abc123!
+      KC_DB_URL: jdbc:postgresql://postgres/keycloakdb
+      KC_DB_USERNAME: keycloak
+      KC_DB_PASSWORD: abc123!
     {% endif -%}   {#  KEYCLOAK_db_vendor #}
     {%if (KEYCLOAK_db_vendor | lower) == 'mysql' | default(false) %}
-      DB_VENDOR: mysql
-      DB_ADDR: mysql
-      DB_DATABASE: keycloakdb
-      DB_USER: keycloak
-      DB_PASSWORD: abc123!
+      KC_DB_URL: jdbc:mysql://mysql/keycloakdb
+      KC_DB_USERNAME: keycloak
+      KC_DB_PASSWORD: abc123!
     {% endif -%}   {#  KEYCLOAK_db_vendor #}
     {%if (KEYCLOAK_db_vendor | lower) == 'mssql' | default(false) %}
-      DB_VENDOR: mssql
-      DB_ADDR: sqlserver
-      DB_DATABASE: Keycloak
-      DB_USER: sa
-      DB_PASSWORD: abc123!
+      KC_DB_URL: jdbc:sqlserver://sqlserver;database=keycloak
+      KC_DB_USERNAME: sa
+      KC_DB_PASSWORD: abc123!
     {% endif -%}   {#  KEYCLOAK_db_vendor #}
     volumes:
       - ./data-transfer:/data-transfer
@@ -15188,7 +15184,9 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     command:
       - start-dev
+    {%if KEYCLOAK_import_realm_enable | default(false) %}
       - --import-realm
+    {% endif -%}   {#  KEYCLOAK_import_realm_enable #}
     restart: {{container_restart_policy}}
     {% endif -%}   {#  use_timezone #}
 {% endif %}   {#  KEYCLOAK_enable #}
