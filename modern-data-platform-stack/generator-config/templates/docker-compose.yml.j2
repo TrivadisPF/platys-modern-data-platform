@@ -803,46 +803,52 @@ networks:
     {% set ns.kafkaClientPassword = '${PLATYS_EXTERNAL_KAFKA_PASSWORD:?PLATYS_EXTERNAL_KAFKA_PASSWORD must be set either in .env or as an environment variable}' %}
   {% endif %}  {# KAFKA_sasl_password #}
 
-    {% set ns.schemaRegistryUrl = external['SCHEMA_REGISTRY_url'] %}
-    {% set schemaRegistryUsername = '${PLATYS_SCHEMA_REGISTRY_USERNAME:?PLATYS_SCHEMA_REGISTRY_USERNAME must be set either in .env or as an environment variable}' %}
-    {% set schemaRegistryPassword = '${PLATYS_SCHEMA_REGISTRY_PASSWORD:?PLATYS_SCHEMA_REGISTRY_PASSWORD must be set either in .env or as an environment variable}' %}
+  {% set ns.schemaRegistryUrl = external['SCHEMA_REGISTRY_url'] %}
+  {% set schemaRegistryUsername = '${PLATYS_SCHEMA_REGISTRY_USERNAME:?PLATYS_SCHEMA_REGISTRY_USERNAME must be set either in .env or as an environment variable}' %}
+  {% set schemaRegistryPassword = '${PLATYS_SCHEMA_REGISTRY_PASSWORD:?PLATYS_SCHEMA_REGISTRY_PASSWORD must be set either in .env or as an environment variable}' %}
 {% else %} {# not external['KAFKA_sasl_username'] #}
     {#% for datacenter in (DATA_CENTER.split(',') | default([]) ) %#}
-      {% set dcName = dataCenter %}
-      {% set basePort = 9092 + dataCenterId * KAFKA_broker_nodes %}
-      {% set basePortJMX = 9992 + dataCenterId * KAFKA_broker_nodes %}
-      {% set serviceBaseName = "kafka" ~ dcName ~ "-" %}
+  {% set dcName = dataCenter %}
+  {% set basePort = 9092 + dataCenterId * KAFKA_broker_nodes %}
+  {% set basePortJMX = 9992 + dataCenterId * KAFKA_broker_nodes %}
+  {% set serviceBaseName = "kafka" ~ dcName ~ "-" %}
 
-      {% for num in range(KAFKA_broker_nodes | default(1) ) %}
-        {% set port = basePort + loop.index-1 %}
-        {% set portJMX = basePortJMX + loop.index-1 %}
-        {% set serviceName = serviceBaseName ~ loop.index %}
-        {% if loop.first %}
-           {% set ns.bootstrapServers = serviceName ~ ":1" ~ port %}
-           {% set ns.controllerQuorumVoters = loop.index ~ ":1" ~ serviceName ~ ":1" ~ port %}
-           {% set ns.controllerQuorumVoters = loop.index ~ "@" ~ serviceName ~ ":3" ~ port %}
-        {% else %}
-           {% set ns.bootstrapServers = ns.bootstrapServers ~ ',' ~ serviceName ~ ":1" ~ port %}
-           {% set ns.controllerQuorumVoters = ns.controllerQuorumVoters ~ ',' ~ loop.index ~ "@" ~ serviceName ~ ":3" ~ port %}
-        {% endif %}
+  {% for num in range(KAFKA_broker_nodes | default(1) ) %}
+    {% set port = basePort + loop.index-1 %}
+    {% set portJMX = basePortJMX + loop.index-1 %}
+    {% set serviceName = serviceBaseName ~ loop.index %}
+    {% if loop.first %}
+      {% set ns.bootstrapServers = serviceName ~ ":1" ~ port %}
+      {% set ns.controllerQuorumVoters = loop.index ~ ":1" ~ serviceName ~ ":1" ~ port %}
+      {% set ns.controllerQuorumVoters = loop.index ~ "@" ~ serviceName ~ ":3" ~ port %}
+    {% else %}
+      {% set ns.bootstrapServers = ns.bootstrapServers ~ ',' ~ serviceName ~ ":1" ~ port %}
+      {% set ns.controllerQuorumVoters = ns.controllerQuorumVoters ~ ',' ~ loop.index ~ "@" ~ serviceName ~ ":3" ~ port %}
+    {% endif %}
 
-        {% if ns.serviceNames is not defined %}
-          {% set ns.serviceNames = serviceName %}
-          {% set ns.ports = port|string %}
-          {% set ns.portsJMX = portJMX|string %}
-        {% else %}
-          {% set ns.serviceNames = ns.serviceNames ~ ',' ~ serviceName %}
-          {% set ns.ports = ns.ports ~ ',' ~ port %}
-          {% set ns.portsJMX = ns.portsJMX ~ ',' ~ portJMX %}
-        {% endif %}
-      {% endfor %}
-      {#% endfor #}  {# datacenter in (KAFKA_datacenters.split(',') | default([]) ) #}
-      {% set ns.secureKafkaEnabled = (KAFKA_security_protocol != 'PLAINTEXT') %}
-      {% set ns.securityProtocol = KAFKA_security_protocol %}
-      {% set ns.saslMechanism = KAFKA_sasl_mechanism %}
-      {% set ns.loginModule = 'org.apache.kafka.common.security.scram.ScramLoginModule' %}
-      {% set ns.kafkaClientUsername = KAFKA_client_username %}
-      {% set ns.kafkaClientPassword = KAFKA_client_password %}
+    {% if ns.serviceNames is not defined %}
+      {% set ns.serviceNames = serviceName %}
+      {% set ns.ports = port|string %}
+      {% set ns.portsJMX = portJMX|string %}
+    {% else %}
+      {% set ns.serviceNames = ns.serviceNames ~ ',' ~ serviceName %}
+      {% set ns.ports = ns.ports ~ ',' ~ port %}
+      {% set ns.portsJMX = ns.portsJMX ~ ',' ~ portJMX %}
+    {% endif %}
+  {% endfor %}
+    {#% endfor #}  {# datacenter in (KAFKA_datacenters.split(',') | default([]) ) #}
+    {% set ns.secureKafkaEnabled = (KAFKA_security_protocol != 'PLAINTEXT') %}
+    {% set ns.securityProtocol = KAFKA_security_protocol %}
+    {% set ns.saslMechanism = KAFKA_sasl_mechanism %}
+  {% if KAFKA_sasl_mechanism == "SCRAM-SHA-256" or KAFKA_sasl_mechanism = "SCRAM_SHA-512" %}
+    {% set ns.loginModule = 'org.apache.kafka.common.security.scram.ScramLoginModule' %}
+  {% elif KAFKA_sasl_mechanism == "OAUTHBEARER" %}   {# KAFKA_sasl_mechanism #}
+    {% set ns.loginModule = 'org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule' %}
+  {% else %}   {# KAFKA_sasl_mechanism #}
+    {% set ns.loginModule = 'org.apache.kafka.common.security.plain.PlainLoginModule' %}
+  {% endif %}   {# KAFKA_sasl_mechanism #}
+    {% set ns.kafkaClientUsername = KAFKA_client_username %}
+    {% set ns.kafkaClientPassword = KAFKA_client_password %}
 {% endif %}   {# external['KAFKA_enable'] #}
 
 {#  ================================== Schema Registry Settings ========================================== #}
@@ -15168,8 +15174,12 @@ services:
     {% endif -%}   {#  KEYCLOAK_db_vendor #}
     volumes:
       - ./data-transfer:/data-transfer
-      - ./conf/apicurio-registry/apicurio-realm{{"-with-users" if APICURIO_auth_import_default_users}}.json:/tmp/apicurio-realm.json
-      - ./scripts/keycloak/keycloak-export.sh:/opt/jboss/keycloak/bin/keycloak-export.sh
+    {% if (SCHEMA_REGISTRY_enable and SCHEMA_REGISTRY_flavour | lower) == 'apicurio' | default(false) %}
+      - ./security/apicurio-registry/keycloak/apicurio-realm{{"-with-users" if APICURIO_auth_import_default_users}}.json:/tmp/apicurio-realm.json
+    {% endif -%}
+    {% if KAFKA_enable and ns.secureKafkaEnabled %}
+      - ./security/kafka/keycloak/kafka-authbearer.json:/tmp/kafka-realm.json
+    {% endif -%}   {#  KEYCLOAK_db_vendor #}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
