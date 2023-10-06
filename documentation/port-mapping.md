@@ -518,6 +518,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28315 | 10000 | dataiku-dss |
 28316 | 1080 | maildev |
 28317 | 10000 | maildev |
+28318 | 1080 | mailpit |
+28319 | 10000 | mailpit |
 
 ## Ports > 28500
 
