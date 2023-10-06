@@ -6091,6 +6091,7 @@ services:
       - DATAVERSE_DB_HOST=dataverse-postgresql
       - DATAVERSE_DB_USER=dataverse
       - DATAVERSE_DB_PASSWORD=abc123!
+      - DATAVERSE_MAIL_HOST=devmail
       - ENABLE_JDWP=1
       - DATAVERSE_FEATURE_API_BEARER_AUTH=1
     {%if use_timezone | default(false) %}
@@ -14751,13 +14752,16 @@ services:
       com.platys.webui.url: "http://dataplatform:28316"
     ports:
       - "28316:1080"
-      - "28317:1025"
+      - "28317:{{MAILDEV_port}}"
     environment:
       - MAILDEV_WEB_PORT=1080
-      - MAILDEV_SMTP_PORT=1025
+      - MAILDEV_SMTP_PORT={{MAILDEV_smtp_port}}
       - MAILDEV_MAIL_DIRECTORY=/mail
       - MAILDEV_WEB_USER=maildev
       - MAILDEV_WEB_PASS=abc123!
+    {% if MAILDEV_web_disable | default(false) %}
+      - MAILDEV_DISABLE_WEB=true
+    {% endif -%}   {#  MAILDEV_web_disable #}
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
