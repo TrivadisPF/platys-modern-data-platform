@@ -1277,8 +1277,6 @@ services:
     image: confluentinc/cp-kafka:{{__CONFLUENT_PLATFORM_version}}
     container_name: kafka-sec-init
     hostname: kafka-sec-init
-    labels:
-      com.platys.init: true
     depends_on:
       - zookeeper-1
     command: "bash -c 'echo Waiting for Zookeeper to be ready... && \
@@ -1299,8 +1297,6 @@ services:
     image: trivadis/kafka-init:{{__KAFKA_INIT_version}}
     container_name: kafka-init
     hostname: kafka-init
-    labels:
-      com.platys.init: true
     depends_on:
       kafka-1:
         condition: service_started
@@ -6125,8 +6121,6 @@ services:
     container_name: dev_bootstrap
     hostname: dev_bootstrap
     image: gdcc/configbaker:unstable
-    labels:
-      com.platys.init: true
     command:
       - bootstrap.sh
       - dev
@@ -6178,8 +6172,6 @@ services:
     container_name: dataverse-solr-initializer
     hostname: dataverse-solr-initializer
     image: gdcc/configbaker:unstable
-    labels:
-      com.platys.init: true
     command:
       - sh
       - -c
@@ -7140,8 +7132,6 @@ services:
     image: airbyte/init:{{__AIRBYTE_version}}
     container_name: airbyte-init
     hostname: airbyte-init
-    labels:
-      com.platys.init: true
     environment:
       - LOCAL_ROOT=/tmp/airbyte_local
       - HACK_LOCAL_ROOT_PARENT=/tmp
@@ -7159,13 +7149,12 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
     command: /bin/sh -c "./scripts/create_mount_directories.sh /local_parent ${HACK_LOCAL_ROOT_PARENT} ${LOCAL_ROOT}"
+    init: true
 
   airbyte-bootloader:
     image: airbyte/bootloader:{{__AIRBYTE_version}}
     container_name: airbyte-bootloader
     hostname: airbyte-bootloader
-    labels:
-      com.platys.name: 'airbyte'
     environment:
       - AIRBYTE_VERSION={{__AIRBYTE_version}}
       - DATABASE_PASSWORD={{AIRBYTE_database_password}}
@@ -7185,6 +7174,7 @@ services:
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki') | default(false) %}
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
+    init: true
 
   airbyte-db:
     image: airbyte/db:{{__AIRBYTE_version}}
@@ -7851,8 +7841,6 @@ services:
     image: apache/airflow:{{__AIRFLOW_version}}
     container_name: airflow-init
     hostname: airflow-init
-    labels:
-      com.platys.init: true
     entrypoint: /bin/bash
     # yamllint disable rule:line-length
     command:
@@ -7945,6 +7933,7 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
     user: "0:0"
+    init: true
 
 {% endif %}   {#  AIRFLOW_enable  #}
 
@@ -8668,8 +8657,6 @@ services:
     image: apache/superset:{{__SUPERSET_version}}
     hostname: superset-init
     container_name: superset-init
-    labels:
-      com.platys.init: true
     user: "root"
     environment:
       - DATABASE_DB=superset
@@ -8700,6 +8687,7 @@ services:
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
     command: ["/app/docker/docker-init.sh"]
+    init: true
 
   superset-worker:
     image: apache/superset:{{__SUPERSET_version}}
