@@ -515,7 +515,9 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28312 | 3000 | markdown-madness |
 28313 | 80 | kadeck |
 28314 | 8080 | watchtower |
-28315 | 10000 | dataiku-dss
+28315 | 10000 | dataiku-dss |
+28316 | 1080 | maildev |
+28317 | 10000 | maildev |
 
 ## Ports > 28500
 

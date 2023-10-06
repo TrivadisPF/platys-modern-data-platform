@@ -422,6 +422,8 @@ networks:
 
 {% set __FILEZILLA_version = FILEZILLA_version | default('latest') -%}
 
+{% set __MAILDEV_version = MAILDEV_version | default('latest') -%}
+
 {% set __CAMUNDA_BPM_PLATFORM_version = CAMUNDA_BPM_PLATFORM_version | default('latest') -%}
 {% set __CAMUNDA_OPTIMIZE_version = CAMUNDA_OPTIMIZE_version | default('latest') -%}
 {% set __CAMUNDA_ZEEBE_version = CAMUNDA_ZEEBE_version | default('latest') -%}
@@ -729,6 +731,7 @@ networks:
   {% set THINGSBOARD_enable = false -%}
   {% set ACTIVEMQ_enable = false -%}
   {% set FTP_enable = false -%}
+  {% set MAILDEV_enable = false -%}
   {% set CAMUNDA_BPM_PLATFORM_enable = false -%}
   {% set CAMUNDA_OPTIMIZE_enable = false -%}
   {% set CAMUNDA_ZEEBE_enable = false -%}
@@ -14735,6 +14738,45 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  FILEZILLA_enable #}
+
+{% if MAILDEV_enable | default(false) %}
+  #  ================================== Filezilla ========================================== #
+  maildev:
+    image: maildev/maildev:{{__MAILDEV_version}}
+    container_name: maildev
+    hostname: maildev
+    labels:
+      com.platys.name: "maildev"
+      com.platys.webui.title: "Maildev UI"
+      com.platys.webui.url: "http://dataplatform:28316"
+    ports:
+      - "28316:1080"
+      - "28317:1025"
+    environment:
+      - MAILDEV_WEB_PORT=1080
+      - MAILDEV_SMTP_PORT=1025
+      - MAILDEV_MAIL_DIRECTORY=/mail
+      - MAILDEV_WEB_USER=maildev
+      - MAILDEV_WEB_PASS=abc123!
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {% if MAILDEV_volume_map_data %}
+      - "./container-volume/maildev/data:/mail"
+    {% endif %}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    tmpfs:
+      - /mail:mode=770,size=128M,uid=1000,gid=1000
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  MAILDEV_enable #}
 
 {% if CAMUNDA_BPM_PLATFORM_enable | default(false) %}
   #  ================================== Camunda Optimize ========================================== #

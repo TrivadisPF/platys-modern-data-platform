@@ -1,0 +1,1 @@
+Contains the data of MailDev service, if flag MAILDEV_volume_map_data is set to true.

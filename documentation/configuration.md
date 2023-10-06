@@ -1059,6 +1059,9 @@ For each service there might be some other settings, such as controlling the num
 | `SFTP_home`                                   	| `ftp-data` 	| 1.16.0 	| The home directory on the SFTP Server |             	|                                	|
 | [**_FileZilla_**](./services/filezilla.md)  &nbsp;&nbsp;&nbsp;&nbsp;![x86-64](./images/x86-64.png)                                    	|         	|       	|                                                                                                                                                                                     	|      
 | `FILEZILLA_enable`                                   	| `false` 	| 1.16.0 	| Generate FileZilla service                                                                                                                                                                	|             	|                                	|
+| [**_MailDev_**](./services/maildev.md)  &nbsp;&nbsp;&nbsp;&nbsp;![x86-64](./images/x86-64.png)                                    	|         	|       	|                                                                                                                                                                                     	|      
+| `MAILDEV_enable`                                   	| `false` 	| 1.17.0 	| Generate MailDev service                                                                                                                                                                	|             	|                                	|
+| `MAILDEV_volume_map_data`                                   	| `false` 	| 1.17.0 	| Volume map the `data` folder into the container. |             	|                                	|
 
 ### Process Orchestration
 
