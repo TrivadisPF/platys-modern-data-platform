@@ -22,6 +22,8 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Kadeck
  * MailDev
  * Mailpit
+ * Dataverse
+ * CKAN
 
 ### New/Updated Cookbook Recipes
 
