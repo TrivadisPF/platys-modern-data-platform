@@ -1,0 +1,1 @@
+Contains the data of Mailpit service, if flag MAILPIT_volume_map_data is set to true.
