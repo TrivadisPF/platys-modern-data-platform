@@ -6092,7 +6092,8 @@ services:
       - DATAVERSE_DB_USER=dataverse
       - DATAVERSE_DB_PASSWORD=abc123!
       - DATAVERSE_MAIL_HOST=maildev
-      - DATAVERSE_SOLR_HOST=dataverse-solr
+      # there is a bug and therefore DATAVERSE_SOLR_HOST does not work
+      - _CT_DATAVERSE_SOLR_HOST=dataverse-solr
       - DATAVERSE_SOLR_PORT=8983
       - ENABLE_RELOAD=1
       - ENABLE_JDWP=1
@@ -6122,9 +6123,12 @@ services:
     container_name: dev_bootstrap
     hostname: dev_bootstrap
     image: gdcc/configbaker:unstable
+    labels:
+      com.platys.name: "dataverse"
     command:
       - bootstrap.sh
       - dev
+    init: true
     restart: "no"
 
   dataverse-postgresql:
@@ -6172,6 +6176,8 @@ services:
     container_name: dataverse-solr-initializer
     hostname: dataverse-solr-initializer
     image: gdcc/configbaker:unstable
+    labels:
+      com.platys.name: "dataverse"    
     command:
       - sh
       - -c
@@ -6179,6 +6185,7 @@ services:
     volumes:
       - ./container-volume/dataverse/solr/data:/var/solr
       - ./container-volume/dataverse/solr/conf:/solr-template
+    init: true
     restart: "no"
 
 {% endif %}   {#  DATAVERSE_enable #}
