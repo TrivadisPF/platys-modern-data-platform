@@ -6141,11 +6141,13 @@ services:
     restart: {{container_restart_policy}}
 
   dataverse-solr:
-    image: solr:8.11.1
+    image: solr:9.3.0
     container_name: dataverse-solr
     hostname: dataverse-solr
     labels:
       com.platys.name: "solr"
+    depends_on:
+      - dataverse-solr-initializer      
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -6166,8 +6168,9 @@ services:
       - "/template"
     restart: {{container_restart_policy}}
 
-  dataverse_solr_initializer:
-    container_name: "dev_solr_initializer"
+  dataverse-solr-initializer:
+    container_name: dataverse-solr-initializer
+    hostname: dataverse-solr-initializer
     image: gdcc/configbaker:unstable
     command:
       - sh
