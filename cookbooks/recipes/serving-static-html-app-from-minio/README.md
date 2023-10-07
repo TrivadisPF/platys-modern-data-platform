@@ -32,7 +32,8 @@ add the following configuration setting after the `MINIO_WEB_enable `
       MINIO_WEB_s3_bucket_name: 'webapp-bucket'
       MINIO_WEB_s3_prefix: 'my-web-app/'
       MINIO_WEB_default_html: 'myblog.html'
-      MINIO_WEB_favicon: 'myapp.ico'
+      MINIO_WEB_favicon: ''
+      MINIO_WEB_md_template: ''     
 ```      
 
 Now generate and start the platform 
@@ -76,16 +77,30 @@ minio-1/webapp-bucket/
       └─ profile-picture.png
 ```
 
-
-
-```bash
-cp ./data-transfer/platys-cookbooks/html/myapp.ico ./custom-conf/minio-web
-```
-
-
 ## Test the Application
 
 Now test the application by navigating to <http://dataplatform:28306> and you should get the following result
 
 ![](./images/my-web-app.png)
 
+
+## Replace the favourite icon
+
+Minio-Web comes with a default favourite icon, which can be replaced if desired.
+
+```bash
+cp ./data-transfer/platys-cookbooks/html/myapp.ico ./custom-conf/minio-web
+```
+
+update the configuration in `config.yml` to specify the custom favicon (replacing the default one)
+
+```yaml
+      MINIO_WEB_favicon: 'myapp.ico'
+```      
+
+and regenerate and restart the `minio-web` container
+
+```bash
+platys gen
+docker compose up -d minio-web
+```
