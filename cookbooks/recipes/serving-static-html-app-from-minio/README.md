@@ -32,6 +32,7 @@ add the following configuration setting after the `MINIO_WEB_enable `
       MINIO_WEB_s3_bucket_name: 'webapp-bucket'
       MINIO_WEB_s3_prefix: 'my-web-app/'
       MINIO_WEB_default_html: 'myblog.html'
+      MINIO_WEB_favicon: 'myapp.ico'
 ```      
 
 Now generate and start the platform 
@@ -58,12 +59,6 @@ then upload the image
 docker exec -ti minio-mc mc cp /data-transfer/platys-cookbooks/html/profile-picture.png minio-1/webapp-bucket/my-web-app/images/profile-picture.png
 ```
 
-and then the favicon (favourite icon)
-
-```bash
-docker exec -ti minio-mc mc cp /data-transfer/platys-cookbooks/html/profile-picture.png minio-1/webapp-bucket/my-web-app/assets/favicon.ico
-```
-
 now let's make sure that the files have been uploaded correctly
 
 ```bash
@@ -80,6 +75,13 @@ minio-1/webapp-bucket/
    └─ images
       └─ profile-picture.png
 ```
+
+
+
+```bash
+cp ./data-transfer/platys-cookbooks/html/myapp.ico ./custom-conf/minio-web
+```
+
 
 ## Test the Application
 
