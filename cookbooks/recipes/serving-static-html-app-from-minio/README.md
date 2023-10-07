@@ -86,7 +86,7 @@ Now test the application by navigating to <http://dataplatform:28306> and you sh
 
 ## Replace the favourite icon
 
-Minio-Web comes with a default favourite icon, which can be replaced if desired.
+Minio-Web comes with a default favourite icon, which can be replaced if desired. Let's use this icon instead: ![](./artefacts/myapp.ico)
 
 ```bash
 cp ./data-transfer/platys-cookbooks/html/myapp.ico ./custom-conf/minio-web
@@ -104,3 +104,7 @@ and regenerate and restart the `minio-web` container
 platys gen
 docker compose up -d minio-web
 ```
+
+Test the application again by navigating to <http://dataplatform:28306> and you should see your own favourite icon:
+
+![](./images/my-web-app2.png)
