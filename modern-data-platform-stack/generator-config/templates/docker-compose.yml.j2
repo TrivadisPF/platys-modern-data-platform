@@ -1251,7 +1251,7 @@ services:
       {% if KAFKA_sasl_mechanism == 'SCRAM-SHA-256' %}
       - ./security/kafka/sasl-scram/kafka.jaas.conf:/etc/kafka/kafka_server_jaas.conf
       - ./security/kafka/sasl-scram/client.properties:/tmp/client.properties
-      - ./scripts/kafka/update_storage.sh:/tmp/update_storage.sh
+      - ./scripts/kafka/kraft/update_storage.sh:/tmp/kraft/update_storage.sh
       {% endif %}
     {% endif %}
     {% if KAFKA_jmx_monitoring_prometheus_enable %}
@@ -1265,7 +1265,7 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
     {% if ns.secureKafkaEnabled | default(false) %}
-    command: "bash -c '/tmp/update_storage.sh {{KAFKA_cluster_id}} {{KAFKA_initial_users}} && /etc/confluent/docker/run ;'"
+    command: "bash -c '/tmp/kraft/update_storage.sh {{KAFKA_cluster_id}} {{KAFKA_initial_users}} && /etc/confluent/docker/run ;'"
     {% endif -%}  {#  ns.secureKafkaEnabled  #}
     restart: {{container_restart_policy}}
   {% endfor %} {# for serviceName in (ns.serviceNames) #}
