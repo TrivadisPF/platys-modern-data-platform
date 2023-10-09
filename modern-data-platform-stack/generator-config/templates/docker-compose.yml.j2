@@ -6111,10 +6111,9 @@ services:
       - dataverse_files_s3_custom__endpoint__url={{s3Endpoint | default(omit) }}
       - dataverse_files_s3_custom__endpoint__region='{{s3DefaultRegion if s3DefaultRegion is defined and s3DefaultRegion else omit}}'
       - dataverse_files_s3_path__style__access={{s3PathStyleAccess}}
-    {% endif %}
-      - AWS_ACCESS_KEY_ID={{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
-      - AWS_SECRET_ACCESS_KEY={{s3SecretAccessKey}}
-
+      - dataverse_files_s3_access__key={{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
+      - dataverse_files_s3_secret__key={{s3SecretAccessKey}}
+    {% endif %} {#  MINIO_enable #}
     {% if KEYCLOAK_enable | default(false) %}
       - DATAVERSE_FEATURE_API_BEARER_AUTH=1
       - DATAVERSE_AUTH_OIDC_ENABLED=1
@@ -6127,6 +6126,7 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
+      - ./credentials:/opt/payara/.aws/credentials
     {%if DATAVERSE_volume_map_data | default(false) %}
       - ./container-volume/dataverse/data:/data
     {% endif -%}   {#  DATAVERSE_volume_map_data #}
