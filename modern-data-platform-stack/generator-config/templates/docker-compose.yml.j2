@@ -825,10 +825,10 @@ networks:
     {% if loop.first %}
       {% set ns.bootstrapServers = serviceName ~ ":1" ~ port %}
       {% set ns.controllerQuorumVoters = loop.index ~ ":1" ~ serviceName ~ ":1" ~ port %}
-      {% set ns.controllerQuorumVoters = loop.index ~ "@" ~ serviceName ~ ":3" ~ port %}
+      {% set ns.controllerQuorumVoters = loop.index ~ "@" ~ serviceName ~ ":4" ~ port %}
     {% else %}
       {% set ns.bootstrapServers = ns.bootstrapServers ~ ',' ~ serviceName ~ ":1" ~ port %}
-      {% set ns.controllerQuorumVoters = ns.controllerQuorumVoters ~ ',' ~ loop.index ~ "@" ~ serviceName ~ ":3" ~ port %}
+      {% set ns.controllerQuorumVoters = ns.controllerQuorumVoters ~ ',' ~ loop.index ~ "@" ~ serviceName ~ ":4" ~ port %}
     {% endif %}
 
     {% if ns.serviceNames is not defined %}
@@ -1141,7 +1141,7 @@ services:
       KAFKA_CONTROLLER_QUORUM_VOTERS: '{{ns.controllerQuorumVoters}}'
       KAFKA_PROCESS_ROLES: 'broker,controller'
       KAFKA_NODE_ID: {{loop.index}}
-      CLUSTER_ID: xtzWWN4bTjitpL3kfd9s5g
+      CLUSTER_ID: {{KAFKA_cluster_id}}
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'LISTENER_CONTROLLER:PLAINTEXT,LISTENER_LOCAL:{{KAFKA_security_protocol}},LISTENER_INTERNAL:{{KAFKA_security_protocol}},LISTENER_DOCKERHOST:{{KAFKA_security_protocol}},LISTENER_EXTERNAL:{{KAFKA_security_protocol}}'
       KAFKA_LISTENERS: 'LISTENER_CONTROLLER://{{serviceName}}:4{{port}},LISTENER_LOCAL://{{serviceName}}:3{{port}},LISTENER_INTERNAL://{{serviceName}}:1{{port}},LISTENER_DOCKERHOST://{{serviceName}}:{{dockerHostPort}},LISTENER_EXTERNAL://{{serviceName}}:{{externalPort}}'
     {% else %}
@@ -1246,9 +1246,6 @@ services:
     {% endif %}
     {% if KAFKA_volume_map_data %}
       - "./container-volume/kafka-{{loop.index}}:/var/lib/kafka/data"
-    {% endif %}
-    {% if KAFKA_use_kraft_mode %}
-      - "./scripts/kafka/kraft/update_run.sh:/tmp/update_run.sh"
     {% endif %}
     {% if ns.secureKafkaEnabled %}
       {% if KAFKA_sasl_mechanism == 'SCRAM-SHA-256' %}
