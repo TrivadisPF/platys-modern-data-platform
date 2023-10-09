@@ -6081,7 +6081,7 @@ services:
       com.platys.webui.title: "Dataverse UI"
       com.platys.webui.url: "http://dataplatform:28294"
       com.platys.restapi.title: "Dataverse UI"
-      com.platys.restapi.url: "http://dataplatform:28294/api/dataverses/root/contents"
+      com.platys.restapi.url: "http://dataplatform:28294/api/info/metrics/dataverses"
     ports:
       - "28294:8080"
       - "4848:4848"
@@ -6094,12 +6094,27 @@ services:
       - DATAVERSE_DB_USER=dataverse
       - DATAVERSE_DB_PASSWORD=abc123!
       - DATAVERSE_MAIL_HOST={{DATAVERSE_mail_host}}
+#      - DATAVERSE_MAIL_USER=eadp
+      - DATAVERSE_MAIL_FROM=dataverse@localhost
       # there is a bug and therefore DATAVERSE_SOLR_HOST does not work
       - _CT_DATAVERSE_SOLR_HOST=dataverse-solr
       - DATAVERSE_SOLR_PORT=8983
+      - STORAGE_DIR=/dataverse
       - ENABLE_JMX=1
       - ENABLE_RELOAD=1
       - ENABLE_JDWP=1
+#      - dataverse_files_storage__driver__id=s3
+    {%if MINIO_enable or external['S3_enable'] | default(false) %}
+      - dataverse_files_s3_type=s3
+      - dataverse_files_s3_label="Object Storage"
+      - dataverse_files_s3_bucket__name="dataverse_bucket"
+      - dataverse.files.s3.custom__endpoint__url={{s3Endpoint | default(omit) }}
+      - dataverse.files.s3.custom__endpoint__region='{{s3DefaultRegion if s3DefaultRegion is defined and s3DefaultRegion else omit}}'
+      - dataverse_files_s3_path__style__access={{s3PathStyleAccess}}
+    {% endif %}
+      - AWS_ACCESS_KEY_ID={{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
+      - AWS_SECRET_ACCESS_KEY={{s3SecretAccessKey}}
+
     {% if KEYCLOAK_enable | default(false) %}
       - DATAVERSE_FEATURE_API_BEARER_AUTH=1
       - DATAVERSE_AUTH_OIDC_ENABLED=1
@@ -16242,7 +16257,7 @@ services:
       com.platys.restapi.url: "http://dataplatform:28314/v1/update"
     ports:
       - 28314:8080
-    {% endif %}   {#  WATCHTOWER_http_api_token #}
+    {% endif -%}   {#  WATCHTOWER_http_api_token #}
     environment:
       - DUMMY=true
       - WATCHTOWER_POLL_INTERVAL={{WATCHTOWER_poll_interval if WATCHTOWER_poll_interval is defined and WATCHTOWER_poll_interval else omit}}
