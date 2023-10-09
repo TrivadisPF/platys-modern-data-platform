@@ -1251,6 +1251,7 @@ services:
       {% if KAFKA_sasl_mechanism == 'SCRAM-SHA-256' %}
       - ./security/kafka/sasl-scram/kafka.jaas.conf:/etc/kafka/kafka_server_jaas.conf
       - ./security/kafka/sasl-scram/client.properties:/tmp/client.properties
+      - ./scripts/kafka/update_storage.sh:/tmp/update_storage.sh
       {% endif %}
     {% endif %}
     {% if KAFKA_jmx_monitoring_prometheus_enable %}
@@ -1263,11 +1264,16 @@ services:
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki') | default(false) %}
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
+    {% if ns.secureKafkaEnabled %}
+      {% if KAFKA_sasl_mechanism == 'SCRAM-SHA-256' %}
+    command: "bash -c '/tmp/update_storage.sh {{KAFKA_cluster_id}} {{KAFKA_initial_users}} && /etc/confluent/docker/run ;'"
+      {% endif -%}
+    {% endif -%}
     restart: {{container_restart_policy}}
   {% endfor %} {# for serviceName in (ns.serviceNames) #}
 {% endif %} {# KAFKA_enable #}
 
-{% if (KAFKA_enable and ns.secureKafkaEnabled) | default(false) %}
+{% if (KAFKA_enable and not KAFKA_use_kraft_mode and ns.secureKafkaEnabled) | default(false) %}
   #  ================================== Kafka Sec(urity) Init ========================================== #
   kafka-sec-init:
     image: confluentinc/cp-kafka:{{__CONFLUENT_PLATFORM_version}}
@@ -1285,7 +1291,7 @@ services:
       KAFKA_BROKER_ID: ignored
       KAFKA_ZOOKEEPER_CONNECT: ignored
     init: true
-{% endif %} {# KAFKA_enable or external['KAFKA_enable'] and KAFKA_INIT #}
+{% endif %} {# KAFKA_enable and not KAFKA_use_kraft_mode and ns.secureKafkaEnabled #}
 
 {% if (KAFKA_enable or external['KAFKA_enable']) and KAFKA_INIT_enable | default(false) %}
   #  ================================== Kafka Init ========================================== #
