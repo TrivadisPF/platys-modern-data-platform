@@ -8,4 +8,4 @@ do
     esac
 done
 
-kafka-storage format --ignore-formatted -c /etc/kafka/kafka.properties --cluster_id $cluster_id --add-scram 'SCRAM-SHA-256=[name=broker,password=broker-secret]'
+kafka-storage format --ignore-formatted -c /etc/kafka/kafka.properties --cluster-id $cluster_id --add-scram 'SCRAM-SHA-256=[name=broker,password=broker-secret]'
