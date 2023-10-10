@@ -16,11 +16,7 @@ echo "===> Running preflight checks ... "
 
 export IFS=","
 for userAndPassword in $2; do
-  user=$userAndPassword | cut -d ':' -f 1
-  password=$userAndPassword | cut -d ':' -f 2
+  IFS=':' read -r -a data <<< "$userAndPassword"
 
-  echo "$user / $password"
+  kafka-storage format --config /etc/kafka/kafka.properties --ignore-formatted --cluster-id $1 --add-scram 'SCRAM-SHA-256=[name=${data[0]},password=${data[1]}]'
 done
-
-kafka-storage format --ignore-formatted -c /etc/kafka/kafka.properties --cluster-id $1 --add-scram 'SCRAM-SHA-256=[name=broker,password=broker]'
-kafka-storage format --ignore-formatted -c /etc/kafka/kafka.properties --cluster-id $1 --add-scram 'SCRAM-SHA-256=[name=client,password=client-secret]'
