@@ -14,13 +14,13 @@ echo "===> Running preflight checks ... "
 
 # ======> END: copy
 
-while getopts u:a:f: flag
-do
-    case "${flag}" in
-        i) cluster_id=${OPTARG};;
-        u) users=${OPTARG};;
-    esac
+export IFS=","
+for userAndPassword in $2; do
+  user=$userAndPassword | cut -d ':' -f 1
+  password=$userAndPassword | cut -d ':' -f 2
+
+  echo "$user / $password"
 done
 
-kafka-storage format --ignore-formatted -c /etc/kafka/kafka.properties --cluster-id $cluster_id --add-scram 'SCRAM-SHA-256=[name=broker,password=broker]'
-kafka-storage format --ignore-formatted -c /etc/kafka/kafka.properties --cluster-id $cluster_id --add-scram 'SCRAM-SHA-256=[name=client,password=client-secret]'
+kafka-storage format --ignore-formatted -c /etc/kafka/kafka.properties --cluster-id $1 --add-scram 'SCRAM-SHA-256=[name=broker,password=broker]'
+kafka-storage format --ignore-formatted -c /etc/kafka/kafka.properties --cluster-id $1 --add-scram 'SCRAM-SHA-256=[name=client,password=client-secret]'
