@@ -50,6 +50,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Update `grafana` to `10.1.1`
  * Update `jikkou` to `latest`
  * Update `keycloak` to `22.0`
+ * Update `marquez` to `0.41.0`
 
 ### Enhancements
 
