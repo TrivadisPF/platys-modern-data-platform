@@ -6140,13 +6140,37 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
 
-  dev_bootstrap:
-    container_name: dev_bootstrap
-    hostname: dev_bootstrap
+  dataverse-bootstrap:
+    container_name: dataverse-bootstrap
+    hostname: dataverse-bootstrap
     image: gdcc/configbaker:unstable
     command:
       - bootstrap.sh
       - dev
+    init: true
+    restart: "no"
+
+  dataverse-demo-data-load:
+    container_name: dataverse-demo-data-load
+    hostname: dataverse-demo-data-load
+    image: python
+    profiles:
+      - load
+    environment:
+      - API_TOKEN=${API_TOKEN}
+      - DATAVERSE_URL=http://dataplatform:28294
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./scripts/python/run_pip_and_python.sh:/app/run_pip_and_python.sh:ro
+    command:
+      # In the command section, $ are replaced with $$ to avoid the error 'Invalid interpolation format for "command" option'
+      - sh
+      - -c
+      - |
+        git clone https://github.com/gschmutz/dataverse-sample-data
+        cd dataverse-sample-data
+        pip install -r requirements.txt
+        python create_sample_data.py
     init: true
     restart: "no"
 
