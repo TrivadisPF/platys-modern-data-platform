@@ -1144,8 +1144,8 @@ services:
       KAFKA_PROCESS_ROLES: {{ 'broker,controller' if loop.index <= 3 else 'broker' }}
       KAFKA_NODE_ID: {{loop.index}}
       CLUSTER_ID: {{KAFKA_cluster_id}}
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'CONTROLLER:{{KAFKA_controller_security_protocol}},LOCAL:{{KAFKA_security_protocol}},BROKER:{{KAFKA_security_protocol}},DOCKERHOST:{{KAFKA_security_protocol}},EXTERNAL:{{KAFKA_security_protocol}}'
-      KAFKA_LISTENERS: 'CONTROLLER://{{serviceName}}:4{{port}},LOCAL://{{serviceName}}:3{{port}},BROKER://{{serviceName}}:1{{port}},DOCKERHOST://{{serviceName}}:{{dockerHostPort}},EXTERNAL://{{serviceName}}:{{externalPort}}'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'CONTROLLER:{{KAFKA_controller_security_protocol}},BROKER:{{KAFKA_security_protocol}},LOCAL:{{KAFKA_security_protocol}},DOCKERHOST:{{KAFKA_security_protocol}},EXTERNAL:{{KAFKA_security_protocol}}'
+      KAFKA_LISTENERS: 'CONTROLLER://{{serviceName}}:4{{port}},BROKER://{{serviceName}}:1{{port}},LOCAL://{{serviceName}}:3{{port}},DOCKERHOST://{{serviceName}}:{{dockerHostPort}},EXTERNAL://{{serviceName}}:{{externalPort}}'
     {% else %}
       KAFKA_ZOOKEEPER_CONNECT: 'zookeeper{{dataCenter}}-1:{{zookeeperPort}}'
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'BROKER:{{KAFKA_security_protocol}},LOCAL:{{KAFKA_security_protocol}},DOCKERHOST:{{KAFKA_security_protocol}},EXTERNAL:{{KAFKA_security_protocol}}'
@@ -1159,8 +1159,11 @@ services:
       {% if KAFKA_use_kraft_mode | default(false) %}
       KAFKA_SASL_MECHANISM_CONTROLLER_PROTOCOL: {{KAFKA_controller_sasl_mechanism}}
       KAFKA_LISTENER_NAME_CONTROLLER_{{KAFKA_controller_sasl_mechanism}}_SASL_JAAS_CONFIG: {{ns.loginModule}} required username="broker" password="broker";
-      KAFKA_LISTENER_NAME_BROKER_{{KAFKA_controller_sasl_mechanism}}_SASL_JAAS_CONFIG: {{ns.loginModule}} required username="broker" password="broker";
       {% endif %}
+      KAFKA_LISTENER_NAME_BROKER_{{KAFKA_controller_sasl_mechanism}}_SASL_JAAS_CONFIG: {{ns.loginModule}} required username="broker" password="broker";
+      KAFKA_LISTENER_NAME_LOCAL_{{KAFKA_controller_sasl_mechanism}}_SASL_JAAS_CONFIG: {{ns.loginModule}} required username="broker" password="broker";
+      KAFKA_LISTENER_NAME_DOCKERHOST_{{KAFKA_controller_sasl_mechanism}}_SASL_JAAS_CONFIG: {{ns.loginModule}} required username="broker" password="broker";
+      KAFKA_LISTENER_NAME_EXTERNAL_{{KAFKA_controller_sasl_mechanism}}_SASL_JAAS_CONFIG: {{ns.loginModule}} required username="broker" password="broker";
       KAFKA_SASL_SERVER_CALLBACK_HANDLER_CLASS: {{KAFKA_sasl_server_callback_handler_class}}
       CONFLUENT_METRICS_REPORTER_SASL_MECHANISM: {{KAFKA_sasl_mechanism}}
       CONFLUENT_METRICS_REPORTER_SECURITY_PROTOCOL: {{KAFKA_security_protocol}}
@@ -1275,9 +1278,9 @@ services:
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki') | default(false) %}
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
-    {% if ns.secureKafkaEnabled | default(false) %}
+    {% if ns.secureKafkaEnabled and KAFKA_sasl_mechanism == 'SCRAM-SHA-256' | default(false) %}
     command: "bash -c '/tmp/kraft/update_storage.sh {{KAFKA_cluster_id}} {{KAFKA_initial_users}} {{KAFKA_security_debug | lower }} && /etc/confluent/docker/run ;'"
-    {% endif -%}  {#  ns.secureKafkaEnabled  #}
+    {% endif -%}  {#  ns.secureKafkaEnabled and KAFKA_sasl_mechanism == 'SCRAM-SHA-256'  #}
     restart: {{container_restart_policy}}
   {% endfor %} {# for serviceName in (ns.serviceNames) #}
 {% endif %} {# KAFKA_enable #}
