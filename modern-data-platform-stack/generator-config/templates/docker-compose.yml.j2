@@ -849,6 +849,8 @@ networks:
     {% set ns.loginModule = 'org.apache.kafka.common.security.scram.ScramLoginModule' %}
   {% elif KAFKA_sasl_mechanism == "OAUTHBEARER" %}   {# KAFKA_sasl_mechanism #}
     {% set ns.loginModule = 'org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule' %}
+  {% elif KAFKA_sasl_mechanism == "PLAIN" %}   {# KAFKA_sasl_mechanism #}
+    {% set ns.loginModule = 'org.apache.kafka.common.security.plain.PlainLoginModule' %}
   {% else %}   {# KAFKA_sasl_mechanism #}
     {% set ns.loginModule = 'org.apache.kafka.common.security.plain.PlainLoginModule' %}
   {% endif %}   {# KAFKA_sasl_mechanism #}
@@ -1154,11 +1156,10 @@ services:
     {% if ns.secureKafkaEnabled %}
       KAFKA_SASL_ENABLED_MECHANISMS: {{KAFKA_sasl_mechanism}}
       KAFKA_SASL_MECHANISM_INTER_BROKER_PROTOCOL: {{KAFKA_sasl_mechanism}}
-      KAFKA_LISTENER_NAME_SCRAM-SHA-256_SASL_JAAS_CONFIG: {{ns.loginModule}} required username="broker" password="broker";
       {% if KAFKA_use_kraft_mode | default(false) %}
       KAFKA_SASL_MECHANISM_CONTROLLER_PROTOCOL: {{KAFKA_controller_sasl_mechanism}}
-      KAFKA_LISTENER_NAME_CONTROLLER_SCRAM-SHA-256_SASL_JAAS_CONFIG: {{ns.loginModule}} required username="broker" password="broker";
-      KAFKA_LISTENER_NAME_BROKER_SCRAM-SHA-256_SASL_JAAS_CONFIG: {{ns.loginModule}} required username="broker" password="broker";
+      KAFKA_LISTENER_NAME_CONTROLLER_{{KAFKA_controller_sasl_mechanism}}_SASL_JAAS_CONFIG: {{ns.loginModule}} required username="broker" password="broker";
+      KAFKA_LISTENER_NAME_BROKER_{{KAFKA_controller_sasl_mechanism}}_SASL_JAAS_CONFIG: {{ns.loginModule}} required username="broker" password="broker";
       {% endif %}
       KAFKA_SASL_SERVER_CALLBACK_HANDLER_CLASS: {{KAFKA_sasl_server_callback_handler_class}}
       CONFLUENT_METRICS_REPORTER_SASL_MECHANISM: {{KAFKA_sasl_mechanism}}
@@ -1168,8 +1169,8 @@ services:
                 password=\"client-secret\";"
       KAFKA_OPTS: "-Djava.security.auth.login.config=/etc/kafka/kafka_server_jaas.conf"
     {% endif %}
-    {% if KAFKA_authorizer_enable | default(false) %}
-      KAFKA_ALLOW_EVERYONE_IF_NO_ACL_FOUND: "{{KAFKA_allow_everyone_if_no_acl_found}}"
+    {% if KAFKA_authorizer_enable and ns.secureKafkaEnabled | default(false) %}
+      KAFKA_ALLOW_EVERYONE_IF_NO_ACL_FOUND: "{{KAFKA_allow_everyone_if_no_acl_found | lower }}"
       {% if not KAFKA_use_kraft_mode | default(false) %}
       KAFKA_AUTHORIZER_CLASS_NAME: "kafka.security.authorizer.AclAuthorizer"
       {% else %}
@@ -1178,7 +1179,7 @@ services:
       {% if KAFKA_super_users is defined and KAFKA_super_users and KAFKA_super_users | length %}
       KAFKA_SUPER_USERS: "{% for user in KAFKA_super_users.split(',') -%}User:{{ user }}{% if not loop.last %};{% endif %} {%- endfor %}"
       {% endif -%} {# KAFKA_super_users #}
-    {% endif -%} {# KAFKA_authorizer_enable #}
+    {% endif -%} {# KAFKA_authorizer_enable and ns.secureKafkaEnabled #}
     {% if KAFKA_CCC_enable and (KAFKA_edition | lower) == 'enterprise' | default(false) %}
       KAFKA_METRIC_REPORTERS: io.confluent.metrics.reporter.ConfluentMetricsReporter
       KAFKA_CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: '{{ns.bootstrapServers}}'
