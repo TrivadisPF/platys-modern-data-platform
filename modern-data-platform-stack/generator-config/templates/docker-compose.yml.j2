@@ -1011,20 +1011,20 @@ services:
     {% if KAFKA_jmx_monitoring_prometheus_enable %}
       EXTRA_ARGS: -javaagent:/usr/share/jmx-exporter/jmx_prometheus_javaagent-0.16.1.jar=1234:/usr/share/jmx-exporter/zookeeper.yml
     {% endif -%}
-    {% if KAFKA_sasl_mechanism == 'SCRAM-SHA-256' %}
+    {% if KAFKA_sasl_mechanism == 'SCRAM-SHA-256' or KAFKA_sasl_mechanism == 'SCRAM-SHA-512' %}
       KAFKA_OPTS: -Djava.security.auth.login.config=/etc/kafka/zookeeper_server_jaas.conf
                 -Dzookeeper.authProvider.1=org.apache.zookeeper.server.auth.SASLAuthenticationProvider
                 -Dzookeeper.allowSaslFailedClients=false
                 -Dzookeeper.requireClientAuthScheme=sasl
-    {% endif -%} {# KAFKA_sasl_mechanism = 'SCRAM-SHA-256' #}
+    {% endif -%} {# KAFKA_sasl_mechanism = 'SCRAM-SHA-256' or 'SCRAM-SHA-512' #}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
-    {% if KAFKA_sasl_mechanism == 'SCRAM-SHA-256' %}
+    {% if KAFKA_sasl_mechanism == 'SCRAM-SHA-256' or KAFKA_sasl_mechanism == 'SCRAM-SHA-512' %}
       - ./security/zookeeper/sasl-scram/zookeeper.sasl.jaas.config:/etc/kafka/zookeeper_server_jaas.conf
-    {% endif -%} {# KAFKA_sasl_mechanism = 'SCRAM-SHA-256' #}
+    {% endif -%} {# KAFKA_sasl_mechanism = 'SCRAM-SHA-256' or 'SCRAM-SHA-512' #}
     {% if ZOOKEEPER_volume_map_data %}
       - "./container-volume/zookeeper-{{loop.index}}/data:/var/lib/zookeeper/data"
       - "./container-volume/zookeeper-{{loop.index}}/log:/var/lib/zookeeper/log"
@@ -1278,7 +1278,7 @@ services:
       - "./container-volume/kafka-{{loop.index}}:/var/lib/kafka/data"
     {% endif %}
     {% if ns.secureKafkaEnabled %}
-      {% if KAFKA_sasl_mechanism == 'SCRAM-SHA-256' %}
+      {% if KAFKA_sasl_mechanism == 'SCRAM-SHA-256' or KAFKA_sasl_mechanism == 'SCRAM-SHA-512' %}
       - ./security/kafka/sasl-scram/kafka.jaas.conf:/etc/kafka/kafka_server_jaas.conf
       - ./security/kafka/sasl-scram/client.properties:/tmp/client.properties
       - ./scripts/kafka/kraft/update_storage.sh:/tmp/kraft/update_storage.sh
@@ -1294,9 +1294,9 @@ services:
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki') | default(false) %}
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
-    {% if ns.secureKafkaEnabled and KAFKA_sasl_mechanism == 'SCRAM-SHA-256' | default(false) %}
-    command: "bash -c '/tmp/kraft/update_storage.sh {{KAFKA_cluster_id}} {{KAFKA_initial_users}} {{KAFKA_security_debug | lower }} && /etc/confluent/docker/run ;'"
-    {% endif -%}  {#  ns.secureKafkaEnabled and KAFKA_sasl_mechanism == 'SCRAM-SHA-256'  #}
+    {% if ns.secureKafkaEnabled and (KAFKA_sasl_mechanism == 'SCRAM-SHA-256' or KAFKA_sasl_mechanism == 'SCRAM-SHA-512') | default(false) %}
+    command: "bash -c '/tmp/kraft/update_storage.sh {{KAFKA_cluster_id}} {{KAFKA_initial_users}} {{KAFKA_sasl_mechanism}} {{KAFKA_security_debug | lower }} && /etc/confluent/docker/run ;'"
+    {% endif -%}  {#  ns.secureKafkaEnabled and KAFKA_sasl_mechanism == 'SCRAM-SHA-256' or 'SCRAM-SHA-512') #}
     restart: {{container_restart_policy}}
   {% endfor %} {# for serviceName in (ns.serviceNames) #}
 {% endif %} {# KAFKA_enable #}
