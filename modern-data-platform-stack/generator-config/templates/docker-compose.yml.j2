@@ -1153,14 +1153,13 @@ services:
       KAFKA_REPLICA_SELECTOR_CLASS: {{KAFKA_replica_selector_class | default(omit)}}
     {% if ns.secureKafkaEnabled %}
       KAFKA_SASL_ENABLED_MECHANISMS: {{KAFKA_sasl_mechanism}}
-      {% if KAFKA_use_kraft_mode | default(false) %}
-      KAFKA_SASL_MECHANISM_CONTROLLER_PROTOCOL: {{KAFKA_controller_sasl_mechanism}}
-      {% endif %}
       KAFKA_SASL_MECHANISM_INTER_BROKER_PROTOCOL: {{KAFKA_sasl_mechanism}}
       KAFKA_LISTENER_NAME_SCRAM-SHA-256_SASL_JAAS_CONFIG: {{ns.loginModule}} required username="broker" password="broker";
+      {% if KAFKA_use_kraft_mode | default(false) %}
+      KAFKA_SASL_MECHANISM_CONTROLLER_PROTOCOL: {{KAFKA_controller_sasl_mechanism}}
       KAFKA_LISTENER_NAME_CONTROLLER_SCRAM-SHA-256_SASL_JAAS_CONFIG: {{ns.loginModule}} required username="broker" password="broker";
       KAFKA_LISTENER_NAME_BROKER_SCRAM-SHA-256_SASL_JAAS_CONFIG: {{ns.loginModule}} required username="broker" password="broker";
-#      KAFKA_SECURITY_INTER_BROKER_PROTOCOL: {{KAFKA_security_protocol}}
+      {% endif %}
       KAFKA_SASL_SERVER_CALLBACK_HANDLER_CLASS: {{KAFKA_sasl_server_callback_handler_class}}
       CONFLUENT_METRICS_REPORTER_SASL_MECHANISM: {{KAFKA_sasl_mechanism}}
       CONFLUENT_METRICS_REPORTER_SECURITY_PROTOCOL: {{KAFKA_security_protocol}}
@@ -1190,6 +1189,9 @@ services:
       KAFKA_CONFLUENT_LOG_PLACEMENT_CONSTRAINTS: '{{KAFKA_confluent_log_placement_constraints}}'
       {% endif %}
       {%if KAFKA_confluent_tier_enable | default(false) %}
+      KAFKA_CONFLUENT_CLUSTER_LINK_ENABLE: '{{KAFKA_confluent_cluster_link_enable | default(omit) }}'
+      {% endif -%} {# KAFKA_confluent_tier_enable #}
+      {%if KAFKA_confluent_tier_enable | default(false) %}
       KAFKA_CONFLUENT_TIER_ENABLE: '{{KAFKA_confluent_tier_enable | default(omit) }}'
       KAFKA_CONFLUENT_TIER_FEATURE: '{{KAFKA_confluent_tier_feature | default(omit) }}'
       KAFKA_CONFLUENT_TIER_BACKEND: {{KAFKA_confluent_tier_backend | default(omit) }}
@@ -1215,6 +1217,7 @@ services:
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: {{KAFKA_internal_replication_factor | default(1)}}
       KAFKA_MESSAGE_TIMESTAMP_TYPE: {{KAFKA_message_timestamp_type | default('CreateTime')}}
+      KAFKA_LOG_DIRS: {{KAFKA_log_dirs if KAFKA_log_dirs is defined and KAFKA_log_dirs and KAFKA_log_dirs | lenght else omit }}
       KAFKA_COMPRESSION_TYPE: '{{KAFKA_compression_type | default(omit) }}'
       KAFKA_LOG_SEGMENT_BYTES: {{KAFKA_log_segment_bytes | default(omit) }}
       KAFKA_LOG_RETENTION_MS: {{KAFKA_log_retention_ms | default(omit) }}
