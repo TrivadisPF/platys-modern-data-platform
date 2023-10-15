@@ -776,7 +776,7 @@ networks:
 
 {#  ================================== Kafka Settings ========================================== #}
 
-{% macro login_module(sasl_mechanism) -%}
+{% macro login_module(sasl_mechanism) %}
   {% if sasl_mechanism == "SCRAM-SHA-256" or sasl_mechanism == "SCRAM_SHA-512" %}
     'org.apache.kafka.common.security.scram.ScramLoginModule'
   {% elif sasl_mechanism == "OAUTHBEARER" %}   {# KAFKA_sasl_mechanism #}
@@ -786,7 +786,7 @@ networks:
   {% else %}   {# KAFKA_sasl_mechanism #}
     'org.apache.kafka.common.security.plain.PlainLoginModule'
   {% endif %}   {# KAFKA_sasl_mechanism #}
-{%- endmacro %}
+{% endmacro %}
 
 {% set ns = namespace(bootstrapServers='') %}
 {% set ns = namespace(schemaRegistryUrl='') %}
@@ -851,7 +851,7 @@ networks:
     {% set ns.secureKafkaEnabled = (KAFKA_security_protocol != 'PLAINTEXT') %}
     {% set ns.securityProtocol = KAFKA_security_protocol %}
     {% set ns.saslMechanism = KAFKA_sasl_mechanism %}
-    {% set ns.loginModule = 'org.apache.kafka.common.security.scram.ScramLoginModule' %}
+    {% set ns.loginModule = login_module(KAFKA_sasl_mechanism) %}
     {% set ns.kafkaClientUsername = KAFKA_client_username %}
     {% set ns.kafkaClientPassword = KAFKA_client_password %}
 {% endif %}   {# external['KAFKA_enable'] #}
