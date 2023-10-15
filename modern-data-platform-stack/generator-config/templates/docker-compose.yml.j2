@@ -1005,7 +1005,7 @@ services:
     {% if KAFKA_jmx_monitoring_prometheus_enable %}
       EXTRA_ARGS: -javaagent:/usr/share/jmx-exporter/jmx_prometheus_javaagent-0.16.1.jar=1234:/usr/share/jmx-exporter/zookeeper.yml
     {% endif -%}
-    {% if KAFKA_sasl_mechanism == 'SCRAM-SHA-256' or KAFKA_sasl_mechanism == 'SCRAM-SHA-512' %}
+    {% if KAFKA_sasl_mechanism == 'SCRAM-SHA-256' or KAFKA_sasl_mechanism == 'SCRAM-SHA-512' or KAFKA_sasl_mechanism == 'PLAIN' %}
       KAFKA_OPTS: -Djava.security.auth.login.config=/etc/kafka/zookeeper_server_jaas.conf
                 -Dzookeeper.authProvider.1=org.apache.zookeeper.server.auth.SASLAuthenticationProvider
                 -Dzookeeper.allowSaslFailedClients=false
@@ -1016,8 +1016,8 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
-    {% if KAFKA_sasl_mechanism == 'SCRAM-SHA-256' or KAFKA_sasl_mechanism == 'SCRAM-SHA-512' %}
-      - ./security/zookeeper/sasl-scram/zookeeper.sasl.jaas.config:/etc/kafka/zookeeper_server_jaas.conf
+    {% if KAFKA_sasl_mechanism == 'SCRAM-SHA-256' or KAFKA_sasl_mechanism == 'SCRAM-SHA-512' or KAFKA_sasl_mechanism == 'PLAIN' %}
+      - ./security/zookeeper/zookeeper.sasl.jaas.config:/etc/kafka/zookeeper_server_jaas.conf
     {% endif -%} {# KAFKA_sasl_mechanism = 'SCRAM-SHA-256' or 'SCRAM-SHA-512' #}
     {% if ZOOKEEPER_volume_map_data %}
       - "./container-volume/zookeeper-{{loop.index}}/data:/var/lib/zookeeper/data"
