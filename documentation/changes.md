@@ -25,6 +25,10 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Dataverse
  * CKAN
 
+### Removed Services
+ 
+ * Azkarra Worker
+
 ### New/Updated Cookbook Recipes
 
  * [Collecting Docker Logs with Loki](../cookbooks/recipes/collecting-docker-logs-with-loki/README.md)

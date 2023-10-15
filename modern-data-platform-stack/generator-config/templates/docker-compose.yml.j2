@@ -28,7 +28,6 @@ networks:
 {% set __KAFKA_KSQLDB_version = KAFKA_KSQLDB_version | default('latest') -%}
 {% set __MATERIALIZE_version = MATERIALIZE_version | default('latest') -%}
 {% set __HSTREAMDB_version = HSTREAMDB_version | default('latest') -%}
-{% set __AZKARRA_version = AZKARRA_version | default('latest') -%}
 
 {% set __SCHEMA_REGISTRY_UI_version = SCHEMA_REGISTRY_UI_version | default('latest') -%}
 
@@ -496,11 +495,6 @@ networks:
   {% set KAFKA_enable = true -%}
   {% set SCHEMA_REGISTRY_enable = true -%}
 {% endif -%}   {# DATAHUB_enable  #}
-
-{% if AZKARRA_enable or PINOT_enable -%}
-# enforce some dependencies
-  {% set KAFKA_enable = true -%}
-{% endif -%}   {# AZKARRA_enable  #}
 
 {% if (KAFKA_enable and not KAFKA_use_kraft_mode) or ATLAS_enable or DRILL_enable or PINOT_enable -%}
 # enforce some dependencies
@@ -1840,33 +1834,6 @@ services:
     restart: {{container_restart_policy}}
 
 {% endif %}   {# HSTOREDB_enable #}
-
-{% if (AZKARRA_enable) | default(false) %}
-  #  ================================== Azkarra Streams ========================================== #
-  azkarra-worker-1:
-    image: streamthoughts/azkarra-streams-worker:{{__AZKARRA_version}}
-    hostname: azkarra-worker-1
-    container_name: azkarra-worker-1
-    labels:
-      com.platys.name: "azkarra-worker"
-      com.platys.restapi.title: 'Kafka REST Proxy'
-      com.platys.restapi.url: "http://dataplatform:28085"
-    ports:
-      - "28085:8080"
-    environment:
-      AZKARRA_CONTEXT_STREAMS_BOOTSTRAP_SERVERS: '{{ns.bootstrapServers}}'
-      AZKARRA_CONTEXT_STREAMS_STATE_DIR: /var/lib/kafka-streams/
-      AZKARRA_CONTEXT_AUTO_CREATE_TOPICS_ENABLE: "true"
-      AZKARRA_CONTEXT_AUTO_DELETE_TOPICS_ENABLE: "true"
-      AZKARRA_CONTEXT_ENABLE_WAIT_FOR_TOPICS: "true"
-      AZKARRA_COMPONENT_PATHS: /usr/share/azkarra-components
-    volumes:
-      - /components/azkarra:/usr/share/azkarra-components
-      #- /tmp/azkarra/etc/azkarra.conf:/etc/azkarra/azkarra.conf
-    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki') | default(false) %}
-    <<: *logging
-    {% endif -%}   {#  logging_driver is defined ... #}
-{% endif %}   {# AZKARRA_enable #}
 
 {% if ((KAFKA_enable or external['KAFKA_enable']) and KAFKA_RESTPROXY_enable) | default(false) %}
   #  ================================== Confluent REST Proxy ========================================== #
@@ -6132,16 +6099,16 @@ services:
       - ENABLE_RELOAD=0
       - ENABLE_JDWP=1
 #      - dataverse_files_storage__driver__id=s3
-    {%if MINIO_enable or external['S3_enable'] | default(false) %}
+    {%if DATAVERSE_s3_bucket is defined and DATAVERSE_s3_bucket and DATAVERSE_s3_bucket | length and (MINIO_enable or external['S3_enable']) | default(false) %}
       - dataverse_files_s3_type=s3
       - dataverse_files_s3_label="Object Storage"
-      - dataverse_files_s3_bucket__name="dataverse-bucket"
+      - dataverse_files_s3_bucket__name="{{DATAVERSE_s3_bucket}}"
       - dataverse_files_s3_custom__endpoint__url={{s3Endpoint | default(omit) }}
       - dataverse_files_s3_custom__endpoint__region='{{s3DefaultRegion if s3DefaultRegion is defined and s3DefaultRegion else omit}}'
       - dataverse_files_s3_path__style__access={{s3PathStyleAccess}}
       - dataverse_files_s3_access__key={{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
       - dataverse_files_s3_secret__key={{s3SecretAccessKey}}
-    {% endif -%} {#  MINIO_enable #}
+    {% endif -%} {#  DATAVERSE_s3_bucket and MINIO_enable #}
     {% if KEYCLOAK_enable | default(false) %}
       - DATAVERSE_FEATURE_API_BEARER_AUTH=1
       - DATAVERSE_AUTH_OIDC_ENABLED=1
