@@ -64,6 +64,9 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * support for NEO4J major version 4 and 5 with `NEO4J_major_version` setting
  * Markdown Viewer implementation has been changed to use `markdown-madness` instead of `markdown-web` (because it supports images and also has a nicer look&feel). This is now the default option, but you can revert back to the previous one by changing the value of the `MARKDOWN_VIEWER_edition` config setting to `markdown-web`.
  * Watchtower now supports a lot more options and is no longer hardcoded to one single behaviour.
+ * support for Kafka SASL/PLAIN authentication for traditional and KRaft setups
+ * support for Kafka SASL/SCRAM (256 + 512) authentication for traditional and KRaft setups
+ * support for Kafka authorisation for traditional and KRaft setups
 
 ### Breaking Changes
 
