@@ -805,14 +805,14 @@ networks:
     {% set ns.saslMechanism = external['KAFKA_sasl_mechanism'] %}
     {% set ns.loginModule = 'org.apache.kafka.common.security.plain.PlainLoginModule' %}
   {% if external['KAFKA_sasl_username'] is defined and external['KAFKA_sasl_username'] | default(false) %}
-    {% set ns.kafkaClientUsername = external['KAFKA_sasl_username'] %}
+    {% set ns.kafkaToolsDefaultUsername = external['KAFKA_sasl_username'] %}
   {% else %}
-    {% set ns.kafkaClientUsername = '${PLATYS_EXTERNAL_KAFKA_USERNAME:?PLATYS_EXTERNAL_KAFKA_USERNAME must be set either in .env or as an environment variable}' %}
+    {% set ns.kafkaToolsDefaultUsername = '${PLATYS_EXTERNAL_KAFKA_USERNAME:?PLATYS_EXTERNAL_KAFKA_USERNAME must be set either in .env or as an environment variable}' %}
   {% endif %}  {# KAFKA_sasl_username #}
   {% if external['KAFKA_sasl_password'] is defined and external['KAFKA_sasl_password'] | default(false) %}
-    {% set ns.kafkaClientUsername = external['KAFKA_sasl_password'] %}
+    {% set ns.kafkaToolsDefaultUsername = external['KAFKA_sasl_password'] %}
   {% else %}
-    {% set ns.kafkaClientPassword = '${PLATYS_EXTERNAL_KAFKA_PASSWORD:?PLATYS_EXTERNAL_KAFKA_PASSWORD must be set either in .env or as an environment variable}' %}
+    {% set ns.kafkaToolsDefaultPassword = '${PLATYS_EXTERNAL_KAFKA_PASSWORD:?PLATYS_EXTERNAL_KAFKA_PASSWORD must be set either in .env or as an environment variable}' %}
   {% endif %}  {# KAFKA_sasl_password #}
 
   {% set ns.schemaRegistryUrl = external['SCHEMA_REGISTRY_url'] %}
@@ -874,8 +874,8 @@ networks:
   {% set ns.loginModuleDOCKERHOST = login_module(KAFKA_dockerhost_sasl_mechanism, KAFKA_sasl_mechanism) %}
   {% set ns.loginModuleEXTERNAL = login_module(KAFKA_extrnal_sasl_mechanism, KAFKA_sasl_mechanism) %}
 
-  {% set ns.kafkaClientUsername = KAFKA_client_username %}
-  {% set ns.kafkaClientPassword = KAFKA_client_password %}
+  {% set ns.kafkaToolsDefaultUsername = KAFKA_tools_username %}
+  {% set ns.kafkaToolsDefaultPassword = KAFKA_tools_password %}
 {% endif %}   {# external['KAFKA_enable'] #}
 
 {#  ================================== Schema Registry Settings ========================================== #}
@@ -1411,7 +1411,7 @@ services:
     {% if external['KAFKA_enable'] and external['KAFKA_sasl_mechanism'] is defined and external['KAFKA_sasl_mechanism'] | length %}
       SECURITY_PROTOCOL: "{{ns.securityProtocolBROKER}}"
       SASL_MECHANISM: "{{ns.saslMechanism}}"
-      SASL_JAAS_CONFIG: "{{ns.loginModule}} required username=\"{{ns.kafkaClientUsername}}\" password=\"{{ns.kafkaClientPassword}}\";"
+      SASL_JAAS_CONFIG: "{{ns.loginModule}} required username=\"{{ns.kafkaToolsDefaultUsername}}\" password=\"{{ns.kafkaToolsDefaultPassword}}\";"
     {% endif -%}   {#  KAFKA_sasl_mechanism #}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
@@ -1484,23 +1484,23 @@ services:
       CONNECT_SECURITY_PROTOCOL: "{{ns.securityProtocol}}"
       CONNECT_SASL_MECHANISM: "{{ns.saslMechanism}}"
       CONNECT_SASL_JAAS_CONFIG: "{{ns.loginModule}} required
-                        username=\"{{KAFKA_CONNECT_kafka_username if KAFKA_CONNECT_kafka_username is defined and KAFKA_CONNECT_kafka_username | length else ns.kafkaClientUsername}}\"
-                        password=\"{{KAFKA_CONNECT_kafka_password if KAFKA_CONNECT_kafka_password is defined and KAFKA_CONNECT_kafka_password | length else ns.kafkaClientPassword}}\";"
+                        username=\"{{KAFKA_CONNECT_kafka_username if KAFKA_CONNECT_kafka_username is defined and KAFKA_CONNECT_kafka_username | length else ns.kafkaToolsDefaultUsername}}\"
+                        password=\"{{KAFKA_CONNECT_kafka_password if KAFKA_CONNECT_kafka_password is defined and KAFKA_CONNECT_kafka_password | length else ns.kafkaToolsDefaultPassword}}\";"
       # producer
       #
       CONNECT_CONSUMER_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: "https"
       CONNECT_CONSUMER_SECURITY_PROTOCOL: "{{ns.securityProtocol}}"
       CONNECT_CONSUMER_SASL_MECHANISM: "{{ns.saslMechanism}}"
       CONNECT_CONSUMER_SASL_JAAS_CONFIG: "{{ns.loginModule}} required
-                        username=\"{{KAFKA_CONNECT_kafka_username if KAFKA_CONNECT_kafka_username is defined and KAFKA_CONNECT_kafka_username | length else ns.kafkaClientUsername}}\"
-                        password=\"{{KAFKA_CONNECT_kafka_password if KAFKA_CONNECT_kafka_password is defined and KAFKA_CONNECT_kafka_password | length else ns.kafkaClientPassword}}\";"
+                        username=\"{{KAFKA_CONNECT_kafka_username if KAFKA_CONNECT_kafka_username is defined and KAFKA_CONNECT_kafka_username | length else ns.kafkaToolsDefaultUsername}}\"
+                        password=\"{{KAFKA_CONNECT_kafka_password if KAFKA_CONNECT_kafka_password is defined and KAFKA_CONNECT_kafka_password | length else ns.kafkaToolsDefaultPassword}}\";"
       #
       CONNECT_PRODUCER_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: "https"
       CONNECT_PRODUCER_SECURITY_PROTOCOL: "{{ns.securityProtocol}}"
       CONNECT_PRODUCER_SASL_MECHANISM: "{{ns.saslMechanism}}"
       CONNECT_PRODUCER_SASL_JAAS_CONFIG: "{{ns.loginModule}} required
-                        username=\"{{KAFKA_CONNECT_kafka_username if KAFKA_CONNECT_kafka_username is defined and KAFKA_CONNECT_kafka_username | length else ns.kafkaClientUsername}}\"
-                        password=\"{{KAFKA_CONNECT_kafka_password if KAFKA_CONNECT_kafka_password is defined and KAFKA_CONNECT_kafka_password | length else ns.kafkaClientPassword}}\";"
+                        username=\"{{KAFKA_CONNECT_kafka_username if KAFKA_CONNECT_kafka_username is defined and KAFKA_CONNECT_kafka_username | length else ns.kafkaToolsDefaultUsername}}\"
+                        password=\"{{KAFKA_CONNECT_kafka_password if KAFKA_CONNECT_kafka_password is defined and KAFKA_CONNECT_kafka_password | length else ns.kafkaToolsDefaultPassword}}\";"
     {% endif -%}   {#  ns.secureKafkaEnabled #}
       #CLASSPATH: /usr/share/java/monitoring-interceptors/monitoring-interceptors-4.0.0.jar
       AWS_ACCESS_KEY_ID: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
@@ -1625,20 +1625,20 @@ services:
       KSQL_SECURITY_PROTOCOL: "{{ns.securityProtocol}}"
       KSQL_SASL_MECHANISM: "{{ns.saslMechanism}}"
       KSQL_SASL_JAAS_CONFIG: "{{ns.loginModule}} required
-                        username=\"{{KSQLDB_kafka_username if KSQLDB_kafka_username is defined and KSQLDB_kafka_username | length else ns.kafkaClientUsername}}\"
-                        password=\"{{KSQLDB_kafka_password if KSQLDB_kafka_password is defined and KSQLDB_kafka_password | length else ns.kafkaClientPassword}}\";"
+                        username=\"{{KSQLDB_kafka_username if KSQLDB_kafka_username is defined and KSQLDB_kafka_username | length else ns.kafkaToolsDefaultUsername}}\"
+                        password=\"{{KSQLDB_kafka_password if KSQLDB_kafka_password is defined and KSQLDB_kafka_password | length else ns.kafkaToolsDefaultPassword}}\";"
       # producer
       KSQL_PRODUCER_CONFLUENT_MONITORING_INTERCEPTOR_SECURITY_PROTOCOL: "{{ns.securityProtocol}}"
       KSQL_PRODUCER_CONFLUENT_MONITORING_INTERCEPTOR_SASL_MECHANISM: "{{ns.saslMechanism}}"
       KSQL_PRODUCER_CONFLUENT_MONITORING_INTERCEPTOR_SASL_JAAS_CONFIG: "{{ns.loginModule}} required
-                        username=\"{{KSQLDB_kafka_username if KSQLDB_kafka_username is defined and KSQLDB_kafka_username | length else ns.kafkaClientUsername}}\"
-                        password=\"{{KSQLDB_kafka_password if KSQLDB_kafka_password is defined and KSQLDB_kafka_password | length else ns.kafkaClientPassword}}\";"
+                        username=\"{{KSQLDB_kafka_username if KSQLDB_kafka_username is defined and KSQLDB_kafka_username | length else ns.kafkaToolsDefaultUsername}}\"
+                        password=\"{{KSQLDB_kafka_password if KSQLDB_kafka_password is defined and KSQLDB_kafka_password | length else ns.kafkaToolsDefaultPassword}}\";"
       # consumer
       KSQL_CONSUMER_CONFLUENT_MONITORING_INTERCEPTOR_SECURITY_PROTOCOL: "{{ns.securityProtocol}}"
       KSQL_CONSUMER_CONFLUENT_MONITORING_INTERCEPTOR_SASL_MECHANISM: "{{ns.saslMechanism}}"
       KSQL_CONSUMER_CONFLUENT_MONITORING_INTERCEPTOR_SASL_JAAS_CONFIG: "{{ns.loginModule}} required
-                        username=\"{{KSQLDB_kafka_username if KSQLDB_kafka_username is defined and KSQLDB_kafka_username | length else ns.kafkaClientUsername}}\"
-                        password=\"{{KSQLDB_kafka_password if KSQLDB_kafka_password is defined and KSQLDB_kafka_password | length else ns.kafkaClientPassword}}\";"
+                        username=\"{{KSQLDB_kafka_username if KSQLDB_kafka_username is defined and KSQLDB_kafka_username | length else ns.kafkaToolsDefaultUsername}}\"
+                        password=\"{{KSQLDB_kafka_password if KSQLDB_kafka_password is defined and KSQLDB_kafka_password | length else ns.kafkaToolsDefaultPassword}}\";"
     {% endif -%}   {#  ns.secureKafkaEnabled #}
 
     {% if ( KAFKA_CONNECT_enable ) | default(false) %}
@@ -1914,8 +1914,8 @@ services:
       KAFKA_REST_CLIENT_SECURITY_PROTOCOL: "{{ns.securityProtocol}}"
       KAFKA_REST_CLIENT_SASL_MECHANISM: "{{ns.saslMechanism}}"
       KAFKA_REST_CLIENT_SASL_JAAS_CONFIG: "{{ns.loginModule}} required
-                        username=\"{{KAFKA_RESTPROXY_kafka_username if KAFKA_RESTPROXY_kafka_username is defined and KAFKA_RESTPROXY_kafka_username | length else ns.kafkaClientUsername}}\"
-                        password=\"{{KAFKA_RESTPROXY_kafka_password if KAFKA_RESTPROXY_kafka_password is defined and KAFKA_RESTPROXY_kafka_password | length else ns.kafkaClientPassword}}\";"
+                        username=\"{{KAFKA_RESTPROXY_kafka_username if KAFKA_RESTPROXY_kafka_username is defined and KAFKA_RESTPROXY_kafka_username | length else ns.kafkaToolsDefaultUsername}}\"
+                        password=\"{{KAFKA_RESTPROXY_kafka_password if KAFKA_RESTPROXY_kafka_password is defined and KAFKA_RESTPROXY_kafka_password | length else ns.kafkaToolsDefaultPassword}}\";"
     {% endif -%}   {#  ns.secureKafkaEnabled #}
     {% if KAFKA_jmx_monitoring_prometheus_enable %}
       KAFKAREST_OPTS: -javaagent:/usr/share/jmx-exporter/jmx_prometheus_javaagent-0.16.1.jar=1234:/usr/share/jmx-exporter/confluent_rest.yml
@@ -1958,8 +1958,8 @@ services:
       KAFKA_MQTT_PRODUCER_SECURITY_PROTOCOL: "{{ns.securityProtocol}}"
       KAFKA_MQTT_PRODUCER_SASL_MECHANISM: "{{ns.saslMechanism}}"
       KAFKA_MQTT_PRODUCER_SASL_JAAS_CONFIG: "{{ns.loginModule}} required
-                        username=\"{{KAFKA_MQTTPROXY_kafka_username if KAFKA_MQTTPROXY_kafka_username is defined and KAFKA_MQTTPROXY_kafka_username | length else ns.kafkaClientUsername}}\"
-                        password=\"{{KAFKA_MQTTPROXY_kafka_password if KAFKA_MQTTPROXY_kafka_password is defined and KAFKA_MQTTPROXY_kafka_password | length else ns.kafkaClientPassword}}\";"
+                        username=\"{{KAFKA_MQTTPROXY_kafka_username if KAFKA_MQTTPROXY_kafka_username is defined and KAFKA_MQTTPROXY_kafka_username | length else ns.kafkaToolsDefaultUsername}}\"
+                        password=\"{{KAFKA_MQTTPROXY_kafka_password if KAFKA_MQTTPROXY_kafka_password is defined and KAFKA_MQTTPROXY_kafka_password | length else ns.kafkaToolsDefaultPassword}}\";"
     {% endif -%}   {#  ns.secureKafkaEnabled #}
 
     {%if use_timezone | default(false) %}
@@ -2042,8 +2042,8 @@ services:
       SCHEMA_REGISTRY_KAFKASTORE_SECURITY_PROTOCOL: "{{ns.securityProtocol}}"
       SCHEMA_REGISTRY_KAFKASTORE_SASL_MECHANISM: "{{ns.saslMechanism}}"
       SCHEMA_REGISTRY_KAFKASTORE_SASL_JAAS_CONFIG: "{{ns.loginModule}} required
-                        username=\"{{SCHEMA_REGISTRY_kafka_username if SCHEMA_REGISTRY_kafka_username is defined and SCHEMA_REGISTRY_kafka_username | length else ns.kafkaClientUsername}}\"
-                        password=\"{{SCHEMA_REGISTRY_kafka_password if SCHEMA_REGISTRY_kafka_password is defined and SCHEMA_REGISTRY_kafka_password | length else ns.kafkaClientPassword}}\";"
+                        username=\"{{SCHEMA_REGISTRY_kafka_username if SCHEMA_REGISTRY_kafka_username is defined and SCHEMA_REGISTRY_kafka_username | length else ns.kafkaToolsDefaultUsername}}\"
+                        password=\"{{SCHEMA_REGISTRY_kafka_password if SCHEMA_REGISTRY_kafka_password is defined and SCHEMA_REGISTRY_kafka_password | length else ns.kafkaToolsDefaultPassword}}\";"
     {% endif -%}   {#  ns.secureKafkaEnabled #}
     {% if OTEL_COLLECTOR_enable | default(false) %}
       OTEL_RESOURCE_ATTRIBUTES: 'service.name=schema-registry'
@@ -2192,7 +2192,7 @@ services:
   {% if ns.secureKafkaEnabled %}
       CONTROL_CENTER_STREAMS_SECURITY_PROTOCOL: "{{ns.securityProtocol}}"
       CONTROL_CENTER_STREAMS_SASL_MECHANISM: "{{ns.saslMechanism}}"
-      CONTROL_CENTER_STREAMS_SASL_MECHANISM: "{{ns.loginModule}} required username=\"{{ns.kafkaClientUsername}}\" password=\"{{ns.kafkaClientPassword}}\";"
+      CONTROL_CENTER_STREAMS_SASL_MECHANISM: "{{ns.loginModule}} required username=\"{{ns.kafkaToolsDefaultUsername}}\" password=\"{{ns.kafkaToolsDefaultPassword}}\";"
   {% endif -%}   {#  ns.secureKafkaEnabled #}
   {% if ( KAFKA_CONNECT_enable or KSQLDB_use_embedded_connect) | default(false) %}
       CONTROL_CENTER_CONNECT_DEMO_CLUSTER: '${DOCKER_HOST_IP}:8083'
@@ -2258,23 +2258,23 @@ services:
       CONNECT_SECURITY_PROTOCOL: "{{ns.securityProtocol}}"
       CONNECT_SASL_MECHANISM: "{{ns.saslMechanism}}"
       CONNECT_SASL_JAAS_CONFIG: "{{ns.loginModule}} required
-                        username=\"{{KAFKA_CONNECT_kafka_username if KAFKA_CONNECT_kafka_username is defined and KAFKA_CONNECT_kafka_username | length else ns.kafkaClientUsername}}\"
-                        password=\"{{KAFKA_CONNECT_kafka_password if KAFKA_CONNECT_kafka_password is defined and KAFKA_CONNECT_kafka_password | length else ns.kafkaClientPassword}}\";"
+                        username=\"{{KAFKA_CONNECT_kafka_username if KAFKA_CONNECT_kafka_username is defined and KAFKA_CONNECT_kafka_username | length else ns.kafkaToolsDefaultUsername}}\"
+                        password=\"{{KAFKA_CONNECT_kafka_password if KAFKA_CONNECT_kafka_password is defined and KAFKA_CONNECT_kafka_password | length else ns.kafkaToolsDefaultPassword}}\";"
       # producer
       #
       CONNECT_CONSUMER_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: "https"
       CONNECT_CONSUMER_SECURITY_PROTOCOL: "{{ns.securityProtocol}}"
       CONNECT_CONSUMER_SASL_MECHANISM: "{{ns.saslMechanism}}"
       CONNECT_CONSUMER_SASL_JAAS_CONFIG: "{{ns.loginModule}} required
-                        username=\"{{KAFKA_CONNECT_kafka_username if KAFKA_CONNECT_kafka_username is defined and KAFKA_CONNECT_kafka_username | length else ns.kafkaClientUsername}}\"
-                        password=\"{{KAFKA_CONNECT_kafka_password if KAFKA_CONNECT_kafka_password is defined and KAFKA_CONNECT_kafka_password | length else ns.kafkaClientPassword}}\";"
+                        username=\"{{KAFKA_CONNECT_kafka_username if KAFKA_CONNECT_kafka_username is defined and KAFKA_CONNECT_kafka_username | length else ns.kafkaToolsDefaultUsername}}\"
+                        password=\"{{KAFKA_CONNECT_kafka_password if KAFKA_CONNECT_kafka_password is defined and KAFKA_CONNECT_kafka_password | length else ns.kafkaToolsDefaultPassword}}\";"
       #
       CONNECT_PRODUCER_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: "https"
       CONNECT_PRODUCER_SECURITY_PROTOCOL: "{{ns.securityProtocol}}"
       CONNECT_PRODUCER_SASL_MECHANISM: "{{ns.saslMechanism}}"
       CONNECT_PRODUCER_SASL_JAAS_CONFIG: "{{ns.loginModule}} required
-                        username=\"{{KAFKA_CONNECT_kafka_username if KAFKA_CONNECT_kafka_username is defined and KAFKA_CONNECT_kafka_username | length else ns.kafkaClientUsername}}\"
-                        password=\"{{KAFKA_CONNECT_kafka_password if KAFKA_CONNECT_kafka_password is defined and KAFKA_CONNECT_kafka_password | length else ns.kafkaClientPassword}}\";"
+                        username=\"{{KAFKA_CONNECT_kafka_username if KAFKA_CONNECT_kafka_username is defined and KAFKA_CONNECT_kafka_username | length else ns.kafkaToolsDefaultUsername}}\"
+                        password=\"{{KAFKA_CONNECT_kafka_password if KAFKA_CONNECT_kafka_password is defined and KAFKA_CONNECT_kafka_password | length else ns.kafkaToolsDefaultPassword}}\";"
     {% endif -%}   {#  ns.secureKafkaEnabled #}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
@@ -2396,8 +2396,8 @@ services:
     {% if ns.secureKafkaEnabled %}
       SECURITY_PROTOCOL: "{{ns.securityProtocol}}"
       SASL_MECHANISM: "{{ns.saslMechanism}}"
-      SASL_USERNAME: "{{ns.kafkaClientUsername}}"
-      SASL_USERNAME: "{{ns.kafkaClientPassword}}"
+      SASL_USERNAME: "{{ns.kafkaToolsDefaultUsername}}"
+      SASL_USERNAME: "{{ns.kafkaToolsDefaultPassword}}"
     {% endif -%}   {#  ns.secureKafkaEnabled #}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
@@ -2464,8 +2464,8 @@ services:
       JIKKOU_DEFAULT_KAFKA_SECURITY_PROTOCOL: "{{ns.securityProtocol}}"
       JIKKOU_DEFAULT_KAFKA_SASL_MECHANISM: "{{ns.saslMechanism}}"
       JIKKOU_DEFAULT_KAFKA_SASL_JAAS_CONFIG: "{{ns.loginModule}} required
-                        username=\"{{KAFKA_RESTPROXY_kafka_username if KAFKA_RESTPROXY_kafka_username is defined and KAFKA_RESTPROXY_kafka_username | length else ns.kafkaClientUsername}}\"
-                        password=\"{{KAFKA_RESTPROXY_kafka_password if KAFKA_RESTPROXY_kafka_password is defined and KAFKA_RESTPROXY_kafka_password | length else ns.kafkaClientPassword}}\";"
+                        username=\"{{KAFKA_RESTPROXY_kafka_username if KAFKA_RESTPROXY_kafka_username is defined and KAFKA_RESTPROXY_kafka_username | length else ns.kafkaToolsDefaultUsername}}\"
+                        password=\"{{KAFKA_RESTPROXY_kafka_password if KAFKA_RESTPROXY_kafka_password is defined and KAFKA_RESTPROXY_kafka_password | length else ns.kafkaToolsDefaultPassword}}\";"
     {% endif -%}   {#  ns.secureKafkaEnabled #}
       JIKKOU_DEFAULT_SCHEMA_REGISTRY_URL: ''
     {%if JIKKOU_kafka_brokers_wait_for_min_available_enabled | default(true) %}
@@ -2747,7 +2747,7 @@ services:
     {% if ns.secureKafkaEnabled %}
                 security.protocol: "{{ns.securityProtocol}}"
                 sasl.mechanism: "{{ns.saslMechanism}}"
-                sasl.jaas.config: "{{ns.loginModule}} required username=\"{{ns.kafkaClientUsername}}\" password=\"{{ns.kafkaClientPassword}}\";"
+                sasl.jaas.config: "{{ns.loginModule}} required username=\"{{ns.kafkaToolsDefaultUsername}}\" password=\"{{ns.kafkaToolsDefaultPassword}}\";"
     {% endif -%}   {#  ns.secureKafkaEnabled #}
     {% if (SCHEMA_REGISTRY_enable or external['SCHEMA_REGISTRY_enable']) | default(false) %}
               schema-registry:
@@ -2809,7 +2809,7 @@ services:
     {% if ns.secureKafkaEnabled %}
       KAFKA_CLUSTERS_0_PROPERTIES_SECURITY_PROTOCOL: "{{ns.securityProtocol}}"
       KAFKA_CLUSTERS_0_PROPERTIES_SASL_MECHANISM: "{{ns.saslMechanism}}"
-      KAFKA_CLUSTERS_0_PROPERTIES_SASL_JAAS_CONFIG: "{{ns.loginModule}} required username=\"{{ns.kafkaClientUsername}}\" password=\"{{ns.kafkaClientPassword}}\";"
+      KAFKA_CLUSTERS_0_PROPERTIES_SASL_JAAS_CONFIG: "{{ns.loginModule}} required username=\"{{ns.kafkaToolsDefaultUsername}}\" password=\"{{ns.kafkaToolsDefaultPassword}}\";"
       KAFKA_CLUSTERS_0_PROPERTIES_CLIENT_DNS_LOOKUP: use_all_dns_ips
       KAFKA_CLUSTERS_0_DISABLELOGDIRSCOLLECTION: 'true'
     {% endif -%}   {#  ns.secureKafkaEnabled #}
@@ -2892,8 +2892,8 @@ services:
       KAFKA_TLS_ENABLED: 'true'
       KAFKA_SASL_ENABLED: 'true'
       KAFKA_SASL_MECHANISM: '{{ns.saslMechanism}}'
-      KAFKA_SASL_USERNAME: {{ns.kafkaClientUsername}}
-      KAFKA_SASL_PASSWORD: {{ns.kafkaClientPassword}}
+      KAFKA_SASL_USERNAME: {{ns.kafkaToolsDefaultUsername}}
+      KAFKA_SASL_PASSWORD: {{ns.kafkaToolsDefaultPassword}}
     {% endif -%}   {#  secureKafkaEnabled #}
     {% if ( SCHEMA_REGISTRY_enable or external['SCHEMA_REGISTRY_enable']) | default(false) %}
       KAFKA_SCHEMAREGISTRY_ENABLED: 'True'
@@ -2942,8 +2942,8 @@ services:
       KAFKA_TLS_ENABLED: 'true'
       KAFKA_SASL_ENABLED: 'true'
       KAFKA_SASL_MECHANISM: '{{ns.saslMechanism}}'
-      KAFKA_SASL_USERNAME: {{ns.kafkaClientUsername}}
-      KAFKA_SASL_PASSWORD: {{ns.kafkaClientPassword}}
+      KAFKA_SASL_USERNAME: {{ns.kafkaToolsDefaultUsername}}
+      KAFKA_SASL_PASSWORD: {{ns.kafkaToolsDefaultPassword}}
     {% endif -%}   {#  ns.secureKafkaEnabled #}
     {% if ( SCHEMA_REGISTRY_enable or external['SCHEMA_REGISTRY_enable']) | default(false) %}
       KAFKA_SCHEMAREGISTRY_ENABLED: 'True'
@@ -3092,7 +3092,7 @@ services:
     {% if ns.secureKafkaEnabled %}
       - SECURITY_PROTOCOL='{{ns.securityProtocol}}'
       - SASL_MECHANISM='{{ns.saslMechanism}}'
-      - SASL_JAAS_CONFIG='{{ns.loginModule}} required username=\"{{ns.kafkaClientUsername}}\" password=\"{{ns.kafkaClientPassword}}\";'
+      - SASL_JAAS_CONFIG='{{ns.loginModule}} required username=\"{{ns.kafkaToolsDefaultUsername}}\" password=\"{{ns.kafkaToolsDefaultPassword}}\";'
     {% endif -%}   {#  secureKafkaEnabled #}
     {% if (KPOW_edition | lower) == 'ce' or (KPOW_edition | lower) == 'se' or (KPOW_edition | lower) == 'ee' %}
       {% if not KPOW_use_external_license_info %}
@@ -3188,7 +3188,7 @@ services:
     {% if ns.secureKafkaEnabled %}
       - KAFKA_SECURITY_PROTOCOL="{{ns.securityProtocol}}"
       - KAFKA_SASL_MECHANISM="{{ns.saslMechanism}}"
-      - KAFKA_SASL_JAAS_CONFIG="{{ns.loginModule}} required username=\"{{ns.kafkaClientUsername}}\" password=\"{{ns.kafkaClientPassword}}\";"
+      - KAFKA_SASL_JAAS_CONFIG="{{ns.loginModule}} required username=\"{{ns.kafkaToolsDefaultUsername}}\" password=\"{{ns.kafkaToolsDefaultPassword}}\";"
     {% endif -%}   {#  ns.secureKafkaEnabled #}
     {% if (SCHEMA_REGISTRY_enable or external['SCHEMA_REGISTRY_enable']) | default(false) %}
       - SCHEMA_REGISTRY_URL={{ns.schemaRegistryUrl}}
@@ -3281,8 +3281,8 @@ services:
       - APP_KAFKA_PROPERTIES_SECURITY_PROTOCOL="{{ns.securityProtocol}}"
       - APP_KAFKA_PROPERTIES_SASL_MECHANISM="{{ns.saslMechanism}}"
       - APP_KAFKA_PROPERTIES_SASL_JAAS_CONFIG="{{ns.loginModule}} required
-                        username=\"{{KAFKA_RESTPROXY_kafka_username if KAFKA_RESTPROXY_kafka_username is defined and KAFKA_RESTPROXY_kafka_username | length else ns.kafkaClientUsername}}\"
-                        password=\"{{KAFKA_RESTPROXY_kafka_password if KAFKA_RESTPROXY_kafka_password is defined and KAFKA_RESTPROXY_kafka_password | length else ns.kafkaClientPassword}}\";"
+                        username=\"{{KAFKA_RESTPROXY_kafka_username if KAFKA_RESTPROXY_kafka_username is defined and KAFKA_RESTPROXY_kafka_username | length else ns.kafkaToolsDefaultUsername}}\"
+                        password=\"{{KAFKA_RESTPROXY_kafka_password if KAFKA_RESTPROXY_kafka_password is defined and KAFKA_RESTPROXY_kafka_password | length else ns.kafkaToolsDefaultPassword}}\";"
     {% endif -%}   {#  ns.secureKafkaEnabled #}
     {% if use_timezone | default(false) %}
       - TZ={{use_timezone}}
@@ -5063,7 +5063,7 @@ services:
     {% if ns.secureKafkaEnabled %}
       - SPRING_KAFKA_PROPERTIES_SECURITY_PROTOCOL='{{ns.securityProtocol}}'
       - SPRING_KAFKA_PROPERTIES_SASL_MECHANISM='{{ns.saslMechanism}}'
-      - SPRING_KAFKA_PROPERTIES_SASL_JAAS_CONFIG='{{ns.loginModule}} required username=\"{{ns.kafkaClientUsername}}\" password=\"{{ns.kafkaClientPassword}}\";'
+      - SPRING_KAFKA_PROPERTIES_SASL_JAAS_CONFIG='{{ns.loginModule}} required username=\"{{ns.kafkaToolsDefaultUsername}}\" password=\"{{ns.kafkaToolsDefaultPassword}}\";'
     {% endif -%}   {#  secureKafkaEnabled #}
       - DATAHUB_TRACKING_TOPIC=DataHubUsageEvent_v1
       - ELASTIC_CLIENT_HOST=datahub-elasticsearch
@@ -5131,7 +5131,7 @@ services:
     {% if ns.secureKafkaEnabled %}
       - SPRING_KAFKA_PROPERTIES_SECURITY_PROTOCOL='{{ns.securityProtocol}}'
       - SPRING_KAFKA_PROPERTIES_SASL_MECHANISM='{{ns.saslMechanism}}'
-      - SPRING_KAFKA_PROPERTIES_SASL_JAAS_CONFIG='{{ns.loginModule}} required username=\"{{ns.kafkaClientUsername}}\" password=\"{{ns.kafkaClientPassword}}\";'
+      - SPRING_KAFKA_PROPERTIES_SASL_JAAS_CONFIG='{{ns.loginModule}} required username=\"{{ns.kafkaToolsDefaultUsername}}\" password=\"{{ns.kafkaToolsDefaultPassword}}\";'
     {% endif -%}   {#  secureKafkaEnabled #}
       - KAFKA_SCHEMAREGISTRY_URL={{ns.schemaRegistryUrl}}
     {%if not DATAHUB_mae_consumer_standalone | default(true) %}
@@ -5177,7 +5177,7 @@ services:
     {% if ns.secureKafkaEnabled %}
       - SPRING_KAFKA_PROPERTIES_SECURITY_PROTOCOL='{{ns.securityProtocol}}'
       - SPRING_KAFKA_PROPERTIES_SASL_MECHANISM='{{ns.saslMechanism}}'
-      - SPRING_KAFKA_PROPERTIES_SASL_JAAS_CONFIG='{{ns.loginModule}} required username=\"{{ns.kafkaClientUsername}}\" password=\"{{ns.kafkaClientPassword}}\";'
+      - SPRING_KAFKA_PROPERTIES_SASL_JAAS_CONFIG='{{ns.loginModule}} required username=\"{{ns.kafkaToolsDefaultUsername}}\" password=\"{{ns.kafkaToolsDefaultPassword}}\";'
     {% endif -%}   {#  secureKafkaEnabled #}
       - METADATA_AUDIT_EVENT_NAME=MetadataAuditEvent_v4
       - METADATA_CHANGE_LOG_VERSIONED_TOPIC_NAME=MetadataChangeLog_Versioned_v1
@@ -5222,7 +5222,7 @@ services:
     {% if ns.secureKafkaEnabled %}
       - SPRING_KAFKA_PROPERTIES_SECURITY_PROTOCOL='{{ns.securityProtocol}}'
       - SPRING_KAFKA_PROPERTIES_SASL_MECHANISM='{{ns.saslMechanism}}'
-      - SPRING_KAFKA_PROPERTIES_SASL_JAAS_CONFIG='{{ns.loginModule}} required username=\"{{ns.kafkaClientUsername}}\" password=\"{{ns.kafkaClientPassword}}\";'
+      - SPRING_KAFKA_PROPERTIES_SASL_JAAS_CONFIG='{{ns.loginModule}} required username=\"{{ns.kafkaToolsDefaultUsername}}\" password=\"{{ns.kafkaToolsDefaultPassword}}\";'
     {% endif -%}   {#  secureKafkaEnabled #}
       - KAFKA_SCHEMAREGISTRY_URL='{{ns.schemaRegistryUrl}}'
       - ELASTICSEARCH_HOST=datahub-elasticsearch
@@ -5289,7 +5289,7 @@ services:
     {% if ns.secureKafkaEnabled %}
       - SPRING_KAFKA_PROPERTIES_SECURITY_PROTOCOL='{{ns.securityProtocol}}'
       - SPRING_KAFKA_PROPERTIES_SASL_MECHANISM='{{ns.saslMechanism}}'
-      - SPRING_KAFKA_PROPERTIES_SASL_JAAS_CONFIG='{{ns.loginModule}} required username=\"{{ns.kafkaClientUsername}}\" password=\"{{ns.kafkaClientPassword}}\";'
+      - SPRING_KAFKA_PROPERTIES_SASL_JAAS_CONFIG='{{ns.loginModule}} required username=\"{{ns.kafkaToolsDefaultUsername}}\" password=\"{{ns.kafkaToolsDefaultPassword}}\";'
     {% endif -%}   {#  secureKafkaEnabled #}
       - KAFKA_SCHEMAREGISTRY_URL='{{ns.schemaRegistryUrl}}'
       - ELASTICSEARCH_HOST=datahub-elasticsearch
@@ -5564,7 +5564,7 @@ services:
     {% if ns.secureKafkaEnabled %}
       - SPRING_KAFKA_PROPERTIES_SECURITY_PROTOCOL='{{ns.securityProtocol}}'
       - SPRING_KAFKA_PROPERTIES_SASL_MECHANISM='{{ns.saslMechanism}}'
-      - SPRING_KAFKA_PROPERTIES_SASL_JAAS_CONFIG='{{ns.loginModule}} required username=\"{{ns.kafkaClientUsername}}\" password=\"{{ns.kafkaClientPassword}}\";'
+      - SPRING_KAFKA_PROPERTIES_SASL_JAAS_CONFIG='{{ns.loginModule}} required username=\"{{ns.kafkaToolsDefaultUsername}}\" password=\"{{ns.kafkaToolsDefaultPassword}}\";'
     {% endif -%}   {#  secureKafkaEnabled #}
       - KAFKA_ZOOKEEPER_CONNECT=zookeeper-1:2181
     {%if use_timezone | default(false) %}
@@ -13872,8 +13872,8 @@ services:
     {% if ns.secureKafkaEnabled %}
       MINIO_AUDIT_KAFKA_SASL: 'on'
       MINIO_AUDIT_KAFKA_SASL_MECHANISM: '{{ns.saslMechanism}}'
-      MINIO_AUDIT_KAFKA_SASL_USERNAME: '{{KAFKA_RESTPROXY_kafka_username if KAFKA_RESTPROXY_kafka_username is defined and KAFKA_RESTPROXY_kafka_username | length else ns.kafkaClientUsername}}'
-      MINIO_AUDIT_KAFKA_SASL_PASSWORD: '{{KAFKA_RESTPROXY_kafka_password if KAFKA_RESTPROXY_kafka_password is defined and KAFKA_RESTPROXY_kafka_password | length else ns.kafkaClientPassword}}'
+      MINIO_AUDIT_KAFKA_SASL_USERNAME: '{{KAFKA_RESTPROXY_kafka_username if KAFKA_RESTPROXY_kafka_username is defined and KAFKA_RESTPROXY_kafka_username | length else ns.kafkaToolsDefaultUsername}}'
+      MINIO_AUDIT_KAFKA_SASL_PASSWORD: '{{KAFKA_RESTPROXY_kafka_password if KAFKA_RESTPROXY_kafka_password is defined and KAFKA_RESTPROXY_kafka_password | length else ns.kafkaToolsDefaultPassword}}'
     {% endif -%}   {#  ns.secureKafkaEnabled #}
       MINIO_AUDIT_KAFKA_TOPIC: '{{MINIO_audit_kafka_topic}}'
     {% endif -%}   {#  MINIO_browser_enable #}
@@ -14643,7 +14643,7 @@ services:
     {% if ns.secureKafkaEnabled %}
       - TB_QUEUE_KAFKA_CONFLUENT_SECURITY_PROTOCOL='{{ns.securityProtocol}}'
       - TB_QUEUE_KAFKA_CONFLUENT_SASL_MECHANISM='{{ns.saslMechanism}}'
-      - TB_QUEUE_KAFKA_CONFLUENT_SASL_JAAS_CONFIG='{{ns.loginModule}} required username=\"{{ns.kafkaClientUsername}}\" password=\"{{ns.kafkaClientPassword}}\";'
+      - TB_QUEUE_KAFKA_CONFLUENT_SASL_JAAS_CONFIG='{{ns.loginModule}} required username=\"{{ns.kafkaToolsDefaultUsername}}\" password=\"{{ns.kafkaToolsDefaultPassword}}\";'
     {% endif -%}   {#  secureKafkaEnabled #}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
