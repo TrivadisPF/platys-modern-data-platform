@@ -4256,15 +4256,15 @@ services:
       DEPLOY_MODE: client
       SPARK_INSTALL_JARS_PACKAGES: '{{SPARK_install_jars_packages}},{{__SPARK_delta_dep}},{{__SPARK_iceberg_dep}},{{__SPARK_hudi_dep}}'
   {%if MINIO_enable or external['S3_enable'] | default(false) %}
-      CORE_CONF_fs_s3a_endpoint: 'http://minio:9000'
+      CORE_CONF_fs_s3a_endpoint: '{{s3EndpointStorage if s3EndpointStorage is defined and s3EndpointStorage else omit}}'
       CORE_CONF_fs_s3a_path_style_access: 'true'
-      HIVE_SITE_CONF_fs_s3a_endpoint: http://minio:9000
+      HIVE_SITE_CONF_fs_s3a_endpoint: {{s3EndpointStorage if s3EndpointStorage is defined and s3EndpointStorage else omit}}
       HIVE_SITE_CONF_fs_s3a_access_key: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
       HIVE_SITE_CONF_fs_s3a_secret_key: {{s3SecretAccessKey}}
       HIVE_SITE_CONF_fs_s3a_path_style_access: 'true'
       HIVE_SITE_CONF_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
-      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_endpoint: http://minio:9000
+      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_endpoint: {{s3EndpointStorage if s3EndpointStorage is defined and s3EndpointStorage else omit}}
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_path_style_access: 'true'
   {% endif -%}    {#  MINIO_enable #}
   {%if (SPARK_catalog | lower) == 'in-memory' | default(false) %}
@@ -13954,7 +13954,7 @@ services:
     ports:
       - "28193:9090"
     environment:
-      CONSOLE_MINIO_SERVER: "http://minio-1:9000"
+      CONSOLE_MINIO_SERVER: "{{s3EndpointStorage if s3EndpointStorage is defined and s3EndpointStorage else omit}}"
       CONSOLE_PBKDF_PASSPHRASE: abc123!
       CONSOLE_PBKDF_SALT: abc123!
     {%if use_timezone | default(false) %}
@@ -14017,7 +14017,7 @@ services:
     environment:
       MINIO_ACCESS: {{MINIO_access_key}}
       MINIO_SECRET: {{MINIO_secret_key}}
-      MINIO_HOST_PORT: minio-1:9000
+      MINIO_HOST_PORT: {{s3EndpointStorage if s3EndpointStorage is defined and s3EndpointStorage else omit}}
       #MINIO_SSE_MASTER_KEY: 1:da2f4cfa32bed76507dcd44b42872328a8e14f25cd2a1ec0fb85d299a192a447
       ADMINIO_HOST_PORT: ":8080"
     {%if use_timezone | default(false) %}
