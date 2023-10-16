@@ -775,7 +775,6 @@ networks:
 {% endif %}   {# PLATFORM_ARM_enable #}
 
 {#  ================================== Kafka Settings ========================================== #}
-
 {% macro login_module(listener_sasl_mechanism, default_sasl_mechanism) -%}
   {%- set sasl_mechanism = (listener_sasl_mechanism if listener_sasl_mechanism is defined and listener_sasl_mechanism != None else default_sasl_mechanism) -%}
   {%- if sasl_mechanism == "SCRAM-SHA-256" or sasl_mechanism == "SCRAM_SHA-512" -%}
@@ -852,6 +851,8 @@ networks:
     {% set ns.secureKafkaEnabled = (KAFKA_security_protocol != 'PLAINTEXT') %}
     {% set ns.securityProtocol = KAFKA_security_protocol %}
     {% set ns.saslMechanism = KAFKA_sasl_mechanism %}
+    {% set ns.saslMechanismCONTROLLER = KAFKA_controller_sasl_mechanism if KAFKA_controller_sasl_mechanism is defined and KAFKA_controller_sasl_mechanism and KAFKA_controller_sasl_mechanism | length else KAFKA_sasl_mechanism %}
+    {% set ns.saslMechanismBROKER = KAFKA_broker_sasl_mechanism if KAFKA_broker_sasl_mechanism is defined and KAFKA_broker_sasl_mechanism and KAFKA_broker_sasl_mechanism | length else KAFKA_sasl_mechanism %}
     {% set ns.loginModule = login_module(KAFKA_sasl_mechanism, KAFKA_sasl_mechanism) %}
     {% set ns.loginModuleCONTROLLER = login_module(KAFKA_controller_sasl_mechanism, KAFKA_sasl_mechanism) %}
     {% set ns.loginModuleBROKER = login_module(KAFKA_broker_sasl_mechanism, KAFKA_sasl_mechanism) %}
@@ -1163,8 +1164,8 @@ services:
       KAFKA_SASL_ENABLED_MECHANISMS: {{KAFKA_sasl_mechanism}}
       KAFKA_SASL_MECHANISM_INTER_BROKER_PROTOCOL: {{KAFKA_sasl_mechanism}}
       {% if KAFKA_use_kraft_mode | default(false) %}
-      KAFKA_SASL_MECHANISM_CONTROLLER_PROTOCOL: {{KAFKA_controller_sasl_mechanism}}
-      KAFKA_LISTENER_NAME_CONTROLLE_SASL_ENABLED_MECHANISMS: {{KAFKA_controller_sasl_mechanism}}
+      KAFKA_SASL_MECHANISM_CONTROLLER_PROTOCOL: {{ns.saslMechanismCONTROLLER}}
+      KAFKA_LISTENER_NAME_CONTROLLE_SASL_ENABLED_MECHANISMS: {{ns.saslMechanismCONTROLLER}}
       KAFKA_LISTENER_NAME_CONTROLLER_{{KAFKA_controller_sasl_mechanism}}_SASL_JAAS_CONFIG: {{ns.loginModuleCONTROLLER}} required username="broker" password="broker" user_broker="broker";
       {% endif %}
       KAFKA_LISTENER_NAME_BROKER_SASL_ENABLED_MECHANISMS: {{KAFKA_sasl_mechanism}}
@@ -1174,19 +1175,19 @@ services:
         {% endfor %}
         ;
       KAFKA_LISTENER_NAME_LOCAL_SASL_ENABLED_MECHANISMS: {{KAFKA_sasl_mechanism}}
-      KAFKA_LISTENER_NAME_LOCAL_{{KAFKA_sasl_mechanism}}_SASL_JAAS_CONFIG: {{ns.loginModule}} required username="broker" password="broker"
+      KAFKA_LISTENER_NAME_LOCAL_{{KAFKA_sasl_mechanism}}_SASL_JAAS_CONFIG: {{ns.loginModuleLOCAL}} required username="broker" password="broker"
         {% for user in KAFKA_initial_users.split(",") %}
         user_{{user.split(':')[0]}}="{{user.split(':')[1]}}"
         {% endfor %}
         ;
       KAFKA_LISTENER_NAME_DOCKERHOST_SASL_ENABLED_MECHANISMS: {{KAFKA_sasl_mechanism}}
-      KAFKA_LISTENER_NAME_DOCKERHOST_{{KAFKA_sasl_mechanism}}_SASL_JAAS_CONFIG: {{ns.loginModule}} required username="broker" password="broker"
+      KAFKA_LISTENER_NAME_DOCKERHOST_{{KAFKA_sasl_mechanism}}_SASL_JAAS_CONFIG: {{ns.loginModuleDOCKERHOST}} required username="broker" password="broker"
         {% for user in KAFKA_initial_users.split(",") %}
         user_{{user.split(':')[0]}}="{{user.split(':')[1]}}"
         {% endfor %}
         ;
       KAFKA_LISTENER_NAME_EXTERNAL_SASL_ENABLED_MECHANISMS: {{KAFKA_sasl_mechanism}}
-      KAFKA_LISTENER_NAME_EXTERNAL_{{KAFKA_sasl_mechanism}}_SASL_JAAS_CONFIG: {{ns.loginModule}} required username="broker" password="broker"
+      KAFKA_LISTENER_NAME_EXTERNAL_{{KAFKA_sasl_mechanism}}_SASL_JAAS_CONFIG: {{ns.loginModuleEXTERNAL}} required username="broker" password="broker"
         {% for user in KAFKA_initial_users.split(",") %}
         user_{{user.split(':')[0]}}="{{user.split(':')[1]}}"
         {% endfor %}
@@ -1194,7 +1195,7 @@ services:
       KAFKA_SASL_SERVER_CALLBACK_HANDLER_CLASS: {{KAFKA_sasl_server_callback_handler_class}}
       CONFLUENT_METRICS_REPORTER_SASL_MECHANISM: {{KAFKA_sasl_mechanism}}
       CONFLUENT_METRICS_REPORTER_SECURITY_PROTOCOL: {{KAFKA_security_protocol}}
-      CONFLUENT_METRICS_REPORTER_SASL_JAAS_CONFIG: "{{ns.loginModule}} required \
+      CONFLUENT_METRICS_REPORTER_SASL_JAAS_CONFIG: "{{ns.loginModuleBROKER}} required \
                 username=\"client\" \
                 password=\"client-secret\";"
       KAFKA_OPTS: "-Djava.security.auth.login.config=/etc/kafka/kafka_server_jaas.conf"
