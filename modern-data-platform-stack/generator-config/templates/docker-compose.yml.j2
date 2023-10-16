@@ -776,7 +776,8 @@ networks:
 
 {#  ================================== Kafka Settings ========================================== #}
 
-{% macro login_module(sasl_mechanism) -%}
+{% macro login_module(listener_sasl_mechanism, default_sasl_mechanism) -%}
+  {%- set sasl_mechanism = (listener_sasl_mechanism if listener_sasl_mechanism is defined and listener_sasl_mechanism != None else default_sasl_mechanism) -%}
   {%- if sasl_mechanism == "SCRAM-SHA-256" or sasl_mechanism == "SCRAM_SHA-512" -%}
     org.apache.kafka.common.security.scram.ScramLoginModule
   {%- elif sasl_mechanism == "OAUTHBEARER" -%}
@@ -851,7 +852,12 @@ networks:
     {% set ns.secureKafkaEnabled = (KAFKA_security_protocol != 'PLAINTEXT') %}
     {% set ns.securityProtocol = KAFKA_security_protocol %}
     {% set ns.saslMechanism = KAFKA_sasl_mechanism %}
-    {% set ns.loginModule = login_module(KAFKA_sasl_mechanism) %}
+    {% set ns.loginModule = login_module(KAFKA_sasl_mechanism, KAFKA_sasl_mechanism) %}
+    {% set ns.loginModuleCONTROLLER = login_module(KAFKA_controller_sasl_mechanism, KAFKA_sasl_mechanism) %}
+    {% set ns.loginModuleBROKER = login_module(KAFKA_broker_sasl_mechanism, KAFKA_sasl_mechanism) %}
+    {% set ns.loginModuleLOCAL = login_module(KAFKA_local_sasl_mechanism, KAFKA_sasl_mechanism) %}
+    {% set ns.loginModuleDOCKERHOST = login_module(KAFKA_dockerhost_sasl_mechanism, KAFKA_sasl_mechanism) %}
+    {% set ns.loginModuleEXTERNAL = login_module(KAFKA_extrnal_sasl_mechanism, KAFKA_sasl_mechanism) %}
     {% set ns.kafkaClientUsername = KAFKA_client_username %}
     {% set ns.kafkaClientPassword = KAFKA_client_password %}
 {% endif %}   {# external['KAFKA_enable'] #}
@@ -1159,10 +1165,10 @@ services:
       {% if KAFKA_use_kraft_mode | default(false) %}
       KAFKA_SASL_MECHANISM_CONTROLLER_PROTOCOL: {{KAFKA_controller_sasl_mechanism}}
       KAFKA_LISTENER_NAME_CONTROLLE_SASL_ENABLED_MECHANISMS: {{KAFKA_controller_sasl_mechanism}}
-      KAFKA_LISTENER_NAME_CONTROLLER_{{KAFKA_controller_sasl_mechanism}}_SASL_JAAS_CONFIG: {{ns.loginModule}} required username="broker" password="broker" user_broker="broker";
+      KAFKA_LISTENER_NAME_CONTROLLER_{{KAFKA_controller_sasl_mechanism}}_SASL_JAAS_CONFIG: {{ns.loginModuleCONTROLLER}} required username="broker" password="broker" user_broker="broker";
       {% endif %}
       KAFKA_LISTENER_NAME_BROKER_SASL_ENABLED_MECHANISMS: {{KAFKA_sasl_mechanism}}
-      KAFKA_LISTENER_NAME_BROKER_{{KAFKA_sasl_mechanism}}_SASL_JAAS_CONFIG: {{ns.loginModule}} required username="broker" password="broker"
+      KAFKA_LISTENER_NAME_BROKER_{{KAFKA_sasl_mechanism}}_SASL_JAAS_CONFIG: {{ns.loginModuleBROKER}} required username="broker" password="broker"
         {% for user in KAFKA_initial_users.split(",") %}
         user_{{user.split(':')[0]}}="{{user.split(':')[1]}}"
         {% endfor %}
