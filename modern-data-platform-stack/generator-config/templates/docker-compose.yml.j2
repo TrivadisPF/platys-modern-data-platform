@@ -1189,7 +1189,7 @@ services:
       KAFKA_ADVERTISED_LISTENERS: 'BROKER://{{serviceName}}:1{{port}},LOCAL://localhost:3{{port}},DOCKERHOST://${DOCKER_HOST_IP:-127.0.0.1}:{{dockerHostPort}},EXTERNAL://${PUBLIC_IP:-127.0.0.1}:{{externalPort}}'
       KAFKA_REPLICA_SELECTOR_CLASS: {{KAFKA_replica_selector_class | default(omit)}}
     {% if ns.secureKafkaEnabled %}
-      KAFKA_SASL_ENABLED_MECHANISMS: {{ns.saslEnabledMechanisms}}
+      KAFKA_SASL_ENABLED_MECHANISMS: {{[ns.saslMechanismCONTROLLER,ns.saslMechanismBROKER,ns.saslMechanismLOCAL,ns.saslMechanismDOCKERHOST,ns.saslMechanismEXTERNAL] | unqiue | join(',')}}
       KAFKA_SASL_MECHANISM_INTER_BROKER_PROTOCOL: {{ns.saslMechanismBROKER}}
       {% if KAFKA_use_kraft_mode | default(false) %}
       KAFKA_SASL_MECHANISM_CONTROLLER_PROTOCOL: {{ns.saslMechanismCONTROLLER}}
