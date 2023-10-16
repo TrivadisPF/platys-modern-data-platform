@@ -1186,13 +1186,13 @@ services:
     {% if ns.secureKafkaEnabled %}
       KAFKA_SASL_MECHANISM_INTER_BROKER_PROTOCOL: {{ns.saslMechanismBROKER}}
       {% if KAFKA_use_kraft_mode | default(false) %}
-      KAFKA_SASL_ENABLED_MECHANISMS: {{ns.saslMechanismCONTROLLER}},{{ns.saslMechanismBROKER}},{{ns.saslMechanismLOCAL}},{{ns.saslMechanismDOCKERHOST}},{{ns.saslMechanismEXTERNAL}}
+      KAFKA_SASL_ENABLED_MECHANISMS: {{[ns.saslMechanismCONTROLLER,ns.saslMechanismBROKER,ns.saslMechanismLOCAL,ns.saslMechanismDOCKERHOST,ns.saslMechanismEXTERNAL] | unqiue | join(',')}}
       KAFKA_SASL_MECHANISM_CONTROLLER_PROTOCOL: {{ns.saslMechanismCONTROLLER}}
       KAFKA_LISTENER_NAME_CONTROLLE_SASL_ENABLED_MECHANISMS: {{ns.saslMechanismCONTROLLER}}
       KAFKA_LISTENER_NAME_CONTROLLER_{{ns.saslMechanismCONTROLLER}}_SASL_JAAS_CONFIG: {{ns.loginModuleCONTROLLER}} required username="broker" password="broker" user_broker="broker";
       {% elif %}
-      KAFKA_SASL_ENABLED_MECHANISMS: {{ns.saslMechanismBROKER}},{{ns.saslMechanismLOCAL}},{{ns.saslMechanismDOCKERHOST}},{{ns.saslMechanismEXTERNAL}}
-      {% endif %}
+      KAFKA_SASL_ENABLED_MECHANISMS: {{[ns.saslMechanismBROKER,ns.saslMechanismLOCAL,ns.saslMechanismDOCKERHOST,ns.saslMechanismEXTERNAL] | unqiue | join(',')}}
+      {% endif -%}
       KAFKA_LISTENER_NAME_BROKER_SASL_ENABLED_MECHANISMS: {{ns.saslMechanismBROKER}}
       KAFKA_LISTENER_NAME_BROKER_{{ns.saslMechanismBROKER}}_SASL_JAAS_CONFIG: {{ns.loginModuleBROKER}} required username="broker" password="broker"
         {% for user in KAFKA_initial_users.split(",") %}
