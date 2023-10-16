@@ -25,7 +25,7 @@ networks:
 {% set __APICURIO_SCHEMA_REGISTRY_version = APICURIO_SCHEMA_REGISTRY_version | default('latest') -%}
 {% set __ZOONAVIGATOR_version = ZOONAVIGATOR_version | default('latest') -%}
 {% set __ZOONAVIGATOR_API_version = ZOONAVIGATOR_API_version | default('latest') -%}
-{% set __KAFKA_KSQLDB_version = KAFKA_KSQLDB_version | default('latest') -%}
+{% set __KSQLDB_version = KSQLDB_version | default('latest') -%}
 {% set __MATERIALIZE_version = MATERIALIZE_version | default('latest') -%}
 {% set __HSTREAMDB_version = HSTREAMDB_version | default('latest') -%}
 
@@ -525,13 +525,13 @@ networks:
 
 {% if KAFKA_CONNECT_enable -%}
 # enforce some dependencies
-  {% set KAFKA_KSQLDB_use_embedded_connect = false -%}
+  {% set KSQLDB_use_embedded_connect = false -%}
 {% endif -%}   {# KAFKA_CONNECT_enable #}
 
-{% if KAFKA_KSQLDB_enable and not external['SCHEMA_REGISTRY_url'] -%}
+{% if KSQLDB_enable and not external['SCHEMA_REGISTRY_url'] -%}
 # enforce some dependencies
   {% set SCHEMA_REGISTRY_enable = true -%}
-{% endif -%}   {# KAFKA_KSQLDB_enable #}
+{% endif -%}   {# KSQLDB_enable #}
 
 {% if (SCHEMA_REGISTRY_enable and SCHEMA_REGISTRY_flavour | lower) == 'apicurio' and APICURIO_auth_enabled | default(false) -%}
 # enforce keycloak dependencies
@@ -925,33 +925,33 @@ networks:
 {% set ns1 = namespace(connectServersInternalUrl='') %}
 {% set ns1 = namespace(connectServersUrl='') %}
 {% set ns1 = namespace(connectClusterName='') %}
-{% if (KAFKA_CONNECT_enable or KAFKA_KSQLDB_use_embedded_connect) | default(false) %}
+{% if (KAFKA_CONNECT_enable or KSQLDB_use_embedded_connect) | default(false) %}
   {% if KAFKA_CONNECT_enable %}
     {% set connectNodes = KAFKA_CONNECT_nodes %}
     {% set ns1.connectClusterName = 'connect-custer' %}
   {% else %}
-    {% set connectNodes = KAFKA_KSQLDB_nodes %}
+    {% set connectNodes = KSQLDB_nodes %}
     {% set ns1.connectClusterName = 'ksqldb-connect-custer' %}
   {% endif %}
   {% for num in range(connectNodes | default(1) ) %}
     {% set port = 8083 + loop.index-1 %}
     {% if loop.first %}
       {% set ns1.connectServersUrl = 'http://${PUBLIC_IP}:' ~ port %}
-      {%if KAFKA_KSQLDB_use_embedded_connect | default(true) %}
+      {%if KSQLDB_use_embedded_connect | default(true) %}
         {% set ns1.connectServersInternalUrl = 'http://ksqldb-server-' ~ loop.index ~ ':' ~ port %}
       {% else %}
         {% set ns1.connectServersInternalUrl = 'http://kafka-connect-' ~ loop.index ~ ':' ~ port %}
-      {% endif -%}   {#  KAFKA_KSQLDB_use_embedded_connect #}
+      {% endif -%}   {#  KSQLDB_use_embedded_connect #}
     {% else %}
       {% set ns1.connectServersUrl = ns1.connectServersUrl ~ ',http://${PUBLIC_IP}:' ~ port %}
-      {%if KAFKA_KSQLDB_use_embedded_connect | default(true) %}
+      {%if KSQLDB_use_embedded_connect | default(true) %}
         {% set ns1.connectServersInternalUrl = ns1.connectServersInternalUrl ~ ',http://ksqldb-server-' ~ loop.index ~ ':' ~ port %}
       {% else %}
         {% set ns1.connectServersInternalUrl = ns1.connectServersInternalUrl ~ ',http://kafka-connect-' ~ loop.index ~ ':' ~ port %}
-      {% endif -%}   {#  KAFKA_KSQLDB_use_embedded_connect #}
+      {% endif -%}   {#  KSQLDB_use_embedded_connect #}
     {% endif %}
   {% endfor %}
-{% endif %}   {# KAFKA_CONNECT_enable or KAFKA_KSQLDB_use_embedded_connect #}
+{% endif %}   {# KAFKA_CONNECT_enable or KSQLDB_use_embedded_connect #}
 
 {#  ================================== S3 Settings ========================================== #}
 
@@ -1559,9 +1559,9 @@ services:
   {% endfor %}
 {% endif %}   {# KAFKA_enable and KAFKA_CONNECT_enable  #}
 
-{% if ((KAFKA_enable or external['KAFKA_enable']) and KAFKA_KSQLDB_enable )| default(false) %}
+{% if ((KAFKA_enable or external['KAFKA_enable']) and KSQLDB_enable )| default(false) %}
   #  ================================== ksqlDB ========================================== #
-  {% for num in range(KAFKA_KSQLDB_nodes | default(1) ) %}
+  {% for num in range(KSQLDB_nodes | default(1) ) %}
     {% set external_port = 8088 + loop.index - 1 %}
     {% set port = 8088 %}
     {% set jmx_external_port = 1095 + loop.index - 1 %}
@@ -1569,7 +1569,7 @@ services:
     {% set connect_external_port = 8083 + loop.index - 1 %}
     {% set connect_port = 8083 + loop.index - 1 %}
   ksqldb-server-{{loop.index}} :
-    image: confluentinc/{{ 'ksqldb-server' if (KAFKA_KSQLDB_edition | lower) == 'oss' else 'cp-ksqldb-server' }}:{{__KAFKA_KSQLDB_version if (KAFKA_KSQLDB_edition | lower) == 'oss' else __CONFLUENT_PLATFORM_version}}
+    image: confluentinc/{{ 'ksqldb-server' if (KSQLDB_edition | lower) == 'oss' else 'cp-ksqldb-server' }}:{{__KSQLDB_version if (KSQLDB_edition | lower) == 'oss' else __CONFLUENT_PLATFORM_version}}
     hostname: ksqldb-server-{{loop.index}}
     container_name: ksqldb-server-{{loop.index}}
     labels:
@@ -1579,23 +1579,23 @@ services:
     ports:
       - "{{external_port}}:{{port}}"
       - "{{jmx_external_port}}:{{jmx_port}}"
-    {% if ( KAFKA_KSQLDB_use_embedded_connect ) | default(false) %}
+    {% if ( KSQLDB_use_embedded_connect ) | default(false) %}
       - {{connect_external_port}}:{{connect_port}}
     {% endif %}
     environment:
-    {% if ( KAFKA_KSQLDB_edition | lower) == 'cp'  | default(false) %}
+    {% if ( KSQLDB_edition | lower) == 'cp'  | default(false) %}
       KSQL_LOG4J_ROOT_LOGLEVEL: "INFO"
       KSQL_LOG4J_LOGGERS: "org.apache.kafka.connect.runtime.rest=WARN,org.reflections=ERROR"
-      KSQL_LOG4J_PROCESSING_LOG_TOPIC: '{{KAFKA_KSQLDB_log_topic}}'
+      KSQL_LOG4J_PROCESSING_LOG_TOPIC: '{{KSQLDB_log_topic}}'
       KSQL_LOG4J_PROCESSING_LOG_BROKERLIST: '{{ns.bootstrapServers}}'
     {% else %}
       KSQL_LOG4J_OPTS: "-Dlog4j.configuration=file:/opt/app/log4j/log4j.properties"
       KSQL_LOG4J_LOGGERS: "org.apache.kafka.connect.runtime.rest=WARN,org.reflections=ERROR"
-      KSQL_LOG4J_PROCESSING_LOG_TOPIC: '{{KAFKA_KSQLDB_log_topic}}'
+      KSQL_LOG4J_PROCESSING_LOG_TOPIC: '{{KSQLDB_log_topic}}'
       KSQL_LOG4J_PROCESSING_LOG_BROKERLIST: '{{ns.bootstrapServers}}'
     {% endif %}
-      KSQL_KSQL_LOGGING_PROCESSING_TOPIC_NAME: '{{KAFKA_KSQLDB_log_topic}}'
-      KSQL_KSQL_LOGGING_PROCESSING_TOPIC_REPLICATION_FACTOR: {{KAFKA_KSQLDB_internal_replication_factor | default(1)}}
+      KSQL_KSQL_LOGGING_PROCESSING_TOPIC_NAME: '{{KSQLDB_log_topic}}'
+      KSQL_KSQL_LOGGING_PROCESSING_TOPIC_REPLICATION_FACTOR: {{KSQLDB_internal_replication_factor | default(1)}}
       KSQL_KSQL_LOGGING_PROCESSING_ROWS_INCLUDE: 'true'
       KSQL_KSQL_LOGGING_PROCESSING_STREAM_AUTO_CREATE: 'true'
       KSQL_KSQL_LOGGING_PROCESSING_TOPIC_AUTO_CREATE: 'true'
@@ -1604,9 +1604,9 @@ services:
       KSQL_KSQL_STREAMS_NUM_STREAM_THREADS: 1
 
       KSQL_PRODUCER_ENABLE_IDEMPOTENCE: 'true'
-      KSQL_KSQL_PERSISTENCE_DEFAULT_FORMAT_KEY: '{{KAFKA_KSQLDB_persistence_default_format_key | default(KAFKA) }}'
-    {% if KAFKA_KSQLDB_persistence_default_format_value is defined and KAFKA_KSQLDB_persistence_default_format_value|length %}
-      KSQL_KSQL_PERSISTENCE_DEFAULT_FORMAT_VALUE: '{{KAFKA_KSQLDB_persistence_default_format_value}}'
+      KSQL_KSQL_PERSISTENCE_DEFAULT_FORMAT_KEY: '{{KSQLDB_persistence_default_format_key | default(KAFKA) }}'
+    {% if KSQLDB_persistence_default_format_value is defined and KSQLDB_persistence_default_format_value|length %}
+      KSQL_KSQL_PERSISTENCE_DEFAULT_FORMAT_VALUE: '{{KSQLDB_persistence_default_format_value}}'
     {% endif %}
 
       KSQL_APPLICATION_ID: "ksqldb-cluster"
@@ -1615,7 +1615,7 @@ services:
       KSQL_LISTENERS: http://0.0.0.0:{{port}}
       KSQL_BOOTSTRAP_SERVERS: '{{ns.bootstrapServers}}'
       KSQL_CACHE_MAX_BYTES_BUFFERING: 0
-      KSQL_RESPONSE_HTTP_HEADERS_CONFIG: '{{KAFKA_KSQLDB_response_http_headers_config}}'
+      KSQL_RESPONSE_HTTP_HEADERS_CONFIG: '{{KSQLDB_response_http_headers_config}}'
     {% if OTEL_COLLECTOR_enable | default(false) %}
       OTEL_RESOURCE_ATTRIBUTES: 'service.name=ksqldb'
       KSQL_OPTS: '-javaagent:/otel/opentelemetry-javaagent.jar -Dotel.exporter.otlp.endpoint=http://otel-collector:4317'
@@ -1649,9 +1649,9 @@ services:
       KSQL_KSQL_SCHEMA_REGISTRY_BASIC_AUTH_CREDENTIALS_SOURCE: "USER_INFO"
       KSQL_KSQL_SCHEMA_REGISTRY_BASIC_AUTH_USER_INFO:  "{{schemaRegistryUsername}}:{{schemaRegistryPassword}}"
     {% endif %}
-      KSQL_KSQL_INTERNAL_TOPIC_REPLICAS: {{KAFKA_KSQLDB_internal_replication_factor | default(1)}}
-      KSQL_KSQL_SINK_REPLICAS: {{KAFKA_KSQLDB_internal_replication_factor | default(1)}}
-      KSQL_KSQL_STREAMS_REPLICATION_FACTOR: {{KAFKA_KSQLDB_internal_replication_factor | default(1)}}
+      KSQL_KSQL_INTERNAL_TOPIC_REPLICAS: {{KSQLDB_internal_replication_factor | default(1)}}
+      KSQL_KSQL_SINK_REPLICAS: {{KSQLDB_internal_replication_factor | default(1)}}
+      KSQL_KSQL_STREAMS_REPLICATION_FACTOR: {{KSQLDB_internal_replication_factor | default(1)}}
       KSQL_KSQL_QUERY_PULL_METRICS_ENABLED: "true"
       KSQL_KSQL_HIDDEN_TOPICS: '^_.*,default_ksql_processing_log'
     {% if (KAFKA_edition | lower) == 'enterprise' and KAFKA_CCC_enable %}
@@ -1659,21 +1659,21 @@ services:
       KSQL_CONSUMER_INTERCEPTOR_CLASSES: "io.confluent.monitoring.clients.interceptor.MonitoringConsumerInterceptor"
     {% endif %}
 
-      KSQL_KSQL_SUPPRESS_ENABLED: "{{KAFKA_KSQLDB_suppress_enabled | default(omit)}}"
-      KSQL_KSQL_SUPPRESS_BUFFER_SIZE_BYTES: "{{KAFKA_KSQLDB_suppress_buffer_size_bytes | default(-1)}}"
+      KSQL_KSQL_SUPPRESS_ENABLED: "{{KSQLDB_suppress_enabled | default(omit)}}"
+      KSQL_KSQL_SUPPRESS_BUFFER_SIZE_BYTES: "{{KSQLDB_suppress_buffer_size_bytes | default(-1)}}"
 
-      KSQL_KSQL_QUERY_PULL_TABLE_SCAN_ENABLED: "{{KAFKA_KSQLDB_query_pull_table_scan_enabled | default(omit)}}"
+      KSQL_KSQL_QUERY_PULL_TABLE_SCAN_ENABLED: "{{KSQLDB_query_pull_table_scan_enabled | default(omit)}}"
       KSQL_CONFIG_DIR: "/etc/ksqldb"
       KSQL_KSQL_EXTENSION_DIR: '/etc/ksqldb/ext/'
 
-    {% if KAFKA_KSQLDB_queries_file is defined and KAFKA_KSQLDB_queries_file|length %}
-      KSQL_KSQL_QUERIES_FILE: "{{KAFKA_KSQLDB_queries_file}}"
-    {% endif -%}   {#  KAFKA_KSQLDB_queries_file #}
+    {% if KSQLDB_queries_file is defined and KSQLDB_queries_file|length %}
+      KSQL_KSQL_QUERIES_FILE: "{{KSQLDB_queries_file}}"
+    {% endif -%}   {#  KSQLDB_queries_file #}
       KSQL_JMX_OPTS: "-Djava.rmi.server.hostname=localhost -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port={{jmx_port}} -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.rmi.port={{jmx_port}}"
     {% if KAFKA_jmx_monitoring_prometheus_enable %}
       KSQL_OPTS: '-javaagent:/usr/share/jmx-exporter/jmx_prometheus_javaagent-0.16.1.jar=1234:/usr/share/jmx-exporter/confluent_ksql.yml'
     {% endif -%}
-    {% if KAFKA_KSQLDB_use_embedded_connect %}
+    {% if KSQLDB_use_embedded_connect %}
       KSQL_KSQL_CONNECT_WORKER_CONFIG: "/etc/ksqldb/connect.properties"
       # Kafka Connect config below
       KSQL_CONNECT_BOOTSTRAP_SERVERS: "{{ns.bootstrapServers}}"
@@ -1698,9 +1698,9 @@ services:
     volumes:
       - ./data-transfer:/data-transfer
       - ./plugins/ksqldb:/etc/ksqldb/ext
-    {% if ( KAFKA_KSQLDB_edition | lower) == 'oss'  | default(false) %}
+    {% if ( KSQLDB_edition | lower) == 'oss'  | default(false) %}
       - ./conf/ksqldb/etc/log4j.properties:/opt/app/log4j/log4j.properties
-    {% endif -%}   {#  KAFKA_KSQLDB_edition = 'oss' #}
+    {% endif -%}   {#  KSQLDB_edition = 'oss' #}
       - ./plugins/kafka-connect/connectors:/etc/kafka-connect/addl-plugins
       - ./plugins/kafka-connect/jars:/etc/kafka-connect/jars
       - ./plugins/opentelemetry/agents:/otel
@@ -1711,7 +1711,7 @@ services:
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
-    {%if KAFKA_KSQLDB_use_embedded_connect and loop.index == 1 | default(false) %}
+    {%if KSQLDB_use_embedded_connect and loop.index == 1 | default(false) %}
     command:
       # In the command section, $ are replaced with $$ to avoid the error 'Invalid interpolation format for "command" option'
       - bash
@@ -1738,7 +1738,7 @@ services:
   # Access the cli by running:
   # > docker exec -it ksqldb-cli ksql http://ksqldb-server-1:8088
   ksqldb-cli:
-    image: confluentinc/ksqldb-cli:{{__KAFKA_KSQLDB_version}}
+    image: confluentinc/ksqldb-cli:{{__KSQLDB_version}}
     container_name: ksqldb-cli
     hostname: ksqldb-cli
     labels:
@@ -1761,7 +1761,7 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
-{% endif %}   {# KAFKA_broker_enable and KAFKA_KSQLDB_enable #}
+{% endif %}   {# KAFKA_broker_enable and KSQLDB_enable #}
 
 {% if (MATERIALIZE_enable) | default(false) %}
   #  ================================== Materialize ========================================== #
@@ -2194,10 +2194,10 @@ services:
       CONTROL_CENTER_STREAMS_SASL_MECHANISM: "{{ns.saslMechanism}}"
       CONTROL_CENTER_STREAMS_SASL_MECHANISM: "{{ns.loginModule}} required username=\"{{ns.kafkaClientUsername}}\" password=\"{{ns.kafkaClientPassword}}\";"
   {% endif -%}   {#  ns.secureKafkaEnabled #}
-  {% if ( KAFKA_CONNECT_enable or KAFKA_KSQLDB_use_embedded_connect) | default(false) %}
+  {% if ( KAFKA_CONNECT_enable or KSQLDB_use_embedded_connect) | default(false) %}
       CONTROL_CENTER_CONNECT_DEMO_CLUSTER: '${DOCKER_HOST_IP}:8083'
   {% endif %}
-  {% if ( KAFKA_KSQLDB_enable ) | default(false) %}
+  {% if ( KSQLDB_enable ) | default(false) %}
       CONTROL_CENTER_KSQL_DEMO_URL: "http://ksqldb-server-1:8088"
       CONTROL_CENTER_KSQL_DEMO_ADVERTISED_URL: "http://dataplatform:8088"
   {% endif %}
@@ -2558,7 +2558,7 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {# KAFKA_enable and KAFKA_SCHEMA_REGISTRY_UI_enable #}
 
-{% if ((KAFKA_enable or external['KAFKA_enable']) and (KAFKA_CONNECT_enable or KAFKA_KSQLDB_use_embedded_connect) and KAFKA_CONNECT_UI_enable) | default(false) %}
+{% if ((KAFKA_enable or external['KAFKA_enable']) and (KAFKA_CONNECT_enable or KSQLDB_use_embedded_connect) and KAFKA_CONNECT_UI_enable) | default(false) %}
   #  ================================== Kafka Connect UI ========================================== #
   kafka-connect-ui:
     image: landoop/kafka-connect-ui:{{__KAFKA_CONNECT_UI_version}}
@@ -2758,18 +2758,18 @@ services:
                 basic-auth-password: "{{schemaRegistryPassword}}"
         {% endif %}
     {% endif -%}   {#  SCHEMA_REGISTRY_enable #}
-    {% if ( KAFKA_CONNECT_enable or KAFKA_KSQLDB_use_embedded_connect) | default(false) %}
+    {% if ( KAFKA_CONNECT_enable or KSQLDB_use_embedded_connect) | default(false) %}
               connect:
       {% for item in ns1.connectServersInternalUrl.split(",") %}
                 - name: "connect-{{loop.index}}"
                   url: "{{item}}"
       {% endfor -%}
     {% endif -%}   {#  KAFKA_CONNECT_enable #}
-    {% if KAFKA_KSQLDB_enable | default(false) %}
+    {% if KSQLDB_enable | default(false) %}
               ksqldb:
                 - name: "ksqldb"
                   url: "http://ksqldb-server-1:8088"
-    {% endif -%}   {#  KAFKA_KSQLDB_enable #}
+    {% endif -%}   {#  KSQLDB_enable #}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -2820,10 +2820,10 @@ services:
       KAFKA_CLUSTERS_0_SCHEMAREGISTRYAUTH_PASSWORD: "{{schemaRegistryPassword}}"
       {% endif %}
     {% endif -%}   {#  SCHEMA_REGISTRY_enable #}
-    {% if KAFKA_KSQLDB_enable | default(false) %}
+    {% if KSQLDB_enable | default(false) %}
       KAFKA_CLUSTERS_0_KSQLDBSERVER: 'http://ksqldb-server-1:8088'
-    {% endif -%}   {#  KAFKA_KSQLDB_enable #}
-    {% if ( KAFKA_CONNECT_enable or KAFKA_KSQLDB_use_embedded_connect ) | default(false) %}
+    {% endif -%}   {#  KSQLDB_enable #}
+    {% if ( KAFKA_CONNECT_enable or KSQLDB_use_embedded_connect ) | default(false) %}
       KAFKA_CLUSTERS_0_KAFKACONNECT_0_NAME: '{{ns1.connectClusterName}}'
       KAFKA_CLUSTERS_0_KAFKACONNECT_0_ADDRESS: {{ns1.connectServersInternalUrl.split(',')[0]}}
     {% endif -%}   {#  KAFKA_CONNECT_enable #}
@@ -2903,7 +2903,7 @@ services:
       KAFKA_SCHEMAREGISTRY_PASSWORD: "{{schemaRegistryPassword}}"
       {% endif -%}   {#  schemaRegistryUsername is defined #}
     {% endif -%}   {#  SCHEMA_REGISTRY_enable #}
-    {% if ( KAFKA_CONNECT_enable or KAFKA_KSQLDB_use_embedded_connect) | default(false) %}
+    {% if ( KAFKA_CONNECT_enable or KSQLDB_use_embedded_connect) | default(false) %}
       CONNECT_ENABLED: 'True'
       CONNECT_CLUSTERS_NAME: '{{ns1.connectClusterName}}'
       CONNECT_CLUSTERS_URL: '{{ns1.connectServersInternalUrl.split(',')[0]}}'
@@ -2953,7 +2953,7 @@ services:
       KAFKA_SCHEMAREGISTRY_PASSWORD: "{{schemaRegistryPassword}}"
       {% endif -%}   {#  schemaRegistryUsername is defined #}
     {% endif -%}   {#  SCHEMA_REGISTRY_enable #}
-    {% if ( KAFKA_CONNECT_enable or KAFKA_KSQLDB_use_embedded_connect) | default(false) %}
+    {% if ( KAFKA_CONNECT_enable or KSQLDB_use_embedded_connect) | default(false) %}
       CONNECT_ENABLED: 'True'
       CONNECT_CLUSTERS_NAME: '{{ns1.connectClusterName}}'
       CONNECT_CLUSTERS_URL: '{{ns1.connectServersInternalUrl.split(',')[0]}}'
@@ -3118,7 +3118,7 @@ services:
       - ALLOW_CONNECT_INSPECT=true
       - ALLOW_BULK_ACTION=true
     {% endif -%}   {#  KPOW_edition = ce or se or ee #}
-    {% if ( KAFKA_CONNECT_enable or KAFKA_KSQLDB_use_embedded_connect ) | default(false) %}
+    {% if ( KAFKA_CONNECT_enable or KSQLDB_use_embedded_connect ) | default(false) %}
       - CONNECT_NAME=kafka-connect
       - CONNECT_REST_URL={{ns1.connectServersInternalUrl.split(',')[0]}}
 #      - CONNECT_AWS_REGION=
@@ -3130,11 +3130,11 @@ services:
       - SCHEMA_REGISTRY_PASSWORD={{schemaRegistryPassword}}
       {% endif %}
     {% endif -%}   {#  SCHEMA_REGISTRY_enable #}
-    {% if KAFKA_KSQLDB_enable | default(false) %}
+    {% if KSQLDB_enable | default(false) %}
       - KSQLDB_NAME=ksqldb
       - KSQLDB_HOST=ksqldb-server-1
       - KSQLDB_PORT=8088
-    {% endif -%}   {#  KAFKA_KSQLDB_enable #}
+    {% endif -%}   {#  KSQLDB_enable #}
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
