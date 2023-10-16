@@ -788,6 +788,15 @@ networks:
   {%- endif -%}
 {%- endmacro -%}
 
+{% macro sasl_enabled_mechanisms(default_sasl_mechanism, controller_sasl_mechanism, broker_sasl_mechanism, local_sasl_mechanism, dockerhost_sasl_mechanism, external_sasl_mechanism) -%}
+  {{default_sasl_mechanism-}}
+  {{',' ~ controller_sasl_mechanism if controller_sasl_mechanism is defined and controller_sasl_mechanism and controller_sasl_mechanism | length else omit-}}
+  {{',' ~ broker_sasl_mechanism if broker_sasl_mechanism is defined and broker_sasl_mechanism and broker_sasl_mechanism | length else omit-}}
+  {{',' ~ local_sasl_mechanism if local_sasl_mechanism is defined and local_sasl_mechanism and local_sasl_mechanism | length else omit-}}
+  {{',' ~ dockerhost_sasl_mechanism if dockerhost_sasl_mechanism is defined and dockerhost_sasl_mechanism and dockerhost_sasl_mechanism | length else omit-}}
+  {{',' ~ external_sasl_mechanism if external_sasl_mechanism is defined and external_sasl_mechanism and external_sasl_mechanism | length else omit-}}
+{%- endmacro -%}
+
 {% set ns = namespace(bootstrapServers='') %}
 {% set ns = namespace(schemaRegistryUrl='') %}
 {% set ns = namespace(secureKafkaEnabled='') %}
@@ -849,16 +858,30 @@ networks:
   {% endfor %}
     {#% endfor #}  {# datacenter in (KAFKA_datacenters.split(',') | default([]) ) #}
     {% set ns.secureKafkaEnabled = (KAFKA_security_protocol != 'PLAINTEXT') %}
+
     {% set ns.securityProtocol = KAFKA_security_protocol %}
+    {% set ns.securityProtocolCONTROLLER = KAFKA_controller_security_protocol if KAFKA_controller_security_protocol is defined and KAFKA_controller_security_protocol and KAFKA_controller_security_protocol | length else KAFKA_security_protocol %}
+    {% set ns.securityProtocolBROKER = KAFKA_broker_security_protocol if KAFKA_broker_security_protocol is defined and KAFKA_broker_security_protocol and KAFKA_broker_security_protocol | length else KAFKA_security_protocol %}
+    {% set ns.securityProtocolLOCAL = KAFKA_local_security_protocol if KAFKA_local_security_protocol is defined and KAFKA_local_security_protocol and KAFKA_local_security_protocol | length else KAFKA_security_protocol %}
+    {% set ns.securityProtocolDOCKERHOST = KAFKA_dockerhost_security_protocol if KAFKA_dockerhost_security_protocol is defined and KAFKA_dockerhost_security_protocol and KAFKA_dockerhost_security_protocol | length else KAFKA_security_protocol %}
+    {% set ns.securityProtocolEXTERNAL = KAFKA_external_security_protocol if KAFKA_external_security_protocol is defined and KAFKA_external_security_protocol and KAFKA_external_security_protocol | length else KAFKA_security_protocol %}
+
     {% set ns.saslMechanism = KAFKA_sasl_mechanism %}
     {% set ns.saslMechanismCONTROLLER = KAFKA_controller_sasl_mechanism if KAFKA_controller_sasl_mechanism is defined and KAFKA_controller_sasl_mechanism and KAFKA_controller_sasl_mechanism | length else KAFKA_sasl_mechanism %}
     {% set ns.saslMechanismBROKER = KAFKA_broker_sasl_mechanism if KAFKA_broker_sasl_mechanism is defined and KAFKA_broker_sasl_mechanism and KAFKA_broker_sasl_mechanism | length else KAFKA_sasl_mechanism %}
+    {% set ns.saslMechanismLOCAL = KAFKA_local_sasl_mechanism if KAFKA_local_sasl_mechanism is defined and KAFKA_local_sasl_mechanism and KAFKA_local_sasl_mechanism | length else KAFKA_sasl_mechanism %}
+    {% set ns.saslMechanismDOCKERHOST = KAFKA_dockerhost_sasl_mechanism if KAFKA_dockerhost_sasl_mechanism is defined and KAFKA_dockerhost_sasl_mechanism and KAFKA_dockerhost_sasl_mechanism | length else KAFKA_sasl_mechanism %}
+    {% set ns.saslMechanismEXTERNAL = KAFKA_external_sasl_mechanism if KAFKA_external_sasl_mechanism is defined and KAFKA_external_sasl_mechanism and KAFKA_external_sasl_mechanism | length else KAFKA_sasl_mechanism %}
+
+    {% set ns.saslEnabledMechanisms = sasl_enabled_mechanisms(KAFKA_sasl_mechanism, KAFKA_controller_sasl_mechanism, KAFKA_broker_sasl_mechanism, KAFKA_local_sasl_mechanism, KAFKA_dockerhost_sasl_mechanism, KAFKA_external_sasl_mechanism)
+
     {% set ns.loginModule = login_module(KAFKA_sasl_mechanism, KAFKA_sasl_mechanism) %}
     {% set ns.loginModuleCONTROLLER = login_module(KAFKA_controller_sasl_mechanism, KAFKA_sasl_mechanism) %}
     {% set ns.loginModuleBROKER = login_module(KAFKA_broker_sasl_mechanism, KAFKA_sasl_mechanism) %}
     {% set ns.loginModuleLOCAL = login_module(KAFKA_local_sasl_mechanism, KAFKA_sasl_mechanism) %}
     {% set ns.loginModuleDOCKERHOST = login_module(KAFKA_dockerhost_sasl_mechanism, KAFKA_sasl_mechanism) %}
     {% set ns.loginModuleEXTERNAL = login_module(KAFKA_extrnal_sasl_mechanism, KAFKA_sasl_mechanism) %}
+
     {% set ns.kafkaClientUsername = KAFKA_client_username %}
     {% set ns.kafkaClientPassword = KAFKA_client_password %}
 {% endif %}   {# external['KAFKA_enable'] #}
@@ -1151,43 +1174,43 @@ services:
       KAFKA_PROCESS_ROLES: {{ 'broker,controller' if loop.index <= 3 else 'broker' }}
       KAFKA_NODE_ID: {{loop.index}}
       CLUSTER_ID: {{KAFKA_cluster_id}}
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'CONTROLLER:{{KAFKA_controller_security_protocol}},BROKER:{{KAFKA_security_protocol}},LOCAL:{{KAFKA_security_protocol}},DOCKERHOST:{{KAFKA_security_protocol}},EXTERNAL:{{KAFKA_security_protocol}}'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'CONTROLLER:{{ns.securityProtocolCONTROLLER}},BROKER:{{ns.securityProtocolBROKER}},LOCAL:{{ns.securityProtocolLOCAL}},DOCKERHOST:{{ns.securityProtocolDOCKERHOST}},EXTERNAL:{{ns.securityProtocolEXTERNAL}}'
       KAFKA_LISTENERS: 'CONTROLLER://{{serviceName}}:4{{port}},BROKER://{{serviceName}}:1{{port}},LOCAL://{{serviceName}}:3{{port}},DOCKERHOST://{{serviceName}}:{{dockerHostPort}},EXTERNAL://{{serviceName}}:{{externalPort}}'
     {% else %}
       KAFKA_ZOOKEEPER_CONNECT: 'zookeeper{{dataCenter}}-1:{{zookeeperPort}}'
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'BROKER:{{KAFKA_security_protocol}},LOCAL:{{KAFKA_security_protocol}},DOCKERHOST:{{KAFKA_security_protocol}},EXTERNAL:{{KAFKA_security_protocol}}'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'BROKER:{{ns.securityProtocolBROKER}},LOCAL:{{ns.securityProtocolLOCAL}},DOCKERHOST:{{ns.securityProtocolDOCKERHOST}},EXTERNAL:{{ns.securityProtocolEXTERNAL}}'
       KAFKA_LISTENERS: 'BROKER://{{serviceName}}:1{{port}},LOCAL://{{serviceName}}:3{{port}},DOCKERHOST://{{serviceName}}:{{dockerHostPort}},EXTERNAL://{{serviceName}}:{{externalPort}}'
     {% endif %}
       KAFKA_ADVERTISED_LISTENERS: 'BROKER://{{serviceName}}:1{{port}},LOCAL://localhost:3{{port}},DOCKERHOST://${DOCKER_HOST_IP:-127.0.0.1}:{{dockerHostPort}},EXTERNAL://${PUBLIC_IP:-127.0.0.1}:{{externalPort}}'
       KAFKA_REPLICA_SELECTOR_CLASS: {{KAFKA_replica_selector_class | default(omit)}}
     {% if ns.secureKafkaEnabled %}
-      KAFKA_SASL_ENABLED_MECHANISMS: {{KAFKA_sasl_mechanism}}
-      KAFKA_SASL_MECHANISM_INTER_BROKER_PROTOCOL: {{KAFKA_sasl_mechanism}}
+      KAFKA_SASL_ENABLED_MECHANISMS: {{ns.saslEnabledMechanisms}}
+      KAFKA_SASL_MECHANISM_INTER_BROKER_PROTOCOL: {{ns.saslMechanismBROKER}}
       {% if KAFKA_use_kraft_mode | default(false) %}
       KAFKA_SASL_MECHANISM_CONTROLLER_PROTOCOL: {{ns.saslMechanismCONTROLLER}}
       KAFKA_LISTENER_NAME_CONTROLLE_SASL_ENABLED_MECHANISMS: {{ns.saslMechanismCONTROLLER}}
-      KAFKA_LISTENER_NAME_CONTROLLER_{{KAFKA_controller_sasl_mechanism}}_SASL_JAAS_CONFIG: {{ns.loginModuleCONTROLLER}} required username="broker" password="broker" user_broker="broker";
+      KAFKA_LISTENER_NAME_CONTROLLER_{{ns.saslMechanismCONTROLLER}}_SASL_JAAS_CONFIG: {{ns.loginModuleCONTROLLER}} required username="broker" password="broker" user_broker="broker";
       {% endif %}
-      KAFKA_LISTENER_NAME_BROKER_SASL_ENABLED_MECHANISMS: {{KAFKA_sasl_mechanism}}
-      KAFKA_LISTENER_NAME_BROKER_{{KAFKA_sasl_mechanism}}_SASL_JAAS_CONFIG: {{ns.loginModuleBROKER}} required username="broker" password="broker"
+      KAFKA_LISTENER_NAME_BROKER_SASL_ENABLED_MECHANISMS: {{ns.saslMechanismBROKER}}
+      KAFKA_LISTENER_NAME_BROKER_{{ns.saslMechanismBROKER}}_SASL_JAAS_CONFIG: {{ns.loginModuleBROKER}} required username="broker" password="broker"
         {% for user in KAFKA_initial_users.split(",") %}
         user_{{user.split(':')[0]}}="{{user.split(':')[1]}}"
         {% endfor %}
         ;
-      KAFKA_LISTENER_NAME_LOCAL_SASL_ENABLED_MECHANISMS: {{KAFKA_sasl_mechanism}}
-      KAFKA_LISTENER_NAME_LOCAL_{{KAFKA_sasl_mechanism}}_SASL_JAAS_CONFIG: {{ns.loginModuleLOCAL}} required username="broker" password="broker"
+      KAFKA_LISTENER_NAME_LOCAL_SASL_ENABLED_MECHANISMS: {{ns.saslMechanismLOCAL}}
+      KAFKA_LISTENER_NAME_LOCAL_{{ns.saslMechanismLOCAL}}_SASL_JAAS_CONFIG: {{ns.loginModuleLOCAL}} required username="broker" password="broker"
         {% for user in KAFKA_initial_users.split(",") %}
         user_{{user.split(':')[0]}}="{{user.split(':')[1]}}"
         {% endfor %}
         ;
-      KAFKA_LISTENER_NAME_DOCKERHOST_SASL_ENABLED_MECHANISMS: {{KAFKA_sasl_mechanism}}
-      KAFKA_LISTENER_NAME_DOCKERHOST_{{KAFKA_sasl_mechanism}}_SASL_JAAS_CONFIG: {{ns.loginModuleDOCKERHOST}} required username="broker" password="broker"
+      KAFKA_LISTENER_NAME_DOCKERHOST_SASL_ENABLED_MECHANISMS: {{ns.saslMechanismDOCKERHOST}}
+      KAFKA_LISTENER_NAME_DOCKERHOST_{{ns.saslMechanismDOCKERHOST}}_SASL_JAAS_CONFIG: {{ns.loginModuleDOCKERHOST}} required username="broker" password="broker"
         {% for user in KAFKA_initial_users.split(",") %}
         user_{{user.split(':')[0]}}="{{user.split(':')[1]}}"
         {% endfor %}
         ;
-      KAFKA_LISTENER_NAME_EXTERNAL_SASL_ENABLED_MECHANISMS: {{KAFKA_sasl_mechanism}}
-      KAFKA_LISTENER_NAME_EXTERNAL_{{KAFKA_sasl_mechanism}}_SASL_JAAS_CONFIG: {{ns.loginModuleEXTERNAL}} required username="broker" password="broker"
+      KAFKA_LISTENER_NAME_EXTERNAL_SASL_ENABLED_MECHANISMS: {{ns.saslMechanismEXTERNAL}}
+      KAFKA_LISTENER_NAME_EXTERNAL_{{ns.saslMechanismEXTERNAL}}_SASL_JAAS_CONFIG: {{ns.loginModuleEXTERNAL}} required username="broker" password="broker"
         {% for user in KAFKA_initial_users.split(",") %}
         user_{{user.split(':')[0]}}="{{user.split(':')[1]}}"
         {% endfor %}
@@ -1378,7 +1401,7 @@ services:
     environment:
       BOOTSTRAP_SERVERS: '{{ns.bootstrapServers}}'
     {% if external['KAFKA_enable'] and external['KAFKA_sasl_mechanism'] is defined and external['KAFKA_sasl_mechanism'] | length %}
-      SECURITY_PROTOCOL: "{{ns.securityProtocol}}"
+      SECURITY_PROTOCOL: "{{ns.securityProtocolBROKER}}"
       SASL_MECHANISM: "{{ns.saslMechanism}}"
       SASL_JAAS_CONFIG: "{{ns.loginModule}} required username=\"{{ns.kafkaClientUsername}}\" password=\"{{ns.kafkaClientPassword}}\";"
     {% endif -%}   {#  KAFKA_sasl_mechanism #}
