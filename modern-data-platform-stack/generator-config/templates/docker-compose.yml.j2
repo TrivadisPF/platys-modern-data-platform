@@ -799,6 +799,7 @@ networks:
 {% set ns = namespace(controllerQuorumVoters='') %}
 {% if (external['KAFKA_enable']) | default(false) %}
     {% set ns.bootstrapServers = external['KAFKA_bootstrap_servers'] %}
+    {% set ns.bootstrapServer = external['KAFKA_bootstrap_servers'].split(',')[0] %}
     {% set ns.secureKafkaEnabled = (external['KAFKA_security_protocol'] != 'PLAINTEXT') %}
     {% set ns.securityProtocol = external['KAFKA_security_protocol'] %}
     {% set ns.saslMechanism = external['KAFKA_sasl_mechanism'] %}
@@ -847,34 +848,34 @@ networks:
       {% set ns.portsJMX = ns.portsJMX ~ ',' ~ portJMX %}
     {% endif %}
   {% endfor %}
+  {% set ns.bootstrapServer = ns.bootstrapServers.split(',')[0] %}
+
     {#% endfor #}  {# datacenter in (KAFKA_datacenters.split(',') | default([]) ) #}
-    {% set ns.secureKafkaEnabled = (KAFKA_security_protocol != 'PLAINTEXT') %}
+  {% set ns.secureKafkaEnabled = (KAFKA_security_protocol != 'PLAINTEXT') %}
 
-    {% set ns.securityProtocol = KAFKA_security_protocol %}
-    {% set ns.securityProtocolCONTROLLER = KAFKA_controller_security_protocol if KAFKA_controller_security_protocol is defined and KAFKA_controller_security_protocol and KAFKA_controller_security_protocol | length else KAFKA_security_protocol %}
-    {% set ns.securityProtocolBROKER = KAFKA_broker_security_protocol if KAFKA_broker_security_protocol is defined and KAFKA_broker_security_protocol and KAFKA_broker_security_protocol | length else KAFKA_security_protocol %}
-    {% set ns.securityProtocolLOCAL = KAFKA_local_security_protocol if KAFKA_local_security_protocol is defined and KAFKA_local_security_protocol and KAFKA_local_security_protocol | length else KAFKA_security_protocol %}
-    {% set ns.securityProtocolDOCKERHOST = KAFKA_dockerhost_security_protocol if KAFKA_dockerhost_security_protocol is defined and KAFKA_dockerhost_security_protocol and KAFKA_dockerhost_security_protocol | length else KAFKA_security_protocol %}
-    {% set ns.securityProtocolEXTERNAL = KAFKA_external_security_protocol if KAFKA_external_security_protocol is defined and KAFKA_external_security_protocol and KAFKA_external_security_protocol | length else KAFKA_security_protocol %}
+  {% set ns.securityProtocol = KAFKA_security_protocol %}
+  {% set ns.securityProtocolCONTROLLER = KAFKA_controller_security_protocol if KAFKA_controller_security_protocol is defined and KAFKA_controller_security_protocol and KAFKA_controller_security_protocol | length else KAFKA_security_protocol %}
+  {% set ns.securityProtocolBROKER = KAFKA_broker_security_protocol if KAFKA_broker_security_protocol is defined and KAFKA_broker_security_protocol and KAFKA_broker_security_protocol | length else KAFKA_security_protocol %}
+  {% set ns.securityProtocolLOCAL = KAFKA_local_security_protocol if KAFKA_local_security_protocol is defined and KAFKA_local_security_protocol and KAFKA_local_security_protocol | length else KAFKA_security_protocol %}
+  {% set ns.securityProtocolDOCKERHOST = KAFKA_dockerhost_security_protocol if KAFKA_dockerhost_security_protocol is defined and KAFKA_dockerhost_security_protocol and KAFKA_dockerhost_security_protocol | length else KAFKA_security_protocol %}
+  {% set ns.securityProtocolEXTERNAL = KAFKA_external_security_protocol if KAFKA_external_security_protocol is defined and KAFKA_external_security_protocol and KAFKA_external_security_protocol | length else KAFKA_security_protocol %}
 
-    {% set ns.saslMechanism = KAFKA_sasl_mechanism %}
-    {% set ns.saslMechanismCONTROLLER = KAFKA_controller_sasl_mechanism if KAFKA_controller_sasl_mechanism is defined and KAFKA_controller_sasl_mechanism and KAFKA_controller_sasl_mechanism | length else KAFKA_sasl_mechanism %}
-    {% set ns.saslMechanismBROKER = KAFKA_broker_sasl_mechanism if KAFKA_broker_sasl_mechanism is defined and KAFKA_broker_sasl_mechanism and KAFKA_broker_sasl_mechanism | length else KAFKA_sasl_mechanism %}
-    {% set ns.saslMechanismLOCAL = KAFKA_local_sasl_mechanism if KAFKA_local_sasl_mechanism is defined and KAFKA_local_sasl_mechanism and KAFKA_local_sasl_mechanism | length else KAFKA_sasl_mechanism %}
-    {% set ns.saslMechanismDOCKERHOST = KAFKA_dockerhost_sasl_mechanism if KAFKA_dockerhost_sasl_mechanism is defined and KAFKA_dockerhost_sasl_mechanism and KAFKA_dockerhost_sasl_mechanism | length else KAFKA_sasl_mechanism %}
-    {% set ns.saslMechanismEXTERNAL = KAFKA_external_sasl_mechanism if KAFKA_external_sasl_mechanism is defined and KAFKA_external_sasl_mechanism and KAFKA_external_sasl_mechanism | length else KAFKA_sasl_mechanism %}
+  {% set ns.saslMechanism = KAFKA_sasl_mechanism %}
+  {% set ns.saslMechanismCONTROLLER = KAFKA_controller_sasl_mechanism if KAFKA_controller_sasl_mechanism is defined and KAFKA_controller_sasl_mechanism and KAFKA_controller_sasl_mechanism | length else KAFKA_sasl_mechanism %}
+  {% set ns.saslMechanismBROKER = KAFKA_broker_sasl_mechanism if KAFKA_broker_sasl_mechanism is defined and KAFKA_broker_sasl_mechanism and KAFKA_broker_sasl_mechanism | length else KAFKA_sasl_mechanism %}
+  {% set ns.saslMechanismLOCAL = KAFKA_local_sasl_mechanism if KAFKA_local_sasl_mechanism is defined and KAFKA_local_sasl_mechanism and KAFKA_local_sasl_mechanism | length else KAFKA_sasl_mechanism %}
+  {% set ns.saslMechanismDOCKERHOST = KAFKA_dockerhost_sasl_mechanism if KAFKA_dockerhost_sasl_mechanism is defined and KAFKA_dockerhost_sasl_mechanism and KAFKA_dockerhost_sasl_mechanism | length else KAFKA_sasl_mechanism %}
+  {% set ns.saslMechanismEXTERNAL = KAFKA_external_sasl_mechanism if KAFKA_external_sasl_mechanism is defined and KAFKA_external_sasl_mechanism and KAFKA_external_sasl_mechanism | length else KAFKA_sasl_mechanism %}
 
-    {#% set ns.saslEnabledMechanisms = sasl_enabled_mechanisms(KAFKA_sasl_mechanism, KAFKA_controller_sasl_mechanism, KAFKA_broker_sasl_mechanism, KAFKA_local_sasl_mechanism, KAFKA_dockerhost_sasl_mechanism, KAFKA_external_sasl_mechanism) %#}
+  {% set ns.loginModule = login_module(KAFKA_sasl_mechanism, KAFKA_sasl_mechanism) %}
+  {% set ns.loginModuleCONTROLLER = login_module(KAFKA_controller_sasl_mechanism, KAFKA_sasl_mechanism) %}
+  {% set ns.loginModuleBROKER = login_module(KAFKA_broker_sasl_mechanism, KAFKA_sasl_mechanism) %}
+  {% set ns.loginModuleLOCAL = login_module(KAFKA_local_sasl_mechanism, KAFKA_sasl_mechanism) %}
+  {% set ns.loginModuleDOCKERHOST = login_module(KAFKA_dockerhost_sasl_mechanism, KAFKA_sasl_mechanism) %}
+  {% set ns.loginModuleEXTERNAL = login_module(KAFKA_extrnal_sasl_mechanism, KAFKA_sasl_mechanism) %}
 
-    {% set ns.loginModule = login_module(KAFKA_sasl_mechanism, KAFKA_sasl_mechanism) %}
-    {% set ns.loginModuleCONTROLLER = login_module(KAFKA_controller_sasl_mechanism, KAFKA_sasl_mechanism) %}
-    {% set ns.loginModuleBROKER = login_module(KAFKA_broker_sasl_mechanism, KAFKA_sasl_mechanism) %}
-    {% set ns.loginModuleLOCAL = login_module(KAFKA_local_sasl_mechanism, KAFKA_sasl_mechanism) %}
-    {% set ns.loginModuleDOCKERHOST = login_module(KAFKA_dockerhost_sasl_mechanism, KAFKA_sasl_mechanism) %}
-    {% set ns.loginModuleEXTERNAL = login_module(KAFKA_extrnal_sasl_mechanism, KAFKA_sasl_mechanism) %}
-
-    {% set ns.kafkaClientUsername = KAFKA_client_username %}
-    {% set ns.kafkaClientPassword = KAFKA_client_password %}
+  {% set ns.kafkaClientUsername = KAFKA_client_username %}
+  {% set ns.kafkaClientPassword = KAFKA_client_password %}
 {% endif %}   {# external['KAFKA_enable'] #}
 
 {#  ================================== Schema Registry Settings ========================================== #}
@@ -1675,7 +1676,7 @@ services:
     {% if KAFKA_KSQLDB_use_embedded_connect %}
       KSQL_KSQL_CONNECT_WORKER_CONFIG: "/etc/ksqldb/connect.properties"
       # Kafka Connect config below
-      KSQL_CONNECT_BOOTSTRAP_SERVERS: "kafka-1:19092"
+      KSQL_CONNECT_BOOTSTRAP_SERVERS: "{{ns.bootstrapServers}}"
       KSQL_CONNECT_REST_ADVERTISED_HOST_NAME: 'ksqldb-server-{{loop.index}}'
       KSQL_CONNECT_REST_ADVERTISED_PORT: {{connect_port}}
       KSQL_CONNECT_GROUP_ID: ksqldb-kafka-connect-group-01
@@ -4524,7 +4525,7 @@ services:
       DEFAULT_SCENARIO_TYPE: ${DEFAULT_SCENARIO_TYPE-}
       FLINK_REST_URL: http://flink-jobmanager:8081
       FLINK_QUERYABLE_STATE_PROXY_URL: flink-taskmanager-1:9069
-      KAFKA_ADDRESS: kafka-1:19092
+      KAFKA_ADDRESS: {{ns.bootstrapServer}}
       SCHEMA_REGISTRY_URL: '{{ns.schemaRegistryUrl}}'
       COUNTS_URL: http://influxdb-1:8086/query
       OPENAPI_SERVICE_URL: http://customerservice:5000
@@ -4977,7 +4978,7 @@ services:
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
     command: "bash -c 'echo Waiting for Kafka to be ready... && \
-                       cub kafka-ready -b kafka-1:19092 1 120 && \
+                       cub kafka-ready -b {{ns.bootstrapServer}} 1 120 && \
                        kafka-topics --create --if-not-exists --zookeeper zookeeper-1:2181 --partitions 1 --replication-factor 1 --topic ATLAS_HOOK && \
                        kafka-topics --create --if-not-exists --zookeeper zookeeper-1:2181 --partitions 1 --replication-factor 1 --topic ATLAS_ENTITIES'"
   {% endif %} {#  KAFKA_enable #}
@@ -5059,7 +5060,7 @@ services:
       - DATAHUB_APP_VERSION=1.0
       - DATAHUB_PLAY_MEM_BUFFER_SIZE=10MB
       - JAVA_OPTS=-Xms512m -Xmx512m -Dhttp.port=9002 -Dconfig.file=datahub-frontend/conf/application.conf -Djava.security.auth.login.config=datahub-frontend/conf/jaas.conf -Dlogback.configurationFile=datahub-frontend/conf/logback.xml -Dlogback.debug=false -Dpidfile.path=/dev/null
-      - KAFKA_BOOTSTRAP_SERVER=kafka-1:19092
+      - KAFKA_BOOTSTRAP_SERVER={{ns.bootstrapServer}}
     {% if ns.secureKafkaEnabled %}
       - SPRING_KAFKA_PROPERTIES_SECURITY_PROTOCOL='{{ns.securityProtocol}}'
       - SPRING_KAFKA_PROPERTIES_SASL_MECHANISM='{{ns.saslMechanism}}'
@@ -5127,7 +5128,7 @@ services:
       - NEO4J_PASSWORD=abc123!
     {% endif -%}   {#  DATAHUB_graph_service_impl #}
       - JAVA_OPTS=-Xms1g -Xmx1g
-      - KAFKA_BOOTSTRAP_SERVER=kafka-1:19092
+      - KAFKA_BOOTSTRAP_SERVER={{ns.bootstrapServer}}
     {% if ns.secureKafkaEnabled %}
       - SPRING_KAFKA_PROPERTIES_SECURITY_PROTOCOL='{{ns.securityProtocol}}'
       - SPRING_KAFKA_PROPERTIES_SASL_MECHANISM='{{ns.saslMechanism}}'
@@ -5173,7 +5174,7 @@ services:
       - DATAHUB_GMS_PROTOCOL=http
       - DATAHUB_SYSTEM_CLIENT_ID=__datahub_system
       - DATAHUB_SYSTEM_CLIENT_SECRET=JohnSnowKnowsNothing
-      - KAFKA_BOOTSTRAP_SERVER=kafka-1:19092
+      - KAFKA_BOOTSTRAP_SERVER={{ns.bootstrapServer}}
     {% if ns.secureKafkaEnabled %}
       - SPRING_KAFKA_PROPERTIES_SECURITY_PROTOCOL='{{ns.securityProtocol}}'
       - SPRING_KAFKA_PROPERTIES_SASL_MECHANISM='{{ns.saslMechanism}}'
@@ -5218,7 +5219,7 @@ services:
       - DATAHUB_GMS_PORT=8080
       - MAE_CONSUMER_ENABLED=true
       - PE_CONSUMER_ENABLED=true
-      - KAFKA_BOOTSTRAP_SERVER=kafka-1:19092
+      - KAFKA_BOOTSTRAP_SERVER={{ns.bootstrapServer}}
     {% if ns.secureKafkaEnabled %}
       - SPRING_KAFKA_PROPERTIES_SECURITY_PROTOCOL='{{ns.securityProtocol}}'
       - SPRING_KAFKA_PROPERTIES_SASL_MECHANISM='{{ns.saslMechanism}}'
@@ -5285,7 +5286,7 @@ services:
       - EBEAN_DATASOURCE_URL=jdbc:mysql://datahub-mysql:3306/datahub?verifyServerCertificate=false&useSSL=true&useUnicode=yes&characterEncoding=UTF-8&enabledTLSProtocols=TLSv1.2
       - EBEAN_DATASOURCE_USERNAME=datahub
       - EBEAN_DATASOURCE_PASSWORD=datahub
-      - KAFKA_BOOTSTRAP_SERVER=kafka-1:19092
+      - KAFKA_BOOTSTRAP_SERVER={{ns.bootstrapServer}}
     {% if ns.secureKafkaEnabled %}
       - SPRING_KAFKA_PROPERTIES_SECURITY_PROTOCOL='{{ns.securityProtocol}}'
       - SPRING_KAFKA_PROPERTIES_SASL_MECHANISM='{{ns.saslMechanism}}'
@@ -7121,8 +7122,8 @@ services:
     ports:
       - "9393:9393"
     environment:
-      - SPRING_CLOUD_DATAFLOW_APPLICATIONPROPERTIES_STREAM_SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS=PLAINTEXT://kafka-1:19092
-      - SPRING_CLOUD_DATAFLOW_APPLICATIONPROPERTIES_STREAM_SPRING_CLOUD_STREAM_KAFKA_STREAMS_BINDER_BROKERS=PLAINTEXT://kafka-1:19092
+      - SPRING_CLOUD_DATAFLOW_APPLICATIONPROPERTIES_STREAM_SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS=PLAINTEXT://{{ns.bootstrapServer}}
+      - SPRING_CLOUD_DATAFLOW_APPLICATIONPROPERTIES_STREAM_SPRING_CLOUD_STREAM_KAFKA_STREAMS_BINDER_BROKERS=PLAINTEXT://{{ns.bootstrapServer}}
       - SPRING_CLOUD_DATAFLOW_APPLICATIONPROPERTIES_STREAM_SPRING_CLOUD_STREAM_KAFKA_BINDER_ZKNODES=zookeeper-1:2181
       - SPRING_CLOUD_DATAFLOW_APPLICATIONPROPERTIES_STREAM_SPRING_CLOUD_STREAM_KAFKA_STREAMS_BINDER_ZKNODES=zookeeper-1:2181
 
