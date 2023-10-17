@@ -338,7 +338,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28105 | 9000 | cmak (dc2) |
 28106 | 8080 | kadmin     |
 28107 | 8080 | akhq (dc1)    |
-28107 | 8080 | akhq (dc2)     |
+28108 | 8080 | akhq (dc2)     |
 28110 | 9020 | kafdrop     |
 28111 | 28111 | spark-worker-1 |
 28112 | 28112 | spark-worker-2 |
@@ -519,6 +519,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28317 | 25 | maildev |
 28318 | 8025 | mailpit |
 28319 | 25 | mailpit |
+28320 | 25 | akhq (dc1) |
+28321 | 25 | akhq (dc1) |
 
 ## Ports > 28500
 
