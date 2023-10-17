@@ -2738,16 +2738,20 @@ services:
 {% if ((KAFKA_enable or external['KAFKA_enable']) and AKHQ_enable) | default(false) %}
   #  ================================== Apache Kafka HQ (AKHQ) ========================================== #
   {% set externalPort = 28107 + dataCenterId %}
+  {% set monitoringExternalPort = 28320 + dataCenterId}
   akhq{{dataCenter}}:
     image: tchiotludo/akhq:{{__AKHQ_version}}
     container_name: akhq{{dataCenter}}
     hostname: akhq{{dataCenter}}
     labels:
       com.platys.name: "akhq"
-      com.platys.webui.title: 'Apache Kafka AQ UI'
+      com.platys.webui.title: 'AKHQ UI'
       com.platys.webui.url: "http://dataplatform:{{externalPort}}"
+      com.platys.restapi.title: 'AKHQ API'
+      com.platys.restapi.url: "http://dataplatform:{{externalPort}}/api"
     ports:
       - {{externalPort}}:8080
+      - {{monitoringExternalPort}}:28081
     environment:
       AKHQ_CONFIGURATION: |
     {% if AKHQ_auth_enable | default(false) %}
