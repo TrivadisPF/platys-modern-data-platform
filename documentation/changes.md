@@ -67,6 +67,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * support for Kafka SASL/PLAIN authentication for traditional and KRaft setups
  * support for Kafka SASL/SCRAM (256 + 512) authentication for traditional and KRaft setups
  * support for Kafka authorisation for traditional and KRaft setups
+ * support for authentication in AKHQ
 
 ### Breaking Changes
 
