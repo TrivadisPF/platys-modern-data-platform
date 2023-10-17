@@ -876,10 +876,16 @@ networks:
 
   {% set ns.kafkaToolsDefaultUsername = KAFKA_tools_username %}
   {% set ns.kafkaToolsDefaultPassword = KAFKA_tools_password %}
+
+  {% set ns.users = KAFKA_initial_users ~ ',' ~ KAFKA_admin_username ~ ':' ~ KAFKA_admin_password ~
+            ',' ~ KAFKA_tools_username ~ ':' ~ KAFKA_tools_password ~
+            ',' ~ KAFKA_CONNECT_kafka_username ~ ':' ~ KAFKA_CONNECT_kafka_password ~
+            ',' ~ KSQLDB_kafka_username ~ ':' ~ KSQLDB_kafka_password
+  %}
+
 {% endif %}   {# external['KAFKA_enable'] #}
 
-{#  ================================== Schema Registry Settings ========================================== #}
-
+{% if ns.secureKafkaEnabled and KAFKA_security_debug | default(false) %}
 #  ns.securityProtocolCONTROLLER = {{ns.securityProtocolCONTROLLER}}
 #  ns.securityProtocolBROKER = {{ns.securityProtocolBROKER}}
 #  ns.securityProtocolLOCAL = {{ns.securityProtocolLOCAL}}
@@ -895,7 +901,9 @@ networks:
 #  ns.loginModuleLOCAL = {{ns.loginModuleLOCAL}}
 #  ns.loginModuleDOCKERHOST = {{ns.loginModuleDOCKERHOST}}
 #  ns.loginModuleEXTERNAL = {{ns.loginModuleEXTERNAL}}
+{% endif %}
 
+{#  ================================== Schema Registry Settings ========================================== #}
 {% if not (external['SCHEMA_REGISTRY_enable']) | default(false) %}
     {% if SCHEMA_REGISTRY_flavour is defined %}
         {%if SCHEMA_REGISTRY_UI_use_public_ip | default(true) %}
