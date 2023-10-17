@@ -900,7 +900,7 @@ networks:
 
   {% set ns.users = users_list(KAFKA_admin_username, KAFKA_admin_password, KAFKA_CONNECT_kafka_username, KAFKA_CONNECT_kafka_password,
                   KSQLDB_kafka_username,KSQLDB_kafka_password,SCHEMA_REGISTRY_kafka_username,SCHEMA_REGISTRY_kafka_password,
-                  KAFKA_tools_username,KAFKA_tools_password,KAFKA_initial_users) %}
+                  KAFKA_tools_username,KAFKA_tools_password,KAFKA_addl_users) %}
 
 {% endif %}   {# external['KAFKA_enable'] #}
 
@@ -1229,25 +1229,25 @@ services:
       {% endif %}
       KAFKA_LISTENER_NAME_BROKER_SASL_ENABLED_MECHANISMS: {{ns.saslMechanismBROKER}}
       KAFKA_LISTENER_NAME_BROKER_{{ns.saslMechanismBROKER}}_SASL_JAAS_CONFIG: {{ns.loginModuleBROKER}} required username="{{KAFKA_admin_username}}" password="{{KAFKA_admin_password}}"
-        {% for user in KAFKA_initial_users.split(",") %}
+        {% for user in ns.users.split(",") %}
         user_{{user.split(':')[0]}}="{{user.split(':')[1]}}"
         {% endfor %}
         ;
       KAFKA_LISTENER_NAME_LOCAL_SASL_ENABLED_MECHANISMS: {{ns.saslMechanismLOCAL}}
       KAFKA_LISTENER_NAME_LOCAL_{{ns.saslMechanismLOCAL}}_SASL_JAAS_CONFIG: {{ns.loginModuleLOCAL}} required username="{{KAFKA_admin_username}}" password="{{KAFKA_admin_password}}"
-        {% for user in KAFKA_initial_users.split(",") %}
+        {% for user in ns.users.split(",") %}
         user_{{user.split(':')[0]}}="{{user.split(':')[1]}}"
         {% endfor %}
         ;
       KAFKA_LISTENER_NAME_DOCKERHOST_SASL_ENABLED_MECHANISMS: {{ns.saslMechanismDOCKERHOST}}
       KAFKA_LISTENER_NAME_DOCKERHOST_{{ns.saslMechanismDOCKERHOST}}_SASL_JAAS_CONFIG: {{ns.loginModuleDOCKERHOST}} required username="{{KAFKA_admin_username}}" password="{{KAFKA_admin_password}}"
-        {% for user in KAFKA_initial_users.split(",") %}
+        {% for user in ns.users.split(",") %}
         user_{{user.split(':')[0]}}="{{user.split(':')[1]}}"
         {% endfor %}
         ;
       KAFKA_LISTENER_NAME_EXTERNAL_SASL_ENABLED_MECHANISMS: {{ns.saslMechanismEXTERNAL}}
       KAFKA_LISTENER_NAME_EXTERNAL_{{ns.saslMechanismEXTERNAL}}_SASL_JAAS_CONFIG: {{ns.loginModuleEXTERNAL}} required username="{{KAFKA_admin_username}}" password="{{KAFKA_admin_password}}"
-        {% for user in KAFKA_initial_users.split(",") %}
+        {% for user in ns.users.split(",") %}
         user_{{user.split(':')[0]}}="{{user.split(':')[1]}}"
         {% endfor %}
         ;
@@ -1372,7 +1372,7 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
     {% if ns.secureKafkaEnabled and (KAFKA_sasl_mechanism == 'SCRAM-SHA-256' or KAFKA_sasl_mechanism == 'SCRAM-SHA-512') | default(false) %}
-    command: "bash -c '/tmp/kraft/update_storage.sh {{KAFKA_cluster_id}} {{KAFKA_initial_users}} {{KAFKA_sasl_mechanism}} {{KAFKA_security_debug | lower }} && /etc/confluent/docker/run ;'"
+    command: "bash -c '/tmp/kraft/update_storage.sh {{KAFKA_cluster_id}} {{ns.users}} {{KAFKA_sasl_mechanism}} {{KAFKA_security_debug | lower }} && /etc/confluent/docker/run ;'"
     {% endif -%}  {#  ns.secureKafkaEnabled and KAFKA_sasl_mechanism == 'SCRAM-SHA-256' or 'SCRAM-SHA-512') #}
     restart: {{container_restart_policy}}
   {% endfor %} {# for serviceName in (ns.serviceNames) #}
@@ -1388,7 +1388,7 @@ services:
       - zookeeper-1
     command: "bash -c 'echo Waiting for Zookeeper to be ready... && \
                           cub zk-ready zookeeper-1:2181 120 && \
-  {% for user in KAFKA_initial_users.split(",") %}
+  {% for user in ns.users.split(",") %}
                           kafka-configs --zookeeper zookeeper-1:2181 --alter --add-config 'SCRAM-SHA-256=[password={{user.split(":")[1]}}],SCRAM-SHA-512=[password={{user.split(":")[1]}}]' --entity-type users --entity-name {{user.split(":")[0]}} {{ '&&' if not loop.last }} \
   {% endfor %}
                       '"
