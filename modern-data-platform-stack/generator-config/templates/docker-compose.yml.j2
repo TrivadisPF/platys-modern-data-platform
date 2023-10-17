@@ -788,6 +788,27 @@ networks:
   {%- endif -%}
 {%- endmacro -%}
 
+{% macro users_list(admin_username, admin_password, connect_username, connect_password,
+                schemaregistry_username, schemaregistry_password, ksqldb_username, ksqldb_password,
+                tools_username, tools_password, other_users) -%}
+  {{admin_username}}:{{admin_password}}
+  {%- if connect_username is defined and connect_username and connect_username | length -%}
+     ,{{connect_username}}:{{connect_password}}
+  {%- endif -%}
+  {%- if schemaregistry_username is defined and schemaregistry_username and schemaregistry_username | length -%}
+     ,{{schemaregistry_username}}:{{schemaregistry_password}}
+  {%- endif -%}
+  {%- if schemaregistry_username is defined and schemaregistry_username and schemaregistry_username | length -%}
+     ,{{ksqldb_username}}:{{ksqldb_password}}
+  {%- endif -%}
+  {%- if schemaregistry_username is defined and schemaregistry_username and schemaregistry_username | length -%}
+     ,{{tools_username}}:{{tools_password}}
+  {%- endif -%}
+  {%- if other_users is defined and other_users and other_users | length -%}
+     ,{{other_users}}
+  {%- endif -%}
+{%- endmacro -%}
+
 {% set ns = namespace(bootstrapServers='') %}
 {% set ns = namespace(schemaRegistryUrl='') %}
 {% set ns = namespace(secureKafkaEnabled='') %}
@@ -877,11 +898,9 @@ networks:
   {% set ns.kafkaToolsDefaultUsername = KAFKA_tools_username %}
   {% set ns.kafkaToolsDefaultPassword = KAFKA_tools_password %}
 
-  {% set ns.users = KAFKA_initial_users ~ ',' ~ KAFKA_admin_username ~ ':' ~ KAFKA_admin_password ~
-            ',' ~ KAFKA_tools_username ~ ':' ~ KAFKA_tools_password ~
-            ',' ~ KAFKA_CONNECT_kafka_username ~ ':' ~ KAFKA_CONNECT_kafka_password ~
-            ',' ~ KSQLDB_kafka_username ~ ':' ~ KSQLDB_kafka_password
-  %}
+  {% set ns.users = users_list(KAFKA_admin_username, KAFKA_admin_password, KAFKA_CONNECT_kafka_username, KAFKA_CONNECT_kafka_password,
+                  KSQLDB_kafka_username,KSQLDB_kafka_password,SCHEMA_REGISTRY_kafka_username,SCHEMA_REGISTRY_kafka_password,
+                  KAFKA_tools_username,KAFKA_tools_password,KAFKA_initial_users) %}
 
 {% endif %}   {# external['KAFKA_enable'] #}
 
@@ -901,6 +920,7 @@ networks:
 #  ns.loginModuleLOCAL = {{ns.loginModuleLOCAL}}
 #  ns.loginModuleDOCKERHOST = {{ns.loginModuleDOCKERHOST}}
 #  ns.loginModuleEXTERNAL = {{ns.loginModuleEXTERNAL}}
+#  ns.users = {{ns.users}}
 {% endif %}
 
 {#  ================================== Schema Registry Settings ========================================== #}
