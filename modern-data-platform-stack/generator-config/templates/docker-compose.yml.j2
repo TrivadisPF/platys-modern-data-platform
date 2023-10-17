@@ -2750,7 +2750,31 @@ services:
       - {{externalPort}}:8080
     environment:
       AKHQ_CONFIGURATION: |
+    {% if AKHQ_auth_enable | default(false) %}
+        micronaut:
+          security:
+            enabled: true
+            default-group: no-roles
+    {% endif -%}   {#  AKHQ_read_only_mode #}
         akhq:
+    {% if AKHQ_read_only_mode | default(false) %}
+          security:
+            default-group: reader
+    {% endif -%}   {#  AKHQ_read_only_mode #}
+    {% if AKHQ_auth_type == 'basic' | default(false) %}
+          security:
+            enabled: true
+            default-group: no-roles
+            basic-auth:
+              - username: {{AKHQ_username}}
+                password: "{{AKHQ_password}}"
+                groups:
+                - admin
+              - username: reader
+                password: "{{AKHQ_password}}"
+                groups:
+                - reader
+    {% endif -%}   {#  AKHQ_auth_type == 'basic' #}
           pagination.page-size: {{AKHQ_topic_page_size | default(omit)}}
           topic-data:
             size: {{AKHQ_topic_data_size | default(omit)}}
@@ -2764,10 +2788,6 @@ services:
               show-all-consumer-groups: {{'true' if AKHQ_show_all_consumer_groups else 'false'}}
             topic-data:
               sort: {{AKHQ_sort | default('OLDEST')}}
-    {% if AKHQ_read_only_mode | default(false) %}
-          security:
-            default-group: reader
-    {% endif -%}   {#  AKHQ_read_only_mode #}
           connections:
             docker-kafka-server:
               properties:
