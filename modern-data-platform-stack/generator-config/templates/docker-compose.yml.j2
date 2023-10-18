@@ -1620,7 +1620,7 @@ services:
       KSQL_LOG4J_PROCESSING_LOG_TOPIC: '{{KSQLDB_log_topic}}'
       KSQL_LOG4J_PROCESSING_LOG_BROKERLIST: '{{ns.bootstrapServers}}'
     {% else %}
-      KSQL_LOG4J_OPTS: "-Dlog4j.configuration=file:/opt/app/log4j/log4j.properties"
+      KSQL_LOG4J_OPTS: "-Dlog4j.configuration=file:/tmp/log4j.properties"
       KSQL_LOG4J_LOGGERS: "org.apache.kafka.connect.runtime.rest=WARN,org.reflections=ERROR"
       KSQL_LOG4J_PROCESSING_LOG_TOPIC: '{{KSQLDB_log_topic}}'
       KSQL_LOG4J_PROCESSING_LOG_BROKERLIST: '{{ns.bootstrapServers}}'
@@ -1730,7 +1730,7 @@ services:
       - ./data-transfer:/data-transfer
       - ./plugins/ksqldb:/etc/ksqldb/ext
     {% if ( KSQLDB_edition | lower) == 'oss'  | default(false) %}
-      - ./conf/ksqldb/etc/log4j.properties:/opt/app/log4j/log4j.properties
+      - ./conf/ksqldb/etc/log4j.properties:/tmp/log4j.properties.templ
     {% endif -%}   {#  KSQLDB_edition = 'oss' #}
       - ./plugins/kafka-connect/connectors:/etc/kafka-connect/addl-plugins
       - ./plugins/kafka-connect/jars:/etc/kafka-connect/jars
@@ -1742,24 +1742,25 @@ services:
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
-    {%if KSQLDB_use_embedded_connect and loop.index == 1 | default(false) %}
     command:
       # In the command section, $ are replaced with $$ to avoid the error 'Invalid interpolation format for "command" option'
       - bash
       - -c
       - |
+    {%if KSQLDB_use_embedded_connect and loop.index == 1 | default(false) %}
         echo "Installing Connectors"
           for i in $$(echo "{{KSQLDB_connect_connectors}}" | sed "s/,/ /g")
         do
           confluent-hub install --no-prompt --component-dir /etc/kafka-connect/cflthub-plugins --verbose "$$i"
         done
+    {% endif %}
+        python -c 'import os,sys; sys.stdout.write(os.path.expandvars(sys.stdin.read()))' < /tmp/log4j.properties.templ > /tmp/log4j.properties
         #
         echo "Launching ksqlDB server"
         #/etc/confluent/docker/run &
         /usr/bin/docker/run &
         #
         sleep infinity
-    {% endif %}
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki') | default(false) %}
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
