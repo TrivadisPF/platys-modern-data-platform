@@ -23,8 +23,8 @@ against secure cluster
 
 ```bash
 docker exec -ti kcat kcat -b <broker> -t <topic>
+			-X security.protocol=SASL_PLAINTEXT
 			-X sasl.mechanism=SCRAM-SHA-512
-			-X security.protocol=SASL_SSL
 			-X sasl.username=client
 			-X sasl.password=client-secret
 ```
