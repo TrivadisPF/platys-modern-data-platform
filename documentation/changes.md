@@ -24,6 +24,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Mailpit
  * Dataverse
  * CKAN
+ * AsyncAPI Studio
 
 ### Removed Services
  

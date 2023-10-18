@@ -521,6 +521,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28319 | 25 | mailpit |
 28320 | 25 | akhq (dc1) |
 28321 | 25 | akhq (dc1) |
+28322 | 80 | asyncapi-studio |
 
 ## Ports > 28500
 

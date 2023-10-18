@@ -480,6 +480,8 @@ networks:
 {% set __SWAGGER_EDITOR_version = SWAGGER_EDITOR_version | default('latest') -%}
 {% set __SWAGGER_UI_version = SWAGGER_UI_version | default('latest') -%}
 
+{% set __ASYNCAPI_STUDIO_version = ASYNCAPI_STUDIO_version | default('latest') -%}
+
 {% set __MICROCKS_version = MICROCKS_version | default('latest') -%}
 
 {% set __OTEL_COLLECTOR_version = OTEL_COLLECTOR_version | default('latest') -%}
@@ -772,6 +774,7 @@ networks:
   {% set LOG4BRAINS_enable = false -%}
   {% set SWAGGER_EDITOR_enable = false -%}
   {% set SWAGGER_UI_enable = false -%}
+  {% set ASYNCAPI_STUDIO_enable = false -%}
 {% endif %}   {# PLATFORM_ARM_enable #}
 
 {#  ================================== Kafka Settings ========================================== #}
@@ -15546,6 +15549,34 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  SWAGGER_UI_enable #}
+
+{% if ASYNCAPI_STUDIO_enable | default(false) %}
+  #  ================================== AsyncAPI Studio ================= #
+  asyncapi-studio:
+    image: asyncapi/studio:{{__ASYNCAPI_STUDIO_version}}
+    container_name: asyncapi-studio
+    hostname: asyncapi-studio
+    labels:
+      com.platys.name: "asyncapi-studio"
+      com.platys.webui.title: "AsyncAPI Studio UI"
+      com.platys.webui.url: "http://dataplatform:28322"
+    ports:
+      - 28322:80
+    {%if use_timezone | default(false) %}
+    environment:
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  ASYNCAPI_STUDIO_enable #}
 
 {% if MICROCKS_enable | default(false) %}
   #  ================================== Microck ================= #
