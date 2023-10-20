@@ -3376,7 +3376,14 @@ services:
     environment:
       - KLAW_CLUSTERAPI_ACCESS_BASE64_SECRET=VGhpc0lzRXhhY3RseUEzMkNoYXJTdHJpbmdTZWNyZXQK
       - SPRING_DATASOURCE_URL=jdbc:h2:file:/klaw/klawprodb;DB_CLOSE_ON_EXIT=FALSE;DB_CLOSE_DELAY=-1;MODE=MySQL;CASE_INSENSITIVE_IDENTIFIERS=TRUE;
-      - KLAW_QUICKSTART_ENABLED=true
+      - KLAW_QUICKSTART_ENABLED={{KLAW_quickstart_enable | default(false)}}
+      - KLAW_DOCKER_CLUSTERAPI_HOST=http://klaw-cluster-api:9343
+      - KLAW_DOCKER_KAFKA_CLUSTER={{ns.bootstrapServer}}
+      - KLAW_DOCKER_SR_CLUSTER={{ns.schemaRegistryUrl | replace('http://',''))}}
+      - LOGGING_LEVEL_ROOT={{KLAW_logging_level | default(info)}}
+      - KLAW_SUPERADMIN_DEFAULT_USERNAME=superadmin
+      - KLAW_SUPERADMIN_DEFAULT_PASSWORD=abc123!
+      - SPRING_MAIL_HOST={{KLAW_mail_host}}
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -3403,6 +3410,16 @@ services:
       - 28310:9343
     environment:
       - KLAW_CLUSTERAPI_ACCESS_BASE64_SECRET=VGhpc0lzRXhhY3RseUEzMkNoYXJTdHJpbmdTZWNyZXQK
+    {% if ns.secureKafkaEnabled %}
+      {% if KAFKA_sasl_mechanism == 'SCRAM-SHA-256' or KAFKA_sasl_mechanism == 'SCRAM-SHA-512' %}
+      - {{KLAW_cluster_id}}_KAFKASASL_JAASCONFIG_SCRAM={{ns.loginModuleBROKER}} required username='{{ns.kafkaToolsDefaultUsername}}' password='{{ns.kafkaToolsDefaultPassword}}';
+      {% elif KAFKA_sasl_mechanism == 'OAUTHBEARER' %}
+      - {{KLAW_cluster_id}}_KAFKASASL_JAASCONFIG_OAUTHBEARER={{ns.loginModuleBROKER}} required username='{{ns.kafkaToolsDefaultUsername}}' password='{{ns.kafkaToolsDefaultPassword}}';
+      {% elif KAFKA_sasl_mechanism == 'PLAIN' %}
+      - {{KLAW_cluster_id}}_KAFKASASL_JAASCONFIG_PLAIN={{ns.loginModuleBROKER}} required username='{{ns.kafkaToolsDefaultUsername}}' password='{{ns.kafkaToolsDefaultPassword}}';
+      {% endif -%}
+    {% endif -%}   {#  ns.secureKafkaEnabled #}
+      - LOGGING_LEVEL_ROOT={{KLAW_logging_level | default(info)}}
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
