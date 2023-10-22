@@ -1,0 +1,1 @@
+Contains the database data of the Taiga Postresql service, if flag TAIGA_volume_map_db_data is set to true.

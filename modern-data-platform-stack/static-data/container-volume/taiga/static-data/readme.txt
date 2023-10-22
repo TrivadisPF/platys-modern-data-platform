@@ -1,0 +1,1 @@
+Contains the static data of the Taiga service.

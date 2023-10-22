@@ -15238,6 +15238,198 @@ services:
     restart: unless-stopped
 {% endif %}   {# CODE_SERVER_enable #}
 
+{% if TAIGA_enable | default(false) %}
+  #  ================================== Taiga ================= #
+  taiga-front:
+    image: taigaio/frontend:{{__TAIGA_version}}
+    container_name: taiga-back
+    hostname: taiga-back
+    labels:
+      com.platys.name: "taiga"
+      com.platys.webui.title: "Taiga UI"
+      com.platys.webui.url: "http://dataplatform:28323"
+    ports:
+      - 28323:80
+    environment:
+      TAIGA_BACKEND_URL: "http://taiga-backend:9000"
+      TAIGA_EVENTS_URL: "ws://taiga-worker:9000/events/"
+      TAIGA_SUPPORT_EMAIL: ""
+      # Social auth
+      TAIGA_GITHUB_CLIENT_ID: ""
+      TAIGA_GITLAB_URL: ""
+      TAIGA_GITLAB_CLIENT_ID: ""
+      TAIGA_GOOGLE_CLIENT_ID: ""
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/home/coder/data-transfer
+      - ./container-volume/taiga/static-data:/taiga/static
+      - ./container-volume/taiga/media-data:/taiga/media
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: unless-stopped
+
+  taiga-backend:
+    image: taigaio/backend:alpha
+    container_name: taiga-backend
+    hostname: taiga-backend
+    command: "init_and_serve"
+    environment:
+      # Taiga settings
+      TAIGA_LANG: "en_us"
+      TAIGA_SECRET_KEY: "${TAIGA_SECRET_KEY}"
+      TAIGA_BACKEND_URL: "http://taiga-backend:9000"
+      TAIGA_FRONTEND_URL: "http://${PUBLIC_IP}:9000"
+      TAIGA_SUPPORT_EMAIL: ""
+      TAIGA_STATIC_ROOT: "/taiga/static"
+      TAIGA_MEDIA_ROOT: "/taiga/media"
+      # Database settings
+      TAIGA_DB_HOST: "taiga-db"
+      TAIGA_DB_NAME: "taiga"
+      TAIGA_DB_USER: "taiga"
+      TAIGA_DB_PASSWORD: "abc123!"
+      # Social auth
+      TAIGA_GITHUB_CLIENT_ID: ""
+      TAIGA_GITHUB_CLIENT_SECRET: ""
+      TAIGA_GITLAB_URL: ""
+      TAIGA_GITLAB_CLIENT_ID: ""
+      TAIGA_GITLAB_CLIENT_SECRET: ""
+      TAIGA_GOOGLE_CLIENT_ID: ""
+      TAIGA_GOOGLE_CLIENT_SECRET: ""
+      # Email settings
+      TAIGA_EMAIL__BACKEND: ""
+      TAIGA_EMAIL__DEFAULT_SENDER: ""
+      TAIGA_EMAIL__SERVER: ""
+      TAIGA_EMAIL__USERNAME: ""
+      TAIGA_EMAIL__PASSWORD: ""
+      TAIGA_EMAIL__PORT: ""
+      TAIGA_EMAIL__USE_TLS: ""
+      TAIGA_EMAIL__USE_SSL: ""
+      # Redis settings
+      TAIGA_EVENTS__REDIS_HOST: "taiga-redis"
+    volumes:
+      - ./data-transfer:/home/coder/data-transfer
+      - ./container-volume/taiga/static-data:/taiga/static
+      - ./container-volume/taiga/media-data:/taiga/media
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    networks:
+      - taiga
+    depends_on:
+      taiga-db:
+        condition: service_healthy
+      taiga-back:
+        condition: service_healthy
+
+  taiga-worker:
+    image: taigaio/backend:alpha
+    container_name: taiga-worker
+    hostname: taiga-worker
+    command: "tasksqueue worker -n main -c 4"
+    environment:
+      # Taiga settings
+      TAIGA_LANG: "en_us"
+      TAIGA_SECRET_KEY: "${TAIGA_SECRET_KEY}"
+      TAIGA_BACKEND_URL: "http://taiga-backend:9000"
+      TAIGA_FRONTEND_URL: "http://${PUBLIC_IP}:9000"
+      TAIGA_SUPPORT_EMAIL: ""
+      TAIGA_STATIC_ROOT: "/taiga/static"
+      TAIGA_MEDIA_ROOT: "/taiga/media"
+      # Database settings
+      TAIGA_DB_HOST: "taiga-db"
+      TAIGA_DB_NAME: "taiga"
+      TAIGA_DB_USER: "taiga"
+      TAIGA_DB_PASSWORD: "abc123!"
+      # Social auth
+      TAIGA_GITHUB_CLIENT_ID: ""
+      TAIGA_GITHUB_CLIENT_SECRET: ""
+      TAIGA_GITLAB_URL: ""
+      TAIGA_GITLAB_CLIENT_ID: ""
+      TAIGA_GITLAB_CLIENT_SECRET: ""
+      TAIGA_GOOGLE_CLIENT_ID: ""
+      TAIGA_GOOGLE_CLIENT_SECRET: ""
+      # Email settings
+      TAIGA_EMAIL__BACKEND: ""
+      TAIGA_EMAIL__DEFAULT_SENDER: ""
+      TAIGA_EMAIL__SERVER: ""
+      TAIGA_EMAIL__USERNAME: ""
+      TAIGA_EMAIL__PASSWORD: ""
+      TAIGA_EMAIL__PORT: ""
+      TAIGA_EMAIL__USE_TLS: ""
+      TAIGA_EMAIL__USE_SSL: ""
+      # Redis settings
+      TAIGA_EVENTS__REDIS_HOST: "taiga-redis"
+    volumes:
+      - ./data-transfer:/home/coder/data-transfer
+      - ./container-volume/taiga/static-data:/taiga/static
+      - ./container-volume/taiga/media-data:/taiga/media
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    networks:
+      - taiga
+    depends_on:
+      taiga-db:
+        condition: service_healthy
+      taiga-back:
+        condition: service_healthy
+
+  taiga-db:
+    image: postgres:15
+    container_name: taiga-db
+    hostname: taiga-db
+    labels:
+      com.platys.name: "taiga"
+    environment:
+      POSTGRES_DB: "${TAIGA_DB_NAME}"
+      POSTGRES_USER: "${TAIGA_DB_USER}"
+      POSTGRES_PASSWORD: "${TAIGA_DB_PASSWORD}"
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${TAIGA_DB_USER}"]
+      interval: 2s
+      timeout: 15s
+      retries: 5
+    volumes:
+      - ./data-transfer:/home/coder/data-transfer
+    {% if  TAIGA_volume_map_db_data | default(false) %}
+      - ./container-volume/taiga/db-data:/var/lib/postgresql/data
+    {% endif -%}   {#  TAIGA_volume_map_db_data #}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    networks:
+      - taiga
+
+  taiga-redis:
+    image: redis:7
+    container_name: taiga-redis
+    hostname: taiga-redis
+    labels:
+      com.platys.name: "redis"
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 2s
+      timeout: 15s
+      retries: 5
+{% endif %}   {# TAIGA_enable #}
+
 {% if MOCK_SERVER_enable | default(false) %}
   #  ================================== MockServer ========================================== #
   mockserver:
