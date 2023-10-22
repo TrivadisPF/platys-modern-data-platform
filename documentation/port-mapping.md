@@ -52,6 +52,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 3200 | 3200 | tempo |
 3306 | 3306 | mysql |
 3307 | 3306 | datahub-mysql |
+3333 | 3333 | taskcafe |
 3838 | 3838 | shiny-server |
 4000 | 4000 | graphql-mesh |
 4004 | 4004 | log4brains |
@@ -523,6 +524,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28321 | 25 | akhq (dc1) |
 28322 | 80 | asyncapi-studio |
 28323 | 80 | taiga |
+
 
 ## Ports > 28500
 

@@ -25,6 +25,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Dataverse
  * CKAN
  * AsyncAPI Studio
+ * Taskcafé
 
 ### Removed Services
  

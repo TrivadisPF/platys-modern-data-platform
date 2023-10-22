@@ -451,6 +451,8 @@ networks:
 
 {% set __DBT_version = DBT_version | default('latest') -%}
 
+{% set __TASKCAFE_version = TASKCAFE_version | default('latest') -%}
+
 {% set __CODE_SERVER_version = CODE_SERVER_version | default('latest') -%}
 {% set __EXCALIDRAW_version = EXCALIDRAW_version | default('latest') -%}
 {% set __FIREFOX_version = FIREFOX_version | default('latest') -%}
@@ -758,6 +760,7 @@ networks:
   {% set JAEGER_enable = false -%}
   {% set PITCHFORK_enable = false -%}
   {% set TEMPO_enable = false -%}
+  {% set TASKCAFE_enable = false -%}
   {% set CODE_SERVER_enable = false -%}
   {% set EXCALIDRAW_enable = false -%}
   {% set FIREFOX_enable = false -%}
@@ -15430,6 +15433,68 @@ services:
       timeout: 15s
       retries: 5
 {% endif %}   {# TAIGA_enable #}
+
+{% if TASKCAFE_enable | default(false) %}
+  #  ================================== Taskcafe ========================================== #
+  taskcafe:
+    image: taskcafe/taskcafe::{{__TASKCAFE_version}}
+    container_name: taskcafe
+    hostname: taskcafe
+    labels:
+      com.platys.name: "taskcafe"
+      com.platys.webui.title: "Taskcafe UI"
+      com.platys.webui.url: "http://dataplatform:3333"
+    ports:
+      - 3333:3333
+    depends_on:
+      - taskcafe-db
+    environment:
+      TASKCAFE_DATABASE_HOST: taskcafe-db
+      TASKCAFE_DATABASE_USER: taskcafe
+      TASKCAFE_DATABASE_PASSWORD: abc123!
+      TASKCAFE_DATABASE_NAME: taskcafedb
+      TASKCAFE_MIGRATE: "true"
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+
+  taskcafe-db:
+    image: postgres:12.3-alpine
+    container_name: taskcafe-db
+    hostname: taskcafe-db
+    labels:
+      com.platys.name: "postgres"
+    environment:
+      POSTGRES_USER: taskcafe
+      POSTGRES_PASSWORD: abc123!
+      POSTGRES_DB: taskcafedb
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {% if  TASKCAFE_volume_map_db_data | default(false) %}
+      - ./container-volume/taskcafe/db-data:/var/lib/postgresql/data
+    {% endif -%}   {#  use_timezone #}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+{% endif %}   {# MOCK_SERVER_enable #}
 
 {% if MOCK_SERVER_enable | default(false) %}
   #  ================================== MockServer ========================================== #
