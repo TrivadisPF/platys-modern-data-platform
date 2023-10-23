@@ -3383,16 +3383,23 @@ services:
     environment:
       - KLAW_CLUSTERAPI_ACCESS_BASE64_SECRET=VGhpc0lzRXhhY3RseUEzMkNoYXJTdHJpbmdTZWNyZXQK
       - SPRING_DATASOURCE_URL=jdbc:h2:file:/klaw/klawprodb;DB_CLOSE_ON_EXIT=FALSE;DB_CLOSE_DELAY=-1;MODE=MySQL;CASE_INSENSITIVE_IDENTIFIERS=TRUE;
+      - KLAW_CORAL_ENABLED=true
       - KLAW_CLUSTERAPI_URL=http://klaw-cluster-api:9343
       - KLAW_QUICKSTART_ENABLED={{KLAW_quickstart_enable | default(false)}}
-      - KLAW_CORAL_ENABLED=true
-      - KLAW_DOCKER_CLUSTERAPI_HOST=http://klaw-cluster-api:9343
+      - KLAW_DOCKER_INTERNAL_HOST=host.docker.internal
+      - KLAW_DOCKER_CLUSTERAPI_HOST=http://
       - KLAW_DOCKER_KAFKA_CLUSTER={{ns.bootstrapServers}}
       - KLAW_DOCKER_SR_CLUSTER={{ ns.schemaRegistryUrl | replace('http://','') }}
+      - KLAW_QUICKSTART_DEFAULT_USER1=dev1
+      - KLAW_QUICKSTART_DEFAULT_USER2=dev2
+      - KLAW_QUICKSTART_DEFAULT_USER1=abc123!
       - LOGGING_LEVEL_ROOT={{KLAW_logging_level | default(info)}}
       - KLAW_SUPERADMIN_DEFAULT_USERNAME=superadmin
       - KLAW_SUPERADMIN_DEFAULT_PASSWORD=abc123!
       - SPRING_MAIL_HOST={{KLAW_mail_host}}
+      - SPRING_MAIL_PORT={{KLAW_mail_port}}
+      - KLAW_MONITORING_METRICS_ENABLE=false
+      - KLAW_EXPORT_SCHEDULER_ENABLE=false
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -15489,7 +15496,7 @@ services:
       - ./data-transfer:/data-transfer
     {% if  TASKCAFE_volume_map_db_data | default(false) %}
       - ./container-volume/taskcafe/db-data:/var/lib/postgresql/data
-    {% endif -%}   {#  use_timezone #}
+    {% endif -%}   {#  TASKCAFE_volume_map_db_data #}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -15515,11 +15522,15 @@ services:
     environment:
       - VIRTUAL_HOST=focalboard.local
       - VIRTUAL_PORT=8000
+      - FOCALBOARD_SINGLE_USER_TOKEN=abc123!
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
+    {% if  FOCALBOARD_volume_map_db_data | default(false) %}
+      - ./container-volume/focalboard/data:/opt/focalboard/data
+    {% endif -%}   {#  FOCALBOARD_volume_map_db_data #}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
