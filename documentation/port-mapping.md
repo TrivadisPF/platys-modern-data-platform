@@ -201,6 +201,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 9098 | 9098 | kafka-7     |
 9099 | 9099 | kafka-8     |
 9192 | 9192 | lenses-box     |
+9343 | 9343 | klaw-cluster-api |
 9393 | 9393 | spring-dataflow-server |
 9411 | 9411 | zipkin |
 9412 | 9412 | jaeger |
@@ -510,7 +511,6 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28307 | 80 | docker-registry-ui |
 28308 | 8000 | splunk |
 28309 | 9097 | klaw-core |
-28310 | 9343 | klaw-cluster-api |
 28311 | 3000 | raneto |
 28312 | 3000 | markdown-madness |
 28313 | 80 | kadeck |
