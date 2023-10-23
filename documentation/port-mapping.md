@@ -524,7 +524,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28321 | 25 | akhq (dc1) |
 28322 | 80 | asyncapi-studio |
 28323 | 80 | taiga |
-
+28324 | 8000 | focalboard |
 
 ## Ports > 28500
 

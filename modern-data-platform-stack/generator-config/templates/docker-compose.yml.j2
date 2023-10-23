@@ -15498,6 +15498,36 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {# MOCK_SERVER_enable #}
 
+{% if FOCALBOARD_enable | default(false) %}
+  #  ================================== Focalboard ========================================== #
+  focalboard:
+    image: mattermost/focalboard:{{__FOCALBOARD_version}}
+    container_name: focalboard
+    hostname: focalboard
+    labels:
+      com.platys.name: "focalboard"
+      com.platys.webui.title: "Focalboard UI"
+      com.platys.webui.url: "http://dataplatform:28324"
+    ports:
+      - 28324:8000
+    environment:
+      - VIRTUAL_HOST=focalboard.local
+      - VIRTUAL_PORT=8000
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+{% endif %}   {# FOCALBOARD_enable #}
+
 {% if MOCK_SERVER_enable | default(false) %}
   #  ================================== MockServer ========================================== #
   mockserver:
