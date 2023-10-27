@@ -5600,6 +5600,7 @@ services:
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
+    init: true
 
   datahub-mysql-setup:
     image: acryldata/datahub-mysql-setup:head
@@ -5625,6 +5626,7 @@ services:
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
+    init: true
 
   datahub-elasticsearch-setup:
     image: linkedin/datahub-elasticsearch-setup:{{__DATAHUB_version}}
@@ -5649,6 +5651,7 @@ services:
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
+    init: true
 
   datahub-kafka-setup:
     image: linkedin/datahub-kafka-setup:{{__DATAHUB_version}}
@@ -5674,6 +5677,7 @@ services:
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
+    init: true
 
   {%if DATAHUB_provision_sample_data %}
   datahub-ingestion:
@@ -5697,6 +5701,7 @@ services:
     {% endif -%}   {#  use_timezone #}
     entrypoint: ["/tmp/wait-for-it.sh", "datahub-gms:8080", "--timeout=0", "--", "datahub"]
     command: "ingest -c /sample_recipe.yml"
+    init: true
   {% endif -%}   {#  DATAHUB_provision_sample_data #}
 
   datahub-cli:
@@ -6325,6 +6330,8 @@ services:
     hostname: dataverse-postgresql
     labels:
       com.platys.name: "postgresql"
+    ports:
+      - "5435:5432"
     environment:
       - POSTGRES_DB=dataverse
       - POSTGRES_USER=dataverse
@@ -6636,6 +6643,8 @@ services:
       com.platys.name: 'nifi'
       com.platys.webui.title: "Apache NiFi UI Node {{externalPort}}"
       com.platys.webui.url: "http{{ 's' if NIFI_run_secure}}://dataplatform:{{externalPort}}/nifi"
+      com.platys.restapi.title: "Apche NiFi REST API"
+      com.platys.restapi.url: "http{{ 's' if NIFI_run_secure}}://dataplatform:{{externalPort}}/nifi-api"
     ports:
       # HTTP
       - "{{externalPort}}:{{externalPort}}"
