@@ -14890,8 +14890,10 @@ services:
     volumes:
       - ./data-transfer:/data-transfer
     {% if PURE_FTPD_volume_map_data %}
-      - ./container-volumes/pure-ftpd/data:{{PURE_FTPD_home}}"
-    {% endif -%}   {#  PURE_FTPD_volume_map_data #}
+      - ./container-volumes/pure-ftpd/data:{{PURE_FTPD_home}}
+    {% elif PURE_FTPD_volume_map_data_transfer %}
+      - ./data-transfer:{{PURE_FTPD_home}}
+    {% endif -%}   {#  PURE_FTPD_volume_map_data or PURE_FTPD_volume_map_data_transfer #}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -14918,6 +14920,11 @@ services:
       - "2222:22"
     volumes:
       - ./data-transfer:/data-transfer
+    {% if SFTP_volume_map_data %}
+      - ./container-volumes/sftp/data:/home/sftp/{{PURE_FTPD_home}}
+    {% elif SFTP_volume_map_data_transfer %}
+      - ./data-transfer:/home/sftp/{{PURE_FTPD_home}}
+    {% endif -%}   {#  SFTP_volume_map_data or SFTP_volume_map_data_transfer #}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
