@@ -1,4 +1,4 @@
-# Pure FTP 
+# Pure FTPd 
 
 Pure FTP server. 
 
@@ -7,7 +7,7 @@ Pure FTP server.
 ## How to enable?
 
 ```
-platys init --enable-services FTP
+platys init --enable-services PURE_FTPD
 platys gen
 ```
 

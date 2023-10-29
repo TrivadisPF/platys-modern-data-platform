@@ -79,7 +79,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Keycloak is no longer using the "legacy" version but the new Quarkus-based one 
  * Dataiku now maps to port `28315` and no longer to `28205`
  * Change `KAFKA_KSQLDB_xxxxx` to `KSQLDB_xxxxx`
-
+ * Change `FTP_xxxxx` to `PURE_FTPD_xxxxx` to control the Pure FTPd server
 
 ## What's new in 1.16.0
 

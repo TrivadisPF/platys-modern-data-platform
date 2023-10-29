@@ -416,7 +416,7 @@ networks:
 {% set __ACTIVEMQ_ARTEMIS_version = ACTIVEMQ_ARTEMIS_version | default('latest') -%}
 {% set __RABBITMQ_version = RABBITMQ_version | default('latest') -%}
 
-{% set __FTP_PUREFTPD_version = FTP_PUREFTPD_version | default('latest') -%}
+{% set __PURE_FTPD_version = PURE_FTPD_version | default('latest') -%}
 {% set __SFTP_version = SFTP_version | default('latest') -%}
 
 {% set __FILEZILLA_version = FILEZILLA_version | default('latest') -%}
@@ -14863,20 +14863,20 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {#  RABBITMQ_enable #}
 
-{% if FTP_enable | default(false) %}
-  #  ================================== FTP Server ========================================== #
-  ftp:
-    image: stilliard/pure-ftpd:{{__FTP_PUREFTPD_version}}
-    container_name: ftp
-    hostname: ftp
+{% if PURE_FTPD_enable | default(false) %}
+  #  ================================== Pure FTPd Server ========================================== #
+  pure-ftpd:
+    image: stilliard/pure-ftpd:{{__PURE_FTPD_version}}
+    container_name: pure-ftpd
+    hostname: pure-ftpd
     labels:
       com.platys.name: "pure-ftp"
     environment:
 #      - PUBLICHOST="192.168.73.86"
       - PUBLICHOST=ftp
-      - FTP_USER_NAME={{FTP_username}}
-      - FTP_USER_PASS={{FTP_password}}
-      - FTP_USER_HOME={{FTP_home}}
+      - FTP_USER_NAME={{PURE_FTPD_username}}
+      - FTP_USER_PASS={{PURE_FTPD_password}}
+      - FTP_USER_HOME={{PURE_FTPD_home}}
       - FTP_MAX_CLIENTS=9
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
@@ -14886,6 +14886,9 @@ services:
       - "30000-30009:30000-30009"
     volumes:
       - ./data-transfer:/data-transfer
+    {% if PURE_FTPD_volume_map_data %}
+      - ./container-volumes/pure-ftpd/data:{{PURE_FTPD_home}}"
+    {% endif -%}   {#  PURE_FTPD_volume_map_data #}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -14894,7 +14897,7 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
-{% endif %}   {#  FTP_enable #}
+{% endif %}   {#  PURE_FTPD_enable #}
 
 {% if SFTP_enable | default(false) %}
   #  ================================== SFTP Server ========================================== #
