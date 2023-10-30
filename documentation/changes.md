@@ -58,6 +58,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Update `jikkou` to `latest`
  * Update `keycloak` to `22.0`
  * Update `marquez` to `0.41.0`
+ * Update `flink` to `1.18-scala_2.12-java17`
 
 ### Enhancements
 
