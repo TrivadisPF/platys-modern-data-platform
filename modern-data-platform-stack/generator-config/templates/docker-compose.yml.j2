@@ -997,10 +997,9 @@ networks:
   {% set ns.sparkHudiDependencies ="org.apache.hudi:hudi-spark2.4-bundle_2.12:0.13.0" -%}
 {% endif -%}    {# SPARK_base_version #}
 
-{%if (DATAHUB_enable or external['DATAHUB_enable']) | default(false) %}
-  {% set ns.datahubSparkPluginJar = "/spark/jars/datahub-spark-lineage" ~ __DATAHUB_version | replace("v", "") ~ ".jar" -%}
-  {% set ns.datahubSparkPluginDependencies = "io.acryl:datahub-spark-lineage:" ~ __DATAHUB_version | replace("v", "") -%}
-{% endif -%}    {# DATAHUB_enable #}
+{% set ns.datahubSparkPluginJar = "/spark/jars/datahub-spark-lineage" ~ __DATAHUB_version | replace("v", "") ~ ".jar" -%}
+{% set ns.datahubSparkPluginDependencies = "io.acryl:datahub-spark-lineage:" ~ __DATAHUB_version | replace("v", "") -%}
+
 {#  ================================== S3 Settings ========================================== #}
 
 {% if (external['S3_enable']) | default(false) %}
@@ -3977,7 +3976,6 @@ services:
       SPARK_MASTER_OPTS: '{{SPARK_master_opts if SPARK_master_opts is defined and SPARK_master_opts else omit }}'
       INIT_DAEMON_STEP: setup_spark
       MASTER: spark://spark-master:7077
-      SPARK_INSTALL_JARS_PACKAGES: '{{SPARK_install_jars_packages}},{{ns.sparkDeltaDependencies}},{{ns.sparkIcebergDependencies}},{{ns.sparkHudiDependencies}},{{ns.datahubSparkPluginDependencies}}'
     {%if MINIO_enable or external['S3_enable'] | default(false) %}
       CORE_CONF_fs_s3a_endpoint: '{{s3Endpoint | default(omit) }}'
       CORE_CONF_fs_s3a_path_style_access: '{{s3PathStyleAccess}}'
@@ -4038,7 +4036,13 @@ services:
       SPARK_DEFAULTS_CONF_spark_jars_repositories: {{SPARK_jars_repositories}}
       SPARK_DEFAULTS_CONF_spark_jars_packages: "{{SPARK_jars_packages}}"
       SPARK_DEFAULTS_CONF_spark_jars_excludes: {{SPARK_jars_excludes}}
+    {%if (DATAHUB_enable or external['DATAHUB_enable']) | default(false) %}
+      SPARK_INSTALL_JARS_PACKAGES: '{{SPARK_install_jars_packages}},{{ns.sparkDeltaDependencies}},{{ns.sparkIcebergDependencies}},{{ns.sparkHudiDependencies}},{{ns.datahubSparkPluginDependencies}}'
       SPARK_DEFAULTS_CONF_spark_jars: {{SPARK_jars}}{{',' if SPARK_jars | length}}{{ns.sparkTableFormatJar | default('')}}{{',' if ns.sparkTableFormatJar | length}}{{ns.datahubSparkPluginJar | default('')}}
+    {% else %}
+      SPARK_INSTALL_JARS_PACKAGES: '{{SPARK_install_jars_packages}},{{ns.sparkDeltaDependencies}},{{ns.sparkIcebergDependencies}},{{ns.sparkHudiDependencies}}'
+      SPARK_DEFAULTS_CONF_spark_jars: {{SPARK_jars}}{{',' if SPARK_jars | length}}{{ns.sparkTableFormatJar | default('')}}
+    {% endif -%}   {#  DATAHUB_enable or external['DATAHUB_enable'] #}
       SPARK_DEFAULTS_CONF_spark_jars_ivySettings: {{SPARK_jars_ivySettings}}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
