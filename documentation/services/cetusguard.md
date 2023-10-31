@@ -13,5 +13,5 @@ platys gen
 
 ## How to use it?
 
-Use `tcp://cetusguard:2376` for the Docker URL instead of `unix://var/run/docker.sock`.
+Use `cetusguard:2376` instead of `unix://var/run/docker.sock` to connect to the docker server (e.g. set the `DOCKER_HOST` environment variable). 
 
