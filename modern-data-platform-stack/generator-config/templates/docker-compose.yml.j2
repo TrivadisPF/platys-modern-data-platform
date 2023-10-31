@@ -16367,6 +16367,41 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {# PORTAINER_enable #}
 
+{% if CETUSGUARD_enable | default(false) %}
+  #  ================================== Cetusguard ========================================== #
+  cetusguard:
+    image: docker.io/hectorm/cetusguard:{{__CETUSGUARD_version}}
+    container_name: cetusguard
+    hostname: cetusguard
+    networks:
+      - {{platys['platform-name']}}
+    labels:
+      com.platys.name: "cetusguard"
+    environment:
+      CETUSGUARD_BACKEND_ADDR: "unix:///var/run/docker.sock"
+      CETUSGUARD_FRONTEND_ADDR: "tcp://:2375"
+      CETUSGUARD_RULES: |
+        ! Inspect a container
+        GET %API_PREFIX_CONTAINERS%/%CONTAINER_ID_OR_NAME%/json
+      CETUSGUARD_LOG_LEVEL: "7"
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    privileged: true
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    read_only: true
+    restart: {{container_restart_policy}}
+{% endif %}   {# CETUSGUARD_enable #}
+
 {% if CADVISOR_enable | default(false) %}
   #  ================================== cAdvisor ========================================== #
   cadvisor:
