@@ -28,9 +28,10 @@ See [What's new?](./documentation/changes.md) for a detailed list of changes.
 * [Configuration](./documentation/configuration.md) - all settings configurable in the `config.yml`
 * [Tutorials](./tutorials/README.md) - various tutorials detailed instructions on how to work with `platys`
 * [Cookbooks](./cookbooks/README.md) - various recipes showing how to use specific features of `platys`
-* [Port Mapping](./documentation/port-mapping.md)
+* [Port Mapping](./documentation/port-mapping.md) - a list of all the ports which are mapped to the outside for the various supported services
 * [Frequently Asked Questions](./documentation/faq.md)
 * [Troubleshooting](./documentation/troubleshooting.md)
 * [Adding additional services not supported by a platform stack](https://github.com/TrivadisPF/platys/blob/master/documentation/docker-compose-override.md)
+* [Creating a new stack in a scripted way](./documentation/start-stack-scripted-way.md)
 * [How to use a platys-generated stack without Internet](https://github.com/TrivadisPF/platys/blob/master/documentation/docker-compose-without-internet.md)
 * [Upgrade to a new platform stack version](https://github.com/TrivadisPF/platys/blob/master/documentation/upgrade-platform-stack.md)
