@@ -14016,6 +14016,18 @@ services:
       MINIO_REGION_NAME: {{s3DefaultRegion if s3DefaultRegion is defined and s3DefaultRegion else omit}}
       MINIO_DOMAIN: minio
       MINIO_SERVER_URL: "http://${PUBLIC_IP}:9000"
+      MINIO_PROMETHEUS_AUTH_TYPE: public
+      MINIO_PROMETHEUS_URL: "http://prometheus-1:9090"
+    {% if MINIO_audit_webhook_endpoint is defined and MINIO_audit_webhook_endpoint and MINIO_audit_webhook_endpoint | length %}
+      MINIO_AUDIT_WEBHOOK_ENABLE_primary: 'on'
+      MINIO_AUDIT_WEBHOOK_ENDPOINT_primary: {{MINIO_audit_webhook_endpoint}}
+      MINIO_AUDIT_WEBHOOK_AUTH_TOKEN_primary: {{MINIO_audit_webhook_auth_token if MINIO_audit_webhook_auth_token is defined and MINIO_audit_webhook_auth_token and MINIO_audit_webhook_auth_token | length else omit}}
+    {% endif -%}   {#  MINIO_audit_webhook_endpoint #}
+    {% if MINIO_notify_webhook_endpoint is defined and MINIO_notify_webhook_endpoint and MINIO_notify_webhook_endpoint | length %}
+      MINIO_NOTIFY_WEBHOOK_ENABLE_primary: 'on'
+      MINIO_NOTIFY_WEBHOOK_ENDPOINT_primary: {{MINIO_notify_webhook_endpoint}}
+      MINIO_NOTIFY_WEBHOOK_AUTH_TOKEN_primary: {{MINIO_notify_webhook_auth_token if MINIO_notify_webhook_auth_token is defined and MINIO_notify_webhook_auth_token and MINIO_notify_webhook_auth_token | length else omit}}
+    {% endif -%}   {#  MINIO_notify_webhook_endpoint #}
     {% if (KAFKA_enable or external['KAFKA_enable']) and MINIO_audit_kafka_enable | default(false) %}
       MINIO_AUDIT_KAFKA_ENABLE: 'on'
       MINIO_AUDIT_KAFKA_BROKERS: '{{ns.bootstrapServers}}'
