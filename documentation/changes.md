@@ -29,6 +29,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Taskcafé
  * Cetusguard
  * etcd & etcd-e3w
+ * Risingwave
 
 ### Removed Services
  

@@ -28,6 +28,8 @@ networks:
 {% set __KSQLDB_version = KSQLDB_version | default('latest') -%}
 {% set __MATERIALIZE_version = MATERIALIZE_version | default('latest') -%}
 {% set __HSTREAMDB_version = HSTREAMDB_version | default('latest') -%}
+{% set __BENTHOS_version = BENTHOS_version | default('latest') -%}
+{% set __RISINGWAVE_version = RISINGWAVE_version | default('latest') -%}
 
 {% set __SCHEMA_REGISTRY_UI_version = SCHEMA_REGISTRY_UI_version | default('latest') -%}
 
@@ -278,8 +280,6 @@ networks:
 {% endif -%}
 
 {% set __QUINE_version = QUINE_version | default('latest') -%}
-
-{% set __BENTHOS_version = BENTHOS_version | default('latest') -%}
 
 {% set __MEMGRAPH_version = MEMGRAPH_version | default('latest') -%}
 {% set __MEMGRAPH_MAGE_version = MEMGRAPH_MAGE_version | default('latest') -%}
@@ -565,6 +565,8 @@ networks:
   {% set APICURIO_SCHEMA_REGISTRY_enable = false -%}
   {% set MATERIALIZE_enable = false -%}
   {% set HSTREAMDB_enable = false -%}
+  {% set BENTHOS_enable = false -%}
+  {% set RISINGWAVE_enable = false -%}
   {% set KAFKA_REPLICATOR_enable = false -%}
   {% set KAFKA_MM2_enable = false -%}
   {% set LENSES_BOX_enable = false -%}
@@ -654,7 +656,6 @@ networks:
   {% set INVANA_STUDIO_enable = false -%}
   {% set NEO4J_enable = false -%}
   {% set QUINE_enable = false -%}
-  {% set BENTHOS_enable = false -%}
   {% set MEMGRAPH_enable = false -%}
   {% set ARCADEDB_enable = false -%}
   {% set DGRAPH_enable = false -%}
@@ -1940,6 +1941,156 @@ services:
     restart: {{container_restart_policy}}
 
 {% endif %}   {# HSTOREDB_enable #}
+
+{% if BENTHOS_enable | default(false) %}
+  #  ================================== Benthos ========================================== #
+  benthos-1:
+    image: jeffail/benthos:{{__BENTHOS_version}}
+    hostname: benthos-1
+    container_name: benthos-1
+    labels:
+      com.platys.name: "benthos"
+      com.platys.webui.title: "Benthos UI"
+      com.platys.webui.url: "http://dataplatform:4195"
+    ports:
+      - "4195:4195"
+    {%if use_timezone | default(false) %}
+    environment:
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./scripts/benthos:/benthos
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    command: [ '-w', '-c', '/benthos.yaml', '-w' ]
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+
+  {% if BENTHOS_SERVER_enable | default(false) %}
+  benthos-server:
+    image: jeffail/benthos:{{__BENTHOS_version}}
+    hostname: benthos-server
+    container_name: benthos-server
+    labels:
+      com.platys.name: "benthos"
+      com.platys.webui.title: "Benthos Server UI"
+      com.platys.webui.url: "http://dataplatform:4196"
+    ports:
+      - "4196:4196"
+    {%if use_timezone | default(false) %}
+    environment:
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./scripts/benthos:/benthos
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    command: ['blobl', 'server', '--no-open', '--host', '0.0.0.0', '--port', '4196']
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+  {% endif %}   {#  BENTHOS_SERVER_enable #}
+{% endif %}   {#  BENTHOS_enable #}
+
+{% if RISINGWAVE_enable | default(false) %}
+  #  ================================== Risingwave ========================================== #
+  risingwave:
+    image: risingwavelabs/risingwave:{{__RISINGWAVE_version}}
+    hostname: risingwave
+    container_name: risingwave
+    labels:
+      com.platys.name: "risingwave"
+      com.platys.webui.title: "Risingwave UI"
+      com.platys.webui.url: "http://dataplatform:5691"
+    depends_on:
+      - etcd-1
+      - minio-1
+    expose:
+      - "6660"
+      - "1260"
+      - "4566"
+      - "5688"
+      - "1222"
+      - "5690"
+      - "1250"
+      - "5691"
+    ports:
+      - "4566:4566"
+      - "5690:5690"
+      - "5691:5691"
+    environment:
+      - RUST_BACKTRACE="1"
+      # If ENABLE_TELEMETRY is not set, telemetry will start by default
+      - ENABLE_TELEMETRY={{RISINGWAVE_telemetry_enable | default(false) }}
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./conf/risingwave/risingwave.toml:/risingwave.toml
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    command: "standalone \
+                    --meta-opts=\" \
+                      --listen-addr 0.0.0.0:5690 \
+                      --advertise-addr 0.0.0.0:5690 \
+                      --dashboard-host 0.0.0.0:5691 \
+                      --prometheus-host 0.0.0.0:1250 \
+                      --connector-rpc-endpoint 0.0.0.0:50051 \
+                      --backend etcd \
+                      --etcd-endpoints etcd-1:2388 \
+                      --state-store hummock+minio://{{s3AccessKey}}:{{s3SecretAccessKey}}@minio-1:9000/risingwave-bucket \
+                      --data-directory platys_001 \
+                      --config-path /risingwave.toml \
+                      --dashboard-ui-path ${RW_PREFIX}/ui\" \
+                    --compute-opts=\" \
+                      --config-path /risingwave.toml \
+                      --listen-addr 0.0.0.0:5688 \
+                      --prometheus-listener-addr 0.0.0.0:1222 \
+                      --advertise-addr 0.0.0.0:5688 \
+                      --async-stack-trace verbose \
+                      --connector-rpc-endpoint 0.0.0.0:50051 \
+                      #--parallelism 4 \
+                      #--total-memory-bytes 8589934592 \
+                      --role both \
+                      --meta-address http://0.0.0.0:5690\" \
+                    --frontend-opts=\" \
+                      --config-path /risingwave.toml \
+                      --listen-addr 0.0.0.0:4566 \
+                      --advertise-addr 0.0.0.0:4566 \
+                      --prometheus-listener-addr 0.0.0.0:2222 \
+                      --health-check-listener-addr 0.0.0.0:6786 \
+                      --meta-addr http://0.0.0.0:5690\" \
+                    --compactor-opts=\" \
+                      --listen-addr 0.0.0.0:6660 \
+                      --prometheus-listener-addr 0.0.0.0:1260 \
+                      --advertise-addr 0.0.0.0:6660 \
+                      --meta-address http://0.0.0.0:5690\""
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - bash -c 'printf \"GET / HTTP/1.1\n\n\" > /dev/tcp/127.0.0.1/6660; exit $$?;'
+        - bash -c 'printf \"GET / HTTP/1.1\n\n\" > /dev/tcp/127.0.0.1/5688; exit $$?;'
+        - bash -c 'printf \"GET / HTTP/1.1\n\n\" > /dev/tcp/127.0.0.1/4566; exit $$?;'
+        - bash -c 'printf \"GET / HTTP/1.1\n\n\" > /dev/tcp/127.0.0.1/5690; exit $$?;'
+      interval: 1s
+      timeout: 5s
+{% endif %}   {#  RISINGWAVE_enable #}
 
 {% if ((KAFKA_enable or external['KAFKA_enable']) and KAFKA_RESTPROXY_enable) | default(false) %}
   #  ================================== Confluent REST Proxy ========================================== #
@@ -10570,65 +10721,6 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {#  QUINE_enable #}
 
-{% if BENTHOS_enable | default(false) %}
-  #  ================================== Benthos ========================================== #
-  benthos-1:
-    image: jeffail/benthos:{{__BENTHOS_version}}
-    hostname: benthos-1
-    container_name: benthos-1
-    labels:
-      com.platys.name: "benthos"
-      com.platys.webui.title: "Benthos UI"
-      com.platys.webui.url: "http://dataplatform:4195"
-    ports:
-      - "4195:4195"
-    {%if use_timezone | default(false) %}
-    environment:
-      - TZ={{use_timezone}}
-    {% endif -%}   {#  use_timezone #}
-    volumes:
-      - ./data-transfer:/data-transfer
-      - ./scripts/benthos:/benthos
-    {%if use_timezone | default(false) %}
-      - "./etc/timezone:/etc/timezone:ro"
-      - "./etc/localtime:/etc/localtime:ro"
-    {% endif -%}   {#  use_timezone #}
-    command: [ '-w', '-c', '/benthos.yaml', '-w' ]
-    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki') | default(false) %}
-    <<: *logging
-    {% endif -%}   {#  logging_driver is defined ... #}
-    restart: {{container_restart_policy}}
-
-  {% if BENTHOS_SERVER_enable | default(false) %}
-  benthos-server:
-    image: jeffail/benthos:{{__BENTHOS_version}}
-    hostname: benthos-server
-    container_name: benthos-server
-    labels:
-      com.platys.name: "benthos"
-      com.platys.webui.title: "Benthos Server UI"
-      com.platys.webui.url: "http://dataplatform:4196"
-    ports:
-      - "4196:4196"
-    {%if use_timezone | default(false) %}
-    environment:
-      - TZ={{use_timezone}}
-    {% endif -%}   {#  use_timezone #}
-    volumes:
-      - ./data-transfer:/data-transfer
-      - ./scripts/benthos:/benthos
-    {%if use_timezone | default(false) %}
-      - "./etc/timezone:/etc/timezone:ro"
-      - "./etc/localtime:/etc/localtime:ro"
-    {% endif -%}   {#  use_timezone #}
-    command: ['blobl', 'server', '--no-open', '--host', '0.0.0.0', '--port', '4196']
-    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki') | default(false) %}
-    <<: *logging
-    {% endif -%}   {#  logging_driver is defined ... #}
-    restart: {{container_restart_policy}}
-  {% endif %}   {#  BENTHOS_SERVER_enable #}
-{% endif %}   {#  BENTHOS_enable #}
-
 {% if MEMGRAPH_enable | default(false) %}
   #  ================================== Memgraph ========================================== #
   memgraph:
@@ -16439,7 +16531,7 @@ services:
     expose:
       - "2379"
     ports:
-      - "2379:2379"
+        - "2379:2379"
       - "2380:2380"
     {%if use_timezone | default(false) %}
     environment:

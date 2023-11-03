@@ -72,6 +72,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 4196 | 4196 | benthos-server |
 4317 | 4317 | otel-collector |
 4466 | 4466 | curity |
+4566 | 4566 | risingwave |
 5000 | 5000 | amundsenfrontend |
 5001 | 5000 | amundsensearch |
 5002 | 5000 | amundsenmetadata |
@@ -91,6 +92,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 5601 | 5601 | kibana |
 5602 | 5601 | datahub-kibana |
 5603 | 5601 | opensearch-dashboards |
+5690 | 5690 | risingwave |
+5691 | 5691 | risingwave |
 5672 | 5672 | activemq |
 5673 | 5672 | rabbitmq (amqp) |
 5701 | 5701 | hazelcast	-1 |
