@@ -28,6 +28,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Taiga
  * Taskcafé
  * Cetusguard
+ * etcd
 
 ### Removed Services
  

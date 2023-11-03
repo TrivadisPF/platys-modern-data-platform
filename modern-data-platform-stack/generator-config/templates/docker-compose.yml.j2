@@ -433,6 +433,7 @@ networks:
 {% set __VAULT_version = VAULT_version | default('latest') -%}
 {% set __KEYCLOAK_version = KEYCLOAK_version | default('latest') -%}
 {% set __MOCK_SERVER_version = MOCK_SERVER_version | default('latest') -%}
+{% set __ETCD_version = ETCD_version | default('latest') -%}
 {% set __PORTAINER_version = PORTAINER_version | default('latest') -%}
 {% set __CETUSGUARD_version = CETUSGUARD_version | default('latest') -%}
 {% set __CADVISOR_version = CADVISOR_version | default('latest') -%}
@@ -741,6 +742,7 @@ networks:
   {% set EXCALIDRAW_enable = false -%}
   {% set FIREFOX_enable = false -%}
   {% set FILE_BROWSER_enable = false -%}
+  {% set ETCD_enable = false -%}
   {% set CADVISOR_enable = false -%}
   {% set DOCKER_REGISTRY_enable = false -%}
   {% set DOCKER_REGISTRY_UI_enable = false -%}
@@ -16424,6 +16426,54 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  GRAFANA_enable #}
+
+{% if ETCD_enable | default(false) %}
+  #  ================================== etcd ========================================== #
+  etcd-1:
+    image: quay.io/coreos/etcd:{{__ETCD_version}}
+    container_name: etcd-1
+    hostname: etcd-1
+    labels:
+      com.platys.name: "etcd"
+    expose:
+      - "2379"
+    ports:
+      - "2379:2379"
+      - "2380:2380"
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - /var/run/docker.sock:/var/run/docker.sock
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    command:
+            - '--name=etcd-1'
+            - '--initial-advertise-peer-urls=http://etcd-1:2380' *
+            - '--listen-peer-urls=http://0.0.0.0:2380'  *
+            - '--listen-client-urls=http://0.0.0.0:2379'  *
+            - '--advertise-client-urls=http://etcd-1:2379'  *
+            - '--listen-metrics-urls=http://0.0.0.0:2379' *
+            - '--max-txn-ops=999999'  *
+            - '--max-request-bytes=10485760'
+            - '--auto-compaction-mode=periodic'
+            - '--auto-compaction-retention=1m'
+            - '--snapshot-count=10000'
+            - '--data-dir=/etcd-data'
+#            - '--initial-cluster=etcd-1=http://etcd-1:2380,etcd-2=http://etcd-2:2380,etcd-3=http://etcd-3:2380'
+#            - '--initial-cluster-state=new'
+#            - '--initial-cluster-token=mys3cr3ttok3n'
+#            - '--heartbeat-interval=250'
+#            - '--election-timeout=1250'
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+{% endif %}   {# ETCD_enable #}
 
 {% if PORTAINER_enable | default(false) %}
   #  ================================== Portainer ========================================== #
