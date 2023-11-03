@@ -16451,6 +16451,7 @@ services:
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
+    entrypoint: /usr/local/bin/etcd
     command:
             - '--name=etcd-1'
             - '--initial-advertise-peer-urls=http://etcd-1:2380' *
@@ -16473,6 +16474,16 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
+    healthcheck:
+      test:
+        - CMD
+        - etcdctl
+        - --endpoints=http://localhost:2379
+        - endpoint
+        - health
+      interval: 1s
+      timeout: 5s
+      retries: 5
 {% endif %}   {# ETCD_enable #}
 
 {% if ETCD_enable | default(false) %}
