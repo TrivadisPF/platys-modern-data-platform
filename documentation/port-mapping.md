@@ -514,7 +514,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28307 | 80 | docker-registry-ui |
 28308 | 8000 | splunk |
 28309 | 9097 | klaw-core |
-28310 |      | **UNUSED** |
+28310 | 8080 | etcd-keeper |
 28311 | 3000 | raneto |
 28312 | 3000 | markdown-madness |
 28313 | 80 | kadeck |

@@ -434,6 +434,7 @@ networks:
 {% set __KEYCLOAK_version = KEYCLOAK_version | default('latest') -%}
 {% set __MOCK_SERVER_version = MOCK_SERVER_version | default('latest') -%}
 {% set __ETCD_version = ETCD_version | default('latest') -%}
+{% set __ETCD_KEEPER_version = ETCD_KEEPER_version | default('latest') -%}
 {% set __PORTAINER_version = PORTAINER_version | default('latest') -%}
 {% set __CETUSGUARD_version = CETUSGUARD_version | default('latest') -%}
 {% set __CADVISOR_version = CADVISOR_version | default('latest') -%}
@@ -742,7 +743,7 @@ networks:
   {% set EXCALIDRAW_enable = false -%}
   {% set FIREFOX_enable = false -%}
   {% set FILE_BROWSER_enable = false -%}
-  {% set ETCD_enable = false -%}
+  {% set ETCD_KEEPER_enable = false -%}
   {% set CADVISOR_enable = false -%}
   {% set DOCKER_REGISTRY_enable = false -%}
   {% set DOCKER_REGISTRY_UI_enable = false -%}
@@ -16446,7 +16447,6 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
-      - /var/run/docker.sock:/var/run/docker.sock
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -16469,6 +16469,37 @@ services:
 #            - '--initial-cluster-token=mys3cr3ttok3n'
 #            - '--heartbeat-interval=250'
 #            - '--election-timeout=1250'
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+{% endif %}   {# ETCD_enable #}
+
+{% if ETCD_enable | default(false) %}
+  #  ================================== etcd-keeper ========================================== #
+  etcd-keeper:
+    image: evildecay/etcdkeeper:{{__ETCD_KEEPER_version}}
+    hostname: etcd-keeper
+    container_name: etcd-keeper
+    labels:
+      com.platys.name: "etcd-keeper"
+      com.platys.webui.title: "etcd UI"
+      com.platys.webui.url: "http://dataplatform:28310"
+    ports:
+      - "28310:8080"
+    depends_on:
+      - etcd-1
+    environment:
+      - HOST="0.0.0.0"
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki') | default(false) %}
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
