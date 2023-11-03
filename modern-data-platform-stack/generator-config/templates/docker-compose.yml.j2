@@ -14023,11 +14023,6 @@ services:
       MINIO_AUDIT_WEBHOOK_ENDPOINT_primary: {{MINIO_audit_webhook_endpoint}}
       MINIO_AUDIT_WEBHOOK_AUTH_TOKEN_primary: {{MINIO_audit_webhook_auth_token if MINIO_audit_webhook_auth_token is defined and MINIO_audit_webhook_auth_token and MINIO_audit_webhook_auth_token | length else omit}}
     {% endif -%}   {#  MINIO_audit_webhook_endpoint #}
-    {% if MINIO_notify_webhook_endpoint is defined and MINIO_notify_webhook_endpoint and MINIO_notify_webhook_endpoint | length %}
-      MINIO_NOTIFY_WEBHOOK_ENABLE_primary: 'on'
-      MINIO_NOTIFY_WEBHOOK_ENDPOINT_primary: {{MINIO_notify_webhook_endpoint}}
-      MINIO_NOTIFY_WEBHOOK_AUTH_TOKEN_primary: {{MINIO_notify_webhook_auth_token if MINIO_notify_webhook_auth_token is defined and MINIO_notify_webhook_auth_token and MINIO_notify_webhook_auth_token | length else omit}}
-    {% endif -%}   {#  MINIO_notify_webhook_endpoint #}
     {% if (KAFKA_enable or external['KAFKA_enable']) and MINIO_audit_kafka_enable | default(false) %}
       MINIO_AUDIT_KAFKA_ENABLE: 'on'
       MINIO_AUDIT_KAFKA_BROKERS: '{{ns.bootstrapServers}}'
@@ -14039,6 +14034,29 @@ services:
     {% endif -%}   {#  ns.secureKafkaEnabled #}
       MINIO_AUDIT_KAFKA_TOPIC: '{{MINIO_audit_kafka_topic}}'
     {% endif -%}   {#  MINIO_browser_enable #}
+      MINIO_API_SYNC_EVENTS: {{'on' if MINIO_notify_snyc_enable else omit}}
+    {% if MINIO_notify_webhook_endpoint is defined and MINIO_notify_webhook_endpoint and MINIO_notify_webhook_endpoint | length %}
+      MINIO_NOTIFY_WEBHOOK_ENABLE_primary: 'on'
+      MINIO_NOTIFY_WEBHOOK_ENDPOINT_primary: {{MINIO_notify_webhook_endpoint}}
+      MINIO_NOTIFY_WEBHOOK_AUTH_TOKEN_primary: {{MINIO_notify_webhook_auth_token if MINIO_notify_webhook_auth_token is defined and MINIO_notify_webhook_auth_token and MINIO_notify_webhook_auth_token | length else omit}}
+    {% endif -%}   {#  MINIO_notify_webhook_endpoint #}
+    {% if (KAFKA_enable or external['KAFKA_enable']) and MINIO_notify_kafka_enable | default(false) %}
+      MINIO_NOTFIY_KAFKA_ENABLE_primary: 'on'
+      MINIO_NOTIFY_KAFKA_BROKERS_primary: '{{ns.bootstrapServers}}'
+    {% if ns.secureKafkaEnabled %}
+      MINIO_NOTIFY_KAFKA_SASL_primary: 'on'
+      MINIO_NOTIFY_KAFKA_SASL_MECHANISM_primary: '{{ns.saslMechanismBROKER}}'
+      MINIO_NOTIFY_KAFKA_SASL_USERNAME_primary: '{{KAFKA_RESTPROXY_kafka_username if KAFKA_RESTPROXY_kafka_username is defined and KAFKA_RESTPROXY_kafka_username | length else ns.kafkaToolsDefaultUsername}}'
+      MINIO_NOTIFY_KAFKA_SASL_PASSWORD_primary: '{{KAFKA_RESTPROXY_kafka_password if KAFKA_RESTPROXY_kafka_password is defined and KAFKA_RESTPROXY_kafka_password | length else ns.kafkaToolsDefaultPassword}}'
+    {% endif -%}   {#  ns.secureKafkaEnabled #}
+      MINIO_NOTIFY_KAFKA_TOPIC_primary: '{{MINIO_notify_kafka_topic}}'
+    {% endif -%}   {#  MINIO_browser_enable #}
+    {% if MINIO_lambda_webhook_endpoint is defined and MINIO_lambda_webhook_endpoint and MINIO_lambda_webhook_endpoint | length %}
+      MINIO_LAMBDA_WEBHOOK_ENABLE_primary: 'on'
+      MINIO_LAMBDA_WEBHOOK_ENDPOINT_primary: {{MINIO_lambda_webhook_endpoint}}
+      MINIO_LAMBDA_WEBHOOK_AUTH_TOKEN_primary: {{MINIO_lambda_webhook_auth_token if MINIO_lambda_webhook_auth_token is defined and MINIO_lambda_webhook_auth_token and MINIO_lambda_webhook_auth_token | length else omit}}
+    {% endif -%}   {#  MINIO_lambda_webhook_auth_token #}
+
     {%if not MINIO_browser_enable | default(false) %}
       MINIO_BROWSER: "off"
     {% endif -%}   {#  MINIO_browser_enable #}
