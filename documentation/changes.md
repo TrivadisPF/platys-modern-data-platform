@@ -86,6 +86,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Dataiku now maps to port `28315` and no longer to `28205`
  * Change `KAFKA_KSQLDB_xxxxx` to `KSQLDB_xxxxx`
  * Change `FTP_xxxxx` to `PURE_FTPD_xxxxx` to control the Pure FTPd server
+ * Config `ATLAS_install_hive_hook` has been replaced by `ATLAS_hive_hook_enable` and the JARs for the hook are no longer included and need to be downloaded manually  
 
 ## What's new in 1.16.0
 
