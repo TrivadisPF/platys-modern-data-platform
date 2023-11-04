@@ -16825,27 +16825,29 @@ services:
       retries: 5
 {% endif %}   {# ETCD_enable #}
 
-{% if ETCD_E3W_enable | default(false) %}
-  #  ================================== etcd-e3w ========================================== #
-  etcd-e3w:
+{% if ETCD_BROWSER_enable | default(false) %}
+  #  ================================== etcd-browser ========================================== #
+  etcd-browser:
     image: soyking/e3w:{{__ETCD_E3W_version}}
-    hostname: etcd-e3w
-    container_name: etcd-e3w
+    hostname: etcd-browser
+    container_name: etcd-browser
     labels:
-      com.platys.name: "etcd-e3w"
+      com.platys.name: "etcd-browser"
       com.platys.webui.title: "etcd UI"
       com.platys.webui.url: "http://dataplatform:28310"
     ports:
-      - "28310:8080"
+      - "28310:8081"
     depends_on:
       - etcd-1
-    {%if use_timezone | default(false) %}
     environment:
+      - ETCD=etcd-1:2379
+      - EDITABLE={{1 if ETCD_BROWSER_allow_edit else omit}}
+      - CORS=http://localhost:28310,http://localhost:8081,http://localhost:8080,http://${PUBLIC_IP}:28310,http://${DOCKER_HOST_IP}:28310
+    {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
-      - ./conf/etcd-e3w/config.default.ini:/app/conf/config.default.ini
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
