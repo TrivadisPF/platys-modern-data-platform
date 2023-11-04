@@ -2003,6 +2003,45 @@ services:
 
 {% if RISINGWAVE_enable | default(false) %}
   #  ================================== Risingwave ========================================== #
+  {% if RISINGWAVE_edition == 'playground' | default(false) %}
+  risingwave:
+    image: risingwavelabs/risingwave:{{__RISINGWAVE_version}}
+    hostname: risingwave
+    container_name: risingwave
+    labels:
+      com.platys.name: "risingwave"
+      com.platys.webui.title: "Risingwave UI"
+      com.platys.webui.url: "http://dataplatform:5691"
+    expose:
+      - "4566"
+      - "5691"
+    ports:
+      - "4566:4566"
+      - "5691:5691"
+    {%if use_timezone | default(false) %}
+    environment:
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    command: playground
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - bash -c 'printf \"GET / HTTP/1.1\n\n\" > /dev/tcp/127.0.0.1/4566; exit $$?;'
+        - bash -c 'printf \"GET / HTTP/1.1\n\n\" > /dev/tcp/127.0.0.1/5690; exit $$?;'
+      interval: 1s
+      timeout: 5s
+  {% endif %}  {#  RISINGWAVE_edition == 'playground' #}
+
   {% if RISINGWAVE_edition == 'standalone' | default(false) %}
   risingwave:
     image: risingwavelabs/risingwave:{{__RISINGWAVE_version}}
