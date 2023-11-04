@@ -64,6 +64,8 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Update `flink` to `1.18-scala_2.12-java17`
  * Update `airflow` to `2.7.2`
  * Update `zeebe` to `8.3.1`
+ * Update `grafana` to `10.2.0`
+ * Update `prometheus` to `v2.47.2`
 
 ### Enhancements
 
