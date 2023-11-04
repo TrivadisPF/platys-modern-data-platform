@@ -9,9 +9,9 @@
 FROM python:3.10.13-alpine3.18
 
 # upgrade pip
-RUN python3 -m pip install --upgrade pip
+RUN python3 -m pip install --upgrade pip && \
 	
-RUN apk add --no-cache gcc musl-dev python3-dev && \
+	apk add --no-cache gcc musl-dev python3-dev && \
 	
 	pip install ruamel.yaml.clib  && \
 
@@ -19,10 +19,10 @@ RUN apk add --no-cache gcc musl-dev python3-dev && \
 	pip install docker-compose-templer && mkdir /opt/mdps-gen && chmod 777 -R /opt/mdps-gen && \
 
 	# Install timezone and jq support
-	RUN apk add tzdata &&  apk add jq && \
+	apk add tzdata &&  apk add jq && \
 
 	# Install yq
-	RUN wget -q -O /usr/bin/yq $(wget -q -O - https://api.github.com/repos/mikefarah/yq/releases/latest | jq -r '.assets[] | select(.name == "yq_linux_amd64") | .browser_download_url') &&  chmod +x /usr/bin/yq
+	wget -q -O /usr/bin/yq $(wget -q -O - https://api.github.com/repos/mikefarah/yq/releases/latest | jq -r '.assets[] | select(.name == "yq_linux_amd64") | .browser_download_url') &&  chmod +x /usr/bin/yq
 
 # copy generator config into the image (templates & config.yml)
 COPY ./modern-data-platform-stack/generator-config /opt/mdps-gen
