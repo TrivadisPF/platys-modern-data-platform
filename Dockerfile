@@ -6,16 +6,16 @@
 # The DEL_EMPTY_LINES environment variable, when set, causes empty lines to be removed.
 # The VERBOSE environment variable, when set, switches to a more verbose output.
 #
-FROM python:3.8.0-alpine3.10
+FROM python:3.10.13-alpine3.18
 
 # upgrade pip
 RUN python3 -m pip install --upgrade pip && \
 	
 	apk add --no-cache gcc musl-dev python3-dev && \
 	
-	pip install ruamel.yaml.clib
+	pip install ruamel.yaml.clib  && \
 
-	# install docker-compose-templer 
+	# install docker-compose-templer
 	pip install docker-compose-templer && mkdir /opt/mdps-gen && chmod 777 -R /opt/mdps-gen && \
 
 	# Install timezone and jq support
