@@ -9,9 +9,9 @@
 FROM python:3.10.13-alpine3.18
 
 # upgrade pip
-RUN python3 -m pip install --upgrade pip && \
+RUN python3 -m pip install --upgrade pip
 	
-	apk add --no-cache gcc musl-dev python3-dev && \
+RUN apk add --no-cache gcc musl-dev python3-dev && \
 	
 	pip install ruamel.yaml.clib  && \
 
