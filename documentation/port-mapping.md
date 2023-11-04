@@ -533,6 +533,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28322 | 80 | asyncapi-studio |
 28323 | 80 | taiga |
 28324 | 8000 | focalboard |
+28325 | 8025 | mailhog |
+28326 | 25 | mailhog |
 
 ## Ports > 28500
 

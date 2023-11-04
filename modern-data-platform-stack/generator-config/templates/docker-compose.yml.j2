@@ -394,6 +394,7 @@ networks:
 
 {% set __MAILDEV_version = MAILDEV_version | default('latest') -%}
 {% set __MAILPIT_version = MAILPIT_version | default('latest') -%}
+{% set __MAILHOG_version = MAILHOG_version | default('latest') -%}
 
 {% set __CAMUNDA_BPM_PLATFORM_version = CAMUNDA_BPM_PLATFORM_version | default('latest') -%}
 {% set __CAMUNDA_OPTIMIZE_version = CAMUNDA_OPTIMIZE_version | default('latest') -%}
@@ -709,6 +710,7 @@ networks:
   {% set FTP_enable = false -%}
   {% set MAILDEV_enable = false -%}
   {% set MAILPIT_enable = false -%}
+  {% set MAILHOG_enable = false -%}
   {% set CAMUNDA_BPM_PLATFORM_enable = false -%}
   {% set CAMUNDA_OPTIMIZE_enable = false -%}
   {% set CAMUNDA_ZEEBE_enable = false -%}
@@ -15468,6 +15470,52 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  MAILPIT_enable #}
+
+{% if MAILHOG_enable | default(false) %}
+  #  ================================== MailHog ========================================== #
+  mailhog:
+    image: mailhog/mailhog:{{__MAILHOG_version}}
+    container_name: mailhog
+    hostname: mailhog
+    labels:
+      com.platys.name: "mailhog"
+      com.platys.webui.title: "MailHog UI"
+      com.platys.webui.url: "http://dataplatform:28325"
+      com.platys.restapi.title: "MailHog REST API"
+      com.platys.restapi.url: "http://dataplatform:28325/api/v2/messages"
+    ports:
+      - "28325:8025"
+      - "28326:{{MAILHOG_smtp_port}}"
+    environment:
+      - MH_SMTP_BIND_ADDR=0.0.0.0:{{MAILHOG_smtp_port}}
+      - MH_UI_BIND_ADDR=0.0.0.0:8025
+      - MH_API_BIND_ADDR=0.0.0.0:8025
+      - MH_STORAGE={{MAILHOG_storage_type}}
+    {% if MAILHOG_storage_type | lower == 'maildir' and MAILHOG_volume_map_data %}
+      - MH_MAILDIR_PATH=/data
+    {% endif -%}   {#  MAILHOG_storage_type == maildir and MAILHOG_volume_map_data #}
+    {% if MAILHOG_storage_type | lower == 'mongodb' and MAILHOG_volume_map_data %}
+      - MH_MONGO_URI={{MAILHOG_mongo_uri}}
+      - MH_MONGO_DB={{MAILHOG_mongo_db}}
+      - MH_MONGO_COLLECTION={{MAILHOG_mongo_collection}}
+    {% endif -%}   {#  MAILHOG_storage_type == mongodb #}
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {% if MAILHOG_volume_map_data %}
+      - ./container-volume/mailhog/data:/data
+    {% endif -%}   {#  MAILPIT_volume_map_data #}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  MAILHOG_enable #}
 
 {% if CAMUNDA_BPM_PLATFORM_enable | default(false) %}
   #  ================================== Camunda Optimize ========================================== #
