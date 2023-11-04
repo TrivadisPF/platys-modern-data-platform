@@ -15728,7 +15728,7 @@ services:
       - 28323:80
     environment:
       TAIGA_BACKEND_URL: "http://taiga-backend:9000"
-      TAIGA_EVENTS_URL: "ws://taiga-worker:9000/events/"
+      TAIGA_EVENTS_URL: "ws://${PUBLIC_IP}:28323/events/"
       TAIGA_SUPPORT_EMAIL: ""
       # Social auth
       TAIGA_GITHUB_CLIENT_ID: ""
@@ -15760,7 +15760,7 @@ services:
       # Taiga settings
       TAIGA_LANG: "en_us"
       TAIGA_SECRET_KEY: "${TAIGA_SECRET_KEY}"
-      TAIGA_BACKEND_URL: "http://taiga-backend:9000"
+      TAIGA_BACKEND_URL: "http://${PUBLIC_IP}:9000"
       TAIGA_FRONTEND_URL: "http://${PUBLIC_IP}:9000"
       TAIGA_SUPPORT_EMAIL: ""
       TAIGA_STATIC_ROOT: "/taiga/static"
@@ -15768,7 +15768,7 @@ services:
       # Database settings
       TAIGA_DB_HOST: "taiga-db"
       TAIGA_DB_NAME: "taiga"
-      TAIGA_DB_USER: "taiga"
+      TAIGA_DB_USER: "taiga_db"
       TAIGA_DB_PASSWORD: "abc123!"
       # Social auth
       TAIGA_GITHUB_CLIENT_ID: ""
@@ -15797,13 +15797,6 @@ services:
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
-    networks:
-      - taiga
-    depends_on:
-      taiga-db:
-        condition: service_healthy
-      taiga-back:
-        condition: service_healthy
 
   taiga-worker:
     image: taigaio/backend:alpha
@@ -15851,13 +15844,6 @@ services:
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
-    networks:
-      - taiga
-    depends_on:
-      taiga-db:
-        condition: service_healthy
-      taiga-back:
-        condition: service_healthy
 
   taiga-db:
     image: postgres:15
@@ -15866,14 +15852,14 @@ services:
     labels:
       com.platys.name: "taiga"
     environment:
-      POSTGRES_DB: "${TAIGA_DB_NAME}"
-      POSTGRES_USER: "${TAIGA_DB_USER}"
-      POSTGRES_PASSWORD: "${TAIGA_DB_PASSWORD}"
+      POSTGRES_DB: "{{TAIGA_db_database}}"
+      POSTGRES_USER: "{{TAIGA_db_username}"
+      POSTGRES_PASSWORD: "{{TAIGA_db_password}}"
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${TAIGA_DB_USER}"]
+      test: ["CMD-SHELL", "pg_isready -U {{TAIGA_db_username}"]
       interval: 2s
       timeout: 15s
       retries: 5
@@ -15886,8 +15872,6 @@ services:
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
-    networks:
-      - taiga
 
   taiga-redis:
     image: redis:7
