@@ -1713,22 +1713,35 @@ services:
     {% if ns.secureKafkaEnabled %}
       KSQL_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: "https"
       KSQL_SECURITY_PROTOCOL: "{{ns.securityProtocolBROKER}}"
+      KSQL_PRODUCER_CONFLUENT_MONITORING_INTERCEPTOR_SECURITY_PROTOCOL: "{{ns.securityProtocolBROKER}}"
+      KSQL_CONSUMER_CONFLUENT_MONITORING_INTERCEPTOR_SECURITY_PROTOCOL: "{{ns.securityProtocolBROKER}}"
+      {% if ns.securityProtocolBROKER == 'SASL_PLAINTEXT' %}
       KSQL_SASL_MECHANISM: "{{ns.saslMechanismBROKER}}"
       KSQL_SASL_JAAS_CONFIG: "{{ns.loginModuleBROKER}} required
                         username=\"{{KSQLDB_kafka_username if KSQLDB_kafka_username is defined and KSQLDB_kafka_username | length else ns.kafkaToolsDefaultUsername}}\"
                         password=\"{{KSQLDB_kafka_password if KSQLDB_kafka_password is defined and KSQLDB_kafka_password | length else ns.kafkaToolsDefaultPassword}}\";"
       # producer
-      KSQL_PRODUCER_CONFLUENT_MONITORING_INTERCEPTOR_SECURITY_PROTOCOL: "{{ns.securityProtocolBROKER}}"
       KSQL_PRODUCER_CONFLUENT_MONITORING_INTERCEPTOR_SASL_MECHANISM: "{{ns.saslMechanismBROKER}}"
       KSQL_PRODUCER_CONFLUENT_MONITORING_INTERCEPTOR_SASL_JAAS_CONFIG: "{{ns.loginModuleBROKER}} required
                         username=\"{{KSQLDB_kafka_username if KSQLDB_kafka_username is defined and KSQLDB_kafka_username | length else ns.kafkaToolsDefaultUsername}}\"
                         password=\"{{KSQLDB_kafka_password if KSQLDB_kafka_password is defined and KSQLDB_kafka_password | length else ns.kafkaToolsDefaultPassword}}\";"
       # consumer
-      KSQL_CONSUMER_CONFLUENT_MONITORING_INTERCEPTOR_SECURITY_PROTOCOL: "{{ns.securityProtocolBROKER}}"
       KSQL_CONSUMER_CONFLUENT_MONITORING_INTERCEPTOR_SASL_MECHANISM: "{{ns.saslMechanismBROKER}}"
       KSQL_CONSUMER_CONFLUENT_MONITORING_INTERCEPTOR_SASL_JAAS_CONFIG: "{{ns.loginModuleBROKER}} required
                         username=\"{{KSQLDB_kafka_username if KSQLDB_kafka_username is defined and KSQLDB_kafka_username | length else ns.kafkaToolsDefaultUsername}}\"
                         password=\"{{KSQLDB_kafka_password if KSQLDB_kafka_password is defined and KSQLDB_kafka_password | length else ns.kafkaToolsDefaultPassword}}\";"
+      {% elif ns.securityProtocolBROKER == 'SSL' %}
+      KSQL_SSL_TRUSTSTORE_LOCATION: /certs/client.ts.p12
+      KSQL_SSL_TRUSTSTORE_PASSWORD: {{KAFKA_client_truststore_password}}
+        {% if KAFKA_ssl_client_authentication_enable | default(false) %}
+      KSQL_SSL_KEYSTORE_TYPE: "PKCS12"
+      KSQL_SSL_KEYSTORE_LOCATION: /certs/client.ks.p12
+      KSQL_SSL_KEYSTORE_PASSWORD: {{KAFKA_client_keystore_password}}
+      KSQL_SSL_KEY_PASSWORD: {{KAFKA_client_key_password}}
+        {% endif -%}   {#  KAFKA_ssl_client_authentication_enable #}
+      {% endif -%}   {#  ns.securityProtocol #}
+      KSQL_PRODUCER__SSL_TRUSTSTORE_LOCATION: /certs/client.ts.p12
+      KSQL_PRODUCER__SSL_TRUSTSTORE_PASSWORD: {{KAFKA_client_truststore_password}}
     {% endif -%}   {#  ns.secureKafkaEnabled #}
 
     {% if ( KAFKA_CONNECT_enable ) | default(false) %}
@@ -1781,7 +1794,54 @@ services:
       KSQL_CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: '1'
       KSQL_CONNECT_LOG4J_APPENDER_STDOUT_LAYOUT_CONVERSIONPATTERN: "[%d] %p %X{connector.context}%m (%c:%L)%n"
       KSQL_CONNECT_PLUGIN_PATH: '/usr/share/java,/etc/kafka-connect/addl-plugins,/etc/kafka-connect/cflthub-plugins'
-    {% endif -%}
+      KSQL_CONNECT_CONNECTOR_CLIENT_CONFIG_OVERRIDE_POLICY: 'All'
+      {% if ns.secureKafkaEnabled %}
+      KSQL_CONNECT_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: "https"
+      KSQL_CONNECT_SECURITY_PROTOCOL: "{{ns.securityProtocolBROKER}}"
+      KSQL_CONNECT_CONSUMER_SECURITY_PROTOCOL: "{{ns.securityProtocolBROKER}}"
+      KSQL_CONNECT_PRODUCER_SECURITY_PROTOCOL: "{{ns.securityProtocolBROKER}}"
+        {% if ns.securityProtocolBROKER == 'SASL_PLAINTEXT' %}
+      KSQL_CONNECT_SASL_MECHANISM: "{{ns.saslMechanismBROKER}}"
+      KSQL_CONNECT_SASL_JAAS_CONFIG: "{{ns.loginModuleBROKER}} required
+                        username=\"{{KAFKA_CONNECT_kafka_username if KAFKA_CONNECT_kafka_username is defined and KAFKA_CONNECT_kafka_username | length else ns.kafkaToolsDefaultUsername}}\"
+                        password=\"{{KAFKA_CONNECT_kafka_password if KAFKA_CONNECT_kafka_password is defined and KAFKA_CONNECT_kafka_password | length else ns.kafkaToolsDefaultPassword}}\";"
+
+      # Consumer
+      KSQL_CONNECT_CONSUMER_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: "https"
+      KSQL_CONNECT_CONSUMER_SASL_MECHANISM: "{{ns.saslMechanismBROKER}}"
+      KSQL_CONNECT_CONSUMER_SASL_JAAS_CONFIG: "{{ns.loginModuleBROKER}} required
+                        username=\"{{KAFKA_CONNECT_kafka_username if KAFKA_CONNECT_kafka_username is defined and KAFKA_CONNECT_kafka_username | length else ns.kafkaToolsDefaultUsername}}\"
+                        password=\"{{KAFKA_CONNECT_kafka_password if KAFKA_CONNECT_kafka_password is defined and KAFKA_CONNECT_kafka_password | length else ns.kafkaToolsDefaultPassword}}\";"
+      # Producer
+      KSQL_CONNECT_PRODUCER_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: "https"
+      KSQL_CONNECT_PRODUCER_SASL_MECHANISM: "{{ns.saslMechanismBROKER}}"
+      KSQL_CONNECT_PRODUCER_SASL_JAAS_CONFIG: "{{ns.loginModuleBROKER}} required
+                        username=\"{{KAFKA_CONNECT_kafka_username if KAFKA_CONNECT_kafka_username is defined and KAFKA_CONNECT_kafka_username | length else ns.kafkaToolsDefaultUsername}}\"
+                        password=\"{{KAFKA_CONNECT_kafka_password if KAFKA_CONNECT_kafka_password is defined and KAFKA_CONNECT_kafka_password | length else ns.kafkaToolsDefaultPassword}}\";"
+        {% elif ns.securityProtocolBROKER == 'SSL' %}
+      KSQL_CONNECT_SSL_TRUSTSTORE_LOCATION: /certs/client.ts.p12
+      KSQL_CONNECT_SSL_TRUSTSTORE_PASSWORD: {{KAFKA_client_truststore_password}}
+      KSQL_CONNECT_CONSUMER_SASL_MECHANISM_SSL_TRUSTSTORE_LOCATION: /certs/client.ts.p12
+      KSQL_CONNECT_CONSUMER_SSL_TRUSTSTORE_PASSWORD: {{KAFKA_client_truststore_password}}
+      KSQL_CONNECT_PRODUCER_SSL_TRUSTSTORE_LOCATION: /certs/client.ts.p12
+      KSQL_CONNECT_PRODUCER_SSL_TRUSTSTORE_PASSWORD: {{KAFKA_client_truststore_password}}
+          {% if KAFKA_ssl_client_authentication_enable | default(false) %}
+      KSQL_CONNECT_SSL_KEYSTORE_TYPE: "PKCS12"
+      KSQL_CONNECT_SSL_KEYSTORE_LOCATION: /certs/client.ks.p12
+      KSQL_CONNECT_SSL_KEYSTORE_PASSWORD: {{KAFKA_client_keystore_password}}
+      KSQL_CONNECT_SSL_KEY_PASSWORD: {{KAFKA_client_key_password}}
+      KSQL_CONNECT_CONSUMER_SSL_KEYSTORE_TYPE: "PKCS12"
+      KSQL_CONNECT_CONSUMER_SSL_KEYSTORE_LOCATION: /certs/client.ks.p12
+      KSQL_CONNECT_CONSUMER_SSL_KEYSTORE_PASSWORD: {{KAFKA_client_keystore_password}}
+      KSQL_CONNECT_CONSUMER_SSL_KEY_PASSWORD: {{KAFKA_client_key_password}}
+      KSQL_CONNECT_PRODUCER_SSL_KEYSTORE_TYPE: "PKCS12"
+      KSQL_CONNECT_PRODUCER_SSL_KEYSTORE_LOCATION: /certs/client.ks.p12
+      KSQL_CONNECT_PRODUCER_SSL_KEYSTORE_PASSWORD: {{KAFKA_client_keystore_password}}
+      KSQL_CONNECT_PRODUCER_SSL_KEY_PASSWORD: {{KAFKA_client_key_password}}
+          {% endif -%}   {#  KAFKA_ssl_client_authentication_enable #}
+        {% endif -%}   {#  ns.securityProtocol #}
+      {% endif -%}   {#  ns.secureKafkaEnabled #}
+    {% endif -%}   {#  KSQLDB_use_embedded_connect #}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -2572,7 +2632,7 @@ services:
     {% endif -%}
     {% if ns.secureKafkaEnabled and ns.securityProtocol == 'SSL' %}
       - ./security/kafka/client-certs:/certs
-    {% endif -%} {#  ns.secureKafkaEnabled #}    
+    {% endif -%} {#  ns.secureKafkaEnabled #}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
