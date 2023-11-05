@@ -2763,8 +2763,19 @@ services:
       CONTROL_CENTER_ZOOKEEPER_CONNECT: 'zookeeper-1:2181'
   {% if ns.secureKafkaEnabled %}
       CONTROL_CENTER_STREAMS_SECURITY_PROTOCOL: "{{ns.securityProtocolBROKER}}"
+    {% if ns.securityProtocolBROKER == 'SASL_PLAINTEXT' %}
       CONTROL_CENTER_STREAMS_SASL_MECHANISM: "{{ns.saslMechanismBROKER}}"
       CONTROL_CENTER_STREAMS_SASL_MECHANISM: "{{ns.loginModuleBROKER}} required username=\"{{ns.kafkaToolsDefaultUsername}}\" password=\"{{ns.kafkaToolsDefaultPassword}}\";"
+    {% elif ns.securityProtocolBROKER == 'SSL' %}
+      CONTROL_CENTER_STREAMS_SSL_TRUSTSTORE_LOCATION: /certs/client.ts.p12
+      CONTROL_CENTER_STREAMS_SSL_TRUSTSTORE_PASSWORD: {{KAFKA_client_truststore_password}}
+      {% if KAFKA_ssl_client_authentication_enable | default(false) %}
+      CONTROL_CENTER_STREAMS_SSL_KEYSTORE_TYPE: "PKCS12"
+      CONTROL_CENTER_STREAMS_SSL_KEYSTORE_LOCATION: /certs/client.ks.p12
+      CONTROL_CENTER_STREAMS_SSL_KEYSTORE_PASSWORD: {{KAFKA_client_keystore_password}}
+      CONTROL_CENTER_STREAMS_SSL_KEY_PASSWORD: {{KAFKA_client_key_password}}
+      {% endif -%}   {#  KAFKA_ssl_client_authentication_enable #}
+    {% endif -%}   {#  ns.securityProtocolBROKER #}
   {% endif -%}   {#  ns.secureKafkaEnabled #}
   {% if ( KAFKA_CONNECT_enable or KSQLDB_use_embedded_connect) | default(false) %}
       CONTROL_CENTER_CONNECT_DEMO_CLUSTER: '${DOCKER_HOST_IP}:8083'
@@ -2785,6 +2796,9 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
+    {% if ns.secureKafkaEnabled and ns.securityProtocol == 'SSL' %}
+      - ./security/kafka/client-certs:/certs
+    {% endif -%} {#  ns.secureKafkaEnabled #}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -2828,25 +2842,47 @@ services:
     {% if ns.secureKafkaEnabled %}
       CONNECT_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: "https"
       CONNECT_SECURITY_PROTOCOL: "{{ns.securityProtocolBROKER}}"
+      {% if ns.securityProtocolBROKER == 'SASL_PLAINTEXT' %}
       CONNECT_SASL_MECHANISM: "{{ns.saslMechanismBROKER}}"
       CONNECT_SASL_JAAS_CONFIG: "{{ns.loginModuleBROKER}} required
                         username=\"{{KAFKA_CONNECT_kafka_username if KAFKA_CONNECT_kafka_username is defined and KAFKA_CONNECT_kafka_username | length else ns.kafkaToolsDefaultUsername}}\"
                         password=\"{{KAFKA_CONNECT_kafka_password if KAFKA_CONNECT_kafka_password is defined and KAFKA_CONNECT_kafka_password | length else ns.kafkaToolsDefaultPassword}}\";"
-      # producer
-      #
+      # Consumer
       CONNECT_CONSUMER_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: "https"
       CONNECT_CONSUMER_SECURITY_PROTOCOL: "{{ns.securityProtocolBROKER}}"
       CONNECT_CONSUMER_SASL_MECHANISM: "{{ns.saslMechanismBROKER}}"
       CONNECT_CONSUMER_SASL_JAAS_CONFIG: "{{ns.loginModuleBROKER}} required
                         username=\"{{KAFKA_CONNECT_kafka_username if KAFKA_CONNECT_kafka_username is defined and KAFKA_CONNECT_kafka_username | length else ns.kafkaToolsDefaultUsername}}\"
                         password=\"{{KAFKA_CONNECT_kafka_password if KAFKA_CONNECT_kafka_password is defined and KAFKA_CONNECT_kafka_password | length else ns.kafkaToolsDefaultPassword}}\";"
-      #
+      # Producer
       CONNECT_PRODUCER_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: "https"
       CONNECT_PRODUCER_SECURITY_PROTOCOL: "{{ns.securityProtocolBROKER}}"
       CONNECT_PRODUCER_SASL_MECHANISM: "{{ns.saslMechanismBROKER}}"
       CONNECT_PRODUCER_SASL_JAAS_CONFIG: "{{ns.loginModuleBROKER}} required
                         username=\"{{KAFKA_CONNECT_kafka_username if KAFKA_CONNECT_kafka_username is defined and KAFKA_CONNECT_kafka_username | length else ns.kafkaToolsDefaultUsername}}\"
                         password=\"{{KAFKA_CONNECT_kafka_password if KAFKA_CONNECT_kafka_password is defined and KAFKA_CONNECT_kafka_password | length else ns.kafkaToolsDefaultPassword}}\";"
+      {% elif ns.securityProtocolBROKER == 'SSL' %}
+      CONNECT_SSL_TRUSTSTORE_LOCATION: /certs/client.ts.p12
+      CONNECT_SSL_TRUSTSTORE_PASSWORD: {{KAFKA_client_truststore_password}}
+      CONNECT_CONSUMER_SASL_MECHANISM_SSL_TRUSTSTORE_LOCATION: /certs/client.ts.p12
+      CONNECT_CONSUMER_SSL_TRUSTSTORE_PASSWORD: {{KAFKA_client_truststore_password}}
+      CONNECT_PRODUCER_SSL_TRUSTSTORE_LOCATION: /certs/client.ts.p12
+      CONNECT_PRODUCER_SSL_TRUSTSTORE_PASSWORD: {{KAFKA_client_truststore_password}}
+        {% if KAFKA_ssl_client_authentication_enable | default(false) %}
+      CONNECT_SSL_KEYSTORE_TYPE: "PKCS12"
+      CONNECT_SSL_KEYSTORE_LOCATION: /certs/client.ks.p12
+      CONNECT_SSL_KEYSTORE_PASSWORD: {{KAFKA_client_keystore_password}}
+      CONNECT_SSL_KEY_PASSWORD: {{KAFKA_client_key_password}}
+      CONNECT_CONSUMER_SSL_KEYSTORE_TYPE: "PKCS12"
+      CONNECT_CONSUMER_SSL_KEYSTORE_LOCATION: /certs/client.ks.p12
+      CONNECT_CONSUMER_SSL_KEYSTORE_PASSWORD: {{KAFKA_client_keystore_password}}
+      CONNECT_CONSUMER_SSL_KEY_PASSWORD: {{KAFKA_client_key_password}}
+      CONNECT_PRODUCER_SSL_KEYSTORE_TYPE: "PKCS12"
+      CONNECT_PRODUCER_SSL_KEYSTORE_LOCATION: /certs/client.ks.p12
+      CONNECT_PRODUCER_SSL_KEYSTORE_PASSWORD: {{KAFKA_client_keystore_password}}
+      CONNECT_PRODUCER_SSL_KEY_PASSWORD: {{KAFKA_client_key_password}}
+        {% endif -%}   {#  KAFKA_ssl_client_authentication_enable #}
+      {% endif -%}   {#  ns.securityProtocol #}
     {% endif -%}   {#  ns.secureKafkaEnabled #}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
