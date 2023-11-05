@@ -3215,7 +3215,18 @@ services:
     {% if ns.secureKafkaEnabled %}
                 security.protocol: "{{ns.securityProtocolBROKER}}"
                 sasl.mechanism: "{{ns.saslMechanismBROKER}}"
+        {% if ns.securityProtocolBROKER == 'SASL_PLAINTEXT' %}
                 sasl.jaas.config: "{{ns.loginModuleBROKER}} required username=\"{{ns.kafkaToolsDefaultUsername}}\" password=\"{{ns.kafkaToolsDefaultPassword}}\";"
+        {% elif ns.securityProtocolBROKER == 'SSL' %}
+                ssl.truststore.location: /certs/client.ts.p12
+                ssl.truststore.password: {{KAFKA_client_truststore_password}}
+          {% if KAFKA_ssl_client_authentication_enable | default(false) %}
+                ssl.keystore.type: "PKCS12"
+                ssl.keystore.location: {{path}}/avnadmin.keystore.p12
+                ssl.keystore.password: {{password}}
+                ssl.key.password: {{password}}
+          {% endif -%}   {#  KAFKA_ssl_client_authentication_enable #}
+        {% endif -%}   {#  ns.securityProtocol #}
     {% endif -%}   {#  ns.secureKafkaEnabled #}
     {% if (SCHEMA_REGISTRY_enable or external['SCHEMA_REGISTRY_enable']) | default(false) %}
               schema-registry:
@@ -3243,6 +3254,9 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
+    {% if ns.secureKafkaEnabled and ns.securityProtocol == 'SSL' %}
+      - ./security/kafka/client-certs:/certs
+    {% endif -%} {#  ns.secureKafkaEnabled #}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
