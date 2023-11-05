@@ -3802,8 +3802,8 @@ services:
       - SASL_JAAS_CONFIG='{{ns.loginModuleBROKER}} required username=\"{{ns.kafkaToolsDefaultUsername}}\" password=\"{{ns.kafkaToolsDefaultPassword}}\";'
       {% elif ns.securityProtocolBROKER == 'SSL' %}
       - SSL_ENDPOINT_IDENTIFICATION_ALGORITHM='https'
-      - SSL_TRUSTSTORE_LOCATION:=/certs/client.ts.p12
-      - SSL_TRUSTSTORE_PASSWORD:={{KAFKA_client_truststore_password}}
+      - SSL_TRUSTSTORE_LOCATION=/certs/client.ts.p12
+      - SSL_TRUSTSTORE_PASSWORD={{KAFKA_client_truststore_password}}
         {% if KAFKA_ssl_client_authentication_enable | default(false) %}
       - SSL_KEYSTORE_TYPE="PKCS12"
       - SSL_KEYSTORE_LOCATION=/certs/client.ks.p12
@@ -3913,8 +3913,8 @@ services:
       - KAFKA_SASL_JAAS_CONFIG="{{ns.loginModuleBROKER}} required username=\"{{ns.kafkaToolsDefaultUsername}}\" password=\"{{ns.kafkaToolsDefaultPassword}}\";"
       {% elif ns.securityProtocolBROKER == 'SSL' %}
       - SSL_ENDPOINT_IDENTIFICATION_ALGORITHM='https'
-      - SSL_TRUSTSTORE_LOCATION:=/certs/client.ts.p12
-      - SSL_TRUSTSTORE_PASSWORD:={{KAFKA_client_truststore_password}}
+      - SSL_TRUSTSTORE_LOCATION=/certs/client.ts.p12
+      - SSL_TRUSTSTORE_PASSWORD={{KAFKA_client_truststore_password}}
         {% if KAFKA_ssl_client_authentication_enable | default(false) %}
       - SSL_KEYSTORE_TYPE="PKCS12"
       - SSL_KEYSTORE_LOCATION=/certs/client.ks.p12
@@ -4022,8 +4022,8 @@ services:
                         password=\"{{KAFKA_RESTPROXY_kafka_password if KAFKA_RESTPROXY_kafka_password is defined and KAFKA_RESTPROXY_kafka_password | length else ns.kafkaToolsDefaultPassword}}\";"
       {% elif ns.securityProtocolBROKER == 'SSL' %}
       - APP_KAFKA_PROPERTIES_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM='https'
-      - APP_KAFKA_PROPERTIES_SSL_TRUSTSTORE_LOCATION:=/certs/client.ts.p12
-      - APP_KAFKA_PROPERTIES_SSL_TRUSTSTORE_PASSWORD:={{KAFKA_client_truststore_password}}
+      - APP_KAFKA_PROPERTIES_SSL_TRUSTSTORE_LOCATION=/certs/client.ts.p12
+      - APP_KAFKA_PROPERTIES_SSL_TRUSTSTORE_PASSWORD={{KAFKA_client_truststore_password}}
         {% if KAFKA_ssl_client_authentication_enable | default(false) %}
       - APP_KAFKA_PROPERTIES_SSL_KEYSTORE_TYPE="PKCS12"
       - APP_KAFKA_PROPERTIES_SSL_KEYSTORE_LOCATION=/certs/client.ks.p12
@@ -4078,15 +4078,19 @@ services:
       - KLAW_DOCKER_CLUSTERAPI_HOST=http://klaw-cluster-api:9343
       - KLAW_DOCKER_KAFKA_CLUSTER={{ns.bootstrapServers}}
     {% if ns.secureKafkaEnabled %}
-      {% if KAFKA_sasl_mechanism == 'SCRAM-SHA-256' %}
+      {% if ns.securityProtocolBROKER == 'SASL_PLAINTEXT' %}
+        {% if KAFKA_sasl_mechanism == 'SCRAM-SHA-256' %}
       - KLAW_DOCKER_KAFKA_CLUSTER_SECURITYPROTOCOL=SASL_SSL/SCRAM-SHA-256
-      {% elif KAFKA_sasl_mechanism == 'SCRAM-SHA-512' %}
+        {% elif KAFKA_sasl_mechanism == 'SCRAM-SHA-512' %}
       - KLAW_DOCKER_KAFKA_CLUSTER_SECURITYPROTOCOL=SASL_SSL/SCRAM-SHA-512
-      {% elif KAFKA_sasl_mechanism == 'OAUTHBEARER' %}
+        {% elif KAFKA_sasl_mechanism == 'OAUTHBEARER' %}
       - KLAW_DOCKER_KAFKA_CLUSTER_SECURITYPROTOCOL=SASL_SSL/not-supported
-      {% elif KAFKA_sasl_mechanism == 'PLAIN' %}
+        {% elif KAFKA_sasl_mechanism == 'PLAIN' %}
       - KLAW_DOCKER_KAFKA_CLUSTER_SECURITYPROTOCOL=SASL_PLAIN
-      {% endif -%}
+        {% endif -%}
+      {% elif ns.securityProtocolBROKER == 'SSL' %}
+      - KLAW_DOCKER_KAFKA_CLUSTER_SECURITYPROTOCOL=SSL
+      {% endif -%}   {#  ns.securityProtocol #}
     {% endif -%}   {#  ns.secureKafkaEnabled #}
       - KLAW_DOCKER_SR_CLUSTER={{ ns.schemaRegistryUrl | replace('http://','') }}
       - KLAW_QUICKSTART_DEFAULT_USER1={{KLAW_quickstart_username_1 if KLAW_quickstart_username_1 is defined and KLAW_quickstart_username_1 and KLAW_quickstart_username_1 | length else omit}}
@@ -4104,6 +4108,9 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
+    {% if ns.secureKafkaEnabled and ns.securityProtocol == 'SSL' %}
+      - ./security/kafka/client-certs:/certs
+    {% endif -%} {#  ns.secureKafkaEnabled #}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -4124,13 +4131,24 @@ services:
     environment:
       - KLAW_CLUSTERAPI_ACCESS_BASE64_SECRET=VGhpc0lzRXhhY3RseUEzMkNoYXJTdHJpbmdTZWNyZXQK
     {% if ns.secureKafkaEnabled %}
-      {% if KAFKA_sasl_mechanism == 'SCRAM-SHA-256' or KAFKA_sasl_mechanism == 'SCRAM-SHA-512' %}
+      {% if ns.securityProtocolBROKER == 'SASL_PLAINTEXT' %}
+        {% if KAFKA_sasl_mechanism == 'SCRAM-SHA-256' or KAFKA_sasl_mechanism == 'SCRAM-SHA-512' %}
       - {{KLAW_cluster_id}}_KAFKASASL_JAASCONFIG_SCRAM={{ns.loginModuleBROKER}} required username='{{ns.kafkaToolsDefaultUsername}}' password='{{ns.kafkaToolsDefaultPassword}}';
-      {% elif KAFKA_sasl_mechanism == 'OAUTHBEARER' %}
+        {% elif KAFKA_sasl_mechanism == 'OAUTHBEARER' %}
       - {{KLAW_cluster_id}}_KAFKASASL_JAASCONFIG_OAUTHBEARER={{ns.loginModuleBROKER}} required username='{{ns.kafkaToolsDefaultUsername}}' password='{{ns.kafkaToolsDefaultPassword}}';
-      {% elif KAFKA_sasl_mechanism == 'PLAIN' %}
+        {% elif KAFKA_sasl_mechanism == 'PLAIN' %}
       - {{KLAW_cluster_id}}_KAFKASASL_JAASCONFIG_PLAIN={{ns.loginModuleBROKER}} required username='{{ns.kafkaToolsDefaultUsername}}' password='{{ns.kafkaToolsDefaultPassword}}';
-      {% endif -%}
+        {% endif -%}
+      {% elif ns.securityProtocolBROKER == 'SSL' %}
+      - {{KLAW_cluster_id}}_KAFKASASL_TRUSTSTORE_TYPE="PKCS12"
+      - {{KLAW_cluster_id}}_KAFKASASL_TRUSTSTORE_LOCATION=/certs/client.ts.p12
+      - {{KLAW_cluster_id}}_KAFKASASL_TRUSTSTORE_PWD={{KAFKA_client_truststore_password}}
+        {% if KAFKA_ssl_client_authentication_enable | default(false) %}
+      - {{KLAW_cluster_id}}_KAFKASASL_KEYSTORE_TYPE="PKCS12"
+      - {{KLAW_cluster_id}}_KAFKASASL_KEYSTORE_LOCATION=/certs/client.ks.p12
+      - {{KLAW_cluster_id}}_KAFKASASL_KEYSTORE_PWD={{KAFKA_client_keystore_password}}
+      - {{KLAW_cluster_id}}_KAFKASASL_KEY_PWD={{KAFKA_client_key_password}}
+        {% endif -%}   {#  KAFKA_ssl_client_authentication_enable #}
     {% endif -%}   {#  ns.secureKafkaEnabled #}
       - LOGGING_LEVEL_ROOT={{KLAW_logging_level | default(info)}}
     {%if use_timezone | default(false) %}
@@ -4138,6 +4156,9 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
+    {% if ns.secureKafkaEnabled and ns.securityProtocol == 'SSL' %}
+      - ./security/kafka/client-certs:/certs
+    {% endif -%} {#  ns.secureKafkaEnabled #}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
