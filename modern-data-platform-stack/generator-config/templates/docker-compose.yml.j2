@@ -1543,7 +1543,7 @@ services:
       CONNECT_LOG4J_APPENDER_STDOUT_LAYOUT_CONVERSIONPATTERN: "[%d] %p %X{connector.context}%m (%c:%L)%n"
       CONNECT_PLUGIN_PATH: "/usr/share/java,/etc/kafka-connect/addl-plugins,/etc/kafka-connect/cflthub-plugins"
       CONNECT_CONNECTOR_CLIENT_CONFIG_OVERRIDE_POLICY: 'All'
-    {% if ns.secureKafkaEnabled and  %}
+    {% if ns.secureKafkaEnabled %}
       CONNECT_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: "https"
       CONNECT_SECURITY_PROTOCOL: "{{ns.securityProtocolBROKER}}"
       CONNECT_CONSUMER_SECURITY_PROTOCOL: "{{ns.securityProtocolBROKER}}"
@@ -1797,6 +1797,9 @@ services:
     {% if KAFKA_jmx_monitoring_prometheus_enable %}
       - ./scripts/kafka/jmx-exporter/:/usr/share/jmx-exporter
     {% endif -%}
+    {% if ns.secureKafkaEnabled and ns.securityProtocol == 'SSL' %}
+      - ./security/kafka/client-certs:/certs
+    {% endif -%} {#  ns.secureKafkaEnabled #}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -2382,10 +2385,21 @@ services:
       KAFKA_REST_ACCESS_CONTROL_ALLOW_HEADERS: "origin,content-type,accept,authorization"
     {% if ns.secureKafkaEnabled %}
       KAFKA_REST_CLIENT_SECURITY_PROTOCOL: "{{ns.securityProtocolBROKER}}"
+      {% if ns.securityProtocolBROKER == 'SASL_PLAINTEXT' %}
       KAFKA_REST_CLIENT_SASL_MECHANISM: "{{ns.saslMechanismBROKER}}"
       KAFKA_REST_CLIENT_SASL_JAAS_CONFIG: "{{ns.loginModuleBROKER}} required
                         username=\"{{KAFKA_RESTPROXY_kafka_username if KAFKA_RESTPROXY_kafka_username is defined and KAFKA_RESTPROXY_kafka_username | length else ns.kafkaToolsDefaultUsername}}\"
                         password=\"{{KAFKA_RESTPROXY_kafka_password if KAFKA_RESTPROXY_kafka_password is defined and KAFKA_RESTPROXY_kafka_password | length else ns.kafkaToolsDefaultPassword}}\";"
+      {% elif ns.securityProtocolBROKER == 'SSL' %}
+      KAFKA_REST_SSL_TRUSTSTORE_LOCATION: /certs/client.ts.p12
+      KAFKA_REST_SSL_TRUSTSTORE_PASSWORD: {{KAFKA_client_truststore_password}}
+        {% if KAFKA_ssl_client_authentication_enable | default(false) %}
+      KAFKA_REST_SSL_KEYSTORE_TYPE: "PKCS12"
+      KAFKA_REST_SSL_KEYSTORE_LOCATION: /certs/client.ks.p12
+      KAFKA_REST_SSL_KEYSTORE_PASSWORD: {{KAFKA_client_keystore_password}}
+      KAFKA_REST_SSL_KEY_PASSWORD: {{KAFKA_client_key_password}}
+        {% endif -%}   {#  KAFKA_ssl_client_authentication_enable #}
+      {% endif -%}   {#  ns.securityProtocol #}
     {% endif -%}   {#  ns.secureKafkaEnabled #}
     {% if KAFKA_jmx_monitoring_prometheus_enable %}
       KAFKAREST_OPTS: -javaagent:/usr/share/jmx-exporter/jmx_prometheus_javaagent-0.16.1.jar=1234:/usr/share/jmx-exporter/confluent_rest.yml
@@ -2398,6 +2412,9 @@ services:
     {% if KAFKA_jmx_monitoring_prometheus_enable %}
       - ./scripts/kafka/jmx-exporter/:/usr/share/jmx-exporter
     {% endif -%}
+    {% if ns.secureKafkaEnabled and ns.securityProtocol == 'SSL' %}
+      - ./security/kafka/client-certs:/certs
+    {% endif -%} {#  ns.secureKafkaEnabled #}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -2426,10 +2443,20 @@ services:
     {% if ns.secureKafkaEnabled %}
       KAFKA_MQTT_PRODUCER_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: "https"
       KAFKA_MQTT_PRODUCER_SECURITY_PROTOCOL: "{{ns.securityProtocolBROKER}}"
+      {% if ns.securityProtocolBROKER == 'SASL_PLAINTEXT' %}
       KAFKA_MQTT_PRODUCER_SASL_MECHANISM: "{{ns.saslMechanismBROKER}}"
       KAFKA_MQTT_PRODUCER_SASL_JAAS_CONFIG: "{{ns.loginModuleBROKER}} required
                         username=\"{{KAFKA_MQTTPROXY_kafka_username if KAFKA_MQTTPROXY_kafka_username is defined and KAFKA_MQTTPROXY_kafka_username | length else ns.kafkaToolsDefaultUsername}}\"
                         password=\"{{KAFKA_MQTTPROXY_kafka_password if KAFKA_MQTTPROXY_kafka_password is defined and KAFKA_MQTTPROXY_kafka_password | length else ns.kafkaToolsDefaultPassword}}\";"
+    {% elif ns.securityProtocolBROKER == 'SSL' %}
+      KAFKA_MQTT_PRODUCER_SSL_TRUSTSTORE_LOCATION: /certs/client.ts.p12
+      KAFKA_MQTT_PRODUCER_SSL_TRUSTSTORE_PASSWORD: {{KAFKA_client_truststore_password}}
+        {% if KAFKA_ssl_client_authentication_enable | default(false) %}
+      KAFKA_MQTT_PRODUCER_SSL_KEYSTORE_TYPE: "PKCS12"
+      KAFKA_MQTT_PRODUCER_SSL_KEYSTORE_LOCATION: /certs/client.ks.p12
+      KAFKA_MQTT_PRODUCER_SSL_KEYSTORE_PASSWORD: {{KAFKA_client_keystore_password}}
+      KAFKA_MQTT_PRODUCER_SSL_KEY_PASSWORD: {{KAFKA_client_key_password}}
+        {% endif -%}   {#  KAFKA_ssl_client_authentication_enable #}
     {% endif -%}   {#  ns.secureKafkaEnabled #}
 
     {%if use_timezone | default(false) %}
