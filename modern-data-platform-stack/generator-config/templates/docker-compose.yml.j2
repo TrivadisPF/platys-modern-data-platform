@@ -1543,28 +1543,37 @@ services:
       CONNECT_LOG4J_APPENDER_STDOUT_LAYOUT_CONVERSIONPATTERN: "[%d] %p %X{connector.context}%m (%c:%L)%n"
       CONNECT_PLUGIN_PATH: "/usr/share/java,/etc/kafka-connect/addl-plugins,/etc/kafka-connect/cflthub-plugins"
       CONNECT_CONNECTOR_CLIENT_CONFIG_OVERRIDE_POLICY: 'All'
-    {% if ns.secureKafkaEnabled %}
-      CONNECT_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: "https"
+    {% if ns.secureKafkaEnabled and  %}
       CONNECT_SECURITY_PROTOCOL: "{{ns.securityProtocolBROKER}}"
+      CONNECT_CONSUMER_SECURITY_PROTOCOL: "{{ns.securityProtocolBROKER}}"
+      CONNECT_PRODUCER_SECURITY_PROTOCOL: "{{ns.securityProtocolBROKER}}"
+      {% if ns.securityProtocolBROKER == 'SASL_PLAINTEXT' %}
+      CONNECT_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: "https"
       CONNECT_SASL_MECHANISM: "{{ns.saslMechanismBROKER}}"
       CONNECT_SASL_JAAS_CONFIG: "{{ns.loginModuleBROKER}} required
                         username=\"{{KAFKA_CONNECT_kafka_username if KAFKA_CONNECT_kafka_username is defined and KAFKA_CONNECT_kafka_username | length else ns.kafkaToolsDefaultUsername}}\"
                         password=\"{{KAFKA_CONNECT_kafka_password if KAFKA_CONNECT_kafka_password is defined and KAFKA_CONNECT_kafka_password | length else ns.kafkaToolsDefaultPassword}}\";"
-      # producer
-      #
+
+      # Consumer
       CONNECT_CONSUMER_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: "https"
-      CONNECT_CONSUMER_SECURITY_PROTOCOL: "{{ns.securityProtocolBROKER}}"
       CONNECT_CONSUMER_SASL_MECHANISM: "{{ns.saslMechanismBROKER}}"
       CONNECT_CONSUMER_SASL_JAAS_CONFIG: "{{ns.loginModuleBROKER}} required
                         username=\"{{KAFKA_CONNECT_kafka_username if KAFKA_CONNECT_kafka_username is defined and KAFKA_CONNECT_kafka_username | length else ns.kafkaToolsDefaultUsername}}\"
                         password=\"{{KAFKA_CONNECT_kafka_password if KAFKA_CONNECT_kafka_password is defined and KAFKA_CONNECT_kafka_password | length else ns.kafkaToolsDefaultPassword}}\";"
-      #
+      # Producer
       CONNECT_PRODUCER_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: "https"
-      CONNECT_PRODUCER_SECURITY_PROTOCOL: "{{ns.securityProtocolBROKER}}"
       CONNECT_PRODUCER_SASL_MECHANISM: "{{ns.saslMechanismBROKER}}"
       CONNECT_PRODUCER_SASL_JAAS_CONFIG: "{{ns.loginModuleBROKER}} required
                         username=\"{{KAFKA_CONNECT_kafka_username if KAFKA_CONNECT_kafka_username is defined and KAFKA_CONNECT_kafka_username | length else ns.kafkaToolsDefaultUsername}}\"
                         password=\"{{KAFKA_CONNECT_kafka_password if KAFKA_CONNECT_kafka_password is defined and KAFKA_CONNECT_kafka_password | length else ns.kafkaToolsDefaultPassword}}\";"
+      {% elif ns.securityProtocolBROKER == 'SSL' %}
+      CONNECT_SSL_TRUSTSTORE_LOCATION: /certs/client.ts.p12
+      CONNECT_SSL_TRUSTSTORE_PASSWORD: {{KAFKA_client_truststore_password}}
+      CONNECT_CONSUMER_SASL_MECHANISM_SSL_TRUSTSTORE_LOCATION: /certs/client.ts.p12
+      CONNECT_CONSUMER_SSL_TRUSTSTORE_PASSWORD: {{KAFKA_client_truststore_password}}
+      CONNECT_PRODUCER_SSL_TRUSTSTORE_LOCATION: /certs/client.ts.p12
+      CONNECT_PRODUCER_SSL_TRUSTSTORE_PASSWORD: {{KAFKA_client_truststore_password}}
+      {% endif -%}   {#  ns.securityProtocol #}
     {% endif -%}   {#  ns.secureKafkaEnabled #}
       #CLASSPATH: /usr/share/java/monitoring-interceptors/monitoring-interceptors-4.0.0.jar
       AWS_ACCESS_KEY_ID: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
@@ -1594,6 +1603,9 @@ services:
     {% if KAFKA_jmx_monitoring_prometheus_enable %}
       - ./scripts/kafka/jmx-exporter/:/usr/share/jmx-exporter
     {% endif -%}
+    {% if ns.secureKafkaEnabled and ns.securityProtocol == 'SSL' %}
+      - ./security/kafka/client-certs:/certs
+    {% endif -%} {#  ns.secureKafkaEnabled #}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -3215,18 +3227,18 @@ services:
     {% if ns.secureKafkaEnabled %}
                 security.protocol: "{{ns.securityProtocolBROKER}}"
                 sasl.mechanism: "{{ns.saslMechanismBROKER}}"
-        {% if ns.securityProtocolBROKER == 'SASL_PLAINTEXT' %}
+      {% if ns.securityProtocolBROKER == 'SASL_PLAINTEXT' %}
                 sasl.jaas.config: "{{ns.loginModuleBROKER}} required username=\"{{ns.kafkaToolsDefaultUsername}}\" password=\"{{ns.kafkaToolsDefaultPassword}}\";"
-        {% elif ns.securityProtocolBROKER == 'SSL' %}
+      {% elif ns.securityProtocolBROKER == 'SSL' %}
                 ssl.truststore.location: /certs/client.ts.p12
                 ssl.truststore.password: {{KAFKA_client_truststore_password}}
-          {% if KAFKA_ssl_client_authentication_enable | default(false) %}
+        {% if KAFKA_ssl_client_authentication_enable | default(false) %}
                 ssl.keystore.type: "PKCS12"
-                ssl.keystore.location: {{path}}/avnadmin.keystore.p12
-                ssl.keystore.password: {{password}}
-                ssl.key.password: {{password}}
-          {% endif -%}   {#  KAFKA_ssl_client_authentication_enable #}
-        {% endif -%}   {#  ns.securityProtocol #}
+                ssl.keystore.location: /certs/client.ks.p12
+                ssl.keystore.password: abc123!
+                ssl.key.password: abc123!
+        {% endif -%}   {#  KAFKA_ssl_client_authentication_enable #}
+      {% endif -%}   {#  ns.securityProtocol #}
     {% endif -%}   {#  ns.secureKafkaEnabled #}
     {% if (SCHEMA_REGISTRY_enable or external['SCHEMA_REGISTRY_enable']) | default(false) %}
               schema-registry:
