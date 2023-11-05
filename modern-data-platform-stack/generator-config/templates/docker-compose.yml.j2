@@ -1242,7 +1242,7 @@ services:
     {% endif %}
       KAFKA_ADVERTISED_LISTENERS: 'BROKER://{{serviceName}}:1{{port}},LOCAL://localhost:3{{port}},DOCKERHOST://${DOCKER_HOST_IP:-127.0.0.1}:{{dockerHostPort}},EXTERNAL://${PUBLIC_IP:-127.0.0.1}:{{externalPort}}'
       KAFKA_REPLICA_SELECTOR_CLASS: {{KAFKA_replica_selector_class | default(omit)}}
-    {% if ns.secureKafkaEnabled %}
+    {% if ns.secureKafkaEnabled and ns.securityProtocol == 'SASL_PLAINTEXT' %}
       KAFKA_SASL_MECHANISM_INTER_BROKER_PROTOCOL: {{ns.saslMechanismBROKER}}
       {% if KAFKA_use_kraft_mode | default(false) %}
       KAFKA_SASL_ENABLED_MECHANISMS: {{[ns.saslMechanismCONTROLLER,ns.saslMechanismBROKER,ns.saslMechanismLOCAL,ns.saslMechanismDOCKERHOST,ns.saslMechanismEXTERNAL] | unique | join(',')}}
@@ -1283,7 +1283,13 @@ services:
                 username=\"{{KAFKA_tools_username}}\" \
                 password=\"{{KAFKA_tools_password}}\";"
       KAFKA_OPTS: "-Djava.security.auth.login.config=/etc/kafka/kafka_server_jaas.conf"
-    {% endif %}
+    {% elif ns.secureKafkaEnabled and ns.securityProtocol == 'SSL' %}
+      KAFKA_SSL_KEYSTORE_LOCATION: '/certs/server.ks.p12'
+      KAFKA_SSL_KEYSTORE_PASSWORD: 'abc123!'
+      KAFKA_SSL_KEY_PASSWORD: 'abc123!'
+      KAFKA_SSL_TRUSTSTORE_LOCATION: '/certs/server.ts.p12'
+      KAFKA_SSL_TRUSTSTORE_PASSWORD: 'abc123!'
+    {% endif %}   {# ns.secureKafkaEnabled #}
     {% if KAFKA_authorizer_enable and ns.secureKafkaEnabled | default(false) %}
       KAFKA_ALLOW_EVERYONE_IF_NO_ACL_FOUND: "{{KAFKA_allow_everyone_if_no_acl_found | lower }}"
       {% if not KAFKA_use_kraft_mode | default(false) %}
@@ -1373,7 +1379,7 @@ services:
     {% if KAFKA_volume_map_data %}
       - "./container-volume/kafka-{{loop.index}}:/var/lib/kafka/data"
     {% endif %}
-    {% if ns.secureKafkaEnabled %}
+    {% if ns.secureKafkaEnabled and and ns.securityProtocol == 'SASL_PLAINTEXT' %}
       {% if KAFKA_sasl_mechanism == 'SCRAM-SHA-256' or KAFKA_sasl_mechanism == 'SCRAM-SHA-512' %}
       - ./security/kafka/sasl-scram/kafka.jaas.conf:/etc/kafka/kafka_server_jaas.conf
       - ./security/kafka/sasl-scram/client.properties:/tmp/client.properties
@@ -1385,6 +1391,8 @@ services:
       - ./security/kafka/plain/kafka.jaas.conf:/etc/kafka/kafka_server_jaas.conf
       - ./security/kafka/plain/client.properties:/tmp/client.properties
       {% endif -%}
+    {% elif ns.secureKafkaEnabled and ns.securityProtocol == 'SSL' %}
+      - ./security/kafka/server-certs:/certs
     {% endif -%} {#  ns.secureKafkaEnabled #}
     {% if KAFKA_jmx_monitoring_prometheus_enable %}
       - ./scripts/kafka/jmx-exporter/:/usr/share/jmx-exporter
