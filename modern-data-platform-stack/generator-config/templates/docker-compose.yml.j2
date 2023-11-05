@@ -3003,9 +3003,20 @@ services:
       SCHEMA_REGISTRY_URL: '{{ns.schemaRegistryUrl}}'
     {% if ns.secureKafkaEnabled %}
       SECURITY_PROTOCOL: "{{ns.securityProtocolBROKER}}"
+      {% if ns.securityProtocolBROKER == 'SASL_PLAINTEXT' %}
       SASL_MECHANISM: "{{ns.saslMechanismBROKER}}"
       SASL_USERNAME: "{{ns.kafkaToolsDefaultUsername}}"
       SASL_USERNAME: "{{ns.kafkaToolsDefaultPassword}}"
+      {% elif ns.securityProtocolBROKER == 'SSL' %}
+      SSL_TRUSTSTORE_LOCATION: /certs/client.ts.p12
+      SSL_TRUSTSTORE_PASSWORD: {{KAFKA_client_truststore_password}}
+        {% if KAFKA_ssl_client_authentication_enable | default(false) %}
+      SSL_KEYSTORE_TYPE: "PKCS12"
+      SSL_KEYSTORE_LOCATION: /certs/client.ks.p12
+      SSL_KEYSTORE_PASSWORD: {{KAFKA_client_keystore_password}}
+      SSL_KEY_PASSWORD: {{KAFKA_client_key_password}}
+        {% endif -%}   {#  KAFKA_ssl_client_authentication_enable #}
+      {% endif -%}   {#  ns.securityProtocol #}
     {% endif -%}   {#  ns.secureKafkaEnabled #}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
@@ -3013,6 +3024,9 @@ services:
     volumes:
       - ./data-transfer:/data-transfer
       - ./conf/kaskade/kaskade.yml:/kaskade/kaskade.yml
+    {% if ns.secureKafkaEnabled and ns.securityProtocol == 'SSL' %}
+      - ./security/kafka/client-certs:/certs
+    {% endif -%} {#  ns.secureKafkaEnabled #}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
