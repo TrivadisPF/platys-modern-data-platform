@@ -5894,8 +5894,20 @@ services:
       - KAFKA_BOOTSTRAP_SERVER={{ns.bootstrapServer}}
     {% if ns.secureKafkaEnabled %}
       - SPRING_KAFKA_PROPERTIES_SECURITY_PROTOCOL='{{ns.securityProtocolBROKER}}'
+      {% if ns.securityProtocolBROKER == 'SASL_PLAINTEXT' %}
       - SPRING_KAFKA_PROPERTIES_SASL_MECHANISM='{{ns.saslMechanismBROKER}}'
       - SPRING_KAFKA_PROPERTIES_SASL_JAAS_CONFIG='{{ns.loginModuleBROKER}} required username=\"{{ns.kafkaToolsDefaultUsername}}\" password=\"{{ns.kafkaToolsDefaultPassword}}\";'
+      {% elif ns.securityProtocolBROKER == 'SSL' %}
+      - SPRING_KAFKA_PROPERTIES_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM='https'
+      - SPRING_KAFKA_PROPERTIES_SSL_TRUSTSTORE_LOCATION=/certs/client.ts.p12
+      - SPRING_KAFKA_PROPERTIES_SSL_TRUSTSTORE_PASSWORD={{KAFKA_client_truststore_password}}
+        {% if KAFKA_ssl_client_authentication_enable | default(false) %}
+      - SPRING_KAFKA_PROPERTIES_SSL_KEYSTORE_TYPE="PKCS12"
+      - SPRING_KAFKA_PROPERTIES_SSL_KEYSTORE_LOCATION=/certs/client.ks.p12
+      - SPRING_KAFKA_PROPERTIES_SSL_KEYSTORE_PASSWORD={{KAFKA_client_keystore_password}}
+      - SPRING_KAFKA_PROPERTIES_SSL_KEY_PASSWORD={{KAFKA_client_key_password}}
+        {% endif -%}   {#  KAFKA_ssl_client_authentication_enable #}
+      {% endif -%}   {#  ns.securityProtocol #}
     {% endif -%}   {#  secureKafkaEnabled #}
       - DATAHUB_TRACKING_TOPIC=DataHubUsageEvent_v1
       - ELASTIC_CLIENT_HOST=datahub-elasticsearch
@@ -5908,6 +5920,9 @@ services:
     {%if DATAHUB_map_user_props | default(false) %}
       - ./security/datahub/user.props:/datahub-frontend/conf/user.props
     {% endif -%}   {#  DATAHUB_map_user_props #}
+    {% if ns.secureKafkaEnabled and ns.securityProtocol == 'SSL' %}
+      - ./security/kafka/client-certs:/certs
+    {% endif -%} {#  ns.secureKafkaEnabled #}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -5962,8 +5977,20 @@ services:
       - KAFKA_BOOTSTRAP_SERVER={{ns.bootstrapServer}}
     {% if ns.secureKafkaEnabled %}
       - SPRING_KAFKA_PROPERTIES_SECURITY_PROTOCOL='{{ns.securityProtocolBROKER}}'
+      {% if ns.securityProtocolBROKER == 'SASL_PLAINTEXT' %}
       - SPRING_KAFKA_PROPERTIES_SASL_MECHANISM='{{ns.saslMechanismBROKER}}'
       - SPRING_KAFKA_PROPERTIES_SASL_JAAS_CONFIG='{{ns.loginModuleBROKER}} required username=\"{{ns.kafkaToolsDefaultUsername}}\" password=\"{{ns.kafkaToolsDefaultPassword}}\";'
+      {% elif ns.securityProtocolBROKER == 'SSL' %}
+      - SPRING_KAFKA_PROPERTIES_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM='https'
+      - SPRING_KAFKA_PROPERTIES_SSL_TRUSTSTORE_LOCATION=/certs/client.ts.p12
+      - SPRING_KAFKA_PROPERTIES_SSL_TRUSTSTORE_PASSWORD={{KAFKA_client_truststore_password}}
+        {% if KAFKA_ssl_client_authentication_enable | default(false) %}
+      - SPRING_KAFKA_PROPERTIES_SSL_KEYSTORE_TYPE="PKCS12"
+      - SPRING_KAFKA_PROPERTIES_SSL_KEYSTORE_LOCATION=/certs/client.ks.p12
+      - SPRING_KAFKA_PROPERTIES_SSL_KEYSTORE_PASSWORD={{KAFKA_client_keystore_password}}
+      - SPRING_KAFKA_PROPERTIES_SSL_KEY_PASSWORD={{KAFKA_client_key_password}}
+        {% endif -%}   {#  KAFKA_ssl_client_authentication_enable #}
+      {% endif -%}   {#  ns.securityProtocol #}
     {% endif -%}   {#  secureKafkaEnabled #}
       - KAFKA_SCHEMAREGISTRY_URL={{ns.schemaRegistryUrl}}
     {%if not DATAHUB_mae_consumer_standalone | default(true) %}
@@ -5983,6 +6010,9 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
+    {% if ns.secureKafkaEnabled and ns.securityProtocol == 'SSL' %}
+      - ./security/kafka/client-certs:/certs
+    {% endif -%} {#  ns.secureKafkaEnabled #}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -6008,8 +6038,20 @@ services:
       - KAFKA_BOOTSTRAP_SERVER={{ns.bootstrapServer}}
     {% if ns.secureKafkaEnabled %}
       - SPRING_KAFKA_PROPERTIES_SECURITY_PROTOCOL='{{ns.securityProtocolBROKER}}'
+      {% if ns.securityProtocolBROKER == 'SASL_PLAINTEXT' %}
       - SPRING_KAFKA_PROPERTIES_SASL_MECHANISM='{{ns.saslMechanismBROKER}}'
       - SPRING_KAFKA_PROPERTIES_SASL_JAAS_CONFIG='{{ns.loginModuleBROKER}} required username=\"{{ns.kafkaToolsDefaultUsername}}\" password=\"{{ns.kafkaToolsDefaultPassword}}\";'
+      {% elif ns.securityProtocolBROKER == 'SSL' %}
+      - SPRING_KAFKA_PROPERTIES_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM='https'
+      - SPRING_KAFKA_PROPERTIES_SSL_TRUSTSTORE_LOCATION=/certs/client.ts.p12
+      - SPRING_KAFKA_PROPERTIES_SSL_TRUSTSTORE_PASSWORD={{KAFKA_client_truststore_password}}
+        {% if KAFKA_ssl_client_authentication_enable | default(false) %}
+      - SPRING_KAFKA_PROPERTIES_SSL_KEYSTORE_TYPE="PKCS12"
+      - SPRING_KAFKA_PROPERTIES_SSL_KEYSTORE_LOCATION=/certs/client.ks.p12
+      - SPRING_KAFKA_PROPERTIES_SSL_KEYSTORE_PASSWORD={{KAFKA_client_keystore_password}}
+      - SPRING_KAFKA_PROPERTIES_SSL_KEY_PASSWORD={{KAFKA_client_key_password}}
+        {% endif -%}   {#  KAFKA_ssl_client_authentication_enable #}
+      {% endif -%}   {#  ns.securityProtocol #}
     {% endif -%}   {#  secureKafkaEnabled #}
       - METADATA_AUDIT_EVENT_NAME=MetadataAuditEvent_v4
       - METADATA_CHANGE_LOG_VERSIONED_TOPIC_NAME=MetadataChangeLog_Versioned_v1
@@ -6019,6 +6061,9 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer:rw
+    {% if ns.secureKafkaEnabled and ns.securityProtocol == 'SSL' %}
+      - ./security/kafka/client-certs:/certs
+    {% endif -%} {#  ns.secureKafkaEnabled #}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -6053,8 +6098,20 @@ services:
       - KAFKA_BOOTSTRAP_SERVER={{ns.bootstrapServer}}
     {% if ns.secureKafkaEnabled %}
       - SPRING_KAFKA_PROPERTIES_SECURITY_PROTOCOL='{{ns.securityProtocolBROKER}}'
+      {% if ns.securityProtocolBROKER == 'SASL_PLAINTEXT' %}
       - SPRING_KAFKA_PROPERTIES_SASL_MECHANISM='{{ns.saslMechanismBROKER}}'
       - SPRING_KAFKA_PROPERTIES_SASL_JAAS_CONFIG='{{ns.loginModuleBROKER}} required username=\"{{ns.kafkaToolsDefaultUsername}}\" password=\"{{ns.kafkaToolsDefaultPassword}}\";'
+      {% elif ns.securityProtocolBROKER == 'SSL' %}
+      - SPRING_KAFKA_PROPERTIES_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM='https'
+      - SPRING_KAFKA_PROPERTIES_SSL_TRUSTSTORE_LOCATION=/certs/client.ts.p12
+      - SPRING_KAFKA_PROPERTIES_SSL_TRUSTSTORE_PASSWORD={{KAFKA_client_truststore_password}}
+        {% if KAFKA_ssl_client_authentication_enable | default(false) %}
+      - SPRING_KAFKA_PROPERTIES_SSL_KEYSTORE_TYPE="PKCS12"
+      - SPRING_KAFKA_PROPERTIES_SSL_KEYSTORE_LOCATION=/certs/client.ks.p12
+      - SPRING_KAFKA_PROPERTIES_SSL_KEYSTORE_PASSWORD={{KAFKA_client_keystore_password}}
+      - SPRING_KAFKA_PROPERTIES_SSL_KEY_PASSWORD={{KAFKA_client_key_password}}
+        {% endif -%}   {#  KAFKA_ssl_client_authentication_enable #}
+      {% endif -%}   {#  ns.securityProtocol #}
     {% endif -%}   {#  secureKafkaEnabled #}
       - KAFKA_SCHEMAREGISTRY_URL='{{ns.schemaRegistryUrl}}'
       - ELASTICSEARCH_HOST=datahub-elasticsearch
@@ -6076,6 +6133,9 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
+    {% if ns.secureKafkaEnabled and ns.securityProtocol == 'SSL' %}
+      - ./security/kafka/client-certs:/certs
+    {% endif -%} {#  ns.secureKafkaEnabled #}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -6120,8 +6180,20 @@ services:
       - KAFKA_BOOTSTRAP_SERVER={{ns.bootstrapServer}}
     {% if ns.secureKafkaEnabled %}
       - SPRING_KAFKA_PROPERTIES_SECURITY_PROTOCOL='{{ns.securityProtocolBROKER}}'
+      {% if ns.securityProtocolBROKER == 'SASL_PLAINTEXT' %}
       - SPRING_KAFKA_PROPERTIES_SASL_MECHANISM='{{ns.saslMechanismBROKER}}'
       - SPRING_KAFKA_PROPERTIES_SASL_JAAS_CONFIG='{{ns.loginModuleBROKER}} required username=\"{{ns.kafkaToolsDefaultUsername}}\" password=\"{{ns.kafkaToolsDefaultPassword}}\";'
+      {% elif ns.securityProtocolBROKER == 'SSL' %}
+      - SPRING_KAFKA_PROPERTIES_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM='https'
+      - SPRING_KAFKA_PROPERTIES_SSL_TRUSTSTORE_LOCATION=/certs/client.ts.p12
+      - SPRING_KAFKA_PROPERTIES_SSL_TRUSTSTORE_PASSWORD={{KAFKA_client_truststore_password}}
+        {% if KAFKA_ssl_client_authentication_enable | default(false) %}
+      - SPRING_KAFKA_PROPERTIES_SSL_KEYSTORE_TYPE="PKCS12"
+      - SPRING_KAFKA_PROPERTIES_SSL_KEYSTORE_LOCATION=/certs/client.ks.p12
+      - SPRING_KAFKA_PROPERTIES_SSL_KEYSTORE_PASSWORD={{KAFKA_client_keystore_password}}
+      - SPRING_KAFKA_PROPERTIES_SSL_KEY_PASSWORD={{KAFKA_client_key_password}}
+        {% endif -%}   {#  KAFKA_ssl_client_authentication_enable #}
+      {% endif -%}   {#  ns.securityProtocol #}
     {% endif -%}   {#  secureKafkaEnabled #}
       - KAFKA_SCHEMAREGISTRY_URL='{{ns.schemaRegistryUrl}}'
       - ELASTICSEARCH_HOST=datahub-elasticsearch
@@ -6142,6 +6214,9 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
+    {% if ns.secureKafkaEnabled and ns.securityProtocol == 'SSL' %}
+      - ./security/kafka/client-certs:/certs
+    {% endif -%} {#  ns.secureKafkaEnabled #}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -6398,8 +6473,20 @@ services:
       - KAFKA_BOOTSTRAP_SERVER={{ns.bootstrapServers}}
     {% if ns.secureKafkaEnabled %}
       - SPRING_KAFKA_PROPERTIES_SECURITY_PROTOCOL='{{ns.securityProtocolBROKER}}'
+      {% if ns.securityProtocolBROKER == 'SASL_PLAINTEXT' %}
       - SPRING_KAFKA_PROPERTIES_SASL_MECHANISM='{{ns.saslMechanismBROKER}}'
       - SPRING_KAFKA_PROPERTIES_SASL_JAAS_CONFIG='{{ns.loginModuleBROKER}} required username=\"{{ns.kafkaToolsDefaultUsername}}\" password=\"{{ns.kafkaToolsDefaultPassword}}\";'
+      {% elif ns.securityProtocolBROKER == 'SSL' %}
+      - SPRING_KAFKA_PROPERTIES_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM='https'
+      - SPRING_KAFKA_PROPERTIES_SSL_TRUSTSTORE_LOCATION=/certs/client.ts.p12
+      - SPRING_KAFKA_PROPERTIES_SSL_TRUSTSTORE_PASSWORD={{KAFKA_client_truststore_password}}
+        {% if KAFKA_ssl_client_authentication_enable | default(false) %}
+      - SPRING_KAFKA_PROPERTIES_SSL_KEYSTORE_TYPE="PKCS12"
+      - SPRING_KAFKA_PROPERTIES_SSL_KEYSTORE_LOCATION=/certs/client.ks.p12
+      - SPRING_KAFKA_PROPERTIES_SSL_KEYSTORE_PASSWORD={{KAFKA_client_keystore_password}}
+      - SPRING_KAFKA_PROPERTIES_SSL_KEY_PASSWORD={{KAFKA_client_key_password}}
+        {% endif -%}   {#  KAFKA_ssl_client_authentication_enable #}
+      {% endif -%}   {#  ns.securityProtocol #}
     {% endif -%}   {#  secureKafkaEnabled #}
       - KAFKA_ZOOKEEPER_CONNECT=zookeeper-1:2181
     {%if use_timezone | default(false) %}
@@ -6407,6 +6494,9 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
+    {% if ns.secureKafkaEnabled and ns.securityProtocol == 'SSL' %}
+      - ./security/kafka/client-certs:/certs
+    {% endif -%} {#  ns.secureKafkaEnabled #}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
