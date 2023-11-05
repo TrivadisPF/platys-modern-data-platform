@@ -2525,6 +2525,9 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
+    {% if ns.secureKafkaEnabled and ns.securityProtocol == 'SSL' %}
+      - ./security/kafka/client-certs:/certs
+    {% endif -%} {#  ns.secureKafkaEnabled #}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -3125,7 +3128,7 @@ services:
       - ./conf/jikkou/config:/etc/jikkou/config
     {% if ns.secureKafkaEnabled and ns.securityProtocol == 'SSL' %}
       - ./security/kafka/client-certs:/certs
-    {% endif -%} {#  ns.secureKafkaEnabled #}      
+    {% endif -%} {#  ns.secureKafkaEnabled #}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -3323,17 +3326,27 @@ services:
       ZOOKEEPER_HOST: zookeeper-1:2181
     {% endif -%}   {#  external['KAFKA_enable']) #}
       KAFKA_HOST: {{ns.bootstrapServers}}
-      #SECURITY_PROTOCOL: SSL
-      TRUST_STORE_LOCATION: ssl/client.truststore.jks
-      TRUST_STORE_PASSWORD: password
-      KEY_STORE_LOCATION: ssl/server.keystore.jks
-      KEY_STORE_PASSWORD: password
-      KEY_PASSWORD: password
+    {% if ns.secureKafkaEnabled %}
+      {% if ns.securityProtocolBROKER == 'SASL_PLAINTEXT' %}
+      {% elif ns.securityProtocolBROKER == 'SSL' %}
+      SECURITY_PROTOCOL: SSL
+      TRUST_STORE_LOCATION: /certs/client.ts.p12
+      TRUST_STORE_PASSWORD: {{KAFKA_client_truststore_password}}
+        {% if KAFKA_ssl_client_authentication_enable | default(false) %}
+      KEY_STORE_LOCATION: /certs/client.ks.p12
+      KEY_STORE_PASSWORD: {{KAFKA_client_keystore_password}}
+      KEY_PASSWORD: {{KAFKA_client_key_password}}
+        {% endif -%}   {#  KAFKA_ssl_client_authentication_enable #}
+      {% endif -%}   {#  ns.securityProtocol #}
+    {% endif -%}   {#  ns.secureKafkaEnabled #}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
+    {% if ns.secureKafkaEnabled and ns.securityProtocol == 'SSL' %}
+      - ./security/kafka/client-certs:/certs
+    {% endif -%} {#  ns.secureKafkaEnabled #}      
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
