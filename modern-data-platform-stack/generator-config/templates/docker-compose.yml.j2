@@ -2538,10 +2538,21 @@ services:
       SCHEMA_REGISTRY_DEBUG: "{{CONFLUENT_SCHEMA_REGISTRY_debug}}"
     {% if ns.secureKafkaEnabled %}
       SCHEMA_REGISTRY_KAFKASTORE_SECURITY_PROTOCOL: "{{ns.securityProtocolBROKER}}"
+      {% if ns.securityProtocolBROKER == 'SASL_PLAINTEXT' %}
       SCHEMA_REGISTRY_KAFKASTORE_SASL_MECHANISM: "{{ns.saslMechanismBROKER}}"
       SCHEMA_REGISTRY_KAFKASTORE_SASL_JAAS_CONFIG: "{{ns.loginModuleBROKER}} required
                         username=\"{{SCHEMA_REGISTRY_kafka_username if SCHEMA_REGISTRY_kafka_username is defined and SCHEMA_REGISTRY_kafka_username | length else ns.kafkaToolsDefaultUsername}}\"
                         password=\"{{SCHEMA_REGISTRY_kafka_password if SCHEMA_REGISTRY_kafka_password is defined and SCHEMA_REGISTRY_kafka_password | length else ns.kafkaToolsDefaultPassword}}\";"
+      {% elif ns.securityProtocolBROKER == 'SSL' %}
+      SCHEMA_REGISTRY_SSL_TRUSTSTORE_LOCATION: /certs/client.ts.p12
+      SCHEMA_REGISTRY_SSL_TRUSTSTORE_PASSWORD: {{KAFKA_client_truststore_password}}
+        {% if KAFKA_ssl_client_authentication_enable | default(false) %}
+      SCHEMA_REGISTRY_SSL_KEYSTORE_TYPE: "PKCS12"
+      SCHEMA_REGISTRY_SSL_KEYSTORE_LOCATION: /certs/client.ks.p12
+      SCHEMA_REGISTRY_SSL_KEYSTORE_PASSWORD: {{KAFKA_client_keystore_password}}
+      SCHEMA_REGISTRY_SSL_KEY_PASSWORD: {{KAFKA_client_key_password}}
+        {% endif -%}   {#  KAFKA_ssl_client_authentication_enable #}
+      {% endif -%}   {#  ns.securityProtocol #}
     {% endif -%}   {#  ns.secureKafkaEnabled #}
     {% if OTEL_COLLECTOR_enable | default(false) %}
       OTEL_RESOURCE_ATTRIBUTES: 'service.name=schema-registry'
@@ -2559,6 +2570,9 @@ services:
     {% if KAFKA_jmx_monitoring_prometheus_enable %}
       - ./scripts/kafka/jmx-exporter/:/usr/share/jmx-exporter
     {% endif -%}
+    {% if ns.secureKafkaEnabled and ns.securityProtocol == 'SSL' %}
+      - ./security/kafka/client-certs:/certs
+    {% endif -%} {#  ns.secureKafkaEnabled #}    
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
