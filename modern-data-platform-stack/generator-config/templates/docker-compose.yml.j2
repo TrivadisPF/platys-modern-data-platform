@@ -13540,7 +13540,19 @@ services:
       KAFKA_NODES: {{ns.bootstrapServers}}
     {% if ns.secureKafkaEnabled %}
       KAFKA_SECURITY_PROTOCOL: '{{ns.securityProtocolBROKER}}'
+      {% if ns.securityProtocolBROKER == 'SASL_PLAINTEXT' %}
       KAFKA_CONFIG_RESOURCES: '{{trino_etc_dir}}/kafka-configuration.properties'
+      {% elif ns.securityProtocolBROKER == 'SSL' %}
+      KAFKA_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: "https"
+      KAFKA_SSL_TRUSTSTORE_LOCATION: /certs/client.ts.p12
+      KAFKA_SSL_TRUSTSTORE_PASSWORD: {{KAFKA_client_truststore_password}}
+        {% if KAFKA_ssl_client_authentication_enable | default(false) %}
+      KAFKA_SSL_KEYSTORE_TYPE: "PKCS12"
+      KAFKA_SSL_KEYSTORE_LOCATION: /certs/client.ks.p12
+      KAFKA_SSL_KEYSTORE_PASSWORD: {{KAFKA_client_keystore_password}}
+      KAFKA_SSL_KEY_PASSWORD: {{KAFKA_client_key_password}}
+        {% endif -%}   {#  KAFKA_ssl_client_authentication_enable #}
+      {% endif -%}   {#  ns.securityProtocol #}
     {% endif -%}   {#  secureKafkaEnabled #}
       KAFKA_TABLE_NAMES: {{TRINO_kafka_table_names}}
       KAFKA_DEFAULT_SCHEMA: {{TRINO_kafka_default_schema}}
@@ -13601,6 +13613,9 @@ services:
     {% if ns.secureKafkaEnabled %}
       - './security/kafka/sasl-scram/client.properties:{{trino_etc_dir}}/kafka-configuration.properties'
     {% endif %}
+    {% if ns.secureKafkaEnabled and ns.securityProtocol == 'SSL' %}
+      - ./security/kafka/client-certs:/certs
+    {% endif -%} {#  ns.secureKafkaEnabled #}
   {% endif %}
   {%if HADOOP_enable | default(false) %}
       - './conf/{{conf_dir}}/catalog/hdfs.properties:{{trino_etc_dir}}/catalog/hdfs.properties'
