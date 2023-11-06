@@ -14793,9 +14793,9 @@ services:
       MINIO_AUDIT_KAFKA_TLS: 'on'
       MINIO_AUDIT_KAFKA_TLS_SKIP_VERIFY: "off"
         {% if KAFKA_ssl_client_authentication_enable | default(false) %}
-      MINIO_AUDIT_KAFKA_TLS_CLIENT_AUTH: "on"
-      MINIO_AUDIT_KAFKA_CLIENT_TLS_CERT: client.crt
-      MINIO_AUDIT_KAFKA_CLIENT_TLS_KEY: client.key
+      MINIO_AUDIT_KAFKA_TLS_CLIENT_AUTH: 1
+      MINIO_AUDIT_KAFKA_CLIENT_TLS_CERT: /certs/client.pem
+      MINIO_AUDIT_KAFKA_CLIENT_TLS_KEY: /certs/client.key
         {% endif -%}   {#  KAFKA_ssl_client_authentication_enable #}
       {% endif -%}   {#  ns.securityProtocol #}
     {% endif -%}   {#  ns.secureKafkaEnabled #}
@@ -14808,7 +14808,7 @@ services:
       MINIO_NOTIFY_WEBHOOK_AUTH_TOKEN_primary: {{MINIO_notify_webhook_auth_token if MINIO_notify_webhook_auth_token is defined and MINIO_notify_webhook_auth_token and MINIO_notify_webhook_auth_token | length else omit}}
     {% endif -%}   {#  MINIO_notify_webhook_enable #}
     {% if (KAFKA_enable or external['KAFKA_enable']) and MINIO_notify_kafka_enable | default(false) %}
-      MINIO_NOTFIY_KAFKA_ENABLE_primary: 'on'
+      MINIO_NOTIFY_KAFKA_ENABLE_primary: 'on'
       MINIO_NOTIFY_KAFKA_BROKERS_primary: '{{ns.bootstrapServers}}'
     {% if ns.secureKafkaEnabled %}
       {% if ns.securityProtocolBROKER == 'SASL_PLAINTEXT' %}
@@ -14817,19 +14817,19 @@ services:
       MINIO_NOTIFY_KAFKA_SASL_USERNAME_primary: '{{KAFKA_RESTPROXY_kafka_username if KAFKA_RESTPROXY_kafka_username is defined and KAFKA_RESTPROXY_kafka_username | length else ns.kafkaToolsDefaultUsername}}'
       MINIO_NOTIFY_KAFKA_SASL_PASSWORD_primary: '{{KAFKA_RESTPROXY_kafka_password if KAFKA_RESTPROXY_kafka_password is defined and KAFKA_RESTPROXY_kafka_password | length else ns.kafkaToolsDefaultPassword}}'
       {% elif ns.securityProtocolBROKER == 'SSL' %}
-      MINIO_NOTFIY_KAFKA_TLS_primary: 'on'
-      MINIO_NOTIFY_AUDIT_KAFKA_TLS_SKIP_VERIFY_primary: "off"
+      MINIO_NOTIFY_KAFKA_TLS_primary: 'on'
+      MINIO_NOTIFY_KAFKA_TLS_SKIP_VERIFY_primary: "off"
         {% if KAFKA_ssl_client_authentication_enable | default(false) %}
-      MINIO_NOTIFY_KAFKA_TLS_CLIENT_AUTH_primary: "on"
-      MINIO_NOTIFY_KAFKA_CLIENT_TLS_CERT_primary: client.crt
-      MINIO_NOTIFY_KAFKA_CLIENT_TLS_KEY_primary: client.key
+      MINIO_NOTIFY_KAFKA_TLS_CLIENT_AUTH_primary: 1
+      MINIO_NOTIFY_KAFKA_CLIENT_TLS_CERT_primary: /certs/client.pem
+      MINIO_NOTIFY_KAFKA_CLIENT_TLS_KEY_primary: /certs/client.key
         {% endif -%}   {#  KAFKA_ssl_client_authentication_enable #}
       {% endif -%}   {#  ns.securityProtocol #}
     {% endif -%}   {#  ns.secureKafkaEnabled #}
       MINIO_NOTIFY_KAFKA_TOPIC_primary: '{{MINIO_notify_kafka_topic}}'
     {% endif -%}   {#  MINIO_notify_kafka_enable #}
     {% if MINIO_notify_mqtt_enable | default(false) %}
-      MINIO_NOTFIY_MQTT_ENABLE_primary: 'on'
+      MINIO_NOTIFY_MQTT_ENABLE_primary: 'on'
       MINIO_NOTIFY_MQTT_BROKERS_primary: '{{MINIO_notify_mqtt_broker_endpoint}}'
       MINIO_NOTIFY_MQTT_USERNAME: '{{MINIO_notify_mqtt_username if MINIO_notify_mqtt_username is defined and MINIO_notify_mqtt_username and MINIO_notify_mqtt_username | length else omit}}'
       MINIO_NOTIFY_MQTT_PASSWORD: '{{MINIO_notify_mqtt_password if MINIO_notify_mqtt_password is defined and MINIO_notify_mqtt_password and MINIO_notify_mqtt_password | length else omit}}'
@@ -14837,7 +14837,7 @@ services:
       MINIO_NOTIFY_MQTT_QOS: 0
     {% endif -%}   {#  MINIO_notify_kafka_enable #}
     {% if MINIO_notify_redis_enable | default(false) %}
-      MINIO_NOTFIY_REDIS_ENABLE_primary: 'on'
+      MINIO_NOTIFY_REDIS_ENABLE_primary: 'on'
       MINIO_NOTIFY_REDIS_ADDRESS_primary: '{{MINIO_notify_redis_endpoint}}'
       MINIO_NOTIFY_REDIS_KEY: '{{MINIO_notify_redis_key}}'
       MINIO_NOTIFY_REDIS_FORMAT: '{{MINIO_notify_redis_format}}'
@@ -14862,7 +14862,7 @@ services:
     {% endif %}
     {% if ns.secureKafkaEnabled and ns.securityProtocol == 'SSL' %}
       - ./security/kafka/client-certs:/certs
-    {% endif -%} {#  ns.secureKafkaEnabled #}    
+    {% endif -%} {#  ns.secureKafkaEnabled #}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
