@@ -6062,6 +6062,9 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer:rw
+    {%if DATAHUB_custom_actions is defined and DATAHUB_custom_actions and DATAHUB_custom_actions | length | default(false) %}
+      - ./plugins/datahub/user-actions/custom-action.yml:etc/datahub/actions/conf/custom-action.yml
+    {% endif -%}   {#  DATAHUB_custom_actions #}
     {% if ns.secureKafkaEnabled and ns.securityProtocol == 'SSL' %}
       - ./security/kafka/client-certs:/certs
     {% endif -%} {#  ns.secureKafkaEnabled #}
@@ -6517,8 +6520,8 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
-      - ./scripts/datahub/sample_recipe.yml:/sample_recipe.yml:ro
-      - ./scripts/datahub/bootstrap_mce.json:/bootstrap_mce.json:ro
+      - ./init/datahub/sample-data/sample_recipe.yml:/sample_recipe.yml:ro
+      - ./init/datahub/sample-data/bootstrap_mce.json:/bootstrap_mce.json:ro
       - ./scripts/docker/wait-for-it.sh:/tmp/wait-for-it.sh
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
