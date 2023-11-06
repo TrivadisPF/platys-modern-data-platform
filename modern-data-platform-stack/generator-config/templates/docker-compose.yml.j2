@@ -14784,10 +14784,20 @@ services:
       MINIO_AUDIT_KAFKA_ENABLE: 'on'
       MINIO_AUDIT_KAFKA_BROKERS: '{{ns.bootstrapServers}}'
     {% if ns.secureKafkaEnabled %}
+      {% if ns.securityProtocolBROKER == 'SASL_PLAINTEXT' %}
       MINIO_AUDIT_KAFKA_SASL: 'on'
       MINIO_AUDIT_KAFKA_SASL_MECHANISM: '{{ns.saslMechanismBROKER}}'
       MINIO_AUDIT_KAFKA_SASL_USERNAME: '{{KAFKA_RESTPROXY_kafka_username if KAFKA_RESTPROXY_kafka_username is defined and KAFKA_RESTPROXY_kafka_username | length else ns.kafkaToolsDefaultUsername}}'
       MINIO_AUDIT_KAFKA_SASL_PASSWORD: '{{KAFKA_RESTPROXY_kafka_password if KAFKA_RESTPROXY_kafka_password is defined and KAFKA_RESTPROXY_kafka_password | length else ns.kafkaToolsDefaultPassword}}'
+      {% elif ns.securityProtocolBROKER == 'SSL' %}
+      MINIO_AUDIT_KAFKA_TLS: 'on'
+      MINIO_AUDIT_KAFKA_TLS_SKIP_VERIFY: "off"
+        {% if KAFKA_ssl_client_authentication_enable | default(false) %}
+      MINIO_AUDIT_KAFKA_TLS_CLIENT_AUTH: "on"
+      MINIO_AUDIT_KAFKA_CLIENT_TLS_CERT: client.crt
+      MINIO_AUDIT_KAFKA_CLIENT_TLS_KEY: client.key
+        {% endif -%}   {#  KAFKA_ssl_client_authentication_enable #}
+      {% endif -%}   {#  ns.securityProtocol #}
     {% endif -%}   {#  ns.secureKafkaEnabled #}
       MINIO_AUDIT_KAFKA_TOPIC: '{{MINIO_audit_kafka_topic}}'
     {% endif -%}   {#  MINIO_audit_kafka_enable #}
@@ -14801,10 +14811,20 @@ services:
       MINIO_NOTFIY_KAFKA_ENABLE_primary: 'on'
       MINIO_NOTIFY_KAFKA_BROKERS_primary: '{{ns.bootstrapServers}}'
     {% if ns.secureKafkaEnabled %}
+      {% if ns.securityProtocolBROKER == 'SASL_PLAINTEXT' %}
       MINIO_NOTIFY_KAFKA_SASL_primary: 'on'
       MINIO_NOTIFY_KAFKA_SASL_MECHANISM_primary: '{{ns.saslMechanismBROKER}}'
       MINIO_NOTIFY_KAFKA_SASL_USERNAME_primary: '{{KAFKA_RESTPROXY_kafka_username if KAFKA_RESTPROXY_kafka_username is defined and KAFKA_RESTPROXY_kafka_username | length else ns.kafkaToolsDefaultUsername}}'
       MINIO_NOTIFY_KAFKA_SASL_PASSWORD_primary: '{{KAFKA_RESTPROXY_kafka_password if KAFKA_RESTPROXY_kafka_password is defined and KAFKA_RESTPROXY_kafka_password | length else ns.kafkaToolsDefaultPassword}}'
+      {% elif ns.securityProtocolBROKER == 'SSL' %}
+      MINIO_NOTFIY_KAFKA_TLS_primary: 'on'
+      MINIO_NOTIFY_AUDIT_KAFKA_TLS_SKIP_VERIFY_primary: "off"
+        {% if KAFKA_ssl_client_authentication_enable | default(false) %}
+      MINIO_NOTIFY_KAFKA_TLS_CLIENT_AUTH_primary: "on"
+      MINIO_NOTIFY_KAFKA_CLIENT_TLS_CERT_primary: client.crt
+      MINIO_NOTIFY_KAFKA_CLIENT_TLS_KEY_primary: client.key
+        {% endif -%}   {#  KAFKA_ssl_client_authentication_enable #}
+      {% endif -%}   {#  ns.securityProtocol #}
     {% endif -%}   {#  ns.secureKafkaEnabled #}
       MINIO_NOTIFY_KAFKA_TOPIC_primary: '{{MINIO_notify_kafka_topic}}'
     {% endif -%}   {#  MINIO_notify_kafka_enable #}
@@ -14840,6 +14860,9 @@ services:
     {% if MINIO_volume_map_data %}
       - "./container-volume/minio:/data/"
     {% endif %}
+    {% if ns.secureKafkaEnabled and ns.securityProtocol == 'SSL' %}
+      - ./security/kafka/client-certs:/certs
+    {% endif -%} {#  ns.secureKafkaEnabled #}    
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
