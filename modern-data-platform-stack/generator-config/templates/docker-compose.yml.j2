@@ -4149,6 +4149,7 @@ services:
       - {{KLAW_cluster_id}}_KAFKASASL_KEYSTORE_PWD={{KAFKA_client_keystore_password}}
       - {{KLAW_cluster_id}}_KAFKASASL_KEY_PWD={{KAFKA_client_key_password}}
         {% endif -%}   {#  KAFKA_ssl_client_authentication_enable #}
+      {% endif -%}   {#  ns.securityProtocol #}
     {% endif -%}   {#  ns.secureKafkaEnabled #}
       - LOGGING_LEVEL_ROOT={{KLAW_logging_level | default(info)}}
     {%if use_timezone | default(false) %}
@@ -15588,8 +15589,20 @@ services:
       TB_KAFKA_SERVERS: {{ns.bootstrapServers}}
     {% if ns.secureKafkaEnabled %}
       - TB_QUEUE_KAFKA_CONFLUENT_SECURITY_PROTOCOL='{{ns.securityProtocolBROKER}}'
+      {% if ns.securityProtocolBROKER == 'SASL_PLAINTEXT' %}
       - TB_QUEUE_KAFKA_CONFLUENT_SASL_MECHANISM='{{ns.saslMechanismBROKER}}'
       - TB_QUEUE_KAFKA_CONFLUENT_SASL_JAAS_CONFIG='{{ns.loginModuleBROKER}} required username=\"{{ns.kafkaToolsDefaultUsername}}\" password=\"{{ns.kafkaToolsDefaultPassword}}\";'
+      {% elif ns.securityProtocolBROKER == 'SSL' %}
+      - TB_QUEUE_KAFKA_CONFLUENT_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM='https'
+      - TB_QUEUE_KAFKA_CONFLUENT_SSL_TRUSTSTORE_LOCATION=/certs/client.ts.p12
+      - TB_QUEUE_KAFKA_CONFLUENT_SSL_TRUSTSTORE_PASSWORD={{KAFKA_client_truststore_password}}
+        {% if KAFKA_ssl_client_authentication_enable | default(false) %}
+      - TB_QUEUE_KAFKA_CONFLUENT_SSL_KEYSTORE_TYPE="PKCS12"
+      - TB_QUEUE_KAFKA_CONFLUENT_SSL_KEYSTORE_LOCATION=/certs/client.ks.p12
+      - TB_QUEUE_KAFKA_CONFLUENT_SSL_KEYSTORE_PASSWORD={{KAFKA_client_keystore_password}}
+      - TB_QUEUE_KAFKA_CONFLUENT_SSL_KEY_PASSWORD={{KAFKA_client_key_password}}
+        {% endif -%}   {#  KAFKA_ssl_client_authentication_enable #}
+      {% endif -%}   {#  ns.securityProtocol #}
     {% endif -%}   {#  secureKafkaEnabled #}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
@@ -15602,6 +15615,9 @@ services:
     {% if THINGSBOARD_volume_map_log %}
       - ./container-volume/thingsboard/log:/var/log/thingsboard
     {% endif -%}   {#  THINGSBOARD_volume_map_log #}
+    {% if ns.secureKafkaEnabled and ns.securityProtocol == 'SSL' %}
+      - ./security/kafka/client-certs:/certs
+    {% endif -%} {#  ns.secureKafkaEnabled #}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
