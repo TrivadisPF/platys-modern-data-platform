@@ -10369,13 +10369,17 @@ services:
     {% if REDIS_disable_commands is defined and REDIS_disable_commands | default(false) %}
       - DISABLE_COMMANDS={{REDIS_disable_commands | default(omit) }}
     {% endif -%}   {#  REDIS_disable_commands #}
-      - REDIS_PASSWORD={{REDIS_password | default(omit) }}
+      - REDIS_PASSWORD={{REDIS_password if REDIS_password is defined and REDIS_password and REDIS_password | length else omit}}
+      - REDIS_PASSWORD_FILE=/{{REDIS_password_file if REDIS_password_file is defined and REDIS_password_file and REDIS_password_file | length else omit }}
       - REDIS_AOF_ENABLED={{REDIS_aof_enabled | default(omit) }}
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
+    {% if REDIS_password_file is defined and REDIS_password_file and REDIS_password_file | length %}
+      - ./security/redis/{{REDIS_password_file}}:/{{REDIS_password_file}}
+    {% endif %}
     {% if REDIS_volume_map_data %}
       - "./container-volume/redis/data:/bitnami/redis/data"
     {% endif %}
