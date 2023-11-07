@@ -1,0 +1,1 @@
+Place an overrides config file here to override certain Redis configuration settings. Specify the name of the file using the REDIS_overrides_config_file config setting. 
