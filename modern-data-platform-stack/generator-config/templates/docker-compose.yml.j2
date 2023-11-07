@@ -10372,16 +10372,22 @@ services:
     {% if REDIS_password is defined and REDIS_password and REDIS_password | length | default(false) %}
       - REDIS_PASSWORD={{REDIS_password if REDIS_password is defined and REDIS_password and REDIS_password | length else omit}}
     {% elif REDIS_PASSWORD_FILE is defined and REDIS_PASSWORD_FILE and REDIS_PASSWORD_FILE | length | default(false) %}
-      - REDIS_PASSWORD_FILE=/{{REDIS_password_file if REDIS_password_file is defined and REDIS_password_file and REDIS_password_file | length else omit }}
+      - REDIS_PASSWORD_FILE=/opt/bitnami/redis/mounted-etc/{{REDIS_password_file if REDIS_password_file is defined and REDIS_password_file and REDIS_password_file | length else omit }}
     {% endif -%}   {#  REDIS_password or REDIS_PASSWORD_FILE #}
+      - REDIS_ACL_FILE=/{{REDIS_acl_file if REDIS_acl_file is defined and REDIS_acl_file and REDIS_acl_file | length else omit }}
       - REDIS_AOF_ENABLED={{REDIS_aof_enabled | default(omit) }}
+      - REDIS_IO_THREADS
+      - REDIS_IO_THREADS_DO_READS
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
     {% if REDIS_password_file is defined and REDIS_password_file and REDIS_password_file | length %}
-      - ./security/redis/{{REDIS_password_file}}:/{{REDIS_password_file}}
+      - ./security/redis/{{REDIS_password_file}}:/opt/bitnami/redis/mounted-etc/{{REDIS_password_file}}
+    {% endif %}
+    {% if REDIS_acl_file is defined and REDIS_acl_file and REDIS_acl_file | length %}
+      - ./security/redis/{{REDIS_acl_file}}:/opt/bitnami/redis/mounted-etc/{{REDIS_acl_file}}
     {% endif %}
     {% if REDIS_volume_map_data %}
       - "./container-volume/redis/data:/bitnami/redis/data"
