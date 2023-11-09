@@ -68,6 +68,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Update `grafana` to `10.2.0`
  * Update `prometheus` to `v2.47.2`
  * Update `redis` to `7.2`
+ * Update `vault` to `1.15`
 
 ### Enhancements
 
