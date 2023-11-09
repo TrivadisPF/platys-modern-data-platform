@@ -7526,6 +7526,9 @@ services:
       SINGLE_USER_CREDENTIALS_USERNAME: '{{NIFI_username}}'
       SINGLE_USER_CREDENTIALS_PASSWORD: '{{NIFI_password}}'
       INITIAL_ADMIN_IDENTITY: '{{ NIFI_inital_admin_identitiy if NIFI_inital_admin_identitiy is defined and NIFI_inital_admin_identitiy | length else NIFI_username }}'
+    {% if VAULT_enable and VAULT_use_dev_mode | default(false) %}
+      VAULT_TOKEN={{VAULT_dev_mode_token}}
+    {% endif -%}   {#  VAULT_use_dev_mode #}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -16674,7 +16677,7 @@ services:
       - VAULT_ADDRESS=http://0.0.0.0:8200
     {% if VAULT_use_dev_mode | default(false) %}
       - VAULT_DEV_LISTEN_ADDRESS=0.0.0.0:8200
-      - VAULT_DEV_ROOT_TOKEN_ID=abc123!
+      - VAULT_DEV_ROOT_TOKEN_ID={{VAULT_dev_mode_token}}
     {% endif -%}   {#  VAULT_use_dev_mode #}
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
