@@ -7594,12 +7594,19 @@ services:
       INFLUXDB_SERVER: influxdb
       ENDPOINT_LIST: 'controller/cluster,flow/cluster/summary,flow/process-groups/root,flow/status,counters,system-diagnostics'
       SLEEP_INTERVAL: 300
-      API_URL: 'http://nifi-1:8080/nifi-api/'
+      API_URL: 'http{{ 's' if NIFI_run_secure}}://nifi-1:8080/nifi-api/'
+    {%if NIFI_run_secure  | default(false) %}
+      SECURE=true
+      CERT_PASS="abc123!"
+    {% endif -%}   {#  NIFI_run_unsecure #}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
+    {%if NIFI_run_secure  | default(false) %}
+      - ./security/nifi/keystore.pkcs12:/opt/monitofi/cert.pkcs12
+    {% endif -%}   {#  NIFI_run_unsecure #}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
