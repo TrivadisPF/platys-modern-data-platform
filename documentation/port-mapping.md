@@ -165,6 +165,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 8443 | 8443 | kong (proxy ssl) |
 8444 | 8444 | kong (admin api ssl) |
 8446 | 8443 | curity |
+8761 | 8761 | ioevent-api |
 8787 | 8787 | r-studio |
 8812 | 8812 | questdb |
 8888 | 8888 | hue |
@@ -535,6 +536,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28324 | 8000 | focalboard |
 28325 | 8025 | mailhog |
 28326 | 25 | mailhog |
+28327 | 3000 | ioevent-ui |
 
 ## Ports > 28500
 

@@ -402,6 +402,8 @@ networks:
 {% set __CAMUNDA_OPERATE_version = CAMUNDA_OPERATE_version | default('latest') -%}
 {% set __CAMUNDA_ZEEQS_version = CAMUNDA_ZEEQS_version | default('latest') -%}
 
+{% set __IOVENT_version = IOEVENT_version | default('latest') -%}
+
 {% set __PENTHAO_version = PENTHAO_version | default('latest') -%}
 
 {% set __MINIO_version = MINIO_version | default('latest') -%}
@@ -716,6 +718,7 @@ networks:
   {% set CAMUNDA_ZEEBE_enable = false -%}
   {% set CAMUNDA_OPERATE_enable = false -%}
   {% set CAMUNDA_ZEEQS_enable = false -%}
+  {% set IOEVENT_enable = false -%}
   {% set DBT_enable = false -%}
   {% set PENTHAO_enable = false -%}
   {% set MINIO_enable = false -%}
@@ -16172,6 +16175,68 @@ services:
     restart: {{container_restart_policy}}
   {% endif %}   {#  CAMUNDA_ZEEQS_enable #}
 {% endif %}   {#  CAMUNDA_ZEEBE_enable #}
+
+{% if IOEVENT_enable | default(false) %}
+  #  ================================== IOEvent Cockpit ========================================== #
+  ioevent-ui:
+    image: ioevent/cockpit-api:{{__IOEVENT_version}}
+    container_name: ioevent-ui
+    hostname: ioevent-ui
+    labels:
+      com.platys.name: "ioevent"
+      com.platys.webui.title: "IOEvent Cockpit UI"
+      com.platys.webui.url: "http://dataplatform:28327"
+    ports:
+      - 28327:3000
+    environment:
+      COCKPit_API_URL: 'ioevent-api:8761'
+      COCKPit_UI_REGISTRATION: false
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+
+  ioevent-api:
+    image: ioevent/cockpit-api:{{__IOEVENT_version}}
+    container_name: ioevent-api
+    hostname: ioevent-api
+    labels:
+      com.platys.name: "ioevent"
+      com.platys.restapi.title: "IOEvent API"
+      com.platys.restapi.url: "http://iovent-api:8761"
+    ports:
+      - 8761:8761
+    environment:
+      ES_URL: 'http://elasticsearch:9200'
+      #ES_USERNAME:
+      #ES_PASSWORD:
+      KAFKA_BOOTSTRAP_SERVER: '{{ns.bootstrapServers}}'
+      #KAFKA_SASL_JAAS_USERNAME:
+      #KAFKA_SASL_JAAS_PASSWORD:
+      ENABLE_MAIL_SERVICE: false
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  IOEVENT_enable #}
 
 {% if PENTHAO_enable | default(false) %}
   #  ================================== Penthao Webspoon ========================================== #
