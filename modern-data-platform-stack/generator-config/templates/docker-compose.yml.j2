@@ -259,6 +259,7 @@ networks:
 {% set __MEMCACHED_version = MEMCACHED_version | default('latest') -%}
 
 {% set __REDIS_version = REDIS_version | default('latest') -%}
+{% set __REDIS_EXPORTER_version = REDIS_EXPORTER_version | default('latest') -%}
 {% set __REDIS_INSIGHT_version = REDIS_INSIGHT_version | default('latest') -%}
 {% set __REDIS_COMMANDER_version = REDIS_COMMANDER_version | default('latest') -%}
 
@@ -402,7 +403,7 @@ networks:
 {% set __CAMUNDA_OPERATE_version = CAMUNDA_OPERATE_version | default('latest') -%}
 {% set __CAMUNDA_ZEEQS_version = CAMUNDA_ZEEQS_version | default('latest') -%}
 
-{% set __IOVENT_COCKPIT_version = IOEVENT_COCKPIT_version | default('latest') -%}
+{% set __IOEVENT_COCKPIT_version = IOEVENT_COCKPIT_version | default('latest') -%}
 
 {% set __PENTHAO_version = PENTHAO_version | default('latest') -%}
 
@@ -10465,6 +10466,39 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
   {% endfor %}
+
+  {% if REDIS_EXPORTER_enable | default(false) %}
+  redis-exporter:
+    image: bitnami/redis-exporter:{{__REDIS_EXPORTER_version}}
+    container_name: redis-commander
+    hostname: redis-commander
+    labels:
+      com.platys.name: "redis-exporter"
+      com.platys.restapi.title: "Redis Promethes Exporter API"
+      com.platys.restapi.url: "http://redis-exporter:9121"
+    ports:
+      - "9121:9121"
+    environment:
+      - REDIS_ADDR=redis-1:6379
+    {% if not REDIS_allow_empty_password and REDIS_password is defined and REDIS_password and REDIS_password | length | default(false) %}
+      - REDIS_PASSWORD={{REDIS_password if REDIS_password is defined and REDIS_password and REDIS_password | length else omit}}
+    {% elif not REDIS_allow_empty_password and REDIS_password_file is defined and REDIS_password_file and REDIS_password_file | length | default(false) %}
+      - REDIS_PASSWORD_FILE=/opt/bitnami/redis/mounted-etc/{{REDIS_password_file if REDIS_password_file is defined and REDIS_password_file and REDIS_password_file | length else omit }}
+    {% endif -%}   {# not REDIS_allow_empty_password and REDIS_password or REDIS_PASSWORD_FILE #}
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+  {% endif %}   {#  REDIS_EXPORTER_enable #}
 
   {% if REDIS_INSIGHT_enable | default(false) %}
   redis-insight:
