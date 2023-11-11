@@ -70,7 +70,9 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Update `prometheus` to `v2.47.2`
  * Update `redis` to `7.2`
  * Update `vault` to `1.15`
- * Update `influxdb` to `1.11-
+ * Update `influxdb` to `1.8` (latest OSS version)
+ * Update `kapacitor` to `1.7`
+ * Update `telegraf` to `1.28`
 
 ### Enhancements
 
