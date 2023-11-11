@@ -33,6 +33,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Risingwave
  * MonitoFi
  * IOEvent Cockpit
+ * Redis (Metrics) Exporter
 
 ### Removed Services
  
@@ -74,6 +75,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Update `influxdb` to `1.8` (latest OSS version)
  * Update `kapacitor` to `1.7`
  * Update `telegraf` to `1.28`
+ * Update `tile38` to `1.32.0`
 
 ### Enhancements
 
