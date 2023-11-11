@@ -7592,14 +7592,17 @@ services:
     hostname: monitofi
     labels:
       com.platys.name: 'monitofi'
+    depends_on:
+      - influxdb
+      - grafana
     environment:
       INFLUXDB_SERVER: influxdb
       INFLUXDB_PORT: 8086
       INFLUXDB_USERNAME: root
       INFLUXDB_PASSWORD: root
       INFLUXDB_DATABASE: nifi
-      ENDPOINT_LIST: 'controller/cluster,flow/cluster/summary,flow/process-groups/root,flow/status,counters,system-diagnostics'
-      SLEEP_INTERVAL: 300
+      ENDPOINT_LIST: 'controller{{/cluster if NIFI_create_cluster}},flow/cluster/summary,flow/process-groups/root,flow/status,counters,system-diagnostics'
+      SLEEP_INTERVAL: {{MONITOFI_sleep_interval}}
       API_URL: 'http{{ 's' if NIFI_run_secure}}://nifi-1:18080/nifi-api/'
     {%if NIFI_run_secure  | default(false) %}
       SECURE=true
