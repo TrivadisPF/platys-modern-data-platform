@@ -402,7 +402,7 @@ networks:
 {% set __CAMUNDA_OPERATE_version = CAMUNDA_OPERATE_version | default('latest') -%}
 {% set __CAMUNDA_ZEEQS_version = CAMUNDA_ZEEQS_version | default('latest') -%}
 
-{% set __IOVENT_version = IOEVENT_version | default('latest') -%}
+{% set __IOVENT_version = IOEVENT_COCKPIT_version | default('latest') -%}
 
 {% set __PENTHAO_version = PENTHAO_version | default('latest') -%}
 
@@ -718,7 +718,7 @@ networks:
   {% set CAMUNDA_ZEEBE_enable = false -%}
   {% set CAMUNDA_OPERATE_enable = false -%}
   {% set CAMUNDA_ZEEQS_enable = false -%}
-  {% set IOEVENT_enable = false -%}
+  {% set IOEVENT_COCKPIT_enable = false -%}
   {% set DBT_enable = false -%}
   {% set PENTHAO_enable = false -%}
   {% set MINIO_enable = false -%}
@@ -16176,20 +16176,20 @@ services:
   {% endif %}   {#  CAMUNDA_ZEEQS_enable #}
 {% endif %}   {#  CAMUNDA_ZEEBE_enable #}
 
-{% if IOEVENT_enable | default(false) %}
+{% if IOEVENT_COCKPIT_enable | default(false) %}
   #  ================================== IOEvent Cockpit ========================================== #
-  ioevent-ui:
-    image: ioevent/cockpit-ui:{{__IOEVENT_version}}
-    container_name: ioevent-ui
-    hostname: ioevent-ui
+  ioevent-cockpit-ui:
+    image: ioevent/cockpit-ui:{{__IOEVENT_COCKPIT_version}}
+    container_name: ioevent-cockpit-ui
+    hostname: ioevent-cockpit-ui
     labels:
-      com.platys.name: "ioevent"
+      com.platys.name: "ioevent-cockpit"
       com.platys.webui.title: "IOEvent Cockpit UI"
       com.platys.webui.url: "http://dataplatform:28327"
     ports:
       - 28327:3000
     environment:
-      COCKPit_API_URL: 'ioevent-api:8761'
+      COCKPit_API_URL: 'ioevent-cockpit-api:8761'
       COCKPit_UI_REGISTRATION: false
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
@@ -16206,12 +16206,12 @@ services:
     restart: {{container_restart_policy}}
 
   ioevent-api:
-    image: ioevent/cockpit-api:{{__IOEVENT_version}}
-    container_name: ioevent-api
-    hostname: ioevent-api
+    image: ioevent/cockpit-cockpit-api:{{__IOEVENT_COCKPIT_version}}
+    container_name: ioevent-cockpit-api
+    hostname: ioevent-cockpit-api
     labels:
-      com.platys.name: "ioevent"
-      com.platys.restapi.title: "IOEvent API"
+      com.platys.name: "ioevent-cockpit"
+      com.platys.restapi.title: "IOEvent Cockpit API"
       com.platys.restapi.url: "http://iovent-api:8761"
     ports:
       - 8761:8761
@@ -16236,7 +16236,7 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
-{% endif %}   {#  IOEVENT_enable #}
+{% endif %}   {#  IOEVENT_COCKPIT_enable #}
 
 {% if PENTHAO_enable | default(false) %}
   #  ================================== Penthao Webspoon ========================================== #
