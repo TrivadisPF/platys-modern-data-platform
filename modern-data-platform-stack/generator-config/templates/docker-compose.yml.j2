@@ -10445,15 +10445,34 @@ services:
       - REDIS_MASTER_HOST=redis-1
       - REDIS_MASTER_PORT_NUMBER=6379
       - REDIS_MASTER_PASSWORD={{REDIS_password | default(omit) }}
-      - ALLOW_EMPTY_PASSWORD={{REDIS_allow_empty_password | default(omit) }}
+      - ALLOW_EMPTY_PASSWORD={{'yes' if REDIS_allow_empty_password else 'no' }}
+    {% if REDIS_disable_commands is defined and REDIS_disable_commands | default(false) %}
       - DISABLE_COMMANDS={{REDIS_disable_commands | default(omit) }}
-      - REDIS_PASSWORD={{REDIS_password | default(omit) }}
-      - REDIS_AOF_ENABLED={{REDIS_aof_enabled | default(omit) }}
+    {% endif -%}   {# REDIS_disable_commands #}
+    {% if not REDIS_allow_empty_password and REDIS_password is defined and REDIS_password and REDIS_password | length | default(false) %}
+      - REDIS_PASSWORD={{REDIS_password if REDIS_password is defined and REDIS_password and REDIS_password | length else omit}}
+    {% elif not REDIS_allow_empty_password and REDIS_password_file is defined and REDIS_password_file and REDIS_password_file | length | default(false) %}
+      - REDIS_PASSWORD_FILE=/opt/bitnami/redis/mounted-etc/{{REDIS_password_file if REDIS_password_file is defined and REDIS_password_file and REDIS_password_file | length else omit }}
+    {% endif -%}   {# not REDIS_allow_empty_password and REDIS_password or REDIS_PASSWORD_FILE #}
+      - REDIS_ACL_FILE=/{{REDIS_acl_file if REDIS_acl_file is defined and REDIS_acl_file and REDIS_acl_file | length else omit }}
+      - REDIS_AOF_ENABLED={{'yes' if REDIS_aof_enable else omit }}
+      - REDIS_RDB_POLICY={{REDIS_rdb_save_policy if REDIS_rdb_enable and REDIS_rdb_save_policy is defined and REDIS_rdb_save_policy and REDIS_rdb_save_policy | length else omit}}
+      - REDIS_RDB_POLICY_DISABLED={{'yes' if not REDIS_rdb_enable else omit }}
+      - REDIS_IO_THREADS={{REDIS_io_threads if REDIS_io_threads is defined and REDIS_io_threads and REDIS_io_threads | length and REDIS_io_threads > 0 else omit }}
+      - REDIS_IO_THREADS_DO_READS={{'yes' if REDIS_io_threads_do_reads_enable else omit }}
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
+    {% if REDIS_overrides_config_file is defined and REDIS_overrides_config_file and REDIS_overrides_config_file | length %}
+      - ./custom-conf/redis/{{REDIS_overrides_config_file}}:/opt/bitnami/redis/mounted-etc/{{REDIS_overrides_config_file}}
+    {% endif %}    {% if REDIS_password_file is defined and REDIS_password_file and REDIS_password_file | length %}
+      - ./security/redis/{{REDIS_password_file}}:/opt/bitnami/redis/mounted-etc/{{REDIS_password_file}}
+    {% endif %}
+    {% if REDIS_password_file is defined and REDIS_password_file and REDIS_password_file | length %}
+      - ./security/redis/{{REDIS_password_file}}:/opt/bitnami/redis/mounted-etc/{{REDIS_password_file}}
+    {% endif %}
     {% if REDIS_volume_map_data %}
       - "./container-volume/redis/data/redis-replica-{{loop.index}}:/bitnami/redis/data"
     {% endif %}
@@ -16228,7 +16247,7 @@ services:
     ports:
       - 28327:3000
     environment:
-      COCKPit_API_URL: 'ioevent-cockpit-api:8761'
+      COCKPit_API_URL: 'http://ioevent-cockpit-api:8761'
       COCKPit_UI_REGISTRATION: false
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
