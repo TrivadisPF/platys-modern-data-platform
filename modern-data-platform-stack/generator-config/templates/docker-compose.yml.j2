@@ -10429,6 +10429,11 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     command: /opt/bitnami/scripts/redis/run.sh --loglevel {{REDIS_log_level}}
     restart: {{container_restart_policy}}
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli --no-auth-warning -a \"$$(cat $$REDIS_PASSWORD_FILE)\" ping | grep PONG"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
 
   {% for num in range(REDIS_replicasets| default(0) ) %}
     {% set external_port = 6380 + loop.index - 1 %}
