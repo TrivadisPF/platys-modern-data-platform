@@ -10431,7 +10431,7 @@ services:
     restart: {{container_restart_policy}}
     healthcheck:
     {% if not REDIS_allow_empty_password and REDIS_password is defined and REDIS_password and REDIS_password | length | default(false) %}
-      test: ["CMD-SHELL", "redis-cli --no-auth-warning -a \"$$(cat $$REDIS_PASSWORD)\" ping | grep PONG"]
+      test: ["CMD-SHELL", "redis-cli --no-auth-warning -a \"$$(echo $$REDIS_PASSWORD)\" ping | grep PONG"]
     {% elif not REDIS_allow_empty_password and REDIS_password_file is defined and REDIS_password_file and REDIS_password_file | length | default(false) %}
       test: ["CMD-SHELL", "redis-cli --no-auth-warning -a \"$$(cat $$REDIS_PASSWORD_FILE)\" ping | grep PONG"]
     {% else %}
@@ -10495,6 +10495,17 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
+    healthcheck:
+    {% if not REDIS_allow_empty_password and REDIS_password is defined and REDIS_password and REDIS_password | length | default(false) %}
+      test: ["CMD-SHELL", "redis-cli --no-auth-warning -a \"$$(echo $$REDIS_PASSWORD)\" ping | grep PONG"]
+    {% elif not REDIS_allow_empty_password and REDIS_password_file is defined and REDIS_password_file and REDIS_password_file | length | default(false) %}
+      test: ["CMD-SHELL", "redis-cli --no-auth-warning -a \"$$(cat $$REDIS_PASSWORD_FILE)\" ping | grep PONG"]
+    {% else %}
+      test: ["CMD-SHELL", "redis-cli --no-auth-warning ping | grep PONG"]
+    {% endif -%}   {# not REDIS_allow_empty_password and REDIS_password or REDIS_PASSWORD_FILE #}
+      interval: 5s
+      timeout: 3s
+      retries: 5    
   {% endfor %}
 
   {% if REDIS_EXPORTER_enable | default(false) %}
