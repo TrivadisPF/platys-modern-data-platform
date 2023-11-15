@@ -7511,7 +7511,14 @@ services:
       NIFI_SECURITY_USER_AUTHORIZER: single-user-authorizer
       NIFI_SECURITY_USER_LOGIN_IDENTITY_PROVIDER: single-user-provider
     {% else %}
+      # overwrite nifi.properties configurations
       NIFI_WEB_HTTP_PORT: '{{externalPort}}'
+      NIFI_FLOW_CONFIGURATION_ARCHIVE_ENABLED: '{{NIFI_flow_configuration_archive_enable | default(true) }}'
+      NIFI_FLOW_CONFIGURATION_ARCHIVE_MAX_TIME: '{{NIFI_flow_configuration_archive_max_time | omit }}'
+      NIFI_FLOW_CONFIGURATION_ARCHIVE_MAX_STORAGE: '{{NIFI_flow_configuration_archive_max_storage | omit }}'
+      NIFI_FLOW_CONFIGURATION_ARCHIVE_MAX_STORAGE: '{{NIFI_flow_configuration_archive_max_count | omit }}'
+      NIFI_QUEUE_BACKPRESSURE_COUNT: '{{NIFI_queue_backpressure_count | omit }}'
+      NIFI_QUEUE_BACKPRESSURE_SIZE: '{{NIFI_queue_backpressure_size | omit }}'
     {% endif -%}   {#  NIFI_run_unsecure #}
     {%if MINIO_enable or external['S3_enable'] | default(false) %}
       S3_ENDPOINT: '{{s3Endpoint | default(omit) }}'
@@ -10505,7 +10512,7 @@ services:
     {% endif -%}   {# not REDIS_allow_empty_password and REDIS_password or REDIS_PASSWORD_FILE #}
       interval: 5s
       timeout: 3s
-      retries: 5    
+      retries: 5
   {% endfor %}
 
   {% if REDIS_EXPORTER_enable | default(false) %}
