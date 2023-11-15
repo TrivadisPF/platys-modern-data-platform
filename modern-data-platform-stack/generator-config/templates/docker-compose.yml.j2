@@ -7533,19 +7533,6 @@ services:
     {% if VAULT_enable and VAULT_use_dev_mode | default(false) %}
       VAULT_TOKEN: {{VAULT_dev_mode_token}}
     {% endif -%}   {#  VAULT_use_dev_mode #}
-      # overwrite nifi.properties configurations
-      NIFI_FLOW_CONFIGURATION_ARCHIVE_ENABLED: '{{NIFI_flow_configuration_archive_enable | default(true) }}'
-      NIFI_FLOW_CONFIGURATION_ARCHIVE_MAX_TIME: '{{NIFI_flow_configuration_archive_max_time | default(omit) }}'
-      NIFI_FLOW_CONFIGURATION_ARCHIVE_MAX_STORAGE: '{{NIFI_flow_configuration_archive_max_storage | default(omit) }}'
-      NIFI_FLOW_CONFIGURATION_ARCHIVE_MAX_COUNT: '{{NIFI_flow_configuration_archive_max_count | default(omit) }}'
-      NIFI_QUEUE_BACKPRESSURE_COUNT: '{{NIFI_queue_backpressure_count | default(omit) }}'
-      NIFI_QUEUE_BACKPRESSURE_SIZE: '{{NIFI_queue_backpressure_size | default(omit) }}'
-      NIFI_CONTENT_REPOSITORY_ARCHIVE_ENABLED: '{{NIFI_content_repository_archive_enable | default(true) }}'
-      NIFI_CONTENT_REPOSITORY_ARCHIVE_MAX_RETENTION_PERIOD: '{{NIFI_content_repository_archive_max_retention_period | default(omit) }}'
-      NIFI_PROVENANCE_REPOSITORY_MAX_STORAGE_TIME: '{{NIFI_provenance_repository_max_storage_time | default(omit) }}'
-      NIFI_PROVENANCE_REPOSITORY_MAX_STORAGE_SIZE: '{{NIFI_provenance_repository_max_storage_size | default(omit) }}'
-      NIFI_UI_AUTOREFRESH_INTERVAL: '{{NIFI_ui_autorefresh_interval| default(omit) }}'
-      NIFI_ANALYTICS_PREDICT_ENABLED: '{{NIFI_analytics_predict_enable | default(true) }}'
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -7561,7 +7548,7 @@ services:
       - ./{{'custom-conf/nifi/security' if NIFI_use_custom_certs is defined and NIFI_use_custom_certs else 'security/nifi'}}/truststore.jks:/opt/certs/truststore.jks
     {% endif -%}   {#  NIFI_run_unsecure #}
     {% if NIFI_volume_map_custom_config %}
-      - ./custom-conf/nifi/config/nifi.properties:/opt/nifi/nifi-current/conf/nifi.properties
+      - ./custom-conf/nifi/config/nifi.properties:/tmp/nifi.properties.templ
     {% endif %}
     {% if NIFI_volume_map_data %}
       - ./container-volume/nifi-{{loop.index}}/database_repository:/opt/nifi/nifi-current/database_repository
@@ -7591,6 +7578,9 @@ services:
       - bash
       - -c
       - |
+    {% if NIFI_volume_map_custom_config %}
+        cat /tmp/nifi.properties.templ > /opt/nifi/nifi-current/conf/nifi.properties
+    {% endif -%}
     {%if MINIO_enable or external['S3_enable'] | default(false) %}
         eval "echo \"$(cat /tmp/s3-credentials.properties.templ)\"" >> s3-credentials.properties
     {% endif -%}   {#  MINIO_enable or external S3 #}
