@@ -76,6 +76,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Update `kapacitor` to `1.7`
  * Update `telegraf` to `1.28`
  * Update `tile38` to `1.32.0`
+ * Update `hasura` to `v2.35.1`
 
 ### Enhancements
 
