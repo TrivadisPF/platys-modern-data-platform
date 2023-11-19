@@ -10849,20 +10849,24 @@ services:
     ports:
       - {{external_port}}:27017
     environment:
+      - MONGO_INITDB_DATABASE={{MONGO_init_database if MONGO_init_database is defined and MONGO_init_database and MONGO_init_database | length else omit }}
+      - MONGO_INITDB_ROOT_USERNAME={{MONGO_root_username if MONGO_root_username is defined and MONGO_root_username and MONGO_root_username | length else omit }}
+      - MONGO_INITDB_ROOT_PASSWORD={{MONGO_root_password if MONGO_root_password is defined and MONGO_root_password and MONGO_root_password | length else omit}}
       - MONGO_DATA_DIR=/data/db
       - MONGO_LOG_DIR=/data/log
-      - MONGO_INITDB_ROOT_USERNAME={{MONGO_root_username}}
-      - MONGO_INITDB_ROOT_PASSWORD={{MONGO_root_password}}
-      - MONGO_INITDB_DATABASE=sample
-      - MONGO_INITDB_USERNAME=admin
-      - MONGO_INITDB_PASSWORD=admin
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
       # seeding scripts
-      - ./init/mongo/initdb:/docker-entrypoint-initdb.d
+      - ./init/mongo:/docker-entrypoint-initdb.d
+    {% if MONGO_volume_map_data %}
+      - ./container-volumes/mongo-{{loop.index}}/data:/data/db
+    {% endif -%}   {#  MONGO_volume_map_data #}
+    {% if MONGO_volume_map_log %}
+      - ./container-volumes/mongo-{{loop.index}}/log:/data/log
+    {% endif -%}   {#  MONGO_volume_map_log #}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"

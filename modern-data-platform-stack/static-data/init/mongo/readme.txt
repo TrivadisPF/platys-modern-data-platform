@@ -1,0 +1,3 @@
+Add scripts which should be executed upon initialisation of the MongoDB database. When a container is started for the first time it will execute files with extensions .sh and .js that are found in this folder. 
+
+Files will be executed in alphabetical order. .js files will be executed by mongosh using the database specified by the MONGO_INITDB_DATABASE variable, if it is present, or test otherwise. You may also switch databases within the .js script.
