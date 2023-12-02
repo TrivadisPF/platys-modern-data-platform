@@ -54,7 +54,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Update `starbrustdata` to `429-e`
  * Update `jikkou` to `0.21.0`
  * Update `minio` to `RELEASE.2023-11-01T18-37-25Z`
- * Update `nifi` to `1.23.2`
+ * Update `nifi` to `1.24.0`
  * Update `ksqldb` to `0.29.0`
  * Update `datahub` to `v0.12.0`
  * Update `Confluent Platform` to `7.5.0`
