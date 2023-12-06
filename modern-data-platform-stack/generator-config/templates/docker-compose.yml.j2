@@ -472,9 +472,9 @@ networks:
 {% set __PITCHFORK_version = PITCHFORK_version | default('latest') -%}
 
 {% set __hw_arch = hw_arch | default('x86-64') -%}
-{% set __PYTHON_VERSION = PYTHON_version | default('3') -%}
+{% set __PYTHON_version = PYTHON_version | default('3') -%}
 
-{% set __S3FS_VERSION = S3FS_version | default('3') -%}
+{% set __S3FS_version = S3FS_version | default('3') -%}
 
 {% if DATAHUB_enable -%}
 # enforce some dependencies
@@ -17880,7 +17880,7 @@ services:
 {% if PYTHON_enable | default(false) %}
   #  ================================== python ========================================== #
   python-1:
-    image: {{PYTHON_image}}:{{__PYTHON_VERSION}}
+    image: {{PYTHON_image}}:{{__PYTHON_version}}
     container_name: python-1
     hostname: python-1
     labels:
@@ -18108,7 +18108,7 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {# WATCHTOWER_enable #}
 
-{% if S3FS_enable | default(false) %}
+{% if S3FS_enable and (MINIO_enable or external['S3_enable']) | default(false) %}
   #  ================================== S3FS (S3 Bucket mapping) ========================================== #
   s3fs:
     image: efrecon/s3fs:{{__S3FS_version}}
@@ -18133,7 +18133,7 @@ services:
       AWS_S3_MOUNT: '/opt/s3fs/bucket'
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
-    {% endif -%}   {#  use_timezone #}      
+    {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
       - './s3-bucket:/opt/s3fs/bucket:rshared'
