@@ -474,6 +474,8 @@ networks:
 {% set __hw_arch = hw_arch | default('x86-64') -%}
 {% set __PYTHON_VERSION = PYTHON_version | default('3') -%}
 
+{% set __S3FS_VERSION = S3FS_version | default('3') -%}
+
 {% if DATAHUB_enable -%}
 # enforce some dependencies
   {% set KAFKA_enable = true -%}
@@ -18105,6 +18107,47 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
 {% endif %}   {# WATCHTOWER_enable #}
+
+{% if S3FS_enable | default(false) %}
+  #  ================================== S3FS (S3 Bucket mapping) ========================================== #
+  s3fs:
+    image: efrecon/s3fs:{{__S3FS_version}}
+    container_name: s3fs
+    hostname: s3fs
+    labels:
+      com.platys.name: "s3fs"
+    cap_add:
+      - SYS_ADMIN
+    security_opt:
+      - 'apparmor:unconfined'
+    devices:
+      - /dev/fuse
+    environment:
+      AWS_S3_BUCKET: '{{S3FS_bucket_name}}'
+      AWS_S3_ACCESS_KEY_ID: '{{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}'
+      AWS_S3_SECRET_ACCESS_KEY: '{{s3SecretAccessKey}}'
+#      AWS_S3_AUTHFILE: '${AWS_S3_AUTHFILE}'
+#      AWS_S3_ACCESS_KEY_ID_FILE: '${AWS_S3_ACCESS_KEY_ID_FILE}'
+#      AWS_S3_SECRET_ACCESS_KEY_FILE: '${AWS_S3_SECRET_ACCESS_KEY_FILE}'
+      AWS_S3_URL: '{{s3Endpoint | default(omit) }}'
+      AWS_S3_MOUNT: '/opt/s3fs/bucket'
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}      
+    volumes:
+      - ./data-transfer:/data-transfer
+      - './s3-bucket:/opt/s3fs/bucket:rshared'
+    {% if s3PathStyleAccess == 'true' | lower | default(false) %}
+      S3FS_ARGS: 'use_path_request_style'
+    {% endif %}
+      S3FS_DEBUG: 0
+      UID: 1000
+      GID: 1000
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+{% endif %}   {# S3FS_enable #}
 
 {% if PROVISIONING_DATA_enable | default(false) %}
   #  ================================== data-provisioning ========================================== #
