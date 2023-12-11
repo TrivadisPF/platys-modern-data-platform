@@ -952,8 +952,8 @@ networks:
 {% else -%}
     {% set ns.schemaRegistryUrlExternal = external['SCHEMA_REGISTRY_url'] %}
     {% set ns.schemaRegistryUrl = external['SCHEMA_REGISTRY_url'] %}
-    {% set schemaRegistryUsername = '${PLATYS_SCHEMA_REGISTRY_USERNAME:?PLATYS_SCHEMA_REGISTRY_USERNAME must be set either in .env or as an environment variable}' %}
-    {% set schemaRegistryPassword = '${PLATYS_SCHEMA_REGISTRY_PASSWORD:?PLATYS_SCHEMA_REGISTRY_PASSWORD must be set either in .env or as an environment variable}' %}
+    {% set ns.schemaRegistryUsername = '${PLATYS_SCHEMA_REGISTRY_USERNAME:?PLATYS_SCHEMA_REGISTRY_USERNAME must be set either in .env or as an environment variable}' %}
+    {% set ns.schemaRegistryPassword = '${PLATYS_SCHEMA_REGISTRY_PASSWORD:?PLATYS_SCHEMA_REGISTRY_PASSWORD must be set either in .env or as an environment variable}' %}
 {% endif %}   {# not external['SCHEMA_REGISTRY_enable'] #}
 
 {#  ================================== Kafka Connect Settings ========================================== #}
@@ -1770,9 +1770,9 @@ services:
       KSQL_KSQL_CONNECT_URL: {{ns1.connectServersInternalUrl.split(',')[0]}}
     {% endif -%}   {#  KAFKA_CONNECT_enable #}
       KSQL_KSQL_SCHEMA_REGISTRY_URL: '{{ns.schemaRegistryUrl}}'
-    {% if schemaRegistryUsername is defined and schemaRegistryUsername|length %}
+    {% if ns.schemaRegistryUsername is defined and ns.schemaRegistryUsername|length %}
       KSQL_KSQL_SCHEMA_REGISTRY_BASIC_AUTH_CREDENTIALS_SOURCE: "USER_INFO"
-      KSQL_KSQL_SCHEMA_REGISTRY_BASIC_AUTH_USER_INFO:  "{{schemaRegistryUsername}}:{{schemaRegistryPassword}}"
+      KSQL_KSQL_SCHEMA_REGISTRY_BASIC_AUTH_USER_INFO:  "{{ns.schemaRegistryUsername}}:{{ns.schemaRegistryPassword}}"
     {% endif %}
       KSQL_KSQL_INTERNAL_TOPIC_REPLICAS: {{KSQLDB_internal_replication_factor | default(1)}}
       KSQL_KSQL_SINK_REPLICAS: {{KSQLDB_internal_replication_factor | default(1)}}
@@ -3303,8 +3303,8 @@ services:
     environment:
       KAFKA_BROKERCONNECT: '{{ns.bootstrapServers}}'
       SCHEMAREGISTRY_CONNECT: '{{ns.schemaRegistryUrl}}'
-      {% if schemaRegistryUsername is defined and schemaRegistryUsername|length %}
-      SCHEMAREGISTRY_AUTH: '{{schemaRegistryUsername}}:{{schemaRegistryPassword}}'
+      {% if ns.schemaRegistryUsername is defined and ns.schemaRegistryUsername|length %}
+      SCHEMAREGISTRY_AUTH: '{{ns.schemaRegistryUsername}}:{{ns.schemaRegistryPassword}}'
       {% endif %}
       MESSAGE_FORMAT: AVRO
       JVM_OPTS: "-Xms32M -Xmx64M -Xss180K -XX:-TieredCompilation -XX:+UseStringDeduplication -noverify"
@@ -3460,9 +3460,9 @@ services:
               schema-registry:
                 url: "{{ns.schemaRegistryUrl}}"
                 type: "confluent"
-        {% if schemaRegistryUsername is defined and schemaRegistryUsername|length %}
-                basic-auth-username: "{{schemaRegistryUsername}}"
-                basic-auth-password: "{{schemaRegistryPassword}}"
+        {% if ns.schemaRegistryUsername is defined and ns.schemaRegistryUsername|length %}
+                basic-auth-username: "{{ns.schemaRegistryUsername}}"
+                basic-auth-password: "{{ns.schemaRegistryPassword}}"
         {% endif %}
     {% endif -%}   {#  SCHEMA_REGISTRY_enable #}
     {% if ( KAFKA_CONNECT_enable or KSQLDB_use_embedded_connect) | default(false) %}
@@ -3535,9 +3535,9 @@ services:
     {% endif -%}   {#  ns.secureKafkaEnabled #}
     {% if (SCHEMA_REGISTRY_enable or external['SCHEMA_REGISTRY_enable']) | default(false) %}
       KAFKA_CLUSTERS_0_SCHEMAREGISTRY: '{{ns.schemaRegistryUrlExternal}}'
-      {% if schemaRegistryUsername is defined and schemaRegistryUsername|length %}
-      KAFKA_CLUSTERS_0_SCHEMAREGISTRYAUTH_USERNAME: "{{schemaRegistryUsername}}"
-      KAFKA_CLUSTERS_0_SCHEMAREGISTRYAUTH_PASSWORD: "{{schemaRegistryPassword}}"
+      {% if ns.schemaRegistryUsername is defined and ns.schemaRegistryUsername|length %}
+      KAFKA_CLUSTERS_0_SCHEMAREGISTRYAUTH_USERNAME: "{{ns.schemaRegistryUsername}}"
+      KAFKA_CLUSTERS_0_SCHEMAREGISTRYAUTH_PASSWORD: "{{ns.schemaRegistryPassword}}"
       {% endif %}
     {% endif -%}   {#  SCHEMA_REGISTRY_enable #}
     {% if KSQLDB_enable | default(false) %}
@@ -3626,10 +3626,10 @@ services:
     {% if ( SCHEMA_REGISTRY_enable or external['SCHEMA_REGISTRY_enable']) | default(false) %}
       KAFKA_SCHEMAREGISTRY_ENABLED: 'True'
       KAFKA_SCHEMAREGISTRY_URLS: '{{ns.schemaRegistryUrlExternal}}'
-      {% if schemaRegistryUsername is defined and schemaRegistryUsername|length %}
-      KAFKA_SCHEMAREGISTRY_USERNAME: "{{schemaRegistryUsername}}"
-      KAFKA_SCHEMAREGISTRY_PASSWORD: "{{schemaRegistryPassword}}"
-      {% endif -%}   {#  schemaRegistryUsername is defined #}
+      {% if ns.schemaRegistryUsername is defined and ns.schemaRegistryUsername|length %}
+      KAFKA_SCHEMAREGISTRY_USERNAME: "{{ns.schemaRegistryUsername}}"
+      KAFKA_SCHEMAREGISTRY_PASSWORD: "{{ns.schemaRegistryPassword}}"
+      {% endif -%}   {#  ns.schemaRegistryUsername is defined #}
     {% endif -%}   {#  SCHEMA_REGISTRY_enable #}
     {% if ( KAFKA_CONNECT_enable or KSQLDB_use_embedded_connect) | default(false) %}
       CONNECT_ENABLED: 'True'
@@ -3676,10 +3676,10 @@ services:
     {% if ( SCHEMA_REGISTRY_enable or external['SCHEMA_REGISTRY_enable']) | default(false) %}
       KAFKA_SCHEMAREGISTRY_ENABLED: 'True'
       KAFKA_SCHEMAREGISTRY_URLS: '{{ns.schemaRegistryUrlExternal}}'
-      {% if schemaRegistryUsername is defined and schemaRegistryUsername|length %}
-      KAFKA_SCHEMAREGISTRY_USERNAME: "{{schemaRegistryUsername}}"
-      KAFKA_SCHEMAREGISTRY_PASSWORD: "{{schemaRegistryPassword}}"
-      {% endif -%}   {#  schemaRegistryUsername is defined #}
+      {% if ns.schemaRegistryUsername is defined and ns.schemaRegistryUsername|length %}
+      KAFKA_SCHEMAREGISTRY_USERNAME: "{{ns.schemaRegistryUsername}}"
+      KAFKA_SCHEMAREGISTRY_PASSWORD: "{{ns.schemaRegistryPassword}}"
+      {% endif -%}   {#  ns.schemaRegistryUsername is defined #}
     {% endif -%}   {#  SCHEMA_REGISTRY_enable #}
     {% if ( KAFKA_CONNECT_enable or KSQLDB_use_embedded_connect) | default(false) %}
       CONNECT_ENABLED: 'True'
@@ -3865,9 +3865,9 @@ services:
     {% endif -%}   {#  KAFKA_CONNECT_enable #}
     {% if (SCHEMA_REGISTRY_enable or external['SCHEMA_REGISTRY_enable']) | default(false) %}
       - SCHEMA_REGISTRY_URL={{ns.schemaRegistryUrlExternal}}
-      {% if schemaRegistryUsername is defined and schemaRegistryUsername|length %}
-      - SCHEMA_REGISTRY_USER={{schemaRegistryUsername}}
-      - SCHEMA_REGISTRY_PASSWORD={{schemaRegistryPassword}}
+      {% if ns.schemaRegistryUsername is defined and ns.schemaRegistryUsername|length %}
+      - SCHEMA_REGISTRY_USER={{ns.schemaRegistryUsername}}
+      - SCHEMA_REGISTRY_PASSWORD={{ns.schemaRegistryPassword}}
       {% endif %}
     {% endif -%}   {#  SCHEMA_REGISTRY_enable #}
     {% if KSQLDB_enable | default(false) %}
