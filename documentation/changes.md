@@ -107,6 +107,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Change `KAFKA_KSQLDB_xxxxx` to `KSQLDB_xxxxx`
  * Change `FTP_xxxxx` to `PURE_FTPD_xxxxx` to control the Pure FTPd server
  * Config `ATLAS_install_hive_hook` has been replaced by `ATLAS_hive_hook_enable` and the JARs for the hook are no longer included and need to be downloaded manually  
+ * Config `KAFKA_jmx_monitoring_prometheus_enable` replaced by global configuration property `jmx_monitoring_with_prometheus_enable` as it doesn't apply to just the Kafka cluster
 
 ## What's new in 1.16.0
 
