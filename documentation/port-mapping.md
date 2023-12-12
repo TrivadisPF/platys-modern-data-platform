@@ -538,6 +538,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28325 | 8025 | mailhog |
 28326 | 25 | mailhog |
 28327 | 3000 | ioevent-cockpit-ui |
+28328 | 9093 | prometheus-alertmanager |
 
 ## Ports > 28500
 

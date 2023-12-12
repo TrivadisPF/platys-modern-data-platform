@@ -35,6 +35,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * IOEvent Cockpit
  * Redis (Metrics) Exporter
  * S3FS
+ * Prometheus Alertmanager
 
 ### Removed Services
  
@@ -62,7 +63,6 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Update `portainer-ce` to `2.18.4-alpine`
  * Update `activemq-classic` to `5.18.2`
  * Update `materialize` to `v0.64.0`
- * Update `grafana` to `10.1.1`
  * Update `jikkou` to `latest`
  * Update `keycloak` to `22.0`
  * Update `marquez` to `0.41.0`
@@ -70,7 +70,9 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Update `airflow` to `2.7.3`
  * Update `zeebe` to `8.3.1`
  * Update `grafana` to `10.2.0`
- * Update `prometheus` to `v2.47.2`
+ * Update `prometheus` to `v2.28.1`
+ * Update `prometheus-pushgateway` to `v1.6.2`
+ * Update `prometheus-nodeexporter` to `v1.7.0`
  * Update `redis` to `7.2`
  * Update `vault` to `1.15`
  * Update `influxdb` to `1.8` (latest OSS version)

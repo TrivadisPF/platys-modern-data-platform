@@ -328,6 +328,7 @@ networks:
 {% set __PROMETHEUS_version = PROMETHEUS_version | default('latest') -%}
 {% set __PROMETHEUS_PUSHGATEWAY_version = PROMETHEUS_PUSHGATEWAY_version | default('latest') -%}
 {% set __PROMETHEUS_NODEEXPORTER_version = PROMETHEUS_NODEEXPORTER_version | default('latest') -%}
+{% set __PROMETHEUS_ALERTMANAGER_version = PROMETHEUS_ALERTMANAGER_version | default('latest') -%}
 
 {% set __TILE38_version = TILE38_version | default('latest') -%}
 
@@ -12553,6 +12554,7 @@ services:
       - "--web.console.templates=/usr/share/prometheus/consoles"
       - "--web.listen-address=0.0.0.0:9090"
       - "--storage.tsdb.retention.time=30d"
+      - "--log.level=info"
     restart: {{container_restart_policy}}
 
   {% if PROMETHEUS_PUSHGATEWAY_enable | default(false) %}
@@ -12589,7 +12591,7 @@ services:
     image: prom/node-exporter:{{__PROMETHEUS_NODEEXPORTER_version}}
     container_name: prometheus-nodeexporter
     labels:
-      com.platys.name: "prometheus"
+      com.platys.name: "prometheus-nodeexporter"
     {%if use_timezone | default(false) %}
     environment:
       TZ: {{use_timezone}}
@@ -12609,6 +12611,30 @@ services:
       - "--collector.filesystem.ignored-mount-points"
       - "^(aufs|proc|nsfs|shm|cgroup|tmpfs|binfmt_misc|debugfs|devpts|fusectl|hugetlbfs|fuse.lxcfs|mqueue|pstore|securityfs|sysfs|autofs|devtmpfs|configfs)"
   {% endif %}   {#  PROMETHEUS_NODEEXPORTER_enable #}
+
+  {% if PROMETHEUS_ALERTMANAGER_enable | default(false) %}
+  prometheus-alertmanager:
+    image: prom/alertmanager:{{__PROMETHEUS_ALERTMANAGER_version}}
+    container_name: prometheus-alertmanager
+    labels:
+      com.platys.name: "prometheus-alertmanager"
+      com.platys.webui.title: "Prometheus Alertmanager UI"
+      com.platys.webui.url: "http://dataplatform:28328"
+    ports:
+      - "28328:9093"
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./conf/prometheus/prometheus-alerts/prometheus.yml:/etc/prometheus/prometheus.yml
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+  {% endif %}   {#  PROMETHEUS_ALERTMANAGER_enable #}
+
 {% endif %}   {#  PROMETHEUS_enable #}
 
 {% if TILE38_enable | default(false) %}
