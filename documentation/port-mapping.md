@@ -8,6 +8,15 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 --------------------|------------------|-----------------------|
 21 | 21 | ftp |
 80 | 80 | markdown-viewer or firefox |
+1234 | 1234 | kafka-1 | 
+1235 | 1234 | kafka-2 | 
+1236 | 1234 | kafka-3 | 
+1237 | 1234 | kafka-4 | 
+1238 | 1234 | kafka-5 | 
+1239 | 1234 | kafka-6 | 
+1240 | 1234 | zookeeper-1 | 
+1241 | 1234 | zookeeper-2 | 
+1242 | 1234 | zookeeper-3 | 
 1337 | 1337 | konga | 
 1433 | 1433 | sqlserver |
 1521 | 1521 | oracledb-ee |

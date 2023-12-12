@@ -850,11 +850,13 @@ networks:
   {% set dcName = dataCenter %}
   {% set basePort = 9092 + dataCenterId * KAFKA_broker_nodes %}
   {% set basePortJMX = 9992 + dataCenterId * KAFKA_broker_nodes %}
+  {% set basePortProm = 1234 + dataCenterId * KAFKA_broker_nodes %}
   {% set serviceBaseName = "kafka" ~ dcName ~ "-" %}
 
   {% for num in range(KAFKA_broker_nodes | default(1) ) %}
     {% set port = basePort + loop.index-1 %}
     {% set portJMX = basePortJMX + loop.index-1 %}
+    {% set portProm = basePortProm + loop.index-1 %}
     {% set serviceName = serviceBaseName ~ loop.index %}
     {% if loop.first %}
       {% set ns.bootstrapServers = serviceName ~ ":1" ~ port %}
@@ -869,10 +871,12 @@ networks:
       {% set ns.serviceNames = serviceName %}
       {% set ns.ports = port|string %}
       {% set ns.portsJMX = portJMX|string %}
+      {% set ns.portsProm = portProm|string %}
     {% else %}
       {% set ns.serviceNames = ns.serviceNames ~ ',' ~ serviceName %}
       {% set ns.ports = ns.ports ~ ',' ~ port %}
       {% set ns.portsJMX = ns.portsJMX ~ ',' ~ portJMX %}
+      {% set ns.portsProm = ns.portsProm ~ ',' ~ portProm %}
     {% endif %}
   {% endfor %}
   {% set ns.bootstrapServer = ns.bootstrapServers.split(',')[0] %}
@@ -1101,6 +1105,7 @@ services:
   #  ================================== Zookeeper ========================================== #
   {% for num in range(ZOOKEEPER_nodes | default('1') ) %}
   {% set port = 2181 + (dataCenterId * ZOOKEEPER_nodes) + loop.index-1 %}
+  {% set promPort = 1240 + (dataCenterId * ZOOKEEPER_nodes) + loop.index-1 %}
   zookeeper{{dataCenter}}-{{loop.index}}:
     image: confluentinc/cp-zookeeper:{{__CONFLUENT_PLATFORM_version}}
     container_name: zookeeper{{dataCenter}}-{{loop.index}}
@@ -1109,6 +1114,9 @@ services:
       com.platys.name: "zookeeper"
     ports:
       - "{{port}}:{{port}}"
+    {% if jmx_monitoring_with_prometheus_enable %}
+      - "{{promPort}}:1234"
+    {% endif -%}
     environment:
       ZOOKEEPER_SERVER_ID: {{loop.index}}
       ZOOKEEPER_CLIENT_PORT: {{port}}
@@ -1226,6 +1234,7 @@ services:
       {% set dockerHostPort = port %}
     {% endif %}
     {% set portJMX = ns.portsJMX.split(',')[loop.index-1] %}
+    {% set portProm = ns.portsProm.split(',')[loop.index-1] %}
     {% set dcName = 'rack1' %}
     {% set zookeeperPort = 2181 + (dataCenterId * ZOOKEEPER_nodes) %}
   {{serviceName}}:
@@ -1244,6 +1253,7 @@ services:
       - "2{{port}}:2{{port}}"
       - "3{{port}}:3{{port}}"
       - "{{portJMX}}:{{portJMX}}"
+      - "{{portProm}}:1234"
     environment:
       KAFKA_BROKER_ID: {{loop.index}}
       KAFKA_BROKER_RACK: '{{dcName}}'
@@ -12539,7 +12549,8 @@ services:
     {% if not PROMETHEUS_volume_map_custom_config %}
       - ./conf/prometheus/prometheus-config/prometheus.yml:/etc/prometheus/prometheus.yml
     {% else %}
-      - ./custom-conf/prometheus/prometheus-config/prometheus.yml:/tmp/nifi.properties.templ
+      - ./custom-conf/prometheus/
+      /prometheus.yml:/tmp/nifi.properties.templ
     {% endif -%}
     {% if PROMETHEUS_volume_map_data %}
       - "./container-volume/prometheus:/prometheus"
