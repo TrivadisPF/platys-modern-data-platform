@@ -7508,6 +7508,7 @@ services:
   {% for num in range(NIFI_nodes | default('1') ) %}
     {% set externalPort = 18080 + loop.index-1 %}
     {% set externalRemotePort = 10005 + loop.index-1 %}
+    {% set externalPromPort = 1250 + loop.index-1 %}
     {% set clusterPort = 11005 + loop.index-1 %}
   nifi-{{loop.index}}:
     image: {{'trivadis/apache-nifi' if NIFI_python_enabled else 'apache/nifi'}}:{{__NIFI_version}}{{'-python' ~ NIFI_python_version if NIFI_python_enabled}}
@@ -7524,6 +7525,8 @@ services:
       - "{{externalPort}}:{{externalPort}}"
       # Remote Input Socket
       - {{externalRemotePort}}:{{externalRemotePort}}/tcp
+      # Remote Input Socket
+      - {{externalPromPort}}:1234
     environment:
     {%if NIFI_create_cluster  | default(false) %}
       NIFI_CLUSTER_IS_NODE: 'true'
