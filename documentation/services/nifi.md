@@ -31,7 +31,6 @@ replace the `<token>` placeholder with the access token returned from the above 
 curl 'https://localhost:18080/nifi-api/flow/current-user' -H 'Accept-Encoding: gzip, deflate, sdch, br' -H 'Authorization: Bearer <token>' -H 'Accept: application/json, text/javascript, */*; q=0.01' --compressed --insecure
 ```
 
-
 ### Installing JDBC Driver
 
 If you want to use one of the Database Processors, you need to install a JDBC Driver for the database. Download it into `./plugins/nifi/jars` of your Platys stack and specify the folder `/extra-jars` folder when creating the Controller service in Apache NiFi.
