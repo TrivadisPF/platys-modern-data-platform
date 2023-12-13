@@ -17,6 +17,20 @@ Navigate to <http://dataplatform:18080/nifi>
 
 Login with User `nifi` and password `1234567890ACD`.
 
+### Using REST API?
+
+Retrieve the access token
+
+```bash
+curl --location 'https://localhost:18080/nifi-api/access/token' --header 'Content-Type: application/x-www-form-urlencoded' --data-urlencode 'username=nifi' --data-urlencode 'password=1234567890ACD' --insecure
+```
+
+replace the `<token>` placeholder with the access token returned from the above call
+
+```bash
+curl 'https://localhost:18080/nifi-api/flow/current-user' -H 'Accept-Encoding: gzip, deflate, sdch, br' -H 'Authorization: Bearer <token>' -H 'Accept: application/json, text/javascript, */*; q=0.01' --compressed --insecure
+```
+
 
 ### Installing JDBC Driver
 
