@@ -222,6 +222,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 9098 | 9098 | kafka-7     |
 9099 | 9099 | kafka-8     |
 9192 | 9192 | lenses-box     |
+9292 | 9292 | pact-broker     |
 9343 | 9343 | klaw-cluster-api |
 9393 | 9393 | spring-dataflow-server |
 9411 | 9411 | zipkin |

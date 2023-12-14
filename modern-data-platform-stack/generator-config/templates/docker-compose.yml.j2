@@ -17084,6 +17084,41 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {#  POSTMAN_enable #}
 
+{% if PACT_BROKER_enable | default(false) %}
+  #  ================================== Postman ================= #
+  pact-broker:
+    image: pactfoundation/pact-broker:{{__PACT_BROKER_version}}
+    container_name: pact-broker
+    hostname: pact-broker
+    labels:
+      com.platys.name: "pact-broker"
+      com.platys.webui.title: "Pact Broker UI"
+      com.platys.webui.url: "http://dataplatform:3010"
+    ports:
+      - 9292:9292
+    environment:
+      - PACT_BROKER_PORT='9292'
+      - PACT_BROKER_DATABASE_URL="postgres://postgres:password@postgres/postgres"
+      - PACT_BROKER_LOG_LEVEL=INFO
+      - PACT_BROKER_SQL_LOG_LEVEL=DEBUG
+      - PACT_BROKER_DATABASE_CONNECT_MAX_RETRIES="5"
+      - PACT_BROKER_BASE_URL='https://localhost http://localhost http://localhost:9292 http://pact-broker:9292 https://host.docker.internal http://host.docker.internal http://host.docker.internal:9292'
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+
+{% endif %}   {#  PACT_BROKER_enable #}
+
 {% if SWAGGER_EDITOR_enable | default(false) %}
   #  ================================== Swagger Editor ================= #
   swagger-editor:
