@@ -43,7 +43,7 @@ Create a `.env` file
 nano .env
 ```
 
-and add the following environment variable to specify the password for the Git Repo
+and add the following environment variable to specify the access token for the Git Repo (
 
 ```bash
 PLATYS_NIFI_REGISTRY_GIT_PASSWORD=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
@@ -95,5 +95,24 @@ Enable authentication by adding the following settings to the `config.yml`
       NIFI_REGISTRY_git_remote: origin
       NIFI_REGISTRY_git_user: gschmutz
       NIFI_REGISTRY_git_repo: http://github.com/<owner>/nifi-git-flow-provider
-      NIFI_REGISTRY_flow_storage_folder_on_dockerhost: ./nifi-git-flow-provider
+      NIFI_REGISTRY_flow_storage_folder_on_dockerhost: ./container-volume/nifi-registry/flow-storage
 ```
+
+## Using Git Flow Persistence Provider with SSH authentication
+
+To enable authentication by SSH key, change the settings in the `config.yml` to
+
+```yaml
+      NIFI_REGISTRY_flow_provider: git
+      NIFI_REGISTRY_git_remote: origin
+      NIFI_REGISTRY_git_user:
+      NIFI_REGISTRY_git_use_ssh_auth: true
+      NIFI_REGISTRY_git_repo:
+      NIFI_REGISTRY_flow_storage_folder_on_dockerhost: ./<git-repo-folder>
+```
+
+
+cp /home/${USER}/.ssh/id_rsa.pub ./security/nifi-registry/git/ssh
+
+When using SSH authentication, the automatic Git Clone will not work. Therefore manually clone the repo to `./<git-repo-folder>` and then start the `nifi-registry` service.
+
