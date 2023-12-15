@@ -1,7 +1,7 @@
 global:
   # How frequently to scrape targets by default.
   # Default 15s
-  scrape_interval: 30s
+  scrape_interval: 15s
   # How frequently to evaluate rules.
   # Default 15s
   evaluation_interval: 15s
@@ -10,6 +10,12 @@ global:
   # Required because cp-demo is using cpu throttling, so let's leave enough time to fetch the metrics in particular for the first time as it needs to compile all rexps
   scrape_timeout: 15s
 
+  # Attach these labels to any time series or alerts when communicating with
+  # external systems (federation, remote storage, Alertmanager).
+  external_labels:
+      monitor: 'docker-platys'
+
+# Load and evaluate rules in this file every 'evaluation_interval' seconds.
 rule_files:
   - "alert.rules"
 
@@ -18,7 +24,7 @@ alerting:
     - scheme: http
       static_configs:
         - targets:
-            - "alertmanager:9093"
+            - "prometheus-alertmanager:9093"
 
 scrape_configs:
   - job_name: "prometheus"
