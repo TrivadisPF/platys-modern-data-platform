@@ -1,7 +1,7 @@
 ---
 technologies:       nifi,nifi-registry
-version:				1.16.0
-validated-at:			6.3.2023
+version:				1.17.0
+validated-at:			15.12.2023
 ---
 
 # NiFi Registry with Git Flow Persistence Provider
@@ -14,7 +14,7 @@ First [initialise a platys-supported data platform](../documentation/getting-sta
 
 ```bash
 export DATAPLATFORM_HOME=${PWD}
-platys init --enable-services NIFI,NIFI_REGISTRY -s trivadis/platys-modern-data-platform -w 1.16.0
+platys init --enable-services NIFI,NIFI_REGISTRY -s trivadis/platys-modern-data-platform -w 1.17.0
 ```
 
 Before we can generate the platform, we need to create a Git Repository and extend the `config.yml` with the necessary configuration.
