@@ -17639,7 +17639,27 @@ services:
       - ./scripts/grafana/dashboards/dashboard.yml:/etc/grafana/provisioning/dashboards/dashboard.yml
       - ./scripts/grafana/dashboards/docker:/etc/grafana/provisioning/dashboards/docker
     {% if (KAFKA_enable or external['KAFKA_enable']) | default(false) %}
-      - ./scripts/grafana/dashboards/kafka:/etc/grafana/provisioning/dashboards/kafka
+      {% if (KAFKA_use_kraft_mode | default(false) %}
+      - ./scripts/grafana/dashboards/kafka/confluent-platform-zkless.json:/etc/grafana/provisioning/dashboards/kafka/confluent-platform-zkless.json
+      {% else %}
+      - ./scripts/grafana/dashboards/kafka/confluent-platform.json:/etc/grafana/provisioning/dashboards/kafka/confluent-platform.json
+      {% endif -%}
+      - ./scripts/grafana/dashboards/kafka/kafka-cluster.json:/etc/grafana/provisioning/dashboards/kafka/kafka-cluster.json
+      - ./scripts/grafana/dashboards/kafka/kraft.json:/etc/grafana/provisioning/dashboards/kafka/kraft.json
+      - ./scripts/grafana/dashboards/kafka/cluster-linking.json:/etc/grafana/provisioning/dashboards/kafka/cluster-linking.json
+      - ./scripts/grafana/dashboards/kafka-transaction-coordinator.json:/etc/grafana/provisioning/dashboards/kafka/kafka-transaction-coordinator.json
+      - ./scripts/grafana/dashboards/kafka/kafka-connect-cluster.json:/etc/grafana/provisioning/dashboards/kafka/kafka-connect-cluster.json
+      - ./scripts/grafana/dashboards/kafka/confluent-oracle-cdc.json:/etc/grafana/provisioning/dashboards/kafka/confluent-oracle-cdc.json
+      - ./scripts/grafana/dashboards/kafka/ksqldb-cluster.json:/etc/grafana/provisioning/dashboards/kafka/ksqldb-cluster.json
+      - ./scripts/grafana/dashboards/kafka/schema-registry-cluster.json:/etc/grafana/provisioning/dashboards/kafka/schema-registry-cluster.json
+      - ./scripts/grafana/dashboards/kafka/rest-proxy.json:/etc/grafana/provisioning/dashboards/kafka/rest-proxy.json
+      - ./scripts/grafana/dashboards/kafka/kafka-topics.json:/etc/grafana/provisioning/dashboards/kafka/kafka-topics.json
+      - ./scripts/grafana/dashboards/kafka/kafka-lag-exporter.json:/etc/grafana/provisioning/dashboards/kafka/kafka-lag-exporter.json
+      - ./scripts/grafana/dashboards/kafka/kafka-consumer.json:/etc/grafana/provisioning/dashboards/kafka/kafka-consumer.json
+      - ./scripts/grafana/dashboards/kafka/kafka-producer.json:/etc/grafana/provisioning/dashboards/kafka/kafka-producer.json
+      - ./scripts/grafana/dashboards/kafka/kafka-quotas.json:/etc/grafana/provisioning/dashboards/kafka/kafka-quotas.json
+      - ./scripts/grafana/dashboards/kafka/kafka-streams.json:/etc/grafana/provisioning/dashboards/kafka/kafka-streams.json
+      - ./scripts/grafana/dashboards/kafka/kafka-streams-rocksdb.json:/etc/grafana/provisioning/dashboards/kafka/kafka-streams-rocksdb.json
     {% endif -%}   {#  (KAFKA_enable or external['KAFKA_enable']) #}
     {% if NIFI_enable | default(false) %}
       - ./scripts/grafana/dashboards/nifi:/etc/grafana/provisioning/dashboards/nifi
