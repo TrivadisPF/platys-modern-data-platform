@@ -7739,7 +7739,8 @@ services:
       NIFI_REGISTRY_S3_SECRET_ACCESS_KEY: {{s3SecretAccessKey}}
       NIFI_REGISTRY_S3_ENDPOINT_URL: '{{s3Endpoint | default(omit) }}'
     {% endif -%}   {#  NIFI_REGISTRY_bundle_provider #}
-      LOG_LEVEL: INFO
+      LOG_LEVEL: {{NIFI_REGISTRY_log_level | upper | default('INFO')}}
+      NIFI_REGISTRY_LOGS_DIR: '/opt/nifi-registry/nifi-registry-current/logs'
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -7751,6 +7752,9 @@ services:
     {% endif -%}   {#  NIFI_REGISTRY_run_secure #}
     {% if NIFI_REGISTRY_volume_map_data %}
       - ./container-volume/nifi_registry/database:/opt/nifi-registry/nifi-registry-current/database
+    {% endif -%}   {#  NIFI_REGISTRY_volume_map_data #}
+    {% if NIFI_REGISTRY_volume_logs_data %}
+      - ./container-volume/nifi_registry/database:/opt/nifi-registry/nifi-registry-current/logs
     {% endif -%}   {#  NIFI_REGISTRY_volume_map_data #}
     {% if NIFI_REGISTRY_volume_map_flow_storage %}
       {% if NIFI_REGISTRY_flow_provider == 'file' | default(false) %}
