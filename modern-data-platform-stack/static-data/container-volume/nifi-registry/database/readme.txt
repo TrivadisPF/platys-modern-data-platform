@@ -1,1 +1,1 @@
-Contains the database folder of nidi-registry service, if flag NIFI_REGISTRY_volume_map_data is set to true.
+Contains the database folder of nifi-registry service, if flag NIFI_REGISTRY_volume_map_data is set to true.

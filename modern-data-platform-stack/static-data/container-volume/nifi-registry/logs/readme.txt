@@ -1,0 +1,1 @@
+Contains the logs folder of nifi-registry service, if flag NIFI_REGISTRY_volume_map_logs is set to true.
