@@ -7746,7 +7746,7 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
-      - ./conf/nifi-registry/logback.xml.templ:/opt/nifi-registry/nifi-registry-current/conf/logback.xml.templ
+      - ./conf/nifi-registry/logback.xml.templ:/tmp/logback.xml.templ
     {%if NIFI_REGISTRY_run_secure  | default(false) %}
       - ./{{'custom-conf/nifi/security' if NIFI_REGISTRY_use_custom_certs is defined and NIFI_use_custom_certs else 'security/nifi'}}/keystore.jks:/opt/certs/keystore.jks
       - ./{{'custom-conf/nifi/security' if NIFI_REGISTRY_use_custom_certs is defined and NIFI_use_custom_certs else 'security/nifi'}}/truststore.jks:/opt/certs/truststore.jks
@@ -7774,6 +7774,13 @@ services:
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki') | default(false) %}
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
+    entrypoint:
+      # We override the entrypoint from the docker image and therefore have to run ../scripts/start.sh from the NiFi docker image
+      - bash
+      - -c
+      - |
+        eval "echo \"$$(cat /tmp/logback.xml.templ)\"" >> /opt/nifi-registry/nifi-registry-current/conf/logback.xml
+        ../scripts/start.sh
     restart: {{container_restart_policy}}
 {% endif %}   {#  NIFI_REGISTRY_enable  #}
 
