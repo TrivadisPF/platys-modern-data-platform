@@ -46,10 +46,16 @@ platys gen
 docker compose up -d
 ```
 
-## Create the necessary topic
+## Create the necessary topics
 
 ```bash
+docker exec -ti kafka-1 kafka-topics --create --bootstrap-server kafka-1:19092 --topic users --partitions 6 --replication-factor 3
 docker exec -ti kafka-1 kafka-topics --create --bootstrap-server kafka-1:19092 --topic wikipedia.parsed --partitions 6 --replication-factor 3
+docker exec -ti kafka-1 kafka-topics --create --bootstrap-server kafka-1:19092 --topic wikipedia.parsed.count-by-domain --partitions 6 --replication-factor 3
+docker exec -ti kafka-1 kafka-topics --create --bootstrap-server kafka-1:19092 --topic wikipedia.failed --partitions 6 --replication-factor 3
+docker exec -ti kafka-1 kafka-topics --create --bootstrap-server kafka-1:19092 --topic WIKIPEDIABOT --partitions 6 --replication-factor 3
+docker exec -ti kafka-1 kafka-topics --create --bootstrap-server kafka-1:19092 --topic WIKIPEDIANOBOT --partitions 6 --replication-factor 3
+docker exec -ti kafka-1 kafka-topics --create --bootstrap-server kafka-1:19092 --topic WIKIPEDIA_COUNT_GT_1 --partitions 6 --replication-factor 3
 ```
 
 ## Start Wikipedia Connector
@@ -113,6 +119,8 @@ docker compose up -d
 ```
 
 ### ksqldb
+
+
 
 ```sql
 CREATE STREAM wikipedia WITH (kafka_topic='wikipedia.parsed', value_format='AVRO');
