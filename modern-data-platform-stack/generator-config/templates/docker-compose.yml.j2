@@ -17636,7 +17636,17 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
-      - ./scripts/grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ./scripts/grafana/dashboards/dashboard.yml:/etc/grafana/provisioning/dashboards/dashboard.yml
+      - ./scripts/grafana/dashboards/docker:/etc/grafana/provisioning/dashboards/docker
+    {% if (KAFKA_enable or external['KAFKA_enable']) | default(false) %}
+      - ./scripts/grafana/dashboards/kafka:/etc/grafana/provisioning/dashboards/kafka
+    {% endif -%}   {#  (KAFKA_enable or external['KAFKA_enable']) #}
+    {% if NIFI_enable | default(false) %}
+      - ./scripts/grafana/dashboards/nifi:/etc/grafana/provisioning/dashboards/nifi
+    {% endif -%}   {#  NIFI_enable #}
+    {% if MINIO_enable | default(false) %}
+      - ./scripts/grafana/dashboards/minio:/etc/grafana/provisioning/dashboards/minio
+    {% endif -%}   {#  MINIO_enable #}
     {% if PROMETHEUS_enable | default(false) %}
       - ./scripts/grafana/datasources/prometheus-datasource.yml:/etc/grafana/provisioning/datasources/prometheus-datasource.yml
     {% endif -%}   {#  PROMETHEUS_enable #}
