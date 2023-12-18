@@ -8,6 +8,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 --------------------|------------------|-----------------------|
 21 | 21 | ftp |
 80 | 80 | markdown-viewer or firefox |
+1222 | 1222 | risingwave | 
 1234 | 1234 | kafka-1 (prometheus exporter) | 
 1235 | 1234 | kafka-2 (prometheus exporter) | 
 1236 | 1234 | kafka-3 (prometheus exporter) | 
@@ -17,9 +18,11 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 1240 | 1234 | zookeeper-1 (prometheus exporter) | 
 1241 | 1234 | zookeeper-2 (prometheus exporter) | 
 1242 | 1234 | zookeeper-3 (prometheus exporter) | 
-1250 | 1234 | nifi-1 (prometheus exporter) | 
-1251 | 1234 | nifi-2 (prometheus exporter) | 
-1252 | 1234 | nifi-3 (prometheus exporter) | 
+1250 | 1250 | risingwave | 
+1260 | 1260 | risingwave | 
+1270 | 1234 | nifi-1 (prometheus exporter) | 
+1271 | 1234 | nifi-2 (prometheus exporter) | 
+1272 | 1234 | nifi-3 (prometheus exporter) | 
 1337 | 1337 | konga | 
 1433 | 1433 | sqlserver |
 1521 | 1521 | oracledb-ee |
@@ -253,6 +256,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 10007 | 10000 | nifi-3 |
 11211 | 11211 | memcached |
 11212 | 11211 | ignite-1 |
+12222 | 2222 | risingwave |s
 13133 | 13133 | otel-collector |
 14250 | 14250 | jaeger (model.proto port)
 14271 | 14271 | jaeger (admin port) |

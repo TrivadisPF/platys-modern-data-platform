@@ -2215,10 +2215,15 @@ services:
       - "5690"
       - "1250"
       - "5691"
+      - "2222"
     ports:
       - "4566:4566"
       - "5690:5690"
       - "5691:5691"
+      - "1222:1222"
+      - "1250:1250"
+      - "1260:1260"
+      - "12222:2222"
     environment:
       - RUST_BACKTRACE="1"
       # If ENABLE_TELEMETRY is not set, telemetry will start by default
@@ -2245,7 +2250,6 @@ services:
                       --state-store hummock+minio://{{s3AccessKey}}:{{s3SecretAccessKey}}@minio-1:9000/risingwave-bucket \
                       --data-directory platys_001 \
                       --config-path /risingwave.toml \
-                      --dashboard-ui-path ${RW_PREFIX}/ui\" \
                     --compute-opts=\" \
                       --config-path /risingwave.toml \
                       --listen-addr 0.0.0.0:5688 \
@@ -2261,7 +2265,7 @@ services:
                       --config-path /risingwave.toml \
                       --listen-addr 0.0.0.0:4566 \
                       --advertise-addr 0.0.0.0:4566 \
-                      --prometheus-listener-addr 0.0.0.0:2222 \
+                      --prometheus-listener-addr 0.0.0.0:12222 \
                       --health-check-listener-addr 0.0.0.0:6786 \
                       --meta-addr http://0.0.0.0:5690\" \
                     --compactor-opts=\" \
@@ -2273,6 +2277,12 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
+    deploy:
+      resources:
+        limits:
+          memory: 28G
+        reservations:
+          memory: 28G
     healthcheck:
       test:
         - CMD-SHELL
@@ -7529,7 +7539,7 @@ services:
   {% for num in range(NIFI_nodes | default('1') ) %}
     {% set externalPort = 18080 + loop.index-1 %}
     {% set externalRemotePort = 10005 + loop.index-1 %}
-    {% set externalPromPort = 1250 + loop.index-1 %}
+    {% set externalPromPort = 1270 + loop.index-1 %}
     {% set clusterPort = 11005 + loop.index-1 %}
   nifi-{{loop.index}}:
     image: {{'trivadis/apache-nifi' if NIFI_python_enabled else 'apache/nifi'}}:{{__NIFI_version}}{{'-python' ~ NIFI_python_version if NIFI_python_enabled}}
@@ -17624,6 +17634,8 @@ services:
     ports:
       - "3000:3000"
     environment:
+      - GF_SERVER_HTTP_ADDR=0.0.0.0
+      - GF_SERVER_HTTP_PORT=3000
       - GF_INSTALL_PLUGINS={{GRAFANA_install_plugins if GRAFANA_install_plugins is defined and GRAFANA_install_plugins and GRAFANA_install_plugins | length else omit}}
       - GF_AUTH_ANONYMOUS_ENABLED={{GRAFANA_auth_anonymous_enabled}}
       - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
@@ -17695,6 +17707,13 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - bash -c 'printf \"GET / HTTP/1.1\n\n\" > /dev/tcp/127.0.0.1/3000; exit $$?;'
+      interval: 1s
+      timeout: 5s
+      retries: 5
 {% endif %}   {#  GRAFANA_enable #}
 
 {% if ETCD_enable | default(false) %}
