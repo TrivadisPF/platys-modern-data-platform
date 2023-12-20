@@ -29,13 +29,13 @@ TOKEN=$(curl -k 'https://localhost:18080/nifi-api/access/token' \
 and then use it in any call to the [NIFi Rest API](https://nifi.apache.org/docs/nifi-docs/rest-api/index.html):
 
 ```bash
-curl -k 'https://localhost:18080/nifi-api/flow/current-user' -H "Authorization: Bearer $TOKEN" --insecure
+curl -k -H "Authorization: Bearer $TOKEN" 'https://localhost:18080/nifi-api/flow/current-user'  
 ```
 
 as it returns JSON, we can pipe into `jq`
 
 ```bash
-curl -k 'https://localhost:18080/nifi-api/flow/current-user' -H "Authorization: Bearer $TOKEN" --insecure | jq
+curl -k -H "Authorization: Bearer $TOKEN" 'https://localhost:18080/nifi-api/flow/current-user' | jq
 ```
 
 ### Installing JDBC Driver
