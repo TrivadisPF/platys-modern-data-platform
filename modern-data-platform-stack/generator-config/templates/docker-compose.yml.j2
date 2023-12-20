@@ -7556,7 +7556,7 @@ services:
       - "{{externalPort}}:{{externalPort}}"
       # Remote Input Socket
       - {{externalRemotePort}}:{{externalRemotePort}}/tcp
-      # Remote Input Socket
+      # Prometheus Port
       - {{externalPromPort}}:1234
     environment:
     {%if NIFI_create_cluster  | default(false) %}
@@ -7575,7 +7575,7 @@ services:
       KEYSTORE_PATH: /opt/certs/keystore.jks
       KEYSTORE_TYPE: JKS
       KEYSTORE_PASSWORD: {{NIFI_keystore_password if NIFI_keystore_password is defined and NIFI_keystore_password | length else 'BWt7eLC4R53N4bIxdZEVPhAdkYlQ0Le8Tw0erGXpvI0' }}
-      KEY_PASSWORD: {{NIFI_key_password if NIFI_key_password is defined and NIFI_key_password  | length else omit }}
+      KEY_PASSWORD: {{NIFI_key_password if NIFI_key_password is defined and NIFI_key_password  | length else 'BWt7eLC4R53N4bIxdZEVPhAdkYlQ0Le8Tw0erGXpvI0' }}
       TRUSTSTORE_PATH: /opt/certs/truststore.jks
       TRUSTSTORE_TYPE: JKS
       TRUSTSTORE_PASSWORD: {{NIFI_truststore_password if NIFI_truststore_password is defined and NIFI_truststore_password | length else 'PkhvPAirou5R/K9HQxVk99uT+hehM7SRURyFSbxTlTQ' }}
@@ -7615,8 +7615,8 @@ services:
       - ./plugins/nifi/jars/:/extra-jars/
       - ./plugins/nifi/nars/:/opt/nifi/nifi-current/extensions
     {%if NIFI_run_secure  | default(false) %}
-      - ./{{'custom-conf/nifi/security' if NIFI_use_custom_certs is defined and NIFI_use_custom_certs else 'security/nifi'}}/keystore.jks:/opt/certs/keystore.jks
-      - ./{{'custom-conf/nifi/security' if NIFI_use_custom_certs is defined and NIFI_use_custom_certs else 'security/nifi'}}/truststore.jks:/opt/certs/truststore.jks
+      - ./{{'custom-conf/nifi/security/nifi-' ~ loop.index' if NIFI_use_custom_certs is defined and NIFI_use_custom_certs else 'security/nifi/nifi-' ~ loop.index}}/keystore.jks:/opt/certs/keystore.jks
+      - ./{{'custom-conf/nifi/security/nifi-' ~ loop.index' if NIFI_use_custom_certs is defined and NIFI_use_custom_certs else 'security/nifi/nifi-' ~ loop.index}}/truststore.jks:/opt/certs/truststore.jks
     {% endif -%}   {#  NIFI_run_unsecure #}
     {% if NIFI_volume_map_custom_config %}
       - ./custom-conf/nifi/config/nifi.properties:/tmp/nifi.properties.templ
