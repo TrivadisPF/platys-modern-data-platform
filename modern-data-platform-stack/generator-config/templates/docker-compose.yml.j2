@@ -18287,6 +18287,12 @@ services:
     command: server
   {% endif -%}   {# MARKDOWN_VIEWER_use_markdown_madness_impl #}
     restart: {{container_restart_policy}}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://dataplatform:{{80 + (dataCenterId * 1) if (MARKDOWN_VIEWER_use_port_80 | default(true) )  else 8008 }}"]
+      interval: 1m30s
+      timeout: 10s
+      retries: 3
+      start_period: 1m
 
   markdown-renderer{{dataCenter}}:
     image: trivadis/jinja2-renderer:latest
