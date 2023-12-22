@@ -86,6 +86,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 4054 | 4054 | zeppelin (spark ui) |
 4195 | 4195 | benthos-1 |
 4196 | 4196 | benthos-server |
+4200 | 4200 | cribl-master |
 4317 | 4317 | otel-collector |
 4466 | 4466 | curity |
 4566 | 4566 | risingwave |
