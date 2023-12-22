@@ -193,6 +193,8 @@ networks:
 
 {% set __STREAMPIPES_version = STREAMPIPES_version | default('latest') -%}
 
+{% set __CRIBL_version = CRIBL_version | default('latest') -%}
+
 {% set __FLUENTD_version = FLUENTD_version | default('latest') -%}
 
 {% set __CONDUIT_version = CONDUIT_version | default('latest') -%}
@@ -8030,6 +8032,69 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  STREAMPIPES_enable #}
+
+{%if CRIBL_enable | default(false) %}
+  #  ================================== Cribl ========================================== #
+  cribl-master:
+    image: cribl/cribl:{{__CRIBL_version}}
+    container_name: cribl-master
+    hostname: cribl-master
+    labels:
+      com.platys.name: 'cribl'
+      com.platys.webui.title: "Cribl UI"
+      com.platys.webui.url: "http://dataplatform:28329"
+    ports:
+      - "28329:9000"
+    environment:
+      CRIBL_DIST_MODE: master
+      CRIBL_DIST_MASTER_URL: tcp://2fQ9GRc3n7jhWBmpOfgCi6664yGZHuFB@0.0.0.0:4200
+      CRIBL_VOLUME_DIR: /opt/cribl/config-volume
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./conifg/cribl:/opt/cribl/config-volume
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+
+  {% for num in range(CRIBL_workers | default(1) ) %}
+
+  cribl-worker-{{loop.index}}:
+    image: cribl/cribl:{{__CRIBL_version}}
+    container_name: cribl-worker-{{loop.index}}
+    hostname: cribl-worker-{{loop.index}}
+    labels:
+      com.platys.name: 'cribl'
+    depends_on:
+      - cribl-master
+    ports:
+      - 9000
+    environment:
+      CRIBL_DIST_MODE: worker
+      CRIBL_DIST_MASTER_URL: tcp://2fQ9GRc3n7jhWBmpOfgCi6664yGZHuFB@0.0.0.0:4200
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+  {% endfor %}
+{% endif %}   {#  CRIBL_enable #}
+
 
 {%if CONDUIT_enable | default(false) %}
   #  ================================== Conduit ========================================== #
