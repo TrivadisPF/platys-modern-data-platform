@@ -557,7 +557,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28326 | 25 | mailhog |
 28327 | 3000 | ioevent-cockpit-ui |
 28328 | 9093 | prometheus-alertmanager |
-28329 | 9000 | cripl-master |
+28329 | 9000 | cribl-master |
+28330 | 8080 | blaze-fhir |
 
 ## Ports > 28500
 

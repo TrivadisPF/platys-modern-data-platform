@@ -493,6 +493,8 @@ networks:
 
 {% set __S3FS_version = S3FS_version | default('3') -%}
 
+{% set __BLAZE_FHIR_version = BLAZE_FHIR_version | default('3') -%}
+
 {% if DATAHUB_enable -%}
 # enforce some dependencies
   {% set KAFKA_enable = true -%}
@@ -18430,6 +18432,34 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
 {% endif %}   {# S3FS_enable #}
+
+{% if BLAZE_FHIR_enable | default(false) %}
+  #  ================================== Blaze FHIR Server ========================================== #
+  blaze-fhir:
+    image: samply/blaze:{{__BLAZE_FHIR_version}}
+    container_name: blaze-fhir
+    hostname: blaze-fhir
+    labels:
+      com.platys.name: "blaze-fhir"
+      com.platys.webui.title: "Blaze UI"
+      com.platys.webui.url: "http://dataplatform:28330"
+      com.platys.restapi.title: "Blaze REST API"
+      com.platys.restapi.url: "http://dataplatform:28330/fhir"
+    ports:
+      - "28330:8080"
+    environment:
+      BASE_URL: 'http://localhost:8080'
+      JAVA_TOOL_OPTIONS: '-Xmx2g'
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+{% endif %}   {# BLAZE_FHIR_enable #}
 
 {% if PROVISIONING_DATA_enable | default(false) %}
   #  ================================== data-provisioning ========================================== #
