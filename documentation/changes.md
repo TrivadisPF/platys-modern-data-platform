@@ -38,6 +38,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Prometheus Alertmanager
  * Pact Broker
  * Cribl
+ * Blaze (FHIR Server)
 
 ### Removed Services
  
