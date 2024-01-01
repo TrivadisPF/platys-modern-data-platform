@@ -100,6 +100,8 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * support for Kafka authorisation for traditional and KRaft setups
  * support for authentication in AKHQ
  * removed JAR's from the plugin folder to decrease the size of the docker image
+ * added multi-arch docker build to also build the docker image of the generator as an arm64 type
+ * the "preview" version is no longer tagged as `1.nn.nn-preview` but as `develop`, so to get the development version, just use `platys init -n demo-platform --stack trivadis/platys-modern-data-platform --stack-version develop --structure flat`
 
 ### Breaking Changes
 
