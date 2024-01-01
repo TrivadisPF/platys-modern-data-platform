@@ -2,7 +2,9 @@ name: build-platys-modern-dataplatform
 
 on:
   push:
-    branches: develop
+    branches: 
+      - develop
+      - master
 
 jobs:
   build:
@@ -25,10 +27,17 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       -
+        name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: trivadis/platys-modern-data-platform:
+      -
         name: Build and push
         uses: docker/build-push-action@v5
         with:
           context: .
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: trivadis/platys-modern-data-platform:1.17.0-preview
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
