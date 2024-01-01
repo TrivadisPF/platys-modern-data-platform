@@ -8,6 +8,17 @@ The streaming database: redefining stream processing. PostgreSQL-compatible, hig
 
 ```bash
 platys init --enable-services RISINGWAVE, ETSD, MINIO
+```
+
+Make sure that the bucket `risingwave-bucket` is created by adding it to the setting in `config.yml`
+
+```
+      MINIO_buckets: 'risingwave-bucket'
+```      
+
+and then generate the platform
+
+```
 platys gen
 ```
 
