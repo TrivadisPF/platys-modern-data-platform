@@ -19,7 +19,7 @@ RUN python3 -m pip install --upgrade pip && \
 	pip install docker-compose-templer && mkdir /opt/mdps-gen && chmod 777 -R /opt/mdps-gen && \
 
 	# Install timezone and jq support
-	apk add tzdata &&  apk add jq && apk add yq \
+	apk add tzdata &&  apk add jq && apk add yq
 
 	# Install yq
 	#wget -q -O /usr/bin/yq $(wget -q -O - https://api.github.com/repos/mikefarah/yq/releases/latest | jq -r '.assets[] | select(.name == "yq_linux_amd64") | .browser_download_url') &&  chmod +x /usr/bin/yq
