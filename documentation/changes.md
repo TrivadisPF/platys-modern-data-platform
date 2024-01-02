@@ -40,6 +40,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Cribl Stream
  * Cribl Edge
  * Blaze (FHIR Server)
+ * FileBeat
 
 ### Removed Services
  
@@ -87,6 +88,8 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Update `materialize` to `v0.77.1`
  * Update `cadvisor` to `v0.47.2`
  * Update `portainer` to `2.19.4-alpine`
+ * Update `elasticsearch` to `8.11.3`
+ * Update `kibana` to `8.11.3`
 
 ### Enhancements
 

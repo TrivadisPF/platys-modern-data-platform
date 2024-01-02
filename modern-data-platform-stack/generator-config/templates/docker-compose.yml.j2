@@ -196,6 +196,7 @@ networks:
 {% set __CRIBL_version = CRIBL_version | default('latest') -%}
 
 {% set __FLUENTD_version = FLUENTD_version | default('latest') -%}
+{% set __FILEBEAT_version = FILEBEAT_version | default('latest') -%}
 
 {% set __CONDUIT_version = CONDUIT_version | default('latest') -%}
 
@@ -8231,6 +8232,45 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  FLUENTD_enable  #}
+
+{%if FILEBEAT_enable | default(false) %}
+  #  ================================== FileBeat ========================================== #
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:{{__FILEBEAT_version}}
+    container_name: filebeat
+    hostname: filebeat
+    labels:
+      com.platys.name: 'filebeat'
+    environment:
+      strict.perms: false
+    {% if ELASTICSEARCH_enable | default(false) %}
+      output.elasticsearch.hosts: elasticsearch-1:9200
+      ELASTICSEARCH_HOSTS: elasticsearch-1:9200
+      ELASTICSEARCH_USERNAME: na
+      ELASTICSEARCH_PASSWORD: na
+    {% endif -%}   {#  ELASTICSEARCH_enable #}
+    {% if KIBANA_enable | default(false) %}
+      setup.kibana.host: kibana:5601
+    {% endif -%}   {#  KIBANA_enable #}
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    {% if FILEBEAT_conf_file is defined and FILEBEAT_conf_file and FILEBEAT_conf_file | length %}
+      - ./conf/filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+    {% endif -%}   {#  FLUENTD_conf_file #}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  FILEBEAT_enable  #}
 
 {%if NODERED_enable | default(false) %}
   #  ================================== Node-RED ========================================== #
