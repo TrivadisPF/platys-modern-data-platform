@@ -8199,7 +8199,7 @@ services:
     ports:
       - "24224:24224"
     environment:
-      FLUENTD_CONF: {{FLUENTD_conf_file if FLUENTD_conf_file is defined and FLUENTD_conf_file and FLUENTD_conf_file | length else omit}}
+      #FLUENTD_CONF: /fluentd/etc/{{FLUENTD_conf_file_name if FLUENTD_conf_file_name is defined and FLUENTD_conf_file_name and FLUENTD_conf_file_name | length else omit}}
     {% if ELASTICSEARCH_enable | default(false) %}
       ELASTICSEARCH_HOSTNAME: elasticsearch-1
       ELASTICSEARCH_PORT: 9200
@@ -8220,8 +8220,8 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
-    {% if FLUENTD_conf_file is defined and FLUENTD_conf_file and FLUENTD_conf_file | length %}
-      - ./conf/fluentd:/fluentd/etc
+    {% if FLUENTD_conf_file_name is defined and FLUENTD_conf_file_name and FLUENTD_conf_file_name | length %}
+      - ./conf/fluentd/{{FLUENTD_conf_file_name}}:/fluentd/etc/fluent.conf:ro
     {% endif -%}   {#  FLUENTD_conf_file #}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
@@ -8259,8 +8259,8 @@ services:
       - ./data-transfer:/data-transfer
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
-    {% if FILEBEAT_conf_file is defined and FILEBEAT_conf_file and FILEBEAT_conf_file | length %}
-      - ./conf/filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+    {% if FILEBEAT_conf_file_name is defined and FILEBEAT_conf_file_name and FILEBEAT_conf_file_name | length %}
+      - ./conf/filebeat/{{FILEBEAT_conf_file_name}}:/usr/share/filebeat/filebeat.yml:ro
     {% endif -%}   {#  FLUENTD_conf_file #}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
