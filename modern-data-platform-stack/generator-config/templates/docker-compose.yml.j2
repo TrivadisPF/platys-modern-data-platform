@@ -8035,15 +8035,15 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {#  STREAMPIPES_enable #}
 
-{%if CRIBL_enable | default(false) %}
-  #  ================================== Cribl ========================================== #
+{%if CRIBL_STREAM_enable | default(false) %}
+  #  ================================== Cribl Stream ========================================== #
   cribl-master:
     image: cribl/cribl:{{__CRIBL_version}}
     container_name: cribl-master
     hostname: cribl-master
     labels:
-      com.platys.name: 'cribl'
-      com.platys.webui.title: "Cribl UI"
+      com.platys.name: 'cribl-stream'
+      com.platys.webui.title: "Cribl Stream UI"
       com.platys.webui.url: "http://dataplatform:28329"
     ports:
       - "28329:9000"
@@ -8057,7 +8057,7 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
-    {% if CRIBL_volume_map_data %}
+    {% if CRIBL_STREAM_volume_map_data %}
       - ./container-volume/cribl:/opt/cribl/config-volume
     {% endif %}
     {%if use_timezone | default(false) %}
@@ -8069,8 +8069,7 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
 
-  {% for num in range(CRIBL_workers | default(1) ) %}
-
+  {% for num in range(CRIBL_STREAM_workers | default(1) ) %}
   cribl-worker-{{loop.index}}:
     image: cribl/cribl:{{__CRIBL_version}}
     container_name: cribl-worker-{{loop.index}}
@@ -8098,8 +8097,48 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
   {% endfor %}
-{% endif %}   {#  CRIBL_enable #}
+{% endif %}   {#  CRIBL_STREAM_enable #}
 
+{%if CRIBL_EDGE_enable | default(false) %}
+  #  ================================== Cribl Edge ========================================== #
+  {% for num in range(CRIBL_EDGE_nodes | default(1) ) %}
+  cribl-edge-{{loop.index}}:
+    image: cribl/cribl:{{__CRIBL_version}}
+    container_name: cribl-edge-{{loop.index}}
+    hostname: cribl-edge-{{loop.index}}
+    labels:
+      com.platys.name: 'cribl-edge'
+      com.platys.webui.title: "Cribl Edge UI"
+      com.platys.webui.url: "http://dataplatform:28330"
+    depends_on:
+      - cribl-master
+    ports:
+      - 28330:9420
+    environment:
+    {%if CRIBL_EDGE_managed | default(false) %}
+      CRIBL_DIST_MODE: managed-edge
+      CRIBL_DIST_MASTER_URL: tcp://2fQ9GRc3n7jhWBmpOfgCi6664yGZHuFB@0.0.0.0:4200?group=default
+    {% endif -%}   {#  CRIBL_EDGE_managed #}
+      CRIBL_EDGE: 1
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - /var/run/appscope:/var/run/appscope
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /:/hostfs:ro
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    privileged: true
+    restart: {{container_restart_policy}}
+  {% endfor %}
+{% endif %}   {#  CRIBL_EDGE_enable #}
 
 {%if CONDUIT_enable | default(false) %}
   #  ================================== Conduit ========================================== #
@@ -18442,11 +18481,11 @@ services:
     labels:
       com.platys.name: "blaze-fhir"
       com.platys.webui.title: "Blaze UI"
-      com.platys.webui.url: "http://dataplatform:28330"
+      com.platys.webui.url: "http://dataplatform:28331"
       com.platys.restapi.title: "Blaze REST API"
-      com.platys.restapi.url: "http://dataplatform:28330/fhir"
+      com.platys.restapi.url: "http://dataplatform:28331/fhir"
     ports:
-      - "28330:8080"
+      - "28331:8080"
     environment:
       BASE_URL: 'http://localhost:8080'
       JAVA_TOOL_OPTIONS: '-Xmx2g'

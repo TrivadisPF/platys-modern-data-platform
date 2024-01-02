@@ -558,7 +558,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28327 | 3000 | ioevent-cockpit-ui |
 28328 | 9093 | prometheus-alertmanager |
 28329 | 9000 | cribl-master |
-28330 | 8080 | blaze-fhir |
+28330 | 9420 | cribl-edge |
+28331 | 8080 | blaze-fhir |
 
 ## Ports > 28500
 
