@@ -1089,7 +1089,7 @@ x-logging: &logging
   logging:
     driver: fluentd
     options:
-      fluentd-address: "localhost:24224"
+      fluentd-address: "{{loggin_fluentd_address}}"
       fluentd-async-connect: "true"
       tag: docker
 {% endif %}   {# logging_driver = 'fluentd' #}
@@ -1103,6 +1103,25 @@ x-logging: &logging
       loki-batch-size: "400"
       loki-retries: "0"
 {% endif %}   {# logging_driver = 'loki' #}
+
+{%if logging_driver == "syslog" | default(false) %}
+x-logging: &logging
+  logging:
+    driver: syslog
+    options:
+      syslog-address: "{{logging_syslog_address}}"
+      tag: docker
+{% endif %}   {# logging_driver = 'syslog' #}
+
+{%if logging_driver == "splunk" | default(false) %}
+x-logging: &logging
+  logging:
+    driver: splunk
+    options:
+      splunk-url: "{{logging_splunk_url}}"
+      splunk-token: "{{logging_splunk_token | default(omit) }}"
+      tag: "docker"
+{% endif %}   {# logging_driver = 'syslog' #}
 
 {#  ================================== Services ========================================== #}
 
