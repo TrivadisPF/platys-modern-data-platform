@@ -5836,7 +5836,85 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}{% endif %}
-{#  RANGER_enable #}
+{% endif %}   {#  RANGER_enable #}
+
+{% if OPEN_POLICY_AGENT_enable  | default(false) %}
+  #  ================================== Open Policy Agent (opa) ========================================== #
+  open-policy-agent:
+    image: openpolicyagent/opa:{{__OPEN_POLICY_AGENT_version}}
+    container_name: open-policy-agent
+    hostname: open-policy-agent
+    labels:
+      com.platys.name: "open-policy-agent"
+      com.platys.restapi.title: "Open Policy Agent (OPA) REST API"
+      com.platys.restapi.url: "https://dataplatform:28332"
+    ports:
+      - "28332:8181"
+    command:
+      - "run"
+      - "--server"
+      - "--addr=0.0.0.0:8181"
+      - "--log-level={{OPEN_POLICY_AGENT_log_level}}"
+      - "--log-format=json"
+      - "--set=decision_logs.console=true"
+#      - "--config-file=/data/enterprise-opa-conf.yaml"
+      - "/data/policy/transform.rego"
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+#      - ./conf/styra:/data
+      - ./security/styra/policy:/data/policy
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  OPEN_POLICY_AGENT_enable #}
+
+{% if STYRA_enable  | default(false) %}
+  #  ================================== Styra Enterprise Open Policy Agent (opa) ========================================== #
+  styra:
+    image:
+    image: ghcr.io/styrainc/enterprise-opa:{{__STYRA_version}}
+    container_name: styra
+    hostname: styra
+    labels:
+      com.platys.name: "styra"
+      com.platys.restapi.title: "Styra (Enterprise OPA) REST API"
+      com.platys.restapi.url: "https://dataplatform:28333"
+    ports:
+      - "28333:8181"
+    command:
+      - "run"
+      - "--server"
+      - "--addr=0.0.0.0:8181"
+      - "--log-level={{STYRA_log_level}}"
+#      - "--config-file=/data/enterprise-opa-conf.yaml"
+      - "/data/policy/transform.rego"
+    environment:
+      EOPA_LICENSE_KEY: {{STYRA_license_key}}
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+#      - ./conf/styra:/data
+      - ./security/styra/policy:/data/policy
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  STYRA_enable #}
 
 {% if ATLAS_enable  | default(false) %}
   #  ================================== Apache Atlas ========================================== #
