@@ -560,8 +560,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28329 | 9000 | cribl-master |
 28330 | 9420 | cribl-edge |
 28331 | 8080 | blaze-fhir |
-28332 | 8181 | open-policy-agent |
-28333 | 8181 | styra |
+28332 | 8181 | opa |
+28333 | 8181 | styra-eopa |
 
 ## Ports > 28500
 

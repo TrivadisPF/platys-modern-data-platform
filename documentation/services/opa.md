@@ -7,7 +7,7 @@ Open Policy Agent (OPA) is an open source, general-purpose policy engine.
 ## How to enable?
 
 ```
-platys init --enable-services OPEN_POLICY_AGENT
+platys init --enable-services OPA
 platys gen
 ```
 
