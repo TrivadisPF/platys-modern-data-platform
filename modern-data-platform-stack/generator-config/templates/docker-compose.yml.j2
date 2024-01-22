@@ -5877,6 +5877,44 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {#  OPA_enable #}
 
+{% if STYRA_EOPA_enable  | default(false) %}
+  #  ================================== Styra Enterprise Open Policy Agent (opa) ========================================== #
+  styra-eopa:
+    image: ghcr.io/styra-eopainc/enterprise-opa:{{__styra-eopa_version}}
+    container_name: styra-eopa
+    hostname: styra-eopa
+    labels:
+      com.platys.name: "styra-eopa"
+      com.platys.restapi.title: "Styra Enterprise OPA REST API"
+      com.platys.restapi.url: "https://dataplatform:28333"
+    ports:
+      - "28333:8181"
+    command:
+      - "run"
+      - "--server"
+      - "--addr=0.0.0.0:8181"
+      - "--log-level={{styra-eopa_log_level}}"
+#      - "--config-file=/data/enterprise-opa-conf.yaml"
+      - "/data/policy/transform.rego"
+    environment:
+      EOPA_LICENSE_KEY: {{styra-eopa_license_key}}
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+#      - ./conf/styra-eopa:/data
+      - ./security/styra-eopa/policy:/data/policy
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  STYRA_EOPA_enable #}
+
 {% if ATLAS_enable  | default(false) %}
   #  ================================== Apache Atlas ========================================== #
   atlas:
