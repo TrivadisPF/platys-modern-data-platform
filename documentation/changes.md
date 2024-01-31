@@ -92,6 +92,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Update `portainer` to `2.19.4-alpine`
  * Update `elasticsearch` to `8.11.3`
  * Update `kibana` to `8.11.3`
+ * Update `hasura` to `v2.37.0-ce`
 
 ### Enhancements
 
