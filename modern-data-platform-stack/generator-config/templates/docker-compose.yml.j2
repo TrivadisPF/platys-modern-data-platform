@@ -269,6 +269,7 @@ networks:
 {% set __CHARTBOARD_version = CHARTBOARD_version | default('latest') -%}
 
 {% set __RETOOL_version = RETOOL_version | default('latest') -%}
+{% set __TOOLJET_version = TOOLJET_version | default('latest') -%}
 {% set __BASEROW_version = BASEROW_version | default('latest') -%}
 
 {% set __MEMCACHED_version = MEMCACHED_version | default('latest') -%}
@@ -10688,6 +10689,39 @@ services:
     command: bash -c "./docker_scripts/generate_key_pair.sh; ./retool_backend"
     restart: {{container_restart_policy}}
 {% endif %}   {#  RETOOL_enable #}
+
+{% if TOOLJET_enable | default(false) %}
+  #  ================================== ToolJet ========================================== #
+  tooljet:
+    image: tooljet/tooljet:{{__BASEROW_version}}
+    hostname: tooljet
+    container_name: tooljet
+    labels:
+      com.platys.name: "tooljet"
+      com.platys.webui.title: "ToolJet UI"
+      com.platys.webui.url: "http://dataplatform:28334"
+    ports:
+      - "28334:80"
+    tty: true
+    stdin_open: true
+    environment:
+      SERVE_CLIENT: "true"
+      PORT: "80"
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    command: npm run start:prod
+    restart: {{container_restart_policy}}
+{% endif %}   {#  TOOLJET_enable #}
 
 {% if BASEROW_enable | default(false) %}
   #  ================================== Baserow ========================================== #
