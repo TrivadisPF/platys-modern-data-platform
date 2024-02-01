@@ -93,6 +93,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Update `elasticsearch` to `8.11.3`
  * Update `kibana` to `8.11.3`
  * Update `hasura` to `v2.37.0-ce`
+ * Update `risingwave` to `v1.6.0`
 
 ### Enhancements
 
