@@ -18722,6 +18722,31 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {# BLAZE_FHIR_enable #}
 
+
+{% if LFH_FHIR_enable | default(false) %}
+  #  ================================== LinuxForHealth (IBM) FHIR Server ========================================== #
+  lfh-fhir:
+    image: ghcr.io/linuxforhealth/fhir-server:{{__LFH_FHIR_version}}
+    container_name: lfh-fhir
+    hostname: lfh-fhir
+    labels:
+      com.platys.restapi.title: "LinuxForHealth FHIR REST API"
+      com.platys.restapi.url: "http://dataplatform:9443/fhir-server/api/v4/$healthcheck"
+    ports:
+      - "9443:9443"
+    environment:
+      BOOTSTRAP_DB: true
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+{% endif %}   {# LFH_FHIR_enable #}
+
 {% if PROVISIONING_DATA_enable | default(false) %}
   #  ================================== data-provisioning ========================================== #
   data-provisioning:

@@ -40,6 +40,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Cribl Stream
  * Cribl Edge
  * Blaze (FHIR Server)
+ * LinuxForHealth (FHIR Server)
  * FileBeat
  * Open Policy Agent (OPA)
  * Styra Enterprise OPA

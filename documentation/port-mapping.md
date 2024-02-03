@@ -232,6 +232,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 9411 | 9411 | zipkin |
 9412 | 9412 | jaeger |
 9413 | 9413 | pitchfork |
+9443 | 9443 | lfh-fhir |
 9600 | 9600 | zeebe-1 |
 9851 | 9851 | tile38 |
 9870 | 9870 | namenode |
