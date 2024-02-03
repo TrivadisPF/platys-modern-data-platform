@@ -565,6 +565,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28333 | 8181 | styra-eopa |
 28334 | 80 | tooljet |
 28335 | 8080 | fhir-gateway |
+28336 | 8080 | hapi-fhir |
 
 ## Ports > 28500
 

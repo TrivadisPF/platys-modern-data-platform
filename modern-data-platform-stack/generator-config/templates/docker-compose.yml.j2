@@ -495,6 +495,7 @@ networks:
 
 {% set __S3FS_version = S3FS_version | default('3') -%}
 
+{% set __HAPI_FHIR_version = HAPI_FHIR_version | default('3') -%}
 {% set __BLAZE_FHIR_version = BLAZE_FHIR_version | default('3') -%}
 {% set __LFH_FHIR_version = LFH_FHIR_version | default('3') -%}
 {% set __FHIR_GATEWAY_version = FHIR_GATEWAY_version | default('3') -%}
@@ -18696,6 +18697,31 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {# S3FS_enable #}
 
+{% if HAPI_FHIR_enable | default(false) %}
+  #  ================================== Hapi FHIR Server ========================================== #
+  hapi-fhir:
+    image: docker.io/hapiproject/hapi:{{__HAPI_FHIR_version}}
+    container_name: blaze-fhir
+    hostname: blaze-fhir
+    labels:
+      com.platys.name: "hapi-fhir"
+      com.platys.restapi.title: "HAPI FHIR REST API"
+      com.platys.restapi.url: "http://dataplatform:28336/fhir"
+    ports:
+      - "28336:8080"
+    environment:
+#      - SPRING_CONFIG_LOCATION
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+{% endif %}   {# HAPI_FHIR_enable #}
+
 {% if BLAZE_FHIR_enable | default(false) %}
   #  ================================== Blaze FHIR Server ========================================== #
   blaze-fhir:
@@ -18714,7 +18740,7 @@ services:
       BASE_URL: 'http://localhost:8080'
       JAVA_TOOL_OPTIONS: '-Xmx2g'
     {%if use_timezone | default(false) %}
-      - TZ={{use_timezone}}
+      TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
@@ -18742,7 +18768,7 @@ services:
       FHIR_USER_PASSWORD: abc123!
       FHIR_ADMIN_PASSWORD: abc123!
     {%if use_timezone | default(false) %}
-      - TZ={{use_timezone}}
+      TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
@@ -18802,7 +18828,7 @@ services:
       SERVICES_KAFKA_GENERATE_OUTPUT_TOPIC_MATCH_EXPRESSION:
     {% endif -%}   {#  FHIR_GATEWAY_kafka_enabled #}
     {%if use_timezone | default(false) %}
-      - TZ={{use_timezone}}
+      TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
