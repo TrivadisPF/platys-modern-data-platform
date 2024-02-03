@@ -18774,18 +18774,26 @@ services:
       - /tmp
     privileged: false
     environment:
+    {%if FHIR_GATEWAY_postgresql_enabled | default(false) %}
+      SERVICES_PSQL_ENABLED: true
       SPRING_DATASOURCE_URL: jdbc:postgresql://fhir-db:5432/fhir
       SPRING_DATASOURCE_USERNAME: postgres
       # kics-scan ignore-line
       SPRING_DATASOURCE_PASSWORD: abc123!
+    {% else %}
+      SERVICES_PSQL_ENABLED: false
+      SPRING_DATASOURCE_URL:
+      SPRING_SQL_INIT_MODE: {{FHIR_GATEWAY_postgresql_enabled | default(false) }}
+    {% endif -%}   {#  FHIR_GATEWAY_postgresql_enabled #}
       SERVICES_PSEUDONYMIZER_ENABLED: {{FHIR_GATEWAY_pseudonymizer_enabled | default(false) }}
       SERVICES_PSEUDONYMIZER_URL: http://fhir-pseudonymizer:8080/fhir
       SERVICES_LOINC_CONVERSIONS_URL: http://loinc-converter:8080/api/v1
       SERVICES_FHIRSERVER_URL: http://fhir-server:8080/fhir
       SERVICES_FHIRSERVER_ENABLED: {{FHIR_GATEWAY_fhir_server_enabled | default(false) }}
-      SERVICES_PSQL_ENABLED: {{FHIR_GATEWAY_postgresql_enabled | default(false) }}
       SERVICES_KAFKA_ENABLED: {{FHIR_GATEWAY_kafka_enabled | default(false) }}
+    {%if FHIR_GATEWAY_kafka_enabled | default(false) %}
       BOOTSTRAP_SERVERS: {{ns.bootstrapServers}}
+    {% endif -%}   {#  FHIR_GATEWAY_kafka_enabled #}
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
