@@ -497,6 +497,7 @@ networks:
 
 {% set __BLAZE_FHIR_version = BLAZE_FHIR_version | default('3') -%}
 {% set __LFH_FHIR_version = LFH_FHIR_version | default('3') -%}
+{% set __FHIR_GATWAY_version = FHIR_GATWAY_version | default('3') -%}
 
 {% if DATAHUB_enable -%}
 # enforce some dependencies
@@ -18723,7 +18724,6 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {# BLAZE_FHIR_enable #}
 
-
 {% if LFH_FHIR_enable | default(false) %}
   #  ================================== LinuxForHealth (IBM) FHIR Server ========================================== #
   lfh-fhir:
@@ -18731,12 +18731,16 @@ services:
     container_name: lfh-fhir
     hostname: lfh-fhir
     labels:
+      com.platys.name: "lfh-fhir"
       com.platys.restapi.title: "LinuxForHealth FHIR REST API"
       com.platys.restapi.url: "http://dataplatform:9443/fhir-server/api/v4/$healthcheck"
     ports:
       - "9443:9443"
     environment:
       BOOTSTRAP_DB: true
+      DISABLED_OPERATIONS: ''
+      FHIR_USER_PASSWORD: abc123!
+      FHIR_ADMIN_PASSWORD: abc123!
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -18747,6 +18751,51 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
 {% endif %}   {# LFH_FHIR_enable #}
+
+{% if FHIR_GATEWAY_enable | default(false) %}
+  #  ================================== fhir-gateway ========================================== #
+  fhir-gateway:
+    image: ghcr.io/miracum/fhir-gateway:{{__FHIR_GATWAY_version}}
+    container_name: fhir-gateway
+    hostname: fhir-gateway
+    labels:
+      com.platys.name: "fhir-gateway"
+#    depends_on:
+#      - loinc-converter
+#      - fhir-db
+#      - fhir-pseudonymizer
+    cap_drop:
+      - ALL
+    ipc: none
+    security_opt:
+      - "no-new-privileges:true"
+    read_only: true
+    tmpfs:
+      - /tmp
+    privileged: false
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://fhir-db:5432/fhir
+      SPRING_DATASOURCE_USERNAME: postgres
+      # kics-scan ignore-line
+      SPRING_DATASOURCE_PASSWORD: abc123!
+      SERVICES_PSEUDONYMIZER_ENABLED: {{FHIR_GATEWAY_pseudonymizer_enabled | default(false) }}
+      SERVICES_PSEUDONYMIZER_URL: http://fhir-pseudonymizer:8080/fhir
+      SERVICES_LOINC_CONVERSIONS_URL: http://loinc-converter:8080/api/v1
+      SERVICES_FHIRSERVER_URL: http://fhir-server:8080/fhir
+      SERVICES_FHIRSERVER_ENABLED: {{FHIR_GATEWAY_fhir_server_enabled | default(false) }}
+      SERVICES_PSQL_ENABLED: {{FHIR_GATEWAY_postgresql_enabled | default(false) }}
+      SERVICES_KAFKA_ENABLED: {{FHIR_GATEWAY_kafka_enabled | default(false) }}
+      BOOTSTRAP_SERVERS: {{ns.bootstrapServers}}
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+{% endif %}   {# FHIR_GATEWAY_enable #}
 
 {% if PROVISIONING_DATA_enable | default(false) %}
   #  ================================== data-provisioning ========================================== #
