@@ -125,6 +125,8 @@ networks:
 {% set __DATAHUB_version = DATAHUB_version | default('latest') -%}
 {% set __DATAHUB_ACTIONS_version = DATAHUB_ACTIONS_version | default('latest') -%}
 
+{% set __OPENMETADATA_version = OPENMETADATA_version | default('latest') -%}
+
 {% set __AMUNDSEN_FRONTEND_version = AMUNDSEN_FRONTEND_version | default('latest') -%}
 {% set __AMUNDSEN_SEARCH_version = AMUNDSEN_SEARCH_version | default('latest') -%}
 {% set __AMUNDSEN_METADATA_version = AMUNDSEN_METADATA_version | default('latest') -%}
@@ -6732,6 +6734,453 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  DATALAB_enable #}
+
+{% if OPENMETADATA_enable  | default(false) %}
+  #  ================================== OpenMetadata ========================================== #
+  openmetadata-migrate-all:
+    image: docker.getcollate.io/openmetadata/server:{{__OPENMETADATA_version}}
+    hostname: openmetadata-migrate-all
+    container_name: openmetadata-migrate-all
+    labels:
+      com.platys.name: "openmetadata"
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+    environment:
+      OPENMETADATA_CLUSTER_NAME: openmetadata
+      SERVER_PORT: 8585
+      SERVER_ADMIN_PORT: 8586
+      LOG_LEVEL: INFO
+
+      # Migration
+      MIGRATION_LIMIT_PARAM: 1200
+
+      # OpenMetadata Server Authentication Configuration
+      AUTHORIZER_CLASS_NAME: org.openmetadata.service.security.DefaultAuthorizer
+      AUTHORIZER_REQUEST_FILTER: org.openmetadata.service.security.JwtFilter
+      AUTHORIZER_ADMIN_PRINCIPALS: [admin]
+      AUTHORIZER_ALLOWED_REGISTRATION_DOMAIN: ["all"]
+      AUTHORIZER_INGESTION_PRINCIPALS: [ingestion-bot]
+      AUTHORIZER_PRINCIPAL_DOMAIN: "openmetadata.org"
+      AUTHORIZER_ENFORCE_PRINCIPAL_DOMAIN: false
+      AUTHORIZER_ENABLE_SECURE_SOCKET: false
+      AUTHENTICATION_PROVIDER: basic
+      AUTHENTICATION_RESPONSE_TYPE: id_token
+      CUSTOM_OIDC_AUTHENTICATION_PROVIDER_NAME: ""
+      AUTHENTICATION_PUBLIC_KEYS: [http://localhost:8585/api/v1/system/config/jwks]
+      AUTHENTICATION_AUTHORITY: https://accounts.google.com
+      AUTHENTICATION_CLIENT_ID: ""
+      AUTHENTICATION_CALLBACK_URL: ""
+      AUTHENTICATION_JWT_PRINCIPAL_CLAIMS: [email,preferred_username,sub]
+      AUTHENTICATION_ENABLE_SELF_SIGNUP: true
+
+      # JWT Configuration
+      RSA_PUBLIC_KEY_FILE_PATH: "./conf/public_key.der"
+      RSA_PRIVATE_KEY_FILE_PATH: "./conf/private_key.der"
+      JWT_ISSUER: "open-metadata.org"
+      JWT_KEY_ID: "Gb389a-9f76-gdjs-a92j-0242bk94356"
+      # OpenMetadata Server Pipeline Service Client Configuration
+      PIPELINE_SERVICE_CLIENT_ENDPOINT: http://openmetadata-ingestion:8080
+      PIPELINE_SERVICE_CLIENT_HEALTH_CHECK_INTERVAL: 300
+      SERVER_HOST_API_URL: http://openmetadata-server:8585/api
+      PIPELINE_SERVICE_CLIENT_VERIFY_SSL: "no-ssl"
+      PIPELINE_SERVICE_CLIENT_SSL_CERT_PATH: ""
+      # Database configuration for MySQL
+      DB_DRIVER_CLASS: com.mysql.cj.jdbc.Driver
+      DB_SCHEME: mysql
+      DB_PARAMS: allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
+      DB_USER: openmetadata_user
+      DB_USER_PASSWORD: abc123!
+      DB_HOST: openmetadata-mysql
+      DB_PORT: 3306
+      OM_DATABASE: openmetadata_db
+      # ElasticSearch Configurations
+      ELASTICSEARCH_HOST: openmetadata-elasticsearch
+      ELASTICSEARCH_PORT: 9200
+      ELASTICSEARCH_SCHEME: http
+      ELASTICSEARCH_USER: ""
+      ELASTICSEARCH_PASSWORD: ""
+      SEARCH_TYPE: "elasticsearch"
+      ELASTICSEARCH_TRUST_STORE_PATH: ""
+      ELASTICSEARCH_TRUST_STORE_PASSWORD: ""
+      ELASTICSEARCH_CONNECTION_TIMEOUT_SECS: 5
+      ELASTICSEARCH_SOCKET_TIMEOUT_SECS: 60
+      ELASTICSEARCH_KEEP_ALIVE_TIMEOUT_SECS: 600
+      ELASTICSEARCH_BATCH_SIZE: 10
+      ELASTICSEARCH_INDEX_MAPPING_LANG: EN
+
+      #eventMonitoringConfiguration
+      EVENT_MONITOR: prometheus
+      EVENT_MONITOR_BATCH_SIZE: 10
+      EVENT_MONITOR_PATH_PATTERN: ["/api/v1/tables/*", "/api/v1/health-check"]
+      EVENT_MONITOR_LATENCY: []
+
+      #pipelineServiceClientConfiguration
+      PIPELINE_SERVICE_CLIENT_ENABLED: true
+      PIPELINE_SERVICE_CLIENT_CLASS_NAME: "org.openmetadata.service.clients.pipeline.airflow.AirflowRESTClient"
+      PIPELINE_SERVICE_IP_INFO_ENABLED: false
+      PIPELINE_SERVICE_CLIENT_HOST_IP: ""
+      PIPELINE_SERVICE_CLIENT_SECRETS_MANAGER_LOADER: "noop"
+      #airflow parameters
+      AIRFLOW_USERNAME: admin
+      AIRFLOW_PASSWORD: admin
+      AIRFLOW_TIMEOUT: 10
+      AIRFLOW_TRUST_STORE_PATH: ""
+      AIRFLOW_TRUST_STORE_PASSWORD: ""
+      FERNET_KEY: jJ/9sz0g0OHxsfxOoSfdFdmk3ysNmPRnH3TUAbz3IHA=
+
+      #secretsManagerConfiguration
+      SECRET_MANAGER: db
+      #parameters:
+      OM_SM_REGION: ""
+      OM_SM_ACCESS_KEY_ID: ""
+      OM_SM_ACCESS_KEY: ""
+
+      #email configuration:
+      OM_EMAIL_ENTITY: "OpenMetadata"
+      OM_SUPPORT_URL: "https://slack.open-metadata.org"
+      AUTHORIZER_ENABLE_SMTP : false
+      OPENMETADATA_SERVER_URL: ""
+      OPENMETADATA_SMTP_SENDER_MAIL: ""
+      SMTP_SERVER_ENDPOINT: ""
+      SMTP_SERVER_PORT: ""
+      SMTP_SERVER_USERNAME: ""
+      SMTP_SERVER_PWD: ""
+      SMTP_SERVER_STRATEGY: "SMTP_TLS"
+
+      # Heap OPTS Configurations
+      OPENMETADATA_HEAP_OPTS: "--Xmx1G -Xms1G"
+      # Mask passwords values in UI
+      MASK_PASSWORDS_API: false
+
+      #OpenMetadata Web Configuration
+      WEB_CONF_URI_PATH: "/api"
+      #HSTS
+      WEB_CONF_HSTS_ENABLED: false
+      WEB_CONF_HSTS_MAX_AGE: "365 days"
+      WEB_CONF_HSTS_INCLUDE_SUBDOMAINS: true
+      WEB_CONF_HSTS_PRELOAD: "true"
+      #Frame Options
+      WEB_CONF_FRAME_OPTION_ENABLED: false
+      WEB_CONF_FRAME_OPTION: "SAMEORIGIN"
+      WEB_CONF_FRAME_ORIGIN: ""
+      #Content Type
+      WEB_CONF_CONTENT_TYPE_OPTIONS_ENABLED: false
+      #XSS-Protection
+      WEB_CONF_XSS_PROTECTION_ENABLED: false
+      WEB_CONF_XSS_PROTECTION_ON: true
+      WEB_CONF_XSS_PROTECTION_BLOCK: true
+      #CSP
+      WEB_CONF_XSS_CSP_ENABLED: false
+      WEB_CONF_XSS_CSP_POLICY: "default-src 'self'"
+      WEB_CONF_XSS_CSP_REPORT_ONLY_POLICY: ""
+
+      #Referrer-Policy
+      WEB_CONF_REFERRER_POLICY_ENABLED: false
+      WEB_CONF_REFERRER_POLICY_OPTION: "SAME_ORIGIN"
+      #Permission-Policy
+      WEB_CONF_PERMISSION_POLICY_ENABLED: false
+      WEB_CONF_PERMISSION_POLICY_OPTION: ""
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    command: "./bootstrap/openmetadata-ops.sh migrate"
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    init: true
+
+  openmetadata-server:
+    image: docker.getcollate.io/openmetadata/server:{{__OPENMETADATA_version}}
+    hostname: openmetadata-server
+    container_name: openmetadata-server
+    labels:
+      com.platys.name: "openmetadata"
+      com.platys.webui.title: "OpenMetadata UI"
+      com.platys.webui.url: "https://dataplatform:8585"
+    expose:
+      - 8585
+      - 8586
+    ports:
+      - "8585:8585"
+      - "8586:8586"
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+      openmetadata-migrate-all:
+        condition: service_completed_successfully
+    environment:
+      OPENMETADATA_CLUSTER_NAME: openmetadata
+      SERVER_PORT: 8585
+      SERVER_ADMIN_PORT: 8586
+      LOG_LEVEL: INFO
+
+      # OpenMetadata Server Authentication Configuration
+      AUTHORIZER_CLASS_NAME: org.openmetadata.service.security.DefaultAuthorizer
+      AUTHORIZER_REQUEST_FILTER: org.openmetadata.service.security.JwtFilter
+      AUTHORIZER_ADMIN_PRINCIPALS: [admin]
+      AUTHORIZER_ALLOWED_REGISTRATION_DOMAIN: ["all"]
+      AUTHORIZER_INGESTION_PRINCIPALS: [ingestion-bot]
+      AUTHORIZER_PRINCIPAL_DOMAIN: "openmetadata.org"
+      AUTHORIZER_ENFORCE_PRINCIPAL_DOMAIN: false
+      AUTHORIZER_ENABLE_SECURE_SOCKET: false
+      AUTHENTICATION_PROVIDER: basic
+      AUTHENTICATION_RESPONSE_TYPE: id_token
+      CUSTOM_OIDC_AUTHENTICATION_PROVIDER_NAME: ""
+      AUTHENTICATION_PUBLIC_KEYS: [http://localhost:8585/api/v1/system/config/jwks]
+      AUTHENTICATION_AUTHORITY: https://accounts.google.com
+      AUTHENTICATION_CLIENT_ID: ""
+      AUTHENTICATION_CALLBACK_URL: ""
+      AUTHENTICATION_JWT_PRINCIPAL_CLAIMS: [email,preferred_username,sub]
+      AUTHENTICATION_ENABLE_SELF_SIGNUP: true
+
+      # JWT Configuration
+      RSA_PUBLIC_KEY_FILE_PATH: "./conf/public_key.der"
+      RSA_PRIVATE_KEY_FILE_PATH: "./conf/private_key.der"
+      JWT_ISSUER: "open-metadata.org"
+      JWT_KEY_ID: "Gb389a-9f76-gdjs-a92j-0242bk94356"
+      # OpenMetadata Server Pipeline Service Client Configuration
+      PIPELINE_SERVICE_CLIENT_ENDPOINT: http://openmetadata-ingestion:8080
+      PIPELINE_SERVICE_CLIENT_HEALTH_CHECK_INTERVAL: 300
+      SERVER_HOST_API_URL: http://openmetadata-server:8585/api
+      PIPELINE_SERVICE_CLIENT_VERIFY_SSL: "no-ssl"
+      PIPELINE_SERVICE_CLIENT_SSL_CERT_PATH: ""
+      # Database configuration for MySQL
+      DB_DRIVER_CLASS: com.mysql.cj.jdbc.Driver
+      DB_SCHEME: mysql
+      DB_PARAMS: allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
+      DB_USER: openmetadata_user
+      DB_USER_PASSWORD: abc123!
+      DB_HOST: openmetadata-mysql
+      DB_PORT: 3306
+      OM_DATABASE: openmetadata_db
+      # ElasticSearch Configurations
+      ELASTICSEARCH_HOST: openmetadata-elasticsearch
+      ELASTICSEARCH_PORT: 9200
+      ELASTICSEARCH_SCHEME: http
+      ELASTICSEARCH_USER: ""
+      ELASTICSEARCH_PASSWORD: ""
+      SEARCH_TYPE: "elasticsearch"
+      ELASTICSEARCH_TRUST_STORE_PATH: ""
+      ELASTICSEARCH_TRUST_STORE_PASSWORD: ""
+      ELASTICSEARCH_CONNECTION_TIMEOUT_SECS: 5
+      ELASTICSEARCH_SOCKET_TIMEOUT_SECS: 60
+      ELASTICSEARCH_KEEP_ALIVE_TIMEOUT_SECS: 600
+      ELASTICSEARCH_BATCH_SIZE: 10
+      ELASTICSEARCH_INDEX_MAPPING_LANG: EN
+
+      #eventMonitoringConfiguration
+      EVENT_MONITOR: prometheus
+      EVENT_MONITOR_BATCH_SIZE: 10
+      EVENT_MONITOR_PATH_PATTERN: ["/api/v1/tables/*", "/api/v1/health-check"]
+      EVENT_MONITOR_LATENCY: []
+
+      #pipelineServiceClientConfiguration
+      PIPELINE_SERVICE_CLIENT_ENABLED: true
+      PIPELINE_SERVICE_CLIENT_CLASS_NAME: "org.openmetadata.service.clients.pipeline.airflow.AirflowRESTClient"
+      PIPELINE_SERVICE_IP_INFO_ENABLED: false
+      PIPELINE_SERVICE_CLIENT_HOST_IP: ""
+      PIPELINE_SERVICE_CLIENT_SECRETS_MANAGER_LOADER: "noop"
+      #airflow parameters
+      AIRFLOW_USERNAME: admin
+      AIRFLOW_PASSWORD: admin
+      AIRFLOW_TIMEOUT: 10
+      AIRFLOW_TRUST_STORE_PATH: ""
+      AIRFLOW_TRUST_STORE_PASSWORD: ""
+      FERNET_KEY: jJ/9sz0g0OHxsfxOoSfdFdmk3ysNmPRnH3TUAbz3IHA=
+
+      #secretsManagerConfiguration
+      SECRET_MANAGER: db
+      #parameters:
+      OM_SM_REGION: ""
+      OM_SM_ACCESS_KEY_ID: ""
+      OM_SM_ACCESS_KEY: ""
+
+      #email configuration:
+      OM_EMAIL_ENTITY: "OpenMetadata"
+      OM_SUPPORT_URL: "https://slack.open-metadata.org"
+      AUTHORIZER_ENABLE_SMTP : false
+      OPENMETADATA_SERVER_URL: ""
+      OPENMETADATA_SMTP_SENDER_MAIL: ""
+      SMTP_SERVER_ENDPOINT: ""
+      SMTP_SERVER_PORT: ""
+      SMTP_SERVER_USERNAME: ""
+      SMTP_SERVER_PWD: ""
+      SMTP_SERVER_STRATEGY: "SMTP_TLS"
+
+      # Heap OPTS Configurations
+      OPENMETADATA_HEAP_OPTS: "--Xmx1G -Xms1G"
+      # Mask passwords values in UI
+      MASK_PASSWORDS_API: false
+
+      #OpenMetadata Web Configuration
+      WEB_CONF_URI_PATH: "/api"
+      #HSTS
+      WEB_CONF_HSTS_ENABLED: false
+      WEB_CONF_HSTS_MAX_AGE: "365 days"
+      WEB_CONF_HSTS_INCLUDE_SUBDOMAINS: true
+      WEB_CONF_HSTS_PRELOAD: "true"
+      #Frame Options
+      WEB_CONF_FRAME_OPTION_ENABLED: false
+      WEB_CONF_FRAME_OPTION: "SAMEORIGIN"
+      WEB_CONF_FRAME_ORIGIN: ""
+      #Content Type
+      WEB_CONF_CONTENT_TYPE_OPTIONS_ENABLED: false
+      #XSS-Protection
+      WEB_CONF_XSS_PROTECTION_ENABLED: false
+      WEB_CONF_XSS_PROTECTION_ON: true
+      WEB_CONF_XSS_PROTECTION_BLOCK: true
+      #CSP
+      WEB_CONF_XSS_CSP_ENABLED: false
+      WEB_CONF_XSS_CSP_POLICY: "default-src 'self'"
+      WEB_CONF_XSS_CSP_REPORT_ONLY_POLICY: ""
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    healthcheck:
+      test: [ "CMD", "wget", "-q", "--spider",  "http://localhost:8586/healthcheck" ]
+
+  openmetadata-mysql:
+    hostname: openmetadata-mysql
+    container_name: openmetadata-mysql
+    image: docker.getcollate.io/openmetadata/db:1.4.0-SNAPSHOT
+    labels:
+      com.platys.name: "mysql"
+    expose:
+      - 3306
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {% if OPENMETADATA_volume_map_data %}
+      - ./container-volume/openmetadata/mysql:/var/lib/mysql
+    {% endif %}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    command: "--sort_buffer_size=10M"
+    restart: {{container_restart_policy}}
+    healthcheck:
+      test: mysql --user=root --password=$$MYSQL_ROOT_PASSWORD --silent --execute "use openmetadata_db"
+      interval: 15s
+      timeout: 10s
+      retries: 10
+
+  openmetadata-elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.10.2
+    hostname: openmetadata-elasticsearch
+    container_name: openmetadata-elasticsearch
+    labels:
+      com.platys.name: "elasticsearch"
+    ports:
+      - "19203:9200"
+    environment:
+      - discovery.type=single-node
+      - ES_JAVA_OPTS=-Xms1024m -Xmx1024m
+      - xpack.security.enabled=false
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {% if OPENMETADATA_volume_map_data %}
+      - ./container-volume/openmetadata/elasticsearch:/usr/share/elasticsearch/data
+    {% endif %}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+    healthcheck:
+      test: "curl -s http://localhost:9200/_cluster/health?pretty | grep status | grep -qE 'green|yellow' || exit 1"
+      interval: 15s
+      timeout: 10s
+      retries: 10
+
+  openmetadata-ingestion:
+    image: docker.getcollate.io/openmetadata/ingestion:{{__OPENMETADATA_version}}
+    hostname: openmetadata-ingestion
+    container_name: openmetadata-ingestion
+    depends_on:
+      elasticsearch:
+        condition: service_started
+      mysql:
+        condition: service_healthy
+      openmetadata-server:
+        condition: service_started
+    labels:
+      com.platys.name: "openmetadata"
+      com.platys.webui.title: "OpenMetadata Ingestion UI"
+      com.platys.webui.url: "https://dataplatform:28337"
+    expose:
+      - 8080
+    ports:
+      - "28337:8080"
+    environment:
+      AIRFLOW__API__AUTH_BACKENDS: "airflow.api.auth.backend.basic_auth,airflow.api.auth.backend.session"
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__OPENMETADATA_AIRFLOW_APIS__DAG_GENERATED_CONFIGS: "/opt/airflow/dag_generated_configs"
+      DB_HOST: openmetadata-mysql
+      DB_PORT: 3306
+      AIRFLOW_DB: airflow_db
+      DB_SCHEME: mysql+pymysql
+      DB_USER: airflow_user
+      DB_PASSWORD: abc123!
+      # extra connection-string properties for the database
+      # EXAMPLE
+      # require SSL (only for Postgres)
+      # properties: "?sslmode=require"
+      DB_PROPERTIES: ""
+      # To test the lineage backend
+      # AIRFLOW__LINEAGE__BACKEND: airflow_provider_openmetadata.lineage.backend.OpenMetadataLineageBackend
+      # AIRFLOW__LINEAGE__AIRFLOW_SERVICE_NAME: local_airflow
+      # AIRFLOW__LINEAGE__OPENMETADATA_API_ENDPOINT: http://openmetadata-server:8585/api
+      # AIRFLOW__LINEAGE__JWT_TOKEN: ...
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./container-volume/openmetadata/ingestion/config:/opt/airflow/dag_generated_configs
+      - ./container-volume/openmetadata/ingestion/dags:/opt/airflow/dags
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    entrypoint: /bin/bash
+    command:
+      - "/opt/airflow/ingestion_dependency.sh"
+    restart: {{container_restart_policy}}
+{% endif %}   {#  OPENMETADATA_enable #}
 
 {% if AMUNDSEN_enable  | default(false) %}
   #  ================================== Amundsen ========================================== #

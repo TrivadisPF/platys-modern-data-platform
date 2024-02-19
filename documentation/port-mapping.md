@@ -181,6 +181,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 8443 | 8443 | kong (proxy ssl) |
 8444 | 8444 | kong (admin api ssl) |
 8446 | 8443 | curity |
+8585 | 8585 | openmetadata-server |
+8586 | 8586 | openmetadata-server |
 8761 | 8761 | ioevent-cockpit-api |
 8787 | 8787 | r-studio |
 8812 | 8812 | questdb |
@@ -301,6 +303,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 19200 | 9200 | elasticsearch-atlas |
 19201 | 9200 | amundsen-elasticsearch |
 19202 | 9200 | datahub-elasticsearch |
+19203 | 9200 | openmetadata-elasticsearch |
 19092 | 19092 | kafka-1 (docker-host)   |
 19093 | 19093 | kafka-2 (docker-host    |
 19094 | 19094 | kafka-3 (docker-host)   |
@@ -566,6 +569,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28334 | 80 | tooljet |
 28335 | 8080 | fhir-gateway |
 28336 | 8080 | hapi-fhir |
+28337 | 8080 | openmetadata-ingestion |
 
 ## Ports > 28500
 
