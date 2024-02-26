@@ -255,6 +255,8 @@ networks:
 {% set __OPTUNA_version = OPTUNA_version | default('latest') -%}
 {% set __OPTUNA_DASHBOARD_version = OPTUNA_DASHBOARD_version | default('latest') -%}
 
+{% set __MINDSDB_version = MINDSDB_version | default('latest') -%}
+
 {% set __LITELLM_version = LITELLM_version | default('latest') -%}
 
 {% set __KIE_SERVER_version = KIE_SERVER_version | default('latest') -%}
@@ -660,6 +662,8 @@ networks:
   {% set SHINY_SERVER_enable = false -%}
   {% set MLFLOW_SERVER_enable = false -%}
   {% set OPTUNA_enable = false -%}
+  {% set MINDSDB_enable = false -%}
+  {% set LITELLM_enable = false -%}
   {% set DATAIKU_DSS_enable = false -%}
   {% set KIE_SERVER_enable = false -%}
   {% set METABASE_enable = false -%}
@@ -10397,6 +10401,50 @@ services:
   {% endif %}   {# OPTUNA_DASHBOARD_enable  #}
 {% endif %}   {# OPTUNA_enable  #}
 
+
+{%if MINDSDB_enable | default(false) %}
+  #  ================================== MindsDB  ========================================== #
+  mindsdb:
+    image: mindsdb/mindsdb:{{__MINDSDB_version}}
+    container_name: mindsdb
+    hostname: mindsdb
+    labels:
+      com.platys.name: 'mindsdb'
+      com.platys.webui.title: "MindsDB UI"
+      com.platys.webui.url: "http://dataplatform:47334"
+      com.platys.restapi.title: "MindsDB API"
+      com.platys.restapi.url: "http://dataplatform:47334/v1/api/api/databases"
+    ports:
+      - 47334:47334
+      - 47335:47335
+      - 47336:47336
+    environment:
+      MINDSDB_DOCKER_ENV: "true"
+      MINDSDB_STORAGE_DIR: /mindsdb/var
+      FLASK_DEBUG: 1
+      MINDSDB_LOG_LEVEL: "INFO"
+      #OPENAI_API_KEY:
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    command: bash -c "watchfiles --filter python 'python -m mindsdb' ."
+    restart: {{container_restart_policy}}
+    healthcheck:
+      test:  ["CMD", "curl", "-f", "http://localhost:47334/api/util/ping"]
+      interval: 30s
+      timeout: 4s
+      retries: 100
+{% endif %}   {# MINDSDB_enable  #}
+
 {%if LITELLM_enable | default(false) %}
   #  ================================== LiteLLM  ========================================== #
   litellm:
@@ -10406,7 +10454,7 @@ services:
     labels:
       com.platys.name: 'litellm'
       com.platys.restapi.title: "LiteLLM API"
-      com.platys.restapi.url: "http://dataplatform:11434/business-central"
+      com.platys.restapi.url: "http://dataplatform:11434"
     ports:
       - 11434:11434
     extra_hosts:

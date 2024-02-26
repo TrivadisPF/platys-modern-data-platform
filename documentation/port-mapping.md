@@ -355,6 +355,9 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 39097 | 29097 | kafka-6 (localhost)   |
 39098 | 29098 | kafka-7 (localhost)   |
 39099 | 29099 | kafka-8 (localhost)   |
+47334 | 47334 | mindsdb |
+47335 | 47335 | mindsdb |
+47336 | 47336 | mindsdb |
 78 | 45678 | dremio |
 61613 | 61613 | activemq (stomp) |
 61614 | 61614 | activemq (ws) |
