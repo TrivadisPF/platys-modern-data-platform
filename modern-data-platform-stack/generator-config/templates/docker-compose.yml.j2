@@ -258,6 +258,8 @@ networks:
 {% set __MINDSDB_version = MINDSDB_version | default('latest') -%}
 
 {% set __OLLAMA_version = OLLAMA_version | default('latest') -%}
+{% set __OLLAMA_WEBUI_version = OLLAMA_WEBUI_version | default('latest') -%}
+
 {% set __LITELLM_version = LITELLM_version | default('latest') -%}
 
 {% set __KIE_SERVER_version = KIE_SERVER_version | default('latest') -%}
@@ -10475,6 +10477,37 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {# OLLAMA_enable  #}
 
+{%if OLLAMA_WEBUI_enable | default(false) %}
+  #  ================================== Ollama WebUI  ========================================== #
+  ollama-webui:
+    image: ghcr.io/open-webui/open-webui:{{__OLAMA_WEBUI_version}}
+    container_name: ollama-webui
+    hostname: ollama-webui
+    labels:
+      com.platys.name: 'ollama-webui'
+      com.platys.webui.title: "Ollama Web UI"
+      com.platys.webui.url: "http://dataplatform:28338"
+    ports:
+      - 28338:8080
+    environment:
+      OLLAMA_API_BASE_URL: http://ollama:11434/api
+      WEBUI_SECRET_KEY:
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      # - ./container-volumes/ollama-webui:/app/backend/data
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+{% endif %}   {# OLLAMA_WEBUI_enable  #}
+
 {%if LITELLM_enable | default(false) %}
   #  ================================== LiteLLM  ========================================== #
   litellm:
@@ -10506,6 +10539,7 @@ services:
     entrypoint: []
     restart: {{container_restart_policy}}
 {% endif %}   {# LITELLM_enable  #}
+
 
 {%if KIE_SERVER_enable | default(false) %}
   #  ================================== Drools KIE Server  ========================================== #

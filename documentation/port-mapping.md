@@ -575,6 +575,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28335 | 8080 | fhir-gateway |
 28336 | 8080 | hapi-fhir |
 28337 | 8080 | openmetadata-ingestion |
+28338 | 8080 | ollama-webui |
 
 ## Ports > 28500
 
