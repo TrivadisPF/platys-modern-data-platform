@@ -47,6 +47,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Styra Enterprise OPA
  * ToolJet
  * Miracum FHIR Gateway
+ * LiteLLM
 
 ### Removed Services
  

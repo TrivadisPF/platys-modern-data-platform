@@ -255,6 +255,8 @@ networks:
 {% set __OPTUNA_version = OPTUNA_version | default('latest') -%}
 {% set __OPTUNA_DASHBOARD_version = OPTUNA_DASHBOARD_version | default('latest') -%}
 
+{% set __LITELLM_version = LITELLM_version | default('latest') -%}
+
 {% set __KIE_SERVER_version = KIE_SERVER_version | default('latest') -%}
 
 {% set __PROMTAIL_version = PROMTAIL_version | default('latest') -%}
@@ -6773,7 +6775,6 @@ services:
       AUTHENTICATION_AUTHORITY: "https://accounts.google.com"
       AUTHENTICATION_CLIENT_ID: ""
       AUTHENTICATION_CALLBACK_URL: ""
-      AUTHENTICATION_JWT_PRINCIPAL_CLAIMS1: [\"email\",\"preferred_username\",\"sub\"]
       AUTHENTICATION_JWT_PRINCIPAL_CLAIMS: ["\"email\"","\"preferred_username\"","\"sub\""]
       AUTHENTICATION_ENABLE_SELF_SIGNUP: true
 
@@ -10337,8 +10338,6 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
-
-
 {% endif %}   {#  MLFLOW_SERVER_enable  #}
 
 {% if (OPTUNA_enable) | default(false) %}
@@ -10397,6 +10396,38 @@ services:
     restart: {{container_restart_policy}}
   {% endif %}   {# OPTUNA_DASHBOARD_enable  #}
 {% endif %}   {# OPTUNA_enable  #}
+
+{%if LITELLM_enable | default(false) %}
+  #  ================================== LiteLLM  ========================================== #
+  litellm:
+    image: ghcr.io/berriai/litellm:{{__LITELLM_version}}
+    container_name: litellm
+    hostname: litellm
+    labels:
+      com.platys.name: 'litellm'
+      com.platys.restapi.title: "LiteLLM API"
+      com.platys.restapi.url: "http://dataplatform:11434/business-central"
+    ports:
+      - 11434:11434
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    command: ["/bin/sh", "-c", "pip install async_generator && litellm --model ollama/llama2 --api_base http://host.docker.internal:11434 --host 0.0.0.0 --port 11434"]
+    entrypoint: []
+    restart: {{container_restart_policy}}
+{% endif %}   {# LITELLM_enable  #}
 
 {%if KIE_SERVER_enable | default(false) %}
   #  ================================== Drools KIE Server  ========================================== #
@@ -12386,6 +12417,11 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
+    healthcheck:
+        test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider localhost:7474 || exit 1"]
+        interval: 15s
+        timeout: 30s
+        retries: 10
 {% endif %}   {#  NEO4J_enable #}
 
 {% if QUINE_enable | default(false) %}
