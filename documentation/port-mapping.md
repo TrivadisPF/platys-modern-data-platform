@@ -260,7 +260,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 10007 | 10000 | nifi-3 |
 11211 | 11211 | memcached |
 11212 | 11211 | ignite-1 |
-11434 | 11434 | litellm |
+11434 | 11434 | ollama |
+11435 | 11434 | litellm |
 12222 | 2222 | risingwave |
 13133 | 13133 | otel-collector |
 14250 | 14250 | jaeger (model.proto port)

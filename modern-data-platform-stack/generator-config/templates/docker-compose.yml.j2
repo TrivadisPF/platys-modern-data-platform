@@ -10444,6 +10444,36 @@ services:
       retries: 100
 {% endif %}   {# MINDSDB_enable  #}
 
+{%if OLLAMA_enable | default(false) %}
+  #  ================================== Ollama  ========================================== #
+  ollama:
+    image: ollama/ollama:{{__OLLAMA_version}}
+    container_name: ollama
+    hostname: ollama
+    labels:
+      com.platys.name: 'ollama'
+      com.platys.restapi.title: "Ollama API"
+      com.platys.restapi.url: "http://dataplatform:11434"
+    ports:
+      - 11434:11434
+    tty: true
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      #- ./container-volumes/ollama/data:/root/.ollama
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+{% endif %}   {# OLLAMA_enable  #}
+
 {%if LITELLM_enable | default(false) %}
   #  ================================== LiteLLM  ========================================== #
   litellm:
@@ -10453,9 +10483,9 @@ services:
     labels:
       com.platys.name: 'litellm'
       com.platys.restapi.title: "LiteLLM API"
-      com.platys.restapi.url: "http://dataplatform:11434"
+      com.platys.restapi.url: "http://dataplatform:11435"
     ports:
-      - 11434:11434
+      - 11435:11434
     extra_hosts:
       - "host.docker.internal:host-gateway"
     {%if use_timezone | default(false) %}
