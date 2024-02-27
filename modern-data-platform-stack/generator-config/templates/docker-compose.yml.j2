@@ -10424,7 +10424,7 @@ services:
       MINDSDB_DOCKER_ENV: "True"
       #MINDSDB_STORAGE_DIR: /mindsdb/var
       FLASK_DEBUG: 1
-      MINDSDB_LOG_LEVEL: "INFO"
+      MINDSDB_LOG_LEVEL: "DEBUG"
       #OPENAI_API_KEY:
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
@@ -10456,7 +10456,7 @@ services:
     labels:
       com.platys.name: 'ollama'
       com.platys.restapi.title: "Ollama API"
-      com.platys.restapi.url: "http://dataplatform:11434"
+      com.platys.restapi.url: "http://dataplatform:11434/api/tags"
     ports:
       - 11434:11434
     tty: true
@@ -10475,7 +10475,7 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
-
+  {%if OLAMA_llm is defined and OLAMA_llm and OLAMA_llm | length %}
   ollama-pull-model:
     image: genai-stack/pull-model:latest
     container_name: ollama-pull-model
@@ -10487,6 +10487,7 @@ services:
       - OLLAMA_BASE_URL=http://ollama:11434
       - LLM={{OLAMA_llm}}
     tty: true
+  {% endif -%}   {#  OLAMA_llm is defined ... #}
 {% endif %}   {# OLLAMA_enable  #}
 
 {%if OLLAMA_WEBUI_enable | default(false) %}
@@ -10517,7 +10518,7 @@ services:
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
-    restart: {{container_restart_policy}}
+    init: true
 {% endif %}   {# OLLAMA_WEBUI_enable  #}
 
 {%if LITELLM_enable | default(false) %}
