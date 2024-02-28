@@ -329,6 +329,8 @@ networks:
 
 {% set __QUESTDB_version = QUESTDB_version | default('latest') -%}
 
+{% set __CHROMA_version = CHROMA_version | default('latest') -%}
+
 {% set __KUDU_version = KUDU_version | default('latest') -%}
 
 {% set __DRUID_version = DRUID_version | default('latest') -%}
@@ -13131,6 +13133,38 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
 {% endif %}   {# KUDU_enable #}
+
+{% if CHROMA_enable | default(false) %}
+  #  ================================== Chroma VectorDB ========================================== #
+  chroma:
+    image: ghcr.io/chroma-core/chroma:{{__CHROMA_version}}
+    container_name: chroma
+    hostname: chroma
+    labels:
+      com.platys.name: "chroma"
+      com.platys.restapi.title: "Chroma API"
+      com.platys.restapi.url: "http://dataplatform:28339/docs"
+    ports:
+      - "28339:8000"
+    evironment:
+      IS_PERSISTENT: true
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {% if CHROMA_volume_map_data %}
+      - "./container-volume/chroma/data:/chroma/chroma/"
+    {% endif %}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  CHROMA_enable #}
 
 {% if DRUID_enable | default(false) %}
   #  ================================== Druid ========================================== #
