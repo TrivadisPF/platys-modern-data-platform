@@ -333,6 +333,8 @@ networks:
 
 {% set __CHROMA_version = CHROMA_version | default('latest') -%}
 
+{% set __MILVUS_version = MILVUS_version | default('latest') -%}
+
 {% set __KUDU_version = KUDU_version | default('latest') -%}
 
 {% set __DRUID_version = DRUID_version | default('latest') -%}
@@ -10561,7 +10563,6 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {# LITELLM_enable  #}
 
-
 {%if FLOWISE_enable | default(false) %}
   #  ================================== Flowise AI  ========================================== #
   flowise:
@@ -13243,6 +13244,40 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  CHROMA_enable #}
+
+{% if MILVUS_enable | default(false) %}
+  #  ================================== Milvus VectorDB ========================================== #
+  milvus:
+    image: milvusdb/milvus:{{__MILVUS_version}}
+    container_name: milvus
+    hostname: milvus
+    labels:
+      com.platys.name: "milvus"
+    ports:
+      # grpc
+      - "28341:19530"
+      # metrics
+      - "28342:9091"
+    environment:
+      ETCD_ENDPOINTS: etcd-1:2379
+      MINIO_ADDRESS: minio-1:9000
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {% if MILVUS_volume_map_data %}
+      - "./container-volume/milvus/data:/var/lib/milvus"
+    {% endif %}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  MILVUS_enable #}
 
 {% if DRUID_enable | default(false) %}
   #  ================================== Druid ========================================== #

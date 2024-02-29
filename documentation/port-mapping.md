@@ -578,6 +578,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28338 | 8080 | ollama-webui |
 28339 | 8000 | chroma |
 28340 | 3000 | flowise |
+28341 | 19530 | milvus (grpc) |
+28342 | 9091 | milvus (metric) |
 
 ## Ports > 28500
 
