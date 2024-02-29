@@ -10581,18 +10581,27 @@ services:
       FLOWISE_USERNAME: {{FLOWISE_username}}
       FLOWISE_PASSWORD: {{FLOWISE_password}}
       FLOWISE_FILE_SIZE_LIMIT: 50mb
-      DEBUG: false
-      DATABASE_TYPE: posgres
+      DEBUG: {{FLOWISE_debug | default(false) }}
+      DATABASE_TYPE: {{FLOWISE_database_type}}
+  {% if (FLOWISE_database_type | lower) == 'mysql' %}
+      DATABASE_PORT: 3306
+      DATABASE_HOST: mysql
+      DATABASE_NAME: {{FLOWISE_database_name}}
+      DATABASE_USER: {{FLOWISE_database_user}}
+      DATABASE_PASSWORD: {{FLOWISE_database_password}}
+  {% endif -%}   {#  FLOWISE_database_type == mysql #}
+  {% if (FLOWISE_database_type | lower) == 'postgres' %}
       DATABASE_PORT: 5432
       DATABASE_HOST: postgresql-1
-      DATABASE_NAME: flowise
-      DATABASE_USER: flowise
-      DATABASE_PASSWORD: abc123!
+      DATABASE_NAME: {{FLOWISE_database_name}}
+      DATABASE_USER: {{FLOWISE_database_user}}
+      DATABASE_PASSWORD: {{FLOWISE_database_password}}
+  {% endif -%}   {#  FLOWISE_database_type == postgres #}
       # DATABASE_SSL:
       # DATABASE_SSL_KEY_BASE64:
       # FLOWISE_SECRETKEY_OVERWRITE=${FLOWISE_SECRETKEY_OVERWRITE}
-      LOG_LEVEL: info
-      DISABLE_FLOWISE_TELEMETRY: true
+      LOG_LEVEL: {{FLOWISE_log_level | default(info) }}
+      DISABLE_FLOWISE_TELEMETRY: {{FLOWISE_disable_telemetry}}
     {% if FLOWISE_volume_map_data %}
       DATABASE_PATH: /root/.flowise
       APIKEY_PATH: /root/.flowise
