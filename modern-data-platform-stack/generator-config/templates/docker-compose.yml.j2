@@ -334,6 +334,7 @@ networks:
 {% set __CHROMA_version = CHROMA_version | default('latest') -%}
 
 {% set __MILVUS_version = MILVUS_version | default('latest') -%}
+{% set __ATTU_version = ATTU_version | default('latest') -%}
 
 {% set __KUDU_version = KUDU_version | default('latest') -%}
 
@@ -13277,6 +13278,37 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
+
+  {% if ATTU_enable | default(false) %}
+  attu:
+    image: zilliz/attu:{{__ATTU_version}}
+    container_name: attu
+    hostname: attu
+    labels:
+      com.platys.name: "attu"
+      com.platys.webui.title: "Attu UI"
+      com.platys.webui.url: "http://dataplatform:28343"
+    ports:
+      - "28343:3000"
+    environment:
+      MILVUS_URL: milvus:19530
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {% if MILVUS_volume_map_data %}
+      - "./container-volume/milvus/data:/var/lib/milvus"
+    {% endif %}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+  {% endif %}   {#  ATTU_enable #}
 {% endif %}   {#  MILVUS_enable #}
 
 {% if DRUID_enable | default(false) %}

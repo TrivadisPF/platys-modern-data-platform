@@ -52,7 +52,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Ollama
  * Ollama WebUI
  * Chroma
- * Milvus
+ * Milvus & Attu
  * Flowise
 
 ### Removed Services
