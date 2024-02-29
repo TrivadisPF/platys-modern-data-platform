@@ -262,6 +262,8 @@ networks:
 
 {% set __LITELLM_version = LITELLM_version | default('latest') -%}
 
+{% set __FLOWISE_version = FLOWISE_version | default('latest') -%}
+
 {% set __KIE_SERVER_version = KIE_SERVER_version | default('latest') -%}
 
 {% set __PROMTAIL_version = PROMTAIL_version | default('latest') -%}
@@ -669,6 +671,7 @@ networks:
   {% set OPTUNA_enable = false -%}
   {% set MINDSDB_enable = false -%}
   {% set LITELLM_enable = false -%}
+  {% set FLOWISE_enable = false -%}
   {% set DATAIKU_DSS_enable = false -%}
   {% set KIE_SERVER_enable = false -%}
   {% set METABASE_enable = false -%}
@@ -10555,6 +10558,61 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {# LITELLM_enable  #}
 
+
+{%if FLOWISE_enable | default(false) %}
+  #  ================================== Flowise AI  ========================================== #
+  flowise:
+    image: flowiseai/flowise:{{__FLOWISE_version}}
+    container_name: flowise
+    hostname: flowise
+    labels:
+      com.platys.name: 'flowise'
+      com.platys.webui.title: "Flowise UI"
+      com.platys.webui.url: "http://dataplatform:28340"
+    ports:
+      - 28340:3000
+    environment:
+      PORT: 3000
+      CORS_ORIGINS: "*"
+      IFRAME_ORIGINS: "*"
+      FLOWISE_USERNAME: {{FLOWISE_username}}
+      FLOWISE_PASSWORD: {{FLOWISE_password}}
+      FLOWISE_FILE_SIZE_LIMIT: 50mb
+      DEBUG: false
+      DATABASE_PATH: /root/.flowise
+      DATABASE_TYPE: posgres
+      DATABASE_PORT: 5432
+      DATABASE_HOST: postgresql-1
+      DATABASE_NAME: flowise
+      DATABASE_USER: flowise
+      DATABASE_PASSWORD: abc123!
+      # DATABASE_SSL:
+      # DATABASE_SSL_KEY_BASE64:
+      APIKEY_PATH: /root/.flowise
+      SECRETKEY_PATH: /root/.flowise
+      # FLOWISE_SECRETKEY_OVERWRITE=${FLOWISE_SECRETKEY_OVERWRITE}
+      LOG_LEVEL: info
+      LOG_PATH: /root/.flowise/logs
+      BLOB_STORAGE_PATH: /root/.flowise/storage
+      DISABLE_FLOWISE_TELEMETRY: true
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {% if FLOWISE_volume_map_data %}
+      - ./container-volumes/flowise/data:/root/.flowise
+    {% endif -%}   {#  FLOWISE_volume_map_data #}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    command: /bin/sh -c "sleep 3; flowise start"
+    restart: {{container_restart_policy}}
+{% endif %}   {# FLOWISE_enable  #}
 
 {%if KIE_SERVER_enable | default(false) %}
   #  ================================== Drools KIE Server  ========================================== #

@@ -577,6 +577,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28337 | 8080 | openmetadata-ingestion |
 28338 | 8080 | ollama-webui |
 28339 | 8000 | chroma |
+28340 | 3000 | flowise |
 
 ## Ports > 28500
 
