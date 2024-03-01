@@ -1,5 +1,7 @@
 #!/bin/sh
 
+apt update
+
 pip3 install --upgrade pip
 pip3 install --no-cache-dir streamlit
 
