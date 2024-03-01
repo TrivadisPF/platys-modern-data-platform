@@ -11508,7 +11508,7 @@ services:
 
 {% if STREAMLIT_enable | default(false) %}
   #  ================================== Streamlit ========================================== #
-  {% for app in range(STREAMLIT_apps.split(",") | count ) %}
+  {% for num in range(STREAMLIT_apps.split(",") | count ) %}
     {% set external_port = 28345 + loop.index - 1 %}
   streamlit-{{loop.index}}:
     image: {{STREAMLIT_image}}:{{__STREAMLIT_python_version}}
@@ -11548,9 +11548,9 @@ services:
         pip install {{STREAMLIT_python_packages}}
     {% endif -%}   {#  PYTHON_python_packages #}
     {% if STREAMLIT_requirements_file is defined and STREAMLIT_requirements_file and STREAMLIT_requirements_file|length %}
-        /app/run_pip_and_streamlit.sh /tmp/{{app}} /tmp/{{STREAMLIT_requirements_file}}
+        /app/run_pip_and_streamlit.sh /tmp/{{STREAMLIT_apps.split(",")[loop.index-1]}} /tmp/{{STREAMLIT_requirements_file}}
     {% else %}
-        /app/run_pip_and_streamlit.sh /tmp/{{app}}
+        /app/run_pip_and_streamlit.sh /tmp/{{STREAMLIT_apps.split(",")[loop.index-1]}}
     {% endif -%}   {#  PYTHON_requirements_file #}
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
     <<: *logging
