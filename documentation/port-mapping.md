@@ -581,6 +581,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28341 | 19530 | milvus (grpc) |
 28342 | 9091 | milvus (metric) |
 28343 | 3000 | attu |
+28344 | | ?
+28345 | 80 | streamlit-1 |
 
 ## Ports > 28500
 
