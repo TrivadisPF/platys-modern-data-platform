@@ -676,6 +676,9 @@ networks:
   {% set MLFLOW_SERVER_enable = false -%}
   {% set OPTUNA_enable = false -%}
   {% set MINDSDB_enable = false -%}
+  {% set OLLAMA_enable = false -%}
+  {% set OLLAMA_WEBUI_enable = false -%}
+  {% set ANYTHING_LLM_enable = false -%}
   {% set LITELLM_enable = false -%}
   {% set FLOWISE_enable = false -%}
   {% set DATAIKU_DSS_enable = false -%}
@@ -1111,6 +1114,14 @@ networks:
 {% else %}
     {% set ns.gmsUrl = 'http://datahub-gms:8080' %}
 {% endif %}   {# external['DATAHUB_enable'] #}
+
+{#  ================================== Datahub Settings ========================================== #}
+
+{% if (external['OLLAMA_enable']) | default(false) %}
+    {% set ns.ollamaUrl = external['OLLAMA_url'] %}
+{% else %}
+    {% set ns.ollamaUrl = 'http://ollama:11434' %}
+{% endif %}   {# external['OLLAMA_enable'] #}
 
 {#  ================================== Extension Fields ========================================== #}
 
@@ -10567,7 +10578,7 @@ services:
       context: ./dockerfiles/genai-stack
       dockerfile: pull_model.Dockerfile
     environment:
-      - OLLAMA_BASE_URL=http://ollama:11434
+      - OLLAMA_BASE_URL={{ns.ollamaUrl}}
       - LLM={{OLLAMA_llm}}
     tty: true
     init: true
@@ -10587,7 +10598,7 @@ services:
     ports:
       - 28338:8080
     environment:
-      OLLAMA_API_BASE_URL: http://ollama:11434/api
+      OLLAMA_API_BASE_URL: {{ns.ollamaUrl}}/api
       WEBUI_SECRET_KEY:
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
@@ -10620,7 +10631,7 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
     environment:
-      OLLAMA_BASE_PATH: http://ollama:11434/api
+      OLLAMA_BASE_PATH: {{ns.ollamaUrl}}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
