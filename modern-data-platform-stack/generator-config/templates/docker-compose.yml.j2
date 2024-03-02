@@ -10702,6 +10702,8 @@ services:
       com.platys.webui.url: "http://dataplatform:28340"
     ports:
       - 28340:3000
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     environment:
       PORT: 3000
       CORS_ORIGINS: "*"
@@ -13410,6 +13412,12 @@ services:
       - "28339:8000"
     environment:
       IS_PERSISTENT: true
+      PERSIST_DIRECTORY: /chroma/chroma
+    {% if CHROMA_auth_token is defined and CHROMA_auth_token and CHROMA_auth_token | length | default(false) %}
+      CHROMA_SERVER_AUTH_CREDENTIALS: {{CHROMA_auth_token}}
+      CHROMA_SERVER_AUTH_CREDENTIALS_PROVIDER: "chromadb.auth.token.TokenConfigServerAuthCredentialsProvider"
+      CHROMA_SERVER_AUTH_PROVIDER: "chromadb.auth.token.TokenAuthServerProvider"
+    {% endif -%}   {#  CHROMA_auth_token #}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
