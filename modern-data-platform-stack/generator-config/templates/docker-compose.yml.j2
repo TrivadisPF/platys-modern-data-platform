@@ -10603,6 +10603,44 @@ services:
     init: true
 {% endif %}   {# OLLAMA_WEBUI_enable  #}
 
+{%if ANYTHING_LLM_enable | default(false) %}
+  #  ================================== Anything LLM  ========================================== #
+  anything-llm:
+    image: mintplexlabs/anythingllm:{{__ANYTHING_LLM_version}}
+    container_name: anything-llm
+    hostname: anything-llm
+    labels:
+      com.platys.name: 'anything-llm'
+      com.platys.webui.title: "Anything LLM"
+      com.platys.webui.url: "http://dataplatform:28344"
+    ports:
+      - 28344:3001
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      OLLAMA_BASE_PATH: http://ollama:11434/api
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {% if ANYTHING_LLM_volume_map_dotenv %}
+      - ./custom-conf/anything-llm/.env:/app/server/.env"
+    {% endif %}
+    {% if ANYTHING_LLM_volume_map_data %}
+      - ./container-volumes/anything-llm/storage:/app/server/storage
+      - ./container-volumes/anything-llm/hotdir:/app/collector/hotdir
+      - ./container-volumes/anything-llm/outputs:/app/collector/outputs
+    {% endif %}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+{% endif %}   {# ANYTHING_LLM_enable  #}
+
 {%if LITELLM_enable | default(false) %}
   #  ================================== LiteLLM  ========================================== #
   litellm:
