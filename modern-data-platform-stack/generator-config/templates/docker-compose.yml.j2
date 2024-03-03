@@ -5723,7 +5723,7 @@ services:
       com.platys.name: 'hive-metastore'
       com.platys.description: "Hive Metastore DB"
     environment:
-    {%if use_timezone | default(false) %}      
+    {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
@@ -10682,7 +10682,17 @@ services:
       dockerfile: pull_model.Dockerfile
     environment:
       - OLLAMA_BASE_URL={{ns.ollamaUrl}}
-      - LLMS={{OLLAMA_llms}}
+    entrypoint:
+      # In the command section, $ are replaced with $$ to avoid the error 'Invalid interpolation format for "command" option'
+      - bash
+      - -c
+      - |
+        echo "Installing LLMs"
+        for llm in $$(echo "{{OLLAMA_llms}}" | sed "s/,/ /g")
+        do
+          export LLM="$$llm"
+          bb -f pull_model.clj "$$llm"
+        done
     tty: true
     init: true
   {% endif -%}   {#  OLLAMA_llm is defined ... #}
