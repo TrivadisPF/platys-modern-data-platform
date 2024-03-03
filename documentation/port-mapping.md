@@ -71,6 +71,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 3306 | 3306 | mysql |
 3307 | 3306 | datahub-mysql |
 3333 | 3333 | taskcafe |
+3355 | 3355 | vector-admin | 
 3838 | 3838 | shiny-server |
 4000 | 4000 | graphql-mesh |
 4004 | 4004 | log4brains |
@@ -178,6 +179,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 8161 | 8161 | activemq |
 8182 | 8182 | janusgraph |
 8200 | 8200 | vault |
+8288 | 8288 | vector-admin |
 8443 | 8443 | kong (proxy ssl) |
 8444 | 8444 | kong (admin api ssl) |
 8446 | 8443 | curity |
@@ -587,6 +589,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28347 | 80 | streamlit-3 |
 28348 | 80 | streamlit-4 |
 28349 | 80 | streamlit-5 |
+28350 | 3001 | vector-admin |
 
 ## Ports > 28500
 

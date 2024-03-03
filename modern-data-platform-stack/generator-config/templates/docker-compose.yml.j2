@@ -339,6 +339,8 @@ networks:
 {% set __MILVUS_version = MILVUS_version | default('latest') -%}
 {% set __ATTU_version = ATTU_version | default('latest') -%}
 
+{% set __VECTOR_ADMIN_version = VECTOR_ADMIN_version | default('latest') -%}
+
 {% set __KUDU_version = KUDU_version | default('latest') -%}
 
 {% set __DRUID_version = DRUID_version | default('latest') -%}
@@ -706,6 +708,9 @@ networks:
   {% set QUESTDB_enable = false -%}
   {% set KUDU_enable = false -%}
   {% set CHROMA_enable = false -%}
+  {% set MILVUS_enable = false -%}
+  {% set ATTU_enable = false -%}
+  {% set VECTOR_ADMIN_enable = false -%}  
   {% set DRUID_enable = false -%}
   {% set PINOT_enable = false -%}
   {% set IGNITE_enable = false -%}
@@ -13503,6 +13508,45 @@ services:
     restart: {{container_restart_policy}}
   {% endif %}   {#  ATTU_enable #}
 {% endif %}   {#  MILVUS_enable #}
+
+{% if VECTOR_ADMIN_enable | default(false) %}
+  vector-admin:
+    image: mintplexlabs/vectoradmin:{{__VECTOR_ADMIN_version}}
+    container_name: vector-admin
+    hostname: vector-admin
+    labels:
+      com.platys.name: "vector-admin"
+      com.platys.webui.title: "Vector Admin UI"
+      com.platys.webui.url: "http://dataplatform:28350"
+    ports:
+      - "28350:3001"
+      - "3355:3355"
+      - "8288:8288"
+    environment:
+      SERVER_PORT: 3001
+      DATABASE_CONNECTION_STRING: "postgresql://vectoradmin:abc123!@postgresql:5432/vectoradmindb"
+      STORAGE_DIR: "./backend/storage"
+      JWT_SECRET: abc123!
+      INNGEST_LANDING_PAGE: true
+      INNGEST_EVENT_KEY: background_workers
+      INNGEST_SIGNING_KEY: random-string-goes-here
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {% if MILVUS_volume_map_data %}
+      - "./container-volume/milvus/data:/var/lib/milvus"
+    {% endif %}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  VECTOR_ADMIN_enable #}
 
 {% if DRUID_enable | default(false) %}
   #  ================================== Druid ========================================== #
