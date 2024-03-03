@@ -56,6 +56,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Flowise
  * Streamlit Applications
  * Anything LLM
+ * Vector Admin
 
 ### Removed Services
  
