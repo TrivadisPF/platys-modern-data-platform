@@ -77,7 +77,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Update `starbrustdata` to `429-e`
  * Update `jikkou` to `0.21.0`
  * Update `minio` to `RELEASE.2023-11-01T18-37-25Z`
- * Update `nifi` to `1.24.0`
+ * Update `nifi` to `1.25.0`
  * Update `ksqldb` to `0.29.0`
  * Update `datahub` to `v0.12.1`
  * Update `Confluent Platform` to `7.6.0`
@@ -124,6 +124,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * removed JAR's from the plugin folder to decrease the size of the docker image
  * added multi-arch docker build to also build the docker image of the generator as an arm64 type
  * the "preview" version is no longer tagged as `1.nn.nn-preview` but as `develop`, so to get the development version, just use `platys init -n demo-platform --stack trivadis/platys-modern-data-platform --stack-version develop --structure flat`
+ * Add property (`NIFI_major_version`) to chose between NiFi Version 1 and Version 2
 
 ### Breaking Changes
 
