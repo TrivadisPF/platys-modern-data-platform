@@ -70,6 +70,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 3200 | 3200 | tempo |
 3306 | 3306 | mysql |
 3307 | 3306 | datahub-mysql |
+3308 | 3306 | single-store |
 3333 | 3333 | taskcafe |
 3355 | 3355 | vector-admin | 
 3838 | 3838 | shiny-server |
@@ -590,6 +591,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28348 | 80 | streamlit-4 |
 28349 | 80 | streamlit-5 |
 28350 | 3001 | vector-admin |
+28351 | 8000 | single-store |
+28352 | 9000 | single-store |
 
 ## Ports > 28500
 

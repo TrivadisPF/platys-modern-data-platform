@@ -14286,6 +14286,45 @@ services:
 
 {% endif %}   {#  YUGABYTE_enable #}
 
+
+{% if SINGLE_STORE_enable | default(false) %}
+  #  ================================== SingleStore ========================================== #
+  single-store:
+    image: ghcr.io/singlestore-labs/singlestoredb-dev:{{__SINGLE_STORE_version}}
+    container_name: single-store
+    hostname: single-store
+    labels:
+      com.platys.name: "single-store"
+      com.platys.description: "Distributed SQL database"
+      com.platys.webui.title: "SingleStore Studio UI"
+      com.platys.webui.url: "http://dataplatform:28351"
+      com.platys.restapi.title: "SingleStore Data API"
+      com.platys.restapi.url: "http://dataplatform:28352"
+    ports:
+      - 3308:3306
+      - 28351:8080
+      - 28352:9000
+    environment:
+      - SINGLESTORE_LICENSE={{SINGLE_STORE_license}}
+      - ROOT_PASSWORD=abc123!
+      - INIT_SQL=/tmp/init/init.sql
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./init/single-store/:/tmp/init
+      #- my_cool_volume:/data
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  SINGLE_STORE_enable #}
+
 {% if ORACLE_EE_enable | default(false) %}
   #  ================================== Oracle EE ========================================== #
   oracledb-ee:
