@@ -1,16 +1,14 @@
-# Tile38
+# yugabyteDB
 
-Fast Geospatial Database & Geofencing Server.
+YugabyteDB - the cloud native distributed SQL database for mission-critical applications.
 
-**[Website](https://tile38.com/)** | **[Documentation](https://tile38.com/topics/installation)** | **[GitHub](https://github.com/tidwall/tile38)**
+**[Website](https://www.yugabyte.com)** | **[Documentation](https://docs.yugabyte.com)** | **[GitHub](https://github.com/yugabyte/yugabyte-db)**
 
 ## How to enable?
 
 ```
-platys init --enable-services TILE38
+platys init --enable-services YUGABYTE
 platys gen
 ```
 
 ## How to use it?
-
-Navigate to <http://dataplatform:9851>
