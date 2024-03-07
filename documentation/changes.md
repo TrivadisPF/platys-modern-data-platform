@@ -58,6 +58,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Anything LLM
  * Vector Admin
  * SingleStore
+ * Qdrant
 
 ### Removed Services
  

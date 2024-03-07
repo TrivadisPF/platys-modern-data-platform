@@ -125,6 +125,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 6060 | 6060 | zeppelin |
 6066 | 6066 | spark-master |
 6080 | 6080 | ranger-admin |
+6333 | 6333 | qdrant |
+6334 | 6334 | qdrant |
 6379 | 6379 | redis-1 |
 6380 | 6379 | redis-replica-1 |
 6381 | 6379 | redis-replica-1 |

@@ -336,6 +336,8 @@ networks:
 
 {% set __CHROMA_version = CHROMA_version | default('latest') -%}
 
+{% set __QDRANT_version = QDRANT_version | default('latest') -%}
+
 {% set __MILVUS_version = MILVUS_version | default('latest') -%}
 {% set __ATTU_version = ATTU_version | default('latest') -%}
 
@@ -13553,6 +13555,41 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  CHROMA_enable #}
+
+{% if QDRANT_enable | default(false) %}
+  #  ================================== Qdrant VectorDB ========================================== #
+  qdrant:
+    image: qdrant/qdrant:{{__QDRANT_version}}
+    container_name: qdrant
+    hostname: qdrant
+    labels:
+      com.platys.name: "qdrant"
+      com.platys.webui.title: "Qdrant UI"
+      com.platys.webui.url: "http://dataplatform:6333/dashboard"
+      com.platys.restapi.title: "Qdrant API"
+      com.platys.restapi.url: "http://dataplatform:6333"
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    environment:
+      IS_PERSISTENT: true
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {% if QDRANT_volume_map_data %}
+      - "./container-volume/qdrant/data:/qdrant/storage"
+    {% endif %}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  QDRANT_enable #}
 
 {% if MILVUS_enable | default(false) %}
   #  ================================== Milvus VectorDB ========================================== #
