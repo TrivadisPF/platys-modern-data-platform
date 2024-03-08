@@ -595,6 +595,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28350 | 3001 | vector-admin |
 28351 | 8000 | single-store |
 28352 | 9000 | single-store |
+28353 | 8000 | gpt-researcher |
 
 ## Ports > 28500
 
