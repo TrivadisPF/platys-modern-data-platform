@@ -10715,6 +10715,53 @@ services:
   {% endif -%}   {#  OLLAMA_llm is defined ... #}
 {% endif %}   {# OLLAMA_enable  #}
 
+{%if LOCAL_AI_enable | default(false) %}
+  #  ================================== LocalAI  ========================================== #
+  local-ai:
+    image: localai/localai:{{__LOCAL_AI_version}}
+  {% if LOCAL_AI_gpu_enabled | default(false) %}
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+  {% endif -%}    {# OLLAMA_gpu_enabled  #}
+    container_name: local-ai
+    hostname: local-ai
+    labels:
+      com.platys.name: 'local-ai'
+      com.platys.description: "Locally runs large language models"
+      com.platys.restapi.title: "LocalAI API"
+      com.platys.restapi.url: "http://dataplatform:28356"
+    ports:
+      - 28356:8080
+    environment:
+      CONTEXT_SIZE: 512
+      MODELS_PATH: /models
+      IMAGE_PATH: /tmp
+      DEBUG: true
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {% if LOCAL_AI_volume_map_data %}
+      ./container-volumes/local-ai/models:/models:cached
+      ./container-volumes/local-ai/images:/tmp/generated/images/
+    {% endif %}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+
+{% endif %}   {# LOCAL_AI_enable  #}
+
 {%if OLLAMA_WEBUI_enable | default(false) %}
   #  ================================== Ollama WebUI  ========================================== #
   ollama-webui:

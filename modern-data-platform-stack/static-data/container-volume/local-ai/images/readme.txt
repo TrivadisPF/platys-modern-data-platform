@@ -1,0 +1,1 @@
+Contains the generated images of LocalAI service, if flag LOCAL_AI_volume_map_data is set to true.

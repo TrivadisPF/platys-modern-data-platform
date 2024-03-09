@@ -600,6 +600,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28353 | 8000 | gpt-researcher |
 28354 | 8080 | weaviate |
 28355 | 3000 | big-agi |
+28356 | 8080 | local-ai |
 
 ## Ports > 28500
 
