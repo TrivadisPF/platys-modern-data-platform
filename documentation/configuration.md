@@ -1390,6 +1390,7 @@ For each service there might be some other settings, such as controlling the num
 | `MARKDOWN_VIEWER_use_port_80` | `true` 	| 1.10.0 	| Use Port `80` for the markdown viewer? If set to `false`, port `8008` is used. |
 | `MARKDOWN_VIEWER_use_public_ip` | `true` 	| 1.10.0 	| When rendering markdown pages, use the public IP address for links to services. If set to `false`, the docker host IP is used instead. |
 | `MARKDOWN_VIEWER_edition` | `markdown-madness` 	| 1.17.0 	| The markdown "engine" to use, either `markdown-web` or `markdown-madness`. |
+| `MARKDOWN_VIEWER_services_list_version` | `2` 	| 1.17.0 	| The version of the Services list to render. Either `1` (original) or `2` (with ports). |
 | [**_log4brains_**](./services/log4brains.md) &nbsp;&nbsp;&nbsp;&nbsp;![x86-64](./images/x86-64.png)                   	|         	|       	|                                                                                                                                                                                     	|             	
 | `LOG4BRAINS_enable` | `true` 	| 1.11.0 	| Generate log4brains service. |
 | `LOG4BRAINS_repository_name` | `trivadis` 	| 1.11.0 	| The repository name part of the log4brains docker image which should be used  |
