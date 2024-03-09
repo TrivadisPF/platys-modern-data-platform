@@ -61,6 +61,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Qdrant
  * Redis Stack
  * Weaviate
+ * Big-AGI
 
 ### Removed Services
  
