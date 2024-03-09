@@ -1,0 +1,48 @@
+# {{environ('PLATYS_PLATFORM_NAME')}} - List of Services
+
+| Service | External<br>Port | Internal<br>Port | Description
+|--------------|------|------|------------
+{%- for service in services.items() | sort() %}
+{%- if service[1].init is not defined %}
+| {%- if service[1].labels and service[1].labels['com.platys.name'] is defined -%} [{{ service[0]}}](./documentation/services/{{service[1].labels['com.platys.name'] }} ) {%- else -%} {{ service[0]}} {%- endif -%}  
+| {%- if service[1].labels -%}
+  {%- for label,value in service[1].labels.items() -%}
+    {%- if label == 'com.platys.webui.title' -%}
+      [{{value}}]
+    {%- endif -%}
+  {%- endfor -%}
+  {%- for label,value in service[1].labels.items() -%}
+    {%- if label == 'com.platys.webui.url' -%}
+      {%- if environ('USE_PUBLIC_IP') == 'True' -%}
+ ({{ value | replace ('dataplatform', environ('PUBLIC_IP'))}})
+      {%- else -%}
+ ({{ value | replace ('dataplatform', environ('DOCKER_HOST_IP'))}})
+      {%- endif -%}
+    {%- endif -%}
+  {%- endfor -%} &nbsp;&nbsp;
+  {%- for label,value in service[1].labels.items() -%}
+    {%- if label == 'com.platys.restapi.title' -%}
+      [{{value}}]
+    {%- endif -%}
+  {%- endfor -%}
+  {%- for label,value in service[1].labels.items() -%}
+    {%- if label == 'com.platys.restapi.url' -%}
+      {%- if environ('USE_PUBLIC_IP') == 'True' -%}
+({{ value | replace ('dataplatform', environ('PUBLIC_IP'))}})
+      {%- else -%}
+({{ value | replace ('dataplatform', environ('DOCKER_HOST_IP'))}})
+      {%- endif -%}
+    {%- endif -%}
+  {%- endfor -%}
+ {%- endif -%}
+|{%- for port in service[1].ports -%}
+{{port.split(':')[0]}}<br>
+  {%- endfor -%}
+|{%- for port in service[1].ports -%}
+{{port.split(':')[1]}}<br>
+  {%- endfor -%}
+| {%- if service[1].labels and service[1].labels['com.platys.description'] is defined -%} {{service[1].labels['com.platys.description'] }} {%- endif -%} 
+{%- endif -%} 
+{%- endfor -%} |
+
+**Note:** init container ("init: true") are not shown
