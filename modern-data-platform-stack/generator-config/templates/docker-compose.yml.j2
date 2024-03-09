@@ -291,7 +291,7 @@ networks:
 {% set __MEMCACHED_version = MEMCACHED_version | default('latest') -%}
 
 {% set __REDIS_version = REDIS_version | default('latest') -%}
-{% set __REDIS_SERVER_version = REDIS_SERVER_version | default('latest') -%}
+{% set __REDIS_STACK_version = REDIS_STACK_version | default('latest') -%}
 {% set __REDIS_EXPORTER_version = REDIS_EXPORTER_version | default('latest') -%}
 {% set __REDIS_INSIGHT_version = REDIS_INSIGHT_version | default('latest') -%}
 {% set __REDIS_COMMANDER_version = REDIS_COMMANDER_version | default('latest') -%}
@@ -11989,18 +11989,18 @@ services:
   {% endfor %}
 {% endif %}   {#  REDIS_enable #}
 
-{% if REDIS_SERVER_enable | default(false) %}
+{% if REDIS_STACK_enable | default(false) %}
   #  ================================== Redis Server ========================================== #
-  redis-server-1:
-    image: redis/redis-stack-server:{{__REDIS_SERVER_version}}
-    hostname: redis-server-1
-    container_name: redis-server-1
+  redis-stack-1:
+    image: redis/redis-stack-server:{{__REDIS_STACK_version}}
+    hostname: redis-stack-1
+    container_name: redis-stack-1
     labels:
-      com.platys.name: "redis-server"
+      com.platys.name: "redis-stack"
     ports:
       - 6385:6379
     environment:
-      - REDIS_ARGS="--requirepass {{REDIS_SERVER_password}}"
+      - REDIS_ARGS="--requirepass {{REDIS_STACK_password}}"
       - REDISEARCH_ARGS=
       - REDISJSON_ARGS=
       - REDISGRAPH_ARGS=
@@ -12011,8 +12011,8 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
-    {% if REDIS_SERVER_volume_map_data %}
-      - "./container-volume/redis-server/data:/data"
+    {% if REDIS_STACK_volume_map_data %}
+      - "./container-volume/redis-stack/data:/data"
     {% endif %}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
@@ -12022,7 +12022,7 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
-{% endif %}   {#  REDIS_SERVER_enable #}
+{% endif %}   {#  REDIS_STACK_enable #}
 
 {% if REDIS_EXPORTER_enable | default(false) %}
   #  ================================== Redis Exporter ========================================== #

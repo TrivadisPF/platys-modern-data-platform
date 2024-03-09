@@ -1,1 +1,0 @@
-Contains the data of redis-server service, if flag REDIS_SERVER_volume_map_data is set to true.

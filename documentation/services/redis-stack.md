@@ -1,4 +1,4 @@
-# Redis Server
+# Redis Stack
 
 A Redis server with additional database capabilities powered by Redis modules. 
 
@@ -7,7 +7,7 @@ A Redis server with additional database capabilities powered by Redis modules.
 ## How to enable?
 
 ```
-platys init --enable-services REDIS_SERVER
+platys init --enable-services REDIS_STACK
 platys gen
 ```
 

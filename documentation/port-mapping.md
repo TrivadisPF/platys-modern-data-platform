@@ -131,7 +131,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 6380 | 6379 | redis-replica-1 |
 6381 | 6379 | redis-replica-2 |
 6382 | 6379 | redis-replica-3 |
-6385 | 6379 | redis-server-1 |
+6385 | 6379 | redis-stack-1 |
 6385 | 6379 | redash-redis |
 6386 | 6379 | tyk-redis |
 6570 | 6570 | hserver-1 |
