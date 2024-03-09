@@ -599,6 +599,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28352 | 9000 | single-store |
 28353 | 8000 | gpt-researcher |
 28354 | 8080 | weaviate |
+28355 | 3000 | big-agi |
 
 ## Ports > 28500
 

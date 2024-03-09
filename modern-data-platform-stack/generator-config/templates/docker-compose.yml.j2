@@ -262,6 +262,8 @@ networks:
 
 {% set __ANYTHING_LLM_version = ANYTHING_LLM_version | default('latest') -%}
 
+{% set __BIG_AGI_version = BIG_AGI_version | default('latest') -%}
+
 {% set __LITELLM_version = LITELLM_version | default('latest') -%}
 
 {% set __FLOWISE_version = FLOWISE_version | default('latest') -%}
@@ -689,6 +691,7 @@ networks:
   {% set OLLAMA_enable = false -%}
   {% set OLLAMA_WEBUI_enable = false -%}
   {% set ANYTHING_LLM_enable = false -%}
+  {% set BIG_AGI_enable = false -%}
   {% set LITELLM_enable = false -%}
   {% set FLOWISE_enable = false -%}
   {% set DATAIKU_DSS_enable = false -%}
@@ -10781,6 +10784,40 @@ services:
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+{% endif %}   {# ANYTHING_LLM_enable  #}
+
+{%if BIG_AGI_enable | default(false) %}
+  #  ================================== Big-AGI  ========================================== #
+  big-agi:
+    image: ghcr.io/enricoros/big-agi:{{__BIG_AGI_version}}
+    container_name: big-agi
+    hostname: big-agi
+    labels:
+      com.platys.name: 'big-agi'
+      com.platys.description: "Personal AI application powered by LLMs"
+      com.platys.webui.title: "Big-AGI UI"
+      com.platys.webui.url: "http://dataplatform:28355"
+    ports:
+      - 28355:3000
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      OLLAMA_API_HOST: {{ns.ollamaUrl}}
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    command: [ "next", "start", "-p", "3000" ]
+    restart: {{container_restart_policy}}
 {% endif %}   {# ANYTHING_LLM_enable  #}
 
 {%if LITELLM_enable | default(false) %}
