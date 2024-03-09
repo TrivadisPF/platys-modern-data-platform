@@ -1,0 +1,1 @@
+Contains the data of Weaviate vector db service, if flag WEAVIATE_volume_map_data is set to true.

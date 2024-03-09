@@ -365,7 +365,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 47334 | 47334 | mindsdb |
 47335 | 47335 | mindsdb |
 47336 | 47336 | mindsdb |
-78 | 45678 | dremio |
+45678 | 45678 | dremio |
+50051 | 50051 | weaviate |
 61613 | 61613 | activemq (stomp) |
 61614 | 61614 | activemq (ws) |
 61616 | 61616 | activemq (jms) |
@@ -597,6 +598,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28351 | 8000 | single-store |
 28352 | 9000 | single-store |
 28353 | 8000 | gpt-researcher |
+28354 | 8080 | weaviate |
 
 ## Ports > 28500
 
