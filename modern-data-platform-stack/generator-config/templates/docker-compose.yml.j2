@@ -291,6 +291,7 @@ networks:
 {% set __MEMCACHED_version = MEMCACHED_version | default('latest') -%}
 
 {% set __REDIS_version = REDIS_version | default('latest') -%}
+{% set __REDIS_SERVER_version = REDIS_SERVER_version | default('latest') -%}
 {% set __REDIS_EXPORTER_version = REDIS_EXPORTER_version | default('latest') -%}
 {% set __REDIS_INSIGHT_version = REDIS_INSIGHT_version | default('latest') -%}
 {% set __REDIS_COMMANDER_version = REDIS_COMMANDER_version | default('latest') -%}
@@ -11986,8 +11987,45 @@ services:
       timeout: 3s
       retries: 5
   {% endfor %}
+{% endif %}   {#  REDIS_enable #}
 
-  {% if REDIS_EXPORTER_enable | default(false) %}
+{% if REDIS_SERVER_enable | default(false) %}
+  #  ================================== Redis Server ========================================== #
+  redis-server-1:
+    image: redis/redis-stack-server:{{__REDIS_SERVER_version}}
+    hostname: redis-server-1
+    container_name: redis-server-1
+    labels:
+      com.platys.name: "redis-server"
+    ports:
+      - 6385:6379
+    environment:
+      - REDIS_ARGS="--requirepass {{REDIS_SERVER_password}}"
+      - REDISEARCH_ARGS=
+      - REDISJSON_ARGS=
+      - REDISGRAPH_ARGS=
+      - REDISTIMESERIES_ARGS=
+      - REDISBLOOM_ARGS=
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {% if REDIS_SERVER_volume_map_data %}
+      - "./container-volume/redis-server/data:/data"
+    {% endif %}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  REDIS_SERVER_enable #}
+
+{% if REDIS_EXPORTER_enable | default(false) %}
+  #  ================================== Redis Exporter ========================================== #
   redis-exporter:
     image: bitnami/redis-exporter:{{__REDIS_EXPORTER_version}}
     container_name: redis-exporter
@@ -12035,8 +12073,7 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
-  {% endif %}   {#  REDIS_EXPORTER_enable #}
-{% endif %}   {#  REDIS_enable #}
+{% endif %}   {#  REDIS_EXPORTER_enable #}
 
 {% if REDIS_INSIGHT_enable | default(false) %}
   #  ================================== Redis Insight ========================================== #
