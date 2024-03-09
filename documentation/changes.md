@@ -60,6 +60,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * SingleStore
  * Qdrant
  * Redis Stack
+ * Weaviate
 
 ### Removed Services
  
@@ -128,6 +129,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * added multi-arch docker build to also build the docker image of the generator as an arm64 type
  * the "preview" version is no longer tagged as `1.nn.nn-preview` but as `develop`, so to get the development version, just use `platys init -n demo-platform --stack trivadis/platys-modern-data-platform --stack-version develop --structure flat`
  * Add property (`NIFI_major_version`) to chose between NiFi Version 1 and Version 2
+ * Markdown-Viewer service comes with a redesigned service list now also visualising the exposed ports and the description of each service. This is `v2`, you can switch back to `v1` by configuring `MARKDOWN_VIEWER_services_list_version` and set it to `1`.
 
 ### Breaking Changes
 
