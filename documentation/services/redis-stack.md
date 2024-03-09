@@ -13,8 +13,8 @@ platys gen
 
 ## How to use it?
 
-To connect to Redis Server over the Redis-CLI, use
+To connect to Redis Stack over the Redis-CLI, use
 
 ```
-docker exec -ti redis-server-1 redis-cli
+docker exec -ti redis-stack-1 redis-cli
 ```
