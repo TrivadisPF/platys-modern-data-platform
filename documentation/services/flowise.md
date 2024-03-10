@@ -14,3 +14,5 @@ platys gen
 ## How to use it?
 
 Navigate to <http://dataplatform:28340>.
+
+Login with username `flowise` and password `abc123!`.
