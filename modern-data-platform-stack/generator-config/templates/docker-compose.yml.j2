@@ -11110,6 +11110,7 @@ services:
       MB_DB_PASS: {{METABASE_mysql_password}}
       MB_DB_HOST: mysql
     {% endif -%}   {#  METABASE_db_type = postgres #}
+      MB_ENABLE_QUERY_CACHING: {{METABASE_query_caching_enabled}}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
       JAVA_TIMEZONE: {{use_timezone}}
@@ -15674,6 +15675,13 @@ services:
   {% if REDIS_STACK_enable | default(false) %}
       REDIS_TABLE_NAMES: '{{TRINO_redis_stack_table_names if TRINO_redis_stack_table_names is defined and TRINO_redis_stack_table_names and TRINO_redis_stack_table_names | length else '' }}'
       REDIS_NODES: redis-stack-1:6379
+
+      REDISEARCH_URI: redis://redis-stack-1:6379
+      REDISEARCH_USERNAME:
+      REDISEARCH_PASSWORD:
+      REDISEARCH_CASE_INSENSITIVE_NAMES: false
+      REDISEARCH_CURSOR_COUNT: 1000
+      REDISEARCH_DEFAULT_LIMIT: 10000
   {% endif %}
   {% if TRINO_event_listeners is defined and TRINO_event_listeners | length | default(false) %}
       EVENT_LISTENER_CONFIG_FILES: {{ns2.eventListnerPropertyFiles}}
@@ -15735,7 +15743,8 @@ services:
   {% endif %}
   {% if REDIS_STACK_enable | default(false) %}
       - './conf/{{conf_dir}}/catalog/redis-stack.properties:{{trino_etc_dir}}/catalog/redis-stack.properties'
-  {% endif %}
+      - './conf/{{conf_dir}}/catalog/redis-search.properties:{{trino_etc_dir}}/catalog/redis-search.properties'
+   {% endif %}
   {% if MONGO_enable | default(false) %}
       - './conf/{{conf_dir}}/catalog/mongo.properties:{{trino_etc_dir}}/catalog/mongo.properties'
   {% endif %}
@@ -15744,6 +15753,9 @@ services:
   {% endif %}
   {% if PINOT_enable | default(false) %}
       - './conf/{{conf_dir}}/catalog/pinot.properties:{{trino_etc_dir}}/catalog/pinot.properties'
+  {% endif %}
+  {% if DRUID_enable | default(false) %}
+      - './conf/{{conf_dir}}/catalog/druid.properties:{{trino_etc_dir}}/catalog/druid.properties'
   {% endif %}
   {% if TRINO_with_tpch_catalog | default(false) %}
       - './conf/{{conf_dir}}/catalog/tpch.properties:{{trino_etc_dir}}/catalog/tpch.properties'
@@ -15857,6 +15869,26 @@ services:
       ORACLE_USER: {{TRINO_oracle_user | default('demo') }}
       ORACLE_PASSWORD: {{TRINO_oracle_password | default('abc123!') }}
   {% endif %}
+  {% if REDIS_enable | default(false) %}
+      REDIS_TABLE_NAMES: '{{TRINO_redis_table_names if TRINO_redis_table_names is defined and TRINO_redis_table_names and TRINO_redis_table_names | length else '' }}'
+      REDIS_NODES: redis-1:6379
+  {% endif %}
+  {% if REDIS_STACK_enable | default(false) %}
+      REDIS_TABLE_NAMES: '{{TRINO_redis_stack_table_names if TRINO_redis_stack_table_names is defined and TRINO_redis_stack_table_names and TRINO_redis_stack_table_names | length else '' }}'
+      REDIS_NODES: redis-stack-1:6379
+
+      REDISEARCH_URI: redis://redis-stack-1:6379
+      REDISEARCH_USERNAME:
+      REDISEARCH_PASSWORD:
+      REDISEARCH_CASE_INSENSITIVE_NAMES: false
+      REDISEARCH_CURSOR_COUNT: 1000
+      REDISEARCH_DEFAULT_LIMIT: 10000
+  {% endif %}
+  {% if TRINO_event_listeners is defined and TRINO_event_listeners | length | default(false) %}
+      EVENT_LISTENER_CONFIG_FILES: {{ns2.eventListnerPropertyFiles}}
+  {% else %}
+      EVENT_LISTENER_CONFIG_FILES: ''
+  {% endif %}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -15898,6 +15930,13 @@ services:
   {% endif %}
   {% if ORACLE_EE_enable or ORACLE_XE_enable | default(false) %}
       - './conf/{{conf_dir}}/catalog/oracle.properties:{{trino_etc_dir}}/catalog/oracle.properties'
+  {% endif %}
+  {% if REDIS_enable | default(false) %}
+      - './conf/{{conf_dir}}/catalog/redis.properties:{{trino_etc_dir}}/catalog/redis.properties'
+  {% endif %}
+  {% if REDIS_STACK_enable | default(false) %}
+      - './conf/{{conf_dir}}/catalog/redis-stack.properties:{{trino_etc_dir}}/catalog/redis-stack.properties'
+      - './conf/{{conf_dir}}/catalog/redis-search.properties:{{trino_etc_dir}}/catalog/redis-search.properties'
   {% endif %}
   {% if MONGO_enable | default(false) %}
       - './conf/{{conf_dir}}/catalog/mongo.properties:{{trino_etc_dir}}/catalog/mongo.properties'
