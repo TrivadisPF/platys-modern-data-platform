@@ -15658,6 +15658,14 @@ services:
       ORACLE_USER: {{TRINO_oracle_user | default('demo') }}
       ORACLE_PASSWORD: {{TRINO_oracle_password | default('abc123!') }}
   {% endif %}
+  {% if REDIS_enable | default(false) %}
+      REDIS_TABLE_NAMES: {{TRINO_redis_table_names | default('demo') }}
+      REDIS_NODES: redis-1:6379
+  {% endif %}
+  {% if REDIS_STACK_enable | default(false) %}
+      REDIS_TABLE_NAMES: {{TRINO_redis_stack_table_names | default('demo') }}
+      REDIS_NODES: redis-stack-1:6379
+  {% endif %}
   {% if TRINO_event_listeners is defined and TRINO_event_listeners | length | default(false) %}
       EVENT_LISTENER_CONFIG_FILES: {{ns2.eventListnerPropertyFiles}}
   {% else %}
@@ -15712,6 +15720,12 @@ services:
   {% endif %}
   {% if ORACLE_EE_enable or ORACLE_XE_enable | default(false) %}
       - './conf/{{conf_dir}}/catalog/oracle.properties:{{trino_etc_dir}}/catalog/oracle.properties'
+  {% endif %}
+  {% if REDIS_enable | default(false) %}
+      - './conf/{{conf_dir}}/catalog/redis.properties:{{trino_etc_dir}}/catalog/redis.properties'
+  {% endif %}
+  {% if REDIS_STACK_enable | default(false) %}
+      - './conf/{{conf_dir}}/catalog/redis-stack.properties:{{trino_etc_dir}}/catalog/redis-stack.properties'
   {% endif %}
   {% if MONGO_enable | default(false) %}
       - './conf/{{conf_dir}}/catalog/mongo.properties:{{trino_etc_dir}}/catalog/mongo.properties'
