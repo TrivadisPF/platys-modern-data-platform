@@ -107,7 +107,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Update `telegraf` to `1.28`
  * Update `tile38` to `1.32.0`
  * Update `hasura` to `v2.35.1`
- * Update `materialize` to `v0.77.1`
+ * Update `materialize` to `v0.91.0`
  * Update `cadvisor` to `v0.47.2`
  * Update `portainer` to `2.19.4-alpine`
  * Update `elasticsearch` to `8.11.3`
