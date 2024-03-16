@@ -438,6 +438,7 @@ networks:
 {% set __ACTIVEMQ_CLASSIC_version = ACTIVEMQ_CLASSIC_version | default('latest') -%}
 {% set __ACTIVEMQ_ARTEMIS_version = ACTIVEMQ_ARTEMIS_version | default('latest') -%}
 {% set __RABBITMQ_version = RABBITMQ_version | default('latest') -%}
+{% set __SOLACE_version = SOLACE_version | default('latest') -%}
 
 {% set __PURE_FTPD_version = PURE_FTPD_version | default('latest') -%}
 {% set __SFTP_version = SFTP_version | default('latest') -%}
@@ -11083,6 +11084,7 @@ services:
     container_name: metabase
     labels:
       com.platys.name: "metabase"
+      com.platys.description: "Simple and powerful analytics tool"
       com.platys.webui.title: "Metabase UI"
       com.platys.webui.url: "http://dataplatform:28257"
     ports:
@@ -17864,7 +17866,7 @@ services:
 {% endif %}   {#  ACTIVEMQ_enable #}
 
 {% if RABBITMQ_enable | default(false) %}
-  #  ================================== Active MQ ========================================== #
+  #  ================================== RabbitMQ ========================================== #
   rabbitmq:
     image: rabbitmq:{{__RABBITMQ_version}}
     container_name: rabbitmq
@@ -17880,6 +17882,9 @@ services:
       RABBITMQ_ERLANG_COOKIE: "62cd4092-dbb3-4e7a-ac6d-ffd7cee850ee"
       RABBITMQ_DEFAULT_USER: rabbitmq
       RABBITMQ_DEFAULT_PASS: abc123!
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
     {% if RABBITMQ_volume_map_data %}
@@ -17897,6 +17902,45 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  RABBITMQ_enable #}
+
+{% if SOLACE_enable | default(false) %}
+  #  ================================== Solace PubSub+ ========================================== #
+  solace:
+    image: solace/solace-pubsub-standard:{{__SOLACE_version}}
+    container_name: solace
+    hostname: solace
+    labels:
+      com.platys.name: "solace"
+      com.platys.webui.title: "Solace UI"
+      com.platys.webui.url: "http://dataplatform:28358"
+    ports:
+      - 28357:8008    # Web Transport
+      - 1892:1883     # MQTT
+      - 5674:5671     # AMQP
+      - 5674:5671     # AMQP
+      - 28358:9000    # REST
+      - 28358:8080    # SEMP
+    environment:
+      username_admin_globalaccesslevel: admin
+      username_admin_password: abc123!
+      system_scaling_maxconnectioncount: 100
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {% if SOLACE_volume_map_data %}
+      - ./container-volume/solace/data:/var/lib/solace
+    {% endif -%}   {#  SOLACE_volume_map_data #}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  SOLACE_enable #}
 
 {% if PURE_FTPD_enable | default(false) %}
   #  ================================== Pure FTPd Server ========================================== #

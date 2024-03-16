@@ -43,6 +43,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 1889 | 1883 | hivemq4-2 |
 1890 | 1883 | activemq |
 1891 | 1883 | emqx-1 |
+1892 | 1883 | solace-1 |
 2113 | 2113 | eventstore |
 2181 | 2181 | zookeeper-1 |
 2182 | 2182 | zookeeper-2 |
@@ -115,6 +116,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 5691 | 5691 | risingwave |
 5672 | 5672 | activemq |
 5673 | 5672 | rabbitmq (amqp) |
+5674 | 5672 | solace-1 (amqp) |
 5701 | 5701 | hazelcast	-1 |
 5705 | 5701 | zeebe-1 |
 5778 | 5778 | jaeger (config) |
@@ -601,6 +603,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28354 | 8080 | weaviate |
 28355 | 3000 | big-agi |
 28356 | 8080 | local-ai |
+28357 | 8008 | solace (web transport) |
+28358 | 9000 | solace (rest) |
 
 ## Ports > 28500
 
