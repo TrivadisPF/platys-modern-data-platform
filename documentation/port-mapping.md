@@ -604,7 +604,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28355 | 3000 | big-agi |
 28356 | 8080 | local-ai |
 28357 | 8008 | solace (web transport) |
-28358 | 9000 | solace (rest) |
+28358 | 8080 | solace (http) |
+28359 | 9000 | solace (rest) |
 
 ## Ports > 28500
 
