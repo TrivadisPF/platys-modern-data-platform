@@ -439,6 +439,7 @@ networks:
 {% set __ACTIVEMQ_ARTEMIS_version = ACTIVEMQ_ARTEMIS_version | default('latest') -%}
 {% set __RABBITMQ_version = RABBITMQ_version | default('latest') -%}
 {% set __SOLACE_version = SOLACE_version | default('latest') -%}
+{% set __SOLACE_KAFKA_PROXY_version = SOLACE_KAFKA_PROXY_version | default('latest') -%}
 
 {% set __PURE_FTPD_version = PURE_FTPD_version | default('latest') -%}
 {% set __SFTP_version = SFTP_version | default('latest') -%}
@@ -786,6 +787,8 @@ networks:
   {% set MQTT_UI_enable = false -%}
   {% set THINGSBOARD_enable = false -%}
   {% set ACTIVEMQ_enable = false -%}
+  {% set SOLACE_PUBSUB_enable = false -%}
+  {% set SOLACE_KAFKA_PROXY_enable = false -%}
   {% set FTP_enable = false -%}
   {% set MAILDEV_enable = false -%}
   {% set MAILPIT_enable = false -%}
@@ -17903,19 +17906,29 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {#  RABBITMQ_enable #}
 
-{% if SOLACE_enable | default(false) %}
+{% if SOLACE_PUBSUB_enable | default(false) %}
   #  ================================== Solace PubSub+ ========================================== #
-  solace:
-    image: solace/solace-pubsub-standard:{{__SOLACE_version}}
-    container_name: solace
-    hostname: solace
+  solace-pubsub:
+    image: solace/solace-pubsub-standard:{{__SOLACE_PUBSUBversion}}
+    container_name: solace-pubsub
+    hostname: solace-pubsub
     labels:
-      com.platys.name: "solace"
+      com.platys.name: "solace-pubsub"
       com.platys.description: "Solace Event Broker"
       com.platys.webui.title: "Solace UI"
       com.platys.webui.url: "http://dataplatform:28358"
       com.platys.restapi.title: "Solace Rest API"
       com.platys.restapi.url: "http://dataplatform:28359"
+    shm_size: 1g
+    ulimits:
+      core: -1
+      nofile:
+        soft: 2448
+        hard: 6592
+    deploy:
+      restart_policy:
+        condition: on-failure
+        max_attempts: 1
     ports:
       - 28357:8008    # Web Transport
       - 1892:1883     # MQTT
@@ -17926,6 +17939,41 @@ services:
       username_admin_globalaccesslevel: admin
       username_admin_password: abc123!
       system_scaling_maxconnectioncount: 100
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {% if SOLACE_PUBSUB_volume_map_data %}
+      - ./container-volume/solace/data:/var/lib/solace
+    {% endif -%}   {#  SOLACE_PUBSUB_volume_map_data #}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  SOLACE_PUBSUB_enable #}
+
+{% if SOLACE_KAFKA_PROXY_enable | default(false) %}
+  #  ================================== Solace Kafka Proxy ========================================== #
+  solace-kafka-proxy:
+    image: trivadis/pubsubplus-kafka-proxy:{{__SOLACE_KAFKA_PROXY_version}}
+    container_name: solace-kafka-proxy
+    hostname: solace-kafka-proxy
+    labels:
+      com.platys.name: "solace-kafka-proxy"
+      com.platys.description: "Solace Kafka Proxy"
+    ports:
+      - 9092:9092    # Web Transport
+    environment:
+      PROXY_LISTENERS: PLAINTEXT://${DOCKER_HOST_IP}:9092
+      PROXY_ADVERTISED_LISTENERS: PLAINTEXT://${PUBLIC_IP}:9092
+      SOLACE_HOST: tpcs://solace:55443
+      SOLACE_VPN_NAME: default
+      SOLACE_SEPARATORS: "_."
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -17942,7 +17990,7 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
-{% endif %}   {#  SOLACE_enable #}
+{% endif %}   {#  SOLACE_KAFKA_PROXY_enable #}
 
 {% if PURE_FTPD_enable | default(false) %}
   #  ================================== Pure FTPd Server ========================================== #

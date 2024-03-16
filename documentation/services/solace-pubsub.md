@@ -1,4 +1,4 @@
-# Solace
+# Solace PubSub+
 
 PubSub+ event brokers power an event mesh, a modern messaging layer that can be deployed across every environment and component of the distributed enterprise, to stream events across them all.
 
@@ -7,7 +7,7 @@ PubSub+ event brokers power an event mesh, a modern messaging layer that can be 
 ## How to enable?
 
 ```
-platys init --enable-services SOLACE
+platys init --enable-services SOLACE_PUBSUB
 platys gen
 ```
 
@@ -15,4 +15,10 @@ platys gen
 
 Navigate to <http://dataplatform:28358>.
 
-Login with username `admin` and password `abc123!`.
+Login with username `admin	` and password `abc123!`.
+
+### Using the CLI
+
+```bash
+docker exec -it solace /usr/sw/loads/currentload/bin/cli -A
+```
