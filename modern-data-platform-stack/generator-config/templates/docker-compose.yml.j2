@@ -17932,12 +17932,13 @@ services:
     ports:
       - 28357:8008    # Web Transport
       - 1892:1883     # MQTT
-      - 5674:5671     # AMQP
+      - 5674:5672     # AMQP
       - 28358:8080    # SEMP
       - 28359:9000    # REST
+      - 28360:55555   # Solace Message Format (SMF)
     environment:
-      username_admin_globalaccesslevel: admin
-      username_admin_password: abc123!
+      username_admin_globalaccesslevel: {{SOLACE_PUBSUB_username}}
+      username_admin_password: {{SOLACE_PUBSUB_password}}
       system_scaling_maxconnectioncount: 100
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
@@ -17967,13 +17968,13 @@ services:
       com.platys.name: "solace-kafka-proxy"
       com.platys.description: "Solace Kafka Proxy"
     ports:
-      - 9092:9092
+      - 59092:59092
     environment:
-      PROXY_LISTENERS: PLAINTEXT://${DOCKER_HOST_IP}:9092
-      PROXY_ADVERTISED_LISTENERS: PLAINTEXT://${PUBLIC_IP}:9092
-      SOLACE_HOST: tpcs://solace:55443
-      SOLACE_VPN_NAME: default
-      SOLACE_SEPARATORS: "_."
+      PROXY_LISTENERS: PLAINTEXT://solace-kafka-proxy:59092
+      PROXY_ADVERTISED_LISTENERS: PLAINTEXT://${PUBLIC_IP}:59092
+      SOLACE_HOST: tpc://solace-pubsub:55555
+      SOLACE_VPN_NAME: {{SOLACE_KAFKA_PROXY_vpn_name}}
+      SOLACE_SEPARATORS: {{SOLACE_KAFKA_PROXY_separators}}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
