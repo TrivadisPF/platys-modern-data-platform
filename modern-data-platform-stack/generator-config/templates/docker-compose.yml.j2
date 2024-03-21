@@ -18398,11 +18398,20 @@ services:
 #      - "./X4Config.xml:/opt/X4/X4config.xml" # X4config binding, you would need to place the file before starting.
 #      - "./deployments:/opt/X4/deployments" # Deployments binding, in case you want to add x4apps there.
 #      - "./X4DB/1:/opt/X4/X4DB/1" # Projects binding.
-    mem_limit: 1g
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
+
+  x4-keycloak:
+    image: softproject/keycloak
+    container_name: x4-keycloak
+    hostname: x4-keycloak
+    ports:
+      - "28362:8085"
+    environment:
+      - KEYCLOAK_ADMIN=admin
+      - KEYCLOAK_ADMIN_PASSWORD=demo
 {% endif %}   {#  X4_SERVER_enable #}
 
 {% if IOEVENT_COCKPIT_enable | default(false) %}
