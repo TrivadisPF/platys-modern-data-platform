@@ -456,6 +456,8 @@ networks:
 {% set __CAMUNDA_OPERATE_version = CAMUNDA_OPERATE_version | default('latest') -%}
 {% set __CAMUNDA_ZEEQS_version = CAMUNDA_ZEEQS_version | default('latest') -%}
 
+{% set __X4_SERVER_version = X4_SERVER_version | default('latest') -%}
+
 {% set __IOEVENT_COCKPIT_version = IOEVENT_COCKPIT_version | default('latest') -%}
 
 {% set __PENTHAO_version = PENTHAO_version | default('latest') -%}
@@ -798,6 +800,7 @@ networks:
   {% set CAMUNDA_ZEEBE_enable = false -%}
   {% set CAMUNDA_OPERATE_enable = false -%}
   {% set CAMUNDA_ZEEQS_enable = false -%}
+  {% set X4_SERVER_enable = false -%}
   {% set IOEVENT_COCKPIT_enable = false -%}
   {% set DBT_enable = false -%}
   {% set PENTHAO_enable = false -%}
@@ -18362,6 +18365,45 @@ services:
     restart: {{container_restart_policy}}
   {% endif %}   {#  CAMUNDA_ZEEQS_enable #}
 {% endif %}   {#  CAMUNDA_ZEEBE_enable #}
+
+{% if X4_SERVER_enable | default(false) %}
+  #  ================================== Softproject X4 Server ========================================== #
+  x4-server:
+    image: softproject/x4_server:{{__X4_SERVER_version}}
+    container_name: x4-server
+    hostname: x4-server
+    labels:
+      com.platys.name: "x4-server"
+      com.platys.description: "BPMN "
+      com.platys.restapi.title: "X4 Server Rest-API"
+      com.platys.restapi.url: "http://dataplatform:28361"
+    ports:
+      - 28361:8080
+    environment:
+    {% if (X4_SERVER_db_type | lower) == 'postgres' %}
+      DATABASE_MODE: postgresql
+      DATABASE_USER: postgres
+      DATABASE_PASSWORD: postgres
+      DATABASE_HOST: postgres_db
+      DATABASE_PORT: 5432
+    {% endif -%}   {#  X4_SERVER_db_type = postgres #}
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./licenses/x4-server/x4.license:/opt/X4/x4.license" # X4 license binding, you should place a valid license.
+#      - "./conf/x4-server:/opt/X4/configurations" # Configuration binding for keycloak.
+#      - "./logs:/opt/X4/wildfly/standalone/log" # Logs binding.
+#      - "./X4Config.xml:/opt/X4/X4config.xml" # X4config binding, you would need to place the file before starting.
+#      - "./deployments:/opt/X4/deployments" # Deployments binding, in case you want to add x4apps there.
+#      - "./X4DB/1:/opt/X4/X4DB/1" # Projects binding.
+    mem_limit: 1g
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  X4_SERVER_enable #}
 
 {% if IOEVENT_COCKPIT_enable | default(false) %}
   #  ================================== IOEvent Cockpit ========================================== #

@@ -608,6 +608,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28358 | 8080 | solace-pubsub (http) |
 28359 | 9000 | solace-pubsub (rest) |
 28360 | 55555 | solace-pubsub (smf) |
+28361 | 8080 | x4-server |
 
 ## Ports > 28500
 
