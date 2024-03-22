@@ -16978,6 +16978,12 @@ services:
       MINIO_SERVER_URL: "http://${PUBLIC_IP}:9000"
       MINIO_PROMETHEUS_AUTH_TYPE: public
       MINIO_PROMETHEUS_URL: "http://prometheus-1:9090"
+    {% if MINIO_key_encryption_service_enable | default(false) %}
+      MINIO_KMS_KES_ENDPOINT: "https://minio-kes:7373"
+      MINIO_KMS_KES_KEY_FILE: /root/.minio/certs/private.key
+      MINIO_KMS_KES_CERT_FILE: /root/.minio/certs/public.crt
+      MINIO_KMS_KES_KEY_NAME: my-minio-key
+    {% endif -%}   {#  MINIO_key_encryption_service_enable #}
     {% if MINIO_audit_webhook_enable | default(false) %}
       MINIO_AUDIT_WEBHOOK_ENABLE_primary: 'on'
       MINIO_AUDIT_WEBHOOK_ENDPOINT_primary: {{MINIO_audit_webhook_endpoint}}
@@ -17065,7 +17071,10 @@ services:
     {% endif %}
     {% if ns.secureKafkaEnabled and ns.securityProtocol == 'SSL' %}
       - ./security/kafka/client-certs:/certs
-    {% endif -%} {#  ns.secureKafkaEnabled #}
+    {% endif -%}   {# ns.secureKafkaEnabled #}
+    {% if MINIO_key_encryption_service_enable | default(false) %}
+      - ./security/minio/certs:/root/.minio/certs
+    {% endif -%} {# MINIO_key_encryption_service_enable #}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -17073,7 +17082,11 @@ services:
     {% if MINIO_volume_map_data %}
     user: "{{uid | default(1000)}}"
     {% endif -%}   {#  MINIO_volume_map_data #}
+    {% if MINIO_key_encryption_service_enable | default(false) %}
+    command: bin/sh -c 'cat /root/.minio/certs/public.crt >>/etc/pki/tls/certs/ca-bundle.crt && minio server /data --console-address ":{{uiport}}"'
+    {% else -%}
     command: server /data --console-address ":{{uiport}}"
+    {% endif -%}   {#  MINIO_key_encryption_service_enable #}
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
