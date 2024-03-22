@@ -65,6 +65,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * LocalAI
  * Solace PubSub+
  * Solace Kafka Proxy
+ * Softproject X4 Server
 
 ### Removed Services
  
