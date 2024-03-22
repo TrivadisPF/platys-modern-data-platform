@@ -67,6 +67,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Solace Kafka Proxy
  * Softproject X4 Server
  * MariaDB
+ * Minio KES
 
 ### Removed Services
  
@@ -86,7 +87,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Update `trino` to `443`
  * Update `starbrustdata` to `435-e.2`
  * Update `jikkou` to `0.21.0`
- * Update `minio` to `RELEASE.2023-11-01T18-37-25Z`
+ * Update `minio` to `RELEASE.2024-03-21T23-13-43Z`
  * Update `nifi` to `1.25.0`
  * Update `ksqldb` to `0.29.0`
  * Update `datahub` to `v0.12.1`

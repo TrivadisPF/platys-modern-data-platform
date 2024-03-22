@@ -469,6 +469,7 @@ networks:
 {% set __ADMINIO_UI_version = ADMINIO_UI_version | default('latest') -%}
 {% set __ADMINIO_API_version = ADMINIO_API_version | default('latest') -%}
 {% set __MINIO_WEB_version = MINIO_WEB_version | default('latest') -%}
+{% set __MINIO_KES_version = MINIO_KES_version | default('latest') -%}
 {% set __S3MANAGER_version = S3MANAGER_version | default('latest') -%}
 {% set __FILESTASH_version = FILESTASH_version | default('latest') -%}
 {% set __AWSCLI_version = AWSCLI_version | default('latest') -%}
@@ -17280,6 +17281,35 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  MINIO_WEB_enable #}
+
+{% if MINIO_KES_enable | default(false) %}
+  #  ================================== Minio KES ========================================== #
+  minio-kes:
+    image: minio/kes:{{__MINIO_KES_version}}
+    container_name: minio-kes
+    hostname: minio-kes
+    labels:
+      com.platys.name: "minio-kes"
+      com.platys.webui.title: "Minio KES"
+      com.platys.webui.url: "http://dataplatform:7373"
+    ports:
+      - 7373:7373
+    environment:
+      KES_SERVER: "https://minio-kes:7373"
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  MINIO_KES_enable #}
 
 {% if ICEBERG_REST_CATALOG_enable | default(false) %}
   #  ================================== Iceberg REST Catalog ========================================== #

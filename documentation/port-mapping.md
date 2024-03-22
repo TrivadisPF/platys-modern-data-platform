@@ -151,6 +151,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 7201 | 7199 | cassandra-3 |
 7202 | 7199 | cassandra-4 |
 7203 | 7199 | cassandra-5 |
+7373 | 7373 | minio-kes |
 7444 | 7444 | memgraph-platform |
 7474 | 7474 | neo4j-1 |
 7475 | 7474 | neo4j-2 |
