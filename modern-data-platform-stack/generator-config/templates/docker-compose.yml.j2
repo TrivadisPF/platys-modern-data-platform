@@ -18374,12 +18374,13 @@ services:
     hostname: x4-server
     labels:
       com.platys.name: "x4-server"
-      com.platys.description: "BPMN "
+      com.platys.description: "BPMN"
       com.platys.restapi.title: "X4 Server Rest-API"
       com.platys.restapi.url: "http://dataplatform:28361"
     ports:
       - 28361:8080
     environment:
+      DUMMY: false
     {% if (X4_SERVER_db_type | lower) == 'postgres' %}
       DATABASE_MODE: postgresql
       DATABASE_USER: postgres
@@ -18407,11 +18408,22 @@ services:
     image: softproject/keycloak
     container_name: x4-keycloak
     hostname: x4-keycloak
+    labels:
+      com.platys.name: "keycloak"
     ports:
       - "28362:8085"
     environment:
       - KEYCLOAK_ADMIN=admin
       - KEYCLOAK_ADMIN_PASSWORD=demo
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
 {% endif %}   {#  X4_SERVER_enable #}
 
 {% if IOEVENT_COCKPIT_enable | default(false) %}
