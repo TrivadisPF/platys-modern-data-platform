@@ -376,6 +376,7 @@ networks:
 {% set __ORACLE_REST_DATA_SERVICE_version = ORACLE_REST_DATA_SERVICE_version | default('latest') -%}
 
 {% set __MYSQL_version = MYSQL_version | default('latest') -%}
+{% set __MARIADB_version = MARIADB_version | default('latest') -%}
 {% set __POSTGRESQL_version = POSTGRESQL_version | default('latest') -%}
 {% set __POSTGREST_version = POSTGREST_version | default('latest') -%}
 {% set __TIMESCALEDB_version = TIMESCALEDB_version | default('latest') -%}
@@ -14815,6 +14816,41 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  MYSQL_enable #}
+
+{% if MARIADB_enable | default(false) %}
+  #  ================================== MariaDB ========================================== #
+  mariadb:
+    image: mariadb:{{__MARIADB_version}}
+    container_name: mariadb
+    labels:
+      com.platys.name: "mariadb"
+      com.platys.description: "Relational database"
+    ports:
+      - 3309:3306
+    environment:
+      - MYSQL_DATABASE={{MARIADB_database}}
+      - MYSQL_USER={{MARIADB_user}}
+      - MYSQL_PASSWORD={{MARIADB_password}}
+      - MYSQL_ROOT_PASSWORD=manager
+      - MYSQL_LOG_CONSOLE=true
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./init/mariadb:/docker-entrypoint-initdb.d/
+    {% if MARIADB_volume_map_data %}
+      - ./container-volume/mariadb/data:/var/lib/mysql:Z
+    {% endif %}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  MARIADB_enable #}
 
 {% if SQLSERVER_enable | default(false) %}
   #  ================================== SQL Server ========================================== #

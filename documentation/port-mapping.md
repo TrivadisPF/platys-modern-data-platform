@@ -72,6 +72,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 3306 | 3306 | mysql |
 3307 | 3306 | datahub-mysql |
 3308 | 3306 | single-store |
+3309 | 3306 | mariadb |
 3333 | 3333 | taskcafe |
 3355 | 3355 | vector-admin | 
 3838 | 3838 | shiny-server |
