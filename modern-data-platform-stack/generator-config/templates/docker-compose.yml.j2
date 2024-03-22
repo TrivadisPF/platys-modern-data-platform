@@ -17301,10 +17301,13 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
+      - ./security/minio/certs:/etc/kes/certs
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
+    entrypoint: bin/sh -c 'cat /etc/kes/certs/public.crt >>/etc/pki/tls/certs/ca-bundle.crt && /kes server --config /etc/kes/server-config.yaml'
+    command: ''
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
