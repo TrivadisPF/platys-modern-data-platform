@@ -17083,9 +17083,6 @@ services:
     {% if MINIO_volume_map_data %}
     user: "{{uid | default(1000)}}"
     {% endif -%}   {#  MINIO_volume_map_data #}
-    {% if MINIO_key_encryption_service_enable | default(false) %}
-    command: bin/sh -c 'cat /root/.minio/certs/public.crt >>/etc/pki/tls/certs/ca-bundle.crt && minio server /data --console-address ":{{uiport}}"'
-    {% else -%}
     command: server /data --console-address ":{{uiport}}"
     {% endif -%}   {#  MINIO_key_encryption_service_enable #}
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
@@ -17114,7 +17111,6 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
-#      - ./conf/minio/config.json:/root/.mc/config.json
       - ./scripts/docker/wait-for-it.sh:/usr/src/app/wait-for-it.sh
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
@@ -17301,6 +17297,7 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
+      - ./conf/minio-kes:/etc/kes
       - ./security/minio/certs:/etc/kes/certs
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"

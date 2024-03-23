@@ -2,7 +2,7 @@
 
 KES is a cloud-native distributed key management and encryption server designed to secure modern applications at scale.
 
-**[Website](https://min.io/)** | **[Documentation](https://min.io/docs/kes/cli/kes-server)** | **[GitHub](https://github.com/minio/minio)**
+**[Website](https://min.io/)** | **[Documentation](https://min.io/docs/kes/cli/kes-server)** | **[GitHub](https://github.com/minio/kes)**
 
 ## How to enable?
 
