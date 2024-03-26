@@ -6244,7 +6244,7 @@ services:
       {% endif -%}   {#  ns.securityProtocol #}
     {% endif -%}   {#  secureKafkaEnabled #}
       - DATAHUB_TRACKING_TOPIC=DataHubUsageEvent_v1
-      - ELASTIC_CLIENT_HOST=datahub-elasticsearch
+      - ELASTIC_CLIENT_HOST={{datahub-elasticsearch if DATAHUB_search_service_impl == 'elasticsearch' else datahub-opensearch}}
       - ELASTIC_CLIENT_PORT=9200
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
@@ -6271,7 +6271,7 @@ services:
     hostname: datahub-gms
     container_name: datahub-gms
     depends_on:
-      - datahub-elasticsearch
+      - {{datahub-elasticsearch if DATAHUB_search_service_impl == 'elasticsearch' else datahub-opensearch}}
       - datahub-mysql
     {%if (DATAHUB_graph_service_impl | lower) == 'neo4j'  | default(true) %}
       - datahub-neo4j
@@ -6293,7 +6293,7 @@ services:
       - EBEAN_DATASOURCE_URL=jdbc:mysql://datahub-mysql:3306/datahub?verifyServerCertificate=false&useSSL=true&useUnicode=yes&characterEncoding=UTF-8
       - EBEAN_DATASOURCE_USERNAME=datahub
       - EBEAN_DATASOURCE_PASSWORD=datahub
-      - ELASTICSEARCH_HOST=datahub-elasticsearch
+      - ELASTICSEARCH_HOST={{datahub-elasticsearch if DATAHUB_search_service_impl == 'elasticsearch' else datahub-opensearch}}
       - ELASTICSEARCH_INDEX_BUILDER_SETTINGS_REINDEX=true
       - ELASTICSEARCH_INDEX_BUILDER_MAPPINGS_REINDEX=true
       - ELASTICSEARCH_PORT=9200
@@ -6427,7 +6427,7 @@ services:
       com.platys.restapi.url: "http://dataplatform:28145"
     depends_on:
       - kafka-setup
-      - datahub-elasticsearch
+      - {{datahub-elasticsearch if DATAHUB_search_service_impl == 'elasticsearch' else datahub-opensearch}}
       - datahub-neo4j
     ports:
         - "28145:9091"
@@ -6456,7 +6456,7 @@ services:
       {% endif -%}   {#  ns.securityProtocol #}
     {% endif -%}   {#  secureKafkaEnabled #}
       - KAFKA_SCHEMAREGISTRY_URL='{{ns.schemaRegistryUrl}}'
-      - ELASTICSEARCH_HOST=datahub-elasticsearch
+      - ELASTICSEARCH_HOST={{datahub-elasticsearch if DATAHUB_search_service_impl == 'elasticsearch' else datahub-opensearch}}
       - ELASTICSEARCH_PORT=9200
       - ES_BULK_REFRESH_POLICY=WAIT_UNTIL
       - GRAPH_SERVICE_IMPL={{DATAHUB_graph_service_impl}}
@@ -6539,7 +6539,7 @@ services:
       {% endif -%}   {#  ns.securityProtocol #}
     {% endif -%}   {#  secureKafkaEnabled #}
       - KAFKA_SCHEMAREGISTRY_URL='{{ns.schemaRegistryUrl}}'
-      - ELASTICSEARCH_HOST=datahub-elasticsearch
+      - ELASTICSEARCH_HOST={{datahub-elasticsearch if DATAHUB_search_service_impl == 'elasticsearch' else datahub-opensearch}}
       - ELASTICSEARCH_PORT=9200
       - ES_BULK_REFRESH_POLICY=WAIT_UNTIL
       - JAVA_OPTS=-Xms1g -Xmx1g
@@ -6571,7 +6571,7 @@ services:
   {% endif -%}   {#  DATAHUB_mce_consumer_standalone #}
 
   datahub-mysql:
-    image: mysql:5.7
+    image: mariadb:10.5.8
     hostname: datahub-mysql
     container_name: datahub-mysql
     labels:
@@ -6602,7 +6602,13 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
-
+    healthcheck:
+      interval: 1s
+      retries: 5
+      start_period: 20s
+      test: mysqladmin ping -h mysql -u $$MYSQL_USER --password=$$MYSQL_PASSWORD
+      timeout: 5s
+      
   {%if (DATAHUB_graph_service_impl | lower) == 'neo4j'  | default(true) %}
   datahub-neo4j:
     image: neo4j:4.4.9-community
@@ -6620,6 +6626,7 @@ services:
       - NEO4J_AUTH=neo4j/abc123!
       - NEO4J_dbms_default__database=graph.db
       - NEO4J_dbms_allow__upgrade=true
+      - NEO4JLABS_PLUGINS=["apoc"]
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -6638,6 +6645,7 @@ services:
     restart: {{container_restart_policy}}
   {% endif -%}   {#  DATAHUB_graph_service_impl #}
 
+  {%if DATAHUB_search_service_impl == 'elasticsearch' %}
   datahub-elasticsearch:
     image: elasticsearch:7.10.1
     container_name: datahub-elasticsearch
@@ -6681,6 +6689,7 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
+  {% endif -%}   {#  DATAHUB_search_service_impl == 'elasticsearch' #}
 
   {%if DATAHUB_use_kibana | default(true) %}
   datahub-kibana:
@@ -6696,7 +6705,7 @@ services:
       - "5602:5601"
     environment:
       - SERVER_HOST=0.0.0.0
-      - ELASTICSEARCH_HOSTS="http://datahub-elasticsearch:9200"
+      - ELASTICSEARCH_HOSTS="http://{{datahub-elasticsearch if DATAHUB_search_service_impl == 'elasticsearch' else datahub-opensearch}}:9200"
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -6715,6 +6724,54 @@ services:
     restart: {{container_restart_policy}}
   {% endif -%}   {#  DATAHUB_use_kibana #}
 
+  {%if DATAHUB_search_service_impl == 'opensearch' %}
+  datahub-opensearch:
+    image: opensearchproject/opensearch:{{__OPENSEARCH_version}}
+    hostname: opensearch-{{loop.index}}
+    container_name: opensearch-{{loop.index}}
+    labels:
+      com.platys.name: "opensearch"
+      com.platys.restapi.title: "OpenSearch REST API"
+      com.platys.restapi.url: "http://dataplatform:28363"
+      com.platys.manual.step.msgs: "sudo sysctl -w vm.max_map_count=262144"
+    ports:
+      - "28363:9200"
+    environment:
+      - cluster.name=opensearch-cluster
+      - node.name=datahub-opensearch
+      - discovery.type=single-node
+      - "DISABLE_INSTALL_DEMO_CONFIG=true"   # disables execution of install_demo_configuration.sh bundled with security plugin, which installs demo certificates and security configurations to OpenSearch
+      - "DISABLE_SECURITY_PLUGIN=true"   #  disables security plugin entirely in OpenSearch by setting plugins.security.disabled: true in opensearch.yml
+      - "bootstrap.memory_lock=true" # along with the memlock settings below, disables swapping
+      - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m" # minimum and maximum Java heap size, recommend setting both to 50% of system RAM
+      - "http.cors.enabled=true"
+      - http.cors.allow-origin="http://${DOCKER_HOST_IP}:28275,http://${PUBLIC_IP}:28275,http://dejavu:1358,http://dataplatform:28125,http://dataplatform:28125,http://${PUBLIC_IP}:28125,http://${DOCKER_HOST_IP}:28125,http://127.0.0.1:1358"
+      - http.cors.allow-headers="X-Requested-With,X-Auth-Token,Content-Type,Content-Length,Authorization"
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536 # maximum number of open files for the OpenSearch user, set to at least 65536 on modern systems
+        hard: 65536
+    volumes:
+      - ./data-transfer:/data-transfer
+    {% if DATAHUB_volume_map_data %}
+      - ./container-volumes/datahub/opensearch/data:/usr/share/opensearch/data
+    {% endif -%}   {#  OPENSEARCH_volume_map_data #}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+  {% endif -%}   {#  DATAHUB_search_service_impl == 'opensearch' #}
+
   datahub-upgrade:
     image: acryldata/datahub-upgrade:{{__DATAHUB_version}}
     hostname: datahub-upgrade
@@ -6732,7 +6789,7 @@ services:
       - EBEAN_DATASOURCE_DRIVER=com.mysql.jdbc.Driver
       - KAFKA_BOOTSTRAP_SERVER={{ns.bootstrapServers}}
       - KAFKA_SCHEMAREGISTRY_URL={{ns.schemaRegistryUrl}}
-      - ELASTICSEARCH_HOST=datahub-elasticsearch
+      - ELASTICSEARCH_HOST={{datahub-elasticsearch if DATAHUB_search_service_impl == 'elasticsearch' else datahub-opensearch}}
       - ELASTICSEARCH_PORT=9200
       - ELASTICSEARCH_INDEX_BUILDER_MAPPINGS_REINDEX=true
       - ELASTICSEARCH_INDEX_BUILDER_SETTINGS_REINDEX=true
@@ -6791,12 +6848,14 @@ services:
       datahub_setup_job: true
       com.platys.name: "datahub"
     depends_on:
-      - datahub-elasticsearch
+      - {{datahub-elasticsearch if DATAHUB_search_service_impl == 'elasticsearch' else datahub-opensearch}}
     environment:
-      - ELASTICSEARCH_HOST=datahub-elasticsearch
+      - ELASTICSEARCH_HOST={{datahub-elasticsearch if DATAHUB_search_service_impl == 'elasticsearch' else datahub-opensearch}}
       - ELASTICSEARCH_PORT=9200
       - ELASTICSEARCH_PROTOCOL=http
       - DATAHUB_ANALYTICS_ENABLED={{DATAHUB_analytics_enabled | lower | default(false)}}
+      - USE_AWS_ELASTICSEARCH={{false if DATAHUB_search_service_impl == 'elasticsearch' else true}}
+      - ELASTICSEARCH_USE_SSL=false
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}

@@ -612,6 +612,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28360 | 55555 | solace-pubsub (smf) |
 28361 | 8080 | x4-server |
 28362 | 8085 | x4-keycloak |
+28363 | 9200 | datahub-opensearch |
 
 
 ## Ports > 28500
