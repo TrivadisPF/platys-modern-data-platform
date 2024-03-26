@@ -90,7 +90,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Update `minio` to `RELEASE.2024-03-21T23-13-43Z`
  * Update `nifi` to `1.25.0`
  * Update `ksqldb` to `0.29.0`
- * Update `datahub` to `v0.12.1`
+ * Update `datahub` to `v0.13.0`
  * Update `Confluent Platform` to `7.6.0`
  * Update `portainer-ce` to `2.18.4-alpine`
  * Update `activemq-classic` to `5.18.2`
