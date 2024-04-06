@@ -613,7 +613,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28361 | 8080 | x4-server |
 28362 | 8085 | x4-keycloak |
 28363 | 9200 | datahub-opensearch |
-
+28364 | 8080 | autogen-studio |
 
 ## Ports > 28500
 

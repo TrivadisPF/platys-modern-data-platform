@@ -267,6 +267,8 @@ networks:
 
 {% set __BIG_AGI_version = BIG_AGI_version | default('latest') -%}
 
+{% set __AUTOGEN_STUDIO_version = AUTOGEN_STUDIO_version | default('latest') -%}
+
 {% set __LITELLM_version = LITELLM_version | default('latest') -%}
 
 {% set __FLOWISE_version = FLOWISE_version | default('latest') -%}
@@ -701,6 +703,7 @@ networks:
   {% set OLLAMA_WEBUI_enable = false -%}
   {% set ANYTHING_LLM_enable = false -%}
   {% set BIG_AGI_enable = false -%}
+  {% set AUTOGEN_STUDIO_enable = false -%}
   {% set LITELLM_enable = false -%}
   {% set FLOWISE_enable = false -%}
   {% set DATAIKU_DSS_enable = false -%}
@@ -10304,7 +10307,7 @@ services:
       - ./scripts/docker/docker-maven-download.sh:/maven-download.sh
     {% if JUPYTER_volume_map_docker_daemon %}
       - /var/run/docker.sock:/var/run/docker.sock
-    {% endif -%}   {#  JUPYTER_volume_map_docker_daemon #}      
+    {% endif -%}   {#  JUPYTER_volume_map_docker_daemon #}
 #    {%if MINIO_enable or external['S3_enable'] | default(false) %}
 #      - ./plugins/jupyter/aws-java-sdk-bundle-1.11.375.jar:/usr/local/spark/jars/aws-java-sdk-bundle-1.11.375.jar
 #      - ./plugins/jupyter/hadoop-aws-3.2.1.jar:/usr/local/spark/jars/hadoop-aws-3.2.1.jar
@@ -10939,7 +10942,42 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     command: [ "next", "start", "-p", "3000" ]
     restart: {{container_restart_policy}}
-{% endif %}   {# ANYTHING_LLM_enable  #}
+{% endif %}   {# BIG_AGI_enable  #}
+
+{%if AUTOGEN_STUDIO_enable | default(false) %}
+  #  ================================== Big-AGI  ========================================== #
+  autogen-studio:
+    image: daxiongmao87/autogen-studio-ui:{{__AUTOGEN_STUDIO_version}}
+    container_name: autogen-studio
+    hostname: autogen-studio
+    labels:
+      com.platys.name: 'autogen-studio'
+      com.platys.description: "Tool for AI development"
+      com.platys.webui.title: "AutoGen Studio UI"
+      com.platys.webui.url: "http://dataplatform:28364"
+    ports:
+      - 28364:8080
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      AUTOGEN_PORT: 8080
+      AUTOGEN_HOST: 127.0.0.1
+      AUTOGEN_WORKERS: 1
+      OPENAI_API_KEY: {{AUTOGEN_STUDIO_openai_api_key}}
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+{% endif %}   {# AUTOGEN_STUDIO_enable  #}
 
 {%if LITELLM_enable | default(false) %}
   #  ================================== LiteLLM  ========================================== #
