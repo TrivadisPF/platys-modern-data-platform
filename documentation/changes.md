@@ -68,6 +68,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Softproject X4 Server
  * MariaDB
  * Minio KES
+ * AutoGen Studio
 
 ### Removed Services
  
