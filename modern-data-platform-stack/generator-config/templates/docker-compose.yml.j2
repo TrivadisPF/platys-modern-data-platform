@@ -10854,13 +10854,16 @@ services:
       - 28338:8080
     environment:
       OLLAMA_BASE_URL: {{ns.ollamaUrl}}
-      WEBUI_SECRET_KEY:
+      WEBUI_SECRET_KEY: {{OLLAMA_WEBUI_secret_key if OLLAMA_WEBUI_secret_key is defined and OLLAMA_WEBUI_secret_key and OLLAMA_WEBUI_secret_key | length else omit}}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
       # - ./container-volumes/ollama-webui:/app/backend/data
+    {% if OLLAMA_WEBUI_volume_map_data %}
+      - ./container-volume/ollama-webui/data:/app/backend/data 
+    {% endif -%}   {#  OLLAMA_WEBUI_volume_map_data #}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
