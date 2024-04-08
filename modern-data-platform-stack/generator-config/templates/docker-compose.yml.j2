@@ -263,6 +263,8 @@ networks:
 
 {% set __OLLAMA_WEBUI_version = OLLAMA_WEBUI_version | default('latest') -%}
 
+{% set __ALPACA_WEBUI_version = ALPACA_WEBUI_version | default('latest') -%}
+
 {% set __ANYTHING_LLM_version = ANYTHING_LLM_version | default('latest') -%}
 
 {% set __BIG_AGI_version = BIG_AGI_version | default('latest') -%}
@@ -701,6 +703,7 @@ networks:
   {% set MINDSDB_enable = false -%}
   {% set OLLAMA_enable = false -%}
   {% set OLLAMA_WEBUI_enable = false -%}
+  {% set ALPACA_WEBUI_enable = false -%}
   {% set ANYTHING_LLM_enable = false -%}
   {% set BIG_AGI_enable = false -%}
   {% set AUTOGEN_STUDIO_enable = false -%}
@@ -10872,6 +10875,37 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
 {% endif %}   {# OLLAMA_WEBUI_enable  #}
+
+{%if ALPACA_WEBUI_enable | default(false) %}
+  #  ================================== Alpaca WebUI  ========================================== #
+  alpaca-webui:
+    image: forloopse/alpaca-webui:{{__ALPACA_WEBUI_version}}
+    container_name: alpaca-webui
+    hostname: alpaca-webui
+    labels:
+      com.platys.name: 'alpaca-webui'
+      com.platys.description: "User-friendly WebUI for LLMs"
+      com.platys.webui.title: "Alpaca Web UI"
+      com.platys.webui.url: "http://dataplatform:28365"
+    ports:
+      - 28365:3000
+    extra_hosts:
+      - "host.docker.internal:host-gateway"      
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      # - ./container-volumes/ollama-webui:/app/backend/data
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+{% endif %}   {# ALPACA_WEBUI_enable  #}
 
 {%if ANYTHING_LLM_enable | default(false) %}
   #  ================================== Anything LLM  ========================================== #

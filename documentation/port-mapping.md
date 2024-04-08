@@ -614,6 +614,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28362 | 8085 | x4-keycloak |
 28363 | 9200 | datahub-opensearch |
 28364 | 8080 | autogen-studio |
+28365 | 3000 | alpaca-webui |
 
 ## Ports > 28500
 

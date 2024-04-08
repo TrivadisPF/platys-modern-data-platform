@@ -51,6 +51,7 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * MindsDB
  * Ollama
  * Ollama WebUI
+ * Alpaca WebUI
  * Chroma
  * Milvus & Attu
  * Flowise
