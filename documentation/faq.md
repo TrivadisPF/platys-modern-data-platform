@@ -156,7 +156,6 @@ Use the following service block for provisioning Kafka Connect Connector instanc
 
 Add this service to the `docker-compose.override.yml` file. 
 
-   
 ## `platys` documentation
 
 * [Getting Started with `platys` and the `modern-data-platform` platform stack](getting-started.md)

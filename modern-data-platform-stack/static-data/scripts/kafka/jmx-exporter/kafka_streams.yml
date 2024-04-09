@@ -1,7 +1,6 @@
 ---
 lowercaseOutputName: true
 lowercaseOutputLabelNames: true
-cacheRules: true
 whitelistObjectNames:
   - kafka.streams:*
   # The two lines below are used to pull the Kafka Client Producer & consumer metrics from Kafka Streams Client.
@@ -35,9 +34,17 @@ rules:
       thread_id: "$2"
       task_id: "$3"
   # kafka.streams:type=stream-metrics,client-id=*
-  - pattern: "kafka.streams<type=stream-metrics, (.+)=(.+)><>(state|alive-stream-threads|commit-id|version|application-id): (.+)"
+  - pattern: "kafka.streams<type=stream-metrics, (.+)=(.+)><>(state|commit-id|version|application-id): (.+)"
     name: kafka_streams_stream_metrics
     value: 1
+    type: UNTYPED
+    labels:
+      $1: "$2"
+      $3: "$4"
+  # kafka.streams:type=stream-metrics,client-id=*
+  - pattern: "kafka.streams<type=stream-metrics, (.+)=(.+)><>(alive-stream-threads|failed-stream-threads): (.+)"
+    name: kafka_streams_stream_metrics
+    value: "$4"
     type: UNTYPED
     labels:
       $1: "$2"

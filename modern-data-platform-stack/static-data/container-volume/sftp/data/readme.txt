@@ -1,0 +1,1 @@
+Contains the data of the SFTP service, if flag SFTP_volume_map_data is set to true.

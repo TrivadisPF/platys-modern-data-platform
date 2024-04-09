@@ -1,0 +1,1 @@
+Contains the data of MailHog service, if MAILHOG_storage_type is set to 'maildir' and flag MAILHOG_volume_map_data is set to true.

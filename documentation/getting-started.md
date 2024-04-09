@@ -20,21 +20,21 @@ cd platys-demo-platform
 
 Now let's initialise the current directory to use the Modern Data Analytics Platform Stack. 
 
-We specify the platform stack name `trivadis/platys-modern-data-platform` to use as well as the stack version `1.16.0` (the current version of this platform stack). 
+We specify the platform stack name `trivadis/platys-modern-data-platform` to use as well as the stack version `1.17.0` (the current version of this platform stack). 
 
 With the `-n` option we give the platform a meaningful name. It will be used as the name of the docker network, so it is important that it is unique, if you use multiple platforms on the same machine.
 
 ```bash
-platys init -n demo-platform --stack trivadis/platys-modern-data-platform --stack-version 1.16.0 --structure flat
+platys init -n demo-platform --stack trivadis/platys-modern-data-platform --stack-version 1.17.0 --structure flat
 ```
 
 This generates a `config.yml` file, if it does not exist already, with all the services which can be configured for the platform.
 
 ```
 Running using config file [config.yml]
-{"status":"Pulling from trivadis/platys-modern-data-platform","id":"1.16.0"}
+{"status":"Pulling from trivadis/platys-modern-data-platform","id":"1.17.0"}
 {"status":"Digest: sha256:4b3278aba39bcdeb43a1aefe1b17fe2edd6facf2843df64db104f6d850392dbe"}
-{"status":"Status: Image is up to date for trivadis/platys-modern-data-platform:1.16.0"}
+{"status":"Status: Image is up to date for trivadis/platys-modern-data-platform:1.17.0"}
   ______     _                 ___
  /_  __/____(_)   ______ _____/ (_)____
   / / / ___/ / | / / __ `/ __  / / ___/
@@ -76,7 +76,7 @@ You can see the configuration options, available through this platform stack, si
       platys:
           platform-name: 'demo-platform'
           platform-stack: 'trivadis/platys-modern-data-platform'
-          platform-stack-version: '1.16.0'
+          platform-stack-version: '1.17.0'
           structure: 'flat'
       # ========================================================================
       # Global configuration, valid for all or a group of services 
@@ -170,7 +170,7 @@ All configuration settings for the `platys-modern-data-platform` platform stack 
 A shortcut exists with the `--enable-services` flag, which directly generates a `config.yml` file with the services needed. So to enable `KAFKA` and `AKHQ` directly from the `init`, we can use
 
 ```
-platys init -n demo-platform --enable-services KAFKA,KAFKA_AKHQ --stack trivadis/platys-modern-data-platform --stack-version 1.16.0  
+platys init -n demo-platform --enable-services KAFKA,KAFKA_AKHQ --stack trivadis/platys-modern-data-platform --stack-version 1.17.0  
 ```
 
 which produces the following `config.yml`
@@ -182,7 +182,7 @@ which produces the following `config.yml`
       platys:
           platform-name: 'demo-platform'
           platform-stack: 'trivadis/platys-modern-data-platform'
-          platform-stack-version: '1.16.0'
+          platform-stack-version: '1.17.0'
           structure: 'flat'
       # ========================================================================
       # Global configuration, valid for all or a group of services 
@@ -204,7 +204,7 @@ which produces the following `config.yml`
 If you want to know the service names you can use with the `--enable-services` flag you can query for it using the `list_services` command.
 
 ```
-platys list_services --stack trivadis/platys-modern-data-platform --stack-version 1.16.0
+platys list_services --stack trivadis/platys-modern-data-platform --stack-version 1.17.0
 ```
 
 ## Step 3: Generate the platform
@@ -219,10 +219,10 @@ and you should see an output similar to this
 
 ```
 docker@ubuntu:~/platys-demo1.9$ platys gen
-2020/12/06 23:08:06 using configuration file [config.yml] with values:  platform-name: [demo-platform], platform-stack: [trivadis/platys-modern-data-platform] platform-stack-version: [1.16.0], structure [flat]
-{"status":"Pulling from trivadis/platys-modern-data-platform","id":"1.16.0"}
+2020/12/06 23:08:06 using configuration file [config.yml] with values:  platform-name: [demo-platform], platform-stack: [trivadis/platys-modern-data-platform] platform-stack-version: [1.17.0], structure [flat]
+{"status":"Pulling from trivadis/platys-modern-data-platform","id":"1.17.0"}
 {"status":"Digest: sha256:4b3278aba39bcdeb43a1aefe1b17fe2edd6facf2843df64db104f6d850392dbe"}
-{"status":"Status: Image is up to date for trivadis/platys-modern-data-platform:1.16.0"}
+{"status":"Status: Image is up to date for trivadis/platys-modern-data-platform:1.17.0"}
 ======================================================================
 generating using the following custom stack-config.yml:
       # Default values for the generator
@@ -231,7 +231,7 @@ generating using the following custom stack-config.yml:
       platys:
           platform-name: 'demo-platform'
           platform-stack: 'trivadis/platys-modern-data-platform'
-          platform-stack-version: '1.16.0'
+          platform-stack-version: '1.17.0'
           structure: 'flat'
       # ========================================================================
       # Global configuration, valid for all or a group of services 

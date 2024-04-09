@@ -1,0 +1,1 @@
+Contains the data of mariadb db service, if flag MARIADB_volume_map_data is set to true.

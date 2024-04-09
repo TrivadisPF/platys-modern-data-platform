@@ -1,6 +1,6 @@
 #!/bin/sh
 
-apt update
+apk update
 
 if [ -z "$2" ]
 then

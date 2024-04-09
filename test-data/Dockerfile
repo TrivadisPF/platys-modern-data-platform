@@ -11,6 +11,7 @@ COPY graphdb-news /data/graphdb-news
 COPY wordcount /data/wordcount
 COPY adventureworks /data/adventureworks
 COPY imdb-movies /data/imdb-movies
+COPY platys-cookbooks /data/platys-cookbooks
 
 # copy the generator script and make it executable
 COPY run.sh /usr/local/bin/

@@ -1,0 +1,240 @@
+global:
+  # How frequently to scrape targets by default.
+  # Default 15s
+  scrape_interval: 15s
+  # How frequently to evaluate rules.
+  # Default 15s
+  evaluation_interval: 15s
+  # How long until a scrape request times out.
+  # Default to 10s.
+  # Required because cp-demo is using cpu throttling, so let's leave enough time to fetch the metrics in particular for the first time as it needs to compile all rexps
+  scrape_timeout: 15s
+
+  # Attach these labels to any time series or alerts when communicating with
+  # external systems (federation, remote storage, Alertmanager).
+  external_labels:
+      monitor: 'docker-platys'
+
+# Load and evaluate rules in this file every 'evaluation_interval' seconds.
+rule_files:
+  - "alert.rules"
+
+alerting:
+  alertmanagers:
+    - scheme: http
+      static_configs:
+        - targets:
+            - "prometheus-alertmanager:9093"
+
+scrape_configs:
+  - job_name: "prometheus"
+    static_configs:
+      - targets: ["prometheus-1:9090"]
+
+
+  - job_name: "node-exporter"
+    static_configs:
+      - targets: ["prometheus-nodeexporter:9100"]
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: hostname
+        regex: '([^:]+)(:[0-9]+)?'
+        replacement: '${1}'
+
+
+  - job_name: "zookeeper"
+    static_configs:
+      - targets:
+          - "zookeeper-1:1234"
+          - "zookeeper-2:1234"
+          - "zookeeper-3:1234"
+        labels:
+          env: "dev"
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: hostname
+        regex: '([^:]+)(:[0-9]+)?'
+        replacement: '${1}'
+
+
+  - job_name: "kafka-broker"
+    static_configs:
+      - targets:
+          - "kafka-1:1234"
+          - "kafka-2:1234"
+          - "kafka-3:1234"
+          - "kafka-4:1234"
+          - "kafka-5:1234"
+          - "kafka-6:1234"
+        labels:
+          env: "dev"
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: hostname
+        regex: '([^:]+)(:[0-9]+)?'
+        replacement: '${1}'
+
+  - job_name: 'kafka-controller'
+    static_configs:
+      - targets: ['kafka-1:1234', 'kafka-2:1234', 'kafka-3:1234', 'kafka-4:1234', 'kafka-5:1234', 'kafka-6:1234']
+        labels:
+          env: "dev"
+
+  - job_name: "schema-registry"
+    static_configs:
+      - targets:
+          - "schema-registry-1:1234"
+        labels:
+          env: "dev"
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: hostname
+        regex: '([^:]+)(:[0-9]+)?'
+        replacement: '${1}'
+
+
+  - job_name: "kafka-connect"
+    static_configs:
+      - targets:
+          - "kafka-connect-1:1234"
+          - "kafka-connect-2:1234"
+          - "kafka-connect-3:1234"
+        labels:
+          env: "dev"
+          kafka_connect_cluster_id: "cluster1"
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: hostname
+        regex: '([^:]+)(:[0-9]+)?'
+        replacement: '${1}'
+
+
+  - job_name: "ksqldb"
+    static_configs:
+      - targets:
+          - "ksqldb-server-1:1234"
+          - "ksqldb-server-2:1234"
+          - "ksqldb-server-3:1234"
+        labels:
+          env: "dev"
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: hostname
+        regex: '([^:]+)(:[0-9]+)?'
+        replacement: '${1}'
+
+
+  - job_name: "streams-demo"
+    static_configs:
+      - targets:
+          - "streams-demo:1234"
+        labels:
+          env: "dev"
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: hostname
+        regex: '([^:]+)(:[0-9]+)?'
+        replacement: '${1}'
+
+  - job_name: "rest-proxy"
+    static_configs:
+      - targets:
+          - "kafka-rest-1:1234"
+          - "kafka-rest-2:1234"
+          - "kafka-rest-3:1234"
+        labels:
+          env: "dev"
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: hostname
+        regex: '([^:]+)(:[0-9]+)?'
+        replacement: '${1}'
+
+  # No producer for the moment in cp-demo
+  # - job_name: 'kafka-producer'
+  #   static_configs:
+  #     - targets:
+  #         - 'kafka1:1235'
+  #       labels:
+  #         env: 'dev'
+  #   relabel_configs:
+  #     - source_labels: [__address__]
+  #       target_label: hostname
+  #       regex: '([^:]+)(:[0-9]+)?'
+  #       replacement: '${1}'
+
+  # No consumer for the moment in cp-demo
+  # - job_name: 'kafka-consumer'
+  #   static_configs:
+  #     - targets:
+  #         - "kafka1:1236"
+  #       labels:
+  #         env: 'dev'
+  #   relabel_configs:
+  #     - source_labels: [__address__]
+  #       target_label: hostname
+  #       regex: '([^:]+)(:[0-9]+)?'
+  #       replacement: '${1}'
+
+  - job_name: "kafka-lag-exporter"
+    static_configs:
+      - targets:
+          - "kafka-lag-exporter:9999"
+        labels:
+          env: "dev"
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+        regex: '([^:]+)(:[0-9]+)?'
+        replacement: '${1}'
+
+  - job_name: etcd
+    static_configs:
+      - targets: ["etcd-1:2381"]
+
+  - job_name: 'cadvisor'
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['cadvisor:8080']
+
+  - job_name: 'pushgateway'
+    scrape_interval: 10s
+    honor_labels: true
+    static_configs:
+      - targets: ['prometheus-pushgateway:9091']
+
+  - job_name: risingwave-compute-1
+    static_configs:
+      - targets: ["risingwave-compute-1:1222"]
+      - targets: ["risingwave:1222"]
+
+  - job_name: risingwave-meta-1
+    static_configs:
+      - targets: ["risingwave-meta-1:1250"]
+      - targets: ["risingwave:1250"]
+
+  - job_name: risingwave-compactor-1
+    static_configs:
+      - targets: ["risingwave-compactor-1:1260"]
+      - targets: ["risingwave:1260"]
+
+  - job_name: risingwave-frontend-1
+    static_configs:
+      - targets: ["risingwave-frontend-1:2222"]
+      - targets: ["risingwave:2222"]
+
+  - job_name: minio-1
+    metrics_path: /minio/v2/metrics/cluster
+    scheme: http
+    static_configs:
+      - targets: ["minio-1:9000"]
+
+  - job_name: redis_exporter
+    static_configs:
+    - targets: ['redis-exporter:9121']
+
+  - job_name: zipkin
+    scrape_interval: 5s
+    metrics_path: '/prometheus'
+    static_configs:
+      - targets: ['zipkin:9411']      

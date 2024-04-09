@@ -13,4 +13,8 @@ platys gen
 
 ## How to use it?
 
-Navigate to <http://dataplatform:28193>
+Navigate to <http://dataplatform:28192>. 
+
+### Storage Backends
+
+By default `s3`, `local`, `ftp` and `sftp` storage backends are enabled. Navigate to <http://dataplatform:28192/admin/backend> to change to the Admin console, where you can enable other storage backends.

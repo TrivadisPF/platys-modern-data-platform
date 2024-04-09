@@ -1,0 +1,1 @@
+Add scripts which should be executed upon initialisation of the InfluxDB database. This will only be done once, in the init phase of the database. Scripts must have extension .sh, must have execute file permissions.

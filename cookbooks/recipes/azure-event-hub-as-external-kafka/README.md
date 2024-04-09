@@ -1,7 +1,7 @@
 ---
 technologies:       azure,event-hub,kafka
-version:				1.16.0
-validated-at:			15.4.2023
+version:				1.17.0
+validated-at:			16.10.2023
 ---
 
 # Azure Event Hub as external Kafka
@@ -27,6 +27,7 @@ bash
         KAFKA_security_protocol: SASL_SSL
         KAFKA_sasl_mechanism: PLAIN
         KAFKA_sasl_username: $$ConnectionString
+        KAFKA_login_module: org.apache.kafka.common.security.plain.PlainLoginModule
 ```
 
 For the password to not end up in the `docker-compose.yml` file, we have to add it as an environment variable:

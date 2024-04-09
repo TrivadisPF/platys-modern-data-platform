@@ -1,0 +1,1 @@
+Add an init.sql script to run it against the SingleStore db upon startup.

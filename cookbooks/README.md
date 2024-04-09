@@ -1,4 +1,4 @@
-# Modern Data Platform Cookbooks  - v1.16.0
+# Modern Data Platform Cookbooks  - v1.17.0
 Inhere we are documenting cookbooks on how to use the platform:
 
  * **Airflow**
@@ -13,6 +13,9 @@ Inhere we are documenting cookbooks on how to use the platform:
    * [Querying data in Kafka from Trino (formerly PrestoSQL)](./recipes/querying-kafka-with-trino/README.md) - `1.14.0`
    * [Querying HDFS data using Trino](./recipes/querying-hdfs-with-presto/README.md) - `1.11.0`
    * [Trino Security](./recipes/trino-security/README.md) - `1.16.0`
+
+ * **MinIO**
+   * [Serving a static Web application from MinIO](./recipes/serving-static-html-app-from-minio/README.md)
 
  * **MQTT**
    * [Using Confluent MQTT Proxy](./recipes/using-mqtt-proxy/README.md)
@@ -60,8 +63,11 @@ Inhere we are documenting cookbooks on how to use the platform:
 
  * **Kafka**
    * [Simulated Multi-DC Setup on one machine](./recipes/simulated-multi-dc-setup/README.md) - `1.14.0`  
-   * [Automate management of Kafka topics on the platform](./recipes/jikkou-automate-kafka-topics-management/README.md) - `1.14.0`
+   * [Automate management of Kafka topics using Jikkou](./recipes/jikkou-automate-kafka-topics-management/README.md) - `1.17.0`
    * [Azure Event Hub as external Kafka](./recipes/azure-event-hub-as-external-kafka/README.md) - `1.16.0`
+   * [SASL/SCRAM Authentication with Zookeeper](./recipes/kafka-sasl-scram-authentication-zk/README.md) - `1.17.0`
+   * [SASL/SCRAM Authentication with KRaft](./recipes/kafka-sasl-scram-authentication-kraft/README.md) - `1.17.0`
+   * [SASL/PLAIN Authentication](./recipes/kafka-sasl-plain-authentication/README.md) - `1.17.0`
 
  * **Confluent Enterprise Platform**
    * [Using Confluent Enterprise Tiered Storage](./recipes/confluent-tiered-storage/README.md) - `1.13.0`
@@ -78,16 +84,13 @@ Inhere we are documenting cookbooks on how to use the platform:
  * **Apicurio Registry**
    * [Apicurio Registry with SQL Storage (PostgreSQL)](./recipes/apicurio-with-database-storage/README.md) - `1.14.0`
 
- * **Jikkou**
-   * [Automate management of Kafka topics on the platform](./recipes/jikkou-automate-kafka-topics-management/README.md)    
-
  * **Oracle RDBMS**
    * [Using private (Trivadis) Oracle EE image](./recipes/using-private-oracle-ee-image/README.md) - `1.13.0`    
    * [Using public Oracle XE image](./recipes/using-public-oracle-xe-image/README.md) - `1.16.0`    
 
  * **Neo4J**
-     * [Working with Neo4J](./recipes/working-with-neo4j/README.md) - `1.15.0`  
-     * [Neo4J and yFiles graphs for Jupyter](./recipes/neo4j-jupyter-yfiles/README.md) - `1.16.0`   
+   * [Working with Neo4J](./recipes/working-with-neo4j/README.md) - `1.15.0`  
+   * [Neo4J and yFiles graphs for Jupyter](./recipes/neo4j-jupyter-yfiles/README.md) - `1.16.0`   
 
  * **Tipboard**
    * [ Working with Tipboard and Kafka](./recipes/tipboard-and-kafka/README.md) - `1.14.0`    
@@ -99,5 +102,12 @@ Inhere we are documenting cookbooks on how to use the platform:
    * [Using Jupyter notebook with Spark and Avro](./recipes/jupyter-spark/README.md) - `1.16.0` 
    * [Using JupyterHub](./recipes/using-jupyter-hub/README.md) - `1.16.0` 
 
+ * **Dataverse**
+   * [Dataverse with Minio (S3) storage](./recipes/dataverse-with-minio/README.md) - `1.17.0` 
+
  * **MLflow**
    * [Using MLflow from Jupyter](./recipes/using-mflow-from-jupyter/README.md) - `1.16.0` 
+
+ * **Docker Logging**
+   * [Collecting Docker Logs with Loki](./recipes/collecting-docker-logs-with-loki/README.md) - `1.17.0` 
+

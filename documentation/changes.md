@@ -2,6 +2,155 @@
 
 See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/platys/blob/master/documentation/upgrade-platform-stack.md) for how to upgrade to newer version.
 
+## What's new in 1.17.0
+
+The Modern Data Platform version 1.16.0 contains the following bug fixes and enhancements:
+
+### New Services
+
+ * Minio Web
+ * ActiveMQ Artemis
+ * HStreamDB
+ * Kafka Init
+ * Docker Registry
+ * Docker Registry UI
+ * Splunk
+ * Klaw
+ * FluentD
+ * Raneto
+ * Markdown Madness
+ * Kadeck
+ * MailDev
+ * Mailpit
+ * MailHog
+ * Dataverse
+ * CKAN
+ * AsyncAPI Studio
+ * Taiga
+ * Taskcafé
+ * Cetusguard
+ * etcd & etcd-browser
+ * Risingwave
+ * MonitoFi
+ * IOEvent Cockpit
+ * Redis (Metrics) Exporter
+ * S3FS
+ * Prometheus Alertmanager
+ * Pact Broker
+ * Cribl Stream
+ * Cribl Edge
+ * Blaze (FHIR Server)
+ * LinuxForHealth (FHIR Server)
+ * HAPI FHIR Server
+ * FileBeat
+ * Open Policy Agent (OPA)
+ * Styra Enterprise OPA
+ * ToolJet
+ * Miracum FHIR Gateway
+ * LiteLLM
+ * MindsDB
+ * Ollama
+ * Ollama WebUI
+ * Alpaca WebUI
+ * Chroma
+ * Milvus & Attu
+ * Flowise
+ * Streamlit Applications
+ * Anything LLM
+ * Vector Admin
+ * SingleStore
+ * Qdrant
+ * Redis Stack
+ * Weaviate
+ * Big-AGI
+ * LocalAI
+ * Solace PubSub+
+ * Solace Kafka Proxy
+ * Softproject X4 Server
+ * MariaDB
+ * Minio KES
+ * AutoGen Studio
+
+### Removed Services
+ 
+ * Azkarra Worker
+
+### New/Updated Cookbook Recipes
+
+ * [Collecting Docker Logs with Loki](../cookbooks/recipes/collecting-docker-logs-with-loki/README.md)
+ * [Kafka SASL/SCRAM Authentication](../cookbooks/recipes/kafka-sasl-scram-authentication/README.md)
+ * [Serving a static Web application from MinIO](../cookbooks/recipes/serving-static-html-app-from-minio/README.md)
+
+ 
+### Version upgrades
+
+ * Update `zeebe` to `8.2.5`
+ * Update `druid` to `26.0.0`
+ * Update `trino` to `443`
+ * Update `starbrustdata` to `435-e.2`
+ * Update `jikkou` to `0.21.0`
+ * Update `minio` to `RELEASE.2024-03-21T23-13-43Z`
+ * Update `nifi` to `1.25.0`
+ * Update `ksqldb` to `0.29.0`
+ * Update `datahub` to `v0.13.0`
+ * Update `Confluent Platform` to `7.6.0`
+ * Update `portainer-ce` to `2.18.4-alpine`
+ * Update `activemq-classic` to `5.18.2`
+ * Update `materialize` to `v0.64.0`
+ * Update `jikkou` to `latest`
+ * Update `keycloak` to `22.0`
+ * Update `marquez` to `0.41.0`
+ * Update `flink` to `1.18-scala_2.12-java17`
+ * Update `airflow` to `2.7.3`
+ * Update `zeebe` to `8.3.1`
+ * Update `grafana` to `10.2.0`
+ * Update `prometheus` to `v2.28.1`
+ * Update `prometheus-pushgateway` to `v1.6.2`
+ * Update `prometheus-nodeexporter` to `v1.7.0`
+ * Update `redis` to `7.2`
+ * Update `vault` to `1.15`
+ * Update `influxdb` to `1.8` (latest OSS version)
+ * Update `kapacitor` to `1.7`
+ * Update `telegraf` to `1.28`
+ * Update `tile38` to `1.32.0`
+ * Update `hasura` to `v2.35.1`
+ * Update `materialize` to `v0.91.0`
+ * Update `cadvisor` to `v0.47.2`
+ * Update `portainer` to `2.19.4-alpine`
+ * Update `elasticsearch` to `8.11.3`
+ * Update `kibana` to `8.11.3`
+ * Update `hasura` to `v2.37.0-ce`
+ * Update `risingwave` to `v1.6.0`
+
+### Enhancements
+
+ * support for configuring Airflow authentication backends via `AIRFLOW_auth_backends` config setting
+ * support ActiveMQ Artemis as an ActiveMQ edition
+ * add support for multiple trino event listener plugins (rename `TRINO_event_listener` to `TRINO_event_listeners`)
+ * support for NEO4J major version 4 and 5 with `NEO4J_major_version` setting
+ * Markdown Viewer implementation has been changed to use `markdown-madness` instead of `markdown-web` (because it supports images and also has a nicer look&feel). This is now the default option, but you can revert back to the previous one by changing the value of the `MARKDOWN_VIEWER_edition` config setting to `markdown-web`.
+ * Watchtower now supports a lot more options and is no longer hardcoded to one single behaviour.
+ * support for Kafka SASL/PLAIN authentication for traditional and KRaft setups
+ * support for Kafka SASL/SCRAM (256 + 512) authentication for traditional and KRaft setups
+ * support for Kafka authorisation for traditional and KRaft setups
+ * support for authentication in AKHQ
+ * removed JAR's from the plugin folder to decrease the size of the docker image
+ * added multi-arch docker build to also build the docker image of the generator as an arm64 type
+ * the "preview" version is no longer tagged as `1.nn.nn-preview` but as `develop`, so to get the development version, just use `platys init -n demo-platform --stack trivadis/platys-modern-data-platform --stack-version develop --structure flat`
+ * Add property (`NIFI_major_version`) to chose between NiFi Version 1 and Version 2
+ * Markdown-Viewer service comes with a redesigned service list now also visualising the exposed ports and the description of each service. This is `v2`, you can switch back to `v1` by configuring `MARKDOWN_VIEWER_services_list_version` and set it to `1`.
+
+### Breaking Changes
+
+ * Remove usage of `$PUBLIC_IP` from the labels section in the `docker-compose.yml` to make it more stable to changing the value of the environment variable with a stack running (`docker compose up -d` will cause less harm)
+ * Rename Trino configuration setting `TRINO_additional_connectors` to `TRINO_additional_plugins`
+ * Keycloak is no longer using the "legacy" version but the new Quarkus-based one 
+ * Dataiku now maps to port `28315` and no longer to `28205`
+ * Change `KAFKA_KSQLDB_xxxxx` to `KSQLDB_xxxxx`
+ * Change `FTP_xxxxx` to `PURE_FTPD_xxxxx` to control the Pure FTPd server
+ * Config `ATLAS_install_hive_hook` has been replaced by `ATLAS_hive_hook_enable` and the JARs for the hook are no longer included and need to be downloaded manually  
+ * Config `KAFKA_jmx_monitoring_prometheus_enable` replaced by global configuration property `jmx_monitoring_with_prometheus_enable` as it doesn't apply to just the Kafka cluster
+
 ## What's new in 1.16.0
 
 The Modern Data Platform version 1.16.0 contains the following bug fixes and enhancements:
