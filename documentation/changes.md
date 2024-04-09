@@ -4,7 +4,7 @@ See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/plat
 
 ## What's new in 1.17.0
 
-The Modern Data Platform version 1.16.0 contains the following bug fixes and enhancements:
+The Modern Data Platform version 1.17.0 contains the following bug fixes and enhancements:
 
 ### New Services
 
