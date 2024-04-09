@@ -1,4 +1,4 @@
-# Modern Data Platform Cookbooks  - v1.16.0
+# Modern Data Platform Cookbooks  - v1.17.0
 Inhere we are documenting cookbooks on how to use the platform:
 
  * **Airflow**
@@ -16,7 +16,6 @@ Inhere we are documenting cookbooks on how to use the platform:
 
  * **MinIO**
    * [Serving a static Web application from MinIO](./recipes/serving-static-html-app-from-minio/README.md)
-
 
  * **MQTT**
    * [Using Confluent MQTT Proxy](./recipes/using-mqtt-proxy/README.md)
@@ -66,7 +65,9 @@ Inhere we are documenting cookbooks on how to use the platform:
    * [Simulated Multi-DC Setup on one machine](./recipes/simulated-multi-dc-setup/README.md) - `1.14.0`  
    * [Automate management of Kafka topics using Jikkou](./recipes/jikkou-automate-kafka-topics-management/README.md) - `1.17.0`
    * [Azure Event Hub as external Kafka](./recipes/azure-event-hub-as-external-kafka/README.md) - `1.16.0`
-   * [SASL/SCRAM Authentication](./recipes/kafka-sasl-scram-authentication/README.md) - `1.17.0`
+   * [SASL/SCRAM Authentication with Zookeeper](./recipes/kafka-sasl-scram-authentication-zk/README.md) - `1.17.0`
+   * [SASL/SCRAM Authentication with KRaft](./recipes/kafka-sasl-scram-authentication-kraft/README.md) - `1.17.0`
+   * [SASL/PLAIN Authentication](./recipes/kafka-sasl-plain-authentication/README.md) - `1.17.0`
 
  * **Confluent Enterprise Platform**
    * [Using Confluent Enterprise Tiered Storage](./recipes/confluent-tiered-storage/README.md) - `1.13.0`
@@ -100,6 +101,9 @@ Inhere we are documenting cookbooks on how to use the platform:
  * **Jupyter**
    * [Using Jupyter notebook with Spark and Avro](./recipes/jupyter-spark/README.md) - `1.16.0` 
    * [Using JupyterHub](./recipes/using-jupyter-hub/README.md) - `1.16.0` 
+
+ * **Dataverse**
+   * [Dataverse with Minio (S3) storage](./recipes/dataverse-with-minio/README.md) - `1.17.0` 
 
  * **MLflow**
    * [Using MLflow from Jupyter](./recipes/using-mflow-from-jupyter/README.md) - `1.16.0` 
