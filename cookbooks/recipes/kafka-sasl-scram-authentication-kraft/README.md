@@ -1,12 +1,12 @@
 ---
 technologies:       kafka
 version:				1.17.0
-validated-at:			3.10.2023
+validated-at:			15.10.2023
 ---
 
-# Kafka SASL/SCRAM Authentication
+# Kafka SASL/SCRAM Authentication with KRaft
 
-This recipe will show how to use Kafka with SASL/SCRAM Authentication enabled and the usage of a client (AKHQ) to access it.
+This recipe will show how to use Kafka with SASL/SCRAM Authentication enabled in a KRaft setup and the usage of a client (AKHQ) to access it.
 
 ## Initialise data platform
 
@@ -21,6 +21,7 @@ edit `config.yml` and add the following configuration setting after the `KAFKA_e
 ```yaml
       KAFKA_enable=true
       
+      KAFKA_use_kraft_mode: true
       KAFKA_security_protocol: 'SASL_PLAINTEXT'
       # either 'PLAIN', 'SCRAM-SHA-256' or 'SCRAM-SHA-512'
       KAFKA_sasl_mechanism: 'SCRAM-SHA-256'
@@ -99,3 +100,17 @@ docker exec -ti kafka-1 kafka-configs --zookeeper zookeeper-1:2181 --alter --add
 ```bash
 docker exec -ti kafka-1 kafka-configs --zookeeper zookeeper-1:2181  --alter --delete-config 'SCRAM-SHA-256' --entity-type users --entity-name new-user
 ```
+
+
+## ACL
+
+kafka-acls --bootstrap-server localhost:9092 \
+  --command-config adminclient-configs.conf \
+  --add \
+  --allow-principal User:alice \
+  --allow-principal User:fred \
+  --allow-host host-1 \
+  --allow-host host-2 \
+  --operation read \
+  --operation write \
+  --topic finance-topic
