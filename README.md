@@ -1,15 +1,6 @@
-# Platform Stack: `modern-data-platform` - v1.18.0
+# Platform Stack: `modern-data-platform` - v1.17.1
 
-This Platform Stack defines the set of services for a Modern Data Platform, such as
-
-* Kafka
-* Spark
-* Hadoop Ecosystem
-* StreamSets & NiFi
-* Zeppelin & Jupyter
-* NoSQL
-
-and many others. 
+This Platform Stack defines the set of services for a Modern Data Platform to be used with the [Platys](http://github.com/trivadispf/platys) platform generator.
 
 ## Which services can I use? 
 
