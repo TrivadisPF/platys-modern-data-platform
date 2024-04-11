@@ -1,4 +1,4 @@
-# `modern-data-platform` - Configuration v1.17.0
+# `modern-data-platform` - Configuration v1.17.1
 
 This is the documentation of the configuration settings which can be overwritten using a custom YAML file. All the defaults are defined in [`../modern-data-platform-stack/generator-config/vars/config.yml`](../modern-data-platform-stack/generator-config/vars/config.yml).
 
@@ -45,7 +45,7 @@ There are some overall settings which will control the behaviour for all or a gr
 | `DATAHUB_enable`                             	| `false` | 1.16.0 | Use external DataHub service. Specify the DataHub GMS service through the `DATAHUB_gms_url` property.  |  
 | `DATAHUB_gms_url`                             	| `` 	| 1.16.0 | the web url of the external DataHub GMS service instance to connect to. |  
 | `OLLAMA_enable`                             	| `false` | 1.17.0 | Use external Ollama service. Specify the Ollama base URL through the `OLLAMA_url` property.  |  
-| `OLLAMA_url`                             	| `` 	| 1.17.0 | the base url of the Ollama service (in the format `http://<host>:<port>`) |  
+| `OLLAMA_url`                             	| `http://${PUBLIC_IP}:11434` 	| 1.17.0 | the base url of the Ollama service (in the format `http://<host>:<port>`) |  
 
 ## Platform Services
 
@@ -1001,6 +1001,9 @@ For each service there might be some other settings, such as controlling the num
 | `ATTU_enable`                              	| `false` 	| 1.17.0 	| Generate Attu service                                                                                                                                                           	|             	|                                	|
 | [**_Vector Admin_**](./services/vector-admin.md) &nbsp;&nbsp;&nbsp;&nbsp;![x86-64](./images/x86-64.png)                                	|         	|       	|                                                                                                                                                                                     	|     
 | `VECTOR_ADMIN_enable`                              	| `false` 	| 1.17.0 	| Generate Vector Admin service                                                                                                                                                           	|             	|                                	|
+| `VECTOR_ADMIN_postgresql_database`                                  	| `` 	| 1.18.0 	| the PostgreSQL database to use for connecting to the PostgreSQL. If not set, the value of the `POSTGRESQL_database` property is used.                                                                                                                                                   	|     
+| `VECTOR_ADMIN_postgresql_user`                                  	| `` 	| 1.18.0 	| the PostgreSQL user to use for connecting to the PostgreSQL database. If not set, the value of the `POSTGRESQL_user` property is used.                                                                                                                                                   	|     
+| `VECTOR_ADMIN_postgresql_password`                                  	| `` 	| 1.18.0 	| the PostgreSQL password to use for connecting to the PostgreSQL database. If not set, the value of the `POSTGRESQL_password` property is used.                                                                                                                                                   	|     
 | [**_Hazelcast_**](./services/hazelcast.md) &nbsp;&nbsp;&nbsp;&nbsp;![x86-64](./images/x86-64.png)                               	|         	|       	|                                                                                                                                                                                     	|     
 | `HAZELCAST_enable`                             	| `false` 	| 1.13.0 	| Generate Hazelcast service                                                                                                                                                      	|             	|                                	|
 | `HAZELCAST_nodes`                             	| `1` 	| 1.13.0 	| How many Hazelcast nodes should be generated                                                                                                                                                  	|             	|                                	|

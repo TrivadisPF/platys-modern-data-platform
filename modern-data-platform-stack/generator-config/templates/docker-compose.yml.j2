@@ -560,6 +560,11 @@ networks:
   {% set ZOOKEEPER_enable = true -%}
 {% endif -%}   {# NIFI_enable and NIFI_create_cluster #}
 
+{% if (VECTOR_ADMIN_enable) -%}
+# enforce some dependencies
+  {% set POSTGRESQL_enable = true -%}
+{% endif -%}
+
 {% if jmx_monitoring_with_prometheus_enable -%}
 # enforce some dependencies
   {% set PROMETHEUS_enable = true -%}
@@ -14145,7 +14150,7 @@ services:
       - "8288:8288"
     environment:
       SERVER_PORT: 3001
-      DATABASE_CONNECTION_STRING: "postgresql://vectoradmin:abc123!@postgresql:5432/vectoradmindb"
+      DATABASE_CONNECTION_STRING: "postgresql://{{VECTOR_ADMIN_postgresql_user if VECTOR_ADMIN_postgresql_user is defined and VECTOR_ADMIN_postgresql_user and VECTOR_ADMIN_postgresql_user | length else POSTGRESQL_user}}:{{VECTOR_ADMIN_postgresql_password if VECTOR_ADMIN_postgresql_password is defined and VECTOR_ADMIN_postgresql_password and VECTOR_ADMIN_postgresql_password | length else POSTGRESQL_password}}@postgresql:5432/{{VECTOR_ADMIN_postgresql_database if VECTOR_ADMIN_postgresql_database is defined and VECTOR_ADMIN_postgresql_database and VECTOR_ADMIN_postgresql_database | length else POSTGRESQL_database}}"
       STORAGE_DIR: "./backend/storage"
       JWT_SECRET: abc123!
       INNGEST_LANDING_PAGE: true
