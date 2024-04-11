@@ -2,18 +2,14 @@
 
 See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/platys/blob/master/documentation/upgrade-platform-stack.md) for how to upgrade to newer version.
 
-## What's new in 1.18.0
+## What's new in 1.17.1
 
-The Modern Data Platform version 1.18.0 contains the following bug fixes and enhancements:
+The Modern Data Platform version 1.17.1 contains no new services but a few small enhancements:
 
-### New Services
+### Enhancements
 
-### New/Updated Cookbook Recipes
-
-### Version upgrades
-
-### Breaking Changes
-
+ * VectorAdmin uses postgresql default database and enables it automatically
+ * default value for external Ollama endpoint
 
 ## What's new in 1.17.0
 
