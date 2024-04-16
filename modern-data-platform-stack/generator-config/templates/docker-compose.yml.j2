@@ -11181,7 +11181,12 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
     environment:
+    {% if (LANGFLOW_database_type | lower) == 'sqlite' %}
+      LANGFLOW_DATABASE_URL: sqlite:///./langflow.db
+    {% endif -%}   {#  LANGFLOW_database_type #}
+    {% if (LANGFLOW_database_type | lower) == 'postgres' %}
       LANGFLOW_DATABASE_URL: postgresql://{{LANGFLOW_database_user}}:{{LANGFLOW_database_password}}@postgresql:5432/{{LANGFLOW_database_name}}
+    {% endif -%}   {#  LANGFLOW_database_type #}
       LANGFLOW_CONFIG_DIR: /var/lib/langflow
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
