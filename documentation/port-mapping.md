@@ -161,6 +161,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 7688 | 7687 | neo4j-2 |
 7689 | 7687 | neo4j-3 |
 7690 | 7687 | memgraph-platform |
+7860 | 7860 | langflow-backend |
 8000 | 8000 | kong (proxy) |
 8001 | 8001 | kong (admin api) |
 8002 | 8002 | kong (admin gui) |
@@ -615,6 +616,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28363 | 9200 | datahub-opensearch |
 28364 | 8080 | autogen-studio |
 28365 | 3000 | alpaca-webui |
+28366 | 7860 | langflow-frontend |
+
 
 ## Ports > 28500
 

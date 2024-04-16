@@ -274,6 +274,7 @@ networks:
 {% set __LITELLM_version = LITELLM_version | default('latest') -%}
 
 {% set __FLOWISE_version = FLOWISE_version | default('latest') -%}
+{% set __LANGFLOW_version = LANGFLOW_version | default('latest') -%}
 
 {% set __GPT_RESEARCHER_version = GPT_RESEARCHER_version | default('latest') -%}
 
@@ -714,6 +715,7 @@ networks:
   {% set AUTOGEN_STUDIO_enable = false -%}
   {% set LITELLM_enable = false -%}
   {% set FLOWISE_enable = false -%}
+  {% set LANGFLOW_enable = false -%}
   {% set DATAIKU_DSS_enable = false -%}
   {% set KIE_SERVER_enable = false -%}
   {% set METABASE_enable = false -%}
@@ -11120,7 +11122,7 @@ services:
   {% endif -%}   {#  FLOWISE_database_type == mysql #}
   {% if (FLOWISE_database_type | lower) == 'postgres' %}
       DATABASE_PORT: 5432
-      DATABASE_HOST: postgresql-1
+      DATABASE_HOST: postgresql
       DATABASE_NAME: {{FLOWISE_database_name}}
       DATABASE_USER: {{FLOWISE_database_user}}
       DATABASE_PASSWORD: {{FLOWISE_database_password}}
@@ -11161,6 +11163,42 @@ services:
     command: /bin/sh -c "sleep 3; flowise start"
     restart: {{container_restart_policy}}
 {% endif %}   {# FLOWISE_enable  #}
+
+{%if LANGFLOW_enable | default(false) %}
+  #  ================================== Langflow  ========================================== #
+  langflow-backend:
+    image: logspace/langflow:{{__LANGFLOW_version}}
+    container_name: langflow-backend
+    hostname: langflow-backend
+    labels:
+      com.platys.name: 'langflow'
+      com.platys.description: 'visual way to build, iterate and deploy AI apps'
+      com.platys.webui.title: 'Langflow UI'
+      com.platys.webui.url: "http://dataplatform:7860"
+    ports:
+      - "7860:7860"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      LANGFLOW_DATABASE_URL: postgresql://{{LANGFLOW_database_user}}:{{LANGFLOW_database_password}}@postgresql:5432/{{LANGFLOW_database_name}}
+      LANGFLOW_CONFIG_DIR: /var/lib/langflow
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {% if LANGFLOW_volume_map_data %}
+      - ./container-volumes/langflow/data:/var/lib/langflow
+    {% endif -%}   {#  FLOWISE_volume_map_data #}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+{% endif %}   {# LANGFLOW_enable  #}
 
 {%if GPT_RESEARCHER_enable | default(false) %}
   #  ================================== GPT Researcher  ========================================== #
