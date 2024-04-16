@@ -10,6 +10,10 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
 
  * Langflow 
 
+### Version upgrades
+
+ * Update `postgresql` to `16` 
+
 ## What's new in 1.17.1
 
 The Modern Data Platform version 1.17.1 contains no new services but a few small enhancements:
