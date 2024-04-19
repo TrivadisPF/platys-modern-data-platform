@@ -13,6 +13,39 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
 ### Version upgrades
 
  * Update `postgresql` to `16` 
+ * Update `mongo` to `7.0` 
+ * Update `solr` to `9.5` 
+ * Update `janusgraph` to `1.0.0-20231010-065545.e3799d4`
+ * Update `neo4j` to `5.19`
+ * Update `memgraph` to `2.16.0`
+ * Update `memgraph-mage` to `1.16-memgraph-2.16-dev`
+ * Update `arcadedb` to `24.2.1`
+ * Update `dgraph` to `v23.1.1`
+ * Update `graphdb` to `10.6.3`
+ * Update `questdb` to `7.4.0`
+ * Update `kudu` to `1.17`
+ * Update `chroma` to `0.4.25.dev139`
+ * Update `qdrant` to `v1.8.4`
+ * Update `weaviate` to `1.24.10`
+ * Update `druid` to `29.0.1`
+ * Update `pinot` to `1.1.0`
+ * Update `prometheus` to `v2.51.2`
+ * Update `prometheus-pushgateway` to `v1.8.0`
+ * Update `prometheus-alertmanager` to `v0.27.0`
+ * Update `tile38` to `1.32.2`
+ * Update `yugabyte` to `2.14.16.0-b17`
+ * Update `single-store` to `0.2.18`
+ * Update `timescaledb` to `2.14.2-pg16`
+ * Update `hazelcast` to `5.4`
+ * Update `trino` to `445`
+ * Update `prestodb` to `0.286`
+ * Update `ahana` to `0.286`
+ * Update `dremio` to `24.2`
+ * Update `hasura` to `v2.38.1-ce`
+ * Update `marquez` and `marquez-web` to `0.46.0`
+ * Update `datastax` to `6.8.44`
+ * Update `elasticsearch` to `7.17.20` and `8.13.0`
+ * Update `kibana` to `7.17.20` and `8.13.0`
 
 ## What's new in 1.17.1
 
