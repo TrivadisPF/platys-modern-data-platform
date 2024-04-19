@@ -1,0 +1,1 @@
+Place GraphDB Enterprise license file here (named graphdb.license).

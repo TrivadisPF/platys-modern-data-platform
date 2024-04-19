@@ -13630,12 +13630,9 @@ services:
   graphdb-1:
   {% if (GRAPHDB_edition | lower) == 'free'  %}
     image: khaller/graphdb-free:{{__GRAPHDB_FREE_version}}
-  {% elif (GRAPHDB_edition | lower) == 'se' %}
-    image: ontotext/graphdb:{{__GRAPHDB_version}}-se
-  {% elif (GRAPHDB_edition | lower) == 'ee' %}
-    image: ontotext/graphdb:{{__GRAPHDB_version}}-ee
+  {% elif (GRAPHDB_edition | lower) == 'se' or 'ee' %}
+    image: ontotext/graphdb:{{__GRAPHDB_version}}
   {% endif -%}   {#  GRAPHDB_enable #}
-
     hostname: graphdb-1
     container_name: graphdb-1
     labels:
@@ -13663,6 +13660,9 @@ services:
     volumes:
       - ./data-transfer:/data-transfer
       - ./init/graphdb:/repository.init/
+    {% if (GRAPHDB_edition | lower) == 'se' or 'ee' %}
+      - ./licences/graphdb:/opt/graphdb/home
+    {% endif %}
     {% if GRAPHDB_volume_map_data %}
       - "./container-volume/graphdb/data:/opt/graphdb/data"
     {% endif %}
