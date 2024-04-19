@@ -46,6 +46,8 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Update `datastax` to `6.8.44`
  * Update `elasticsearch` to `7.17.20` and `8.13.0`
  * Update `kibana` to `7.17.20` and `8.13.0`
+ * Update `memcached` to `1.6.26`
+ * Update `redis-stack` to `7.2.0-v10`
 
 ## What's new in 1.17.1
 
