@@ -41,7 +41,7 @@ nano .env
 and add the following environment variable to specify the password 
 
 ```bash
-PLATYS_KAFKA_PASSWORD=Endpoint=sb://fzageventhub.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=XXXXXXXXXXXXXXXX
+PLATYS_KAFKA_PASSWORD=Endpoint=sb://xxxxxxx.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=XXXXXXXXXXXXXXXX
 ```
 
 Save the file and generate and start the data platform.
