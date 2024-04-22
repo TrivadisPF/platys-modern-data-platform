@@ -50,6 +50,7 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Update `memcached` to `1.6.26`
  * Update `redis-stack` to `7.2.0-v10`
  * Update `flowise` to `1.6.5`
+ * Update `stardog` to `latest`
 
 ## What's new in 1.17.1
 
