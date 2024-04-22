@@ -277,6 +277,7 @@ networks:
 
 {% set __FLOWISE_version = FLOWISE_version | default('latest') -%}
 {% set __LANGFLOW_version = LANGFLOW_version | default('latest') -%}
+{% set __LANGFUSE_version = LANGFUSE_version | default('latest') -%}
 
 {% set __GPT_RESEARCHER_version = GPT_RESEARCHER_version | default('latest') -%}
 
@@ -11208,6 +11209,43 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
 {% endif %}   {# LANGFLOW_enable  #}
+
+{%if LANGFUSE_enable | default(false) %}
+  #  ================================== Langfuse  ========================================== #
+  langfuse:
+    image: ghcr.io/langfuse/langfuse:{{__LANGFUSE_version}}
+    container_name: langfuse
+    hostname: langfuse
+    labels:
+      com.platys.name: 'langfuse'
+      com.platys.description: 'LLM engineering platform'
+      com.platys.webui.title: 'Langfuse UI'
+      com.platys.webui.url: "http://dataplatform:28366"
+    ports:
+      - "28366:3000"
+    environment:
+    {% if (LANGFUSE_database_type | lower) == 'postgres' %}
+      DATABASE_URL: postgresql://{{LANGFUSE_database_user}}:{{LANGFUSE_database_password}}@postgresql:5432/{{LANGFUSE_database_name}}
+    {% endif -%}   {#  LANGFUSE_database_type #}
+      NEXTAUTH_SECRET: abc123!
+      SALT: abc123!
+      NEXTAUTH_URL: http://${PUBLIC_IP}:28366
+      TELEMETRY_ENABLED: {{LANGFUSE_enable_telemetry}}
+      LANGFUSE_ENABLE_EXPERIMENTAL_FEATURES: {{LANGFUSE_enable_experimental_features}}
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+{% endif %}   {# LANGFUSE_enable  #}
 
 {%if GPT_RESEARCHER_enable | default(false) %}
   #  ================================== GPT Researcher  ========================================== #
