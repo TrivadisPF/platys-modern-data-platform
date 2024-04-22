@@ -46,7 +46,7 @@ nano .env
 and add the following environment variable to specify the access token for the Git Repo (
 
 ```bash
-PLATYS_NIFI_REGISTRY_GIT_PASSWORD=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
+PLATYS_NIFI_REGISTRY_GIT_PASSWORD=XXXXXXXXXXXXXXXXXXXX
 ```
 
 Save the file and generate and start the data platform.
