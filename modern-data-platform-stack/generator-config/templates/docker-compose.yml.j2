@@ -99,6 +99,8 @@ networks:
   {% set __LIVY_version = LIVY_version ~ "-spark" ~ SPARK_2_4_version.split(".")[0]  ~ "." ~ SPARK_2_4_version.split(".")[1]  -%}
 {% endif -%}
 
+{% set __KYUUBI_version = KYUUBI_version | default('latest') -%}
+
 {% set __ZEPPELIN_version = ZEPPELIN_version ~ "-spark" ~ __SPARK_version -%}
 
 {% set __FLINK_version = FLINK_version | default('latest') -%}
@@ -5320,8 +5322,37 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
   {% endif %}   {#  SPARK_THRIFTSERVER_enable #}
-
 {% endif %}   {#  SPARK_enable #}
+
+{% if KYUUBI_enable | default(false) %}
+  kyuubi:
+    image: apache/kyuubi:{{__KYUUBI_version}}
+    container_name: kyuubi
+    hostname: kyuubi
+    labels:
+      com.platys.name: 'kyuubi'
+      com.platys.description: "gateway to provide serverless SQL"
+      com.platys.webui.title: "Kyuubi UI"
+      com.platys.webui.url: "http://dataplatform:10099"
+    ports:
+      - "10009:10009"
+      - "10099:10099"
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./conf/kyuubi/kyuubi-defaults.conf:/opt/kyuubi/conf/kyuubi-defaults.conf
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  KYUUBI_enable #}
 
 {% if SPARK_enable and LIVY_enable | default(false) %}
   #  ================================== Apache Livy ========================================== #

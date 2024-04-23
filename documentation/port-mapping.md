@@ -269,6 +269,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 10005 | 10000 | nifi-1 |
 10006 | 10000 | nifi-2 |
 10007 | 10000 | nifi-3 |
+10009 | 10009 | kyuubi |
+10099 | 10099 | kyuubi |
 11211 | 11211 | memcached |
 11212 | 11211 | ignite-1 |
 11434 | 11434 | ollama |
