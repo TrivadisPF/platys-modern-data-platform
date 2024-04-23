@@ -10,6 +10,7 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
 
  * Langflow 
  * Langfuse
+ * Kyuubi
 
 ### Version upgrades
 
@@ -51,6 +52,7 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Update `redis-stack` to `7.2.0-v10`
  * Update `flowise` to `1.6.5`
  * Update `stardog` to `latest`
+ * Update `minio` to `RELEASE.2024-04-06T05-26-02Z`
 
 ## What's new in 1.17.1
 
