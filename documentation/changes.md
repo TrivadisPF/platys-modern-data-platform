@@ -53,6 +53,7 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Update `flowise` to `1.6.5`
  * Update `stardog` to `latest`
  * Update `minio` to `RELEASE.2024-04-06T05-26-02Z`
+ * Update `datahub` to `v0.13.1`
 
 ## What's new in 1.17.1
 
