@@ -54,6 +54,7 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Update `stardog` to `latest`
  * Update `minio` to `RELEASE.2024-04-06T05-26-02Z`
  * Update `datahub` to `v0.13.2`
+ * Update `risingwave` to `v1.8.2`
 
 ## What's new in 1.17.1
 
