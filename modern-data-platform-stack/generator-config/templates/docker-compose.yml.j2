@@ -327,6 +327,7 @@ networks:
 {% elif (NEO4J_major_version | lower) == '5'  %}
   {% set __NEO4J_version = NEO4J_5_version -%}
 {% endif -%}
+{% set __NEODASH_version = NEODASH_version | default('latest') -%}
 
 {% set __QUINE_version = QUINE_version | default('latest') -%}
 
@@ -13469,6 +13470,35 @@ services:
         timeout: 30s
         retries: 10
 {% endif %}   {#  NEO4J_enable #}
+
+{% if NEODASH_enable | default(false) %}
+  #  ================================== NeoDash ========================================== #
+  neodash:
+    image: neo4jlabs/neodash:{{__NEODASH_version}}
+    hostname: neodash
+    container_name: neodash
+    labels:
+      com.platys.name: "neodash"
+      com.platys.description: "Visualize you Neo4J data"
+      com.platys.webui.title: "NeoDash UI"
+      com.platys.webui.url: "http://dataplatform:"
+    ports:
+      - "5005:5005"
+    {%if use_timezone | default(false) %}
+    environment:
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  NEODASH_enable #}
 
 {% if QUINE_enable | default(false) %}
   #  ================================== Quine ========================================== #
