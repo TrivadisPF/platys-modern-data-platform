@@ -14,14 +14,14 @@ platys gen
 ## How to use it?
 
 ```bash
-telnet localhost 4222
+telnet dataplatform 4222
 ```
 
-you should see this result
+you should see a result similar to this
 
 ```
 Trying ::1...
-Connected to localhost.
+Connected to dataplatform.
 Escape character is '^]'.
 INFO {"server_id":"NDP7NP2P2KADDDUUBUDG6VSSWKCW4IC5BQHAYVMLVAJEGZITE5XP7O5J","version":"2.0.0","proto":1,"go":"go1.11.10","host":"0.0.0.0","port":4222,"max_payload":1048576,"client_id":13249}
 ```
