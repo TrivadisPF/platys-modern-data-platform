@@ -57,6 +57,11 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Update `datahub` to `v0.13.2`
  * Update `risingwave` to `v1.8.2`
 
+### Breaking Changes
+
+ * Remove `NEO4J_dbms_logs_debug_level` setting from Neo4J
+ * Change to config settings to configure memory in Neo4J: `NEO4J_server_memory_pagecache_size`, `NEO4J_server_memory_heap_initial_size` and `NEO4J_server_memory_heap_max_size`
+
 ## What's new in 1.17.1
 
 The Modern Data Platform version 1.17.1 contains no new services but a few small enhancements:
