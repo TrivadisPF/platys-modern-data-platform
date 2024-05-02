@@ -202,6 +202,7 @@ networks:
 {% set __CRIBL_version = CRIBL_version | default('latest') -%}
 
 {% set __FLUENTD_version = FLUENTD_version | default('latest') -%}
+{% set __FLUENT_BIT_version = FLUENT_BIT_version | default('latest') -%}
 {% set __FILEBEAT_version = FILEBEAT_version | default('latest') -%}
 
 {% set __CONDUIT_version = CONDUIT_version | default('latest') -%}
@@ -9095,6 +9096,36 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  FLUENTD_enable  #}
+
+{%if FLUENT_BIT_enable | default(false) %}
+  #  ================================== Fluent Bit ========================================== #
+  fluent-bit:
+    image: fluent/fluent-bit:{{__FLUENTD_version}}
+    container_name: fluent-bit
+    hostname: fluent-bit
+    labels:
+      com.platys.name: 'fluent-bit'
+      com.platys.description: "Fluent Bit Data Integration Agent"
+    ports:
+      - "24225:24224"
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {% if FLUENT_BIT_volume_map_config | default(false) %}
+      - ./custom-conf/fluent-bit/fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf:ro
+    {% endif -%}   {#  FLUENT_BIT_volume_map_config #}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  FLUENT_BIT_enable  #}
 
 {%if FILEBEAT_enable | default(false) %}
   #  ================================== FileBeat ========================================== #

@@ -12,6 +12,7 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Langfuse
  * Kyuubi
  * NeoDash
+ * Fluent Bit
 
 ### Version upgrades
 
