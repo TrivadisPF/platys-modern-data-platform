@@ -13416,7 +13416,10 @@ services:
     {% elif (NEO4J_major_version | lower) == '4' %}
       - NEO4JLABS_PLUGINS=[{{NEO4J_plugins.split(",") | map("to_json") | join(',')}}]
     {% endif -%}   {#  NEO4J_major_version and NEO4J_server_config_strict_validation_enabled #}
-    {% if NEO4J_dbms_security_procedures_unrestricted is defined and NEO4J_dbms_security_procedures_unrestricted | length %}
+    {% if NEO4J_dbms_security_procedures_allowlist is defined and NEO4J_dbms_security_procedures_allowlist and NEO4J_dbms_security_procedures_allowlist | length %}
+      - NEO4J_dbms_security_procedures_allowlist={{NEO4J_dbms_security_procedures_unrestricted}}
+    {% endif -%}   {#  NEO4J_dbms_security_procedures_allowlist #}
+    {% if NEO4J_dbms_security_procedures_unrestricted is defined and NEO4J_dbms_security_procedures_unrestricted and NEO4J_dbms_security_procedures_unrestricted | length %}
       - NEO4J_dbms_security_procedures_unrestricted={{NEO4J_dbms_security_procedures_unrestricted}}
     {% endif -%}   {#  NEO4J_dbms_security_procedures_unrestricted #}
     {% if NEO4J_dbms_memory_pagecache_size is defined and NEO4J_dbms_memory_pagecache_size | length %}
@@ -13484,7 +13487,7 @@ services:
       com.platys.webui.url: "http://dataplatform:"
     ports:
       - "5005:5005"
-    platform: linux/amd64      
+    platform: linux/amd64
     {%if use_timezone | default(false) %}
     environment:
       - TZ={{use_timezone}}
