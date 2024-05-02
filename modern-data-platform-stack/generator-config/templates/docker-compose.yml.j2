@@ -454,6 +454,7 @@ networks:
 {% set __RABBITMQ_version = RABBITMQ_version | default('latest') -%}
 {% set __SOLACE_PUBSUB_version = SOLACE_PUBSUB_version | default('latest') -%}
 {% set __SOLACE_KAFKA_PROXY_version = SOLACE_KAFKA_PROXY_version | default('latest') -%}
+{% set __NATS_version = NATS_version | default('latest') -%}
 
 {% set __PURE_FTPD_version = PURE_FTPD_version | default('latest') -%}
 {% set __SFTP_version = SFTP_version | default('latest') -%}
@@ -18625,6 +18626,35 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  SOLACE_KAFKA_PROXY_enable #}
+
+{% if NATS_enable | default(false) %}
+  #  ================================== NATS ========================================== #
+  nats-1:
+    image: nats:{{__NATS_version}}
+    container_name: nats-1
+    hostname: nats-1
+    labels:
+      com.platys.name: "nats"
+      com.platys.description: "Cloud and edge native messaging"
+    ports:
+      - 4222:4222
+      - 8222:8222
+      - 6222:6222
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  NATS_enable #}
 
 {% if PURE_FTPD_enable | default(false) %}
   #  ================================== Pure FTPd Server ========================================== #

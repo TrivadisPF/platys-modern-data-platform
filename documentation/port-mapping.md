@@ -91,6 +91,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 4195 | 4195 | benthos-1 |
 4196 | 4196 | benthos-server |
 4200 | 4200 | cribl-master |
+4222 | 4222 | nats-1 |
 4317 | 4317 | otel-collector |
 4466 | 4466 | curity |
 4566 | 4566 | risingwave |
@@ -129,6 +130,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 6060 | 6060 | zeppelin |
 6066 | 6066 | spark-master |
 6080 | 6080 | ranger-admin |
+6222 | 6222 | nats-1 |
 6333 | 6333 | qdrant |
 6334 | 6334 | qdrant |
 6379 | 6379 | redis-1 |
@@ -189,6 +191,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 8161 | 8161 | activemq |
 8182 | 8182 | janusgraph |
 8200 | 8200 | vault |
+8222 | 8222 | nats-1 |
 8288 | 8288 | vector-admin |
 8443 | 8443 | kong (proxy ssl) |
 8444 | 8444 | kong (admin api ssl) |
