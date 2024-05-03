@@ -13974,12 +13974,17 @@ services:
       com.platys.description: "Agent for collecting, processing, aggregating, and writing metrics"
     environment:
       HOSTNAME: telegraf
+      INFLUX_TOKEN: {{INFLUXDB_TELEGRAF_influx_token | omit }}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
+    {% if INFLUXDB_TELEGRAF_custom_conf_file is defined and INFLUXDB_TELEGRAF_custom_conf_file and INFLUXDB_TELEGRAF_custom_conf_file | length | default(false) %}
+      - ./custom-conf/influxdata/telegraf/{{INFLUXDB_TELEGRAF_custom_conf_file}}:/etc/telegraf/telegraf.conf
+    {% else %}
       - ./conf/influxdata/telegraf/telegraf.conf:/etc/telegraf/telegraf.conf
+    {% endif -%}   {#  INFLUXDB_TELEGRAF_custom_conf_file #}
       # Mount for Docker API access
       - /var/run/docker.sock:/var/run/docker.sock
     {%if use_timezone | default(false) %}
@@ -18344,7 +18349,7 @@ services:
       - /bin/sh
       - -c
       - |
-        while [ 1 -eq 1 ];do sleep 60;done    
+        while [ 1 -eq 1 ];do sleep 60;done
     restart: {{container_restart_policy}}
 {% endif %}   {#  MQTTX_CLI_enable #}
 
