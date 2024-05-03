@@ -443,6 +443,8 @@ networks:
 {% set __HIVEMQ4_version = HIVEMQ4_version | default('latest') -%}
 {% set __EMQX_oss_version = EMQX_oss_version | default('latest') -%}
 {% set __EMQX_enterprise_version = EMQX_enterprise_version | default('latest') -%}
+{% set __MQTTX_CLI_version = MQTTX_CLI_version | default('latest') -%}
+{% set __MQTTX_WEB_version = MQTTX_WEB_version | default('latest') -%}
 {% set __HIVEMQ_MQTT_WEB_CLIENT_version = HIVEMQ_MQTT_WEB_CLIENT_version | default('latest') -%}
 
 {% set __CEDALO_MANAGEMENT_CENTER_version = CEDALO_MANAGEMENT_CENTER_version | default('latest') -%}
@@ -810,6 +812,8 @@ networks:
   {% set HIVEMQ3_enable = false -%}
   {% set HIVEMQ4_enable = false -%}
   {% set EMQX_enable = false -%}
+  {% set MQTTX_CLI_enable = false -%}
+  {% set MQTTX_WEB_enable = false -%}
   {% set MQTT_UI_enable = false -%}
   {% set THINGSBOARD_enable = false -%}
   {% set ACTIVEMQ_enable = false -%}
@@ -18313,6 +18317,60 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  EMQX_enable #}
+
+{% if MQTTX_CLI_enable | default(false) %}
+  #  ================================== MQTTX Web ========================================== #
+  mqttx-cli:
+    image: emqx/mqttx-cli:{{__MQTTX_CLI_version}}
+    container_name: mqttx-cli
+    hostname: mqttx-cli
+    labels:
+      com.platys.name: "mqttx-cli"
+      com.platys.description: "a CLI for MQTT"
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  MQTTX_CLI_enable #}
+
+{% if MQTTX_WEB_enable | default(false) %}
+  #  ================================== MQTTX Web ========================================== #
+  mqttx-web:
+    image: emqx/mqttx-web:{{__MQTTX_WEB_version}}
+    container_name: mqttx-web
+    hostname: mqttx-web
+    labels:
+      com.platys.name: "mqttx-web"
+      com.platys.description: "a Web UI for MQTT"
+      com.platys.webui.title: "MQTTX-web UI"
+      com.platys.webui.url: "http://dataplatform:28367"
+    ports:
+      - '28367:80'
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  MQTTX_WEB_enable #}
 
 {% if MQTT_UI_enable | default(false) %}
   #  ================================== MQTT UI ========================================== #

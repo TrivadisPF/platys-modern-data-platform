@@ -624,7 +624,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28364 | 8080 | autogen-studio |
 28365 | 3000 | alpaca-webui |
 28366 | 3000 | langfuse |
-
+28367 | 80| mqttx-web |
 
 ## Ports > 28500
 
