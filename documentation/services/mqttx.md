@@ -18,3 +18,21 @@ platys gen
 Navigate to <http://dataplatform:28367>.
 
 ### CLI
+
+```bash
+docker exec -ti mqttx-cli mqttx
+```
+
+## Using Simulator
+
+list the built-in scenarios
+
+```bash
+docker exec -ti mqttx-cli mqttx ls --scenarios
+```
+
+run the `smart_home` scenario
+
+```bash
+docker exec -ti mqttx-cli mqttx simulate -sc smart_home -c 100 conn  -h 'mosquitto-1' -p 1883
+```
