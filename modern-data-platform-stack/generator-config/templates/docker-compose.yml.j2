@@ -13975,6 +13975,14 @@ services:
     environment:
       HOSTNAME: telegraf
       INFLUX_TOKEN: {{INFLUXDB_TELEGRAF_influx_token | default(omit) }}
+    {% if INFLUXDB_TELEGRAF_monitor_docker_host_enabled | default(false) %}
+      HOST_ETC: /hostfs/etc
+      HOST_PROC: /hostfs/proc
+      HOST_SYS: /hostfs/sys
+      HOST_VAR: /hostfs/var
+      HOST_RUN: /hostfs/run
+      HOST_MOUNT_PREFIX: /hostfs
+    {% endif -%}   {#  INFLUXDB_TELEGRAF_monitor_docker_host_enabled #}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -13987,6 +13995,9 @@ services:
     {% endif -%}   {#  INFLUXDB_TELEGRAF_custom_conf_file #}
       # Mount for Docker API access
       - /var/run/docker.sock:/var/run/docker.sock
+    {% if INFLUXDB_TELEGRAF_monitor_docker_host_enabled | default(false) %}
+      - /:/hostfs:ro
+    {% endif -%}   {#  INFLUXDB_TELEGRAF_monitor_docker_host_enabled #}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
