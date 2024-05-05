@@ -293,6 +293,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 16379 | 6379| yb-tserver-1 |
 16686 | 16686 | jaeger |
 17200 | 7200 | graphdb-1 |
+17300 | 7300 | graphdb-1 |
 17474 | 7474 | amundsen-neo4j |
 17687 | 7687 | amundsen-neo4j |
 17475 | 7474 | datahub-neo4j |
