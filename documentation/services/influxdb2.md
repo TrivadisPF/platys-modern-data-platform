@@ -17,6 +17,14 @@ Navigate to <http://dataplatform:19999> and login with user `influx` and passwor
 
 ### InfluxDB CLI
 
+The CLI can be used with `docker exec` command
+
 ```bash
 docker exec -ti influxdb2 influx -h
+```
+
+To use the InfluxQL interactive shell to execute InfluxQL queries with InfluxDB v2
+
+```bash
+docker exec -ti influxdb2 influx v1 shell
 ```

@@ -1491,7 +1491,7 @@ For each service there might be some other settings, such as controlling the num
 | `LOG4BRAINS_image_name` | `log4brains` 	| 1.11.0 	| The image name part of the log4brains docker image which should be used |
 | `LOG4BRAINS_adr_source_dir` | `true` 	| 1.11.0 	| The folder holding the ADR sources. |
 | `LOG4BRAINS_command` | `preview` 	| 1.11.0 	| The log4brains command to run |
-                 	|           	|                                                                                                                                                                                 
+                                                                                                                                                                                                      
 ### Code Execution
 
 | Config                                         	| Default 	| Since 	| Description                                                                                                                                                                        	                    	|
@@ -1549,6 +1549,15 @@ For each service there might be some other settings, such as controlling the num
 | [**_S3FS_**](./services/s3fs.md)   &nbsp;&nbsp;&nbsp;&nbsp;![x86-64](./images/x86-64.png)  ![arm](./images/arm.png)                         	|         	|       	|                                                                                                                                                                                     	|             	|                                	|
 | `S3FS_enable`                             	| `false` 	| 1.17.0 	| Generate S3FS service. You also have to enable either `minio` or external `s3`.                                                                                                                                            	|
 | `S3FS_bucket_name`                             	| `false` 	| 1.17.0 	| The bucket name to use on S3.                                                                                                                                              	|
+
+### Semantic Web
+
+| Config                                         	| Default 	| Since 	| Description                                                                                                                                                                        	                    	|
+|------------------------------------------------	|:-------:	|-------	|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------	|   
+| [**_WEB_PROTEGE_**](./services/web-protege.md)   &nbsp;&nbsp;&nbsp;&nbsp;![x86-64](./images/x86-64.png)              	|         	|       	|                                                                                                                                                                                     	|             	|                                	|
+| `WEB_PROTEGE_enable`                             	| `false` 	| 1.18.0 	| Generate HAPI FHIR server service                                                                                                                                             	|             	|                                	|
+| `WEB_PROTEGE_volume_map_data`                             	| `false` 	| 1.18.0 	| Volume map data folder into container.                                                                                                                                            	|             	|                                	|
+
 
 ### Healthcare FHIR
 

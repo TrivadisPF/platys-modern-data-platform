@@ -21183,6 +21183,56 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {# S3FS_enable #}
 
+{% if WEB_PROTEGE_enable | default(false) %}
+  #  ================================== Web Protégé ========================================== #
+  web-protege:
+    image: protegeproject/webprotege:{{__WEB_PROTEGE_version}}
+    container_name: web-protege
+    hostname: web-protege
+    labels:
+      com.platys.name: "web-protege"
+      com.platys.description: "Ontology Editor"
+      com.platys.webui.title: "Web Protégé UI"
+      com.platys.webui.url: "http://dataplatform:28368"
+    ports:
+      - "28368:8080"
+    environment:
+      - webprotege.mongodb.host=web-protege-mongo
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if WEB_PROTEGE_volume_map_data %}
+      - ./container-volume/web-protege/data:/srv/webprotege
+    {% endif -%}   {#  WEB_PROTEGE_volume_map_data #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+
+  web-protege-mongo:
+    image: mongo:4.1-bionic
+    container_name: web-protege-mongo
+    hostname: web-protege-mongo
+    labels:
+      com.platys.name: "mongo"
+      com.platys.description: "MongoDB for Web Protégé"
+    {%if use_timezone | default(false) %}
+    environment:
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if WEB_PROTEGE_volume_map_data %}
+      - ./container-volume/web-protege/mongodb-data:/data/db
+    {% endif -%}   {#  WEB_PROTEGE_volume_map_data #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+{% endif %}   {# WEB_PROTEGE_enable #}
+
 {% if HAPI_FHIR_enable | default(false) %}
   #  ================================== Hapi FHIR Server ========================================== #
   hapi-fhir:
