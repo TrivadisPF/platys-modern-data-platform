@@ -1,0 +1,1 @@
+Contains the logs folder of graphdb service, if flag GRAPHDB_volume_map_data is set to true.
