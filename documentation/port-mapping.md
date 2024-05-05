@@ -66,7 +66,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 3005 | 3000 | marquez-web |
 3010 | 3000 | postman |
 3006 | 3000 | retool-api |
-3030 | 3030 | lenses |
+3030 | 3030 | jena-fuseki |
 3100 | 3100 | loki |
 3200 | 3200 | tempo |
 3306 | 3306 | mysql |
@@ -627,6 +627,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28366 | 3000 | langfuse |
 28367 | 80 | mqttx-web |
 28368 | 8080 | web-protege |
+28369 | 3030 | lenses |
+
 
 ## Ports > 28500
 

@@ -346,6 +346,8 @@ networks:
 {% set __GRAPHDB_FREE_version = GRAPHDB_FREE_version | default('latest') -%}
 {% set __GRAPHDB_version = GRAPHDB_version | default('latest') -%}
 
+{% set __JENA_FUSEKI_version = JENA_FUSEKI_version | default('latest') -%}
+
 {% set __INFLUXDB_version = INFLUXDB_version | default('latest') -%}
 {% set __TELEGRAF_version = TELEGRAF_version | default('latest') -%}
 {% set __CHRONOGRAF_version = CHRONOGRAF_version | default('latest') -%}
@@ -3153,9 +3155,9 @@ services:
       com.platys.name: "lenses-box"
       com.platys.description: "Landoop Lenses Box"
       com.platys.webui.title: 'Lenses Box UI'
-      com.platys.webui.url: "http://dataplatform:3030"
+      com.platys.webui.url: "http://dataplatform:28369"
     ports:
-      - 3030:3030
+      - 28369:3030
       - 9192:9192
     environment:
       ADV_HOST: "${PUBLIC_IP}"
@@ -13796,7 +13798,7 @@ services:
     container_name: graphdb-1
     labels:
       com.platys.name: "graphdb"
-      com.platys.description: "Graph Database"
+      com.platys.description: "Triple/RDF Store"
       com.platys.webui.title: "GraphDBs UI"
       com.platys.webui.url: "http://dataplatform:17200"
     ports:
@@ -13837,8 +13839,43 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
-
 {% endif %}   {#  GRAPHDB_enable #}
+
+{% if JENA_FUSEKI_enable | default(false) %}
+  #  ================================== Fuseki ========================================== #
+  jena-fuseki-1:
+    image: stain/jena-fuseki:{{__JENA_FUSEKI_version}}
+    hostname: jena-fuseki-1
+    container_name: jena-fuseki-1
+    labels:
+      com.platys.name: "jena-fuseki"
+      com.platys.description: "Triple/RDF Store"
+      com.platys.webui.title: "Jena-Fuseki UI"
+      com.platys.webui.url: "http://dataplatform:3030"
+    ports:
+      - "3030:3030"
+    environment:
+      - FUSEKI_DATASET_1=demo
+      - ADMIN_PASSWORD=abc123!
+      - JVM_ARGS=-Xmx2g # Default: 1200MiB
+    {%if use_timezone | default(false) %}
+      TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {% if JENA_FUSEKI_volume_map_data %}
+      - "./container-volume/jena-fuseki/data:/fuseki"
+      - "./container-volume/jena-fuseki/staging:/staging"
+    {% endif %}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  JENA_FUSEKI_enable #}
 
 {% if INFLUXDB_enable | default(false) %}
   #  ================================== InfluxData InfluxDB ========================================== #
