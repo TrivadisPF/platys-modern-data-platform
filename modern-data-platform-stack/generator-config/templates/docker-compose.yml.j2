@@ -515,6 +515,7 @@ networks:
 {% set __ETCD_version = ETCD_version | default('latest') -%}
 {% set __ETCD_BROWSER_version = ETCD_BROWSER_version | default('latest') -%}
 {% set __PORTAINER_version = PORTAINER_version | default('latest') -%}
+{% set __RANCHER_version = RANCHER_version | default('latest') -%}
 {% set __CETUSGUARD_version = CETUSGUARD_version | default('latest') -%}
 {% set __CADVISOR_version = CADVISOR_version | default('latest') -%}
 {% set __DOCKER_REGISTRY_version = DOCKER_REGISTRY_version | default('latest') -%}
@@ -20696,6 +20697,39 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
 {% endif %}   {# PORTAINER_enable #}
+
+{% if RANCHER_enable | default(false) %}
+  #  ================================== Rancher ========================================== #
+  rancher:
+    image: rancher/rancher:{{__RANCHER_version}}
+    container_name: rancher
+    hostname: rancher
+    labels:
+      com.platys.name: "rancher"
+      com.platys.description: "Kubernetes cluster management"
+      com.platys.webui.title: "Rancher UI"
+      com.platys.webui.url: "http://dataplatform:28137"
+    ports:
+      - 28370:80
+      - 28371:443
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {% if RANCHER_volume_map_data %}
+      - ./container-volume/rancher/data:/var/lib/rancher
+    {% endif -%}   {#  RANCHER_volume_map_data #}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+{% endif %}   {# RANCHER_enable #}
 
 {% if CETUSGUARD_enable | default(false) %}
   #  ================================== Cetusguard ========================================== #
