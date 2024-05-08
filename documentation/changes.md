@@ -63,6 +63,7 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Update `datahub` to `v0.13.2`
  * Update `risingwave` to `v1.8.2`
  * Update `portainer` to `alpine-sts`
+ * Update `flowise` to `1.7.1`
 
 ### Breaking Changes
 
