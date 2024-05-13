@@ -15,3 +15,8 @@ platys gen
 
 Navigate to <http://dataplatform:28370>.
 
+To get the initial password, execute the following
+
+```bash
+docker logs  rancher  2>&1 | grep "Bootstrap Password:"docker logs  rancher  2>&1 | grep "Bootstrap Password:"
+```
