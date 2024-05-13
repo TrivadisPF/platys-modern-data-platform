@@ -70,6 +70,7 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Remove `NEO4J_dbms_logs_debug_level` setting from Neo4J
  * Change to config settings to configure memory in Neo4J: `NEO4J_server_memory_pagecache_size`, `NEO4J_server_memory_heap_initial_size` and `NEO4J_server_memory_heap_max_size`
  * Lenses no longer uses external port `3030` but `28369`
+ * `wetty` is no longer enabled by default in the initial `config.yml` file
  
 ## What's new in 1.17.1
 
