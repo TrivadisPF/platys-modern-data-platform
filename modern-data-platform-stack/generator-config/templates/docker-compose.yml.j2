@@ -13455,9 +13455,9 @@ services:
       {% if not NEO4J_server_config_strict_validation_enabled %}
       - NEO4J_server_config_strict__validation_enabled=false
       {% endif -%}   {#  use_timezone #}
-      - NEO4J_PLUGINS=[{{NEO4J_plugins.split(",") | map("to_json") | join(',')}}]
+      - NEO4J_PLUGINS=[{{NEO4J_download_plugins.split(",") | map("to_json") | join(',')}}]
     {% elif (NEO4J_major_version | lower) == '4' %}
-      - NEO4JLABS_PLUGINS=[{{NEO4J_plugins.split(",") | map("to_json") | join(',')}}]
+      - NEO4JLABS_PLUGINS=[{{NEO4J_download_plugins.split(",") | map("to_json") | join(',')}}]
     {% endif -%}   {#  NEO4J_major_version and NEO4J_server_config_strict_validation_enabled #}
     {% if NEO4J_dbms_security_procedures_allowlist is defined and NEO4J_dbms_security_procedures_allowlist and NEO4J_dbms_security_procedures_allowlist | length %}
       - NEO4J_dbms_security_procedures_allowlist={{NEO4J_dbms_security_procedures_unrestricted}}
@@ -13485,7 +13485,7 @@ services:
       - NEO4J_apoc_trigger_enabled={{NEO4J_apoc_trigger_enabled | default(false)}}
       - NEO4J_apoc_trigger_refresh={{NEO4J_apoc_trigger_refresh}}
 
-    {% if (KAFKA_enable or external['KAFKA_enable']) and 'streams' in NEO4J_plugins | default(false) %}
+    {% if (KAFKA_enable or external['KAFKA_enable']) and 'streams' in NEO4J_download_plugins | default(false) %}
       - NEO4J_kafka_bootstrap_servers='{{ns.bootstrapServers}}'
       - NEO4J_kafka_acks={{NEO4J_kafka_acks}}
       - NEO4J_kafka_streams_log_compaction_strategy='compact'
@@ -13505,8 +13505,10 @@ services:
     volumes:
       - ./data-transfer:/data-transfer
       - "./init/neo4j:/init"
-    {% if not ( NEO4J_plugins is defined and NEO4J_plugins | length) %}
-      - "./plugins/neo4j/:/plugins:rw"
+    {% if NEO4J_mount_plugins is defined and NEO4J_mount_plugins and NEO4J_mount_plugins | length | default(false) %}
+      {% for plugin in NEO4J_mount_plugins.split(",") %}
+      - "./plugins/neo4j/{{plugin}}:/plugins/{{plugin}}:rw"
+      {% endfor %}
     {% endif %}
     {% if NEO4J_volume_map_data %}
       - "./container-volume/neo4j/data:/data"
