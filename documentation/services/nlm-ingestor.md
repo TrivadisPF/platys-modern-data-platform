@@ -13,3 +13,4 @@ platys gen
 
 ## How to use it?
 
+llmsherpa_url: `http://dataplatorm:28372/api/parseDocument?renderFormat=all&useNewIndentParser=true`
