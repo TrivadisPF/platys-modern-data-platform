@@ -106,6 +106,8 @@ networks:
 
 {% set __TIKA_version = TIKA_version | default('latest') -%}
 
+{% set __NLM_INGESTOR_version = NLM_INGESTOR_version | default('latest') -%}
+
 {% set __HIVE_version = HIVE_version | default('latest') -%}
 {% set __HIVE_version_suffix = HIVE_version_suffix | default('postgresql-metastore-s3') -%}
 {% set __HIVE_METASTORE_DB_version = HIVE_METASTORE_DB_version | default('latest') -%}
@@ -688,6 +690,7 @@ networks:
   {% set HADOOP_enable = false -%}
   {% set SPARK_enable = false -%}
   {% set TIKA_enable = false -%}
+  {% set NLM_INGESTOR_enable = false -%}
   {% set HIVE_enable = false -%}
   {% set AVRO_TOOLS_enable = false -%}
   {% set OPENLDAP_enable = false -%}
@@ -5694,6 +5697,35 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: always
 {% endif %}   {#  TIKA_enable #}
+
+{% if NLM_INGESTOR_enable | default(false) %}
+  #  ================================== NLM Ingestor ========================================== #
+  nlm-ingestor:
+    image: ghcr.io/nlmatics/nlm-ingestor:{{__NLM_INGESTOR_version}}
+    container_name: nlm-ingestor
+    hostname: nlm-ingestor
+    labels:
+      com.platys.name: 'nlm-ingestor'
+      com.platys.description: "Document parsers (PDF, DOCX, PPTX, ...)"
+      com.platys.restapi.title: "NLM Ingestor API"
+      com.platys.restapi.url: "http://dataplatform:28372/"
+    ports:
+      - "28372:5001"
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: always
+{% endif %}   {#  NLM_INGESTOR_enable #}
 
 {% if HIVE_SERVER_enable | default(false) %}
   #  ================================== Apache Hive Server ========================================== #

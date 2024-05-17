@@ -18,6 +18,7 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Web Protégé
  * Jena-Fuseki
  * Rancher
+ * NLM Ingestor
 
 ### Version upgrades
 
