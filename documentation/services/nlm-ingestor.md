@@ -2,7 +2,7 @@
 
 Custom RAG (retrieval augmented generation) friendly parsers for various file formats.
 
-**[Documentation](https://github.com/nlmatics/nlm-ingestor)** | **[GitHub](https://github.com/nlmatics/nlm-ingestor)**
+**[Homepage](https://www.nlmatics.com/)** | **[Documentation](https://github.com/nlmatics/nlm-ingestor)** | **[GitHub](https://github.com/nlmatics/nlm-ingestor)**
 
 ## How to enable?
 
