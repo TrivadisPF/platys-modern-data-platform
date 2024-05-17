@@ -637,6 +637,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 Container Port(s) | Internal Port(s)           | Service (alternatives) |
 --------------------|------------------|-----------------------|
 28500 - 28510 | 28500 - 28510 | streamsets-1 (additional ports) |
-28520 - 28600 | any | reserved for applications |
+28510 - 28620 | 28500 - 28510 | nifi-1 (additional ports |
+28530 - 28600 | any | reserved for applications |
 
 An overview of the URL for the various web-based UIs can be found [here](./environment/README.md).
