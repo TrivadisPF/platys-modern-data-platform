@@ -631,6 +631,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28370 | 80 | rancher |
 28371 | 443 | rancher |
 28372 | 5001 | nlm-ingestor |
+28373 | 8000 | verba |
 
 
 ## Ports > 28500

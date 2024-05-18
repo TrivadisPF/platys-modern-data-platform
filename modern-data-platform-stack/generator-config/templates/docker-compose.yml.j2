@@ -284,6 +284,8 @@ networks:
 
 {% set __GPT_RESEARCHER_version = GPT_RESEARCHER_version | default('latest') -%}
 
+{% set __VERBA_version = VERBA_version | default('latest') -%}
+
 {% set __KIE_SERVER_version = KIE_SERVER_version | default('latest') -%}
 
 {% set __PROMTAIL_version = PROMTAIL_version | default('latest') -%}
@@ -11400,6 +11402,57 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {# GPT_RESEARCHER_enable  #}
 
+{%if VERBA_enable | default(false) %}
+  #  ================================== Verba  ========================================== #
+  verba:
+    image: trivadis/verba:{{__VERBA_version}}
+    container_name: verba
+    hostname: verba
+    labels:
+      com.platys.name: 'verba'
+      com.platys.description: "Retrieval Augmented Generation (RAG) chatbot"
+      com.platys.webui.title: "Verba UI"
+      com.platys.webui.url: "http://dataplatform:28373"
+    ports:
+      - 28373:8000
+    environment:
+    {% if WEAVIATE_enable | default(false) %}
+      - WEAVIATE_URL_VERBA=http://weaviate:8080
+      ## IF YOU WANT AUTHENTICATION, UNCOMENT BELLOW
+      ## AND ADD WEAVIATE SERVICE
+      #- WEAVIATE_API_KEY_VERBA=adminkey
+    {% endif %}
+#      - OPENAI_API_KEY=$OPENAI_API_KEY
+#      - COHERE_API_KEY={{VERBA_cohere_api_key}}
+      - OLLAMA_URL={{ns.ollamaUrl}}
+      - OLLAMA_MODEL={{VERBA_ollama_model}}
+      - UNSTRUCTURED_API_KEY=${PLATYS_UNSTRUCTURED_API_KEY:-{{VERBA_unstructured_api_key}}}
+      - UNSTRUCTURED_API_URL={{ns.unstructuredApiUrl}}
+      - GITHUB_TOKEN={{VERBA_github_token}}
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {% if VERBA_volume_map_data %}
+      - "./container-volume/verba/data:/data/"
+    {% endif %}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+    healthcheck:
+      test: wget --no-verbose --tries=3 --spider http://localhost:8000 || exit 1
+      interval: 5s
+      timeout: 10s
+      retries: 5
+      start_period: 10s
+{% endif %}   {# GPT_RESEARCHER_enable  #}
+
 {%if KIE_SERVER_enable | default(false) %}
   #  ================================== Drools KIE Server  ========================================== #
   business-central:
@@ -14345,7 +14398,6 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  QDRANT_enable #}
-
 
 {% if WEAVIATE_enable | default(false) %}
   #  ================================== Weaviate VectorDB ========================================== #
