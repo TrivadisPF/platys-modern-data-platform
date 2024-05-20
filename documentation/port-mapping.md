@@ -159,11 +159,13 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 7474 | 7474 | neo4j-1 |
 7475 | 7474 | neo4j-2 |
 7476 | 7474 | neo4j-3 |
+7477 | 7474 | neo4j-4 |
 7577 | 7577 | spring-skipper-server |
 7687 | 7687 | neo4j-1 |
 7688 | 7687 | neo4j-2 |
 7689 | 7687 | neo4j-3 |
-7690 | 7687 | memgraph-platform |
+7690 | 7687 | neo4j-4 |
+7699 | 7687 | memgraph-platform |
 7860 | 7860 | langflow|
 8000 | 8000 | kong (proxy) |
 8001 | 8001 | kong (admin api) |

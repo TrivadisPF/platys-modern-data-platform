@@ -13564,18 +13564,21 @@ services:
 
 {% if NEO4J_enable | default(false) %}
   #  ================================== Neo4J ========================================== #
-  neo4j-1:
+  {% for num in range(NEO4J_nodes | default(1) ) %}
+    {% set external_port_neo4j = 7474 + loop.index - 1 %}
+    {% set external_port_bolt = 7687 + loop.index - 1 %}
+  neo4j-{{loop.index}}:
     image: neo4j:{{__NEO4J_version}}{{ '-enterprise' if (NEO4J_edition | lower) == 'enterprise'}}
-    hostname: neo4j-1
-    container_name: neo4j-1
+    hostname: neo4j-{{loop.index}}
+    container_name: neo4j-{{loop.index}}
     labels:
       com.platys.name: "neo4j"
       com.platys.description: "Native graph database management system"
       com.platys.webui.title: "Neo4J UI"
-      com.platys.webui.url: "http://dataplatform:7474"
+      com.platys.webui.url: "http://dataplatform:{external_port_bolt}}"
     ports:
-      - "7474:7474"
-      - "7687:7687"
+      - "{{external_port_neo4j}}:7474"
+      - "{{external_port_bolt}}:7687"
     environment:
       - NEO4J_server_bolt_listen__address=0.0.0.0:7687
     {% if (NEO4J_edition | lower) == 'enterprise'  %}
@@ -13660,6 +13663,7 @@ services:
         interval: 15s
         timeout: 30s
         retries: 10
+  {% endfor %}  {#  for NEO4J_nodes #}
 {% endif %}   {#  NEO4J_enable #}
 
 {% if NEODASH_enable | default(false) %}
@@ -13741,7 +13745,7 @@ services:
       com.platys.webui.url: "http://dataplatform:28288"
   {% endif %}
     ports:
-      - "7690:7687"
+      - "7699:7687"
   {% if (MEMGRAPH_edition | lower) == 'platform'  %}
       - "28288:3000"
   {% endif %}
