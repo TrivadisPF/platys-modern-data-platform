@@ -15,7 +15,7 @@ platys gen
 
 ```bash
 curl -X 'POST' \  
-        'http://192.168.1.102:8000/general/v0/general' \
+        'http://192.168.1.102:28374/general/v0/general' \
          -H 'accept: application/json' \
          -H 'Content-Type: multipart/form-data' \
          -F 'files=@sample-docs/layout-parser-paper.pdf' \
