@@ -108,6 +108,8 @@ networks:
 
 {% set __NLM_INGESTOR_version = NLM_INGESTOR_version | default('latest') -%}
 
+{% set __UNSTRUCTURED_version = UNSTRUCTURED_version | default('latest') -%}
+
 {% set __HIVE_version = HIVE_version | default('latest') -%}
 {% set __HIVE_version_suffix = HIVE_version_suffix | default('postgresql-metastore-s3') -%}
 {% set __HIVE_METASTORE_DB_version = HIVE_METASTORE_DB_version | default('latest') -%}
@@ -693,6 +695,7 @@ networks:
   {% set SPARK_enable = false -%}
   {% set TIKA_enable = false -%}
   {% set NLM_INGESTOR_enable = false -%}
+  {% set UNSTRUCTURED_enable = false -%}
   {% set HIVE_enable = false -%}
   {% set AVRO_TOOLS_enable = false -%}
   {% set OPENLDAP_enable = false -%}
@@ -5729,6 +5732,35 @@ services:
     restart: always
 {% endif %}   {#  NLM_INGESTOR_enable #}
 
+{% if UNSTRUCTURED_enable | default(false) %}
+  #  ================================== Unstructured IO ========================================== #
+  unstructured-api:
+    image: ghcr.io/nlmatics/nlm-ingestor:{{__NLM_INGESTOR_version}}
+    container_name: unstructured-api
+    hostname: unstructured-api
+    labels:
+      com.platys.name: 'unstructured-api'
+      com.platys.description: "Pre-processing pipeline for documents (PDF, DOCX, PPTX, ...)"
+      com.platys.restapi.title: "Unstructured API"
+      com.platys.restapi.url: "http://dataplatform:28374/api"
+    ports:
+      - "28374:8000"
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: always
+{% endif %}   {#  UNSTRUCTURED_enable #}
+
 {% if HIVE_SERVER_enable | default(false) %}
   #  ================================== Apache Hive Server ========================================== #
   hive-server:
@@ -10419,7 +10451,7 @@ services:
       - "14040-14044:4040-4044"
     user: "root"
     extra_hosts:
-      - "host.docker.internal:host-gateway"    
+      - "host.docker.internal:host-gateway"
     environment:
       JUPYTER_ENABLE_LAB: "'yes'"
       GRANT_SUDO: "'yes'"

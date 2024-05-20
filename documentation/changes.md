@@ -20,6 +20,7 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Rancher
  * NLM Ingestor
  * Weaviate Verba
+ * Unstructured API
 
 ### Version upgrades
 

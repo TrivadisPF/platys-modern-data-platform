@@ -632,7 +632,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28371 | 443 | rancher |
 28372 | 5001 | nlm-ingestor |
 28373 | 8000 | verba |
-
+28374 | 8000 | unstructured-api |
 
 ## Ports > 28500
 
