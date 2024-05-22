@@ -21,6 +21,7 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * NLM Ingestor
  * Weaviate Verba
  * Unstructured API
+ * gpt-researcher
 
 ### Version upgrades
 
