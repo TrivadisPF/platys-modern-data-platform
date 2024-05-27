@@ -1515,7 +1515,7 @@ For each service there might be some other settings, such as controlling the num
 | [**_Markdown Madness_**](./services/markdown-madness.md) &nbsp;&nbsp;&nbsp;&nbsp;![x86-64](./images/x86-64.png)                   	|         	|       	|                                                                                                                                                                                     	|             	
 | `MARKDOWN_MADNESS_enable` | `false` 	| 1.17.0 	| Generate a Markdown Madness service. |
 | `MARKDOWN_MADNESS_volume_map_docs` | `false` 	| 1.17.0 	| Volume map the `docs` folder of the container. |
-| `MARKDOWN_MADNESS_volume_map_config_file` | `false` 	| 1.17.0 	| Volume map the `./custom-conf/markdown-madness.yml` file into the container to configure the behaviour of Markdown Madness. |
+| `MARKDOWN_MADNESS_volume_map_custom_config_file` | `false` 	| 1.18.0 	| Volume map a `./custom-conf/markdown-madness/markdown-madness.yml` file into the container to overwrite the behaviour of Markdown Madness. |
 | [**_Markdown Viewer_**](./services/markdown-viewer.md) &nbsp;&nbsp;&nbsp;&nbsp;![x86-64](./images/x86-64.png)                   	|         	|       	|                                                                                                                                                                                     	|             	
 | `MARKDOWN_VIEWER_enable` | `true` 	| 1.9.0 	| Generate a web page with the details on the data platform. |
 | `MARKDOWN_VIEWER_use_port_80` | `true` 	| 1.10.0 	| Use Port `80` for the markdown viewer? If set to `false`, port `8008` is used. |
