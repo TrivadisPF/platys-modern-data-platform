@@ -10500,6 +10500,9 @@ services:
     {% if JUPYTER_volume_map_data %}
       - "{{JUPYTER_data_folder_on_docker_host}}:/home/jovyan/work"
     {% endif %}
+    {% if JUPYTER_requirements_file is defined and JUPYTER_requirements_file and JUPYTER_requirements_file|length  %}
+      - {{JUPYTER_requirements_file}}:/tmp/requirements.txt
+    {% endif %}
     {% if JUPYTER_edition == 'all-spark' %}
     #  - "./conf/jupyter/spark-defaults.conf:/usr/local/spark-3.1.1-bin-hadoop3.2/conf/spark-defaults.conf"
     {% endif -%}   {#  JUPYTER_edition == 'all-spark' #}
@@ -10515,8 +10518,11 @@ services:
     {% if JUPYTER_edition == 'all-spark' and JUPYTER_spark_jars_packages is defined and JUPYTER_spark_jars_packages|length  %}
         printf '\nspark.jars.packages  {{JUPYTER_spark_jars_packages}}' >> /usr/local/spark-3.1.1-bin-hadoop3.2/conf/spark-defaults.conf
     {% endif -%}   {#  JUPYTER_spark_jars_packages #}
-    {% if JUPYTER_python_packages is defined and JUPYTER_python_packages|length  %}
+    {% if JUPYTER_python_packages is defined and JUPYTER_python_packages and JUPYTER_python_packages|length  %}
         pip install {{JUPYTER_python_packages}}
+    {% endif -%}   {#  JUPYTER_python_packages #}
+    {% if JUPYTER_requirements_file is defined and JUPYTER_requirements_file and JUPYTER_requirements_file|length  %}
+        pip install -r /tmp/requirements.txt
     {% endif -%}   {#  JUPYTER_python_packages #}
     {%if MINIO_enable or external['S3_enable'] | default(false) %}
         /maven-download.sh central {{JUPYTER_download_jars}} /usr/local/spark/jars
