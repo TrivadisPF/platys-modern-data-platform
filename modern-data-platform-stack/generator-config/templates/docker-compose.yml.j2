@@ -11052,7 +11052,11 @@ services:
       ENABLE_MODEL_FILTER: false
       MODEL_FILTER_LIST: ''
       WEBUI_SECRET_KEY: {{OLLAMA_WEBUI_secret_key if OLLAMA_WEBUI_secret_key is defined and OLLAMA_WEBUI_secret_key and OLLAMA_WEBUI_secret_key | length else omit}}
-      DATABASE_URL: sqlite:///${DATA_DIR}/webui.db
+    {% if (OLLAMA_WEBUI_database_type | lower) == 'postgres' %}
+      DATABASE_URL: postgresql://{{OLLAMA_WEBUI_database_user}}:{{OLLAMA_WEBUI_database_password}}@postgresql:5432/{{OLLAMA_WEBUI_database_name}}
+#    {% elif (OLLAMA_WEBUI_database_type | lower) == 'mysql' %}
+#      DATABASE_URL: mysql://root:mysql@localhost:3306/mysql
+    {% endif -%}   {#  OLLAMA_WEBUI_database_type #}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
