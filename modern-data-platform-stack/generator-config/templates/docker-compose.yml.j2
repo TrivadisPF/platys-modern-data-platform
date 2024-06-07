@@ -519,6 +519,7 @@ networks:
 {% set __ETCD_version = ETCD_version | default('latest') -%}
 {% set __ETCD_BROWSER_version = ETCD_BROWSER_version | default('latest') -%}
 {% set __PORTAINER_version = PORTAINER_version | default('latest') -%}
+{% set __DOCKER_EXEC_WEBCONSOLE_version = DOCKER_EXEC_WEBCONSOLE_version | default('latest') -%}
 {% set __RANCHER_version = RANCHER_version | default('latest') -%}
 {% set __CETUSGUARD_version = CETUSGUARD_version | default('latest') -%}
 {% set __CADVISOR_version = CADVISOR_version | default('latest') -%}
@@ -872,6 +873,7 @@ networks:
   {% set FIREFOX_enable = false -%}
   {% set FILE_BROWSER_enable = false -%}
   {% set ETCD_E3W_enable = false -%}
+  {% set DOCKER_EXEC_WEBCONSOLE_enable = false -%}
   {% set CADVISOR_enable = false -%}
   {% set DOCKER_REGISTRY_enable = false -%}
   {% set DOCKER_REGISTRY_UI_enable = false -%}
@@ -20869,6 +20871,36 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
 {% endif %}   {# PORTAINER_enable #}
+
+{% if DOCKER_EXEC_WEBCONSOLE_enable | default(false) %}
+  #  ================================== Portainer ========================================== #
+  docker-exec-webconsole:
+    image: bitbull/docker-exec-web-console:{{__DOCKER_EXEC_WEBCONSOLE_version}}
+    container_name: docker-exec-webconsole
+    hostname: docker-exec-webconsole
+    labels:
+      com.platys.name: "docker-exec-webconsole"
+      com.platys.description: "Docker Exec Web Console"
+      com.platys.webui.title: "Docker Exec Web Console"
+      com.platys.webui.url: "http://dataplatform:28375"
+    ports:
+      - 28375:8888
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - /var/run/docker.sock:/var/run/docker.sock
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+{% endif %}   {# DOCKER_EXEC_WEBCONSOLE_enable #}
 
 {% if RANCHER_enable | default(false) %}
   #  ================================== Rancher ========================================== #

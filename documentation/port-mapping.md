@@ -635,6 +635,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28372 | 5001 | nlm-ingestor |
 28373 | 8000 | verba |
 28374 | 8000 | unstructured-api |
+28375 | 8888 | docker-exec-webconsole |
 
 ## Ports > 28500
 
