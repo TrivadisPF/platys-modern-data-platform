@@ -14,3 +14,13 @@ platys gen
 ## How to use it?
 
 Navigate to <http://dataplatform:28178> and login with the default user `admin` and password `admin`. 
+
+### Changing password
+
+Add to `config.yml`
+
+```
+FB_PASSWORD=<bcrypt-password>
+```
+
+To encrypt the password, you can run `docker run -ti hurlenko/filebrowser hash <password>`.
