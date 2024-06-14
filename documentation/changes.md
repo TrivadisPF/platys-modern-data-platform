@@ -70,6 +70,7 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Update `flowise` to `1.8.1`
  * Update `nifi` to `2.0.0-M3`
  * Update `nifi` to `1.26.0`
+ * Update `flink` to `1.19-scala_2.12-java17`
 
 ### Breaking Changes
 
