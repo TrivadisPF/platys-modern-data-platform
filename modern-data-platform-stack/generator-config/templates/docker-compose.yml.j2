@@ -5500,6 +5500,13 @@ services:
         state.backend: filesystem
         state.checkpoints.dir: file:///tmp/flink-checkpoints-directory
         state.savepoints.dir: file:///tmp/flink-savepoints-directory
+#        rest.flamegraph.enabled: true
+    {%if MINIO_enable or external['S3_enable'] | default(false) %}
+        s3.access.key: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
+        s3.secret.key: {{s3SecretAccessKey}}
+        s3.endpoint: '{{s3Endpoint | default(omit) }}'
+        s3.path.style.access: '{{s3PathStyleAccess}}'
+    {% endif -%}    {#  MINIO_enable #}
       - ENABLE_BUILT_IN_PLUGINS={{FLINK_enable_build_in_plugins if FLINK_enable_build_in_plugins is defined and FLINK_enable_build_in_plugins != None else omit}}
       - FLINK_INSTALL_MAVEN_DEP={{FLINK_install_maven_dep if FLINK_install_maven_dep is defined and FLINK_install_maven_dep != None else omit}}
       - FLINK_INSTALL_FILE_DEP={{FLINK_install_file_dep if FLINK_install_file_dep is defined and FLINK_install_file_dep != None else omit}}
@@ -5548,6 +5555,12 @@ services:
         state.backend: filesystem
         state.checkpoints.dir: file:///tmp/flink-checkpoints-directory
         state.savepoints.dir: file:///tmp/flink-savepoints-directory
+    {%if MINIO_enable or external['S3_enable'] | default(false) %}
+        s3.access.key: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
+        s3.secret.key: {{s3SecretAccessKey}}
+        s3.endpoint: '{{s3Endpoint | default(omit) }}'
+        s3.path.style.access: '{{s3PathStyleAccess}}'
+    {% endif -%}    {#  MINIO_enable #}
       - ENABLE_BUILT_IN_PLUGINS={{FLINK_enable_build_in_plugins if FLINK_enable_build_in_plugins is defined and FLINK_enable_build_in_plugins != None else omit}}
       - FLINK_INSTALL_MAVEN_DEP={{FLINK_install_maven_dep if FLINK_install_maven_dep is defined and FLINK_install_maven_dep != None else omit}}
       - FLINK_INSTALL_FILE_DEP={{FLINK_install_file_dep if FLINK_install_file_dep is defined and FLINK_install_file_dep != None else omit}}
@@ -5890,6 +5903,9 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
+    {% if HIVE_METASTORE_volume_map_data %}
+      - ./container-volume/hive-metastore-db/data:/var/lib/postgresql/data/pgdata:Z
+    {% endif %}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -5898,7 +5914,7 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
-{% endif %}   {#  HIVE_enable #}
+{% endif %}   {#  HIVE_METASTORE_enable #}
 
 {% if AVRO_TOOLS_enable  | default(false) %}
   #  ================================== Apache Avro Tools ========================================== #

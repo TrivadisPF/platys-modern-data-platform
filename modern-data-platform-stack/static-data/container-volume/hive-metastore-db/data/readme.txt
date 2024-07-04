@@ -1,0 +1,1 @@
+Contains the data of hive megastore service, if flag HIVE_METASTORE_volume_map_data is set to true.
