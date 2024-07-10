@@ -199,6 +199,8 @@ networks:
 {% endif -%}
 {% set __MONITOFI_version = MONITOFI_version | default('latest') -%}
 
+{% set __N8N_version = N8N_version | default('latest') -%}
+
 {% set __STREAMPIPES_version = STREAMPIPES_version | default('latest') -%}
 
 {% set __CRIBL_version = CRIBL_version | default('latest') -%}
@@ -717,6 +719,7 @@ networks:
   {% set NIFI_enable = false -%}
   {% set NIFI_REGISTRY_enable = false -%}
   {% set NIFI_TOOLKIT_enable = false -%}
+  {% set N8N_enable = false -%}
   {% set STREAMSHEETS_enable = false -%}
   {% set CONDUIT_enable = false -%}
   {% set SPRING_DATAFLOW_enable = false -%}
@@ -8821,6 +8824,47 @@ services:
         while [ 1 -eq 1 ];do sleep 60;done
     restart: {{container_restart_policy}}
 {% endif %}   {#  NIFI_TOOLKIT_enable  #}
+
+{%if N8N_enable | default(false) %}
+  #  ================================== n8n ========================================== #
+  n8n:
+    image: docker.n8n.io/n8nio/n8n:{{__N8N_version}}
+    container_name: n8n
+    hostname: n8n
+    labels:
+      com.platys.name: "n8n"
+      com.platys.description: "Workflow automation tool"
+      com.platys.webui.title: "Workflow automation tool"
+      com.platys.webui.url: "http://dataplatform:5678"
+    ports:
+      - 5678:5678
+    environment:
+    {% if (N8N_db_type | lower) == 'postgres' %}
+      DB_TYPE: '{{N8N_db_type}}'
+      DB_POSTGRESDB_DATABASE: {{N8N_postgres_dbname}}
+      DB_POSTGRESDB_HOST: postgresql
+      DB_POSTGRESDB_PORT: 5432
+      DB_POSTGRESDB_USER: {{N8N_postgres_user}}
+      DB_POSTGRESDB_PASSWORD: {{N8N_postgres_password}}
+      # DB_POSTGRESDB_SCHEMA: "-Dlog4j2.formatMsgNoLookups=true"
+    {% endif -%}   {#  N8N_db_type #}
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if N8N_volume_map_data %}
+      - ./container-volume/n8n/data:/home/node/
+    {% endif -%}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  N8N_enable  #}
 
 {%if STREAMPIPES_enable | default(false) %}
   #  ================================== Apache StreamPipes ========================================== #
