@@ -103,14 +103,14 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 5011 | 5001 | marquez |
 5020 | 5000 | docker-registry |
 5050 | 5050 | zeppelin |
-5500 | 5500 | oracledb-ee |
-5501 | 5500 | oracledb-xe |
-\-     | 5432 | hive-metastore-db |
-\-     | 5432 | hue-db |
 5432 | 5432 | postgresql |
 5433 | 5432 | timescaledb |
 5434 | 5432 | marquez-db |
 5435 | 5432 | dataverse-postgresql |
+5500 | 5500 | oracledb-ee |
+5501 | 5500 | oracledb-xe |
+\-     | 5432 | hive-metastore-db |
+\-     | 5432 | hue-db |
 5555 | 5555 | airflow-flower |
 5601 | 5601 | kibana |
 5602 | 5601 | datahub-kibana |
@@ -120,6 +120,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 5672 | 5672 | activemq |
 5673 | 5672 | rabbitmq (amqp) |
 5674 | 5672 | solace-pubsub (amqp) |
+5678 | 5678 | n8n |
 5701 | 5701 | hazelcast	-1 |
 5705 | 5701 | zeebe-1 |
 5778 | 5778 | jaeger (config) |
