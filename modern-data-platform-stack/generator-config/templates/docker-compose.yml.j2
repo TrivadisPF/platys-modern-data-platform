@@ -8839,7 +8839,14 @@ services:
     ports:
       - 5678:5678
     environment:
+      N8N_SECURE_COOKIE: false
+      N8N_METRICS: false
+      N8N_AI_ENABLED: {{true if N8N_ai_enabled is defined and N8N_ai_enabled else omit}}
+      OLLAMA_HOST: {{ns.ollamaUrl}}
       DB_TYPE: '{{N8N_db_type | lower}}'
+    {% if (N8N_db_type | lower) == 'sqlite' %}
+      DB_SQLITE_VACUUM_ON_STARTUP: {{true if N8N_sqlite_vacum_on_startup_enabled is defined and N8N_sqlite_vacum_on_startup_enabled else omit}}
+    {% endif -%}   {#  N8N_db_type #}
     {% if (N8N_db_type | lower) == 'postgres' %}
       DB_POSTGRESDB_DATABASE: {{N8N_postgres_dbname}}
       DB_POSTGRESDB_HOST: postgresql
