@@ -1584,9 +1584,10 @@ services:
     {% endif -%}  {#  ns.secureKafkaEnabled and KAFKA_sasl_mechanism == 'SCRAM-SHA-256' or 'SCRAM-SHA-512') #}
     restart: {{container_restart_policy}}
     healthcheck:
-      test: curl -u superUser:superUser -fail --silent --insecure https://{{serviceName}}:1{{port}}/kafka/v3/clusters/ --output /dev/null || exit 1
-      interval: 10s
-      retries: 25
+      test: kafka-topics --bootstrap-server kafka-1:19092 --list
+      interval: 30s
+      timeout: 10s
+      retries: 3
       start_period: 20s
   {% endfor %} {# for serviceName in (ns.serviceNames) #}
 {% endif %} {# KAFKA_enable #}
