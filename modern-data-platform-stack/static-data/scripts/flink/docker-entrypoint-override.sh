@@ -11,6 +11,12 @@ then
   /platys-scripts/file-download.sh github ${FLINK_INSTALL_FILE_DEP} /opt/flink/lib
 fi
 
+# add python modules
+if [ "${FLINK_python_provide_requirements_file}" == "true" ]; then
+  echo "install python modules"
+  pip install -r /opt/flink/requirements.txt
+fi
+
 # Wait for metastore if we need to
 METASTORE="${METASTORE_HOST}:${METASTORE_PORT}"
 if [ "$METASTORE" != ":" ]; then
