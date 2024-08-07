@@ -12,7 +12,7 @@ then
 fi
 
 # add python modules
-if [ "${FLINK_python_provide_requirements_file}" == "true" ]; then
+if [ ${FLINK_PYTHON_PROVIDE_REQUIREMENTS_FILE} ]; then
   echo "install python modules"
   pip install -r /opt/flink/requirements.txt
 fi
