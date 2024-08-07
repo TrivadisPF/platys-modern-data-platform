@@ -5560,6 +5560,7 @@ services:
         FLINK_PROPERTIES=
         jobmanager.rpc.address: flink-jobmanager
         taskmanager.numberOfTaskSlots: 10
+        taskmanager.memory.process.size: 1728m
         parallelism.default: 2
         execution.checkpointing.interval: 5000
         state.backend: filesystem
@@ -5670,7 +5671,11 @@ services:
     {%if FLINK_python_enabled and FLINK_python_provide_requirements_file  | default(false) %}
       - FLINK_PYTHON_PROVIDE_REQUIREMENTS_FILE=true
     {% endif -%}    {#  NIFI_python_provide_requirements_file #}
-      {%if use_timezone | default(false) %}
+    {% if HIVE_METASTORE_enable | default(false) %}
+      - METASTORE_HOST=hive-metastore
+      - METASTORE_PORT=9083
+    {% endif %}   {#  HIVE_METASTORE_enable #}
+    {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
