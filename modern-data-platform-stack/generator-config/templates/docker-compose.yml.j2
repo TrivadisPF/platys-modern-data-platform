@@ -5483,7 +5483,7 @@ services:
 {% if FLINK_enable | default(false) %}
   #  ================================== Apache Flink ========================================== #
   flink-jobmanager:
-    image: flink:{{__FLINK_version}}
+    image: {{'trivadis/apache-flink' if NIFI_flink_enabled else 'flink'}}:{{__FLINK_version}}{{'-python' ~ FLINK_python_version if NIFI_python_enabled}}
     container_name: flink-jobmanager
     hostname: flink-jobmanager
     labels:
@@ -5522,13 +5522,23 @@ services:
       - flink-vol:/opt/flink
     {%if FLINK_deployment_mode == 'application' | default(false) %}
       - /applications/flink:/opt/flink/usrlib
-    {% endif -%}   {#  FLINK_deployment_mode #}
+    {% endif -%}
+    {%if FLINK_python_provide_requirements_file  | default(false) %}
+      - ./custom-conf/flink/requirements.txt:/opt/flink/requirements.txt
+    {% endif -%}    {#  NIFI_python_provide_requirements_file #}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
     {%if FLINK_deployment_mode == 'session' | default(false) %}
-    entrypoint: /docker-entrypoint-override.sh
+    entrypoint:
+      # We override the entrypoint from the docker image
+      - -c
+      - |
+    {%if FLINK_python_provide_requirements_file  | default(false) %}
+        pip install -r /opt/flink/requirements.txt
+    {% endif -%}   {#  NIFI_python_provide_requirements_file #}
+        /docker-entrypoint-override.sh
     command: jobmanager
     {%elif FLINK_deployment_mode == 'application'  | default(false) %}
     command: standalone-job --job-classname com.job.ClassName [--job-id <job id>] [--fromSavepoint /path/to/savepoint [--allowNonRestoredState]] [job arguments]
@@ -5541,7 +5551,7 @@ services:
   {% for num in range(FLINK_taskmanagers | default(1) ) %}
 
   flink-taskmanager-{{loop.index}}:
-    image: flink:{{__FLINK_version}}
+    image: {{'trivadis/apache-flink' if NIFI_flink_enabled else 'flink'}}:{{__FLINK_version}}{{'-python' ~ FLINK_python_version if NIFI_python_enabled}}
     container_name: flink-taskmanager-{{loop.index}}
     hostname: flink-taskmanager-{{loop.index}}
     labels:
@@ -5591,7 +5601,7 @@ services:
 
   {% if FLINK_SQL_GATEWAY_enable | default(false) %}
   flink-sqlgateway:
-    image: flink:{{__FLINK_version}}
+    image: {{'trivadis/apache-flink' if NIFI_flink_enabled else 'flink'}}:{{__FLINK_version}}{{'-python' ~ FLINK_python_version if NIFI_python_enabled}}
     container_name: flink-sqlgateway
     hostname: flink-sqlgateway
     labels:
@@ -5632,7 +5642,7 @@ services:
 
   {% if FLINK_SQL_CLI_enable | default(false) %}
   flink-sql-cli:
-    image: flink:{{__FLINK_version}}
+    image: {{'trivadis/apache-flink' if NIFI_flink_enabled else 'flink'}}:{{__FLINK_version}}{{'-python' ~ FLINK_python_version if NIFI_python_enabled}}
     container_name: flink-sql-cli
     hostname: flink-sql-cli
     labels:
