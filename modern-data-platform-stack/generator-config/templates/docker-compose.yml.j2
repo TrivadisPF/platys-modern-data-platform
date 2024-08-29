@@ -28,6 +28,7 @@ networks:
 {% set __HSTREAMDB_version = HSTREAMDB_version | default('latest') -%}
 {% set __BENTHOS_version = BENTHOS_version | default('latest') -%}
 {% set __RISINGWAVE_version = RISINGWAVE_version | default('latest') -%}
+{% set __ARROYO_version = ARROYO_version | default('latest') -%}
 
 {% set __SCHEMA_REGISTRY_UI_version = SCHEMA_REGISTRY_UI_version | default('latest') -%}
 
@@ -677,6 +678,7 @@ networks:
   {% set HSTREAMDB_enable = false -%}
   {% set BENTHOS_enable = false -%}
   {% set RISINGWAVE_enable = false -%}
+  {% set ARROYO_enable = false -%}
   {% set KAFKA_REPLICATOR_enable = false -%}
   {% set KAFKA_MM2_enable = false -%}
   {% set LENSES_BOX_enable = false -%}
@@ -2644,6 +2646,41 @@ services:
       timeout: 5s
   {% endif %}  {#  RISINGWAVE_edition == 'cluster' #}
 {% endif %}   {#  RISINGWAVE_enable #}
+
+{% if ARROYO_enable | default(false) %}
+  #  ================================== Arroyo ========================================== #
+  arroyo:
+    image: ghcr.io/arroyosystems/arroyo-single:{{__ARROYO_version}}
+    hostname: arroyo
+    container_name: arroyo
+    labels:
+      com.platys.name: "arroyo"
+      com.platys.description: "Arroyo Streaming DB"
+      com.platys.webui.title: "Arroyo UI"
+      com.platys.webui.url: "http://dataplatform:5115"
+    ports:
+      - "5115:5115"
+    {%if use_timezone | default(false) %}
+    environment:
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5115/api/v1/ping"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 5s
+{% endif %}  {#  ARROYO_enable #}
 
 {% if ((KAFKA_enable or external['KAFKA_enable']) and KAFKA_RESTPROXY_enable) | default(false) %}
   #  ================================== Confluent REST Proxy ========================================== #
