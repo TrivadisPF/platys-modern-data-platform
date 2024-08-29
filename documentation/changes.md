@@ -24,6 +24,7 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * gpt-researcher
  * Docker Exec Web Console
  * n8n
+ * Arroyo
 
 ### Version upgrades
 
