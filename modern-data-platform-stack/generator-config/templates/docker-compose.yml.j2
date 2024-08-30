@@ -79,25 +79,25 @@ networks:
 {% set __SQOOP_version = SQOOP_version | default('latest') -%}
 
 {% if (SPARK_base_version | lower) == '2.4'  %}
-  {% set __SPARK_version = SPARK_2_4_version ~ "-hadoop2.8"  -%}
+  {% set __SPARK_version = SPARK_2_4_version  -%}
   {% set __LIVY_version = LIVY_version ~ "-spark" ~ SPARK_2_4_version.split(".")[0]  ~ "." ~ SPARK_2_4_version.split(".")[1]  -%}
 {% elif (SPARK_base_version | lower) == '3.1'  %}
-  {% set __SPARK_version = SPARK_3_1_version ~ "-hadoop3.2" -%}
+  {% set __SPARK_version = SPARK_3_1_version -%}
   {% set __LIVY_version = LIVY_version ~ "-spark" ~ SPARK_3_1_version.split(".")[0]  ~ "." ~ SPARK_3_1_version.split(".")[1] -%}
 {% elif (SPARK_base_version | lower) == '3.2'  %}
-  {% set __SPARK_version = SPARK_3_2_version ~ "-hadoop3.3-java11" -%}
+  {% set __SPARK_version = SPARK_3_2_version -%}
   {% set __LIVY_version = LIVY_version ~ "-spark" ~ SPARK_3_2_version.split(".")[0]  ~ "." ~ SPARK_3_2_version.split(".")[1] -%}
 {% elif (SPARK_base_version | lower) == '3.3'  %}
-  {% set __SPARK_version = SPARK_3_3_version ~ "-hadoop3.3-java17" -%}
+  {% set __SPARK_version = SPARK_3_3_version -%}
   {% set __LIVY_version = LIVY_version ~ "-spark" ~ SPARK_3_3_version.split(".")[0]  ~ "." ~ SPARK_3_3_version.split(".")[1] -%}
 {% elif (SPARK_base_version | lower) == '3.4'  %}
-  {% set __SPARK_version = SPARK_3_4_version ~ "-hadoop3.3-java17" -%}
+  {% set __SPARK_version = SPARK_3_4_version -%}
   {% set __LIVY_version = LIVY_version ~ "-spark" ~ SPARK_3_4_version.split(".")[0]  ~ "." ~ SPARK_3_4_version.split(".")[1] -%}
 {% elif (SPARK_base_version | lower) == '3.5'  %}
-  {% set __SPARK_version = SPARK_3_5_version ~ "-hadoop3.3-java17" -%}
+  {% set __SPARK_version = SPARK_3_5_version -%}
   {% set __LIVY_version = LIVY_version ~ "-spark" ~ SPARK_3_5_version.split(".")[0]  ~ "." ~ SPARK_3_5_version.split(".")[1] -%}
 {% else -%}
-  {% set __SPARK_version = SPARK_2_4_version ~ "-hadoop2.8" -%}
+  {% set __SPARK_version = SPARK_2_4_version -%}
   {% set __LIVY_version = LIVY_version ~ "-spark" ~ SPARK_2_4_version.split(".")[0]  ~ "." ~ SPARK_2_4_version.split(".")[1]  -%}
 {% endif -%}
 
@@ -4980,7 +4980,7 @@ services:
 {% if SPARK_enable | default(false) %}
   #  ================================== Apache Spark 2.x ========================================== #
   spark-master:
-    image: trivadis/apache-spark-master:{{__SPARK_version}}
+    image: bitnami/spark:{{__SPARK_version}}
     container_name: spark-master
     hostname: spark-master
     labels:
@@ -4989,17 +4989,26 @@ services:
       com.platys.webui.title: 'Spark UI'
       com.platys.webui.url: "http://dataplatform:28304"
     ports:
+      - 28304:8080
       - 6066:6066
       - 7077:7077
-      - 28304:8080
       - "4040-4044:4040-4044"
     env_file:
       - ./conf/hadoop.env
     environment:
-      SPARK_PUBLIC_DNS: ${PUBLIC_IP}
+      # bitnami env vars
+      SPARK_MODE: master
+      SPARK_MASTER_URL: spark://spark-master:7077
+      SPARK_RPC_AUTHENTICATION_ENABLED: no
+      SPARK_RPC_ENCRYPTION_ENABLED: no
+      SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED: no
+      SPARK_SSL_ENABLED: no
+      # spark standard env vars
+      SPARK_MASTER_WEBUI_PORT: 8080
       SPARK_MASTER_OPTS: '{{SPARK_master_opts if SPARK_master_opts is defined and SPARK_master_opts else omit }}'
-      INIT_DAEMON_STEP: setup_spark
-      MASTER: spark://spark-master:7077
+      SPARK_PUBLIC_DNS: ${PUBLIC_IP}
+      # env vars for config files
+#      INIT_DAEMON_STEP: setup_spark
     {%if MINIO_enable or external['S3_enable'] | default(false) %}
       CORE_CONF_fs_s3a_endpoint: '{{s3Endpoint | default(omit) }}'
       CORE_CONF_fs_s3a_path_style_access: '{{s3PathStyleAccess}}'
@@ -5076,7 +5085,7 @@ services:
       - ./plugins/spark/jars:/extra-jars
       - ./container-volume/spark/logs/:/var/log/spark/logs
 #      - ./scripts/docker/maven-download.sh:/usr/src/app/maven-download.sh
-    {%if AIRFLOW_enable or ZEPPELIN_enable| default(false) %}
+    {%if AIRFLOW_enable or ZEPPELIN_enable | default(false) %}
       - spark-vol:/spark
     {% endif -%}   {#  AIRFLOW_enable or ZEPPELIN_enable #}
     {%if use_timezone | default(false) %}
@@ -5093,7 +5102,7 @@ services:
       {% set webui_port = 28111 + loop.index - 1 %}
 
   spark-worker-{{loop.index}}:
-    image: trivadis/apache-spark-worker:{{__SPARK_version}}
+    image: bitnami/spark:{{__SPARK_version}}
     container_name: spark-worker-{{loop.index}}
     hostname: spark-worker-{{loop.index}}
     labels:
@@ -5106,12 +5115,20 @@ services:
     env_file:
       - ./conf/hadoop.env
     environment:
-      SPARK_MASTER: spark://spark-master:7077
+      # bitnami env vars
+      SPARK_MODE: worker
+      SPARK_MASTER_URL: spark://spark-master:7077
+      SPARK_RPC_AUTHENTICATION_ENABLED: no
+      SPARK_RPC_ENCRYPTION_ENABLED: no
+      SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED: no
+      SPARK_SSL_ENABLED: no
+      # spark standard env vars
       SPARK_WORKER_WEBUI_PORT: "{{webui_port}}"
       SPARK_WORKER_CORES: '{{SPARK_worker_cores if SPARK_worker_cores is defined and SPARK_worker_cores else omit }}'
       SPARK_WORKER_MEMORY: '{{SPARK_worker_memory if SPARK_worker_memory is defined and SPARK_worker_memory else omit }}'
       SPARK_WORKER_OPTS: '{{SPARK_worker_opts if SPARK_worker_opts is defined and SPARK_worker_opts else omit }}'
       SPARK_PUBLIC_DNS: ${PUBLIC_IP}
+      # env vars for config files
   {%if MINIO_enable or external['S3_enable'] | default(false) %}
       CORE_CONF_fs_s3a_endpoint: '{{s3Endpoint | default(omit) }}'
       CORE_CONF_fs_s3a_path_style_access: '{{s3PathStyleAccess}}'
@@ -5197,7 +5214,7 @@ services:
 
   {% if SPARK_HISTORY_enable | default(false) %}
   spark-history:
-    image: trivadis/apache-spark-worker:{{__SPARK_version}}
+    image: bitnami/spark:{{__SPARK_version}}
     command: /spark/bin/spark-class org.apache.spark.deploy.history.HistoryServer
     container_name: spark-history
     hostname: spark-history
@@ -5213,6 +5230,7 @@ services:
     ports:
       - 28117:18080
     environment:
+
       SPARK_DEFAULTS_CONF_spark_jars_repositories: {{SPARK_jars_repositories}}
       SPARK_DEFAULTS_CONF_spark_jars_packages: "{{SPARK_jars_packages}}{{',' if SPARK_jars_packages | length}}{{SPARK_datahub_package | default('')}}"
       SPARK_DEFAULTS_CONF_spark_jars_excludes: {{SPARK_jars_excludes}}
@@ -5291,7 +5309,7 @@ services:
 
   {% if SPARK_THRIFTSERVER_enable | default(false) %}
   spark-thriftserver:
-    image: trivadis/apache-spark-thriftserver:{{__SPARK_version}}
+    image: bitnami/spark:{{__SPARK_version}}
     container_name: spark-thriftserver
     hostname: spark-thriftserver
     labels:
@@ -5305,7 +5323,8 @@ services:
     env_file:
       - ./conf/hadoop.env
     environment:
-      SPARK_MASTER: spark://spark-master:7077
+      SPARK_MASTER_URL: spark://spark-master:7077
+      
     {%if MINIO_enable or external['S3_enable'] | default(false) %}
       CORE_CONF_fs_s3a_endpoint: '{{s3Endpoint | default(omit) }}'
       CORE_CONF_fs_s3a_path_style_access: '{{s3PathStyleAccess}}'
