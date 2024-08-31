@@ -4,9 +4,9 @@
 
 export SPARK_THRIFTSERVER_LOG=/opt/bitnami/spark/logs
 
-. "/spark/sbin/spark-config.sh"
+. "/opt/bitnami/spark/sbin/spark-config.sh"
 
-. "/spark/bin/load-spark-env.sh"
+. "/opt/bitnami/spark/bin/load-spark-env.sh"
 
 mkdir -p $SPARK_THRIFTSERVER_LOG
 
