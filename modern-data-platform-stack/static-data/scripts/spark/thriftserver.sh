@@ -15,4 +15,4 @@ export CLASS="org.apache.spark.sql.hive.thriftserver.HiveThriftServer2"
 
 ln -sf /dev/stdout /opt/bitnami/spark/logs/spark-root-org.apache.spark.sql.hive.thriftserver.HiveThriftServer2-1-$SPARK_MASTER_HOST.out
 
-cd /opt/bitnami/spark/bin && /opt/bitnami/spark/bin/spark-submit --class $CLASS 1 --master $SPARK_MASTER --name "Thrift JDBC/ODBC Server" "$@" >> $SPARK_THRIFTSERVER_LOG/spark-thriftserver.out
+cd /opt/bitnami/spark/bin && /opt/bitnami/spark/bin/spark-submit --class $CLASS 1 --master $SPARK_MASTER_URL --name "Thrift JDBC/ODBC Server" "$@" >> $SPARK_THRIFTSERVER_LOG/spark-thriftserver.out
