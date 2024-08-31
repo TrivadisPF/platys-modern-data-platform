@@ -5085,6 +5085,7 @@ services:
       - ./conf/spark/hive-site.xml:/opt/bitnami/spark/conf.default/hive-site.xml
       - ./conf/spark/spark-defaults.conf:/opt/bitnami/spark/conf.default/spark-defaults.conf
       - ./init/spark:/docker-entrypoint-initdb.d
+      - ./scripts/docker/maven-download.sh:/maven-download.sh
       - ./plugins/spark/jars:/extra-jars
       - ./container-volume/spark/logs/:/var/log/spark/logs
 #      - ./scripts/docker/maven-download.sh:/usr/src/app/maven-download.sh
@@ -5205,6 +5206,7 @@ services:
       - ./conf/spark/hive-site.xml:/opt/bitnami/spark/conf.default/hive-site.xml
       - ./conf/spark/spark-defaults.conf:/opt/bitnami/spark/conf.default/spark-defaults.conf
       - ./init/spark:/docker-entrypoint-initdb.d
+      - ./scripts/docker/maven-download.sh:/maven-download.sh
       - ./plugins/spark/jars:/extra-jars
       - ./container-volume/spark/logs/:/var/log/spark/logs
     {%if use_timezone | default(false) %}
@@ -5301,7 +5303,10 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
+      - ./conf/spark/hive-site.xml:/opt/bitnami/spark/conf/hive-site.xml
+      - ./conf/spark/spark-defaults.conf:/opt/bitnami/spark/conf/spark-defaults.conf
       - ./init/spark:/docker-entrypoint-initdb.d
+      - ./scripts/docker/maven-download.sh:/maven-download.sh
       - ./plugins/spark/jars:/extra-jars
       - ./container-volume/spark/logs/:/var/log/spark/logs
     {%if use_timezone | default(false) %}
@@ -5406,14 +5411,16 @@ services:
       - ./conf/spark/hive-site.xml:/opt/bitnami/spark/conf/hive-site.xml
       - ./conf/spark/spark-defaults.conf:/opt/bitnami/spark/conf/spark-defaults.conf
       - ./init/spark:/docker-entrypoint-initdb.d
+      - ./scripts/docker/maven-download.sh:/maven-download.sh
       - ./plugins/spark/jars:/extra-jars
       - ./container-volume/spark/logs/:/var/log/spark/logs
       - ./scripts/docker/wait-for-it.sh:/usr/src/app/wait-for-it.sh
+      - ./scripts/spark/thriftserver.sh:/opt/bitnami/spark/bin/thriftserver.sh
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
-    command: ["/usr/src/app/wait-for-it.sh",  "hive-metastore:9083", "--timeout=120", "--", "./thriftserver.sh"]
+    command: ["/usr/src/app/wait-for-it.sh",  "hive-metastore:9083", "--timeout=120", "--", "./bin/thriftserver.sh"]
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}

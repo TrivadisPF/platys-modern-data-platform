@@ -78,12 +78,12 @@ function configure() {
     done
 }
 
-configure /etc/hadoop/core-site.xml core CORE_CONF
-configure /etc/hadoop/hdfs-site.xml hdfs HDFS_CONF
-configure /etc/hadoop/yarn-site.xml yarn YARN_CONF
-configure /etc/hadoop/httpfs-site.xml httpfs HTTPFS_CONF
-configure /etc/hadoop/kms-site.xml kms KMS_CONF
-#configure /etc/hadoop/mapred-site.xml mapred MAPRED_CONF
+# comment out hadoop configuration with update to bitnami spark 
+#configure /etc/hadoop/core-site.xml core CORE_CONF
+#configure /etc/hadoop/hdfs-site.xml hdfs HDFS_CONF
+#configure /etc/hadoop/yarn-site.xml yarn YARN_CONF
+#configure /etc/hadoop/httpfs-site.xml httpfs HTTPFS_CONF
+#configure /etc/hadoop/kms-site.xml kms KMS_CONF
 
 configure_hive /opt/bitnami/spark/conf/hive-site.xml hive HIVE_SITE_CONF
 
@@ -167,7 +167,7 @@ done
 
 if [ ${SPARK_INSTALL_JARS_PACKAGES} ]
 then
-  /maven-download.sh central ${SPARK_INSTALL_JARS_PACKAGES} /spark/jars
+  /maven-download.sh central ${SPARK_INSTALL_JARS_PACKAGES} /opt/bitnami/spark/jars
 fi  
 
 exec $@
