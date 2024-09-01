@@ -103,7 +103,7 @@ networks:
 
 {% set __KYUUBI_version = KYUUBI_version | default('latest') -%}
 
-{% set __ZEPPELIN_version = ZEPPELIN_version ~ "-spark" ~ __SPARK_version -%}
+{% set __ZEPPELIN_version = ZEPPELIN_version | default('latest') -%}
 
 {% set __FLINK_version = FLINK_version | default('latest') -%}
 {% set __NUSSKNACKER_version = NUSSKNACKER_version | default('latest') -%}
@@ -5091,9 +5091,9 @@ services:
       - ./plugins/spark/jars:/extra-jars
       - ./container-volume/spark/logs/:/var/log/spark/logs
 #      - ./scripts/docker/maven-download.sh:/usr/src/app/maven-download.sh
-    {%if AIRFLOW_enable or ZEPPELIN_enable | default(false) %}
-      - spark-vol:/spark
-    {% endif -%}   {#  AIRFLOW_enable or ZEPPELIN_enable #}
+    {%if AIRFLOW_enable or ZEPPELIN_enable or JUPYTER_enable | default(false) %}
+      - spark-vol:/opt/bitnami/spark
+    {% endif -%}   {#  AIRFLOW_enable or ZEPPELIN_enable or JUPYTER_enable  #}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
