@@ -88,25 +88,19 @@ function replace_env_config_if_not_exists {
   fi
 }
 
-envsubst() {
-  local template="$1"
-  while IFS= read -r line; do
-    eval "echo \"$line\""
-  done < "$template"
-}
-
 function replace_env_config {
   local conf_name=$1
   local envs_to_replace=$2
   echo "creating $conf_name"
-  envsubst $envs_to_replace < conf.templates/$conf_name.template > conf/$conf_name
+  #envsubst $envs_to_replace < conf.templates/$conf_name.template > conf/$conf_name
+  python -c 'import os,sys; sys.stdout.write(os.path.expandvars(sys.stdin.read()))' < conf.templates/$conf_name.template > conf/$conf_name
 }
 
 replace_env_config zeppelin-env.sh
 replace_env_config zeppelin-site.xml
 replace_env_config shiro.ini '$ZEPPELIN_ADMIN_USERNAME,$ZEPPELIN_ADMIN_PASSWORD,$ZEPPELIN_USER_USERNAME,$ZEPPELIN_USER_PASSWORD'
 
-envsubst < /root/.s3cfg.template > /root/.s3cfg
+perl -pe 's/\$\{(\w+)\}/$ENV{$1}/g' < /root/.s3cfg.template > /root/.s3cfg
 
 if [ ${SPARK_INSTALL_JARS_PACKAGES} ]
 then
