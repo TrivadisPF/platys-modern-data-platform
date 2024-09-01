@@ -638,6 +638,11 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28373 | 8000 | verba |
 28374 | 8000 | unstructured-api |
 28375 | 8888 | docker-exec-webconsole |
+28376 | 4040 | jupyter (spark UI)  |
+28377 | 4041 | jupyter (spark UI)  |
+28378 | 4042 | jupyter (spark UI)  |
+28379 | 4043 | jupyter (spark UI)  |
+28380 | 4044 | jupyter (spark UI)  |
 
 ## Ports > 28500
 
