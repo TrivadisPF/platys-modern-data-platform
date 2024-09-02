@@ -10522,7 +10522,7 @@ services:
 {%if ZEPPELIN_enable | default(false) %}
   #  ================================== Zeppelin ========================================== #
   zeppelin:
-    image: apache/zeppelin:{{__ZEPPELIN_version}}
+    image: trivadis/zeppelin:{{__ZEPPELIN_version}}
     container_name: zeppelin
     hostname: zeppelin
     labels:
@@ -10532,6 +10532,9 @@ services:
       com.platys.webui.url: "http://dataplatform:28080"
     ports:
       - "28080:8080"
+  {%if SPARK_enable | default(false) %}
+      - "28380-28385:4040-4044"
+  {% endif -%}   {#  SPAR_enable #}
       - "6060:6060"
       - "5050:5050"
       - "4050-4054:4050-4054"
@@ -10576,7 +10579,6 @@ services:
       ZEPPELIN_ADMIN_PASSWORD: {{ZEPPELIN_admin_password}}
       ZEPPELIN_USER_USERNAME: {{ZEPPELIN_user_username}}
       ZEPPELIN_USER_PASSWORD: {{ZEPPELIN_user_password}}
-
   {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
   {% endif -%}   {#  use_timezone #}
@@ -10614,7 +10616,11 @@ services:
 {%if JUPYTER_enable | default(false) %}
   #  ================================== Jupyter ========================================== #
   jupyter:
+{% if (SPARK_base_version | lower) == '3.5'  %}
     image: quay.io/jupyter/{{ (JUPYTER_edition | lower) }}-notebook:{{__JUPYTER_version}}
+{% endif -%}
+    image: jupyter/{{ (JUPYTER_edition | lower) }}-notebook:{{__JUPYTER_version}}
+{% else -%}
     container_name: jupyter
     hostname: jupyter
     labels:
@@ -10624,7 +10630,9 @@ services:
       com.platys.webui.url: "http://dataplatform:28888"
     ports:
       - "28888:8888"
+  {%if SPARK_enable | default(false) %}
       - "28376-28380:4040-4044"
+  {% endif -%}   {#  SPAR_enable #}
     user: "root"
     extra_hosts:
       - "host.docker.internal:host-gateway"
@@ -10636,30 +10644,19 @@ services:
       NOTEBOOK_ARGS: {{JUPYTER_notebook_args if JUPYTER_notebook_args is defined and JUPYTER_notebook_args | length else omit}}
       DOCKER_STACKS_JUPYTER_CMD: {{JUPYTER_startup_cmd if JUPYTER_startup_cmd is defined and JUPYTER_startup_cmd | length  else omit}}
       MAVEN_DOWNLOAD_JARS: {{JUPYTER_download_jars}}
+      # remove some JARS if they are conflicting with the ones installed above
       REMOVE_JARS: "guava-14.0.1.jar"
-    {%if MINIO_enable or external['S3_enable'] | default(false) %}
-      CORE_CONF_fs_s3a_endpoint: '{{s3Endpoint | default(omit) }}'
-      CORE_CONF_fs_s3a_path_style_access: '{{s3PathStyleAccess}}'
-      HIVE_SITE_CONF_fs_s3a_endpoint: {{s3Endpoint | default(omit) }}
-      HIVE_SITE_CONF_fs_s3a_access_key: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
-      HIVE_SITE_CONF_fs_s3a_secret_key: {{s3SecretAccessKey}}
-      HIVE_SITE_CONF_fs_s3a_path_style_access: '{{s3PathStyleAccess}}'
-      HIVE_SITE_CONF_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
-      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
-      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_endpoint: {{s3Endpoint | default(omit) }}
-      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_path_style_access: '{{s3PathStyleAccess}}'
-      SPARK_HADOOP_FS_S3A_ACCESS_KEY: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
-      SPARK_HADOOP_FS_S3A_SECRET_KEY: {{s3SecretAccessKey}}
+  {%if MINIO_enable or external['S3_enable'] | default(false) %}
       # for awscli & s3cmd
       AWS_ACCESS_KEY_ID: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
       AWS_SECRET_ACCESS_KEY: ${PLATYS_AWS_SECRET_ACCESS_KEY:-{{MINIO_secret_key}}}
       AWS_ENDPOINT: {{s3Endpoint if s3Endpoint is defined and s3Endpoint else omit}}
       AWS_DEFAULT_REGION: {{s3DefaultRegion if s3DefaultRegion is defined and s3DefaultRegion else omit}}
-      {%if MLFLOW_SERVER_enable | default(false) %}
+    {%if MLFLOW_SERVER_enable | default(false) %}
       MLFLOW_S3_ENDPOINT_URL: {{s3Endpoint | default(omit) }}
       MLFLOW_TRACKING_URI: http://mlflow-tracking-server:5000
-      {% endif %}
-    {% endif -%}     {#  MINIO_enable  #}
+    {% endif %}
+  {% endif -%}     {#  MINIO_enable  #}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -10689,7 +10686,7 @@ services:
       - -c
       - |
     {% if JUPYTER_edition == 'all-spark' and JUPYTER_spark_jars_packages is defined and JUPYTER_spark_jars_packages|length  %}
-        printf '\nspark.jars.packages  {{JUPYTER_spark_jars_packages}}' >> /usr/local/spark-3.1.1-bin-hadoop3.2/conf/spark-defaults.conf
+        printf '\nspark.jars.packages  {{JUPYTER_spark_jars_packages}}' >> /usr/local/spark/conf/spark-defaults.conf
     {% endif -%}   {#  JUPYTER_spark_jars_packages #}
     {% if JUPYTER_python_packages is defined and JUPYTER_python_packages and JUPYTER_python_packages|length  %}
         pip install {{JUPYTER_python_packages}}

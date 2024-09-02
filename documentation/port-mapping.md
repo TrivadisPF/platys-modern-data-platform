@@ -643,6 +643,11 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28378 | 4042 | jupyter (spark UI)  |
 28379 | 4043 | jupyter (spark UI)  |
 28380 | 4044 | jupyter (spark UI)  |
+28381 | 4040 | zeppelin (spark UI)  |
+28372 | 4041 | zeppelin (spark UI)  |
+28373 | 4042 | zeppelin (spark UI)  |
+28374 | 4043 | zeppelin (spark UI)  |
+28385 | 4044 | zeppelin (spark UI)  |
 
 ## Ports > 28500
 
