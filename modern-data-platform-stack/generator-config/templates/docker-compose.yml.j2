@@ -10635,6 +10635,7 @@ services:
       NB_USER: {{JUPYTER_nb_user if JUPYTER_nb_user is defined and JUPYTER_nb_user | length else omit}}
       NOTEBOOK_ARGS: {{JUPYTER_notebook_args if JUPYTER_notebook_args is defined and JUPYTER_notebook_args | length else omit}}
       DOCKER_STACKS_JUPYTER_CMD: {{JUPYTER_startup_cmd if JUPYTER_startup_cmd is defined and JUPYTER_startup_cmd | length  else omit}}
+      MAVEN_DOWNLOAD_JARS: {{JUPYTER_download_jars}}
     {%if MINIO_enable or external['S3_enable'] | default(false) %}
       CORE_CONF_fs_s3a_endpoint: '{{s3Endpoint | default(omit) }}'
       CORE_CONF_fs_s3a_path_style_access: '{{s3PathStyleAccess}}'
@@ -10663,6 +10664,7 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
+      - ./init/jupyter/jupyter-init.sh:/usr/local/bin/start-notebook.d/jupyter-init.sh
       - ./scripts/docker/maven-download.sh:/maven-download.sh
     {% if JUPYTER_volume_map_docker_daemon %}
       - /var/run/docker.sock:/var/run/docker.sock
@@ -10700,10 +10702,6 @@ services:
     {% if JUPYTER_requirements_file is defined and JUPYTER_requirements_file and JUPYTER_requirements_file|length  %}
         pip install -r /tmp/requirements.txt
     {% endif -%}   {#  JUPYTER_python_packages #}
-    {%if MINIO_enable or external['S3_enable'] | default(false) %}
-        rm /usr/local/spark/jars/guava-14.0.1.jar
-        /maven-download.sh central {{JUPYTER_download_jars}} /usr/local/spark/jars
-    {% endif %}
     {% if JUPYTER_tokenless %}
         start-notebook.sh --LabApp.token=''
     {% else %}
