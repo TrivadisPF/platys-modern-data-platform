@@ -5428,12 +5428,16 @@ services:
       - ./plugins/spark/jars:/extra-jars
       - ./container-volume/spark/logs/:/var/log/spark/logs
       - ./scripts/docker/wait-for-it.sh:/usr/src/app/wait-for-it.sh
-      - ./scripts/spark/thriftserver.sh:/opt/bitnami/spark/bin/thriftserver.sh
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
-    command: ["/usr/src/app/wait-for-it.sh",  "hive-metastore:9083", "--timeout=120", "--", "./bin/thriftserver.sh"]
+    command:
+      - bash
+      - -c
+      - |
+        /usr/src/app/wait-for-it.sh hive-metastore:9083 --timeout=120 -- echo "now starting spark thriftserver ...."
+        /opt/bitnami/spark/sbin/start-thriftserver.sh --master spark://spark-master:7077
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
