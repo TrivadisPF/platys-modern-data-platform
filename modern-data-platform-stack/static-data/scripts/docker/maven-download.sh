@@ -3,6 +3,11 @@
 #
 # Download connector maven dependencies
 #
+# Params: 
+#     - Repository (central or confluent)
+#     - Maven Coordiantes
+#     - Download destination
+#     - Download strategy (using curl or python)
 # Author: Guido Schmutz <https://github.com/gschmutz>
 #
 set -e
@@ -12,10 +17,43 @@ set -e
 MAVEN_REPO_CENTRAL=${MAVEN_REPO_CENTRAL:-"https://repo1.maven.org/maven2"}
 MAVEN_REPO_CONFLUENT=${MAVEN_REPO_CONFLUENT:-"https://packages.confluent.io/maven"}
 
+download_file_using_python() {
+    local DOWNLOAD_FILE="$1"
+    local DOWNLOAD_URL="$2"
+
+    python -c "
+import sys, requests
+
+def download_file(url, local_filename):
+    with requests.get(url, stream=True) as r:
+        r.raise_for_status()
+        with open(local_filename, 'wb') as f:
+            for chunk in r.iter_content(chunk_size=8192):
+                if chunk:
+                    f.write(chunk)
+
+if len(sys.argv) != 3:
+    print('Usage: python -c \"<script>\" <url> <local_filename>')
+    sys.exit(1)
+
+url = sys.argv[1]
+local_filename = sys.argv[2]
+
+download_file(local_filename, url)
+" $DOWNLOAD_FILE $DOWNLOAD_URL
+}
+
 maven_dep() {
     local REPO="$1"
     local MVN_COORDS="$2"
     local MAVEN_DEP_DESTINATION="$3"
+    local DOWNLOAD_STRATEGY="${4:-curl}"
+
+    case $DOWNLOAD_STRATEGY in
+        "python" ) shift
+            pip install requests
+    esac
+
 
     for i in $(echo $MVN_COORDS | sed "s/,/ /g")
     do
@@ -34,18 +72,26 @@ maven_dep() {
 
 	  DOWNLOAD_URL="$REPO/$GROUP/$PACKAGE/$VERSION/$FILE"
       echo "Downloading $DOWNLOAD_URL ...."
-      curl -sfSL -o "$DOWNLOAD_FILE" "$DOWNLOAD_URL"
       
+      case $DOWNLOAD_STRATEGY in
+        "curl" ) shift
+            curl -sfSL -o "$DOWNLOAD_FILE" "$DOWNLOAD_URL"
+            ;;
+        "python" ) shift
+            download_file_using_python "$DOWNLOAD_FILE" "$DOWNLOAD_URL"
+            ;;
+      esac
+
       mv "$DOWNLOAD_FILE" $MAVEN_DEP_DESTINATION
     done
 }
 
 maven_central_dep() {
-    maven_dep $MAVEN_REPO_CENTRAL $1 $2 $3
+    maven_dep $MAVEN_REPO_CENTRAL $1 $2 $3 $4
 }
 
 maven_confluent_dep() {
-    maven_dep $MAVEN_REPO_CONFLUENT $1 $2 $3
+    maven_dep $MAVEN_REPO_CONFLUENT $1 $2 $3 $4
 }
 
 case $1 in
@@ -57,3 +103,4 @@ case $1 in
             ;;
 
 esac
+
