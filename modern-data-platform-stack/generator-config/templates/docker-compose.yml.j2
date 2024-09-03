@@ -1143,8 +1143,8 @@ networks:
   {% set ns.sparkIcebergDependencies = "org.apache.iceberg:iceberg-spark-runtime-3.4_2.12:1.2.1" -%}
   {% set ns.sparkHudiDependencies ="org.apache.hudi:hudi-spark3.4-bundle_2.12:0.13.0" -%}
 {% elif (SPARK_base_version | lower) == '3.5'  %}
-  {% set ns.sparkTableFormatJar = ("/spark/jars/delta-core_2.12-3.2.0.jar,/spark/jars/delta-storage-3.2.0.jar" if SPARK_table_format_type == 'delta' else "/spark/jars/iceberg-spark-runtime-3.5_2.12-1.5.2.jar" if SPARK_table_format_type == 'iceberg' else "/spark/jars/hudi-spark3.3-bundle_2.12-0.15.0.jar" if SPARK_table_format_type == 'hudi') -%}
-  {% set ns.sparkDeltaDependencies = "io.delta:delta-core_2.12:3.2.0,io.delta:delta-storage:3.2.0" -%}
+  {% set ns.sparkTableFormatJar = ("/spark/jars/delta-spark_2.12-3.2.0.jar,/spark/jars/delta-storage-3.2.0.jar" if SPARK_table_format_type == 'delta' else "/spark/jars/iceberg-spark-runtime-3.5_2.12-1.5.2.jar" if SPARK_table_format_type == 'iceberg' else "/spark/jars/hudi-spark3.3-bundle_2.12-0.15.0.jar" if SPARK_table_format_type == 'hudi') -%}
+  {% set ns.sparkDeltaDependencies = "io.delta:delta-spark_2.12:3.2.0,io.delta:delta-storage:3.2.0" -%}
   {% set ns.sparkIcebergDependencies = "org.apache.iceberg:iceberg-spark-runtime-3.5_2.12:1.5.2" -%}
   {% set ns.sparkHudiDependencies ="org.apache.hudi:hudi-spark3.4-bundle_2.12:0.15.0" -%}
 {% else -%}
@@ -5075,7 +5075,7 @@ services:
       SPARK_DEFAULTS_CONF_spark_jars_packages: "{{SPARK_jars_packages}}"
       SPARK_DEFAULTS_CONF_spark_jars_excludes: {{SPARK_jars_excludes}}
     {%if (DATAHUB_enable or external['DATAHUB_enable'] and SPARK_datahub_agent_enable) | default(false) %}
-      # specifies the JARs to be downloaded to the jars folder by maven-download-sh script
+      # specifies the JARs to be downloaded to the jars folder by maven-download-sh script (triggered in the init script)
       SPARK_INSTALL_JARS_PACKAGES: '{{SPARK_install_jars_packages}},{{ns.sparkDeltaDependencies}},{{ns.sparkIcebergDependencies}},{{ns.sparkHudiDependencies}},{{ns.datahubSparkPluginDependencies}}'
       SPARK_DEFAULTS_CONF_spark_jars: {{SPARK_jars}}{{',' if SPARK_jars | length}}{{ns.sparkTableFormatJar | default('')}}{{',' if ns.sparkTableFormatJar | length}}{{ns.datahubSparkPluginJar | default('')}}
     {% else %}
