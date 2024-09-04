@@ -3,8 +3,8 @@
 # Removing JARs
 for jar in $(echo $REMOVE_JARS | sed "s/,/ /g")
 do
-      rm /usr/local/spark/jars/$jar
-      echo "/usr/local/spark/jars/$jar has been removed!"
+      echo "Trying to remove /usr/local/spark/jars/$jar"
+      rm -fv /usr/local/spark/jars/$jar
 done
 
 # Downloading Maven dependencies
