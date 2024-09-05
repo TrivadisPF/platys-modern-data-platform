@@ -75,6 +75,12 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Update `flink` to `1.20-scala_2.12-java17`
  * Update `Confluent Platform` to `7.7.0`
 
+### Enhancements
+
+ * a README.md file is generated which lists all the services contained in the `docker-compose.yml` file
+ * Refactored Spark (Master, Worker, History and Thriftserver) to use the bitnami docker images
+ * Refactored Zeppelin to use the Dockerfile provided by the Apache Zeppelin project
+
 ### Breaking Changes
 
  * Remove `NEO4J_dbms_logs_debug_level` setting from Neo4J
@@ -83,8 +89,6 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * `wetty` is no longer enabled by default in the initial `config.yml` file
  * Neo4J config setting `NEO4J_plugins` renamed to `NEO4J_download_plugins` and added `NEO4J_mount_plugins` 
  * Memgraph no longer uses external port `7690 ` but `7699`
- * Refactored Spark (Master, Worker, History and Thriftserver) to use the bitnami docker images
- * Refactored Zeppelin to use the Dockerfile provided by the Apache Zeppelin project
  
 ## What's new in 1.17.1
 
