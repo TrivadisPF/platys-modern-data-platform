@@ -15,6 +15,8 @@ RUN python3 -m pip install --upgrade pip && \
 	
 	pip install ruamel.yaml.clib  && \
 
+	pip install Jinja2  && \
+
 	# install docker-compose-templer
 	pip install docker-compose-templer && mkdir /opt/mdps-gen && chmod 777 -R /opt/mdps-gen && \
 
