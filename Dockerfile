@@ -19,7 +19,10 @@ RUN python3 -m pip install --upgrade pip && \
 	pip install docker-compose-templer && mkdir /opt/mdps-gen && chmod 777 -R /opt/mdps-gen && \
 
 	# install jinja2 CLI
-	pip install jinja2-cli  && \
+	pip install jinja2-cli && \
+
+	# install pyyaml
+	pip install pyyaml && \
 
 	# Install timezone and jq support
 	apk add tzdata &&  apk add jq && apk add yq
