@@ -15,12 +15,11 @@ RUN python3 -m pip install --upgrade pip && \
 	
 	pip install ruamel.yaml.clib  && \
 
-	pip install jinja2  && \
-
-	pip install jinja2-cli  && \
-
 	# install docker-compose-templer
 	pip install docker-compose-templer && mkdir /opt/mdps-gen && chmod 777 -R /opt/mdps-gen && \
+
+	# install jinja2 CLI
+	pip install jinja2-cli  && \
 
 	# Install timezone and jq support
 	apk add tzdata &&  apk add jq && apk add yq
