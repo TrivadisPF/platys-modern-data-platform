@@ -388,6 +388,8 @@ networks:
 
 {% set __PINOT_version = PINOT_version | default('latest') -%}
 
+{% set __STARROCKS_version = STARROCKS_version | default('latest') -%}
+
 {% set __IGNITE_version = IGNITE_version | default('latest') -%}
 {% set __GRIDGAIN_CC_version = GRIDGAIN_CC_version | default('latest') -%}
 
@@ -783,6 +785,7 @@ networks:
   {% set VECTOR_ADMIN_enable = false -%}
   {% set DRUID_enable = false -%}
   {% set PINOT_enable = false -%}
+  {% set STARROCKS_enable = false -%}
   {% set IGNITE_enable = false -%}
   {% set JANUSGRAPH_enable = false -%}
   {% set INVANA_ENGINE_enable = false -%}
@@ -15118,6 +15121,124 @@ services:
     restart: {{container_restart_policy}}
   {% endfor %}
 {% endif %}   {# PINOT_enable #}
+
+{% if STARROCKS_enable | default(false) %}
+  #  ================================== Starrocks ========================================== #
+  starrocks-fe:
+    image: astarrocks/fe-ubuntu:{{__STARROCKS_version}}
+    hostname: starrocks-fe
+    container_name: starrocks-fe
+    labels:
+      com.platys.name: "starrocks"
+      com.platys.description: "Real-time analytics database"
+      com.platys.webui.title: "Starrocks Console UI"
+      com.platys.webui.url: "http://dataplatform:28210"
+    user: root
+    ports:
+      - 8030:8030
+      - 9020:9020
+      - 9030:9030
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {% if STARROCKS_volume_map_data %}
+      - ./container-volume/pinot/controller:/tmp/data/controller
+    {% endif -%}   {#  PINOT_volume_map_data #}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    command: >
+      bash -c "echo run_mode=shared_data >> /opt/starrocks/fe/conf/fe.conf &&
+      echo aws_s3_path=starrocks >> /opt/starrocks/fe/conf/fe.conf &&
+      echo aws_s3_endpoint=minio:9000 >> /opt/starrocks/fe/conf/fe.conf &&
+      echo aws_s3_use_instance_profile=false >> /opt/starrocks/fe/conf/fe.conf &&
+      echo cloud_native_storage_type=S3 >> /opt/starrocks/fe/conf/fe.conf &&
+      echo aws_s3_use_aws_sdk_default_behavior=true >> /opt/starrocks/fe/conf/fe.conf &&
+      bash /opt/starrocks/fe/bin/start_fe.sh"
+    restart: {{container_restart_policy}}
+    healthcheck:
+      test: 'mysql -uroot -hstarrocks-fe -P 9030 -e "show frontends\G" |grep "Alive: true"'
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  starrocks-cn-1:
+    image: starrocks/cn-ubuntu:{{__STARROCKS_version}}
+    hostname: starrocks-cn-1
+    container_name: starrocks-cn-1
+    labels:
+      com.platys.name: "starrocks"
+      com.platys.description: "Real-time analytics database"
+    user: root
+    depends_on:
+      - starrocks-fe
+    ports:
+      - 8040:8040
+    environment:
+      JAVA_OPTS: "-Dplugins.dir=/opt/pinot/plugins -Xms4G -Xmx4G -XX:+UseG1GC -XX:MaxGCPauseMillis=200 -Xloggc:gc-pinot-broker.log"
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    command: StartBroker -zkAddress zookeeper-1:2181
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    command:
+      - /bin/bash
+      - -c
+      - |
+        sleep 15s;
+        mysql --connect-timeout 2 -h starrocks-fe -P9030 -uroot -e "ALTER SYSTEM ADD COMPUTE NODE \"starrocks-cn:9050\";"
+        /opt/starrocks/cn/bin/start_cn.sh
+    restart: {{container_restart_policy}}
+
+  {% for num in range(PINOT_servers | default(1) ) %}
+    {% set external_port = 28212 + loop.index - 1 %}
+  pinot-server-{{loop.index}}:
+    image: apachepinot/pinot:{{__PINOT_version}}
+    hostname: pinot-server-{{loop.index}}
+    container_name: pinot-server-{{loop.index}}
+    labels:
+      com.platys.name: "pinot"
+      com.platys.description: "Real-time analytics database"
+    depends_on:
+      - pinot-controller
+    ports:
+      - "{{external_port}}:8098"
+    environment:
+      JAVA_OPTS: "-Dplugins.dir=/opt/pinot/plugins -Xms4G -Xmx16G -XX:+UseG1GC -XX:MaxGCPauseMillis=200 -Xloggc:gc-pinot-server.log"
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {% if PINOT_volume_map_data %}
+      - ./container-volume/pinot/server:/tmp/data/server
+    {% endif -%}   {#  PINOT_volume_map_data #}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    command: StartServer -zkAddress zookeeper-1:2181
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+  {% endfor %}
+{% endif %}   {# STARROCKS_enable #}
 
 {% if IGNITE_enable | default(false) %}
   #  ================================== Apache Ignite ========================================== #
