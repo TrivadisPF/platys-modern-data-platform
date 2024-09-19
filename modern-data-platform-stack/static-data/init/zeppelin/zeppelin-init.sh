@@ -108,7 +108,7 @@ then
 fi
 
 source /opt/conda/etc/profile.d/conda.sh
-conda activate python_310_with_R
+conda activate python_312_with_R
 conda env list  
 
 exec $@
