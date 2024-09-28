@@ -26,6 +26,7 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * n8n
  * Arroyo
  * Data Contract CLI
+ * Data Contract Manager (CE)
 
 ### Version upgrades
 
