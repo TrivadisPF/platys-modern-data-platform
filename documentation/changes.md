@@ -78,6 +78,7 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Update `Confluent Platform` to `7.7.0`
  * Update `milvus` to `v2.4.11`
  * Update `attu` to `v2.4.8`
+ * Update `postgresql` to `17`
 
 ### Enhancements
 
