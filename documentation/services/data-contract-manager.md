@@ -6,8 +6,19 @@ Data Mesh Manager (Community Edition).
 
 ## How to enable?
 
+```bash
+platys init --enable-services DATA_CONTRACT_MANAGER MAILHOG, POSTGRESQL
 ```
-platys init --enable-services DATA_CONTRACT_MANAGER
+
+Add the following settings to `config.yml`
+
+```
+POSTGRESQL_extension: 'pgvector'
+```
+
+Now you can generate and use the platform
+
+```bash
 platys gen
 ```
 
