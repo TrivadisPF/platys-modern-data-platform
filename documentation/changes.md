@@ -85,6 +85,7 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * a README.md file is generated which lists all the services contained in the `docker-compose.yml` file
  * Refactored Spark (Master, Worker, History and Thriftserver) to use the bitnami docker images
  * Refactored Zeppelin to use the Dockerfile provided by the Apache Zeppelin project
+ * Option to overrite the Postgres standard, official image by one with an additional extension, such as `PGVector` or `age` or with your own docker image
 
 ### Breaking Changes
 
