@@ -1285,6 +1285,8 @@ For each service there might be some other settings, such as controlling the num
 | [**_ProjectNessie_**](./services/nessie.md)   &nbsp;&nbsp;&nbsp;&nbsp;![x86-64](./images/x86-64.png)                        	|         	|
 | `NESSIE_enable`                                 	| `false` 	| 1.16.0 	| Generate Nessie service                                                                                                                                                              	|    
 | `NESSIE_store_type`                                 	| `in-memory` 	| 1.16.0 	| Storage adapter to use for Nessie, one of [`in-memory` or `postgresql` or `mongodb`]. This controls where the underlying data will be stored.                                                                                                                                                             	|     
+| [**_Unity Catalog_**](./services/unity-catalog.md)   &nbsp;&nbsp;&nbsp;&nbsp;![x86-64](./images/x86-64.png)                        	|         	|
+| `UNITY_CATALOG_enable`                                 	| `false` 	| 1.18.0 	| Generate Unity Catalog service                                                                                                                                                              	|    
 
 ### Query Engines
 

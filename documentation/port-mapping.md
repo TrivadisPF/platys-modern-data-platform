@@ -644,6 +644,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28379 | 4043 | jupyter (spark UI)  |
 28380 | 4044 | jupyter (spark UI)  |
 28381 | 8080 | data-contract-manager  |
+28382 | 8080 | unity-catalog  |
 
 ## Ports > 28500
 
