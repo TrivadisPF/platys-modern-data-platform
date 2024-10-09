@@ -3686,6 +3686,7 @@ services:
       com.platys.webui.url: "http://dataplatform:{{externalPort}}"
       com.platys.restapi.title: 'AKHQ API'
       com.platys.restapi.url: "http://dataplatform:{{externalPort}}/api"
+      com.platys.password.envvars: "PLATYS_AKHQ_ADMIN_PASSWORD,PLATYS_AKHQ_READER_PASSWORD"
     ports:
       - {{externalPort}}:8080
       - {{monitoringExternalPort}}:28081
@@ -3708,11 +3709,11 @@ services:
             default-group: no-roles
             basic-auth:
               - username: {{AKHQ_username}}
-                password: "{{AKHQ_password}}"
+                password: "${PLATYS_AKHQ_ADMIN_PASSWORD:-{{AKHQ_password}} }"
                 groups:
                 - admin
               - username: reader
-                password: "{{AKHQ_password}}"
+                password: "${PLATYS_AKHQ_READER_PASSWORD:-{{AKHQ_password}} }" 
                 groups:
                 - reader
     {% endif -%}   {#  AKHQ_auth_type == 'basic' #}
@@ -6543,6 +6544,7 @@ services:
       com.platys.description: "Datahub Data Catalog"
       com.platys.webui.title: "DataHub UI"
       com.platys.webui.url: "http://dataplatform:28144"
+      com.platys.password.envvars: "PLATYS_DATAHUB_PASSWORD"
     depends_on:
       - datahub-gms
     ports:
@@ -6550,7 +6552,7 @@ services:
     environment:
       - DATAHUB_GMS_HOST=datahub-gms
       - DATAHUB_GMS_PORT=8080
-      - DATAHUB_SECRET={{DATAHUB_secret | default('abc123!abc123!')}}
+      - DATAHUB_SECRET=${PLATYS_DATAHUB_PASSWORD:-{{DATAHUB_secret | default('abc123!abc123!')}} }
       - DATAHUB_APP_VERSION=1.0
       - DATAHUB_PLAY_MEM_BUFFER_SIZE=10MB
       - JAVA_OPTS=-Xms512m -Xmx512m -Dhttp.port=9002 -Dconfig.file=datahub-frontend/conf/application.conf -Djava.security.auth.login.config=datahub-frontend/conf/jaas.conf -Dlogback.configurationFile=datahub-frontend/conf/logback.xml -Dlogback.debug=false -Dpidfile.path=/dev/null
@@ -9023,30 +9025,47 @@ services:
     ports:
       - 5678:5678
     environment:
+      N8N_USER_FOLDER: '/home/node/.n8n'
       N8N_SECURE_COOKIE: false
       N8N_PREVIEW_MODE: false
       N8N_METRICS: false
+      N8N_DIAGNOSTICS_ENABLED: false
+      N8N_HIRING_BANNER_ENABLED: false
+      N8N_PUBLIC_API_SWAGGERUI_DISABLED: true
+      N8N_VERSION_NOTIFICATIONS_ENABLED: false
+      N8N_TEMPLATES_ENABLED: false
+      N8N_PERSONALIZATION_ENABLED: false
+      N8N_ENCRYPTION_KEY
+      N8N_USER_MANAGEMENT_JWT_SECRET      
       N8N_AI_ENABLED: {{true if N8N_ai_enabled is defined and N8N_ai_enabled else omit}}
       OLLAMA_HOST: {{ns.ollamaUrl}}
       DB_TYPE: '{{N8N_db_type | lower}}'
     {% if (N8N_db_type | lower) == 'sqlite' %}
       DB_SQLITE_VACUUM_ON_STARTUP: {{true if N8N_sqlite_vacum_on_startup_enabled is defined and N8N_sqlite_vacum_on_startup_enabled else omit}}
     {% endif -%}   {#  N8N_db_type #}
-    {% if (N8N_db_type | lower) == 'postgres' %}
+    {% if (N8N_db_type | lower) == 'postgresdb' %}
       DB_POSTGRESDB_DATABASE: {{N8N_postgres_dbname}}
       DB_POSTGRESDB_HOST: postgresql
       DB_POSTGRESDB_PORT: 5432
       DB_POSTGRESDB_USER: {{N8N_postgres_user}}
       DB_POSTGRESDB_PASSWORD: {{N8N_postgres_password}}
-      # DB_POSTGRESDB_SCHEMA: "-Dlog4j2.formatMsgNoLookups=true"
+      DB_POSTGRESDB_SCHEMA: {{N8N_postgres_schema}}
+    {% endif -%}   {#  N8N_db_type #}
+    {% elif (N8N_db_type | lower) == 'mysqldb' %}
+      DB_MYSQLDB_DATABASE: {{N8N_mysql_dbname}}
+      DB_MYSQLDB_HOST: mysql
+      DB_MYSQLDB_PORT: 3306
+      DB_MYSQLDB_USER: {{N8N_mysql_user}}
+      DB_MYSQLDB_PASSWORD: {{N8N_mysql_password}}
     {% endif -%}   {#  N8N_db_type #}
     {%if use_timezone | default(false) %}
+      GENERIC_TIMEZONE: {{use_timezone}}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
     {%if N8N_volume_map_data %}
-      - ./container-volume/n8n/data:/home/node/
+      - ./container-volume/n8n/data:/home/node/.n8n
     {% endif -%}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
@@ -9055,6 +9074,11 @@ services:
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
+    {% if (N8N_db_type | lower) == 'postgres' or (N8N_db_type | lower) == 'mysql' %}
+    links:
+      - {{'postgresql' if N8N_db_type | lower) == 'postgresdb' else omit }}
+      - {{'mysql' if N8N_db_type | lower) == 'mysqldb' else omit }}    
+    {% endif -%}   {#  N8N_db_type #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  N8N_enable  #}
 
