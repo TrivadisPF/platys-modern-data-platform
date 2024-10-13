@@ -8704,6 +8704,7 @@ services:
       com.platys.webui.url: "http{{ 's' if NIFI_run_secure}}://dataplatform:{{externalPort}}/nifi"
       com.platys.restapi.title: "Apche NiFi REST API"
       com.platys.restapi.url: "http{{ 's' if NIFI_run_secure}}://dataplatform:{{externalPort}}/nifi-api"
+      com.platys.password.envvars: "PLATYS_NIFI_PASSWORD"
     ports:
       # HTTP
       - "{{externalPort}}:{{externalPort}}"
@@ -8748,10 +8749,8 @@ services:
       S3_ENDPOINT: '{{s3Endpoint | default(omit) }}'
       S3_PATH_STYLE_ACCESS: '{{s3PathStyleAccess}}'
       S3_REGION: {{s3DefaultRegion if s3DefaultRegion is defined and s3DefaultRegion else omit}}
-      {%if MINIO_enable or external['S3_enable'] | default(false) %}
-      PLATYS_AWS_ACCESS_KEY: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
-      PLATYS_AWS_SECRET_ACCESS_KEY: {{s3SecretAccessKey}}
-      {% endif -%}    {#  MINIO_enable #}
+      AWS_ACCESS_KEY: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
+      AWS_SECRET_ACCESS_KEY: {{s3SecretAccessKey}}
     {% endif -%}    {#  MINIO_enable #}
       NIFI_REMOTE_INPUT_SOCKET_PORT: '{{externalRemotePort}}'
       NIFI_REMOTE_INPUT_HOST: nifi-{{loop.index}}
@@ -8759,7 +8758,7 @@ services:
       NIFI_JVM_HEAP_MAX: {{ NIFI_jvm_heap_max if NIFI_jvm_heap_max is defined and NIFI_jvm_heap_max != None else omit }}
       NIFI_SENSITIVE_PROPS_KEY: '12345678901234567890A'
       SINGLE_USER_CREDENTIALS_USERNAME: '{{NIFI_username}}'
-      SINGLE_USER_CREDENTIALS_PASSWORD: '{{NIFI_password}}'
+      SINGLE_USER_CREDENTIALS_PASSWORD: '${PLATYS_NIFI_PASSWORD:-{{NIFI_password}}}'
       INITIAL_ADMIN_IDENTITY: '{{ NIFI_inital_admin_identitiy if NIFI_inital_admin_identitiy is defined and NIFI_inital_admin_identitiy | length else NIFI_username }}'
     {% if VAULT_enable and VAULT_use_dev_mode | default(false) %}
       VAULT_TOKEN: {{VAULT_dev_mode_token}}
@@ -10577,6 +10576,7 @@ services:
       com.platys.description: "Data Science Notebook"
       com.platys.webui.title: "Apache Zeppelin UI"
       com.platys.webui.url: "http://dataplatform:28080"
+      com.platys.password.envvars: "PLATYS_ZEPPELIN_ADMIN_PASSWORD,PLATYS_ZEPPELIN_USER_PASSWORD,PLATYS_AWS_SECRET_ACCESS_KEY"
     ports:
       - "28080:8080"
       - "6060:6060"
@@ -10620,9 +10620,9 @@ services:
 
       # Will replace values in shiro.ini
       ZEPPELIN_ADMIN_USERNAME: {{ZEPPELIN_admin_username}}
-      ZEPPELIN_ADMIN_PASSWORD: {{ZEPPELIN_admin_password}}
+      ZEPPELIN_ADMIN_PASSWORD: ${PLATYS_ZEPPELIN_ADMIN_PASSWORD:-{{ZEPPELIN_admin_password}}}
       ZEPPELIN_USER_USERNAME: {{ZEPPELIN_user_username}}
-      ZEPPELIN_USER_PASSWORD: {{ZEPPELIN_user_password}}
+      ZEPPELIN_USER_PASSWORD: ${PLATYS_ZEPPELIN_USER_PASSWORD:-{{ZEPPELIN_user_password}}}
   {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
   {% endif -%}   {#  use_timezone #}
@@ -10668,6 +10668,7 @@ services:
       com.platys.description: 'Web-based interactive development environment for notebooks, code, and data'
       com.platys.webui.title: "Jupyter UI"
       com.platys.webui.url: "http://dataplatform:28888"
+      com.platys.password.envvars: "PLATYS_JUPYTER_TOKEN,PLATYS_AWS_SECRET_ACCESS_KEY"
     ports:
       - "28888:8888"
   {%if JUPYTER_edition == 'all-spark' or JUPYTER_edition == 'pyspark' | default(false) %}
@@ -10679,7 +10680,7 @@ services:
     environment:
       JUPYTER_ENABLE_LAB: "'yes'"
       GRANT_SUDO: "'yes'"
-      JUPYTER_TOKEN: {{JUPYTER_token if JUPYTER_token is defined and JUPYTER_token | length else omit}}
+      JUPYTER_TOKEN: ${PLATYS_JUPYTER_TOKEN:-{{JUPYTER_token if JUPYTER_token is defined and JUPYTER_token | length else omit}}}
       NB_USER: {{JUPYTER_nb_user if JUPYTER_nb_user is defined and JUPYTER_nb_user | length else omit}}
       NOTEBOOK_ARGS: {{JUPYTER_notebook_args if JUPYTER_notebook_args is defined and JUPYTER_notebook_args | length else omit}}
       DOCKER_STACKS_JUPYTER_CMD: {{JUPYTER_startup_cmd if JUPYTER_startup_cmd is defined and JUPYTER_startup_cmd | length  else omit}}
@@ -10856,10 +10857,11 @@ services:
       com.platys.description: "Integrated development environment (IDE) for R "
       com.platys.webui.title: "RStudio UI"
       com.platys.webui.url: "http://dataplatform:8787"
+      com.platys.password.envvars: "PLATYS_RSTUDIO_PASSWORD"
     ports:
       - "8787:8787"
     environment:
-      PASSWORD: {{RSTUDIO_password | default ('rstudio')}}
+      PASSWORD: ${PLATYS_RSTUDIO_PASSWORD:-{{RSTUDIO_password | default ('rstudio')}}}
       ROOT: '{{RSTUDIO_run_as_root | default(false)}}'
       DISABLE_AUTH: '{{RSTUDIO_disable_auth | default(false)}}'
     {%if use_timezone | default(false) %}
@@ -18097,6 +18099,7 @@ services:
       com.platys.description: "Software-defined Object Storage"
       com.platys.webui.title: "MinIO UI"
       com.platys.webui.url: "http://dataplatform:9000"
+      com.platys.password.envvars: ""
     ports:
       - '{{port}}:9000'
       - '{{uiport}}:{{uiport}}'
