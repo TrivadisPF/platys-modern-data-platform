@@ -29,6 +29,7 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Data Contract Manager (CE)
  * Unity Catalog
  * Glances
+ * Starrocks
 
 ### Version upgrades
 
