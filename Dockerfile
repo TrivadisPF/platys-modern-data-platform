@@ -18,6 +18,9 @@ RUN python3 -m pip install --upgrade pip && \
 	# install docker-compose-templer
 	pip install docker-compose-templer && mkdir /opt/mdps-gen && chmod 777 -R /opt/mdps-gen && \
 
+	# install pwgen
+	pip install pwgen && \
+
 	# install jinja2 CLI
 	pip install jinja2-cli && \
 
