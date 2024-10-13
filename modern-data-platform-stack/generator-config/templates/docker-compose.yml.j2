@@ -542,6 +542,7 @@ networks:
 {% set __RANCHER_version = RANCHER_version | default('latest') -%}
 {% set __CETUSGUARD_version = CETUSGUARD_version | default('latest') -%}
 {% set __CADVISOR_version = CADVISOR_version | default('latest') -%}
+{% set __GLANCES_version = GLANCES_version | default('latest') -%}
 {% set __DOCKER_REGISTRY_version = DOCKER_REGISTRY_version | default('latest') -%}
 {% set __DOCKER_REGISTRY_UI_version = DOCKER_REGISTRY_UI_version | default('latest') -%}
 {% set __HAWTIO_version = HAWTIO_version | default('latest') -%}
@@ -904,6 +905,7 @@ networks:
   {% set ETCD_E3W_enable = false -%}
   {% set DOCKER_EXEC_WEBCONSOLE_enable = false -%}
   {% set CADVISOR_enable = false -%}
+  {% set GLANCES_enable = false -%}  
   {% set DOCKER_REGISTRY_enable = false -%}
   {% set DOCKER_REGISTRY_UI_enable = false -%}
   {% set HAWTIO_enable = false -%}
@@ -21478,6 +21480,51 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
 {% endif %}   {# CADVISOR_enable #}
+
+{% if GLANCES_enable | default(false) %}
+  #  ================================== Glances ========================================== #
+  glances:
+    image: nicolargo/glances:{{__GLANCES_version}}
+    container_name: glances
+    hostname: glances
+    labels:
+      com.platys.name: "glances"
+      com.platys.description: "A top/htop alternative"
+      com.platys.webui.title: "Glances UI"
+      com.platys.webui.url: "http://dataplatform:28138"
+    ports:
+      - 61208-61209:61208-61209
+    environment:
+      GLANCES_OPT="-C /glances/conf/glances.conf -w"
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "/run/user/1000/podman/podman.sock:/run/user/1000/podman/podman.sock:ro"
+      - "./conf/glances/glances.conf:/glances/conf/glances.conf"      
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    pid: "host"
+    privileged: true
+    network_mode: "host" 
+    {% if GLANCES_with_gpu | default(false) %}
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu] 
+    {% endif -%}   {#  use_timezone #}                    
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+{% endif %}   {# GLANCES_enable #}
 
 {% if DOCKER_REGISTRY_enable | default(false) %}
   #  ================================== Docker Registry ========================================== #
