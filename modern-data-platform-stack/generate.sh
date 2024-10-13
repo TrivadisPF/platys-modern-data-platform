@@ -43,5 +43,9 @@ fi
 # Generate the README file for the generated platform
 jinja2 /opt/mdps-gen/README.md.j2 /opt/mdps-gen/destination/docker-compose.yml --format=yaml --outfile /opt/mdps-gen/destination/README.md
 
+# Generate the password template file
+jinja2 /opt/mdps-gen/env-passsword.j2 /opt/mdps-gen/destination/docker-compose.yml --format=yaml --outfile /opt/mdps-gen/destination/.env-password
+cat /opt/mdps-gen/destination/.env-password > /opt/mdps-gen/destination/.env-password
+
 # Create a .gitignore and the .env to it if it does not yet exists
 grep -qxF '.env' /opt/mdps-gen/destination/.gitignore || echo '.env' >> /opt/mdps-gen/destination/.gitignore
