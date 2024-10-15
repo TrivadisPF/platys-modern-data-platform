@@ -5487,8 +5487,6 @@ services:
       com.platys.description: "gateway to provide serverless SQL"
       com.platys.webui.title: "Kyuubi UI"
       com.platys.webui.url: "http://dataplatform:10099"
-      com.platys.restapi.title: "Kyuubi REST API"
-      com.platys.restapi.url: "http://dataplatform:10099/api/v1/sessions"
     ports:
       - 28385-28387:4040-4042    
       - "10009:10009"
@@ -5520,13 +5518,13 @@ services:
       HIVE_SITE_CONF_datanucleus_autoCreateSchema: false
       HIVE_SITE_CONF_hive_metastore_event_db_notification_api_auth: false      
     {%if HADOOP_enable | default(false) %}
-      SPARK_DEFAULTS_CONF_spark_hadoop_fs_defaultFS: hdfs://namenode:9000
+      SPARK_DEFAULTS_CONF_spark_hadoop_fs_defaultFS: 'hdfs://namenode:9000'
       SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: {{KYUUBI_local_spark_sql_warehouse_dir if KYUUBI_local_spark_sql_warehouse_dir is defined and KYUUBI_local_spark_sql_warehouse_dir | length else 'hdfs://namenode:9000/user/hive/warehouse'}}
     {%elif MINIO_enable or external['S3_enable'] | default(false) %}
-      SPARK_DEFAULTS_CONF_spark_hadoop_fs_defaultFS: s3a://{{s3AdminBucketName}}
+      SPARK_DEFAULTS_CONF_spark_hadoop_fs_defaultFS: 's3a://{{s3AdminBucketName}}'
       SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: {{KYUUBI_local_spark_sql_warehouse_dir if KYUUBI_local_spark_sql_warehouse_dir is defined and KYUUBI_local_spark_sql_warehouse_dir | length else 's3a://{{s3AdminBucketName}}/hive/warehouse'}}
     {% else %}
-      SPARK_DEFAULTS_CONF_spark_hadoop_fs_defaultFS: file:///tmp
+      SPARK_DEFAULTS_CONF_spark_hadoop_fs_defaultFS: 'file:///tmp'
       SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: {{KYUUBI_local_spark_sql_warehouse_dir if KYUUBI_local_spark_sql_warehouse_dir is defined and KYUUBI_local_spark_sql_warehouse_dir | length else 'file:///hive/warehouse'}}
     {% endif -%}   {#  HADOOP_enable #}
       SPARK_DEFAULTS_CONF_spark_sql_hive_metastore_jars: /opt/kyuubi/externals/spark-3.5.1-bin-hadoop3/jars/*
@@ -5536,13 +5534,6 @@ services:
     {% else %}
       SPARK_DEFAULTS_CONF_spark_sql_catalogImplementation: hive
     {% endif -%}   {#  KYUUBI_local_spark_catalog #}
-#      SPARK_DEFAULTS_CONF_spark_yarn_dist_files: '/opt/kyuubi/conf/hive-site.xml'
-#      SPARK_DEFAULTS_CONF_spark_driver_extraJavaOptions: {{SPARK_driver_extraJavaOptions}}
-#      SPARK_DEFAULTS_CONF_spark_executor_extraJavaOptions: {{SPARK_executor_extraJavaOptions}}
-#      SPARK_DEFAULTS_CONF_spark_cores_max: {{SPARK_cores_max if SPARK_cores_max is defined and SPARK_cores_max else omit }}
-#      SPARK_DEFAULTS_CONF_spark_executor_memory: {{SPARK_executor_memory if SPARK_executor_memory is defined and SPARK_executor_memory else omit }}
-#      SPARK_DEFAULTS_CONF_spark_sql_extensions: {{SPARK_sql_extensions if SPARK_sql_extensions is defined and SPARK_sql_extensions else omit }}
-#      SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: {{SPARK_sql_catalog_spark_catalog if SPARK_sql_catalog_spark_catalog is defined and SPARK_sql_catalog_spark_catalog else omit }}
     {%if (DATAHUB_enable or external['DATAHUB_enable'] and SPARK_datahub_agent_enable) | default(false) %}
       SPARK_DEFAULTS_CONF_spark_extraListeners: 'datahub.spark.DatahubSparkListener'
       SPARK_DEFAULTS_CONF_spark_datahub_rest_server: {{ns.gmsUrl}}
