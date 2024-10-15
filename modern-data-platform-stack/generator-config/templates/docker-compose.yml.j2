@@ -5514,26 +5514,26 @@ services:
       HIVE_SITE_CONF_hive_metastore_event_db_notification_api_auth: false      
     {%if HADOOP_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_defaultFS: hdfs://namenode:9000
-      SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined and SPARK_sql_warehouse_dir | length else 'hdfs://namenode:9000/user/hive/warehouse'}}
+      SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: {{KYUUBI_local_spark_sql_warehouse_dir if KYUUBI_local_spark_sql_warehouse_dir is defined and KYUUBI_local_spark_sql_warehouse_dir | length else 'hdfs://namenode:9000/user/hive/warehouse'}}
     {%elif MINIO_enable or external['S3_enable'] | default(false) %}
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_defaultFS: s3a://{{s3AdminBucketName}}
-      SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined and SPARK_sql_warehouse_dir | length else 's3a://{{s3AdminBucketName}}/hive/warehouse'}}
+      SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: {{KYUUBI_local_spark_sql_warehouse_dir if KYUUBI_local_spark_sql_warehouse_dir is defined and KYUUBI_local_spark_sql_warehouse_dir | length else 's3a://{{s3AdminBucketName}}/hive/warehouse'}}
     {% else %}
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_defaultFS: file:///tmp
-      SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined and SPARK_sql_warehouse_dir | length else 'file:///hive/warehouse'}}
+      SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: {{KYUUBI_local_spark_sql_warehouse_dir if KYUUBI_local_spark_sql_warehouse_dir is defined and KYUUBI_local_spark_sql_warehouse_dir | length else 'file:///hive/warehouse'}}
     {% endif -%}   {#  HADOOP_enable #}
       SPARK_DEFAULTS_CONF_spark_sql_hive_metastore_jars: /opt/kyuubi/externals/spark-3.5.1-bin-hadoop3/jars/*
       SPARK_DEFAULTS_CONF_spark_sql_hive_metastore_version: 3.1.2    
-    {%if (SPARK_catalog | lower) == 'in-memory' | default(false) %}
+    {%if (KYUUBI_local_spark_catalog | lower) == 'in-memory' | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalogImplementation: in-memory
     {% else %}
       SPARK_DEFAULTS_CONF_spark_sql_catalogImplementation: hive
-    {% endif -%}   {#  SPARK_catalog #}
-      SPARK_DEFAULTS_CONF_spark_yarn_dist_files: '/opt/kyuubi/conf/hive-site.xml'
-      SPARK_DEFAULTS_CONF_spark_driver_extraJavaOptions: {{SPARK_driver_extraJavaOptions}}
-      SPARK_DEFAULTS_CONF_spark_executor_extraJavaOptions: {{SPARK_executor_extraJavaOptions}}
-      SPARK_DEFAULTS_CONF_spark_cores_max: {{SPARK_cores_max if SPARK_cores_max is defined and SPARK_cores_max else omit }}
-      SPARK_DEFAULTS_CONF_spark_executor_memory: {{SPARK_executor_memory if SPARK_executor_memory is defined and SPARK_executor_memory else omit }}
+    {% endif -%}   {#  KYUUBI_local_spark_catalog #}
+#      SPARK_DEFAULTS_CONF_spark_yarn_dist_files: '/opt/kyuubi/conf/hive-site.xml'
+#      SPARK_DEFAULTS_CONF_spark_driver_extraJavaOptions: {{SPARK_driver_extraJavaOptions}}
+#      SPARK_DEFAULTS_CONF_spark_executor_extraJavaOptions: {{SPARK_executor_extraJavaOptions}}
+#      SPARK_DEFAULTS_CONF_spark_cores_max: {{SPARK_cores_max if SPARK_cores_max is defined and SPARK_cores_max else omit }}
+#      SPARK_DEFAULTS_CONF_spark_executor_memory: {{SPARK_executor_memory if SPARK_executor_memory is defined and SPARK_executor_memory else omit }}
 #      SPARK_DEFAULTS_CONF_spark_sql_extensions: {{SPARK_sql_extensions if SPARK_sql_extensions is defined and SPARK_sql_extensions else omit }}
 #      SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: {{SPARK_sql_catalog_spark_catalog if SPARK_sql_catalog_spark_catalog is defined and SPARK_sql_catalog_spark_catalog else omit }}
     {%if (DATAHUB_enable or external['DATAHUB_enable'] and SPARK_datahub_agent_enable) | default(false) %}
@@ -5548,7 +5548,7 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalog_iceberg: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_iceberg_type: hive
       SPARK_DEFAULTS_CONF_spark_sql_catalog_iceberg_uri: thrift://hive-metastore:9083
-      SPARK_DEFAULTS_CONF_spark_sql_catalog_iceberg_warehouse: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined and SPARK_sql_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_iceberg_warehouse: {{KYUUBI_local_spark_sql_warehouse_dir if KYUUBI_local_spark_sql_warehouse_dir is defined and KYUUBI_local_spark_sql_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
       SPARK_DEFAULTS_CONF_spark_sql_defaultCatalog: iceberg
     {%elif SPARK_table_format_type == 'delta' | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.spark.sql.delta.catalog.DeltaCatalog
@@ -5559,19 +5559,19 @@ services:
       SPARK_DEFAULTS_CONF_spark_serializer: org.apache.spark.serializer.KryoSerializer
     {% endif -%}   {#  SPARK_table_format_type #}
       SPARK_DEFAULTS_CONF_spark_sql_legacy_allowNonEmptyLocationInCTAS: 'true'
-      SPARK_DEFAULTS_CONF_spark_jars_repositories: {{SPARK_jars_repositories}}
-      SPARK_DEFAULTS_CONF_spark_jars_packages: "{{SPARK_jars_packages}}"
-      SPARK_DEFAULTS_CONF_spark_jars_excludes: {{SPARK_jars_excludes}}
+      SPARK_DEFAULTS_CONF_spark_jars_repositories: {{KYUUBI_local_spark_jars_repositories}}
+      SPARK_DEFAULTS_CONF_spark_jars_packages: "{{KYUUBI_local_spark_jars_packages}}"
+      SPARK_DEFAULTS_CONF_spark_jars_excludes: {{KYUUBI_local_spark_jars_excludes}}
     {%if (DATAHUB_enable or external['DATAHUB_enable'] and SPARK_datahub_agent_enable) | default(false) %}
       # specifies the JARs to be downloaded to the jars folder by maven-download-sh script (triggered in the init script)
-      SPARK_INSTALL_JARS_PACKAGES: '{{SPARK_install_jars_packages}},{{ns.sparkDeltaDependencies}},{{ns.sparkIcebergDependencies}},{{ns.sparkHudiDependencies}},{{ns.datahubSparkPluginDependencies}}'
-      SPARK_DEFAULTS_CONF_spark_jars: {{SPARK_jars}}{{',' if SPARK_jars | length}}{{ns.sparkTableFormatJar | default('')}}{{',' if ns.sparkTableFormatJar | length}}{{ns.datahubSparkPluginJar | default('')}}
+      SPARK_INSTALL_JARS_PACKAGES: '{{KYUUBI_local_spark_install_jars_packages}},{{ns.sparkDeltaDependencies}},{{ns.sparkIcebergDependencies}},{{ns.sparkHudiDependencies}},{{ns.datahubSparkPluginDependencies}}'
+      SPARK_DEFAULTS_CONF_spark_jars: {{KYUUBI_local_spark_jars}}{{',' if KYUUBI_local_spark_jars | length}}{{ns.sparkTableFormatJar | default('')}}{{',' if ns.sparkTableFormatJar | length}}{{ns.datahubSparkPluginJar | default('')}}
     {% else %}
       # specifies the JARs to be downloaded to the jars folder by maven-download-sh script
-      SPARK_INSTALL_JARS_PACKAGES: '{{SPARK_install_jars_packages}},{{ns.sparkDeltaDependencies}},{{ns.sparkIcebergDependencies}},{{ns.sparkHudiDependencies}}'
-      SPARK_DEFAULTS_CONF_spark_jars: {{SPARK_jars}}{{',' if SPARK_jars | length}}{{ns.sparkTableFormatJar | default('')}}
+      SPARK_INSTALL_JARS_PACKAGES: '{{KYUUBI_local_spark_install_jars_packages}},{{ns.sparkDeltaDependencies}},{{ns.sparkIcebergDependencies}},{{ns.sparkHudiDependencies}}'
+      SPARK_DEFAULTS_CONF_spark_jars: {{KYUUBI_local_spark_jars}}{{',' if KYUUBI_local_spark_jars | length}}{{ns.sparkTableFormatJar | default('')}}
     {% endif -%}   {#  DATAHUB_enable or external['DATAHUB_enable'] #}
-      SPARK_DEFAULTS_CONF_spark_jars_ivySettings: {{SPARK_jars_ivySettings}}    
+      SPARK_DEFAULTS_CONF_spark_jars_ivySettings: {{KYUUBI_local_spark_jars_ivySettings}}    
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
