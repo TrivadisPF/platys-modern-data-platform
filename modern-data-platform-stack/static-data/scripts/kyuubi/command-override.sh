@@ -18,6 +18,10 @@ export SPARK_CONF_DIR="${KYUUBI_HOME}/conf"
 echo "Copying files from $SPARK_DEFAULT_CONF_DIR to $SPARK_CONF_DIR"
 cp -nr "$SPARK_DEFAULT_CONF_DIR"/. "$SPARK_CONF_DIR"
 
+echo "Copying files from $KYUUBI_DEFAULT_CONF_DIR to $KYUUBI_CONF_DIR"
+cp -nr "$KYUUBI_DEFAULT_CONF_DIR"/. "$KYUUBI_CONF_DIR"
+
+
 ########################
 # Run custom initialization scripts
 # Globals:
