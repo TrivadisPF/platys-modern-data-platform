@@ -647,6 +647,9 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28382 | 8080 | unity-catalog  |
 28383 | 61208 | glances  |
 28384 | 61209 | glances  |
+28385 | 4040 | kyuubi (spark ui)  |
+28386 | 4041 | kyuubi (spark ui)  |
+28387 | 4042 | kyuubi (spark ui)  |
 
 ## Ports > 28500
 
