@@ -9,17 +9,18 @@ set -o xtrace
 # /opt/bitnami/scripts/spark-env.sh
 
 export KYUUBI_INITSCRIPTS_DIR="/docker-entrypoint-initdb.d"
+export KYUUBI_DEFAULT_CONF_DIR="${KYUUBI_HOME}/conf.default"
+export KYUUBI_CONF_DIR="${KYUUBI_HOME}/conf"
 export SPARK_DEFAULT_CONF_DIR="${KYUUBI_HOME}/conf.default"
 export SPARK_CONF_DIR="${KYUUBI_HOME}/conf"
 
 # We add the copy from default config in the entrypoint to not break users 
 # bypassing the setup.sh logic. If the file already exists do not overwrite (in
 # case someone mounts a configuration file in /opt/kyuubi/spark/conf)
-echo "Copying files from $SPARK_DEFAULT_CONF_DIR to $SPARK_CONF_DIR"
-cp -nr "$SPARK_DEFAULT_CONF_DIR"/. "$SPARK_CONF_DIR"
-
 echo "Copying files from $KYUUBI_DEFAULT_CONF_DIR to $KYUUBI_CONF_DIR"
 cp -nr "$KYUUBI_DEFAULT_CONF_DIR"/. "$KYUUBI_CONF_DIR"
+echo "Copying files from $SPARK_DEFAULT_CONF_DIR to $SPARK_CONF_DIR"
+cp -nr "$SPARK_DEFAULT_CONF_DIR"/. "$SPARK_CONF_DIR"
 
 
 ########################
