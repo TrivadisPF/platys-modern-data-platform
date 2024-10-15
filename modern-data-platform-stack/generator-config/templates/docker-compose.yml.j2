@@ -5018,8 +5018,6 @@ services:
       - 6066:6066
       - 7077:7077
       - "4040-4044:4040-4044"
-    env_file:
-      - ./conf/hadoop.env
     environment:
       # bitnami env vars
       SPARK_MODE: master
@@ -5035,17 +5033,33 @@ services:
       # env vars for config files
 #      INIT_DAEMON_STEP: setup_spark
     {%if MINIO_enable or external['S3_enable'] | default(false) %}
-      CORE_CONF_fs_s3a_endpoint: '{{s3Endpoint | default(omit) }}'
-      CORE_CONF_fs_s3a_path_style_access: '{{s3PathStyleAccess}}'
+      HIVE_SITE_CONF_fs_defaultFS: s3a://{{s3AdminBucketName}}
       HIVE_SITE_CONF_fs_s3a_endpoint: '{{s3Endpoint | default(omit) }}'
       HIVE_SITE_CONF_fs_s3a_access_key: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
       HIVE_SITE_CONF_fs_s3a_secret_key: {{s3SecretAccessKey}}
       HIVE_SITE_CONF_fs_s3a_path_style_access: '{{s3PathStyleAccess}}'
       HIVE_SITE_CONF_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
+      HIVE_SITE_CONF_hive_metastore_uris: thrift://hive-metastore:9083
+      HIVE_SITE_CONF_javax_jdo_option_ConnectionURL: jdbc:postgresql://hive-metastore-db/metastore
+      HIVE_SITE_CONF_javax_jdo_option_ConnectionDriverName: org.postgresql.Driver
+      HIVE_SITE_CONF_javax_jdo_option_ConnectionUserName: hive
+      HIVE_SITE_CONF_javax_jdo_option_ConnectionPassword: hive
+      HIVE_SITE_CONF_datanucleus_autoCreateSchema: false
+      HIVE_SITE_CONF_hive_metastore_event_db_notification_api_auth: false      
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_endpoint: '{{s3Endpoint | default(omit) }}'
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_path_style_access: '{{s3PathStyleAccess}}'
     {% endif %}
+    {%if HADOOP_enable | default(false) %}
+      SPARK_DEFAULTS_CONF_spark_hadoop_fs_defaultFS: hdfs://namenode:9000
+      SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined else 'hdfs://namenode:9000/user/hive/warehouse'}}
+    {%elif MINIO_enable or external['S3_enable'] | default(false) %}
+      SPARK_DEFAULTS_CONF_spark_hadoop_fs_defaultFS: s3a://{{s3AdminBucketName}}
+      SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined else 's3a://{{s3AdminBucketName}}/hive/warehouse'}}
+    {% else %}
+      SPARK_DEFAULTS_CONF_spark_hadoop_fs_defaultFS: file:///tmp
+      SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined else 'file:///hive/warehouse'}}
+    {% endif -%}   {#  HADOOP_enable #}
       SPARK_DEFAULTS_CONF_spark_sql_hive_metastore_jars: /opt/bitnami/spark/jars/*
       SPARK_DEFAULTS_CONF_spark_sql_hive_metastore_version: 3.1.2    
     {%if (SPARK_catalog | lower) == 'in-memory' | default(false) %}
@@ -5053,16 +5067,6 @@ services:
     {% else %}
       SPARK_DEFAULTS_CONF_spark_sql_catalogImplementation: hive
     {% endif -%}   {#  SPARK_catalog #}
-    {%if HADOOP_enable | default(false) %}
-      CORE_CONF_fs_defaultFS: hdfs://namenode:9000
-      SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined else 'hdfs://namenode:9000/user/hive/warehouse'}}
-    {%elif MINIO_enable or external['S3_enable'] | default(false) %}
-      CORE_CONF_fs_defaultFS: s3a://{{s3AdminBucketName}}
-      SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined else 's3a://{{s3AdminBucketName}}/hive/warehouse'}}
-    {% else %}
-      CORE_CONF_fs_defaultFS: file:///tmp
-      SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined else 'file:///hive/warehouse'}}
-    {% endif -%}   {#  HADOOP_enable #}
       SPARK_DEFAULTS_CONF_spark_yarn_dist_files: '/spark/conf/hive-site.xml'
       SPARK_DEFAULTS_CONF_spark_driver_extraJavaOptions: {{SPARK_driver_extraJavaOptions}}
       SPARK_DEFAULTS_CONF_spark_executor_extraJavaOptions: {{SPARK_executor_extraJavaOptions}}
@@ -5145,8 +5149,6 @@ services:
       - spark-master
     ports:
       - "{{external_port}}:{{webui_port}}"
-    env_file:
-      - ./conf/hadoop.env
     environment:
       # bitnami env vars
       SPARK_MODE: worker
@@ -5162,35 +5164,41 @@ services:
       SPARK_WORKER_OPTS: '{{SPARK_worker_opts if SPARK_worker_opts is defined and SPARK_worker_opts else omit }}'
       SPARK_PUBLIC_DNS: ${PUBLIC_IP}
       # env vars for config files
-  {%if MINIO_enable or external['S3_enable'] | default(false) %}
-      CORE_CONF_fs_s3a_endpoint: '{{s3Endpoint | default(omit) }}'
-      CORE_CONF_fs_s3a_path_style_access: '{{s3PathStyleAccess}}'
-      HIVE_SITE_CONF_fs_s3a_endpoint: {{s3Endpoint | default(omit) }}
+    {%if MINIO_enable or external['S3_enable'] | default(false) %}
+      HIVE_SITE_CONF_fs_defaultFS: s3a://{{s3AdminBucketName}}
+      HIVE_SITE_CONF_fs_s3a_endpoint: '{{s3Endpoint | default(omit) }}'
       HIVE_SITE_CONF_fs_s3a_access_key: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
       HIVE_SITE_CONF_fs_s3a_secret_key: {{s3SecretAccessKey}}
       HIVE_SITE_CONF_fs_s3a_path_style_access: '{{s3PathStyleAccess}}'
       HIVE_SITE_CONF_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
+      HIVE_SITE_CONF_hive_metastore_uris: thrift://hive-metastore:9083
+      HIVE_SITE_CONF_javax_jdo_option_ConnectionURL: jdbc:postgresql://hive-metastore-db/metastore
+      HIVE_SITE_CONF_javax_jdo_option_ConnectionDriverName: org.postgresql.Driver
+      HIVE_SITE_CONF_javax_jdo_option_ConnectionUserName: hive
+      HIVE_SITE_CONF_javax_jdo_option_ConnectionPassword: hive
+      HIVE_SITE_CONF_datanucleus_autoCreateSchema: false
+      HIVE_SITE_CONF_hive_metastore_event_db_notification_api_auth: false      
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
-      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_endpoint: {{s3Endpoint | default(omit) }}
+      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_endpoint: '{{s3Endpoint | default(omit) }}'
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_path_style_access: '{{s3PathStyleAccess}}'
-  {% endif -%}    {#  MINIO_enable #}
-      SPARK_DEFAULTS_CONF_spark_sql_hive_metastore_jars: /opt/bitnami/spark/jars/*
-      SPARK_DEFAULTS_CONF_spark_sql_hive_metastore_version: 3.1.2  
-  {%if (SPARK_catalog | lower) == 'in-memory' | default(false) %}
-      SPARK_DEFAULTS_CONF_spark_sql_catalogImplementation: in-memory
-  {% else %}
-      SPARK_DEFAULTS_CONF_spark_sql_catalogImplementation: hive
-  {% endif -%}   {#  SPARK_catalog #}
-  {%if HADOOP_enable | default(false) %}
-      CORE_CONF_fs_defaultFS: hdfs://namenode:9000
+    {% endif %}
+    {%if HADOOP_enable | default(false) %}
+      SPARK_DEFAULTS_CONF_spark_hadoop_fs_defaultFS: hdfs://namenode:9000
       SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined else 'hdfs://namenode:9000/user/hive/warehouse'}}
-  {%elif MINIO_enable or external['S3_enable'] | default(false) %}
-      CORE_CONF_fs_defaultFS: s3a://{{s3AdminBucketName}}
+    {%elif MINIO_enable or external['S3_enable'] | default(false) %}
+      SPARK_DEFAULTS_CONF_spark_hadoop_fs_defaultFS: s3a://{{s3AdminBucketName}}
       SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined else 's3a://{{s3AdminBucketName}}/hive/warehouse'}}
-  {% else %}
-      CORE_CONF_fs_defaultFS: file:///tmp
+    {% else %}
+      SPARK_DEFAULTS_CONF_spark_hadoop_fs_defaultFS: file:///tmp
       SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined else 'file:///hive/warehouse'}}
-  {% endif -%}   {#  HADOOP_enable #}
+    {% endif -%}   {#  HADOOP_enable #}
+      SPARK_DEFAULTS_CONF_spark_sql_hive_metastore_jars: /opt/bitnami/spark/jars/*
+      SPARK_DEFAULTS_CONF_spark_sql_hive_metastore_version: 3.1.2    
+    {%if (SPARK_catalog | lower) == 'in-memory' | default(false) %}
+      SPARK_DEFAULTS_CONF_spark_sql_catalogImplementation: in-memory
+    {% else %}
+      SPARK_DEFAULTS_CONF_spark_sql_catalogImplementation: hive
+    {% endif -%}   {#  SPARK_catalog #}
       SPARK_DEFAULTS_CONF_spark_yarn_dist_files: '/spark/conf/hive-site.xml'
       SPARK_DEFAULTS_CONF_spark_driver_extraJavaOptions: {{SPARK_driver_extraJavaOptions}}
       SPARK_DEFAULTS_CONF_spark_executor_extraJavaOptions: {{SPARK_executor_extraJavaOptions}}
@@ -5269,7 +5277,6 @@ services:
     ports:
       - 28117:18080
     environment:
-
       SPARK_DEFAULTS_CONF_spark_jars_repositories: {{SPARK_jars_repositories}}
       SPARK_DEFAULTS_CONF_spark_jars_packages: "{{SPARK_jars_packages}}{{',' if SPARK_jars_packages | length}}{{SPARK_datahub_package | default('')}}"
       SPARK_DEFAULTS_CONF_spark_jars_excludes: {{SPARK_jars_excludes}}
@@ -5367,23 +5374,36 @@ services:
     ports:
       - "28118:10000"
       - "28298:4040"
-    env_file:
-      - ./conf/hadoop.env
     environment:
       SPARK_MASTER_URL: spark://spark-master:7077
-
     {%if MINIO_enable or external['S3_enable'] | default(false) %}
-      CORE_CONF_fs_s3a_endpoint: '{{s3Endpoint | default(omit) }}'
-      CORE_CONF_fs_s3a_path_style_access: '{{s3PathStyleAccess}}'
-      HIVE_SITE_CONF_fs_s3a_endpoint: {{s3Endpoint | default(omit) }}
+      HIVE_SITE_CONF_fs_defaultFS: s3a://{{s3AdminBucketName}}
+      HIVE_SITE_CONF_fs_s3a_endpoint: '{{s3Endpoint | default(omit) }}'
       HIVE_SITE_CONF_fs_s3a_access_key: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
       HIVE_SITE_CONF_fs_s3a_secret_key: {{s3SecretAccessKey}}
       HIVE_SITE_CONF_fs_s3a_path_style_access: '{{s3PathStyleAccess}}'
       HIVE_SITE_CONF_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
+      HIVE_SITE_CONF_hive_metastore_uris: thrift://hive-metastore:9083
+      HIVE_SITE_CONF_javax_jdo_option_ConnectionURL: jdbc:postgresql://hive-metastore-db/metastore
+      HIVE_SITE_CONF_javax_jdo_option_ConnectionDriverName: org.postgresql.Driver
+      HIVE_SITE_CONF_javax_jdo_option_ConnectionUserName: hive
+      HIVE_SITE_CONF_javax_jdo_option_ConnectionPassword: hive
+      HIVE_SITE_CONF_datanucleus_autoCreateSchema: false
+      HIVE_SITE_CONF_hive_metastore_event_db_notification_api_auth: false      
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
-      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_endpoint: {{s3Endpoint | default(omit) }}
+      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_endpoint: '{{s3Endpoint | default(omit) }}'
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_path_style_access: '{{s3PathStyleAccess}}'
-    {% endif -%}    {#  MINIO_enable #}
+    {% endif %}
+    {%if HADOOP_enable | default(false) %}
+      SPARK_DEFAULTS_CONF_spark_hadoop_fs_defaultFS: hdfs://namenode:9000
+      SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined else 'hdfs://namenode:9000/user/hive/warehouse'}}
+    {%elif MINIO_enable or external['S3_enable'] | default(false) %}
+      SPARK_DEFAULTS_CONF_spark_hadoop_fs_defaultFS: s3a://{{s3AdminBucketName}}
+      SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined else 's3a://{{s3AdminBucketName}}/hive/warehouse'}}
+    {% else %}
+      SPARK_DEFAULTS_CONF_spark_hadoop_fs_defaultFS: file:///tmp
+      SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined else 'file:///hive/warehouse'}}
+    {% endif -%}   {#  HADOOP_enable #}
       SPARK_DEFAULTS_CONF_spark_sql_hive_metastore_jars: /opt/bitnami/spark/jars/*
       SPARK_DEFAULTS_CONF_spark_sql_hive_metastore_version: 3.1.2    
     {%if (SPARK_catalog | lower) == 'in-memory' | default(false) %}
@@ -5391,16 +5411,7 @@ services:
     {% else %}
       SPARK_DEFAULTS_CONF_spark_sql_catalogImplementation: hive
     {% endif -%}   {#  SPARK_catalog #}
-    {%if HADOOP_enable | default(false) %}
-      CORE_CONF_fs_defaultFS: hdfs://namenode:9000
-      SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined else 'hdfs://namenode:9000/user/hive/warehouse'}}
-    {%elif MINIO_enable or external['S3_enable'] | default(false) %}
-      CORE_CONF_fs_defaultFS: s3a://{{s3AdminBucketName}}
-      SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined else 's3a://{{s3AdminBucketName}}/hive/warehouse'}}
-    {% else %}
-      CORE_CONF_fs_defaultFS: file:///tmp
-      SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined else 'file:///hive/warehouse'}}
-    {% endif -%}   {#  HADOOP_enable #}
+
     {%if (DATAHUB_enable or external['DATAHUB_enable'] and SPARK_datahub_agent_enable) | default(false) %}
       SPARK_DEFAULTS_CONF_spark_extraListeners: 'datahub.spark.DatahubSparkListener'
       SPARK_DEFAULTS_CONF_spark_datahub_metadata_dataset_env: {{env}}
@@ -5482,17 +5493,33 @@ services:
       - "10099:10099"
     environment:
     {%if MINIO_enable or external['S3_enable'] | default(false) %}
-      CORE_CONF_fs_s3a_endpoint: '{{s3Endpoint | default(omit) }}'
-      CORE_CONF_fs_s3a_path_style_access: '{{s3PathStyleAccess}}'
+      HIVE_SITE_CONF_fs_defaultFS: s3a://{{s3AdminBucketName}}
       HIVE_SITE_CONF_fs_s3a_endpoint: '{{s3Endpoint | default(omit) }}'
       HIVE_SITE_CONF_fs_s3a_access_key: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
       HIVE_SITE_CONF_fs_s3a_secret_key: {{s3SecretAccessKey}}
       HIVE_SITE_CONF_fs_s3a_path_style_access: '{{s3PathStyleAccess}}'
       HIVE_SITE_CONF_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
+      HIVE_SITE_CONF_hive_metastore_uris: thrift://hive-metastore:9083
+      HIVE_SITE_CONF_javax_jdo_option_ConnectionURL: jdbc:postgresql://hive-metastore-db/metastore
+      HIVE_SITE_CONF_javax_jdo_option_ConnectionDriverName: org.postgresql.Driver
+      HIVE_SITE_CONF_javax_jdo_option_ConnectionUserName: hive
+      HIVE_SITE_CONF_javax_jdo_option_ConnectionPassword: hive
+      HIVE_SITE_CONF_datanucleus_autoCreateSchema: false
+      HIVE_SITE_CONF_hive_metastore_event_db_notification_api_auth: false      
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_endpoint: '{{s3Endpoint | default(omit) }}'
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_path_style_access: '{{s3PathStyleAccess}}'
     {% endif %}
+    {%if HADOOP_enable | default(false) %}
+      SPARK_DEFAULTS_CONF_spark_hadoop_fs_defaultFS: hdfs://namenode:9000
+      SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined else 'hdfs://namenode:9000/user/hive/warehouse'}}
+    {%elif MINIO_enable or external['S3_enable'] | default(false) %}
+      SPARK_DEFAULTS_CONF_spark_hadoop_fs_defaultFS: s3a://{{s3AdminBucketName}}
+      SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined else 's3a://{{s3AdminBucketName}}/hive/warehouse'}}
+    {% else %}
+      SPARK_DEFAULTS_CONF_spark_hadoop_fs_defaultFS: file:///tmp
+      SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined else 'file:///hive/warehouse'}}
+    {% endif -%}   {#  HADOOP_enable #}
       SPARK_DEFAULTS_CONF_spark_sql_hive_metastore_jars: /opt/kyuubi/externals/spark-3.5.1-bin-hadoop3/jars/*
       SPARK_DEFAULTS_CONF_spark_sql_hive_metastore_version: 3.1.2    
     {%if (SPARK_catalog | lower) == 'in-memory' | default(false) %}
@@ -5500,16 +5527,6 @@ services:
     {% else %}
       SPARK_DEFAULTS_CONF_spark_sql_catalogImplementation: hive
     {% endif -%}   {#  SPARK_catalog #}
-    {%if HADOOP_enable | default(false) %}
-      CORE_CONF_fs_defaultFS: hdfs://namenode:9000
-      SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined else 'hdfs://namenode:9000/user/hive/warehouse'}}
-    {%elif MINIO_enable or external['S3_enable'] | default(false) %}
-      CORE_CONF_fs_defaultFS: s3a://{{s3AdminBucketName}}
-      SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined else 's3a://{{s3AdminBucketName}}/hive/warehouse'}}
-    {% else %}
-      CORE_CONF_fs_defaultFS: file:///tmp
-      SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined else 'file:///hive/warehouse'}}
-    {% endif -%}   {#  HADOOP_enable #}
       SPARK_DEFAULTS_CONF_spark_yarn_dist_files: '/opt/kyuubi/conf/hive-site.xml'
       SPARK_DEFAULTS_CONF_spark_driver_extraJavaOptions: {{SPARK_driver_extraJavaOptions}}
       SPARK_DEFAULTS_CONF_spark_executor_extraJavaOptions: {{SPARK_executor_extraJavaOptions}}
@@ -5591,40 +5608,44 @@ services:
       com.platys.webui.url: "http://dataplatform:8998/ui#"
       com.platys.restapi.title: "Livy API"
       com.platys.restapi.url: "http://dataplatform:8998/"
-    env_file:
-      - ./conf/hadoop.env
     environment:
       SPARK_MASTER: spark://spark-master:7077
       DEPLOY_MODE: client
-  {%if MINIO_enable or external['S3_enable'] | default(false) %}
-      CORE_CONF_fs_s3a_endpoint: '{{s3EndpointStorage if s3EndpointStorage is defined and s3EndpointStorage else omit}}'
-      CORE_CONF_fs_s3a_path_style_access: 'true'
-      HIVE_SITE_CONF_fs_s3a_endpoint: {{s3EndpointStorage if s3EndpointStorage is defined and s3EndpointStorage else omit}}
+    {%if MINIO_enable or external['S3_enable'] | default(false) %}
+      HIVE_SITE_CONF_fs_defaultFS: s3a://{{s3AdminBucketName}}
+      HIVE_SITE_CONF_fs_s3a_endpoint: '{{s3Endpoint | default(omit) }}'
       HIVE_SITE_CONF_fs_s3a_access_key: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
       HIVE_SITE_CONF_fs_s3a_secret_key: {{s3SecretAccessKey}}
-      HIVE_SITE_CONF_fs_s3a_path_style_access: 'true'
+      HIVE_SITE_CONF_fs_s3a_path_style_access: '{{s3PathStyleAccess}}'
       HIVE_SITE_CONF_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
+      HIVE_SITE_CONF_hive_metastore_uris: thrift://hive-metastore:9083
+      HIVE_SITE_CONF_javax_jdo_option_ConnectionURL: jdbc:postgresql://hive-metastore-db/metastore
+      HIVE_SITE_CONF_javax_jdo_option_ConnectionDriverName: org.postgresql.Driver
+      HIVE_SITE_CONF_javax_jdo_option_ConnectionUserName: hive
+      HIVE_SITE_CONF_javax_jdo_option_ConnectionPassword: hive
+      HIVE_SITE_CONF_datanucleus_autoCreateSchema: false
+      HIVE_SITE_CONF_hive_metastore_event_db_notification_api_auth: false      
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
-      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_endpoint: {{s3EndpointStorage if s3EndpointStorage is defined and s3EndpointStorage else omit}}
-      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_path_style_access: 'true'
-  {% endif -%}    {#  MINIO_enable #}
-      SPARK_DEFAULTS_CONF_spark_sql_hive_metastore_jars: /opt/bitnami/spark/jars/*
-      SPARK_DEFAULTS_CONF_spark_sql_hive_metastore_version: 3.1.2
-  {%if (SPARK_catalog | lower) == 'in-memory' | default(false) %}
-      SPARK_DEFAULTS_CONF_spark_sql_catalogImplementation: in-memory
-  {% else %}
-      SPARK_DEFAULTS_CONF_spark_sql_catalogImplementation: hive
-  {% endif -%}   {#  SPARK_catalog #}
-  {%if HADOOP_enable | default(false) %}
-      CORE_CONF_fs_defaultFS: hdfs://namenode:9000
+      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_endpoint: '{{s3Endpoint | default(omit) }}'
+      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_path_style_access: '{{s3PathStyleAccess}}'
+    {% endif %}
+    {%if HADOOP_enable | default(false) %}
+      SPARK_DEFAULTS_CONF_spark_hadoop_fs_defaultFS: hdfs://namenode:9000
       SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined else 'hdfs://namenode:9000/user/hive/warehouse'}}
-  {%elif MINIO_enable or external['S3_enable'] | default(false) %}
-      CORE_CONF_fs_defaultFS: s3a://{{s3AdminBucketName}}
+    {%elif MINIO_enable or external['S3_enable'] | default(false) %}
+      SPARK_DEFAULTS_CONF_spark_hadoop_fs_defaultFS: s3a://{{s3AdminBucketName}}
       SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined else 's3a://{{s3AdminBucketName}}/hive/warehouse'}}
-  {% else %}
-      CORE_CONF_fs_defaultFS: file:///tmp
+    {% else %}
+      SPARK_DEFAULTS_CONF_spark_hadoop_fs_defaultFS: file:///tmp
       SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined else 'file:///hive/warehouse'}}
-  {% endif -%}   {#  HADOOP_enable #}
+    {% endif -%}   {#  HADOOP_enable #}
+      SPARK_DEFAULTS_CONF_spark_sql_hive_metastore_jars: /opt/bitnami/spark/jars/*
+      SPARK_DEFAULTS_CONF_spark_sql_hive_metastore_version: 3.1.2    
+    {%if (SPARK_catalog | lower) == 'in-memory' | default(false) %}
+      SPARK_DEFAULTS_CONF_spark_sql_catalogImplementation: in-memory
+    {% else %}
+      SPARK_DEFAULTS_CONF_spark_sql_catalogImplementation: hive
+    {% endif -%}   {#  SPARK_catalog #}
       SPARK_DEFAULTS_CONF_spark_yarn_dist_files: '/spark/conf/hive-site.xml'
       SPARK_DEFAULTS_CONF_spark_driver_extraJavaOptions: {{SPARK_driver_extraJavaOptions}}
       SPARK_DEFAULTS_CONF_spark_executor_extraJavaOptions: {{SPARK_executor_extraJavaOptions}}
@@ -6065,10 +6086,7 @@ services:
       - "10000:10000"
       - "10001:10001"
       - "10002:10002"
-    env_file:
-      - ./conf/hadoop.env
     environment:
-      HIVE_SITE_CONF_javax_jdo_option_ConnectionURL: "jdbc:postgresql://hive-metastore/metastore"
       SERVICE_PRECONDITION: "hive-metastore:9083"
   {%if HADOOP_enable | default(false) %}
       CORE_CONF_fs_defaultFS: "hdfs://namenode:9000"
@@ -6076,14 +6094,18 @@ services:
       MAPRED_CONF_mapreduce_map_env: HADOOP_MAPRED_HOME=/opt/hadoop-{{__HADOOP_version}}/
       MAPRED_CONF_mapreduce_reduce_env: HADOOP_MAPRED_HOME=/opt/hadoop-{{__HADOOP_version}}/
   {%elif MINIO_enable or external['S3_enable'] | default(false) %}
-      CORE_CONF_fs_defaultFS: s3a://{{s3AdminBucketName}}
-      CORE_CONF_fs_s3a_endpoint: '{{s3Endpoint | default(omit) }}'
-      CORE_CONF_fs_s3a_path_style_access: '{{s3PathStyleAccess}}'
-      HIVE_SITE_CONF_fs_s3a_endpoint: {{s3Endpoint | default(omit) }}
+      HIVE_SITE_CONF_fs_defaultFS: s3a://{{s3AdminBucketName}}
+      HIVE_SITE_CONF_fs_s3a_endpoint: '{{s3Endpoint | default(omit) }}'
       HIVE_SITE_CONF_fs_s3a_access_key: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
       HIVE_SITE_CONF_fs_s3a_secret_key: {{s3SecretAccessKey}}
       HIVE_SITE_CONF_fs_s3a_path_style_access: '{{s3PathStyleAccess}}'
       HIVE_SITE_CONF_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
+      HIVE_SITE_CONF_hive_metastore_uris: thrift://hive-metastore:9083
+      HIVE_SITE_CONF_javax_jdo_option_ConnectionURL: jdbc:postgresql://hive-metastore-db/metastore
+      HIVE_SITE_CONF_javax_jdo_option_ConnectionDriverName: org.postgresql.Driver
+      HIVE_SITE_CONF_javax_jdo_option_ConnectionUserName: hive
+      HIVE_SITE_CONF_javax_jdo_option_ConnectionPassword: hive
+      HIVE_SITE_CONF_datanucleus_autoCreateSchema: false
   {% else %}
       CORE_CONF_fs_defaultFS: file:///tmp
   {% endif -%}    {#  HADOOP_enable #}
@@ -6113,27 +6135,30 @@ services:
       com.platys.description: "Hive Metastore"
     ports:
       - "9083:9083"
-    env_file:
-      - ./conf/hadoop.env
     environment:
   {%if HADOOP_enable | default(false) %}
       CORE_CONF_fs_defaultFS: hdfs://namenode:9000
       HIVE_SITE_CONF_hive_metastore_dir: hdfs://namenode:9000/user/hive/warehouse
   {%elif MINIO_enable or external['S3_enable'] | default(false) %}
-      CORE_CONF_fs_defaultFS: s3a://{{s3AdminBucketName}}
-      CORE_CONF_fs_s3a_endpoint: '{{s3Endpoint | default(omit) }}'
-      CORE_CONF_fs_s3a_path_style_access: '{{s3PathStyleAccess}}'
+      HIVE_SITE_CONF_fs_defaultFS: s3a://{{s3AdminBucketName}}
       HIVE_SITE_CONF_fs_s3a_endpoint: {{s3Endpoint | default(omit) }}
       HIVE_SITE_CONF_fs_s3a_access_key: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
       HIVE_SITE_CONF_fs_s3a_secret_key: {{s3SecretAccessKey}}
       HIVE_SITE_CONF_fs_s3a_path_style_access: '{{s3PathStyleAccess}}'
       HIVE_SITE_CONF_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
+      HIVE_SITE_CONF_hive_metastore_uris: thrift://hive-metastore:9083
+      HIVE_SITE_CONF_javax_jdo_option_ConnectionURL: jdbc:postgresql://hive-metastore-db/metastore
+      HIVE_SITE_CONF_javax_jdo_option_ConnectionDriverName: org.postgresql.Driver
+      HIVE_SITE_CONF_javax_jdo_option_ConnectionUserName: hive
+      HIVE_SITE_CONF_javax_jdo_option_ConnectionPassword: hive
+      HIVE_SITE_CONF_datanucleus_autoCreateSchema: false
+      HIVE_SITE_CONF_hive_metastore_event_db_notification_api_auth: false          
   {%elif external['ADLS_enable'] | default(false) %}
-      CORE_CONF_fs_defaultFS: file:///tmp
+      HIVE_SITE_CONF_fs_defaultFS: file:///tmp
       HIVE_SITE_CONF_fs_azure_account_auth_type_gusstorage_dfs_core_windows_net: 'SharedKey'
       HIVE_SITE_CONF_fs_azure_account_key_gusstorage_dfs_core_windows_net: {{adlsAccessKey}}
   {% else %}
-      CORE_CONF_fs_defaultFS: file:///tmp
+      HIVE_SITE_CONF_fs_defaultFS: file:///tmp
   {% endif -%}   {#  HADOOP_enable or MINIO_enable #}
       # necessary for Trino to be able to read from Avro
       HIVE_SITE_CONF_metastore_storage_schema_reader_impl: "org.apache.hadoop.hive.metastore.SerDeStorageSchemaReader"
@@ -10674,8 +10699,6 @@ services:
       - "6060:6060"
       - "5050:5050"
       - "4050-4054:4050-4054"
-    env_file:
-      - ./conf/hadoop.env
     environment:
   {%if MINIO_enable or external['S3_enable'] | default(false) %}
       # for awscli & s3cmd
