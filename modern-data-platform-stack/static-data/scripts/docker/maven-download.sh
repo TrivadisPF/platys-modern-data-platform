@@ -7,7 +7,7 @@
 #     - Repository (central or confluent)
 #     - Maven Coordiantes
 #     - Download destination
-#     - Download strategy (using curl or python)
+#     - Download strategy (using curl, wget or python)
 # Author: Guido Schmutz <https://github.com/gschmutz>
 #
 set -e
@@ -54,10 +54,12 @@ maven_dep() {
             pip install requests
     esac
 
+    # Set IFS to a comma
+    IFS=','
 
-    for i in $(echo $MVN_COORDS | sed "s/,/ /g")
+    for mvn_coord in $MVN_COORDS;
     do
-      local MVN_COORD=$i
+      local MVN_COORD=$mvn_coord
 
       local GROUP_TMP=$(echo $MVN_COORD | cut -d: -f1)
       local GROUP=${GROUP_TMP//.//}
@@ -74,15 +76,18 @@ maven_dep() {
       echo "Downloading $DOWNLOAD_URL ...."
       
       case $DOWNLOAD_STRATEGY in
-        "curl" ) shift
-            curl -sfSL -o "$DOWNLOAD_FILE" "$DOWNLOAD_URL"
+        "curl" )
+            curl -sfSL -o "$DOWNLOAD_FILE" "$DOWNLOAD_URL" || true
             ;;
-        "python" ) shift
-            download_file_using_python "$DOWNLOAD_FILE" "$DOWNLOAD_URL"
+        "wget" )
+            wget -q --show-progress --no-check-certificate -O "$DOWNLOAD_FILE" "$DOWNLOAD_URL" || true
+            ;;            
+        "python" )
+            download_file_using_python "$DOWNLOAD_FILE" "$DOWNLOAD_URL" || true
             ;;
       esac
 
-      mv "$DOWNLOAD_FILE" $MAVEN_DEP_DESTINATION
+      mv "$DOWNLOAD_FILE" $MAVEN_DEP_DESTINATION || true
     done
 }
 
