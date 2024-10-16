@@ -75,7 +75,7 @@ function configure_kyuubi() {
 }
 
 configure_hive ${KYUUBI_HOME}/conf/hive-site.xml HIVE_SITE_CONF
-configure_spark ${SPARK_HOME}/conf/spark-defaults.conf SPARK_DEFAULTS_CONF
+configure_spark ${KYUUBI_HOME}/conf/spark-defaults.conf SPARK_DEFAULTS_CONF
 configure_kyuubi ${KYUUBI_HOME}/conf/kyuubi-defaults.conf KYUUBI_DEFAULTS_CONF
 
 function wait_for_it()
