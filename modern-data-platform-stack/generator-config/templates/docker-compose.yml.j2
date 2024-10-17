@@ -6243,6 +6243,7 @@ services:
     labels:
       com.platys.name: "openldap"
       com.platys.description: "Open LDAP"
+      com.platys.password.envvars: "PLATYS_OPENLDAP_ADMIN_PASSWORD,PLATYS_OPENLDAP_CONFIG_PASSWORD"
     ports:
       - 389:389
       - 636:636
@@ -6250,8 +6251,8 @@ services:
       LDAP_ORGANISATION: "platysplatform"
       LDAP_DOMAIN: "platysplatform.io"
       LDAP_BASE_DN: "dc=platysplatform,dc=io"
-      LDAP_ADMIN_PASSWORD: abc123!
-      LDAP_CONFIG_PASSWORD: abc123!
+      LDAP_ADMIN_PASSWORD: ${PLATYS_OPENLDAP_ADMIN_PASSWORD:-abc123!}
+      LDAP_CONFIG_PASSWORD: ${PLATYS_OPENLDAP_CONFIG_PASSWORD:-abc123!}
       LDAP_READONLY_USER: 'true'
       LDAP_RFC2307BIS_SCHEMA: "true"
       LDAP_REMOVE_CONFIG_AFTER_SETUP: "true"
@@ -10557,6 +10558,8 @@ services:
     image: apache/airflow:{{__AIRFLOW_version}}
     container_name: airflow-init
     hostname: airflow-init
+    labels:
+      com.platys.password.envvars: "PLATYS_AIRFLOW_ADMIN_PASSWORD,PLATYS_AIRFLOW_SECRET_KEY"    
     entrypoint: /bin/bash
     # yamllint disable rule:line-length
     command:
@@ -10628,7 +10631,7 @@ services:
       - AIRFLOW__CELERY__RESULT_BACKEND=db+postgresql://airflow:abc123!@airflow-db/airflowdb
       - AIRFLOW__CELERY__BROKER_URL=redis://:@airflow-redis:6379/0
       - AIRFLOW__CORE__FERNET_KEY= ''
-      - AIRFLOW__WEBSERVER__SECRET_KEY={{AIRFLOW_secret_key}}
+      - AIRFLOW__WEBSERVER__SECRET_KEY=${PLATYS_AIRFLOW_SECRET_KEY:-{{AIRFLOW_secret_key}}}
       - AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION={{AIRFLOW_dags_paused_at_creation}}
       - AIRFLOW__CORE__LOAD_EXAMPLES={{AIRFLOW_provision_examples}}
       - AIRFLOW__API__AUTH_BACKENDS={{AIRFLOW_auth_backends | default(omit)}}
@@ -10638,7 +10641,7 @@ services:
       - _AIRFLOW_DB_UPGRADE=True
       - _AIRFLOW_WWW_USER_CREATE=True
       - _AIRFLOW_WWW_USER_USERNAME={{AIRFLOW_admin_username}}
-      - _AIRFLOW_WWW_USER_PASSWORD={{AIRFLOW_admin_password}}
+      - _AIRFLOW_WWW_USER_PASSWORD=${PLATYS_AIRFLOW_ADMIN_PASSWORD:-{{AIRFLOW_admin_password}}}
     volumes:
       - ./data-transfer:/data-transfer
     {%if use_timezone | default(false) %}
@@ -13926,6 +13929,7 @@ services:
       com.platys.description: "Native graph database management system"
       com.platys.webui.title: "Neo4J UI"
       com.platys.webui.url: "http://dataplatform:{{external_port_neo4j}}"
+      com.platys.password.envvars: "PLATYS_NEO4J_ADMIN_PASSWORD"
     ports:
       - "{{external_port_neo4j}}:7474"
       - "{{external_port_bolt}}:7687"
@@ -13934,7 +13938,7 @@ services:
     {% if (NEO4J_edition | lower) == 'enterprise'  %}
       - NEO4J_ACCEPT_LICENSE_AGREEMENT=yes
     {% endif -%}   {#  use_timezone #}
-      - NEO4J_AUTH=neo4j/{{NEO4J_admin_password}}
+      - NEO4J_AUTH=neo4j/${PLATYS_NEO4J_ADMIN_PASSWORD:-{{NEO4J_admin_password}}}
     {% if (NEO4J_major_version | lower) == '5' %}
       {% if not NEO4J_server_config_strict_validation_enabled %}
       - NEO4J_server_config_strict__validation_enabled=false
@@ -16063,16 +16067,17 @@ services:
     labels:
       com.platys.name: "postgresql"
       com.platys.description: "Open-Source object-relational database system"
+      com.platys.password.envvars: "PLATYS_POSTGRESQL_PASSWORD,PLATYS_POSTGRESQL_MULTIPLE_PASSWORD"
     ports:
       - "5432:5432"
     environment:
-      - POSTGRES_PASSWORD={{POSTGRESQL_password | default('abc123!') }}
+      - POSTGRES_PASSWORD=${PLATYS_POSTGRESQL_PASSWORD:-{{POSTGRESQL_password | default('abc123!') }}}
       - POSTGRES_USER={{POSTGRESQL_user | default('demo') }}
       - POSTGRES_DB={{POSTGRESQL_database | default('demodb') }}
     {% if POSTGRESQL_multiple_databases is defined and POSTGRESQL_multiple_databases | length %}
       - POSTGRES_MULTIPLE_DATABASES={{POSTGRESQL_multiple_databases}}
       - POSTGRES_MULTIPLE_USERS={{POSTGRESQL_multiple_users}}
-      - POSTGRES_MULTIPLE_PASSWORDS={{POSTGRESQL_multiple_passwords}}
+      - POSTGRES_MULTIPLE_PASSWORDS=${PLATYS_POSTGRESQL_MULTIPLE_PASSWORD:-{{POSTGRESQL_multiple_passwords}}}
       - POSTGRES_MULTIPLE_ADDL_ROLES={{POSTGRESQL_multiple_addl_roles}}
     {% endif -%}   {#  POSTGRESQL_multiple_databases #}
       - PGDATA=/var/lib/postgresql/data/pgdata
@@ -19497,6 +19502,7 @@ services:
     labels:
       com.platys.name: "sftp"
       com.platys.description: "SFTP Server"
+      com.platys.password.envvars: "PLATYS_SFTP_PASSWORD"
     {%if use_timezone | default(false) %}
     environment:
       - TZ={{use_timezone}}
@@ -19517,7 +19523,7 @@ services:
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
-    command: {{SFTP_username}}:{{SFTP_password}}:::{{SFTP_home}}
+    command: {{SFTP_username}}:${PLATYS_SFTP_PASSWORD:-{{SFTP_password}}}:::{{SFTP_home}}
     restart: {{container_restart_policy}}
 {% endif %}   {#  FTP_enable #}
 
@@ -20466,12 +20472,13 @@ services:
       com.platys.description: "File-Browser"
       com.platys.webui.title: "File Browser UI"
       com.platys.webui.url: "http://dataplatform:28178/filebrowser"
+      com.platys.password.envvars: "PLATYS_FILEBROWSER_PASSWORD"
     ports:
       - 28178:8080
     environment:
       - FB_BASEURL=/filebrowser
       - FB_USER={{FILE_BROWSER_user if FILE_BROWSER_user is defined and FILE_BROWSER_user and FILE_BROWSER_user | length else omit}}
-      - FB_PASSWORD={{FILE_BROWSER_password if FILE_BROWSER_password is defined and FILE_BROWSER_password and FILE_BROWSER_password | length else omit}}
+      - FB_PASSWORD=${PLATYS_FILEBROWSER_PASSWORD:-{{FILE_BROWSER_password if FILE_BROWSER_password is defined and FILE_BROWSER_password and FILE_BROWSER_password | length else omit}}}
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
