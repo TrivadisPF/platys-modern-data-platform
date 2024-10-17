@@ -5505,23 +5505,13 @@ services:
       SPARK_MASTER_URL: 'spark://spark-master:7077'
     {% endif -%}   {#  KYUUBI_use_local_spark  #}    
     {%if MINIO_enable or external['S3_enable'] | default(false) %}
-      HIVE_SITE_CONF_fs_defaultFS: 's3a://{{s3AdminBucketName}}'
-      HIVE_SITE_CONF_fs_s3a_endpoint: '{{s3Endpoint | default(omit) }}'
-      HIVE_SITE_CONF_fs_s3a_access_key: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
-      HIVE_SITE_CONF_fs_s3a_secret_key: {{s3SecretAccessKey}}
-      HIVE_SITE_CONF_fs_s3a_path_style_access: '{{s3PathStyleAccess}}'
-      HIVE_SITE_CONF_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_endpoint: '{{s3Endpoint | default(omit) }}'
+      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_access_key: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
+      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_secret_key: {{s3SecretAccessKey}}
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_path_style_access: '{{s3PathStyleAccess}}'
     {% endif %} 
       HIVE_SITE_CONF_hive_metastore_uris: thrift://hive-metastore:9083
-      HIVE_SITE_CONF_javax_jdo_option_ConnectionURL: jdbc:postgresql://hive-metastore-db/metastore
-      HIVE_SITE_CONF_javax_jdo_option_ConnectionDriverName: org.postgresql.Driver
-      HIVE_SITE_CONF_javax_jdo_option_ConnectionUserName: hive
-      HIVE_SITE_CONF_javax_jdo_option_ConnectionPassword: hive
-      HIVE_SITE_CONF_datanucleus_autoCreateSchema: false
-      HIVE_SITE_CONF_hive_metastore_event_db_notification_api_auth: false      
     {%if HADOOP_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_defaultFS: hdfs://namenode:9000
       SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: {{KYUUBI_local_spark_sql_warehouse_dir if KYUUBI_local_spark_sql_warehouse_dir is defined and KYUUBI_local_spark_sql_warehouse_dir | length else 'hdfs://namenode:9000/user/hive/warehouse'}}
@@ -5539,7 +5529,6 @@ services:
     {% else %}
       SPARK_DEFAULTS_CONF_spark_sql_catalogImplementation: hive
     {% endif -%}   {#  KYUUBI_local_spark_catalog #}
-      SPARK_DEFAULTS_CONF_spark_yarn_dist_files: '/opt/kyuubi/conf/hive-site.xml'
     {%if (DATAHUB_enable or external['DATAHUB_enable'] and SPARK_datahub_agent_enable) | default(false) %}
       SPARK_DEFAULTS_CONF_spark_extraListeners: 'datahub.spark.DatahubSparkListener'
       SPARK_DEFAULTS_CONF_spark_datahub_rest_server: {{ns.gmsUrl}}
