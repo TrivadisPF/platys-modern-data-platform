@@ -37,23 +37,6 @@ function configure_spark() {
     done
 }
 
-function configure_hive() {
-    local path=$1
-    local envPrefix=$2
-
-    local var
-    local value
-
-    echo "Configuring Hive"
-    for c in `printenv | perl -sne 'print "$1 " if m/^${envPrefix}_(.+?)=.*/' -- -envPrefix=$envPrefix`; do
-        name=`echo ${c} | perl -pe 's/___/-/g; s/__/_/g; s/_/./g'`
-        var="${envPrefix}_${c}"
-        value=${!var}
-        echo " - Setting $name=$value"
-        addElement $path $name "$value"
-    done
-}
-
 function configure_kyuubi() {
     local path=$1
     local envPrefix=$2
@@ -62,6 +45,23 @@ function configure_kyuubi() {
     local value
 
     echo "Configuring Kyuubi"
+    for c in `printenv | perl -sne 'print "$1 " if m/^${envPrefix}_(.+?)=.*/' -- -envPrefix=$envPrefix`; do
+        name=`echo ${c} | perl -pe 's/___/-/g; s/__/--/g;  s/_/./g; s/--/_/g;'`        
+        var="${envPrefix}_${c}"
+        value=${!var}
+        echo " - Setting $name=$value"
+        addProperty $path $name "$value"
+    done
+}
+
+function configure_hive() {
+    local path=$1
+    local envPrefix=$2
+
+    local var
+    local value
+
+    echo "Configuring Hive"
     for c in `printenv | perl -sne 'print "$1 " if m/^${envPrefix}_(.+?)=.*/' -- -envPrefix=$envPrefix`; do
         name=`echo ${c} | perl -pe 's/___/-/g; s/__/_/g; s/_/./g'`
         var="${envPrefix}_${c}"

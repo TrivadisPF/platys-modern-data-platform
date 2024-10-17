@@ -5511,7 +5511,6 @@ services:
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_secret_key: {{s3SecretAccessKey}}
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_path_style_access: '{{s3PathStyleAccess}}'
     {% endif %} 
-      HIVE_SITE_CONF_hive_metastore_uris: thrift://hive-metastore:9083
     {%if HADOOP_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_defaultFS: hdfs://namenode:9000
       SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: {{KYUUBI_local_spark_sql_warehouse_dir if KYUUBI_local_spark_sql_warehouse_dir is defined and KYUUBI_local_spark_sql_warehouse_dir | length else 'hdfs://namenode:9000/user/hive/warehouse'}}
@@ -5527,6 +5526,7 @@ services:
     {%if (KYUUBI_local_spark_catalog | lower) == 'in-memory' | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalogImplementation: in-memory
     {% else %}
+      SPARK_DEFAULTS_CONF_spark_hadoop_hive_metastore_uris: thrift://hive-metastore:9083
       SPARK_DEFAULTS_CONF_spark_sql_catalogImplementation: hive
     {% endif -%}   {#  KYUUBI_local_spark_catalog #}
     {%if (DATAHUB_enable or external['DATAHUB_enable'] and SPARK_datahub_agent_enable) | default(false) %}
