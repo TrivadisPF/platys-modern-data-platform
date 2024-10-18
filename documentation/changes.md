@@ -85,6 +85,7 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Update `postgresql` to `17`
  * Update `dataverse` to `alpha`
  * Update `airflow` to `2.10.2`
+ * Update `marquez` to `0.49.0`
 
 ### Enhancements
 
