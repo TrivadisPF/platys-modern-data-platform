@@ -84,6 +84,7 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Update `attu` to `v2.4.8`
  * Update `postgresql` to `17`
  * Update `dataverse` to `alpha`
+ * Update `airflow` to `2.10.2`
 
 ### Enhancements
 
