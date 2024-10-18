@@ -10217,6 +10217,14 @@ services:
       - AIRFLOW_VAR_{{variable}}
       {% endfor %}
     {% endif %}
+    {% if MARQUEZ_enable && AIRFLOW_openlineage_enabled | default(false) %}
+      - AIRFLOW__OPENLINEAGE__DISABLED=false
+      - AIRFLOW__OPENLINEAGE__INCLUDE_FULL_TASK_INFO=true
+      - AIRFLOW__OPENLINEAGE__DEBUG_MODE=false
+      - AIRFLOW__OPENLINEAGE__TRANSPORT='{"type": "http", "url": "http://marquez:5000", "endpoint": "api/v1/lineage"}'
+    {% else %}      
+      - AIRFLOW__OPENLINEAGE__DISABLED=true      
+    {% endif %}      
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
