@@ -10176,6 +10176,7 @@ services:
       com.platys.webui.url: "http://dataplatform:28139"
       com.platys.restapi.title: "Airflow REST API (dags as sample)"
       com.platys.restapi.url: "http://dataplatform:28139/api/v1/dags"
+      com.platys.password.envvars: PLATYS_AIRFLOW_SECRET
     ports:
       - "28139:8080"
   {% if (AIRFLOW_executor | lower) == 'celery'  and AIRFLOW_workers > 0 %}
@@ -10196,7 +10197,7 @@ services:
       - AIRFLOW__CELERY__RESULT_BACKEND=db+postgresql://airflow:abc123!@airflow-db/airflowdb
       - AIRFLOW__CELERY__BROKER_URL=redis://:@airflow-redis:6379/0
       - AIRFLOW__CORE__FERNET_KEY= '{{AIRFLOW_fernet_key}}'
-      - AIRFLOW__WEBSERVER__SECRET_KEY={{AIRFLOW_secret_key}}
+      - AIRFLOW__WEBSERVER__SECRET_KEY=${PLATYS_AIRFLOW_SECRET:-{{AIRFLOW_secret_key}}}
       - AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION={{AIRFLOW_dags_paused_at_creation}}
       - AIRFLOW__CORE__LOAD_EXAMPLES={{AIRFLOW_provision_examples}}
       - AIRFLOW__API__AUTH_BACKENDS={{AIRFLOW_auth_backends | default(omit)}}
@@ -18222,7 +18223,7 @@ services:
       com.platys.description: "Software-defined Object Storage"
       com.platys.webui.title: "MinIO UI"
       com.platys.webui.url: "http://dataplatform:9000"
-      com.platys.password.envvars: ""
+      com.platys.password.envvars: "PLATYS_MINIO_SECRET_KEY"
     ports:
       - '{{port}}:9000'
       - '{{uiport}}:{{uiport}}'
