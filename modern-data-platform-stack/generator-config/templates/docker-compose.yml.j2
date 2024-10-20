@@ -1136,6 +1136,12 @@ networks:
 
 {#  ================================== Spark Settings ========================================== #}
 
+{% if (external['SPARK_enable']) | default(false) %}
+  {% set ns.sparkMasterUrl = external['SPARK_master_url']%}
+{% else -%} 
+  {% set ns.sparkMasterUrl = "spark://spark-master:7077" %}
+{% endif -%} 
+
 {% if (SPARK_base_version | lower) == '2.4'  %}
   {% set ns.sparkTableFormatJar = ("/opt/bitnami/spark/jars/delta-core_2.12-0.6.1.jar,/opt/bitnami/spark/jars/delta-storage-0.6.1.jar" if SPARK_table_format_type == 'delta' else "/opt/bitnami/spark/jars/iceberg-spark-2-0.13.2.jar" if SPARK_table_format_type == 'iceberg' else "/opt/bitnami/spark/jars/hudi-spark2.4-bundle_2.12-0.13.0" if SPARK_table_format_type == 'hudi') -%}
   {% set ns.sparkDeltaDependencies = "io.delta:delta-core_2.12:0.6.1" -%}
@@ -5340,8 +5346,9 @@ services:
     command: /opt/bitnami/spark/bin/spark-class org.apache.spark.deploy.history.HistoryServer
     restart: {{container_restart_policy}}
   {% endif %}   {#  SPARK_HISTORY_enable #}
+{% endif %}   {#  SPARK_enable #}
 
-  {% if SPARK_THRIFTSERVER_enable | default(false) %}
+{% if SPARK_THRIFTSERVER_enable | default(false) %}
   spark-thriftserver:
     image: bitnami/spark:{{__SPARK_version}}
     container_name: spark-thriftserver
@@ -5358,7 +5365,7 @@ services:
     {%if SPARK_THRIFTSERVER_use_local_spark | default(false) %}
       SPARK_MASTER_URL: 'local[*]'
     {% else %}
-      SPARK_MASTER_URL: 'spark://spark-master:7077'
+      SPARK_MASTER_URL: '{{ns.sparkMasterUrl}}'
     {% endif -%}   {#  SPARK_THRIFTSERVER_use_local_spark  #}          
     {%if MINIO_enable or external['S3_enable'] | default(false) %}
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
@@ -5448,8 +5455,8 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
-  {% endif %}   {#  SPARK_THRIFTSERVER_enable #}
-{% endif %}   {#  SPARK_enable #}
+{% endif %}   {#  SPARK_THRIFTSERVER_enable #}
+
 
 {% if KYUUBI_enable | default(false) %}
   kyuubi:
@@ -5473,7 +5480,7 @@ services:
     {%if KYUUBI_use_local_spark | default(false) %}
       SPARK_MASTER_URL: 'local[*]'
     {% else %}
-      SPARK_MASTER_URL: 'spark://spark-master:7077'
+      SPARK_MASTER_URL: '{{ns.sparkMasterUrl}}'
     {% endif -%}   {#  KYUUBI_use_local_spark  #}    
     {%if MINIO_enable or external['S3_enable'] | default(false) %}
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
