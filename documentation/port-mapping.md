@@ -200,6 +200,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 8443 | 8443 | kong (proxy ssl) |
 8444 | 8444 | kong (admin api ssl) |
 8446 | 8443 | curity |
+8501 | 8501 | crewai-studio | 
 8585 | 8585 | openmetadata-server |
 8586 | 8586 | openmetadata-server |
 8761 | 8761 | ioevent-cockpit-api |

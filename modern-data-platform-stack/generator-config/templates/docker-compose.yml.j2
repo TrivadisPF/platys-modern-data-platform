@@ -288,6 +288,8 @@ networks:
 
 {% set __AUTOGEN_STUDIO_version = AUTOGEN_STUDIO_version | default('latest') -%}
 
+{% set __CREWAI_STUDIO_version = CREWAI_STUDIO_version | default('latest') -%}
+
 {% set __LITELLM_version = LITELLM_version | default('latest') -%}
 
 {% set __FLOWISE_version = FLOWISE_version | default('latest') -%}
@@ -761,6 +763,7 @@ networks:
   {% set ANYTHING_LLM_enable = false -%}
   {% set BIG_AGI_enable = false -%}
   {% set AUTOGEN_STUDIO_enable = false -%}
+  {% set CREWAI_STUDIO_enable = false -%}  
   {% set LITELLM_enable = false -%}
   {% set FLOWISE_enable = false -%}
   {% set LANGFLOW_enable = false -%}
@@ -11541,7 +11544,7 @@ services:
 {% endif %}   {# BIG_AGI_enable  #}
 
 {%if AUTOGEN_STUDIO_enable | default(false) %}
-  #  ================================== Big-AGI  ========================================== #
+  #  ================================== Autogen Studio  ========================================== #
   autogen-studio:
     image: daxiongmao87/autogen-studio-ui:{{__AUTOGEN_STUDIO_version}}
     container_name: autogen-studio
@@ -11565,6 +11568,43 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+{% endif %}   {# AUTOGEN_STUDIO_enable  #}
+
+{%if CREWAI_STUDIO_enable | default(false) %}
+  #  ================================== CrewAI Studio  ========================================== #
+  crewai-studio:
+    image: tham0nk/crewai-studio:{{__CREWAI_STUDIO_version}}
+    container_name: crewai-studio
+    hostname: crewai-studio
+    labels:
+      com.platys.name: 'crewai-studio'
+      com.platys.description: "Tool for AI development"
+      com.platys.webui.title: "CrewAI Studio UI"
+      com.platys.webui.url: "http://dataplatform:8501"
+      com.platys.password.envvars: "PLATYS_CREWAI_STUDIO_AGENTOPS_API_KEY"
+    ports:
+      - "8501:8501"
+    environment:
+      AGENTOPS_ENABLED: {{CREWAI_STUDIO_agentops_enabled}}
+      AGENTOPS_API_KEY: ${PLATYS_CREWAI_STUDIO_AGENTOPS_API_KEY:-undefined}
+    {% if (OLLAMA_enable or external['OLLAMA_enable']) | default(false) %%}
+      OLLAMA_HOST: {{ns.ollamaUrl}}
+      #OLLAMA_MODELS: {{CREWAI_STUDIO_ollama_models}}
+    {% endif -%}   {#  use_timezone #}
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./app/crewai-studio/app:/app
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
