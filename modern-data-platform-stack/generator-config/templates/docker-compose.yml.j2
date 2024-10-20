@@ -5355,7 +5355,11 @@ services:
       - "28118:10000"
       - "28298:4040"
     environment:
-      SPARK_MASTER_URL: spark://spark-master:7077
+    {%if SPARK_THRIFTSERVER_use_local_spark | default(false) %}
+      SPARK_MASTER_URL: 'local[*]'
+    {% else %}
+      SPARK_MASTER_URL: 'spark://spark-master:7077'
+    {% endif -%}   {#  SPARK_THRIFTSERVER_use_local_spark  #}          
     {%if MINIO_enable or external['S3_enable'] | default(false) %}
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_endpoint: '{{s3Endpoint | default(omit) }}'
