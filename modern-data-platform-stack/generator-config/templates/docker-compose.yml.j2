@@ -18929,20 +18929,47 @@ services:
       - 19120:19120
     environment:
     {%if NESSIE_store_type == 'in-memory' %}
-      - nessie.version.store.type=INMEMORY
+      - NESSIE_VERSION_STORE_TYPE=INMEMORY
+    {%if NESSIE_store_type == 'rocksdb' %}
+      - NESSIE_VERSION_STORE_TYPE=ROCKSDB
+      - NESSIE_VERSION_STORE_PERSIST_ROCKS_DATABASE_PATH=/nessie-rocks
+      - NESSIE_VERSION_STORE_PERSIST_CACHE_CAPACITY_MB=1024 
+      - NESSIE_VERSION_STORE_PERSIST_COMMIT_TIMEOUT_MILLIS=10000
     {%elif NESSIE_store_type == 'mongodb' %}
-      - nessie.version.store.type=MONGO
-      - quarkus.mongodb.database=nessie
-      - quarkus.mongodb.connection-string=mongodb://{{MONGO_root_username}}:{{MONGO_root_password}}@mongo:27017
+      - NESSIE_VERSION_STORE_TYPE=MONGO
+      - QUARKUS_MONGODB_DATABASE=nessie
+      - QUARKUS_MONGODB_CONNECTION_STRING=mongodb://{{MONGO_root_username}}:{{MONGO_root_password}}@mongo:27017
+    {%elif NESSIE_store_type == 'cassandra' %}
+      - NESSIE_VERSION_STORE_TYPE=CASSANDRA
+      - QUARKUS_CASSANDRA_CONTACT_POINTS=cassandra-1:9042
+      - QUARKUS_CASSANDRA_LOCAL_DATACENTER=se1
+      - QUARKUS_CASSANDRA_KEYSPACE=nessie
     {%elif NESSIE_store_type == 'postgresql' %}
-      - nessie.version.store.type=TRANSACTIONAL
-      - quarkus.datasource.db-kind=postgresql
-      - quarkus.datasource.username={{POSTGRESQL_user}}
-      - quarkus.datasource.password={{POSTGRESQL_password}}
-      - quarkus.datasource.jdbc.url=jdbc:postgresql://posgresql:5432/{{POSTGRESQL_database}}
+      - NESSIE_VERSION_STORE_TYPE=JDBC
+      - QUARKUS_DATASOURCE_DB_KIND=postgresql
+      - QUARKUS_DATASOURCE_USERNAME={{POSTGRESQL_user}}
+      - QUARKUS_DATASOURCE_PASSWORD={{POSTGRESQL_password}}
+      - QUARKUS_DATASOURCE_JDBC_URL=jdbc:postgresql://posgresql:5432/{{POSTGRESQL_database}}
     {% endif -%}   {#  NESSIE_store_type #}
-      - nessie.server.authentication.enabled=false
-      - quarkus.oidc.enabled=true=false
+    {%if MINIO_enable or external['S3_enable'] | default(false) %}
+      # using MinIO as the object store.
+      - NESSIE_CATALOG.default-warehouse=warehouse
+      - NESSIE_CATALOG.warehouses.warehouse.location={{NESSIE_warehouse_location}}
+      - NESSIE_CATALOG_SERVICE_.S3_DEFAULT_OPTIONS_REGIN={{s3DefaultRegion | default(omit) }}
+      - NESSIE_CATALOG_SERVICE_.S3_DEFAULT_OPTIONS_PATH_STYLE_ACCESS=true
+      - NESSIE_CATALOG_SERVICE_.S3_DEFAULT_OPTIONS_ACCESS_KEY=urn:nessie-secret:quarkus:NESSIE_CATALOG.secrets.access-key
+      - NESSIE_CATALOG_SECRETS_ACCESS_KEY_NAME={{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
+      - NESSIE_CATALOG_SECRETS_ACCESS_KEY_SECRET={{s3SecretAccessKey}}
+      - NESSIE_CATALOG_SERVICE_.S3_DEFAULT_OPTIONS_ENDPOINT={{s3Endpoint | default(omit) }}
+      #- NESSIE_CATALOG_SERVICE_.S3_DEFAULT_OPTIONS_EXTERNAL_ENDPOINT=http://127.0.0.1:9002/
+    {% endif %}  
+    {%if KEYCLOAK_enable | default(false) %}
+      - NESSIE_SERVER_AUTHENTICATION_ENABLED=true
+      - QUARKUS_OIDC_ENABLED=true
+      - QUARKUS_OIDC_AUTH_SERVER_URL=http://keycloak:8080/realms/iceberg
+      - QUARKUS_OIDC_CLIENT_ID=client1
+      - QUARKUS_OIDC_TOKEN_ISSUER=http://127.0.0.1:8080/realms/iceberg
+    {% endif %}  
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -18956,6 +18983,36 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
+
+  {% if NESSIE_CLI_enable | default(false) %}
+  nessie-cli:
+    image: ghcr.io/projectnessie/nessie-cli:{{__NESSIE_version}}
+    hostname: nessie-cli
+    container_name: nessie-cli    
+    depends_on:
+      nessie:
+        condition: service_healthy
+    stdin_open: true
+    tty: true
+    labels:
+      com.platys.name: "nessie"
+      com.platys.description: "Git-Like Data Version Control (CLI)"  
+    command: [
+        --uri, "http://nessie:19120/iceberg/main",
+        --client-option, "nessie.enable-api-compatibility-check=false",
+        # Options for the internal Nessie client
+        #--client-option, "nessie.authentication.type=OAUTH2",
+        #--client-option, "nessie.authentication.oauth2.issuer-url=http://keycloak:8080/realms/iceberg",
+        #--client-option, "nessie.authentication.oauth2.client-id=client1",
+        #--client-option, "nessie.authentication.oauth2.client-secret=s3cr3t",
+        #--client-option, "nessie.authentication.oauth2.client-scopes=catalog sign",
+        # Options for the internal Iceberg REST client
+        --client-option, "uri=http://nessie:19120/iceberg/main",
+        --client-option, "oauth2-server-uri=http://keycloak:8080/realms/iceberg/protocol/openid-connect/token",
+        --client-option, "credential=client1:s3cr3t",
+        --client-option, "scope=catalog sign",
+      ]
+  {% endif %}   {#  NESSIE_CLI_enable #}
 {% endif %}   {#  NESSIE_enable #}
 
 {% if UNITY_CATALOG_enable | default(false) %}
@@ -20554,17 +20611,18 @@ services:
       com.platys.description: "File-Browser"
       com.platys.webui.title: "File Browser UI"
       com.platys.webui.url: "http://dataplatform:28178/filebrowser"
-      com.platys.password.envvars: "PLATYS_FILEBROWSER_PASSWORD"
+      com.platys.password.envvars: "PLATYS_FILEBROWSER_PASSWORD_HASH10"
     ports:
       - 28178:8080
     environment:
       - FB_BASEURL=/filebrowser
-      - FB_USER={{FILE_BROWSER_user if FILE_BROWSER_user is defined and FILE_BROWSER_user and FILE_BROWSER_user | length else omit}}
-      - FB_PASSWORD=${PLATYS_FILEBROWSER_PASSWORD:-{{FILE_BROWSER_password if FILE_BROWSER_password is defined and FILE_BROWSER_password and FILE_BROWSER_password | length else omit}}}
+      - FB_USERNAME={{FILE_BROWSER_user if FILE_BROWSER_user is defined and FILE_BROWSER_user and FILE_BROWSER_user | length else omit}}
+      - FB_PASSWORD=${PLATYS_FILEBROWSER_PASSWORD_HASH10:-{{FILE_BROWSER_password if FILE_BROWSER_password is defined and FILE_BROWSER_password and FILE_BROWSER_password | length else omit}}}
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
+      # we map the data-transfer folder to /data so that Filebrowser "sits on top" of the data-transfer folder
       - ./data-transfer:/data
     {% if FILE_BROWSER_volume_map_data %}
       - ./container-volume/filebrowser/data:/config
