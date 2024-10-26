@@ -41,6 +41,7 @@ networks:
 {% set __KAFKACTL_version = KAFKACTL_version | default('latest') -%}
 
 {% set __JIKKOU_version = JIKKOU_version | default('latest') -%}
+{% set __JIKKOU_SERVER_version = JIKKOU_SERVER_version | default('latest') -%}
 
 {% set __KAFKA_TOPICS_UI_version = KAFKA_TOPICS_UI_version | default('latest') -%}
 {% set __KAFKA_CONNECT_UI_version = KAFKA_CONNECT_UI_version | default('latest') -%}
@@ -700,6 +701,7 @@ networks:
   {% set KCAT_enable = false -%}
   {% set KASKADE_enable = false -%}
   {% set JIKKOU_enable = false -%}
+  {% set JIKKOU_SERVER_enable = false -%}  
   {% set KAFKA_UI_enable = false -%}
   {% set EFAK_enable = false -%}
   {% set KOWL_enable = false -%}
@@ -3484,6 +3486,55 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
 {% endif %}   {# JIKKOU_enable #}
+
+{% if ((KAFKA_enable or external['KAFKA_enable']) and JIKKOU_SERVER_enable) | default(false) %}
+  #  ================================== Jikkou Server  ========================================== #
+  jikkou-server:
+    image: streamthoughts/jikkou-api-server:{{__JIKKOU_SERVER_version}}
+    container_name: jikkou-server
+    hostname: jikkou-server
+    labels:
+      com.platys.name: "jikkou"
+      com.platys.description: "Resource as Code framework for Apache Kafka"
+      com.platys.restapi.title: ""
+      com.platys.restapi.url: "http://dataplatform:28388"
+    ports:
+      - "28388:8080"      
+    environment:
+      JIKKOU_CONFIGURATION: |
+        micronaut:
+          server:
+            port: 8080
+        jikkou:
+          # The extension providers
+          extension.providers:
+            # By default, disable all extensions
+            default.enabled: false
+            # Explicitly enabled/disable extensions
+            #<provider_name>.enabled: <boolean>
+            core.enabled: true
+            kafka.enabled: true
+            kafka-connect.enabled: true
+          kafka.client:
+            bootstrap.servers: '{{ns.bootstrapServers}}'
+          schemaRegistry:
+            url: '{{ns.schemaRegistryUrl}}'  
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./scripts/jikkou/:/jikkou
+      - ./conf/jikkou/application.conf:/appuser/.jikkou/application.conf
+      - ./conf/jikkou/config:/etc/jikkou/config
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+{% endif %}   {# JIKKOU_SERVER_enable #}
 
 {% if ((KAFKA_enable or external['KAFKA_enable']) and KAFKA_TOPICS_UI_enable) | default(false) %}
   #  ================================== Kafka Topics UI ========================================== #
