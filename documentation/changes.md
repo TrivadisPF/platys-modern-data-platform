@@ -30,8 +30,9 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Unity Catalog
  * Glances
  * Starrocks
- * CrewAI Studio
+ * CrewAI Studio <--
  * Jikkou Server
+ * SearXNG
 
 ### Version upgrades
 

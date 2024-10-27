@@ -115,6 +115,8 @@ networks:
 
 {% set __UNSTRUCTURED_version = UNSTRUCTURED_version | default('latest') -%}
 
+{% set __SEARXNG_version = SEARXNG_version | default('latest') -%}
+
 {% set __HIVE_version = HIVE_version | default('latest') -%}
 {% set __HIVE_version_suffix = HIVE_version_suffix | default('postgresql-metastore-s3') -%}
 {% set __HIVE_METASTORE_DB_version = HIVE_METASTORE_DB_version | default('latest') -%}
@@ -6122,6 +6124,38 @@ services:
     restart: always
 {% endif %}   {#  UNSTRUCTURED_enable #}
 
+{% if SEARXNG_enable | default(false) %}
+  #  ================================== SearXNG ========================================== #
+  searxng:
+    image: searxng/searxng:{{__SEARXNG_version}}
+    container_name: searxng
+    hostname: searxng
+    labels:
+      com.platys.name: 'searxng'
+      com.platys.description: "Free internet metasearch engine"
+      com.platys.restapi.title: "searxng API"
+      com.platys.restapi.url: "http://dataplatform:28389"
+    ports:
+      - "28389:8000"
+    environment:
+      SEARXNG_BASE_URL: https://${PUBLIC_IP:-localhost}
+      UWSGI_WORKERS=4
+      UWSGI_THREADS=4
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: always
+{% endif %}   {#  SEARXNG_enable #}
+
 {% if HIVE_SERVER_enable | default(false) %}
   #  ================================== Apache Hive Server ========================================== #
   hive-server:
@@ -9195,6 +9229,8 @@ services:
       com.platys.webui.url: "http://dataplatform:5678"
     ports:
       - 5678:5678
+    extra_hosts:
+      - "host.docker.internal:host-gateway"      
     environment:
       N8N_USER_FOLDER: '/home/node/.n8n'
       N8N_SECURE_COOKIE: false

@@ -652,6 +652,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28386 | 4041 | kyuubi (spark ui)  |
 28387 | 4042 | kyuubi (spark ui)  |
 28388 | 8080 | jikkou-server  |
+28389 | 8080 | searxng  |
 
 ## Ports > 28500
 
