@@ -7,7 +7,7 @@ SearXNG is a free internet metasearch engine which aggregates results from vario
 ## How to enable?
 
 ```
-platys init --enable-services SEARXNG
+platys init --enable-services SEARXNG REDIS
 platys gen
 ```
 
