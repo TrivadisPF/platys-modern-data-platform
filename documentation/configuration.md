@@ -1578,6 +1578,7 @@ For each service there might be some other settings, such as controlling the num
 | `RANETO_MADNESS_volume_map_config` | `false` 	| 1.17.0 	| Volume map the `config` folder of the container. |
 | [**_Markdown Madness_**](./services/markdown-madness.md) &nbsp;&nbsp;&nbsp;&nbsp;![x86-64](./images/x86-64.png)                   	|         	|       	|                                                                                                                                                                                     	|             	
 | `MARKDOWN_MADNESS_enable` | `false` 	| 1.17.0 	| Generate a Markdown Madness service. |
+| `MARKDOWN_MADNESS_custom_image_name` | `false` 	| 1.18.0 	| Use a custom image name for the markdown madness service. If you want to specify the version, overwrite the `MARKDOWN_MADNESS_version` property. |
 | `MARKDOWN_MADNESS_volume_map_docs` | `false` 	| 1.17.0 	| Volume map the `docs` folder of the container. |
 | `MARKDOWN_MADNESS_volume_map_custom_config_file` | `false` 	| 1.18.0 	| Volume map a `./custom-conf/markdown-madness/markdown-madness.yml` file into the container to overwrite the behaviour of Markdown Madness. |
 | [**_Markdown Viewer_**](./services/markdown-viewer.md) &nbsp;&nbsp;&nbsp;&nbsp;![x86-64](./images/x86-64.png)                   	|         	|       	|                                                                                                                                                                                     	|             	
