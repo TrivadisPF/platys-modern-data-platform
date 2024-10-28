@@ -18529,8 +18529,11 @@ services:
     labels:
       com.platys.name: "minio"
       com.platys.description: "MinIO Console"
-    {%if use_timezone | default(false) %}
     environment:
+      # these two env variables are also needed for the s3-credentials.properties file gen to work! 
+      AWS_ACCESS_KEY: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
+      AWS_SECRET_ACCESS_KEY: {{s3SecretAccessKey}}    
+    {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
@@ -18546,6 +18549,7 @@ services:
       - -c
       - |
         /usr/src/app/wait-for-it.sh -t 180 minio-1:9000
+        mkdir -p /tmp/.aws
         eval "echo \"$$(cat /tmp/credentials.templ)\"" >> /tmp/.aws/credentials
         mc alias set minio-1 http://minio-1:9000 {{MINIO_access_key}} {{MINIO_secret_key}}
         mc mb --ignore-existing minio-1/{{s3AdminBucketName}}
