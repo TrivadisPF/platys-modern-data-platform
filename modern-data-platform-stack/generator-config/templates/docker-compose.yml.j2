@@ -18536,6 +18536,7 @@ services:
     volumes:
       - ./data-transfer:/data-transfer
       - ./scripts/docker/wait-for-it.sh:/usr/src/app/wait-for-it.sh
+      - ./security/aws/credentials:/tmp/credentials.templ
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -18545,6 +18546,7 @@ services:
       - -c
       - |
         /usr/src/app/wait-for-it.sh -t 180 minio-1:9000
+        eval "echo \"$$(cat /tmp/credentials.templ)\"" >> /tmp/.aws/credentials
         mc alias set minio-1 http://minio-1:9000 {{MINIO_access_key}} {{MINIO_secret_key}}
         mc mb --ignore-existing minio-1/{{s3AdminBucketName}}
     {% if MLFLOW_SERVER_enable | default(false) %}
