@@ -108,6 +108,7 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Neo4J config setting `NEO4J_plugins` renamed to `NEO4J_download_plugins` and added `NEO4J_mount_plugins` 
  * Memgraph no longer uses external port `7690 ` but `7699`
  * change default value for `TRINO_edition` to `oss`
+ * NiFi extensions now need to be listed using property `NIFI_extensions`
  
 ## What's new in 1.17.1
 
