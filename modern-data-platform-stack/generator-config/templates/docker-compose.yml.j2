@@ -536,6 +536,7 @@ networks:
 
 {% set __CODE_SERVER_version = CODE_SERVER_version | default('latest') -%}
 {% set __EXCALIDRAW_version = EXCALIDRAW_version | default('latest') -%}
+{% set __DRAWIO_version = DRAWIO_version | default('latest') -%}
 {% set __FIREFOX_version = FIREFOX_version | default('latest') -%}
 {% set __FILE_BROWSER_version = FILE_BROWSER_version | default('latest') -%}
 {% set __VAULT_version = VAULT_version | default('latest') -%}
@@ -908,6 +909,7 @@ networks:
   {% set FOCALBOARD_enable = false -%}
   {% set CODE_SERVER_enable = false -%}
   {% set EXCALIDRAW_enable = false -%}
+  {% set DRAWIO_enable = false -%}
   {% set FIREFOX_enable = false -%}
   {% set FILE_BROWSER_enable = false -%}
   {% set ETCD_E3W_enable = false -%}
@@ -20708,6 +20710,64 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: unless-stopped
 {% endif %}   {# EXCALIDRAW_enable #}
+
+{% if DRAWIO_enable | default(false) %}
+  #  ================================== draw.io ================= #
+  drawio:
+    image: jgraph/drawio:{{__DRAWIO_version}}
+    container_name: drawio
+    hostname: drawio
+    labels:
+      com.platys.name: "drawio"
+      com.platys.description: "Client-side editor for general diagramming"
+      com.platys.webui.title: "Draw.io UI"
+      com.platys.webui.url: "http://dataplatform:28290"
+    ports:
+      - 28390:8080
+      - 28391:8443
+    environment:
+      LETS_ENCRYPT_ENABLED: false
+      PUBLIC_DNS: domain
+      ORGANISATION_UNIT: unit
+      ORGANISATION: org
+      CITY: city
+      STATE: state
+      COUNTRY_CODE: country
+      EXPORT_URL=http://drawio-export:8000/
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/home/coder/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://drawio:8080 || exit 1"]
+      interval: 1m30s
+      timeout: 10s
+      retries: 5
+      start_period: 10s    
+
+  drawio-export:
+    image: jgraph/export-server
+    container_name: drawio-export
+    hostname: drawio-export
+    labels:
+      com.platys.name: "drawio"
+      com.platys.description: "Client-side editor for general diagramming (exporter)"
+    expose:
+      - "8000"
+    volumes:
+      - ./scripts/drawio/fonts:/usr/share/fonts/drawio
+    environment:
+      - DRAWIO_BASE_URL=${DRAWIO_BASE_URL}      
+{% endif %}   {# DRAWIO_enable #}
 
 {% if FIREFOX_enable | default(false) %}
   #  ================================== Firefox Browser ================= #
