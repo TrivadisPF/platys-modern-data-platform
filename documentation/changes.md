@@ -27,13 +27,13 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Arroyo
  * Data Contract CLI
  * Data Contract Manager (CE)
- * Unity Catalog
  * Glances
  * Starrocks
  * CrewAI Studio <--
  * Jikkou Server
  * SearXNG
  * Draw.io
+ * Unity Catalog & Unity Catalog UI
 
 ### Version upgrades
 

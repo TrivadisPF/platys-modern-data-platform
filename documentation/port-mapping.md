@@ -645,7 +645,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28379 | 4043 | jupyter (spark UI)  |
 28380 | 4044 | jupyter (spark UI)  |
 28381 | 8080 | data-contract-manager  |
-28382 | 8080 | unity-catalog  |
+28382 |  |   |
 28383 | 61208 | glances  |
 28384 | 61209 | glances  |
 28385 | 4040 | kyuubi (spark ui)  |
@@ -655,6 +655,9 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28389 | 8080 | searxng  |
 28390 | 8080 | drawio | 
 28391 | 8443 | drawio | 
+28392 | 8080 | unity-catalog  |
+28393 | 3000 | unity-catalog-ui  |
+
 
 ## Ports > 28500
 

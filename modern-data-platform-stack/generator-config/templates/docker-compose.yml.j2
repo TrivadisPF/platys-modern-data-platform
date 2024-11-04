@@ -527,6 +527,7 @@ networks:
 {% set __NESSIE_version = NESSIE_version | default('latest') -%}
 
 {% set __UNITY_CATALOG_version = UNITY_CATALOG_version | default('latest') -%}
+{% set __UNITY_CATALOG_UI_version = UNITY_CATALOG_UI_version | default('latest') -%}
 
 {% set __DBT_version = DBT_version | default('latest') -%}
 
@@ -19184,11 +19185,11 @@ services:
       com.platys.name: "unity-catalog"
       com.platys.description: "Open, Multi-modal Catalog for Data & AI"
       com.platys.webui.title: "Unity Catalog UI"
-      com.platys.webui.url: "http://dataplatform:28382"
+      com.platys.webui.url: "http://dataplatform:28392"
       com.platys.restapi.title: "Unity Catalog REST API"
       com.platys.restapi.url: "http://dataplatform:19120/q/swagger-ui"
     ports:
-      - 28382:8080
+      - 28392:8080
     {%if use_timezone | default(false) %}
     environment:
       - TZ={{use_timezone}}
@@ -19203,6 +19204,37 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
+
+  {% if UNITY_CATALOG_UI_enable | default(false) %}
+  unity-catalog-ui:
+    image: trivadis/unity-catalog-ui:{{__UNITY_CATALOG_UI_version}}
+    container_name: unity-catalog-ui
+    hostname: unity-catalog-ui
+    labels:
+      com.platys.name: "unity-catalog"
+      com.platys.description: "Open, Multi-modal Catalog for Data & AI"
+      com.platys.webui.title: "Unity Catalog UI"
+      com.platys.webui.url: "http://dataplatform:28393"
+      com.platys.restapi.title: "Unity Catalog REST API"
+      com.platys.restapi.url: "http://dataplatform:19120/q/swagger-ui"
+    ports:
+      - 28393:3000
+    {%if use_timezone | default(false) %}
+    environment:
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+  {% endif %}   {#  UNITY_CATALOG_UI_enable #}
+
 {% endif %}   {#  UNITY_CATALOG_enable #}
 
 {% if MOSQUITTO_enable | default(false) %}

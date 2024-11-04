@@ -1310,7 +1310,7 @@ For each service there might be some other settings, such as controlling the num
 | `NESSIE_cli_enabled`                                 	| `false` 	| 1.18.0 	| Also generate the `nessie-cli` service.                                                                                                                                                         	|       
 | [**_Unity Catalog_**](./services/unity-catalog.md)   &nbsp;&nbsp;&nbsp;&nbsp;![x86-64](./images/x86-64.png)                        	|         	|
 | `UNITY_CATALOG_enable`                                 	| `false` 	| 1.18.0 	| Generate Unity Catalog service                                                                                                                                                              	|    
-
+| `UNITY_CATALOG_UI_enable`                                 	| `false` 	| 1.18.0 	| Generate Unity Catalog UI service                                                                                                                                                              	|    
 ### Query Engines
 
 | Config                                         	| Default 	| Since 	| Description                                                                                                                                                                        	                    	|
