@@ -99,6 +99,7 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Refactored Spark (Master, Worker, History and Thriftserver) to use the bitnami docker images
  * Refactored Zeppelin to use the Dockerfile provided by the Apache Zeppelin project
  * Option to overrite the Postgres standard, official image by one with an additional extension, such as `PGVector` or `age` or with your own docker image
+ * Support for the deployment of Dataverse previewers added (see `DATAVERSE_previewers_xxxx` config settings)
 
 ### Breaking Changes
 
