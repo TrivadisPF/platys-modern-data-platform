@@ -8556,6 +8556,23 @@ services:
     init: true
     restart: "no"
 
+  {% if DATAVERSE_previewers_deploy  | default(false) %}
+  dataverse-setup-previewers:
+    container_name: dataverse-setup-previewers
+    hostname: dataverse-setup-previewers
+    image: trivadis/docker-dataverse-deploy-previewers:latest
+    init: true
+    environment:
+      - API_TOKEN=${API_TOKEN}
+      - DATAVERSE_URL=http://${PUBLIC_IP}:28294
+      - INCLUDE_PREVIEWERS={{DATAVERSE_previewers_include | default("")}}
+      - EXCLUDE_PREVIEWERS={{DATAVERSE_previewers_exclude | default("")}}
+      - REMOVE_EXISTING={{DATAVERSE_previewers_remove_existing | default(omit)}}
+    command:
+      - deploy 
+    restart: "no"
+  {% endif -%}   {#  if DATAVERSE_previewers_deploy ... #}
+  
   dataverse-demo-data-load:
     container_name: dataverse-demo-data-load
     hostname: dataverse-demo-data-load
