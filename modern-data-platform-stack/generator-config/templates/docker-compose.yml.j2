@@ -8547,7 +8547,7 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
 
-  {% if DATAVERSE_previewers_configurer  | default(false) %}
+  {% if DATAVERSE_previewers_configurer_enabled  | default(false) %}
   dataverse-setup-previewers:
     container_name: dataverse-setup-previewers
     hostname: dataverse-setup-previewers
@@ -8556,14 +8556,14 @@ services:
     environment:
       - API_TOKEN=${API_TOKEN}
       - DATAVERSE_URL=http://${PUBLIC_IP}:28394
-      - PREVIEWER_PROVIDER_URL=http://${PUBLIC_IP}:28395
+      - PREVIEWER_PROVIDER_URL={{DATAVERSE_previewers_provider_url | ("https://gdcc.github.io/dataverse-previewers")}}
       - INCLUDE_PREVIEWERS={{DATAVERSE_previewers_include | default("")}}
       - EXCLUDE_PREVIEWERS={{DATAVERSE_previewers_exclude | default("")}}
       - REMOVE_EXISTING={{DATAVERSE_previewers_remove_existing | default(omit)}}
     command:
       - deploy 
     restart: "no"
-  {% endif -%}   {#  if DATAVERSE_previewers_configurer ... #}
+  {% endif -%}   {#  if DATAVERSE_previewers_configurer_enabled ... #}
   
   dataverse-demo-data-load:
     container_name: dataverse-demo-data-load
@@ -8648,7 +8648,7 @@ services:
     init: true
     restart: "no"
 
-  {% if DATAVERSE_previewers_provider | default(false) %}
+  {% if DATAVERSE_previewers_provider_enabled | default(false) %}
   #  ================================== Dataverse Previewer Provider ========================================== #
   dataverse-previewer-provider:
     image: trivadis/dataverse-previewers:latest
@@ -8683,7 +8683,7 @@ services:
       - "/template"
     restart: {{container_restart_policy}}
 
-  {% endif %}   {#  DATAVERSE_previewers_provider #}
+  {% endif %}   {#  DATAVERSE_previewers_provider_enabled #}
 
 {% endif %}   {#  DATAVERSE_enable #}
 
