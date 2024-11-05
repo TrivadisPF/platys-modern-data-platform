@@ -111,6 +111,7 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Memgraph no longer uses external port `7690 ` but `7699`
  * change default value for `TRINO_edition` to `oss`
  * NiFi extensions now need to be listed using property `NIFI_extensions`
+ * `dataverse` port changed to `28394` (used to be `28294` and by taht conflicting with `ckan`)
  
 ## What's new in 1.17.1
 

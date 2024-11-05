@@ -8472,11 +8472,11 @@ services:
       com.platys.name: "dataverse"
       com.platys.description: "Dataverse Publication Platform"
       com.platys.webui.title: "Dataverse UI"
-      com.platys.webui.url: "http://dataplatform:28294"
+      com.platys.webui.url: "http://dataplatform:28394"
       com.platys.restapi.title: "Dataverse UI"
-      com.platys.restapi.url: "http://dataplatform:28294/api/info/metrics/dataverses"
+      com.platys.restapi.url: "http://dataplatform:28394/api/info/metrics/dataverses"
     ports:
-      - "28294:8080"
+      - "28394:8080"
       - "4848:4848"
       - "9009:9009" # JDWP
       - "8686:8686" # JMX
@@ -8547,20 +8547,7 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
 
-  dataverse-bootstrap:
-    container_name: dataverse-bootstrap
-    hostname: dataverse-bootstrap
-    image: gdcc/configbaker:{{DATAVERSE_version}}
-    environment:
-      - DATAVERSE_URL=http://${PUBLIC_IP}:28294
-      - TIMEOUT=10m
-    command:
-      - bootstrap.sh
-      - dev
-    init: true
-    restart: "no"
-
-  {% if DATAVERSE_previewers_deploy  | default(false) %}
+  {% if DATAVERSE_previewers_configurer  | default(false) %}
   dataverse-setup-previewers:
     container_name: dataverse-setup-previewers
     hostname: dataverse-setup-previewers
@@ -8568,14 +8555,14 @@ services:
     init: true
     environment:
       - API_TOKEN=${API_TOKEN}
-      - DATAVERSE_URL=http://${PUBLIC_IP}:28294
+      - DATAVERSE_URL=http://${PUBLIC_IP}:28394
       - INCLUDE_PREVIEWERS={{DATAVERSE_previewers_include | default("")}}
       - EXCLUDE_PREVIEWERS={{DATAVERSE_previewers_exclude | default("")}}
       - REMOVE_EXISTING={{DATAVERSE_previewers_remove_existing | default(omit)}}
     command:
       - deploy 
     restart: "no"
-  {% endif -%}   {#  if DATAVERSE_previewers_deploy ... #}
+  {% endif -%}   {#  if DATAVERSE_previewers_configurer ... #}
   
   dataverse-demo-data-load:
     container_name: dataverse-demo-data-load
@@ -8585,7 +8572,7 @@ services:
       - load
     environment:
       - API_TOKEN=${API_TOKEN}
-      - DATAVERSE_URL=http://${PUBLIC_IP}:28294
+      - DATAVERSE_URL=http://${PUBLIC_IP}:28394
     volumes:
       - ./data-transfer:/data-transfer
       - ./scripts/python/run_pip_and_python.sh:/app/run_pip_and_python.sh:ro
@@ -8659,6 +8646,43 @@ services:
       - ./container-volume/dataverse/solr/conf:/solr-template
     init: true
     restart: "no"
+
+  {% if DATAVERSE_previewers_provider | default(false) %}
+  #  ================================== Dataverse Previewer Provider ========================================== #
+  dataverse-previewer-provider:
+    image: trivadis/dataverse-previewers:{{DATAVERSE_PREVIEWEversion}}
+    container_name: dataverse-previewer-provider
+    hostname: dataverse-previewer-provider
+    labels:
+      com.platys.name: "dataverse-previewer-provider"
+      com.platys.description: "Dataverse Previewers"
+      com.platys.restapi.title: "Dataverse Previewers"
+      com.platys.restapi.url: "http://dataplatform:28394/previewers"
+    ports:
+      - "28394:80"
+    environment:
+      - PREVIEWER_PROVIDER_URL=http://${PUBLIC_IP}:28394
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./container-volume/dataverse/solr/data:/var/solr
+      - ./container-volume/dataverse/solr/conf:/template
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    command:
+      - "solr-precreate"
+      - "collection1"
+      - "/template"
+    restart: {{container_restart_policy}}
+
+  {% endif %}   {#  DATAVERSE_previewers_provider #}
 
 {% endif %}   {#  DATAVERSE_enable #}
 

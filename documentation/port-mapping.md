@@ -657,6 +657,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28391 | 8443 | drawio | 
 28392 | 8080 | unity-catalog  |
 28393 | 3000 | unity-catalog-ui  |
+28394 | 8080 | dataverse  |
+28395 | 80 | dataverse-previewer-provider  |
 
 
 ## Ports > 28500
