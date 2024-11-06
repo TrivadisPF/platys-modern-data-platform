@@ -8547,6 +8547,19 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
 
+  dataverse-bootstrap:
+    container_name: dataverse-bootstrap
+    hostname: dataverse-bootstrap
+    image: gdcc/configbaker:{{DATAVERSE_version}}
+    environment:
+      - DATAVERSE_URL=http://${PUBLIC_IP}:28294
+      - TIMEOUT=10m
+    command:
+      - bootstrap.sh
+      - dev
+    init: true
+    restart: "no"
+
   {% if DATAVERSE_previewers_configurer_enabled  | default(false) %}
   dataverse-setup-previewers:
     container_name: dataverse-setup-previewers
@@ -8556,6 +8569,7 @@ services:
     environment:
       - API_TOKEN=${API_TOKEN}
       - DATAVERSE_URL=http://${PUBLIC_IP}:28394
+      - TIMEOUT=10m
       - PREVIEWER_PROVIDER_URL={{DATAVERSE_previewers_provider_url | default("https://gdcc.github.io/dataverse-previewers")}}
       - INCLUDE_PREVIEWERS={{DATAVERSE_previewers_include | default("")}}
       - EXCLUDE_PREVIEWERS={{DATAVERSE_previewers_exclude | default("")}}
