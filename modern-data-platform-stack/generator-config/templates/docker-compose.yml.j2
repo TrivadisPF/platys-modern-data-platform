@@ -8634,8 +8634,6 @@ services:
     labels:
       com.platys.name: "solr"
       com.platys.description: "Dataverse Platform SolR Instance"
-#    depends_on:
-#      - dataverse-solr-initializer
     environment:
       - DATAVERSE_CORE_NAME=collection1
     {%if use_timezone | default(false) %}
@@ -8644,8 +8642,6 @@ services:
     volumes:
       - ./data-transfer:/data-transfer
       - ./init/dataverse/solr:/docker-entrypoint-initdb.d/    
-#      - ./container-volume/dataverse/solr/data:/var/solr
-#      - ./container-volume/dataverse/solr/conf:/template
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -8653,25 +8649,7 @@ services:
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
-#    command:
-#      - "solr-precreate"
-#      - "collection1"
-#      - "/template"
     restart: {{container_restart_policy}}
-
-  dataverse-solr-initializer:
-    container_name: dataverse-solr-initializer
-    hostname: dataverse-solr-initializer
-    image: gdcc/configbaker:{{DATAVERSE_version}}
-    command:
-      - sh
-      - -c
-      - "fix-fs-perms.sh solr && cp -a /template/* /solr-template"
-    volumes:
-      - ./container-volume/dataverse/solr/data:/var/solr
-      - ./container-volume/dataverse/solr/conf:/solr-template
-    init: true
-    restart: "no"
 
   {% if DATAVERSE_previewers_provider_enabled | default(false) %}
   #  ================================== Dataverse Previewer Provider ========================================== #
