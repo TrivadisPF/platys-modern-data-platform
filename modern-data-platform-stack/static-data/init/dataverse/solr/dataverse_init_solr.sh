@@ -19,7 +19,7 @@ else
     # init script for handling an empty /var/solr
     /opt/solr/docker/scripts/init-var-solr
     
-    # Precreate CKAN core
+    # Precreate Dataverse core
     /opt/solr/docker/scripts/precreate-core $DATAVERSE_CORE_NAME
     
     # Remove the managed schema and replace it with the Dataverse metadata
