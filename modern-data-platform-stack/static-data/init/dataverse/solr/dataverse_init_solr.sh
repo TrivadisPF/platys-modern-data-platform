@@ -1,9 +1,16 @@
 #!/bin/bash
 #
-# Initialize SOLR for Dataverse by creating a ckan core
+# Initialize SOLR for Dataverse by creating a Solr core
 # Arguments are supplied via environment variables: DATAVERSE_CORE_NAME
 # Example:
 #   DATAVERSE_CORE_NAME=collection1
+#
+# The files in conf have been copied from the Dataverse configbaker docker image. To update, perform the following command
+#  cd ./init/dataverse/solr/conf
+#  docker create --name temp-container gdcc/configbaker:alpha
+#  docker cp temp-container:/template/conf/schema.xml .
+#  docker cp temp-container:/template/conf/solrconfig.xml .
+#  docker rm temp-container
 
 set -e
 
@@ -27,7 +34,7 @@ else
     rm $COREDIR/conf/managed-schema.xml
 
     echo "Adding Dataverse schema and solrconfig"
-    cp -R /docker-entrypoint-initdb.d/conf/* $COREDIR/conf
+    cp -R /docker-entrypoint-initdb.d/conf/*.xml $COREDIR/conf
     
     echo "SOLR initialized"
 fi
