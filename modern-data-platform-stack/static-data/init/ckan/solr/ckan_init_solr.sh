@@ -27,7 +27,7 @@ else
     # init script for handling an empty /var/solr
     /opt/docker-solr/scripts/init-var-solr
     
-    # Precreate CKAN core
+    # Precreate CKAN core, in newer version of solr docker image, the script can be found here: "/opt/solr/docker/scripts/precreate-core"
     /opt/docker-solr/scripts/precreate-core $CKAN_CORE_NAME
     
     # Replace the managed schema with CKANs schema
