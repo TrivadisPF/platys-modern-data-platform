@@ -8537,7 +8537,6 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
-      - ./custom-conf/dataverse/logos/:/dv/docroot/logos
     {%if DATAVERSE_volume_map_data | default(false) %}
       - ./container-volume/dataverse/data:/data
     {% endif -%}   {#  DATAVERSE_volume_map_data #}
@@ -8557,9 +8556,14 @@ services:
     environment:
       - DATAVERSE_URL=http://${PUBLIC_IP}:28394
       - TIMEOUT=10m
+    volumes:
+      - ./data-transfer:/data-transfer
+    {% if DATAVERSE_volume_map_bootstrap_script  | default(false) %}
+      - ./scripts/dataverse/bootstrap/init.sh:/scripts/bootstrap/{{DATAVERSE_bootstrap_persona | default("dev")}}/init.sh
+    {% endif -%}   {#  DATAVERSE_volume_map_data #}
     command:
       - bootstrap.sh
-      - dev
+      - {{DATAVERSE_bootstrap_persona | default("dev")}}
     init: true
     restart: "no"
 
@@ -8675,11 +8679,12 @@ services:
       com.platys.name: "dataverse-previewer-provider"
       com.platys.description: "Dataverse Previewers"
       com.platys.restapi.title: "Dataverse Previewers"
-      com.platys.restapi.url: "http://dataplatform:28395/previewers"
+      com.platys.restapi.url: "http://dataplatform:28395/previewers/"
     ports:
       - "28395:80"
     environment:
       - PREVIEWER_PROVIDER_URL=http://${PUBLIC_IP}:28395
+      - VERSIONS="v1.4,betatest"
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
