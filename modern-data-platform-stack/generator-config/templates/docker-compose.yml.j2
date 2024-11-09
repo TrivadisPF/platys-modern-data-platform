@@ -13833,7 +13833,11 @@ services:
     healthcheck:
       test:
         - CMD-SHELL
-        - curl -u admin:testing -s http://localhost:9200/_cat/health?h=status | grep -q green
+    {% if ELASTICSEARCH_security_enabled | default(false) %}     
+        - curl -u elastic:${PLATYS_ELASTICSEARCH_PASSWORD:-{{ELASTICSEARCH_password}}} -s http://localhost:9200/_cat/health?h=status | grep -q green
+    {% else -%}   {#  ELASTICSEARCH_security_enabled #}  
+        - curl -s http://localhost:9200/_cat/health?h=status | grep -q green
+    {% endif -%}   {#  ELASTICSEARCH_security_enabled #}  
       retries: 300
       interval: 10s
 {% endif %}   {#  ELASTICSEARCH_enable #}
