@@ -303,6 +303,8 @@ networks:
 
 {% set __VERBA_version = VERBA_version | default('latest') -%}
 
+{% set __RAGFLOW_version = RAGFLOW_version | default('latest') -%}
+
 {% set __KIE_SERVER_version = KIE_SERVER_version | default('latest') -%}
 
 {% set __PROMTAIL_version = PROMTAIL_version | default('latest') -%}
@@ -12100,9 +12102,75 @@ services:
       timeout: 10s
       retries: 5
       start_period: 10s
-{% endif %}   {# GPT_RESEARCHER_enable  #}
+{% endif %}   {# VERBA_enable  #}
 
+{%if RAGFLOW_enable | default(false) %}
+  #  ================================== Verba  ========================================== #
+  ragflow:
+    image: infiniflow/ragflow:{{__RAGFLOW_version}}
+    container_name: ragflow
+    hostname: ragflow
+    labels:
+      com.platys.name: 'ragflow'
+      com.platys.description: "Retrieval Augmented Generation (RAG) engine"
+      com.platys.webui.title: "Ragflow UI"
+      com.platys.webui.url: "http://dataplatform:28396"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      elasticsearch:
+        condition: service_healthy      
+    ports:
+      - 9380:9380
+      - 28396:80
+      - 28397:443
+      - 28398:5678      
+    environment:
+      - HF_ENDPOINT={{'https://hf-mirror.com' if RAGFLOW_use_huggingface_mirror else omit}}
+      - MACOS={{'1' if RAGFLOW_use_macos_optimization else omit}}
+      - DB_TYPE={{RAGFLOW_db_type | default("mysql")}}
+      - STORAGE_IMPL=MINIO
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./conf/ragflow/service_conf.yaml:/ragflow/conf/service_conf.yaml
+      - ./conf/ragflow/nginx/ragflow.conf:/etc/nginx/conf.d/ragflow.conf
+      - ./conf/ragflow/nginx/proxy.conf:/etc/nginx/proxy.conf
+      - ./conf/ragflow/nginx/nginx.conf:/etc/nginx/nginx.conf
+    {% if RAGFLOW_volume_map_logs %}
+      - ./container-volume/ragflow/logs:/ragflow/logs
+    {% endif %}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
 
+  ragflow-redis:
+    image: valkey/valkey:8
+    container_name: ragflow-redis
+    hostname: ragflow-redis
+    command: redis-server --requirepass ${REDIS_PASSWORD} --maxmemory 128mb --maxmemory-policy allkeys-lru
+    ports:
+      - 6387:6379
+    volumes:
+    {% if RAGFLOW_volume_map_data %}
+      - ./container-volume/reagflow/redis-data:/data
+    {% endif %}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}    
+    restart: {{container_restart_policy}} 
+{% endif %}   {# RAGFLOW_enable  #}
 
 {%if KIE_SERVER_enable | default(false) %}
   #  ================================== Drools KIE Server  ========================================== #
@@ -13725,8 +13793,10 @@ services:
       - "9300:9300"
     environment:
       discovery.type: "single-node"
-      xpack.security.enabled: "false"
+      xpack.security.enabled: {{ELASTICSEARCH_security_enabled | default(false)}}
       xpack.monitoring.collection.enabled: "false"
+      xpack.security.http.ssl.enabled: false
+      xpack.security.transport.ssl.enabled: false      
       http.cors.enabled: "true"
       http.cors.allow-origin: "http://${DOCKER_HOST_IP}:28275,http://${PUBLIC_IP}:28275,http://dejavu:1358,http://dataplatform:28125,http://dataplatform:28125,http://${PUBLIC_IP}:28125,http://${DOCKER_HOST_IP}:28125,http://127.0.0.1:1358"
       http.cors.allow-headers: "X-Requested-With,X-Auth-Token,Content-Type,Content-Length,Authorization"
@@ -13754,7 +13824,7 @@ services:
         - CMD-SHELL
         - curl -u admin:testing -s http://localhost:9200/_cat/health?h=status | grep -q green
       retries: 300
-      interval: 1s
+      interval: 10s
 {% endif %}   {#  ELASTICSEARCH_enable #}
 
 {% if DEJAVU_enable | default(false) %}
@@ -16237,6 +16307,11 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-ur{{MYSQL_user}}", "-p{{MYSQL_password}}"]
+      interval: 10s
+      timeout: 10s
+      retries: 3    
 {% endif %}   {#  MYSQL_enable #}
 
 {% if MARIADB_enable | default(false) %}

@@ -142,6 +142,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 6385 | 6379 | redis-stack-1 |
 6385 | 6379 | redash-redis |
 6386 | 6379 | tyk-redis |
+6387 | 6379 | ragflow-redis |
 6570 | 6570 | hserver-1 |
 6831 | 6831 | jaeger (udp) |
 6749 | 6749 | curity |
@@ -197,6 +198,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 8200 | 8200 | vault |
 8222 | 8222 | nats-1 |
 8288 | 8288 | vector-admin |
+9380 | 9380 | ragflow |
 8443 | 8443 | kong (proxy ssl) |
 8444 | 8444 | kong (admin api ssl) |
 8446 | 8443 | curity |
@@ -645,7 +647,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28379 | 4043 | jupyter (spark UI)  |
 28380 | 4044 | jupyter (spark UI)  |
 28381 | 8080 | data-contract-manager  |
-28382 |  |   |
+28382 |  | |
 28383 | 61208 | glances  |
 28384 | 61209 | glances  |
 28385 | 4040 | kyuubi (spark ui)  |
@@ -659,7 +661,9 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28393 | 3000 | unity-catalog-ui  |
 28394 | 8080 | dataverse  |
 28395 | 80 | dataverse-previewer-provider  |
-
+28396 | 80 | ragflow  |
+28397 | 443 | ragflow |
+28398 | 5678 | ragflow |
 
 ## Ports > 28500
 
