@@ -1,0 +1,1 @@
+Contains the data of Valkey service, if flag VALKEY_volume_map_data is set to true.
