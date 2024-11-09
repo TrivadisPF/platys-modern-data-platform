@@ -12155,7 +12155,10 @@ services:
     image: valkey/valkey:8
     container_name: ragflow-redis
     hostname: ragflow-redis
-    command: redis-server --requirepass ${REDIS_PASSWORD} --maxmemory 128mb --maxmemory-policy allkeys-lru
+    labels:
+      com.platys.name: 'redis'
+      com.platys.description: "Redis key/value store for RAGFlow"  
+      com.platys.password.envvars: "PLATYS_RAGFLOW_REDIS_PASSWORD"
     ports:
       - 6387:6379
     volumes:
@@ -12169,6 +12172,7 @@ services:
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}    
+    command: redis-server --requirepass ${PLATYS_RAGFLOW_REDIS_PASSWORD:-{{RAGFLOW_redis_password}}} --maxmemory 128mb --maxmemory-policy allkeys-lru
     restart: {{container_restart_policy}} 
 {% endif %}   {# RAGFLOW_enable  #}
 

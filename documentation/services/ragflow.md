@@ -7,11 +7,15 @@ RAGFlow is an open-source RAG (Retrieval-Augmented Generation) engine based on d
 ## How to enable?
 
 ```bash
-platys init --enable-services RAGFLOW MINIO ELASTICSEARCH MYSQL
-platys gen
+platys init --enable-services RAGFLOW,MINIO,ELASTICSEARCH,MYSQL
 ```
 
 ```
+
+```
+
+```
+platys gen
 ```
 
 ## How to use it?
