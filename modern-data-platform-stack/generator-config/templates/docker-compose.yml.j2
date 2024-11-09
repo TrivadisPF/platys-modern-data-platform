@@ -333,6 +333,8 @@ networks:
 {% set __REDIS_INSIGHT_version = REDIS_INSIGHT_version | default('latest') -%}
 {% set __REDIS_COMMANDER_version = REDIS_COMMANDER_version | default('latest') -%}
 
+{% set __VALKEY_version = VALKEY_version | default('latest') -%}
+
 {% set __MONGO_version = MONGO_version | default('latest') -%}
 {% set __MONGO_EXPRESS_version = MONGO_EXPRESS_version | default('latest') -%}
 {% set __MONGO_ADMIN_version = MONGO_ADMIN_version | default('latest') -%}
@@ -790,8 +792,10 @@ networks:
   {% set TIPBOARD_enable = false -%}
   {% set CHARTBOARD_enable = false -%}
   {% set BASEROW_enable = false -%}
+  {% set REDIS_enable = false -%}
   {% set REDIS_INSIGHT_enable = false -%}
   {% set REDIS_COMMANDER_enable = false -%}
+  {% set VALKEY_enable = false -%}  
   {% set MONGO_enable = false -%}
   {% set ELASTICSEARCH_enable = false -%}
   {% set OPENSEARCH_enable = false -%}
@@ -13437,6 +13441,144 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  REDIS_COMMANDER_enable #}
+
+{% if VALKEY_enable | default(false) %}
+  #  ================================== Valkey ========================================== #
+  valkey-1:
+    image: bitnami/valkey:{{__VALKEY_version}}
+    hostname: valkey-1
+    container_name: valkey-1
+    labels:
+      com.platys.name: "valkey"
+      com.platys.description: "Key-value store"
+    ports:
+      - 6379:6379
+    environment:
+    {% if VALKEY_replicasets is defined and VALKEY_replicasets and VALKEY_replicasets > 0 %}
+      - VALKEY_REPLICATION_MODE=master
+    {% endif -%}   {#  VALKEY_replicasets > 0 #}
+      - VALKEY_PORT_NUMBER=6379
+      - ALLOW_EMPTY_PASSWORD={{'yes' if VALKEY_allow_empty_password else 'no' }}
+    {% if VALKEY_disable_commands is defined and VALKEY_disable_commands | default(false) %}
+      - DISABLE_COMMANDS={{VALKEY_disable_commands | default(omit) }}
+    {% endif -%}   {# VALKEY_disable_commands #}
+    {% if not VALKEY_allow_empty_password and VALKEY_password is defined and VALKEY_password and VALKEY_password | length | default(false) %}
+      - VALKEY_PASSWORD={{VALKEY_password if VALKEY_password is defined and VALKEY_password and VALKEY_password | length else omit}}
+    {% elif not VALKEY_allow_empty_password and VALKEY_password_file is defined and VALKEY_password_file and VALKEY_password_file | length | default(false) %}
+      - VALKEY_PASSWORD_FILE=/opt/bitnami/redis/mounted-etc/{{VALKEY_password_file if VALKEY_password_file is defined and VALKEY_password_file and VALKEY_password_file | length else omit }}
+    {% endif -%}   {# not VALKEY_allow_empty_password and VALKEY_password or VALKEY_PASSWORD_FILE #}
+      - VALKEY_ACL_FILE=/{{VALKEY_acl_file if VALKEY_acl_file is defined and VALKEY_acl_file and VALKEY_acl_file | length else omit }}
+      - VALKEY_AOF_ENABLED={{'yes' if VALKEY_aof_enable else omit }}
+      - VALKEY_RDB_POLICY={{VALKEY_rdb_save_policy if VALKEY_rdb_enable and VALKEY_rdb_save_policy is defined and VALKEY_rdb_save_policy and VALKEY_rdb_save_policy | length else omit}}
+      - VALKEY_RDB_POLICY_DISABLED={{'yes' if not VALKEY_rdb_enable else omit }}
+      - VALKEY_IO_THREADS={{VALKEY_io_threads if VALKEY_io_threads is defined and VALKEY_io_threads and VALKEY_io_threads | length and VALKEY_io_threads > 0 else omit }}
+      - VALKEY_IO_THREADS_DO_READS={{'yes' if VALKEY_io_threads_do_reads_enable else omit }}
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {% if VALKEY_overrides_config_file is defined and VALKEY_overrides_config_file and VALKEY_overrides_config_file | length %}
+      - ./custom-conf/redis/{{VALKEY_overrides_config_file}}:/opt/bitnami/redis/mounted-etc/{{VALKEY_overrides_config_file}}
+    {% endif %}
+    {% if VALKEY_password_file is defined and VALKEY_password_file and VALKEY_password_file | length %}
+      - ./security/redis/{{VALKEY_password_file}}:/opt/bitnami/redis/mounted-etc/{{VALKEY_password_file}}
+    {% endif %}
+    {% if VALKEY_acl_file is defined and VALKEY_acl_file and VALKEY_acl_file | length %}
+      - ./security/redis/{{VALKEY_acl_file}}:/opt/bitnami/redis/mounted-etc/{{VALKEY_acl_file}}
+    {% endif %}
+    {% if VALKEY_volume_map_data %}
+      - "./container-volume/redis/data:/bitnami/redis/data"
+    {% endif %}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    command: /opt/bitnami/scripts/redis/run.sh --loglevel {{VALKEY_log_level}}
+    restart: {{container_restart_policy}}
+    healthcheck:
+    {% if not VALKEY_allow_empty_password and VALKEY_password is defined and VALKEY_password and VALKEY_password | length | default(false) %}
+      test: ["CMD-SHELL", "redis-cli --no-auth-warning -a \"$$(echo $$VALKEY_PASSWORD)\" ping | grep PONG"]
+    {% elif not VALKEY_allow_empty_password and VALKEY_password_file is defined and VALKEY_password_file and VALKEY_password_file | length | default(false) %}
+      test: ["CMD-SHELL", "redis-cli --no-auth-warning -a \"$$(cat $$VALKEY_PASSWORD_FILE)\" ping | grep PONG"]
+    {% else %}
+      test: ["CMD-SHELL", "redis-cli --no-auth-warning ping | grep PONG"]
+    {% endif -%}   {# not VALKEY_allow_empty_password and VALKEY_password or VALKEY_PASSWORD_FILE #}
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  {% for num in range(VALKEY_replicasets| default(0) ) %}
+    {% set external_port = 6380 + loop.index - 1 %}
+  redis-replica-{{loop.index}}:
+    image: bitnami/redis:{{__VALKEY_version}}
+    hostname: redis-replica-{{loop.index}}
+    container_name: redis-replica-{{loop.index}}
+    labels:
+      com.platys.name: "redis"
+      com.platys.description: "Key-Value NoSQL datastore"
+    ports:
+      - {{external_port}}:6379
+    environment:
+      - VALKEY_REPLICATION_MODE=slave
+      - VALKEY_MASTER_HOST=redis-1
+      - VALKEY_MASTER_PORT_NUMBER=6379
+      - VALKEY_MASTER_PASSWORD={{VALKEY_password | default(omit) }}
+      - ALLOW_EMPTY_PASSWORD={{'yes' if VALKEY_allow_empty_password else 'no' }}
+    {% if VALKEY_disable_commands is defined and VALKEY_disable_commands | default(false) %}
+      - DISABLE_COMMANDS={{VALKEY_disable_commands | default(omit) }}
+    {% endif -%}   {# VALKEY_disable_commands #}
+    {% if not VALKEY_allow_empty_password and VALKEY_password is defined and VALKEY_password and VALKEY_password | length | default(false) %}
+      - VALKEY_PASSWORD={{VALKEY_password if VALKEY_password is defined and VALKEY_password and VALKEY_password | length else omit}}
+    {% elif not VALKEY_allow_empty_password and VALKEY_password_file is defined and VALKEY_password_file and VALKEY_password_file | length | default(false) %}
+      - VALKEY_PASSWORD_FILE=/opt/bitnami/redis/mounted-etc/{{VALKEY_password_file if VALKEY_password_file is defined and VALKEY_password_file and VALKEY_password_file | length else omit }}
+    {% endif -%}   {# not VALKEY_allow_empty_password and VALKEY_password or VALKEY_PASSWORD_FILE #}
+      - VALKEY_ACL_FILE=/{{VALKEY_acl_file if VALKEY_acl_file is defined and VALKEY_acl_file and VALKEY_acl_file | length else omit }}
+      - VALKEY_AOF_ENABLED={{'yes' if VALKEY_aof_enable else omit }}
+      - VALKEY_RDB_POLICY={{VALKEY_rdb_save_policy if VALKEY_rdb_enable and VALKEY_rdb_save_policy is defined and VALKEY_rdb_save_policy and VALKEY_rdb_save_policy | length else omit}}
+      - VALKEY_RDB_POLICY_DISABLED={{'yes' if not VALKEY_rdb_enable else omit }}
+      - VALKEY_IO_THREADS={{VALKEY_io_threads if VALKEY_io_threads is defined and VALKEY_io_threads and VALKEY_io_threads | length and VALKEY_io_threads > 0 else omit }}
+      - VALKEY_IO_THREADS_DO_READS={{'yes' if VALKEY_io_threads_do_reads_enable else omit }}
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {% if VALKEY_overrides_config_file is defined and VALKEY_overrides_config_file and VALKEY_overrides_config_file | length %}
+      - ./custom-conf/redis/{{VALKEY_overrides_config_file}}:/opt/bitnami/redis/mounted-etc/{{VALKEY_overrides_config_file}}
+    {% endif %}    {% if VALKEY_password_file is defined and VALKEY_password_file and VALKEY_password_file | length %}
+      - ./security/redis/{{VALKEY_password_file}}:/opt/bitnami/redis/mounted-etc/{{VALKEY_password_file}}
+    {% endif %}
+    {% if VALKEY_password_file is defined and VALKEY_password_file and VALKEY_password_file | length %}
+      - ./security/redis/{{VALKEY_password_file}}:/opt/bitnami/redis/mounted-etc/{{VALKEY_password_file}}
+    {% endif %}
+    {% if VALKEY_volume_map_data %}
+      - "./container-volume/redis/data/redis-replica-{{loop.index}}:/bitnami/redis/data"
+    {% endif %}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+    healthcheck:
+    {% if not VALKEY_allow_empty_password and VALKEY_password is defined and VALKEY_password and VALKEY_password | length | default(false) %}
+      test: ["CMD-SHELL", "redis-cli --no-auth-warning -a \"$$(echo $$VALKEY_PASSWORD)\" ping | grep PONG"]
+    {% elif not VALKEY_allow_empty_password and VALKEY_password_file is defined and VALKEY_password_file and VALKEY_password_file | length | default(false) %}
+      test: ["CMD-SHELL", "redis-cli --no-auth-warning -a \"$$(cat $$VALKEY_PASSWORD_FILE)\" ping | grep PONG"]
+    {% else %}
+      test: ["CMD-SHELL", "redis-cli --no-auth-warning ping | grep PONG"]
+    {% endif -%}   {# not VALKEY_allow_empty_password and VALKEY_password or VALKEY_PASSWORD_FILE #}
+      interval: 5s
+      timeout: 3s
+      retries: 5
+  {% endfor %}
+{% endif %}   {#  VALKEY_enable #}
 
 {% if CASSANDRA_enable | default(false) %}
   #  ================================== Cassandra ========================================== #
