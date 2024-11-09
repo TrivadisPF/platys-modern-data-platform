@@ -16466,7 +16466,11 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
-
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U {{POSTGRESQL_user | default('demo') }}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   {% if POSTGREST_enable| default(false) %}
   #  ================================== PostgREST ========================================== #
