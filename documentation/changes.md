@@ -34,6 +34,7 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * SearXNG
  * Draw.io
  * Unity Catalog & Unity Catalog UI
+ * RAGFlow
 
 ### Version upgrades
 
