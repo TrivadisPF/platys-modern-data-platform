@@ -13787,6 +13787,7 @@ services:
       com.platys.description: "Search-engine NoSQL store"
       com.platys.restapi.title: "Elasticsearch REST API"
       com.platys.restapi.url: "http://dataplatform:9200"
+      com.platys.password.envvars: "PLATYS_ELASTICSEARCH_PASSWORD"
       com.platys.manual.step.msgs: "sudo sysctl -w vm.max_map_count=262144"
     ports:
       - "9200:9200"
@@ -13796,7 +13797,10 @@ services:
       xpack.security.enabled: {{ELASTICSEARCH_security_enabled | default(false)}}
       xpack.monitoring.collection.enabled: "false"
       xpack.security.http.ssl.enabled: false
-      xpack.security.transport.ssl.enabled: false      
+      xpack.security.transport.ssl.enabled: false
+    {% if ELASTICSEARCH_security_enabled | default(false) %}     
+      ELASTIC_PASSWORD: ${PLATYS_ELASTICSEARCH_PASSWORD:-{{ELASTICSEARCH_password}}} 
+    {% endif -%}   {#  ELASTICSEARCH_security_enabled #}  
       http.cors.enabled: "true"
       http.cors.allow-origin: "http://${DOCKER_HOST_IP}:28275,http://${PUBLIC_IP}:28275,http://dejavu:1358,http://dataplatform:28125,http://dataplatform:28125,http://${PUBLIC_IP}:28125,http://${DOCKER_HOST_IP}:28125,http://127.0.0.1:1358"
       http.cors.allow-headers: "X-Requested-With,X-Auth-Token,Content-Type,Content-Length,Authorization"
