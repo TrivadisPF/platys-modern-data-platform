@@ -13158,50 +13158,50 @@ services:
 {% if REDIS_enable | default(false) %}
   #  ================================== Redis ========================================== #
   redis-1:
-    image: bitnami/redis:{{__REDIS_version}}
+    image: bitnami/{{'redis' if REDIS_edition | lower == 'redis' else 'valkey'}} if :{{__REDIS_version if REDIS_edition | lower == 'redis' else __VALKEY_version}}
     hostname: redis-1
     container_name: redis-1
     labels:
-      com.platys.name: "redis"
+      com.platys.name: {{'redis' if REDIS_edition | lower == 'redis' else 'valkey'}}
       com.platys.description: "Key-value store"
     ports:
       - 6379:6379
     environment:
     {% if REDIS_replicasets is defined and REDIS_replicasets and REDIS_replicasets > 0 %}
-      - REDIS_REPLICATION_MODE=master
+      - {{'REDIS' if REDIS_edition | lower == 'redis' else 'VALKEY'}}_REPLICATION_MODE={{'master' if REDIS_edition | lower == 'redis' else 'primary'}}
     {% endif -%}   {#  REDIS_replicasets > 0 #}
-      - REDIS_PORT_NUMBER=6379
+      - {{'REDIS' if REDIS_edition | lower == 'redis' else 'VALKEY'}}_PORT_NUMBER=6379
       - ALLOW_EMPTY_PASSWORD={{'yes' if REDIS_allow_empty_password else 'no' }}
     {% if REDIS_disable_commands is defined and REDIS_disable_commands | default(false) %}
-      - DISABLE_COMMANDS={{REDIS_disable_commands | default(omit) }}
+      - {{'' if REDIS_edition | lower == 'redis' else 'VALKEY_'}}DISABLE_COMMANDS={{REDIS_disable_commands | default(omit) }}
     {% endif -%}   {# REDIS_disable_commands #}
     {% if not REDIS_allow_empty_password and REDIS_password is defined and REDIS_password and REDIS_password | length | default(false) %}
-      - REDIS_PASSWORD={{REDIS_password if REDIS_password is defined and REDIS_password and REDIS_password | length else omit}}
+      - {{'REDIS' if REDIS_edition | lower == 'redis' else 'VALKEY'}}_PASSWORD={{REDIS_password if REDIS_password is defined and REDIS_password and REDIS_password | length else omit}}
     {% elif not REDIS_allow_empty_password and REDIS_password_file is defined and REDIS_password_file and REDIS_password_file | length | default(false) %}
-      - REDIS_PASSWORD_FILE=/opt/bitnami/redis/mounted-etc/{{REDIS_password_file if REDIS_password_file is defined and REDIS_password_file and REDIS_password_file | length else omit }}
+      - {{'REDIS' if REDIS_edition | lower == 'redis' else 'VALKEY'}}_PASSWORD_FILE=/opt/bitnami/redis/mounted-etc/{{REDIS_password_file if REDIS_password_file is defined and REDIS_password_file and REDIS_password_file | length else omit }}
     {% endif -%}   {# not REDIS_allow_empty_password and REDIS_password or REDIS_PASSWORD_FILE #}
-      - REDIS_ACLFILE=/{{REDIS_aclfile if REDIS_aclfile is defined and REDIS_aclfile and REDIS_aclfile | length else omit }}
-      - REDIS_AOF_ENABLED={{'yes' if REDIS_aof_enable else omit }}
-      - REDIS_RDB_POLICY={{REDIS_rdb_save_policy if REDIS_rdb_enable and REDIS_rdb_save_policy is defined and REDIS_rdb_save_policy and REDIS_rdb_save_policy | length else omit}}
-      - REDIS_RDB_POLICY_DISABLED={{'yes' if not REDIS_rdb_enable else omit }}
-      - REDIS_IO_THREADS={{REDIS_io_threads if REDIS_io_threads is defined and REDIS_io_threads and REDIS_io_threads | length and REDIS_io_threads > 0 else omit }}
-      - REDIS_IO_THREADS_DO_READS={{'yes' if REDIS_io_threads_do_reads_enable else omit }}
+      - {{'REDIS' if REDIS_edition | lower == 'redis' else 'VALKEY'}}_ACLFILE=/{{REDIS_aclfile if REDIS_aclfile is defined and REDIS_aclfile and REDIS_aclfile | length else omit }}
+      - {{'REDIS' if REDIS_edition | lower == 'redis' else 'VALKEY'}}_AOF_ENABLED={{'yes' if REDIS_aof_enable else omit }}
+      - {{'REDIS' if REDIS_edition | lower == 'redis' else 'VALKEY'}}_RDB_POLICY={{REDIS_rdb_save_policy if REDIS_rdb_enable and REDIS_rdb_save_policy is defined and REDIS_rdb_save_policy and REDIS_rdb_save_policy | length else omit}}
+      - {{'REDIS' if REDIS_edition | lower == 'redis' else 'VALKEY'}}_RDB_POLICY_DISABLED={{'yes' if not REDIS_rdb_enable else omit }}
+      - {{'REDIS' if REDIS_edition | lower == 'redis' else 'VALKEY'}}_IO_THREADS={{REDIS_io_threads if REDIS_io_threads is defined and REDIS_io_threads and REDIS_io_threads | length and REDIS_io_threads > 0 else omit }}
+      - {{'REDIS' if REDIS_edition | lower == 'redis' else 'VALKEY'}}_IO_THREADS_DO_READS={{'yes' if REDIS_io_threads_do_reads_enable else omit }}
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
     {% if REDIS_overrides_config_file is defined and REDIS_overrides_config_file and REDIS_overrides_config_file | length %}
-      - ./custom-conf/redis/{{REDIS_overrides_config_file}}:/opt/bitnami/redis/mounted-etc/{{REDIS_overrides_config_file}}
+      - ./custom-conf/{{'redis' if REDIS_edition | lower == 'redis' else 'valkey'}}/{{REDIS_overrides_config_file}}:/opt/bitnami/{{'redis' if REDIS_edition | lower == 'redis' else 'valkey'}}/mounted-etc/{{REDIS_overrides_config_file}}
     {% endif %}
     {% if REDIS_password_file is defined and REDIS_password_file and REDIS_password_file | length %}
-      - ./security/redis/{{REDIS_password_file}}:/opt/bitnami/redis/mounted-etc/{{REDIS_password_file}}
+      - ./security/{{'redis' if REDIS_edition | lower == 'redis' else 'valkey'}}/{{REDIS_password_file}}:/opt/bitnami/{{'redis' if REDIS_edition | lower == 'redis' else 'valkey'}}/mounted-etc/{{REDIS_password_file}}
     {% endif %}
     {% if REDIS_aclfile is defined and REDIS_aclfile and REDIS_aclfile | length %}
-      - ./security/redis/{{REDIS_aclfile}}:/opt/bitnami/redis/mounted-etc/{{REDIS_aclfile}}
+      - ./security/{{'redis' if REDIS_edition | lower == 'redis' else 'valkey'}}/{{REDIS_aclfile}}:/opt/bitnami/{{'redis' if REDIS_edition | lower == 'redis' else 'valkey'}}/mounted-etc/{{REDIS_aclfile}}
     {% endif %}
     {% if REDIS_volume_map_data %}
-      - "./container-volume/redis/data:/bitnami/redis/data"
+      - "./container-volume/{{'redis' if REDIS_edition | lower == 'redis' else 'valkey'}}/data:/bitnami/{{'redis' if REDIS_edition | lower == 'redis' else 'valkey'}}/data"
     {% endif %}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
@@ -13210,15 +13210,15 @@ services:
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
-    command: /opt/bitnami/scripts/redis/run.sh --loglevel {{REDIS_log_level}}
+    command: /opt/bitnami/scripts/{{'redis' if REDIS_edition | lower == 'redis' else 'valkey'}}/run.sh --loglevel {{REDIS_log_level}}
     restart: {{container_restart_policy}}
     healthcheck:
     {% if not REDIS_allow_empty_password and REDIS_password is defined and REDIS_password and REDIS_password | length | default(false) %}
-      test: ["CMD-SHELL", "redis-cli --no-auth-warning -a \"$$(echo $$REDIS_PASSWORD)\" ping | grep PONG"]
+      test: ["CMD-SHELL", "{{'redis' if REDIS_edition | lower == 'redis' else 'valkey'}}-cli --no-auth-warning -a \"$$(echo $$REDIS_PASSWORD)\" ping | grep PONG"]
     {% elif not REDIS_allow_empty_password and REDIS_password_file is defined and REDIS_password_file and REDIS_password_file | length | default(false) %}
-      test: ["CMD-SHELL", "redis-cli --no-auth-warning -a \"$$(cat $$REDIS_PASSWORD_FILE)\" ping | grep PONG"]
+      test: ["CMD-SHELL", "{{'redis' if REDIS_edition | lower == 'redis' else 'valkey'}}-cli --no-auth-warning -a \"$$(cat $$REDIS_PASSWORD_FILE)\" ping | grep PONG"]
     {% else %}
-      test: ["CMD-SHELL", "redis-cli --no-auth-warning ping | grep PONG"]
+      test: ["CMD-SHELL", "{{'redis' if REDIS_edition | lower == 'redis' else 'valkey'}}-cli --no-auth-warning ping | grep PONG"]
     {% endif -%}   {# not REDIS_allow_empty_password and REDIS_password or REDIS_PASSWORD_FILE #}
       interval: 5s
       timeout: 3s
@@ -13227,7 +13227,7 @@ services:
   {% for num in range(REDIS_replicasets| default(0) ) %}
     {% set external_port = 6380 + loop.index - 1 %}
   redis-replica-{{loop.index}}:
-    image: bitnami/redis:{{__REDIS_version}}
+    image: bitnami/{{'redis' if REDIS_edition | lower == 'redis' else 'valkey'}} if :{{__REDIS_version if REDIS_edition | lower == 'redis' else __VALKEY_version}}
     hostname: redis-replica-{{loop.index}}
     container_name: redis-replica-{{loop.index}}
     labels:
@@ -13236,40 +13236,40 @@ services:
     ports:
       - {{external_port}}:6379
     environment:
-      - REDIS_REPLICATION_MODE=slave
-      - REDIS_MASTER_HOST=redis-1
-      - REDIS_MASTER_PORT_NUMBER=6379
-      - REDIS_MASTER_PASSWORD={{REDIS_password | default(omit) }}
+      - {{'REDIS' if REDIS_edition | lower == 'redis' else 'VALKEY'}}_REPLICATION_MODE={{'slave' if REDIS_edition | lower == 'redis' else 'replica'}}
+      - {{'REDIS' if REDIS_edition | lower == 'redis' else 'VALKEY'}}_MASTER_HOST=redis-1
+      - {{'REDIS' if REDIS_edition | lower == 'redis' else 'VALKEY'}}_MASTER_PORT_NUMBER=6379
+      - {{'REDIS' if REDIS_edition | lower == 'redis' else 'VALKEY'}}_MASTER_PASSWORD={{REDIS_password | default(omit) }}
       - ALLOW_EMPTY_PASSWORD={{'yes' if REDIS_allow_empty_password else 'no' }}
     {% if REDIS_disable_commands is defined and REDIS_disable_commands | default(false) %}
-      - DISABLE_COMMANDS={{REDIS_disable_commands | default(omit) }}
+      - {{'' if REDIS_edition | lower == 'redis' else 'VALKEY_'}}DISABLE_COMMANDS={{REDIS_disable_commands | default(omit) }}
     {% endif -%}   {# REDIS_disable_commands #}
     {% if not REDIS_allow_empty_password and REDIS_password is defined and REDIS_password and REDIS_password | length | default(false) %}
-      - REDIS_PASSWORD={{REDIS_password if REDIS_password is defined and REDIS_password and REDIS_password | length else omit}}
+      - {{'REDIS' if REDIS_edition | lower == 'redis' else 'VALKEY'}}_PASSWORD={{REDIS_password if REDIS_password is defined and REDIS_password and REDIS_password | length else omit}}
     {% elif not REDIS_allow_empty_password and REDIS_password_file is defined and REDIS_password_file and REDIS_password_file | length | default(false) %}
-      - REDIS_PASSWORD_FILE=/opt/bitnami/redis/mounted-etc/{{REDIS_password_file if REDIS_password_file is defined and REDIS_password_file and REDIS_password_file | length else omit }}
+      - {{'REDIS' if REDIS_edition | lower == 'redis' else 'VALKEY'}}_PASSWORD_FILE=/opt/bitnami/redis/mounted-etc/{{REDIS_password_file if REDIS_password_file is defined and REDIS_password_file and REDIS_password_file | length else omit }}
     {% endif -%}   {# not REDIS_allow_empty_password and REDIS_password or REDIS_PASSWORD_FILE #}
-      - REDIS_ACLFILE=/{{REDIS_aclfile if REDIS_aclfile is defined and REDIS_aclfile and REDIS_aclfile | length else omit }}
-      - REDIS_AOF_ENABLED={{'yes' if REDIS_aof_enable else omit }}
-      - REDIS_RDB_POLICY={{REDIS_rdb_save_policy if REDIS_rdb_enable and REDIS_rdb_save_policy is defined and REDIS_rdb_save_policy and REDIS_rdb_save_policy | length else omit}}
-      - REDIS_RDB_POLICY_DISABLED={{'yes' if not REDIS_rdb_enable else omit }}
-      - REDIS_IO_THREADS={{REDIS_io_threads if REDIS_io_threads is defined and REDIS_io_threads and REDIS_io_threads | length and REDIS_io_threads > 0 else omit }}
-      - REDIS_IO_THREADS_DO_READS={{'yes' if REDIS_io_threads_do_reads_enable else omit }}
+      - {{'REDIS' if REDIS_edition | lower == 'redis' else 'VALKEY'}}_ACLFILE=/{{REDIS_aclfile if REDIS_aclfile is defined and REDIS_aclfile and REDIS_aclfile | length else omit }}
+      - {{'REDIS' if REDIS_edition | lower == 'redis' else 'VALKEY'}}_AOF_ENABLED={{'yes' if REDIS_aof_enable else omit }}
+      - {{'REDIS' if REDIS_edition | lower == 'redis' else 'VALKEY'}}_RDB_POLICY={{REDIS_rdb_save_policy if REDIS_rdb_enable and REDIS_rdb_save_policy is defined and REDIS_rdb_save_policy and REDIS_rdb_save_policy | length else omit}}
+      - {{'REDIS' if REDIS_edition | lower == 'redis' else 'VALKEY'}}_RDB_POLICY_DISABLED={{'yes' if not REDIS_rdb_enable else omit }}
+      - {{'REDIS' if REDIS_edition | lower == 'redis' else 'VALKEY'}}_IO_THREADS={{REDIS_io_threads if REDIS_io_threads is defined and REDIS_io_threads and REDIS_io_threads | length and REDIS_io_threads > 0 else omit }}
+      - {{'REDIS' if REDIS_edition | lower == 'redis' else 'VALKEY'}}_IO_THREADS_DO_READS={{'yes' if REDIS_io_threads_do_reads_enable else omit }}
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
     {% if REDIS_overrides_config_file is defined and REDIS_overrides_config_file and REDIS_overrides_config_file | length %}
-      - ./custom-conf/redis/{{REDIS_overrides_config_file}}:/opt/bitnami/redis/mounted-etc/{{REDIS_overrides_config_file}}
+      - ./custom-conf/{{'redis' if REDIS_edition | lower == 'redis' else 'valkey'}}/{{REDIS_overrides_config_file}}:/opt/bitnami/{{'redis' if REDIS_edition | lower == 'redis' else 'valkey'}}/mounted-etc/{{REDIS_overrides_config_file}}
     {% endif %}    {% if REDIS_password_file is defined and REDIS_password_file and REDIS_password_file | length %}
-      - ./security/redis/{{REDIS_password_file}}:/opt/bitnami/redis/mounted-etc/{{REDIS_password_file}}
+      - ./security/{{'redis' if REDIS_edition | lower == 'redis' else 'valkey'}}/{{REDIS_password_file}}:/opt/bitnami/{{'redis' if REDIS_edition | lower == 'redis' else 'valkey'}}/mounted-etc/{{REDIS_password_file}}
     {% endif %}
     {% if REDIS_password_file is defined and REDIS_password_file and REDIS_password_file | length %}
-      - ./security/redis/{{REDIS_password_file}}:/opt/bitnami/redis/mounted-etc/{{REDIS_password_file}}
+      - ./security/{{'redis' if REDIS_edition | lower == 'redis' else 'valkey'}}/{{REDIS_password_file}}:/opt/bitnami/{{'redis' if REDIS_edition | lower == 'redis' else 'valkey'}}/mounted-etc/{{REDIS_password_file}}
     {% endif %}
     {% if REDIS_volume_map_data %}
-      - "./container-volume/redis/data/redis-replica-{{loop.index}}:/bitnami/redis/data"
+      - "./container-volume/{{'redis' if REDIS_edition | lower == 'redis' else 'valkey'}}/data/redis-replica-{{loop.index}}:/bitnami/{{'redis' if REDIS_edition | lower == 'redis' else 'valkey'}}/data"
     {% endif %}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
@@ -13281,11 +13281,11 @@ services:
     restart: {{container_restart_policy}}
     healthcheck:
     {% if not REDIS_allow_empty_password and REDIS_password is defined and REDIS_password and REDIS_password | length | default(false) %}
-      test: ["CMD-SHELL", "redis-cli --no-auth-warning -a \"$$(echo $$REDIS_PASSWORD)\" ping | grep PONG"]
+      test: ["CMD-SHELL", "{{'redis' if REDIS_edition | lower == 'redis' else 'valkey'}}-cli --no-auth-warning -a \"$$(echo $$REDIS_PASSWORD)\" ping | grep PONG"]
     {% elif not REDIS_allow_empty_password and REDIS_password_file is defined and REDIS_password_file and REDIS_password_file | length | default(false) %}
-      test: ["CMD-SHELL", "redis-cli --no-auth-warning -a \"$$(cat $$REDIS_PASSWORD_FILE)\" ping | grep PONG"]
+      test: ["CMD-SHELL", "{{'redis' if REDIS_edition | lower == 'redis' else 'valkey'}}-cli --no-auth-warning -a \"$$(cat $$REDIS_PASSWORD_FILE)\" ping | grep PONG"]
     {% else %}
-      test: ["CMD-SHELL", "redis-cli --no-auth-warning ping | grep PONG"]
+      test: ["CMD-SHELL", "{{'redis' if REDIS_edition | lower == 'redis' else 'valkey'}}-cli --no-auth-warning ping | grep PONG"]
     {% endif -%}   {# not REDIS_allow_empty_password and REDIS_password or REDIS_PASSWORD_FILE #}
       interval: 5s
       timeout: 3s
