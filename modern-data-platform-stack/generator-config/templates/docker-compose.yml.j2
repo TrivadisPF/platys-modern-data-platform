@@ -13452,7 +13452,7 @@ services:
       com.platys.name: "valkey"
       com.platys.description: "Key-value store"
     ports:
-      - 6379:6379
+      - {{ '6379' if VALKEY_use_redis_ports is defined and VALKEY_use_redis_ports else 6389}}:6379
     environment:
     {% if VALKEY_replicasets is defined and VALKEY_replicasets and VALKEY_replicasets > 0 %}
       - VALKEY_REPLICATION_MODE=master
@@ -13510,7 +13510,8 @@ services:
       interval: 5s
       timeout: 3s
       retries: 5
-
+    
+  {% set external_base_port = 6380 if VALKEY_use_redis_ports is defined and VALKEY_use_redis_ports else 6390 %}
   {% for num in range(VALKEY_replicasets| default(0) ) %}
     {% set external_port = 6380 + loop.index - 1 %}
   valkey-replica-{{loop.index}}:

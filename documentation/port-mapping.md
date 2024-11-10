@@ -143,6 +143,10 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 6385 | 6379 | redash-redis |
 6386 | 6379 | tyk-redis |
 6387 | 6379 | ragflow-redis |
+6389 | 6379 | valkey-1 (if not redis ports are used) |
+6390 | 6379 | valkey-replica-1 |
+6391 | 6379 | valkey-replica-2 |
+6392 | 6379 | valkey-replica-3 |
 6570 | 6570 | hserver-1 |
 6831 | 6831 | jaeger (udp) |
 6749 | 6749 | curity |
