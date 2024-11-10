@@ -13180,7 +13180,7 @@ services:
     {% elif not REDIS_allow_empty_password and REDIS_password_file is defined and REDIS_password_file and REDIS_password_file | length | default(false) %}
       - REDIS_PASSWORD_FILE=/opt/bitnami/redis/mounted-etc/{{REDIS_password_file if REDIS_password_file is defined and REDIS_password_file and REDIS_password_file | length else omit }}
     {% endif -%}   {# not REDIS_allow_empty_password and REDIS_password or REDIS_PASSWORD_FILE #}
-      - REDIS_ACL_FILE=/{{REDIS_acl_file if REDIS_acl_file is defined and REDIS_acl_file and REDIS_acl_file | length else omit }}
+      - REDIS_ACLFILE=/{{REDIS_aclfile if REDIS_aclfile is defined and REDIS_aclfile and REDIS_aclfile | length else omit }}
       - REDIS_AOF_ENABLED={{'yes' if REDIS_aof_enable else omit }}
       - REDIS_RDB_POLICY={{REDIS_rdb_save_policy if REDIS_rdb_enable and REDIS_rdb_save_policy is defined and REDIS_rdb_save_policy and REDIS_rdb_save_policy | length else omit}}
       - REDIS_RDB_POLICY_DISABLED={{'yes' if not REDIS_rdb_enable else omit }}
@@ -13197,8 +13197,8 @@ services:
     {% if REDIS_password_file is defined and REDIS_password_file and REDIS_password_file | length %}
       - ./security/redis/{{REDIS_password_file}}:/opt/bitnami/redis/mounted-etc/{{REDIS_password_file}}
     {% endif %}
-    {% if REDIS_acl_file is defined and REDIS_acl_file and REDIS_acl_file | length %}
-      - ./security/redis/{{REDIS_acl_file}}:/opt/bitnami/redis/mounted-etc/{{REDIS_acl_file}}
+    {% if REDIS_aclfile is defined and REDIS_aclfile and REDIS_aclfile | length %}
+      - ./security/redis/{{REDIS_aclfile}}:/opt/bitnami/redis/mounted-etc/{{REDIS_aclfile}}
     {% endif %}
     {% if REDIS_volume_map_data %}
       - "./container-volume/redis/data:/bitnami/redis/data"
@@ -13249,7 +13249,7 @@ services:
     {% elif not REDIS_allow_empty_password and REDIS_password_file is defined and REDIS_password_file and REDIS_password_file | length | default(false) %}
       - REDIS_PASSWORD_FILE=/opt/bitnami/redis/mounted-etc/{{REDIS_password_file if REDIS_password_file is defined and REDIS_password_file and REDIS_password_file | length else omit }}
     {% endif -%}   {# not REDIS_allow_empty_password and REDIS_password or REDIS_PASSWORD_FILE #}
-      - REDIS_ACL_FILE=/{{REDIS_acl_file if REDIS_acl_file is defined and REDIS_acl_file and REDIS_acl_file | length else omit }}
+      - REDIS_ACLFILE=/{{REDIS_aclfile if REDIS_aclfile is defined and REDIS_aclfile and REDIS_aclfile | length else omit }}
       - REDIS_AOF_ENABLED={{'yes' if REDIS_aof_enable else omit }}
       - REDIS_RDB_POLICY={{REDIS_rdb_save_policy if REDIS_rdb_enable and REDIS_rdb_save_policy is defined and REDIS_rdb_save_policy and REDIS_rdb_save_policy | length else omit}}
       - REDIS_RDB_POLICY_DISABLED={{'yes' if not REDIS_rdb_enable else omit }}
@@ -13452,22 +13452,22 @@ services:
       com.platys.name: "valkey"
       com.platys.description: "Key-value store"
     ports:
-      - {{ '6379' if VALKEY_use_redis_ports is defined and VALKEY_use_redis_ports else 6389}}:6379
+      - {{ '6379' if VALKEY_use_redis_reserved_ports is defined and VALKEY_use_redis_reserved_ports else 6389}}:6379
     environment:
     {% if VALKEY_replicasets is defined and VALKEY_replicasets and VALKEY_replicasets > 0 %}
-      - VALKEY_REPLICATION_MODE=master
+      - VALKEY_REPLICATION_MODE=primary
     {% endif -%}   {#  VALKEY_replicasets > 0 #}
       - VALKEY_PORT_NUMBER=6379
       - ALLOW_EMPTY_PASSWORD={{'yes' if VALKEY_allow_empty_password else 'no' }}
     {% if VALKEY_disable_commands is defined and VALKEY_disable_commands | default(false) %}
-      - DISABLE_COMMANDS={{VALKEY_disable_commands | default(omit) }}
+      - VALKEY_DISABLE_COMMANDS={{VALKEY_disable_commands | default(omit) }}
     {% endif -%}   {# VALKEY_disable_commands #}
     {% if not VALKEY_allow_empty_password and VALKEY_password is defined and VALKEY_password and VALKEY_password | length | default(false) %}
       - VALKEY_PASSWORD={{VALKEY_password if VALKEY_password is defined and VALKEY_password and VALKEY_password | length else omit}}
     {% elif not VALKEY_allow_empty_password and VALKEY_password_file is defined and VALKEY_password_file and VALKEY_password_file | length | default(false) %}
-      - VALKEY_PASSWORD_FILE=/opt/bitnami/redis/mounted-etc/{{VALKEY_password_file if VALKEY_password_file is defined and VALKEY_password_file and VALKEY_password_file | length else omit }}
+      - VALKEY_PASSWORD_FILE=/opt/bitnami/valkey/mounted-etc/{{VALKEY_password_file if VALKEY_password_file is defined and VALKEY_password_file and VALKEY_password_file | length else omit }}
     {% endif -%}   {# not VALKEY_allow_empty_password and VALKEY_password or VALKEY_PASSWORD_FILE #}
-      - VALKEY_ACL_FILE=/{{VALKEY_acl_file if VALKEY_acl_file is defined and VALKEY_acl_file and VALKEY_acl_file | length else omit }}
+      - VALKEY_ACLFILE=/{{VALKEY_aclfile if VALKEY_aclfile is defined and VALKEY_aclfile and VALKEY_aclfile | length else omit }}
       - VALKEY_AOF_ENABLED={{'yes' if VALKEY_aof_enable else omit }}
       - VALKEY_RDB_POLICY={{VALKEY_rdb_save_policy if VALKEY_rdb_enable and VALKEY_rdb_save_policy is defined and VALKEY_rdb_save_policy and VALKEY_rdb_save_policy | length else omit}}
       - VALKEY_RDB_POLICY_DISABLED={{'yes' if not VALKEY_rdb_enable else omit }}
@@ -13479,16 +13479,16 @@ services:
     volumes:
       - ./data-transfer:/data-transfer
     {% if VALKEY_overrides_config_file is defined and VALKEY_overrides_config_file and VALKEY_overrides_config_file | length %}
-      - ./custom-conf/redis/{{VALKEY_overrides_config_file}}:/opt/bitnami/redis/mounted-etc/{{VALKEY_overrides_config_file}}
+      - ./custom-conf/valkey/{{VALKEY_overrides_config_file}}:/opt/bitnami/valkey/mounted-etc/{{VALKEY_overrides_config_file}}
     {% endif %}
     {% if VALKEY_password_file is defined and VALKEY_password_file and VALKEY_password_file | length %}
-      - ./security/redis/{{VALKEY_password_file}}:/opt/bitnami/redis/mounted-etc/{{VALKEY_password_file}}
+      - ./security/valkey/{{VALKEY_password_file}}:/opt/bitnami/valkey/mounted-etc/{{VALKEY_password_file}}
     {% endif %}
-    {% if VALKEY_acl_file is defined and VALKEY_acl_file and VALKEY_acl_file | length %}
-      - ./security/redis/{{VALKEY_acl_file}}:/opt/bitnami/redis/mounted-etc/{{VALKEY_acl_file}}
+    {% if VALKEY_aclfile is defined and VALKEY_aclfile and VALKEY_aclfile | length %}
+      - ./security/valkey/{{VALKEY_aclfile}}:/opt/bitnami/valkey/mounted-etc/{{VALKEY_aclfile}}
     {% endif %}
     {% if VALKEY_volume_map_data %}
-      - "./container-volume/redis/data:/bitnami/redis/data"
+      - "./container-volume/valkey/data:/bitnami/valkey/data"
     {% endif %}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
@@ -13497,21 +13497,21 @@ services:
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
-    command: /opt/bitnami/scripts/redis/run.sh --loglevel {{VALKEY_log_level}}
+    command: /opt/bitnami/scripts/valkey/run.sh --loglevel {{VALKEY_log_level}}
     restart: {{container_restart_policy}}
     healthcheck:
     {% if not VALKEY_allow_empty_password and VALKEY_password is defined and VALKEY_password and VALKEY_password | length | default(false) %}
-      test: ["CMD-SHELL", "redis-cli --no-auth-warning -a \"$$(echo $$VALKEY_PASSWORD)\" ping | grep PONG"]
+      test: ["CMD-SHELL", "valkey-cli --no-auth-warning -a \"$$(echo $$VALKEY_PASSWORD)\" ping | grep PONG"]
     {% elif not VALKEY_allow_empty_password and VALKEY_password_file is defined and VALKEY_password_file and VALKEY_password_file | length | default(false) %}
-      test: ["CMD-SHELL", "redis-cli --no-auth-warning -a \"$$(cat $$VALKEY_PASSWORD_FILE)\" ping | grep PONG"]
+      test: ["CMD-SHELL", "valkey-cli --no-auth-warning -a \"$$(cat $$VALKEY_PASSWORD_FILE)\" ping | grep PONG"]
     {% else %}
-      test: ["CMD-SHELL", "redis-cli --no-auth-warning ping | grep PONG"]
+      test: ["CMD-SHELL", "valkey-cli --no-auth-warning ping | grep PONG"]
     {% endif -%}   {# not VALKEY_allow_empty_password and VALKEY_password or VALKEY_PASSWORD_FILE #}
       interval: 5s
       timeout: 3s
       retries: 5
     
-  {% set external_base_port = 6380 if VALKEY_use_redis_ports is defined and VALKEY_use_redis_ports else 6390 %}
+  {% set external_base_port = 6380 if VALKEY_use_redis_reserved_ports is defined and VALKEY_use_redis_reserved_ports else 6390 %}
   {% for num in range(VALKEY_replicasets| default(0) ) %}
     {% set external_port = 6380 + loop.index - 1 %}
   valkey-replica-{{loop.index}}:
@@ -13524,20 +13524,20 @@ services:
     ports:
       - {{external_port}}:6379
     environment:
-      - VALKEY_REPLICATION_MODE=slave
-      - VALKEY_MASTER_HOST=valkey-1
-      - VALKEY_MASTER_PORT_NUMBER=6379
-      - VALKEY_MASTER_PASSWORD={{VALKEY_password | default(omit) }}
+      - VALKEY_REPLICATION_MODE=replica
+      - VALKEY_PRIMARY_HOST=valkey-1
+      - VALKEY_PRIMARY_PORT_NUMBER=6379
+      - VALKEY_PRIMARY_PASSWORD={{VALKEY_password | default(omit) }}
       - ALLOW_EMPTY_PASSWORD={{'yes' if VALKEY_allow_empty_password else 'no' }}
     {% if VALKEY_disable_commands is defined and VALKEY_disable_commands | default(false) %}
-      - DISABLE_COMMANDS={{VALKEY_disable_commands | default(omit) }}
+      - VALKEY_DISABLE_COMMANDS={{VALKEY_disable_commands | default(omit) }}
     {% endif -%}   {# VALKEY_disable_commands #}
     {% if not VALKEY_allow_empty_password and VALKEY_password is defined and VALKEY_password and VALKEY_password | length | default(false) %}
       - VALKEY_PASSWORD={{VALKEY_password if VALKEY_password is defined and VALKEY_password and VALKEY_password | length else omit}}
     {% elif not VALKEY_allow_empty_password and VALKEY_password_file is defined and VALKEY_password_file and VALKEY_password_file | length | default(false) %}
-      - VALKEY_PASSWORD_FILE=/opt/bitnami/redis/mounted-etc/{{VALKEY_password_file if VALKEY_password_file is defined and VALKEY_password_file and VALKEY_password_file | length else omit }}
+      - VALKEY_PASSWORD_FILE=/opt/bitnami/valkey/mounted-etc/{{VALKEY_password_file if VALKEY_password_file is defined and VALKEY_password_file and VALKEY_password_file | length else omit }}
     {% endif -%}   {# not VALKEY_allow_empty_password and VALKEY_password or VALKEY_PASSWORD_FILE #}
-      - VALKEY_ACL_FILE=/{{VALKEY_acl_file if VALKEY_acl_file is defined and VALKEY_acl_file and VALKEY_acl_file | length else omit }}
+      - VALKEY_ACLFILE=/{{VALKEY_aclfile if VALKEY_aclfile is defined and VALKEY_aclfile and VALKEY_aclfile | length else omit }}
       - VALKEY_AOF_ENABLED={{'yes' if VALKEY_aof_enable else omit }}
       - VALKEY_RDB_POLICY={{VALKEY_rdb_save_policy if VALKEY_rdb_enable and VALKEY_rdb_save_policy is defined and VALKEY_rdb_save_policy and VALKEY_rdb_save_policy | length else omit}}
       - VALKEY_RDB_POLICY_DISABLED={{'yes' if not VALKEY_rdb_enable else omit }}
@@ -13549,15 +13549,15 @@ services:
     volumes:
       - ./data-transfer:/data-transfer
     {% if VALKEY_overrides_config_file is defined and VALKEY_overrides_config_file and VALKEY_overrides_config_file | length %}
-      - ./custom-conf/redis/{{VALKEY_overrides_config_file}}:/opt/bitnami/redis/mounted-etc/{{VALKEY_overrides_config_file}}
+      - ./custom-conf/valkey/{{VALKEY_overrides_config_file}}:/opt/bitnami/valkey/mounted-etc/{{VALKEY_overrides_config_file}}
     {% endif %}    {% if VALKEY_password_file is defined and VALKEY_password_file and VALKEY_password_file | length %}
-      - ./security/redis/{{VALKEY_password_file}}:/opt/bitnami/redis/mounted-etc/{{VALKEY_password_file}}
+      - ./security/valkey/{{VALKEY_password_file}}:/opt/bitnami/valkey/mounted-etc/{{VALKEY_password_file}}
     {% endif %}
     {% if VALKEY_password_file is defined and VALKEY_password_file and VALKEY_password_file | length %}
-      - ./security/redis/{{VALKEY_password_file}}:/opt/bitnami/redis/mounted-etc/{{VALKEY_password_file}}
+      - ./security/valkey/{{VALKEY_password_file}}:/opt/valkey/valkey/mounted-etc/{{VALKEY_password_file}}
     {% endif %}
     {% if VALKEY_volume_map_data %}
-      - "./container-volume/redis/data/redis-replica-{{loop.index}}:/bitnami/redis/data"
+      - "./container-volume/valkey/data/valkey-replica-{{loop.index}}:/bitnami/valkey/data"
     {% endif %}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
@@ -13569,11 +13569,11 @@ services:
     restart: {{container_restart_policy}}
     healthcheck:
     {% if not VALKEY_allow_empty_password and VALKEY_password is defined and VALKEY_password and VALKEY_password | length | default(false) %}
-      test: ["CMD-SHELL", "redis-cli --no-auth-warning -a \"$$(echo $$VALKEY_PASSWORD)\" ping | grep PONG"]
+      test: ["CMD-SHELL", "valkey-cli --no-auth-warning -a \"$$(echo $$VALKEY_PASSWORD)\" ping | grep PONG"]
     {% elif not VALKEY_allow_empty_password and VALKEY_password_file is defined and VALKEY_password_file and VALKEY_password_file | length | default(false) %}
-      test: ["CMD-SHELL", "redis-cli --no-auth-warning -a \"$$(cat $$VALKEY_PASSWORD_FILE)\" ping | grep PONG"]
+      test: ["CMD-SHELL", "valkey-cli --no-auth-warning -a \"$$(cat $$VALKEY_PASSWORD_FILE)\" ping | grep PONG"]
     {% else %}
-      test: ["CMD-SHELL", "redis-cli --no-auth-warning ping | grep PONG"]
+      test: ["CMD-SHELL", "valkey-cli --no-auth-warning ping | grep PONG"]
     {% endif -%}   {# not VALKEY_allow_empty_password and VALKEY_password or VALKEY_PASSWORD_FILE #}
       interval: 5s
       timeout: 3s
