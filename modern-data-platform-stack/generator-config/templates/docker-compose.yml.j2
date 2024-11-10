@@ -12115,7 +12115,7 @@ services:
 {%if RAGFLOW_enable | default(false) %}
   #  ================================== RAGFlow  ========================================== #
   ragflow:
-    image: infiniflow/ragflow:{{__RAGFLOW_version}}
+    image: trivadis/ragflow:{{__RAGFLOW_version}}{{'-dev' if RAGFLOW_edition == 'dev-slim'}}
     container_name: ragflow
     hostname: ragflow
     labels:
@@ -12142,12 +12142,24 @@ services:
       - MACOS={{'1' if RAGFLOW_use_macos_optimization else omit}}
       - DB_TYPE={{RAGFLOW_db_type | default("mysql")}}
       - STORAGE_IMPL=MINIO
+      - MYSQL_HOST=mysql
+      - MYSQL_USER=ragflow
+      - MYSQL_PASSWORD=abc123!
+      - MYSQL_DBNAME=ragflow_db
+      - ES_HOST=elasticsearch-1
+      - ES_USER=elastic
+      - ES_PASSWORD=abc123!
+      - REDIS_HOST=ragflow-redis
+      - REDIS_PASSWORD=${PLATYS_RAGFLOW_REDIS_PASSWORD:-{{RAGFLOW_redis_password}}}
+      - MINIO_HOST=minio-1
+      - MINIO_USER=admin
+      - MINIO_PASSWORD=abc123abc123!
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
-      - ./conf/ragflow/service_conf.yaml:/ragflow/conf/service_conf.yaml
+#      - ./conf/ragflow/service_conf.yaml:/ragflow/conf/service_conf.yaml
       - ./conf/ragflow/nginx/ragflow.conf:/etc/nginx/conf.d/ragflow.conf
       - ./conf/ragflow/nginx/proxy.conf:/etc/nginx/proxy.conf
       - ./conf/ragflow/nginx/nginx.conf:/etc/nginx/nginx.conf
