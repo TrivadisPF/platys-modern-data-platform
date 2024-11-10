@@ -102,6 +102,7 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Refactored Zeppelin to use the Dockerfile provided by the Apache Zeppelin project
  * Option to overrite the Postgres standard, official image by one with an additional extension, such as `PGVector` or `age` or with your own docker image
  * Support for the deployment of Dataverse previewers added (see `DATAVERSE_previewers_xxxx` config settings)
+ * Support for `valkey` as an edition to the Redis service, to use Valkey (the fork of Redis with open source license) to use as a drop-in replacement
 
 ### Breaking Changes
 
