@@ -69,7 +69,7 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Update `starburstdata` to `453-e.4`
  * Update `prestodb` to `0.286`
  * Update `ahana` to `0.286`
- * Update `dremio` to `24.2`
+ * Update `dremio` to `25.2`
  * Update `hasura` to `v2.38.1-ce`
  * Update `marquez` and `marquez-web` to `0.46.0`
  * Update `datastax` to `6.8.44`
