@@ -18723,8 +18723,10 @@ services:
       MINIO_ROOT_USER: {{s3AccessKey}}
       MINIO_ROOT_PASSWORD: {{s3SecretAccessKey}}
       MINIO_REGION_NAME: {{s3DefaultRegion if s3DefaultRegion is defined and s3DefaultRegion else omit}}
+      MINIO_REGION: {{s3DefaultRegion if s3DefaultRegion is defined and s3DefaultRegion else omit}}
       MINIO_DOMAIN: minio
       MINIO_SERVER_URL: "http://${PUBLIC_IP}:9000"
+      MINIO_COMPRESSION_ENABLE: "off"
       MINIO_PROMETHEUS_AUTH_TYPE: public
       MINIO_PROMETHEUS_URL: "http://prometheus-1:9090"
     {% if MINIO_key_encryption_service_enable | default(false) %}
@@ -18837,12 +18839,10 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
     healthcheck:
-      test:
-        - CMD-SHELL
-        - bash -c 'printf \"GET / HTTP/1.1\n\n\" > /dev/tcp/127.0.0.1/9000; exit $$?;'
-      interval: 1s
-      timeout: 5s
-      retries: 5
+      test: ["CMD", "curl", "-f", "http://minio-1:9000/minio/health/live"]
+      interval: 15s
+      timeout: 20s
+      retries: 3
   {% endfor %}
 
   #  ================================== Minio MC ========================================== #
@@ -19373,8 +19373,8 @@ services:
       com.platys.description: "Git-Like Data Version Control"
       com.platys.webui.title: "Nessie UI"
       com.platys.webui.url: "http://dataplatform:19120"
-      com.platys.restapi.title: "Nessie Swagger UI"
-      com.platys.restapi.url: "http://dataplatform:19120/q/swagger-ui"
+      com.platys.restapi.title: "Nessie REST API"
+      com.platys.restapi.url: "http://dataplatform:19120/api/v2/trees"
     depends_on:
       markdown-viewer:
         condition: service_healthy      
@@ -19400,12 +19400,16 @@ services:
       # Management port (metrics and health checks)
       - 19121:9000    
     environment:
+      - QUARKUS_PROFILE=prod
+      - QUARKUS_HTTP_PORT=19120
+      - QUARKUS_LOG_CONSOLE_FORMAT=%d{yyyy-MM-dd HH:mm:ss} %-5p [%c{1.}] (%t) %s%e%n
+      - QUARKUS_LOG_LEVEL=INFO      
       - NESSIE_SERVER_DEFAULT_BRANCH=main
     {%if NESSIE_store_type == 'in-memory' %}
       - NESSIE_VERSION_STORE_TYPE=IN_MEMORY
     {%elif NESSIE_store_type == 'rocksdb' %}
       - NESSIE_VERSION_STORE_TYPE=ROCKSDB
-      - NESSIE_VERSION_STORE_PERSIST_ROCKS_DATABASE_PATH=/nessie-rocks
+      - NESSIE_VERSION_STORE_PERSIST_ROCKS_DATABASE_PATH=nessie-rocksdb
       - NESSIE_VERSION_STORE_PERSIST_CACHE_CAPACITY_MB=1024 
       - NESSIE_VERSION_STORE_PERSIST_COMMIT_TIMEOUT_MILLIS=10000
     {%elif NESSIE_store_type == 'mongodb' %}
