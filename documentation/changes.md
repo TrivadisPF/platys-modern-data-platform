@@ -94,7 +94,7 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Update `airflow` to `2.10.2`
  * Update `marquez` to `0.49.0`
  * Update `spark` to `3.5.3`
- * Update `projectnessie` to `0.99.0`
+ * Update `projectnessie` to `0.100.0`
 
 ### Enhancements
 
