@@ -20547,6 +20547,11 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
+    healthcheck:
+      test: "exec 3<>/dev/tcp/localhost/9000 && echo -e 'GET /health/ready HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n' >&3 && cat <&3 | grep -q '200 OK'"
+      interval: 5s
+      timeout: 2s
+      retries: 15    
 {% endif %}   {#  X4_SERVER_enable #}
 
 {% if IOEVENT_COCKPIT_enable | default(false) %}
@@ -21307,6 +21312,11 @@ services:
       - --http-port=28204   # change port to 8090, so within the network and external the same port is used
     {% endif -%}   {#  KEYCLOAK_import_realm_enable #}
     restart: {{container_restart_policy}}
+    healthcheck:
+      test: "exec 3<>/dev/tcp/localhost/9000 && echo -e 'GET /health/ready HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n' >&3 && cat <&3 | grep -q '200 OK'"
+      interval: 5s
+      timeout: 2s
+      retries: 15    
 {% endif %}   {#  KEYCLOAK_enable #}
 
 {% if AUTHELIA_enable | default(false) %}
