@@ -18715,10 +18715,12 @@ services:
       com.platys.name: "minio"
       com.platys.description: "Software-defined Object Storage"
       com.platys.webui.title: "MinIO UI"
-      com.platys.webui.url: "http://dataplatform:9000"
+      com.platys.webui.url: "http://dataplatform:{{uiport}}"
       com.platys.password.envvars: "PLATYS_AWS_SECRET_ACCESS_KEY"
     ports:
+      # S3 API Port
       - '{{port}}:9000'
+      # UI Port
       - '{{uiport}}:{{uiport}}'
     environment:
       MINIO_ROOT_USER: {{s3AccessKey}}
@@ -19416,7 +19418,7 @@ services:
       - NESSIE_VERSION_STORE_TYPE=IN_MEMORY
     {%elif NESSIE_store_type == 'rocksdb' %}
       - NESSIE_VERSION_STORE_TYPE=ROCKSDB
-      - NESSIE_VERSION_STORE_PERSIST_ROCKS_DATABASE_PATH=nessie-rocksdb
+      - NESSIE_VERSION_STORE_PERSIST_ROCKS_DATABASE_PATH=/nessie/data
       - NESSIE_VERSION_STORE_PERSIST_CACHE_CAPACITY_MB=1024 
       - NESSIE_VERSION_STORE_PERSIST_COMMIT_TIMEOUT_MILLIS=10000
     {%elif NESSIE_store_type == 'mongodb' %}
@@ -19474,6 +19476,9 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
+    {% if NESSIE_volume_map_data | default(false) %}
+      - ./container-volume/nessie/data:/nessie/data
+    {% endif -%} {# NESSIE_volume_map_data #}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
