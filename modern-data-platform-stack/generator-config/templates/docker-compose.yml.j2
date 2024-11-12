@@ -19379,11 +19379,29 @@ services:
       # API port    
       - 19120:19120
       # Management port (metrics and health checks)
-      - 19121:9000   
+      - 19121:9000
+    depends_on:
+      markdown-viewer
+    {%if POSTGRESQL_enable | default(false) %}
+      postgresql:
+        condition: service_healthy
+    {% endif %}          
+    {%if MYSQL_enable | default(false) %}
+      mysql:
+        condition: service_healthy
+    {% endif %}          
+    {%if MINIO_enable or external['S3_enable'] | default(false) %}
+      minio-1:
+        condition: service_healthy
+    {% endif %}          
+    {%if KEYCLOAK_enable | default(false) %}
+      keycloak:
+        condition: service_healthy         
+    {% endif %}          
     environment:
       - NESSIE_SERVER_DEFAULT_BRANCH=main
     {%if NESSIE_store_type == 'in-memory' %}
-      - NESSIE_VERSION_STORE_TYPE=INMEMORY
+      - NESSIE_VERSION_STORE_TYPE=IN-MEMORY
     {%elif NESSIE_store_type == 'rocksdb' %}
       - NESSIE_VERSION_STORE_TYPE=ROCKSDB
       - NESSIE_VERSION_STORE_PERSIST_ROCKS_DATABASE_PATH=/nessie-rocks
