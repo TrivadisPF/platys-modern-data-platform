@@ -18879,6 +18879,12 @@ services:
         eval "echo \"$$(cat /tmp/credentials.templ)\"" >> /tmp/.aws/credentials
         mc alias set minio-1 http://minio-1:9000 {{MINIO_access_key}} {{MINIO_secret_key}}
         mc mb --ignore-existing minio-1/{{s3AdminBucketName}}
+    {% if MINIO_upload_data_transfer_to_bucket_enabled | default(false) %}
+        mc mb --ignore-existing minio-1/{{MINIO_upload_data_transfer_bucket_name | default("data-transfer-bucket")}};
+        for subfolder in $$(tr ',' '\n' <<< "{{MINIO_upload_data_transfer_subfolders}}")
+          mc cp --recursive /data-transfer/{{MINIO_upload_data_transfer_bucket_name | default("data-transfer-bucket")}} minio-1/{{MINIO_upload_data_transfer_bucket_name | default("data-transfer-bucket")}}/; 
+        done
+    {% endif %}   {#  MINIO_provide_data_transfer_as_bucket #}
     {% if MLFLOW_SERVER_enable | default(false) %}
         mc mb --ignore-existing minio-1/mlruns
     {% endif %}   {#  MLFLOW_SERVER_enable #}
