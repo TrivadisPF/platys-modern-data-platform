@@ -344,6 +344,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 19098 | 19098 | kafka-7 (docker-host)   |
 19099 | 19099 | kafka-8 (docker-host)   |
 19120 | 19120 | nessie |
+19121 | 9000 | nessie (management port) |
 19630 | 19630 | streamsets-transformer-1 |
 19631 | 19630 | streamsets-transformer-1 |
 19632 | 19630 | streamsets-transformer-1 |
