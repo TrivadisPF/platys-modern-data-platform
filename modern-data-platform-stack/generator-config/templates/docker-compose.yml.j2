@@ -547,6 +547,7 @@ networks:
 {% set __FILE_BROWSER_version = FILE_BROWSER_version | default('latest') -%}
 {% set __VAULT_version = VAULT_version | default('latest') -%}
 {% set __KEYCLOAK_version = KEYCLOAK_version | default('latest') -%}
+{% set __AUTHELIA_version = AUTHELIA_version | default('latest') -%}
 {% set __MOCK_SERVER_version = MOCK_SERVER_version | default('latest') -%}
 {% set __ETCD_version = ETCD_version | default('latest') -%}
 {% set __ETCD_BROWSER_version = ETCD_BROWSER_version | default('latest') -%}
@@ -21307,6 +21308,42 @@ services:
     {% endif -%}   {#  KEYCLOAK_import_realm_enable #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  KEYCLOAK_enable #}
+
+{% if AUTHELIA_enable | default(false) %}
+  #  ================================== Authelia ================= #
+  authelia:
+    image: authelia/authelia:{{__AUTHELIA_version}}
+    hostname: authelia
+    container_name: authelia
+    labels:
+      com.platys.name: "authelia"
+      com.platys.description: "Identity and Access Management"
+      com.platys.webui.title: "Authelia UI"
+      com.platys.webui.url: "https://dataplatform:28399"
+    ports:
+      - "28399:9091"
+    environment:
+      X_AUTHELIA_CONFIG_FILTERS: template
+      X_AUTHELIA_HEALTHCHECK: "1"
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./conf/authelia/configuration.yml:/config/configuration.yml
+      - ./security/authelia/key.pem:/config/key.pem
+      - ./security/authelia/users.yml:/config/users.yml
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+    healthcheck:
+      test: "healthcheck.sh"
+      interval: 5s
+      timeout: 2s
+      retries: 15    
+{% endif %}   {#  AUTHELIA_enable #}
 
 {% if POSTMAN_enable | default(false) %}
   #  ================================== Postman ================= #

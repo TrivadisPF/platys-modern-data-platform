@@ -669,6 +669,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28396 | 80 | ragflow  |
 28397 | 443 | ragflow |
 28398 | 5678 | ragflow |
+28399 | 9091 | authelia |
 
 ## Ports > 28500
 

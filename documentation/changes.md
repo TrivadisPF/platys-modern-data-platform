@@ -36,6 +36,7 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Unity Catalog & Unity Catalog UI
  * RAGFlow
  * Valkey
+ * Authelia
 
 ### Version upgrades
 
