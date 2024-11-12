@@ -379,6 +379,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 29200 | 9200 | opensearch-1 |
 29600 | 9600 | opensearch-1 |
 31010 | 31010 | dremio |
+32010 | 32010 | dremio |
 39092 | 29092 | kafka-1 (localhost)   |
 39093 | 29093 | kafka-2 (localhost    |
 39094 | 29094 | kafka-3 (localhost)   |
