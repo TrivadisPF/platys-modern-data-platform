@@ -117,6 +117,7 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * change default value for `TRINO_edition` to `oss`
  * NiFi extensions now need to be listed using property `NIFI_extensions`
  * `dataverse` port changed to `28394` (used to be `28294` and by taht conflicting with `ckan`)
+ * Support for Spark versions `2.4`, `3.1` and `3.2` removed
  
 ## What's new in 1.17.1
 
