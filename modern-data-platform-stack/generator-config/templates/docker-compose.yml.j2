@@ -17479,6 +17479,7 @@ services:
       HIVE_VIEWS_ENABLED: '{{'true' if TRINO_hive_views_enabled else 'false'}}'
       HIVE_RUN_AS_INVOKER: '{{'true' if TRINO_hive_run_as_invoker else 'false'}}'
       HIVE_LEGACY_TRANSLATION: '{{'true' if TRINO_hive_legacy_translation else 'false'}}'
+      NESSIE_CATALOG_WAREHOUSE_DIR: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined and SPARK_sql_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/nessie/warehouse'}}
   {% endif %}
   {%if external['ADLS_enable'] | default(false) %}
       ADLS_STORAGE_ACCOUNT: {{adlsStorageAccount | default(omit) }}
@@ -17568,6 +17569,10 @@ services:
       - './conf/{{conf_dir}}/catalog/iceberg-rest.properties:{{trino_etc_dir}}/catalog/iceberg-rest.properties'
     {%if SPARK_table_format_type == 'iceberg' | default(false) %}
       - './conf/{{conf_dir}}/catalog/iceberg.properties:{{trino_etc_dir}}/catalog/iceberg.properties'
+      {%if NESSIE_enable | default(false) %}
+      - './conf/{{conf_dir}}/catalog/iceberg-nessie.properties:{{trino_etc_dir}}/catalog/iceberg-nessie.properties'
+      - './conf/{{conf_dir}}/catalog/iceberg-rest.properties:{{trino_etc_dir}}/catalog/iceberg-rest.properties'
+      {% endif %}
     {%elif SPARK_table_format_type == 'delta' | default(false) %}
       - './conf/{{conf_dir}}/catalog/delta.properties:{{trino_etc_dir}}/catalog/delta.properties'
     {%elif SPARK_table_format_type == 'hudi' | default(false) %}
@@ -17704,6 +17709,7 @@ services:
       S3_PATH_STYLE_ACCESS: '{{s3PathStyleAccess}}'
       HIVE_STORAGE_FORMAT: '{{TRINO_hive_storage_format if TRINO_hive_storage_format is defined and TRINO_hive_storage_format | length else omit}}'
       HIVE_COMPRESSION_CODEC: '{{TRINO_hive_compression_codec if TRINO_hive_compression_codec is defined and TRINO_hive_compression_codec | length else omit}}'
+      NESSIE_CATALOG_WAREHOUSE_DIR: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined and SPARK_sql_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/nessie/warehouse'}}
   {% endif %}
   {%if external['ADLS_enable'] | default(false) %}
       ADLS_STORAGE_ACCOUNT: {{adlsStorageAccount | default(omit) }}
@@ -17774,6 +17780,10 @@ services:
       - './conf/{{conf_dir}}/catalog/minio.properties:{{trino_etc_dir}}/catalog/minio.properties'
     {%if SPARK_table_format_type == 'iceberg' | default(false) %}
       - './conf/{{conf_dir}}/catalog/iceberg.properties:{{trino_etc_dir}}/catalog/iceberg.properties'
+      {%if NESSIE_enable | default(false) %}
+      - './conf/{{conf_dir}}/catalog/iceberg-nessie.properties:{{trino_etc_dir}}/catalog/iceberg-nessie.properties'
+      - './conf/{{conf_dir}}/catalog/iceberg-rest.properties:{{trino_etc_dir}}/catalog/iceberg-rest.properties'
+      {% endif %}
     {%elif SPARK_table_format_type == 'delta' | default(false) %}
       - './conf/{{conf_dir}}/catalog/delta.properties:{{trino_etc_dir}}/catalog/delta.properties'
     {%elif SPARK_table_format_type == 'hudi' | default(false) %}
