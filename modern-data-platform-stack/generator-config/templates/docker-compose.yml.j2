@@ -19364,9 +19364,19 @@ services:
     depends_on:
       {{'- postgresql' if LAKEFS_database_type is defined and LAKEFS_database_type == 'postgresql' else omit}}
     environment:
+      # possible config settings can be found here: https://docs.lakefs.io/reference/configuration.html#reference
+    {%if LAKEFS_database_type == 'local' %}
+      LAKEFS_DATABASE_TYPE: local
+      LAKEFS_DATABASE_LOCAL_PATH: '/home/lakefs/metadata'
+      LAKEFS_DATABASE_LOCAL_ENABLE_LOGGING: false
+    {%elif LAKEFS_database_type == 'postgresql' %}
+      LAKEFS_DATABASE_TYPE: postgres
+      LAKEFS_DATABASE_POSTGRES_CONNECTION_STRING: "postgres://{{POSTGRESQL_user}}:{{POSTGRESQL_password}}@postgresql:5432/{{POSTGRESQL_database}}"
+    {% endif -%}   {#  LAKEFS_database_type #}
       LAKEFS_BLOCKSTORE_TYPE: {{LAKEFS_blockstore_type | default(local) }}
     {%if LAKEFS_blockstore_type == 'local' %}
-      LAKEFS_BLOCKSTORE_LOCAL_PATH: '/home/lakefs'
+      LAKEFS_BLOCKSTORE_LOCAL_PATH: '/home/lakefs/data'
+      LAKEFS_BLOCKSTORE_LOCAL_IMPORT_ENABLED: {{LAKEFS_blockstore_local_import_enabled | default(false)}}
     {%elif LAKEFS_blockstore_type == 's3' %}
       LAKEFS_BLOCKSTORE_S3_ENDPOINT: {{s3EndpointStorage if s3EndpointStorage is defined and s3EndpointStorage else omit}}
       LAKEFS_BLOCKSTORE_S3_REGION: {{s3DefaultRegion if s3DefaultRegion is defined and s3DefaultRegion else omit}}
@@ -19374,18 +19384,18 @@ services:
       LAKEFS_BLOCKSTORE_S3_FORCE_PATH_STYLE: '{{s3PathStyleAccess}}'
       LAKEFS_BLOCKSTORE_S3_CREDENTIALS_ACCESS_KEY_ID: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
       LAKEFS_BLOCKSTORE_S3_CREDENTIALS_SECRET_ACCESS_KEY: ${PLATYS_AWS_SECRET_ACCESS_KEY:-{{MINIO_secret_key}}}
+      LAKEFS_BLOCKSTORE_S3_CREDENTIALS_FILE: {{LAKEFS_blockstore_s3_credentials_file if LAKEFS_blockstore_s3_credentials_file is defined and LAKEFS_blockstore_s3_credentials_file | length else omit}}
     {% endif -%}   {#  LAKEFS_blockstore_type #}
-      LAKEFS_AUTH_ENCRYPT_SECRET_KEY: ${LAKEFS_AUTH_ENCRYPT_SECRET_KEY:-some random secret string}
-    {%if LAKEFS_database_type == 'local' %}
-      LAKEFS_DATABASE_TYPE: local
-    {%elif LAKEFS_database_type == 'postgresql' %}
-      LAKEFS_DATABASE_TYPE: postgres
-      LAKEFS_DATABASE_POSTGRES_CONNECTION_STRING: "postgres://{{POSTGRESQL_user}}:{{POSTGRESQL_password}}@postgresql:5432/{{POSTGRESQL_database}}"
-    {% endif -%}   {#  LAKEFS_database_type #}
+      LAKEFS_ACTIONS_ENABLED: {{LAKEFS_actions_enabled}}
+      LAKEFS_ACTIONS_LUA_NET_HTTP_ENABLED: {{LAKEFS_actions_lua_net_http_enabled}}
+      LAKEFS_ACTIONS_ENV_ENABLED: true
+      LAKEFS_ACTIONS_ENV_PREFIX: {{LAKEFS_actions_env_prefix if LAKEFS_actions_env_prefix is defined and LAKEFS_actions_env_prefix | length else 'LAKEFSACTION_'}}
+      LAKEFS_AUTH_ENCRYPT_SECRET_KEY: {{LAKEFS_auth_encrypt_secret_key | default ("some random secret string")}}
+      LAKEFS_LOGGING_FORMAT: text
       LAKEFS_LOGGING_LEVEL: {{LAKEFS_logging_level | default(INFO) }}
       LAKEFS_STATS_ENABLED: true
       LAKEFS_USAGE_REPORT_ENABLED: false
-      LAKEFS_COMMITTED_LOCAL_CACHE_DIR: {{LAKEFS_local_cache_dir | default("/home/lakefs/.local_tier") }}
+      LAKEFS_COMMITTED_LOCAL_CACHE_DIR: {{LAKEFS_commited_local_cache_dir if LAKEFS_commited_local_cache_dir is defined and LAKEFS_commited_local_cache_dir | length else omit }}
       LAKEFS_INSTALLATION_USER_NAME: {{LAKEFS_user_name | default(lakefs) }}
       LAKEFS_INSTALLATION_ACCESS_KEY_ID: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
       LAKEFS_INSTALLATION_SECRET_ACCESS_KEY: ${PLATYS_AWS_SECRET_ACCESS_KEY:-{{MINIO_secret_key}}}
@@ -19395,6 +19405,12 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
+    {% if LAKEFS_blockstore_type == 'local' and LAKEFS_volume_map_data | default(false) %}
+      - ./container-volume/lakefs/data:/home/lakefs/data
+    {% endif -%} {# LAKEFS_blockstore_type == 'local' and LAKEFS_volume_map_data #}      
+    {% if LAKEFS_database_type == 'local' and LAKEFS_volume_map_data | default(false) %}
+      - ./container-volume/lakefs/metadata:/home/lakefs/metadata
+    {% endif -%} {# NESSIE_volume_map_data #}      
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
