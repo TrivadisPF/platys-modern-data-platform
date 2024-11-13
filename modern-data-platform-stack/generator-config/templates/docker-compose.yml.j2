@@ -19396,9 +19396,11 @@ services:
       LAKEFS_STATS_ENABLED: true
       LAKEFS_USAGE_REPORT_ENABLED: false
       LAKEFS_COMMITTED_LOCAL_CACHE_DIR: {{LAKEFS_commited_local_cache_dir if LAKEFS_commited_local_cache_dir is defined and LAKEFS_commited_local_cache_dir != None and LAKEFS_commited_local_cache_dir | length else omit }}
+    {%if LAKEFS_database_type == 'local' %}
       LAKEFS_INSTALLATION_USER_NAME: {{LAKEFS_user_name | default(lakefs) }}
       LAKEFS_INSTALLATION_ACCESS_KEY_ID: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
       LAKEFS_INSTALLATION_SECRET_ACCESS_KEY: ${PLATYS_AWS_SECRET_ACCESS_KEY:-{{MINIO_secret_key}}}
+    {% endif -%}   {#  use_timezone #}
       LAKECTL_SERVER_ENDPOINT_URL: http://${PUBLIC_IP}:28220
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
@@ -19420,8 +19422,11 @@ services:
         - |
           lakefs run --local-settings &
     {%if LAKEFS_quickstart_enabled | default(false) %}
-          echo "---- Creating repository ----"
-          wait-for -t 60 lakefs:8000 -- curl -u "$$LAKEFS_INSTALLATION_ACCESS_KEY_ID":"$$LAKEFS_INSTALLATION_SECRET_ACCESS_KEY" -X POST -H "Content-Type: application/json" -d '{ "name": "{{LAKEFS_quickstart_repo_name | default('demo')}}", "storage_namespace": "s3://{{LAKEFS_quickstart_bucket_name | default('lakefs-demo-bucket')}}", "default_branch": "{{LAKEFS_quickstart_default_branch | default('main')}}", "sample_data": {{LAKEFS_quickstart_with_demo_data | default(false)}} }' http://localhost:8000/api/v1/repositories || true
+          wait-for -t 60 lakefs:8000 -- echo "---- Creating repository ----" &&  \
+                                        wget -q --header="Authorization: Basic $(echo -n "$$LAKEFS_INSTALLATION_ACCESS_KEY_ID:$$LAKEFS_INSTALLATION_SECRET_ACCESS_KEY" | base64 -w 0)"  \
+                                              --header="Content-Type: application/json" \
+                                              --post-data='{"name": "{{LAKEFS_quickstart_repo_name | default('demo')}}", "storage_namespace": "s3://{{LAKEFS_quickstart_bucket_name | default('lakefs-demo-bucket')}}", "default_branch": "{{LAKEFS_quickstart_default_branch | default('main')}",  "sample_data": {{LAKEFS_quickstart_with_demo_data | default(false) | lower}}, "read_only": false}' \
+                                              -O - "http://lakefs:8000/api/v1/repositories" 
           # wait-for -t 60 lakefs:8000 -- lakectl repo create --default-branch {{LAKEFS_quickstart_default_branch | default(main)}} lakefs://{{LAKEFS_quickstart_repo_name | default(demo)}} s3://{{LAKEFS_quickstart_repo_name | default(demo)}} || true
     {% endif -%}   {#  LAKEFS_quickstart_enabled  #}
           wait
