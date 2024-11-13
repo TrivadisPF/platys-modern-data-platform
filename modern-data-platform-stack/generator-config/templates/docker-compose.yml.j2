@@ -5214,6 +5214,11 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
+    healthcheck:
+      test: ["CMD", "spark-submit", "--version"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
 
   {% for num in range(SPARK_workers | default(1) ) %}
       {% set external_port = 28111 + loop.index - 1 %}
@@ -5227,7 +5232,8 @@ services:
       com.platys.name: 'spark'
       com.platys.description: "Spark Worker Node"
     depends_on:
-      - spark-master
+      - spark-master:
+          condition: healthy
     ports:
       - "{{external_port}}:{{webui_port}}"
     environment:
