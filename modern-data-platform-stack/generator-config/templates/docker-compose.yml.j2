@@ -5197,7 +5197,7 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalog_iceberg_uri: thrift://hive-metastore:9083
       SPARK_DEFAULTS_CONF_spark_sql_catalog_iceberg_warehouse: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined and SPARK_sql_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
       SPARK_DEFAULTS_CONF_spark_sql_defaultCatalog: iceberg
-      {% endif -%}          
+      {% endif -%}   {#  NESSIE_enable #} 
     {%elif SPARK_table_format_type == 'delta' | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.spark.sql.delta.catalog.DeltaCatalog
       SPARK_DEFAULTS_CONF_spark_sql_extensions: io.delta.sql.DeltaSparkSessionExtension
@@ -5310,7 +5310,18 @@ services:
       SPARK_DEFAULTS_CONF_spark_datahub_metadata_dataset_env: {{env}}
     {% endif -%}   {#  DATAHUB_enable or external['DATAHUB_enable'] #}
     {%if SPARK_table_format_type == 'iceberg' | default(false) %}
-
+      {% if NESSIE_enable | default(false) %}
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.iceberg.spark.SparkCatalog
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog_type: hive
+      SPARK_DEFAULTS_CONF_spark_sql_extensions: org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions,org.projectnessie.spark.extensions.NessieSparkSessionExtensions
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie: org.apache.iceberg.spark.SparkCatalog
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie_type: nessie
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie_ref: main
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie_uri: http://nessie:19120/api/v1
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie_authentication_type: nessie
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie_warehouse: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined and SPARK_sql_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
+      SPARK_DEFAULTS_CONF_spark_sql_defaultCatalog: nessie
+      {% else -%}    
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog_type: hive
       SPARK_DEFAULTS_CONF_spark_sql_extensions: org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions
@@ -5319,7 +5330,7 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalog_iceberg_uri: thrift://hive-metastore:9083
       SPARK_DEFAULTS_CONF_spark_sql_catalog_iceberg_warehouse: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined and SPARK_sql_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
       SPARK_DEFAULTS_CONF_spark_sql_defaultCatalog: iceberg
-
+      {% endif -%}   {#  NESSIE_enable #}
     {%elif SPARK_table_format_type == 'delta' | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.spark.sql.delta.catalog.DeltaCatalog
       SPARK_DEFAULTS_CONF_spark_sql_extensions: io.delta.sql.DeltaSparkSessionExtension
@@ -5426,7 +5437,18 @@ services:
       SPARK_DEFAULTS_CONF_spark_datahub_metadata_dataset_env: {{env}}
     {% endif -%}   {#  DATAHUB_enable or external['DATAHUB_enable'] #}
     {%if SPARK_table_format_type == 'iceberg' | default(false) %}
-
+      {% if NESSIE_enable | default(false) %}
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.iceberg.spark.SparkCatalog
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog_type: hive
+      SPARK_DEFAULTS_CONF_spark_sql_extensions: org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions,org.projectnessie.spark.extensions.NessieSparkSessionExtensions
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie: org.apache.iceberg.spark.SparkCatalog
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie_type: nessie
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie_ref: main
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie_uri: http://nessie:19120/api/v1
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie_authentication_type: nessie
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie_warehouse: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined and SPARK_sql_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
+      SPARK_DEFAULTS_CONF_spark_sql_defaultCatalog: nessie
+      {% else -%}    
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog_type: hive
       SPARK_DEFAULTS_CONF_spark_sql_extensions: org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions
@@ -5435,7 +5457,7 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalog_iceberg_uri: thrift://hive-metastore:9083
       SPARK_DEFAULTS_CONF_spark_sql_catalog_iceberg_warehouse: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined and SPARK_sql_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
       SPARK_DEFAULTS_CONF_spark_sql_defaultCatalog: iceberg
-
+      {% endif -%}   {#  NESSIE_enable #}
     {%elif SPARK_table_format_type == 'delta' | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.spark.sql.delta.catalog.DeltaCatalog
       SPARK_DEFAULTS_CONF_spark_sql_extensions: io.delta.sql.DeltaSparkSessionExtension
@@ -5519,7 +5541,18 @@ services:
       SPARK_DEFAULTS_CONF_spark_datahub_rest_server: {{ns.gmsUrl}}
     {% endif -%}   {#  DATAHUB_enable or external['DATAHUB_enable'] #}
     {%if SPARK_table_format_type == 'iceberg' | default(false) %}
-
+      {% if NESSIE_enable | default(false) %}
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.iceberg.spark.SparkCatalog
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog_type: hive
+      SPARK_DEFAULTS_CONF_spark_sql_extensions: org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions,org.projectnessie.spark.extensions.NessieSparkSessionExtensions
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie: org.apache.iceberg.spark.SparkCatalog
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie_type: nessie
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie_ref: main
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie_uri: http://nessie:19120/api/v1
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie_authentication_type: nessie
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie_warehouse: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined and SPARK_sql_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
+      SPARK_DEFAULTS_CONF_spark_sql_defaultCatalog: nessie
+      {% else -%}    
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog_type: hive
       SPARK_DEFAULTS_CONF_spark_sql_extensions: org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions
@@ -5528,7 +5561,7 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalog_iceberg_uri: thrift://hive-metastore:9083
       SPARK_DEFAULTS_CONF_spark_sql_catalog_iceberg_warehouse: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined and SPARK_sql_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
       SPARK_DEFAULTS_CONF_spark_sql_defaultCatalog: iceberg
-
+      {% endif -%}   {#  NESSIE_enable #}
     {%elif SPARK_table_format_type == 'delta' | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.spark.sql.delta.catalog.DeltaCatalog
       SPARK_DEFAULTS_CONF_spark_sql_extensions: io.delta.sql.DeltaSparkSessionExtension
@@ -5635,7 +5668,18 @@ services:
       SPARK_DEFAULTS_CONF_spark_datahub_metadata_dataset_env: {{env}}
     {% endif -%}   {#  DATAHUB_enable or external['DATAHUB_enable'] #}
     {%if SPARK_table_format_type == 'iceberg' | default(false) %}
-
+      {% if NESSIE_enable | default(false) %}
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.iceberg.spark.SparkCatalog
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog_type: hive
+      SPARK_DEFAULTS_CONF_spark_sql_extensions: org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions,org.projectnessie.spark.extensions.NessieSparkSessionExtensions
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie: org.apache.iceberg.spark.SparkCatalog
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie_type: nessie
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie_ref: main
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie_uri: http://nessie:19120/api/v1
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie_authentication_type: nessie
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie_warehouse: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined and SPARK_sql_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
+      SPARK_DEFAULTS_CONF_spark_sql_defaultCatalog: nessie
+      {% else -%}    
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog_type: hive
       SPARK_DEFAULTS_CONF_spark_sql_extensions: org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions
@@ -5644,7 +5688,7 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalog_iceberg_uri: thrift://hive-metastore:9083
       SPARK_DEFAULTS_CONF_spark_sql_catalog_iceberg_warehouse: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined and SPARK_sql_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
       SPARK_DEFAULTS_CONF_spark_sql_defaultCatalog: iceberg
-
+      {% endif -%}   {#  NESSIE_enable #}
     {%elif SPARK_table_format_type == 'delta' | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.spark.sql.delta.catalog.DeltaCatalog
       SPARK_DEFAULTS_CONF_spark_sql_extensions: io.delta.sql.DeltaSparkSessionExtension
@@ -5760,7 +5804,18 @@ services:
       SPARK_DEFAULTS_CONF_spark_datahub_metadata_dataset_env: {{env}}
   {% endif -%}   {#  DATAHUB_enable or external['DATAHUB_enable'] #}
   {%if SPARK_table_format_type == 'iceberg' | default(false) %}
-
+      {% if NESSIE_enable | default(false) %}
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.iceberg.spark.SparkCatalog
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog_type: hive
+      SPARK_DEFAULTS_CONF_spark_sql_extensions: org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions,org.projectnessie.spark.extensions.NessieSparkSessionExtensions
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie: org.apache.iceberg.spark.SparkCatalog
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie_type: nessie
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie_ref: main
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie_uri: http://nessie:19120/api/v1
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie_authentication_type: nessie
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie_warehouse: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined and SPARK_sql_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
+      SPARK_DEFAULTS_CONF_spark_sql_defaultCatalog: nessie
+      {% else -%}    
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog_type: hive
       SPARK_DEFAULTS_CONF_spark_sql_extensions: org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions
@@ -5769,7 +5824,7 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalog_iceberg_uri: thrift://hive-metastore:9083
       SPARK_DEFAULTS_CONF_spark_sql_catalog_iceberg_warehouse: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined and SPARK_sql_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
       SPARK_DEFAULTS_CONF_spark_sql_defaultCatalog: iceberg
-
+      {% endif -%}   {#  NESSIE_enable #}
   {%elif SPARK_table_format_type == 'delta' | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.spark.sql.delta.catalog.DeltaCatalog
       SPARK_DEFAULTS_CONF_spark_sql_extensions: io.delta.sql.DeltaSparkSessionExtension
