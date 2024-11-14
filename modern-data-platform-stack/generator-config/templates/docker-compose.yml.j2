@@ -18927,7 +18927,8 @@ services:
     environment:
       # these two env variables are also needed for the s3-credentials.properties file gen to work! 
       AWS_ACCESS_KEY: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
-      AWS_SECRET_ACCESS_KEY: {{s3SecretAccessKey}}    
+      AWS_SECRET_ACCESS_KEY: {{s3SecretAccessKey}}
+      MC_HOST_minio-1=http://{{MINIO_access_key}}:{{MINIO_secret_key}}@minio-1:9000    
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -18947,7 +18948,7 @@ services:
         /usr/src/app/wait-for-it.sh -t 180 minio-1:9000
         mkdir -p /tmp/.aws
         eval "echo \"$$(cat /tmp/credentials.templ)\"" >> /tmp/.aws/credentials
-        mc alias set minio-1 http://minio-1:9000 {{MINIO_access_key}} {{MINIO_secret_key}}
+#        mc alias set minio-1 http://minio-1:9000 {{MINIO_access_key}} {{MINIO_secret_key}}
         mc mb --ignore-existing minio-1/{{s3AdminBucketName}}
     {% if MINIO_upload_data_transfer_to_bucket_enabled | default(false) %}
         mc mb --ignore-existing minio-1/{{MINIO_upload_data_transfer_bucket_name | default("data-transfer-bucket")}};
