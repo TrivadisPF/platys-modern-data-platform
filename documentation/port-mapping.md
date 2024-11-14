@@ -108,6 +108,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 5433 | 5432 | timescaledb |
 5434 | 5432 | marquez-db |
 5435 | 5432 | dataverse-postgresql |
+5436 | 5432 | infinity (postgresql) |
 5500 | 5500 | oracledb-ee |
 5501 | 5500 | oracledb-xe |
 \-     | 5432 | hive-metastore-db |
@@ -350,6 +351,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 19632 | 19630 | streamsets-transformer-1 |
 19999 | 9999 | influxdb2 |
 21000 | 21000 | atlas |
+23817 | 23817 | infinity (thrift) |
+23820 | 23820 | infinity (http) |
 24224 | 24224 | fluentd |
 24225 | 24224 | fluent-bit |
 26500 | 26500 | zeebe-1 |

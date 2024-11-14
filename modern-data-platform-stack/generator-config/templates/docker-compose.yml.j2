@@ -374,6 +374,8 @@ networks:
 {% set __MILVUS_version = MILVUS_version | default('latest') -%}
 {% set __ATTU_version = ATTU_version | default('latest') -%}
 
+{% set __INFINITY_version = INFINITY_version | default('latest') -%}
+
 {% set __VECTOR_ADMIN_version = VECTOR_ADMIN_version | default('latest') -%}
 
 {% set __KUDU_version = KUDU_version | default('latest') -%}
@@ -800,6 +802,7 @@ networks:
   {% set WEAVIATE_enable = false -%}
   {% set MILVUS_enable = false -%}
   {% set ATTU_enable = false -%}
+  {% set INFINITY_enable = false -%}
   {% set VECTOR_ADMIN_enable = false -%}
   {% set DRUID_enable = false -%}
   {% set PINOT_enable = false -%}
@@ -15493,6 +15496,54 @@ services:
     restart: {{container_restart_policy}}
   {% endif %}   {#  ATTU_enable #}
 {% endif %}   {#  MILVUS_enable #}
+
+{% if INFINITY_enable | default(false) %}
+  #  ================================== Infinity ========================================== #
+  infinity:
+    image: infiniflow/infinity:{{__INFINITY_version}}
+    container_name: infinity
+    hostname: infinity
+    labels:
+      com.platys.name: "infinity"
+      com.platys.description: "AI-native database for LLM applications"
+      com.platys.webui.title: "Infinity UI"
+      com.platys.webui.url: "http://dataplatform:23820"
+    ports:
+      # Thrift
+      - 23817:23817
+      # HTTP
+      - 23820:23820
+      # psql
+      - 5436:5432
+    environment:
+      IS_PERSISTENT: true
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {% if INFINITY_volume_map_data %}
+      - "./container-volume/infinity/data:/var/infinity"
+    {% endif %}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    mem_limit: {{INFINITY_mem_limit}}
+    ulimits:
+      nofile:
+        soft: 500000
+        hard: 500000    
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+    healthcheck:
+      test: ["CMD", "curl", "http://localhost:23820/admin/node/current"]
+      interval: 10s
+      timeout: 10s
+      retries: 120    
+{% endif %}   {#  INFINITY_enable #}
 
 {% if VECTOR_ADMIN_enable | default(false) %}
   vector-admin:
