@@ -19367,7 +19367,7 @@ services:
       # possible config settings can be found here: https://docs.lakefs.io/reference/configuration.html#reference
     {%if LAKEFS_database_type == 'local' %}
       LAKEFS_DATABASE_TYPE: local
-      LAKEFS_DATABASE_LOCAL_PATH: '/home/lakefs/metadata'
+      LAKEFS_DATABASE_LOCAL_PATH: '~/lakefs/metadata'
       LAKEFS_DATABASE_LOCAL_ENABLE_LOGGING: false
     {%elif LAKEFS_database_type == 'postgresql' %}
       LAKEFS_DATABASE_TYPE: postgres
@@ -19375,7 +19375,7 @@ services:
     {% endif -%}   {#  LAKEFS_database_type #}
       LAKEFS_BLOCKSTORE_TYPE: {{LAKEFS_blockstore_type | default(local) }}
     {%if LAKEFS_blockstore_type == 'local' %}
-      LAKEFS_BLOCKSTORE_LOCAL_PATH: '/home/lakefs/data'
+      LAKEFS_BLOCKSTORE_LOCAL_PATH: '~/lakefs/data'
       LAKEFS_BLOCKSTORE_LOCAL_IMPORT_ENABLED: {{LAKEFS_blockstore_local_import_enabled | default(false)}}
     {%elif LAKEFS_blockstore_type == 's3' %}
       LAKEFS_BLOCKSTORE_S3_ENDPOINT: {{s3EndpointStorage if s3EndpointStorage is defined and s3EndpointStorage else omit}}
@@ -19384,7 +19384,7 @@ services:
       LAKEFS_BLOCKSTORE_S3_FORCE_PATH_STYLE: '{{s3PathStyleAccess}}'
       LAKEFS_BLOCKSTORE_S3_CREDENTIALS_ACCESS_KEY_ID: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
       LAKEFS_BLOCKSTORE_S3_CREDENTIALS_SECRET_ACCESS_KEY: ${PLATYS_AWS_SECRET_ACCESS_KEY:-{{MINIO_secret_key}}}
-      LAKEFS_BLOCKSTORE_S3_CREDENTIALS_FILE: {{LAKEFS_blockstore_s3_credentials_file if LAKEFS_blockstore_s3_credentials_file is defined and LAKEFS_blockstore_s3_credentials_file != None and LAKEFS_blockstore_s3_credentials_file | length else omit}}
+      LAKEFS_BLOCKSTORE_S3_CREDENTIALS_FILE: {{LAKEFS_blockstore_s3_credentials_file if LAKEFS_blockstore_s3_credentials_file is defined and LAKEFS_blockstore_s3_credentials_file != None and LAKEFS_blockstore_s3_credentials_file | length else "~/lakefs/data"}}
     {% endif -%}   {#  LAKEFS_blockstore_type #}
       LAKEFS_ACTIONS_ENABLED: {{LAKEFS_actions_enabled}}
       LAKEFS_ACTIONS_LUA_NET_HTTP_ENABLED: {{LAKEFS_actions_lua_net_http_enabled}}
@@ -19409,11 +19409,12 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
+      - ./conf/lakefs/lakectl.yaml.template:/home/lakefs/.lakectl.yaml.template
     {% if LAKEFS_blockstore_type == 'local' and LAKEFS_volume_map_data | default(false) %}
-      - ./container-volume/lakefs/data:/home/lakefs/data
+      - ./container-volume/lakefs/data:/home/lakefs/lakefs/data
     {% endif -%} {# LAKEFS_blockstore_type == 'local' and LAKEFS_volume_map_data #}      
     {% if LAKEFS_database_type == 'local' and LAKEFS_volume_map_data | default(false) %}
-      - ./container-volume/lakefs/metadata:/home/lakefs/metadata
+      - ./container-volume/lakefs/metadata:/home/lakefs/lakefs/metadata
     {% endif -%} {# NESSIE_volume_map_data #}      
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
@@ -19422,8 +19423,14 @@ services:
     entrypoint: [ {{ '"/app/wait-for", "postgresql:5432", "--",' if LAKEFS_database_type == 'postgresql'}} "/bin/sh", "-c"]
     command:
         - |
+          # replace env variables to provide the .lakectl.yaml file
+          while IFS= read -r line || [[ -n "$line" ]]; do
+            # Use eval to interpret the variable with default values
+            eval "echo \"$line\"" >> $HOME/.lakectl.yaml
+          done < /home/lakefs/.lakectl.yaml.template
+
           lakefs run --local-settings &
-    {%if LAKEFS_quickstart_enabled | default(false) %}
+    {%if LAKEFS_database_type == 'local' and LAKEFS_quickstart_enabled | default(false) %}
           wait-for -t 60 lakefs:8000 -- echo "---- Creating repository ----" &&  \
                                         wget -q --header="Authorization: Basic $(echo -n "$$LAKEFS_INSTALLATION_ACCESS_KEY_ID:$$LAKEFS_INSTALLATION_SECRET_ACCESS_KEY" | base64 -w 0)"  \
                                               --header="Content-Type: application/json" \
@@ -19454,6 +19461,7 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
+      - ./conf/lakefs/lakectl.yaml.template:/home/lakefs/.lakectl.yaml.template
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -19462,6 +19470,12 @@ services:
       - /bin/sh
       - -c
       - |
+        # replace env variables to provide the .lakectl.yaml file
+        while IFS= read -r line || [[ -n "$line" ]]; do
+          # Use eval to interpret the variable with default values
+          eval "echo \"$line\"" >> $HOME/.lakectl.yaml
+        done < /home/lakefs/.lakectl.yaml.template      
+        
         while [ 1 -eq 1 ];do sleep 60;done
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
     <<: *logging
