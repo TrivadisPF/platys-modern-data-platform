@@ -19409,7 +19409,6 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
-      - ./conf/lakefs/lakectl.yaml.template:/home/lakefs/.lakectl.yaml.template
     {% if LAKEFS_blockstore_type == 'local' and LAKEFS_volume_map_data | default(false) %}
       - ./container-volume/lakefs/data:/home/lakefs/lakefs/data
     {% endif -%} {# LAKEFS_blockstore_type == 'local' and LAKEFS_volume_map_data #}      
@@ -19423,12 +19422,6 @@ services:
     entrypoint: [ {{ '"/app/wait-for", "postgresql:5432", "--",' if LAKEFS_database_type == 'postgresql'}} "/bin/sh", "-c"]
     command:
         - |
-          # replace env variables to provide the .lakectl.yaml file
-          while IFS= read -r line || [[ -n "$line" ]]; do
-            # Use eval to interpret the variable with default values
-            eval "echo \"$line\"" >> $HOME/.lakectl.yaml
-          done < /home/lakefs/.lakectl.yaml.template
-
           lakefs run --local-settings &
     {%if LAKEFS_database_type == 'local' and LAKEFS_quickstart_enabled | default(false) %}
           wait-for -t 60 lakefs:8000 -- echo "---- Creating repository ----" &&  \
@@ -19461,7 +19454,6 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
-      - ./conf/lakefs/lakectl.yaml.template:/home/lakefs/.lakectl.yaml.template
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -19470,12 +19462,6 @@ services:
       - /bin/sh
       - -c
       - |
-        # replace env variables to provide the .lakectl.yaml file
-        while IFS= read -r line || [[ -n "$line" ]]; do
-          # Use eval to interpret the variable with default values
-          eval "echo \"$line\"" >> $HOME/.lakectl.yaml
-        done < /home/lakefs/.lakectl.yaml.template      
-        
         while [ 1 -eq 1 ];do sleep 60;done
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
     <<: *logging
