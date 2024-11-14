@@ -12203,9 +12203,14 @@ services:
       - MYSQL_USER=ragflow
       - MYSQL_PASSWORD=abc123!
       - MYSQL_DBNAME=ragflow_db
+      - DOC_ENGINE={{RAGFLOW_doc_engine_type | default("elasticsearch")}}
+    {%if RAGFLOW_doc_engine_type == 'elasticsearch' | default(false) %}
       - ES_HOST=elasticsearch-1
       - ES_USER=elastic
       - ES_PASSWORD=abc123!
+    {% elif RAGFLOW_doc_engine_type == 'infinity' | default(false) %}   
+      - INFINITY_HOST=infinity
+    {% endif -%}   {#  use_timezone #}
       - REDIS_HOST=ragflow-redis
       - REDIS_PASSWORD=${PLATYS_RAGFLOW_REDIS_PASSWORD:-{{RAGFLOW_redis_password}}}
       - MINIO_HOST=minio-1
@@ -12227,6 +12232,15 @@ services:
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
+    {% if RAGFLOW_with_gpu | default(false) %}
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]    
+    {% endif -%}   {#  RAGFLOW_with_gpu #}    
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
@@ -22495,7 +22509,7 @@ services:
             - driver: nvidia
               count: 1
               capabilities: [gpu] 
-    {% endif -%}   {#  use_timezone #}                    
+    {% endif -%}   {#  GLANCES_with_gpu #}                    
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
