@@ -5184,7 +5184,7 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakefs_ref: main
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakefs_uri: '{{s3Endpoint | default(omit) }}'
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakefs_authentication_type: nessie
-      SPARK_DEFAULTS_CONF_spark_sql_catalog_lakefs_warehouse: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined and SPARK_sql_warehouse_dir | length else 'lakefs://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_lakefs_warehouse: {{'lakefs://' ~ LAKEFS_quickstart_repo_name | default('demo')}}
       SPARK_DEFAULTS_CONF_spark_sql_defaultCatalog: lakefs
     {%elif SPARK_table_format_type == 'delta' | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.spark.sql.delta.catalog.DeltaCatalog
@@ -5303,7 +5303,7 @@ services:
       SPARK_DEFAULTS_CONF_spark_datahub_rest_server: {{ns.gmsUrl}}
       SPARK_DEFAULTS_CONF_spark_datahub_metadata_dataset_env: {{env}}
     {% endif -%}   {#  DATAHUB_enable or external['DATAHUB_enable'] #}
-    {%if SPARK_table_format_type == 'iceberg' and not NESSIE_enable | default(false) %}
+    {%if SPARK_table_format_type == 'iceberg' and not NESSIE_enable and not LAKEFS_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog_type: hive
       SPARK_DEFAULTS_CONF_spark_sql_extensions: org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions
@@ -5323,6 +5323,17 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie_authentication_type: nessie
       SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie_warehouse: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined and SPARK_sql_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
       SPARK_DEFAULTS_CONF_spark_sql_defaultCatalog: nessie
+    {% elif SPARK_table_format_type == 'iceberg' and LAKEFS_enable | default(false) %}
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.iceberg.spark.SparkCatalog
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog_type: hive
+      SPARK_DEFAULTS_CONF_spark_sql_extensions: org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_lakefs: org.apache.iceberg.spark.SparkCatalog
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_lakefs_catalog__impl: io.lakefs.iceberg.LakeFSCatalog
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_lakefs_ref: main
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_lakefs_uri: '{{s3Endpoint | default(omit) }}'
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_lakefs_authentication_type: nessie
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_lakefs_warehouse: {{'lakefs://' ~ LAKEFS_quickstart_repo_name | default('demo')}}
+      SPARK_DEFAULTS_CONF_spark_sql_defaultCatalog: lakefs
     {%elif SPARK_table_format_type == 'delta' | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.spark.sql.delta.catalog.DeltaCatalog
       SPARK_DEFAULTS_CONF_spark_sql_extensions: io.delta.sql.DeltaSparkSessionExtension
@@ -5428,7 +5439,7 @@ services:
       SPARK_DEFAULTS_CONF_spark_datahub_rest_server: {{ns.gmsUrl}}
       SPARK_DEFAULTS_CONF_spark_datahub_metadata_dataset_env: {{env}}
     {% endif -%}   {#  DATAHUB_enable or external['DATAHUB_enable'] #}
-    {%if SPARK_table_format_type == 'iceberg' and not NESSIE_enable | default(false) %}
+    {%if SPARK_table_format_type == 'iceberg' and not NESSIE_enable and LAKEFS_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog_type: hive
       SPARK_DEFAULTS_CONF_spark_sql_extensions: org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions
@@ -5448,6 +5459,17 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie_authentication_type: nessie
       SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie_warehouse: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined and SPARK_sql_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
       SPARK_DEFAULTS_CONF_spark_sql_defaultCatalog: nessie
+    {% elif SPARK_table_format_type == 'iceberg' and LAKEFS_enable | default(false) %}
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.iceberg.spark.SparkCatalog
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog_type: hive
+      SPARK_DEFAULTS_CONF_spark_sql_extensions: org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_lakefs: org.apache.iceberg.spark.SparkCatalog
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_lakefs_catalog__impl: io.lakefs.iceberg.LakeFSCatalog
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_lakefs_ref: main
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_lakefs_uri: '{{s3Endpoint | default(omit) }}'
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_lakefs_authentication_type: nessie
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_lakefs_warehouse: {{'lakefs://' ~ LAKEFS_quickstart_repo_name | default('demo')}}
+      SPARK_DEFAULTS_CONF_spark_sql_defaultCatalog: lakefs
     {%elif SPARK_table_format_type == 'delta' | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.spark.sql.delta.catalog.DeltaCatalog
       SPARK_DEFAULTS_CONF_spark_sql_extensions: io.delta.sql.DeltaSparkSessionExtension
@@ -5530,7 +5552,7 @@ services:
       SPARK_DEFAULTS_CONF_spark_datahub_metadata_dataset_env: {{env}}
       SPARK_DEFAULTS_CONF_spark_datahub_rest_server: {{ns.gmsUrl}}
     {% endif -%}   {#  DATAHUB_enable or external['DATAHUB_enable'] #}
-    {%if SPARK_table_format_type == 'iceberg' and not NESSIE_enable | default(false) %}
+    {%if SPARK_table_format_type == 'iceberg' and not NESSIE_enable and not LAKEFS_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog_type: hive
       SPARK_DEFAULTS_CONF_spark_sql_extensions: org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions
@@ -5550,6 +5572,17 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie_authentication_type: nessie
       SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie_warehouse: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined and SPARK_sql_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
       SPARK_DEFAULTS_CONF_spark_sql_defaultCatalog: nessie
+    {% elif SPARK_table_format_type == 'iceberg' and LAKEFS_enable | default(false) %}
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.iceberg.spark.SparkCatalog
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog_type: hive
+      SPARK_DEFAULTS_CONF_spark_sql_extensions: org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_lakefs: org.apache.iceberg.spark.SparkCatalog
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_lakefs_catalog__impl: io.lakefs.iceberg.LakeFSCatalog
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_lakefs_ref: main
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_lakefs_uri: '{{s3Endpoint | default(omit) }}'
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_lakefs_authentication_type: nessie
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_lakefs_warehouse: {{'lakefs://' ~ LAKEFS_quickstart_repo_name | default('demo')}}
+      SPARK_DEFAULTS_CONF_spark_sql_defaultCatalog: lakefs
     {%elif SPARK_table_format_type == 'delta' | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.spark.sql.delta.catalog.DeltaCatalog
       SPARK_DEFAULTS_CONF_spark_sql_extensions: io.delta.sql.DeltaSparkSessionExtension
@@ -5655,7 +5688,7 @@ services:
       SPARK_DEFAULTS_CONF_spark_datahub_rest_server: {{ns.gmsUrl}}
       SPARK_DEFAULTS_CONF_spark_datahub_metadata_dataset_env: {{env}}
     {% endif -%}   {#  DATAHUB_enable or external['DATAHUB_enable'] #}
-    {%if SPARK_table_format_type == 'iceberg' and not NESSIE_enable | default(false) %}
+    {%if SPARK_table_format_type == 'iceberg' and not NESSIE_enable and not LAKEFS_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog_type: hive
       SPARK_DEFAULTS_CONF_spark_sql_extensions: org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions
@@ -5675,6 +5708,17 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie_authentication_type: nessie
       SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie_warehouse: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined and SPARK_sql_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
       SPARK_DEFAULTS_CONF_spark_sql_defaultCatalog: nessie
+    {% elif SPARK_table_format_type == 'iceberg' and LAKEFS_enable | default(false) %}
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.iceberg.spark.SparkCatalog
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog_type: hive
+      SPARK_DEFAULTS_CONF_spark_sql_extensions: org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_lakefs: org.apache.iceberg.spark.SparkCatalog
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_lakefs_catalog__impl: io.lakefs.iceberg.LakeFSCatalog
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_lakefs_ref: main
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_lakefs_uri: '{{s3Endpoint | default(omit) }}'
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_lakefs_authentication_type: nessie
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_lakefs_warehouse: {{'lakefs://' ~ LAKEFS_quickstart_repo_name | default('demo')}}
+      SPARK_DEFAULTS_CONF_spark_sql_defaultCatalog: lakefs
     {%elif SPARK_table_format_type == 'delta' | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.spark.sql.delta.catalog.DeltaCatalog
       SPARK_DEFAULTS_CONF_spark_sql_extensions: io.delta.sql.DeltaSparkSessionExtension
@@ -5789,7 +5833,7 @@ services:
       SPARK_DEFAULTS_CONF_spark_datahub_rest_server: {{ns.gmsUrl}}
       SPARK_DEFAULTS_CONF_spark_datahub_metadata_dataset_env: {{env}}
   {% endif -%}   {#  DATAHUB_enable or external['DATAHUB_enable'] #}
-  {%if SPARK_table_format_type == 'iceberg' and not NESSIE_enable | default(false) %}
+  {%if SPARK_table_format_type == 'iceberg' and not NESSIE_enable and not LAKEFS_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog_type: hive
       SPARK_DEFAULTS_CONF_spark_sql_extensions: org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions
@@ -5809,6 +5853,17 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie_authentication_type: nessie
       SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie_warehouse: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined and SPARK_sql_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
       SPARK_DEFAULTS_CONF_spark_sql_defaultCatalog: nessie
+    {% elif SPARK_table_format_type == 'iceberg' and LAKEFS_enable | default(false) %}
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.iceberg.spark.SparkCatalog
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog_type: hive
+      SPARK_DEFAULTS_CONF_spark_sql_extensions: org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_lakefs: org.apache.iceberg.spark.SparkCatalog
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_lakefs_catalog__impl: io.lakefs.iceberg.LakeFSCatalog
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_lakefs_ref: main
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_lakefs_uri: '{{s3Endpoint | default(omit) }}'
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_lakefs_authentication_type: nessie
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_lakefs_warehouse: {{'lakefs://' ~ LAKEFS_quickstart_repo_name | default('demo')}}
+      SPARK_DEFAULTS_CONF_spark_sql_defaultCatalog: lakefs
   {%elif SPARK_table_format_type == 'delta' | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.spark.sql.delta.catalog.DeltaCatalog
       SPARK_DEFAULTS_CONF_spark_sql_extensions: io.delta.sql.DeltaSparkSessionExtension
@@ -19506,9 +19561,9 @@ services:
           lakefs run --local-settings &
     {%if LAKEFS_database_type == 'local' and LAKEFS_quickstart_enabled | default(false) %}
           wait-for -t 60 lakefs:8000 -- echo "---- Creating repository ----" &&  \
-                                        wget -q --header="Authorization: Basic $(echo -n "$$LAKEFS_INSTALLATION_ACCESS_KEY_ID:$$LAKEFS_INSTALLATION_SECRET_ACCESS_KEY" | base64 -w 0)"  \
+                                        wget -q --header="Authorization: Basic $(echo -n '$$LAKEFS_INSTALLATION_ACCESS_KEY_ID:$$LAKEFS_INSTALLATION_SECRET_ACCESS_KEY' | base64 -w 0)"  \
                                               --header="Content-Type: application/json" \
-                                              --post-data='{"name": "{{LAKEFS_quickstart_repo_name | default('demo')}}", "storage_namespace": "s3://{{LAKEFS_quickstart_bucket_name | default('lakefs-demo-bucket')}}/{{LAKEFS_quickstart_repo_name | default('demo')}}", "default_branch": "{{LAKEFS_quickstart_default_branch | default('main')}}",  "sample_data": {{LAKEFS_quickstart_with_demo_data | default(false) | lower}}, "read_only": false}' \
+                                              --post-data='{"name": "{{LAKEFS_quickstart_repo_name | default('demo')}}", "storage_namespace": "{{LAKEFS_blockstore_type}}://{{LAKEFS_quickstart_bucket_name | default('lakefs-demo-bucket')}}/{{LAKEFS_quickstart_repo_name | default('demo')}}", "default_branch": "{{LAKEFS_quickstart_default_branch | default('main')}}",  "sample_data": {{LAKEFS_quickstart_with_demo_data | default(false) | lower}}, "read_only": false}' \
                                               -O - "http://lakefs:8000/api/v1/repositories"                                 
           # wait-for -t 60 lakefs:8000 -- lakectl repo create --default-branch {{LAKEFS_quickstart_default_branch | default(main)}} lakefs://{{LAKEFS_quickstart_repo_name | default(demo)}} s3://{{LAKEFS_quickstart_repo_name | default(demo)}} || true
     {% endif -%}   {#  LAKEFS_quickstart_enabled  #}
