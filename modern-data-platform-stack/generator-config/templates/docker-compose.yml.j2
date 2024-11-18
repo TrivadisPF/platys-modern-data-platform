@@ -481,6 +481,7 @@ networks:
 
 {% set __PURE_FTPD_version = PURE_FTPD_version | default('latest') -%}
 {% set __SFTP_version = SFTP_version | default('latest') -%}
+{% set __SFTPGO_version = SFTPGO_version | default('latest') -%}
 
 {% set __FILEZILLA_version = FILEZILLA_version | default('latest') -%}
 
@@ -20440,6 +20441,45 @@ services:
     command: {{SFTP_username}}:${PLATYS_SFTP_PASSWORD:-{{SFTP_password}}}:::{{SFTP_home}}
     restart: {{container_restart_policy}}
 {% endif %}   {#  FTP_enable #}
+
+{% if SFTPGO_enable | default(false) %}
+  #  ================================== SFTPgo Server ========================================== #
+  sftpgo:
+    image: drakkan/sftpgo:{{__SFTPGO_version}}
+    container_name: sftpgo
+    hostname: sftpgo
+    labels:
+      com.platys.name: "sftpgo"
+      com.platys.description: "SFTPgo Server"
+      com.platys.webui.title: ""
+      com.platys.webui.url: "http://dataplatform:28382"
+      com.platys.password.envvars: "PLATYS_SFTPGO_ADMIN_PASSWORD"
+    environment:
+      - SFTPGO_DEFAULT_ADMIN_USERNAME={{SFTPGO_admin_username}}
+      - SFTPGO_DEFAULT_ADMIN_PASSWORD=${PLATYS_SFTPGO_ADMIN_PASSWORD:-{{SFTPGO_admin_password}}}
+      
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    ports:
+      - "28382:8080"    
+      - "2022:2022"
+    volumes:
+      - ./data-transfer:/data-transfer
+    {% if SFTPGO_volume_map_data %}
+      - ./container-volumes/sftpgo/data:/srv/sftpgo/data/{{SFTPGO_home}}
+    {% elif SFTPGO_volume_map_data_transfer %}
+      - ./data-transfer:/srv/sftpgo/data/{{SFTPGO_home}}
+    {% endif -%}   {#  SFTPGO_volume_map_data or SFTPGO_volume_map_data_transfer #}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  SFTPGO_enable #}
 
 {% if FILEZILLA_enable | default(false) %}
   #  ================================== Filezilla ========================================== #

@@ -44,6 +44,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 1890 | 1883 | activemq |
 1891 | 1883 | emqx-1 |
 1892 | 1883 | solace-pubsub |
+2022 | 2022 | sftpgo (sftp) |
 2113 | 2113 | eventstore |
 2181 | 2181 | zookeeper-1 |
 2182 | 2182 | zookeeper-2 |
@@ -656,7 +657,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28379 | 4043 | jupyter (spark UI)  |
 28380 | 4044 | jupyter (spark UI)  |
 28381 | 8080 | data-contract-manager  |
-28382 |  | |
+28382 | 8080 | sftpgo (webui) |
 28383 | 61208 | glances  |
 28384 | 61209 | glances  |
 28385 | 4040 | kyuubi (spark ui)  |
