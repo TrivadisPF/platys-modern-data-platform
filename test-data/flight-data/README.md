@@ -41,18 +41,6 @@ Additionally files for the meta data in JSON format have been created.
 1. code - the carrier code
 2. description - the carrier name / description
 
-
-## Airports (csv, json)
-
-
-1. iata - the international airport abbreviation code
-2. airpot - name of the airport
-3. city - in which airport is located
-3. state - in which airport is located
-4. country - in which airport is located
-4. lat - the latitude of the airport
-5. long - the longitude of the airport
-
 ## Plane Data (csv, json)
 
 1. tailnum - 
