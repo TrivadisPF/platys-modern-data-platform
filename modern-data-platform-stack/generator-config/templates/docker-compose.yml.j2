@@ -19608,8 +19608,36 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
- 
 {% endif %}   {#  LAKEFS_enable #}
+
+{% if LAKEFS_HOOKS_enable | default(false) %}
+  lakefs-hooks:
+    image: trivadis/lakefs-hooks
+    container_name: lakefs-hooks
+    hostname: lakefs-hooks
+    labels:
+      com.platys.name: "lakefs-hooks"
+      com.platys.description: "Git-Like Data Version Control"
+    ports:
+      - 28221:5000
+    environment:
+      LAKEFS_SERVER_ADDRESS: http://lakefs:8000
+      LAKEFS_ACCESS_KEY_ID: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
+      LAKEFS_SECRET_ACCESS_KEY: ${PLATYS_AWS_SECRET_ACCESS_KEY:-{{MINIO_secret_key}}}
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  LAKEFS_HOOKS_enable #}
 
 {% if NESSIE_enable | default(false) %}
   #  ================================== Project Nessie ========================================== #
@@ -19908,16 +19936,16 @@ services:
       com.platys.name: "emqx"
       com.platys.description: "MQTT Broker"
       com.platys.webui.title: "EMQX WebUI"
-      com.platys.webui.url: "http://dataplatform:28225"
+      com.platys.webui.url: "http://dataplatform:28404"
       com.platys.restapi.title: "EMQX REST API"
-      com.platys.restapi.url: "http://dataplatform:28225/api/v4/"
+      com.platys.restapi.url: "http://dataplatform:28404/api/v4/"
     ports:
       - "1891:1883"
-      - "28221:8081"
-      - "28222:8083"
-      - "28223:8084"
-      - "28224:8883"
-      - "28225:18083"
+      - "28400:8081"
+      - "28401:8083"
+      - "28402:8084"
+      - "28403:8883"
+      - "28404:18083"
     environment:
       EMQX_NAME: emqx-1
       EMQX_LOG__CONSOLE: console

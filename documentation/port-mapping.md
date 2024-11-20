@@ -499,11 +499,11 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28213 | 8098 | pinot-server-2 |
 28214 | 8098 | pinot-server-3 |
 28220 | 8000 | lakefs |
-28221 | 8081 | emqx-1 |
-28222 | 8083 | emqx-1 |
-28223 | 8084 | emqx-1 |
-28224 | 8883 | emqx-1 |
-28225 | 18083 | emqx-1 |
+28221 | 5000 | lakefs-webhook |
+28222 | |  |
+28223 | | |
+28224 | |  |
+28225 | |  |
 28226 | 9000 | questdb |
 28227 | 8080 | debezium-ui |
 28228 | 9998 | tikka-server |
@@ -675,6 +675,11 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28397 | 443 | ragflow |
 28398 | 5678 | ragflow |
 28399 | 9091 | authelia |
+28400 | 8081 | emqx-1 |
+28401 | 8083 | emqx-1 |
+28402 | 8084 | emqx-1 |
+28403 | 8883 | emqx-1 |
+28404 | 18083 | emqx-1 |
 
 ## Ports > 28500
 
