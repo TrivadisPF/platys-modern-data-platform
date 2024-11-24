@@ -108,6 +108,7 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Support for the deployment of Dataverse previewers added (see `DATAVERSE_previewers_xxxx` config settings)
  * Support for `valkey` as an edition to the Redis service, to use Valkey (the fork of Redis with open source license) to use as a drop-in replacement
  * Update LakeFS to the latest version and add more configuration options
+ * NiFi 2.0.0 support
 
 ### Breaking Changes
 
