@@ -516,6 +516,7 @@ networks:
 {% set __ICEBERG_REST_CATALOG_version = ICEBERG_REST_CATALOG_version | default('latest') -%}
 
 {% set __LAKEFS_version = LAKEFS_version | default('latest') -%}
+{% set __LAKEFS_HOOKS_version = LAKEFS_HOOKS_version | default('latest') -%}
 
 {% set __NESSIE_version = NESSIE_version | default('latest') -%}
 
@@ -11229,8 +11230,9 @@ services:
       JUPYTERHUB_AUTHENTICATOR_CLASS: {{JUPYTERHUB_authenticator_class}}
       JUPYTERHUB_PASSWORD: {{JUPYTERHUB_global_password}}
       DOCKER_NETWORK_NAME: {{platys['platform-name']}}
-      DOCKER_NOTEBOOK_IMAGE: "jupyter/minimal-notebook:latest"
+      DOCKER_NOTEBOOK_IMAGE: "{{JUPYTERHUB_notebook_image}}"
       DOCKER_NOTEBOOK_DIR: "/home/jovyan/work"
+      DATA_VOLUME_CONTAINER: "/data"
       DOCKER_SPAWN_CMD: "start-singleuser.sh"
     {% if JUPYTERHUB_use_postgres is defined and JUPYTERHUB_use_postgres %}
       JUPYTERHUB_USE_POSTGRES: "'yes'"
@@ -19580,7 +19582,7 @@ services:
     restart: {{container_restart_policy}}
 
   lakectl:
-    image: treeverse/lakectl
+    image: treeverse/lakectl:{{__LAKEFS_version}}
     container_name: lakectl
     hostname: lakectl
     labels:
@@ -19612,7 +19614,7 @@ services:
 
 {% if LAKEFS_HOOKS_enable | default(false) %}
   lakefs-hooks:
-    image: trivadis/lakefs-hooks
+    image: trivadis/lakefs-hooks:{{__LAKEFS_HOOKS_version}}
     container_name: lakefs-hooks
     hostname: lakefs-hooks
     labels:
