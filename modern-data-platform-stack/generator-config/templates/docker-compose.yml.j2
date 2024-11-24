@@ -6284,7 +6284,7 @@ services:
       com.platys.restapi.title: "searxng API"
       com.platys.restapi.url: "http://dataplatform:28389"
     ports:
-      - "28389:8000"
+      - "28389:8080"
     cap_drop:
       - ALL
     cap_add:
@@ -6292,12 +6292,15 @@ services:
       - SETGID
       - SETUID      
     environment:
+      BIND_ADDRESS: 0.0.0.0:8080
       SEARXNG_BASE_URL: http://${PUBLIC_IP:-localhost}:28389
+      # either empty or dbpedia, duckduckgo, google, mwmbl, startpage, swisscows, qwant, wikipedia
       AUTOCOMPLETE: 
       SEARXNG_REDIS_URL: redis://searxng-redis:6379/0
       # SEARXNG_SETTINGS_PATH: 
       UWSGI_WORKERS: 4
       UWSGI_THREADS: 4
+      SEARXNG_DEBUG: false
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -11886,8 +11889,12 @@ services:
     labels:
       com.platys.name: 'perplexica'
       com.platys.description: "AI-powered search engine"
+      com.platys.restapi.title: "searxng API"
+      com.platys.restapi.url: "http://dataplatform:28405/api/search"
     ports:
       - 28405:3001
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     depends_on:
       - searxng
     environment: 
@@ -11922,12 +11929,12 @@ services:
       com.platys.webui.url: "http://dataplatform:28406"      
     ports:
       - 28406:3000
-    extra_hosts:
-      - "host.docker.internal:host-gateway"      
     depends_on:
       - perplexica-backend
-    {%if use_timezone | default(false) %}
     environment: 
+      NEXT_PUBLIC_API_URL: http://${PUBLIC_IP}:3001/api
+      NEXT_PUBLIC_WS_URL: ws://${PUBLIC_IP}:3001
+    {%if use_timezone | default(false) %}    
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
