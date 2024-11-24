@@ -272,6 +272,8 @@ networks:
 
 {% set __ANYTHING_LLM_version = ANYTHING_LLM_version | default('latest') -%}
 
+{% set __PERPLEXICA_version = PERPLEXICA_version | default('latest') -%}
+
 {% set __BIG_AGI_version = BIG_AGI_version | default('latest') -%}
 
 {% set __AUTOGEN_STUDIO_version = AUTOGEN_STUDIO_version | default('latest') -%}
@@ -763,6 +765,7 @@ networks:
   {% set OLLAMA_WEBUI_enable = false -%}
   {% set ALPACA_WEBUI_enable = false -%}
   {% set ANYTHING_LLM_enable = false -%}
+  {% set PERPLEXICA_enable = false -%}
   {% set BIG_AGI_enable = false -%}
   {% set AUTOGEN_STUDIO_enable = false -%}
   {% set CREWAI_STUDIO_enable = false -%}  
@@ -9127,7 +9130,6 @@ services:
       NIFI_WEB_HTTPS_PORT: '{{externalPort}}'
       NIFI_WEB_HTTPS_HOST: 0.0.0.0
       NIFI_WEB_PROXY_HOST: '${PUBLIC_IP}:{{externalPort}},${DOCKER_HOST_IP}:{{externalPort}}'
-      AUTH: tls
       {% if NIFI_use_custom_certs is defined and NIFI_use_custom_certs | default(false) %}
       KEYSTORE_PATH: /opt/certs/keystore.jks
       KEYSTORE_TYPE: JKS
@@ -11723,6 +11725,7 @@ services:
       com.platys.description: "User-friendly WebUI for LLMs"
       com.platys.webui.title: "Ollama Web UI"
       com.platys.webui.url: "http://dataplatform:28338"
+      com.centurylinklabs.watchtower.enable: {{true if MARKDOWN_MADNESS_watchtower_enable else omit}}      
     ports:
       - 28338:8080
     environment:
@@ -11841,6 +11844,70 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
 {% endif %}   {# ANYTHING_LLM_enable  #}
+
+{%if PERPLEXICA_enable | default(false) %}
+  #  ================================== Perplexica  ========================================== #
+  perplexica-backend:
+    image: itzcrazykns1337/perplexica-backend:{{__PERPLEXICA_version}}
+    container_name: perplexica-backend
+    hostname: perplexica-backend
+    labels:
+      com.platys.name: 'perplexica'
+      com.platys.description: "AI-powered search engine"
+    ports:
+      - 28405:3001
+    depends_on:
+      - searxng
+    environment: 
+      SEARXNG_API_URL: http://searxng:8080
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./conf/perplixica/config.toml:/home/perplexica/config.toml      
+    {% if PERPLEXICA_volume_map_data %}
+      - ./container-volumes/perplexica/data:/home/perplexica/data
+    {% endif %}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+
+  perplexica-frontend:
+    image: itzcrazykns1337/perplexica-frontend:{{__PERPLEXICA_version}}
+    container_name: perplexica-frontend
+    hostname: perplexica-frontend
+    labels:
+      com.platys.name: 'perplexica'
+      com.platys.description: "AI-powered search engine"
+      com.platys.webui.title: "Perplexica UI"
+      com.platys.webui.url: "http://dataplatform:28406"      
+    ports:
+      - 28406:3000
+    extra_hosts:
+      - "host.docker.internal:host-gateway"      
+    depends_on:
+      - perplexica-backend
+    {%if use_timezone | default(false) %}
+    environment: 
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}    
+{% endif %}   {# PERPLEXICA_enable  #}
 
 {%if BIG_AGI_enable | default(false) %}
   #  ================================== Big-AGI  ========================================== #

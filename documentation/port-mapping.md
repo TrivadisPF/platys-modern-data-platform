@@ -680,6 +680,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28402 | 8084 | emqx-1 |
 28403 | 8883 | emqx-1 |
 28404 | 18083 | emqx-1 |
+28405 | 3001 | perplexica-backend |
+28406 | 3001 | perplexica-frontend |
 
 ## Ports > 28500
 
