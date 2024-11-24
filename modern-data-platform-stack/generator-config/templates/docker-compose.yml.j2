@@ -6293,6 +6293,9 @@ services:
       - SETUID      
     environment:
       SEARXNG_BASE_URL: http://${PUBLIC_IP:-localhost}:28389
+      AUTOCOMPLETE: 
+      SEARXNG_REDIS_URL: redis://searxng-redis:6379/0
+      # SEARXNG_SETTINGS_PATH: 
       UWSGI_WORKERS: 4
       UWSGI_THREADS: 4
     {%if use_timezone | default(false) %}
@@ -6300,7 +6303,6 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
-      - ./conf/searxng:/etc/searxng:rw
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -6309,6 +6311,29 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: always
+
+  searxng-redis:
+    image: docker.io/valkey/valkey:8-alpine
+    container_name: searxng-redis
+    hostname: searxng-redis  
+    labels:
+      com.platys.name: 'redis'
+      com.platys.description: "Key-Value Store for searxng"
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: always
+    command: valkey-server --save 30 1 --loglevel warning
 {% endif %}   {#  SEARXNG_enable #}
 
 {% if HIVE_SERVER_enable | default(false) %}
