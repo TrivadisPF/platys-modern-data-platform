@@ -9125,9 +9125,10 @@ services:
     {% endif -%}   {#  NIFI_create_cluster #}
     {%if NIFI_run_secure  | default(false) %}
       NIFI_WEB_HTTPS_PORT: '{{externalPort}}'
-      NIFI_WEB_HTTPS_HOST: nifi-{{loop.index}}
+      NIFI_WEB_HTTPS_HOST: 0.0.0.0
       NIFI_WEB_PROXY_HOST: '${PUBLIC_IP}:{{externalPort}},${DOCKER_HOST_IP}:{{externalPort}}'
       AUTH: tls
+      {% if NIFI_use_custom_certs is defined and NIFI_use_custom_certs | default(false) %}
       KEYSTORE_PATH: /opt/certs/keystore.jks
       KEYSTORE_TYPE: JKS
       KEYSTORE_PASSWORD: {{NIFI_keystore_password if NIFI_keystore_password is defined and NIFI_keystore_password | length else 'BWt7eLC4R53N4bIxdZEVPhAdkYlQ0Le8Tw0erGXpvI0' }}
@@ -9135,6 +9136,7 @@ services:
       TRUSTSTORE_PATH: /opt/certs/truststore.jks
       TRUSTSTORE_TYPE: JKS
       TRUSTSTORE_PASSWORD: {{NIFI_truststore_password if NIFI_truststore_password is defined and NIFI_truststore_password | length else 'PkhvPAirou5R/K9HQxVk99uT+hehM7SRURyFSbxTlTQ' }}
+      {% endif -%}  {#  NIFI_use_custom_certs #}
       NIFI_SECURITY_USER_AUTHORIZER: single-user-authorizer
       NIFI_SECURITY_USER_LOGIN_IDENTITY_PROVIDER: single-user-provider
     {% else %}
@@ -9180,9 +9182,6 @@ services:
       {% if NIFI_use_custom_certs is defined and NIFI_use_custom_certs | default(false) %}
       - ./custom-conf/nifi/security/nifi-{{loop.index}}/keystore.jks:/opt/certs/keystore.jks
       - ./custom-conf/nifi/security/nifi-{{loop.index}}/truststore.jks:/opt/certs/truststore.jks
-      {% else %}
-      - ./security/nifi/nifi-{{loop.index}}/keystore.jks:/opt/certs/keystore.jks
-      - ./security/nifi/nifi-{{loop.index}}/truststore.jks:/opt/certs/truststore.jks
       {% endif -%}  {#  NIFI_use_custom_certs #}
     {% endif -%}   {#  NIFI_run_unsecure #}
     {% if NIFI_volume_map_custom_config %}
