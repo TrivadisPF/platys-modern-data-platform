@@ -1,1 +1,1 @@
-Place additional NARs for NiFi here and add them to NIFI_extensions configuration setting.
+Place additional NARs for NiFi here. 
