@@ -1,0 +1,1 @@
+Contains the flowfile_repository data folder of nifi v2 service, if flag NIFI2_volume_map_data is set to true.

@@ -23,6 +23,9 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 1270 | 1234 | nifi-1 (prometheus exporter) | 
 1271 | 1234 | nifi-2 (prometheus exporter) | 
 1272 | 1234 | nifi-3 (prometheus exporter) | 
+1273 | 1234 | nifi2-1 (prometheus exporter) | 
+1274 | 1234 | nifi2-2 (prometheus exporter) | 
+1275 | 1234 | nifi2-3 (prometheus exporter) | 
 1337 | 1337 | konga | 
 1433 | 1433 | sqlserver |
 1521 | 1521 | oracledb-ee |
@@ -286,6 +289,9 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 10005 | 10000 | nifi-1 |
 10006 | 10000 | nifi-2 |
 10007 | 10000 | nifi-3 |
+10015 | 10000 | nifi2-1 |
+10016 | 10000 | nifi2-2 |
+10017 | 10000 | nifi2-3 |
 10009 | 10009 | kyuubi |
 10099 | 10099 | kyuubi |
 11211 | 11211 | memcached |
@@ -314,6 +320,9 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 18080 | 8080 | nifi-1 |
 18081 | 8080 | nifi-2 |
 18082 | 8080 | nifi-3 |
+18083 | 8080 | nifi2-1 |
+18084 | 8080 | nifi2-2 |
+18085 | 8080 | nifi2-3 |
 18088 | 8088 | resourcemanager |
 18042 | 8042 | nodemanager |
 18083 | 8083 | replicator-1 |
@@ -688,7 +697,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 Container Port(s) | Internal Port(s)           | Service (alternatives) |
 --------------------|------------------|-----------------------|
 28500 - 28510 | 28500 - 28510 | streamsets-1 (additional ports) |
-28510 - 28620 | 28500 - 28510 | nifi-1 (additional ports |
+28510 - 28520 | 28510 - 28520 | nifi-1 (additional ports |
+28520 - 28530 | 28520 - 28530 | nifi2-1 (additional ports |
 28530 - 28600 | any | reserved for applications |
 
 An overview of the URL for the various web-based UIs can be found [here](./environment/README.md).

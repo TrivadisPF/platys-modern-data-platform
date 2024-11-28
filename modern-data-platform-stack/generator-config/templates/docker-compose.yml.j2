@@ -180,20 +180,18 @@ networks:
 {% set __STREAMSETS_EDGE_version = STREAMSETS_EDGE_version | default('3.12.0') -%}
 {% set __STREAMSETS_DATAOPS_version = STREAMSETS_DATAOPS_version | default('latest') -%}
 
-{% if (NIFI_major_version | lower) == '1'  %}
-  {% set __NIFI_version = NIFI_1_version -%}
-{% elif (NIFI_major_version | lower) == '2'  %}
-  {% set __NIFI_version = NIFI_2_version -%}
-{% endif -%}
+{% set __NIFI_version = NIFI_version -%}
+{% set __NIFI2_version = NIFI2_version -%}
+
 {% if (NIFI_REGISTRY_major_version | lower) == '1'  %}
-  {% set __NIFI_REGISTRY_version = NIFI_REGISTRY_1_version -%}
+  {% set __NIFI_REGISTRY_version = NIFI_REGISTRY_version -%}
 {% elif (NIFI_REGISTRY_major_version | lower) == '2'  %}
-  {% set __NIFI_REGISTRY_version = NIFI_REGISTRY_2_version -%}
+  {% set __NIFI_REGISTRY_version = NIFI_REGISTRY2_version -%}
 {% endif -%}
 {% if (NIFI_TOOLKIT_major_version | lower) == '1'  %}
-  {% set __NIFI_TOOLKIT_version = NIFI_TOOLKIT_1_version -%}
+  {% set __NIFI_TOOLKIT_version = NIFI_TOOLKIT_version -%}
 {% elif (NIFI_TOOLKIT_major_version | lower) == '2'  %}
-  {% set __NIFI_TOOLKIT_version = NIFI_TOOLKIT_2_version -%}
+  {% set __NIFI_TOOLKIT_version = NIFI_TOOLKIT2_version -%}
 {% endif -%}
 {% set __MONITOFI_version = MONITOFI_version | default('latest') -%}
 
@@ -610,6 +608,11 @@ networks:
   {% set ZOOKEEPER_enable = true -%}
 {% endif -%}   {# NIFI_enable and NIFI_create_cluster #}
 
+{% if (NIFI2_enable and NIFI2_create_cluster) -%}
+# enforce some dependencies
+  {% set ZOOKEEPER_enable = true -%}
+{% endif -%}   {# NIFI2_enable and NIFI2_create_cluster #}
+
 {% if (VECTOR_ADMIN_enable) -%}
 # enforce some dependencies
   {% set POSTGRESQL_enable = true -%}
@@ -745,6 +748,7 @@ networks:
   {% set STREAMSETS_TRANSFORMER_enable = false -%}
   {% set STREAMSETS_DATAOPS_enable = false -%}
   {% set NIFI_enable = false -%}
+  {% set NIFI2_enable = false -%}
   {% set NIFI_REGISTRY_enable = false -%}
   {% set NIFI_TOOLKIT_enable = false -%}
   {% set N8N_enable = false -%}
@@ -9207,10 +9211,7 @@ services:
     volumes:
       - ./data-transfer:/data-transfer
       - ./plugins/nifi/jars/:/extra-jars/
-      - ./plugins/nifi/nars/:/opt/nifi/nifi-current/{{'nar_' if (NIFI_major_version | lower) == '2' else ''}}extensions/
-    {% if (NIFI_major_version | lower) == '2'  %}
-      - ./plugins/nifi/python/:/opt/nifi/nifi-current/python_extensions/
-    {% endif -%}   {#  NIFI_major_version == 2 #}
+      - ./plugins/nifi/nars/:/opt/nifi/nifi-current/extensions/
     {%if NIFI_run_secure  | default(false) %}
       {% if NIFI_use_custom_certs is defined and NIFI_use_custom_certs | default(false) %}
       - ./custom-conf/nifi/security/nifi-{{loop.index}}/keystore.jks:/opt/certs/keystore.jks
@@ -9255,6 +9256,144 @@ services:
     {%if NIFI_python_provide_requirements_file  | default(false) %}
         pip install -r /opt/nifi/nifi-current/requirements.txt
     {% endif -%}   {#  NIFI_python_provide_requirements_file #}
+        ../scripts/start.sh
+    restart: {{container_restart_policy}}
+  {% endfor %}
+
+{%if NIFI2_enable | default(false) %}
+  #  ================================== NiFi 2 ========================================== #
+  {% for num in range(NIFI2_nodes | default('1') ) %}
+    {% set externalPort = 18083 + loop.index-1 %}
+    {% set externalRemotePort = 10015 + loop.index-1 %}
+    {% set externalPromPort = 1273 + loop.index-1 %}
+    {% set clusterPort = 11005 + loop.index-1 %}
+  nifi2-{{loop.index}}:
+    image: {{NIFI2_custom_image_name if NIFI2_custom_image_name is defined and NIFI2_custom_image_name | length else 'apache/nifi'}}:{{__NIFI2_version}}
+    container_name: nifi2-{{loop.index}}
+    hostname: nifi2-{{loop.index}}
+    labels:
+      com.platys.name: 'nifi'
+      com.platys.description: "NiFi Data Integration Engine (V2)"
+      com.platys.webui.title: "Apache NiFi UI"
+      com.platys.webui.url: "http{{ 's' if NIFI2_run_secure}}://dataplatform:{{externalPort}}/nifi"
+      com.platys.restapi.title: "Apche NiFi REST API"
+      com.platys.restapi.url: "http{{ 's' if NIFI2_run_secure}}://dataplatform:{{externalPort}}/nifi-api"
+      com.platys.password.envvars: "PLATYS_NIFI2_PASSWORD"
+    ports:
+      # HTTP
+      - "{{externalPort}}:{{externalPort}}"
+      # Remote Input Socket
+      - {{externalRemotePort}}:{{externalRemotePort}}/tcp
+      # Prometheus Port
+      - {{externalPromPort}}:1234
+  {%if loop.index == 1 | default(false) %}
+    {% for num in range(NIFI2_additional_port_mappings | default(0) ) %}
+      {% set external_port = 28520 + loop.index - 1 %}
+      {% set webui_port = 28520 + loop.index - 1 %}
+      - "{{external_port}}:{{webui_port}}"
+    {% endfor %}
+  {% endif %}
+    environment:
+    {%if NIFI2_create_cluster  | default(false) %}
+      NIFI_CLUSTER_IS_NODE: 'true'
+      NIFI_CLUSTER_ADDRESS: nifi-{{loop.index}}
+      NIFI_CLUSTER_NODE_PROTOCOL_PORT: {{clusterPort}}
+      NIFI_ZK_CONNECT_STRING: zookeeper-1:2181
+      NIFI_ZK_ROOT_NODE: '/nifi'
+      NIFI_ELECTION_MAX_WAIT: '{{NIFI2_election_max_wait}}'
+    {% endif -%}   {#  NIFI2_create_cluster #}
+    {%if NIFI2_run_secure  | default(false) %}
+      NIFI_WEB_HTTPS_PORT: '{{externalPort}}'
+      NIFI_WEB_HTTPS_HOST: 0.0.0.0
+      NIFI_WEB_PROXY_HOST: '${PUBLIC_IP}:{{externalPort}},${DOCKER_HOST_IP}:{{externalPort}}'
+      {% if NIFI2_use_custom_certs is defined and NIFI2_use_custom_certs | default(false) %}
+      KEYSTORE_PATH: /opt/certs/keystore.jks
+      KEYSTORE_TYPE: JKS
+      KEYSTORE_PASSWORD: {{NIFI2_keystore_password if NIFI2_keystore_password is defined and NIFI2_keystore_password | length else 'BWt7eLC4R53N4bIxdZEVPhAdkYlQ0Le8Tw0erGXpvI0' }}
+      KEY_PASSWORD: {{NIFI2_key_password if NIFI2_key_password is defined and NIFI2_key_password  | length else 'BWt7eLC4R53N4bIxdZEVPhAdkYlQ0Le8Tw0erGXpvI0' }}
+      TRUSTSTORE_PATH: /opt/certs/truststore.jks
+      TRUSTSTORE_TYPE: JKS
+      TRUSTSTORE_PASSWORD: {{NIFI2_truststore_password if NIFI2_truststore_password is defined and NIFI2_truststore_password | length else 'PkhvPAirou5R/K9HQxVk99uT+hehM7SRURyFSbxTlTQ' }}
+      {% endif -%}  {#  NIFI2_use_custom_certs #}
+      NIFI_SECURITY_USER_AUTHORIZER: single-user-authorizer
+      NIFI_SECURITY_USER_LOGIN_IDENTITY_PROVIDER: single-user-provider
+    {% else %}
+      NIFI_WEB_HTTP_PORT: '{{externalPort}}'
+    {% endif -%}   {#  NIFI2_run_unsecure #}
+    {%if MINIO_enable or external['S3_enable'] | default(false) %}
+      S3_ENDPOINT: '{{s3Endpoint | default(omit) }}'
+      S3_PATH_STYLE_ACCESS: '{{s3PathStyleAccess}}'
+      S3_REGION: {{s3DefaultRegion if s3DefaultRegion is defined and s3DefaultRegion else omit}}
+      # these two env variables are also needed for the s3-credentials.properties file gen to work! 
+      AWS_ACCESS_KEY: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
+      AWS_SECRET_ACCESS_KEY: {{s3SecretAccessKey}}
+    {% endif -%}    {#  MINIO_enable #}
+      NIFI_REMOTE_INPUT_SOCKET_PORT: '{{externalRemotePort}}'
+      NIFI_REMOTE_INPUT_HOST: nifi-{{loop.index}}
+      NIFI_JVM_HEAP_INIT: {{ NIFI2_jvm_heap_init if NIFI2_jvm_heap_init is defined and NIFI2_jvm_heap_init != None else omit }}
+      NIFI_JVM_HEAP_MAX: {{ NIFI2_jvm_heap_max if NIFI2_jvm_heap_max is defined and NIFI2_jvm_heap_max != None else omit }}
+      NIFI_SENSITIVE_PROPS_KEY: '12345678901234567890A'
+      SINGLE_USER_CREDENTIALS_USERNAME: '{{NIFI2_username}}'
+      SINGLE_USER_CREDENTIALS_PASSWORD: '${PLATYS_NIFI2_PASSWORD:-{{NIFI2_password}}}'
+      INITIAL_ADMIN_IDENTITY: '{{ NIFI2_inital_admin_identitiy if NIFI2_inital_admin_identitiy is defined and NIFI2_inital_admin_identitiy | length else NIFI2_username }}'
+    {% if VAULT_enable and VAULT_use_dev_mode | default(false) %}
+      VAULT_TOKEN: {{VAULT_dev_mode_token}}
+    {% endif -%}   {#  VAULT_use_dev_mode #}
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    {%if external['S3_enable'] | default(false) %}
+    env_file: .env
+    {% endif -%}   {#  external S3 #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./plugins/nifi2/jars/:/extra-jars/
+      - ./plugins/nifi2/nars/:/opt/nifi/nifi-current/nar_extensions/
+      - ./plugins/nifi2/python/:/opt/nifi/nifi-current/python_extensions/
+    {%if NIFI2_run_secure  | default(false) %}
+      {% if NIFI2_use_custom_certs is defined and NIFI2_use_custom_certs | default(false) %}
+      - ./custom-conf/nifi2/security/nifi-{{loop.index}}/keystore.jks:/opt/certs/keystore.jks
+      - ./custom-conf/nifi2/security/nifi-{{loop.index}}/truststore.jks:/opt/certs/truststore.jks
+      {% endif -%}  {#  NIFI2_use_custom_certs #}
+    {% endif -%}   {#  NIFI2_run_unsecure #}
+    {% if NIFI2_volume_map_custom_config %}
+      - ./custom-conf/nifi2/config/nifi.properties:/tmp/nifi.properties.templ
+    {% endif %}
+    {% if NIFI2_volume_map_data %}
+      - ./container-volume/nifi2-{{loop.index}}/database_repository:/opt/nifi/nifi-current/database_repository
+      - ./container-volume/nifi2-{{loop.index}}/flowfile_repository:/opt/nifi/nifi-current/flowfile_repository
+      - ./container-volume/nifi2-{{loop.index}}/content_repository:/opt/nifi/nifi-current/content_repository
+      - ./container-volume/nifi2-{{loop.index}}/provenance_repository:/opt/nifi/nifi-current/provenance_repository
+      - ./container-volume/nifi2-{{loop.index}}/state:/opt/nifi/nifi-current/state
+    {% endif %}
+    {% if NIFI2_volume_map_logs %}
+      - ./container-volume/nifi2-{{loop.index}}/logs:/opt/nifi/nifi-current/logs
+    {% endif %}
+    {%if MINIO_enable or external['S3_enable'] | default(false) %}
+      - aws-credentials-vol:/opt/nifi/nifi-current/.aws:RO
+    {% endif %}        
+    {%if NIFI2_python_provide_requirements_file  | default(false) %}
+      - ./custom-conf/nifi2/requirements.txt:/opt/nifi/nifi-current/requirements.txt
+    {% endif -%}    {#  NIFI2_python_provide_requirements_file #}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    entrypoint:
+      # We override the entrypoint from the docker image and therefore have to run ../scripts/start.sh from the NiFi docker image
+      - bash
+      - -c
+      - |
+    {% if NIFI2_volume_map_custom_config %}
+        # this indiretion is needed, to avoid a priviledge error when starting the container
+        cat /tmp/nifi.properties.templ > /opt/nifi/nifi-current/conf/nifi.properties
+    {% endif -%}
+    {%if NIFI2_python_provide_requirements_file  | default(false) %}
+        pip install -r /opt/nifi/nifi-current/requirements.txt
+    {% endif -%}   {#  NIFI2_python_provide_requirements_file #}
         ../scripts/start.sh
     restart: {{container_restart_policy}}
   {% endfor %}
