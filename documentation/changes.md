@@ -108,7 +108,7 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Support for the deployment of Dataverse previewers added (see `DATAVERSE_previewers_xxxx` config settings)
  * Support for `valkey` as an edition to the Redis service, to use Valkey (the fork of Redis with open source license) to use as a drop-in replacement
  * Update LakeFS to the latest version and add more configuration options
- * NiFi 2.0.0 support
+ * NiFi 2.0.0 can be run it in parallel to a 1.x version (`NIFI2_enable` config setting)
 
 ### Breaking Changes
 
@@ -121,6 +121,7 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * change default value for `TRINO_edition` to `oss`
  * `dataverse` port changed to `28394` (used to be `28294` and by taht conflicting with `ckan`)
  * Support for Spark versions `2.4`, `3.1` and `3.2` removed
+ * Remove the `NIFI_major_version` config setting, as there is now support to run both NiFi v1 and v2 in parallel (`NIFI_enable` vs. `NIFI2_enable`)
  
 ## What's new in 1.17.1
 
