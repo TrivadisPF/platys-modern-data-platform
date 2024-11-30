@@ -123,6 +123,7 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * `dataverse` port changed to `28394` (used to be `28294` and by taht conflicting with `ckan`)
  * Support for Spark versions `2.4`, `3.1` and `3.2` removed
  * Remove the `NIFI_major_version` config setting, as there is now support to run both NiFi v1 and v2 in parallel (`NIFI_enable` vs. `NIFI2_enable`)
+ * both in Apache NiFi v1 and v2 support, the `/plugins/nifi/jars/` / `/plugins/nifi2/jars/` is now mapped to `/opt/nifi/nifi-current/addl-jars/` and no longer to `/extra-jars` inside the docker container.
  
 ## What's new in 1.17.1
 
