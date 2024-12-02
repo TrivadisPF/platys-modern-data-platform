@@ -9398,6 +9398,29 @@ services:
         ../scripts/start.sh
     restart: {{container_restart_policy}}
   {% endfor %}
+
+  nifi2-init:
+    image: trivadis/nifi-init:latest
+    container_name: nifi2-init
+    hostname: nifi2-init
+    environment:
+      NIFI_URL: https://nifi2-1:18083
+      NIFI_USERNAME: '{{NIFI2_username}}'
+      NIFI_PASSWORD: '${PLATYS_NIFI2_PASSWORD:-{{NIFI2_password}}}'
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    init: true
+
 {% endif %}   {#  NIFI2_enable  #}
 
 {%if MONITOFI_enable | default(false) %}
