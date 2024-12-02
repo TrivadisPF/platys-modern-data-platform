@@ -9399,14 +9399,20 @@ services:
     restart: {{container_restart_policy}}
   {% endfor %}
 
+  {%if NIFI2_INIT_enable | default(false) %}
   nifi2-init:
     image: trivadis/nifi-init:latest
     container_name: nifi2-init
     hostname: nifi2-init
     environment:
-      NIFI_URL: https://nifi2-1:18083
-      NIFI_USERNAME: '{{NIFI2_username}}'
-      NIFI_PASSWORD: '${PLATYS_NIFI2_PASSWORD:-{{NIFI2_password}}}'
+      - NIFI_URL=https://nifi2-1:18083
+      - NIFI_USERNAME='{{NIFI2_username}}'
+      - NIFI_PASSWORD='${PLATYS_NIFI2_PASSWORD:-{{NIFI2_password}}}'
+    {% if NIFI2_INIT_environment is defined and NIFI2_INIT_environment and NIFI2_INIT_environment | length | default(false) %}
+      {% for envvar in NIFI2_INIT_environment.split(",") %}
+      - {{envvar.split('=')[0]}}="{{envvar.split('=')[1]}}"
+      {% endfor %}
+    {% endif -%}   {#  NIFI2_INIT_environment #}   
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -9422,7 +9428,7 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     init: true
     restart: "no"
-
+  {% endif %}   {#  NIFI2_INIT_enable  #}
 {% endif %}   {#  NIFI2_enable  #}
 
 {%if MONITOFI_enable | default(false) %}
@@ -13488,7 +13494,7 @@ services:
       {% for envvar in STREAMLIT_environment.split(",") %}
       {{envvar.split('=')[0]}}: "{{envvar.split('=')[1]}}"
       {% endfor %}
-    {% endif -%}   {#  use_timezone #}
+    {% endif -%}   {#  STREAMLIT_environment #}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
