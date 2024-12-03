@@ -17900,6 +17900,9 @@ services:
   {% else %}
       EVENT_LISTENER_CONFIG_FILES: ''
   {% endif %}
+  {% if OPA_enable | default(false) %}
+      OPA_ENDPOINT: http://opa:8181
+  {% endif %}
   {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
   {% endif -%}   {#  use_timezone #}
@@ -18005,8 +18008,8 @@ services:
   {% if TRINO_auth_with_groups | default(false) %}
       - ./security/{{conf_dir}}/group-provider.properties:{{trino_etc_dir}}/group-provider.properties
   {% endif %}
-  {% if TRINO_access_control_enabled | default(false) %}
-      - ./security/{{conf_dir}}/access-control.properties:{{trino_etc_dir}}/access-control.properties
+  {% if TRINO_access_control_enabled and ((TRINO_access_control_method | lower) == 'file' or (TRINO_access_control_method | lower) == 'opa') | default(false) %}
+      - ./security/{{conf_dir}}/access-control-{{TRINO_access_control_method | lower}}.properties:{{trino_etc_dir}}/access-control.properties
   {% endif %}
   {% if TRINO_additional_catalogs is defined and TRINO_additional_catalogs | default(false) %}
     {% for catalogName in (TRINO_additional_catalogs.split(',')) %}
@@ -18116,9 +18119,12 @@ services:
   {% else %}
       EVENT_LISTENER_CONFIG_FILES: ''
   {% endif %}
-    {%if use_timezone | default(false) %}
+  {% if OPA_enable | default(false) %}
+      OPA_ENDPOINT: http://opa:8181
+  {% endif %}  
+  {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
-    {% endif -%}   {#  use_timezone #}
+  {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
       - ./conf/{{conf_dir}}/cluster/worker.config.properties:{{trino_etc_dir}}/config.properties
@@ -18210,8 +18216,8 @@ services:
   {% if TRINO_auth_with_groups | default(false) %}
       - ./security/{{conf_dir}}/group-provider.properties:{{trino_etc_dir}}/group-provider.properties
   {% endif %}
-  {% if TRINO_access_control_enabled | default(false) %}
-      - ./security/{{conf_dir}}/access-control.properties:{{trino_etc_dir}}/access-control.properties
+  {% if TRINO_access_control_enabled and ((TRINO_access_control_method | lower) == 'file' or (TRINO_access_control_method | lower) == 'opa') | default(false) %}
+      - ./security/{{conf_dir}}/access-control-{{TRINO_access_control_method | lower}}.properties:{{trino_etc_dir}}/access-control.properties
   {% endif %}
   {% if TRINO_additional_catalogs is defined and TRINO_additional_catalogs | default(false) %}
     {% for catalogName in (TRINO_additional_catalogs.split(',')) %}
