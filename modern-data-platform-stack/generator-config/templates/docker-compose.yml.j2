@@ -122,6 +122,10 @@ networks:
 {% set __RANGER_version = RANGER_version | default('latest') -%}
 {% set __RANGER_postgresql_version = RANGER_postgresql_version | default('latest') -%}
 
+{% set __OPA_version = OPA_version | default('latest') -%}
+{% set __STYRA_EOPA_version = STYRA_EOPA_version | default('latest') -%}
+{% set __OPAL_version = OPAL_version | default('latest') -%}
+
 {% set __ATLAS_version = ATLAS_version | default('latest') -%}
 
 {% set __DATAHUB_version = DATAHUB_version | default('latest') -%}
@@ -737,6 +741,9 @@ networks:
   {% set LDAP_USER_MANAGER_enable = false -%}
   {% set RANGER_enable = false -%}
   {% set RANGER_POSTGRES_enable = false -%}
+  {% set OPA_enable = false -%}
+  {% set STYRA_EOPA_enable = false -%}
+  {% set OPAL_enable = false -%}
   {% set ATLAS_enable = false -%}
   {% set DATAHUB_enable = false -%}
   {% set AMUNDSEN_enable = false -%}
@@ -6763,7 +6770,7 @@ services:
 {% if STYRA_EOPA_enable  | default(false) %}
   #  ================================== Styra Enterprise Open Policy Agent (opa) ========================================== #
   styra-eopa:
-    image: ghcr.io/styra-eopainc/enterprise-opa:{{__styra-eopa_version}}
+    image: ghcr.io/styra-eopainc/enterprise-opa:{{__STYRA_EOPA_version}}
     container_name: styra-eopa
     hostname: styra-eopa
     labels:
@@ -6798,6 +6805,82 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  STYRA_EOPA_enable #}
+
+{% if OPAL_enable  | default(false) %}
+  #  ================================== Open Policy Administration Layer (opa) ========================================== #
+  opal-server:
+    image: permitio/opal-server:{{__OPAL_version}}
+    container_name: opal-server
+    hostname: opal-server
+    labels:
+      com.platys.name: "opal"
+      com.platys.description: "Open Policy Administration Layer"
+      com.platys.restapi.title: "Open Policy Agent (OPA) REST API"
+      com.platys.restapi.url: "https://dataplatform:7002"
+    ports:
+      - "7002:7002"
+    environment:
+    {%if OPAL_broadcast | default(false) %}
+      - OPAL_BROADCAST_URI=postgres://postgres:postgres@${BROADCAST_CHANNEL_HOST}:5432/postgres
+      - UVICORN_NUM_WORKERS=4
+    {% endif -%}   {#  use_timezone #}
+
+      - OPAL_POLICY_REPO_URL=https://github.com/nadavgross/trino-opa-example
+      - OPAL_POLICY_REPO_SSH_KEY=
+      - OPAL_POLICY_REPO_MAIN_BRANCH=master
+      - OPAL_POLICY_REPO_POLLING_INTERVAL=30
+      - OPAL_DATA_CONFIG_SOURCES={"config":{"entries":[{"url":"http://opal_server:7002/policy-data","topics":["policy_data"],"dst_path":"/static"}]}}
+      - OPAL_LOG_FORMAT_INCLUDE_PID=true
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+
+  opal-client:
+    image: permitio/opal-client:{{__OPAL_version}}
+    container_name: opal-client
+    hostname: opal-client
+    labels:
+      com.platys.name: "opal"
+      com.platys.description: "Open Policy Administration Layer"
+      com.platys.restapi.title: "Open Policy Agent (OPA) REST API"
+      com.platys.restapi.url: "https://dataplatform:28407"
+    depends_on:
+      - opal-server
+    ports:
+      - "28407:7000"
+      - "28408:8181"      
+    environment:
+      - OPAL_SERVER_URL=http://opal-server:7002
+      - OPAL_LOG_FORMAT_INCLUDE_PID=true
+      - OPAL_INLINE_OPA_LOG_FORMAT=http
+    {%if OPA_enable | default(false) %}
+      - OPAL_POLICY_STORE_URL=http://opal:8181
+    {% endif -%}   {#  use_timezone #}
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    command: sh -c "exec /usr/wait-for.sh opal-server:7002 --timeout=20 -- /start.sh"
+    restart: {{container_restart_policy}}
+{% endif %}   {#  OPA_enable #}
 
 {% if ATLAS_enable  | default(false) %}
   #  ================================== Apache Atlas ========================================== #

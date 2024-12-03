@@ -158,6 +158,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 6832 | 6832 | jaeger (udp) |
 6875 | 6875 | materialize-1 |
 7000 | 7000 | yb-master |
+7002 | 7002 | opal-server |
 7050 | 7050 | kudu-tserver-1 |
 7051 | 7051 | kudo-master-1 |
 7077 | 7077 | spark-master |
@@ -691,6 +692,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28404 | 18083 | emqx-1 |
 28405 | 3001 | perplexica-backend |
 28406 | 3001 | perplexica-frontend |
+28407 | 7000 | opal-client |
+28408 | 8181 | opal-client |
 
 ## Ports > 28500
 

@@ -99,6 +99,8 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Update `projectnessie` to `0.100.0`
  * Update `lakefs` to `1`
  * Update `vault` to `1.18`
+ * Update `opa` to `0.71.0-dev`
+ * Update `styra` to ` 1.30.0-80-debug`
 
 ### Enhancements
 
