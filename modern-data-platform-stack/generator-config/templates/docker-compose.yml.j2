@@ -9398,28 +9398,39 @@ services:
         ../scripts/start.sh
     restart: {{container_restart_policy}}
   {% endfor %}
+{% endif %}   {#  NIFI2_enable  #}
 
-  {%if NIFI2_INIT_enable | default(false) %}
-  nifi2-init:
-    image: trivadis/nifi-init:latest
-    container_name: nifi2-init
-    hostname: nifi2-init
+{%if PLATYS_MDP_INIT_enable | default(false) %}
+  platys-mdp-init:
+    image: trivadis/platys-mdp-init:latest
+    container_name: platys-mdp-init
+    hostname: platys-mdp-init
+    {%if PLATYS_MDP_INIT_use_env_file | default(false) %}
+    env_file: {{PLATYS_MDP_INIT_env_filename if PLATYS_MDP_INIT_env_filename is defined and PLATYS_MDP_INIT_env_filename and PLATYS_MDP_INIT_env_filename | length else ".env"}}
+    {% endif -%}   {#  NIFI2_enable #}   
     environment:
       W4IT_TIMEOUT: 120
-      NIFI_URL: https://nifi2-1:18083
-      NIFI_USERNAME: '{{NIFI2_username}}'
-      NIFI_PASSWORD: '${PLATYS_NIFI2_PASSWORD:-{{NIFI2_password}}}'
-    {% if NIFI2_INIT_environment is defined and NIFI2_INIT_environment and NIFI2_INIT_environment | length | default(false) %}
-      {% for envvar in NIFI2_INIT_environment.split(",") %}
+    {% if NIFI2_enable | default(false) %}
+      NIFI2_URL: https://nifi2-1:18083
+      NIFI2_USERNAME: '{{NIFI2_username}}'
+      NIFI2_PASSWORD: '${PLATYS_NIFI2_PASSWORD:-{{NIFI2_password}}}'
+    {% endif -%}   {#  NIFI2_enable #}   
+    {% if VAULT_enable | default(false) %}
+      VAULT_URL: https://vault:8200
+      VAULT_USERNAME: '{{VAULT_admin_username}}'
+      VAULT_PASSWORD: '${PLATYS_VAULT_ADMIN_PASSWORD:-{{NIFI2_password}}}'
+    {% endif -%}   {#  VAULT_enable #}   
+    {% if PLATYS_MDP_INIT_environment is defined and PLATYS_MDP_INIT_environment and PLATYS_MDP_INIT_environment | length | default(false) %}
+      {% for envvar in PLATYS_MDP_INIT_environment.split(",") %}
       {{envvar.split('=')[0]}}: "{{envvar.split('=')[1]}}"
       {% endfor %}
-    {% endif -%}   {#  NIFI2_INIT_environment #}   
+    {% endif -%}   {#  PLATYS_MDP_INIT_environment #}   
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
-      - ./init/nifi2:/docker-entrypoint-init.d/
+      - ./init/platys-mdp-init:/docker-entrypoint-init.d/
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -9429,8 +9440,7 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     init: true
     restart: "no"
-  {% endif %}   {#  NIFI2_INIT_enable  #}
-{% endif %}   {#  NIFI2_enable  #}
+{% endif %}   {#  PLATYS_MDP_INIT_enable  #}
 
 {%if MONITOFI_enable | default(false) %}
   #  ================================== MonitoFi ========================================== #
@@ -21832,7 +21842,7 @@ services:
       timeout: 10s
       retries: 5
 
-  {% if VAULT_admin_user is defined and VAULT_admin_user and VAULT_admin_user | length | default(false) %}
+  {% if VAULT_admin_username is defined and VAULT_admin_username and VAULT_admin_username | length | default(false) %}
   vault-init:
     image: hashicorp/vault:{{__VAULT_version}}
     container_name: vault-init
@@ -21858,11 +21868,12 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}    
     command: 
-      - bash
+      - sh
       - -c
       - |
+        vault policy write read-write-policy read-write-policy.hcl
         vault auth enable userpass
-        vault write auth/userpass/users/{{VAULT_admin_user | default("admin")}} password=${PLATYS_VAULT_ADMIN_PASSWORD:-abc123!} policies=root
+        vault write auth/userpass/users/{{VAULT_admin_username | default("admin")}} password=${PLATYS_VAULT_ADMIN_PASSWORD:-abc123!} policies=root
     init: true
     restart: "no"    
   {% endif %}   {#  VAULT_enable #}
