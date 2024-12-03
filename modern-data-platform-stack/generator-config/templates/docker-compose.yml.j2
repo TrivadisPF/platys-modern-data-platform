@@ -21826,6 +21826,46 @@ services:
     cap_add:
       - IPC_LOCK
     command: vault server {{"-dev" if VAULT_use_dev_mode else "-config=/vault/config/vault.json"}}
+    healthcheck:
+      test: ["CMD", "vault", "status"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  {% if VAULT_admin_user is defined and VAULT_admin_user and VAULT_admin_user | length | default(false) %}
+  vault-init:
+    image: hashicorp/vault:{{__VAULT_version}}
+    container_name: vault-init
+    hostname: vault-init
+    labels:
+      com.platys.password.envvars: "PLATYS_VAULT_ADMIN_PASSWORD"            
+    depends_on:    
+      vault:
+        condition: service_healthy    
+    environment:
+      - VAULT_ADDR=http://vault:8200
+      - VAULT_TOKEN={{VAULT_dev_mode_token}}   
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}    
+    command: 
+      - bash
+      - -c
+      - |
+        vault auth enable userpass
+        vault write auth/userpass/users/{{VAULT_admin_user | default("admin")}} password=${PLATYS_VAULT_ADMIN_PASSWORD:-abc123!} policies=root
+    init: true
+    restart: "no"    
+  {% endif %}   {#  VAULT_enable #}
 {% endif %}   {#  VAULT_enable #}
 
 {% if KEYCLOAK_enable | default(false) %}
