@@ -9417,8 +9417,8 @@ services:
     {% endif -%}   {#  NIFI2_enable #}   
     {% if VAULT_enable | default(false) %}
       VAULT_URL: https://vault:8200
-      VAULT_USERNAME: '{{VAULT_admin_username}}'
-      VAULT_PASSWORD: '${PLATYS_VAULT_ADMIN_PASSWORD:-{{NIFI2_password}}}'
+      VAULT_USERNAME: '{{VAULT_username}}'
+      VAULT_PASSWORD: '${PLATYS_VAULT_PASSWORD:-{{NIFI2_password}}}'
     {% endif -%}   {#  VAULT_enable #}   
     {% if PLATYS_MDP_INIT_environment is defined and PLATYS_MDP_INIT_environment and PLATYS_MDP_INIT_environment | length | default(false) %}
       {% for envvar in PLATYS_MDP_INIT_environment.split(",") %}
@@ -21848,7 +21848,7 @@ services:
     container_name: vault-init
     hostname: vault-init
     labels:
-      com.platys.password.envvars: "PLATYS_VAULT_ADMIN_PASSWORD"            
+      com.platys.password.envvars: "PLATYS_VAULT_PASSWORD"            
     depends_on:    
       vault:
         condition: service_healthy    
@@ -21863,6 +21863,7 @@ services:
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
+      - "./security/vault/read-write-policy.hcl:/tmp/read-write-policy.hcl
     {% endif -%}   {#  use_timezone #}
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
     <<: *logging
@@ -21871,9 +21872,9 @@ services:
       - sh
       - -c
       - |
-        vault policy write read-write-policy read-write-policy.hcl
+        vault policy write read-write-policy /tmp/read-write-policy.hcl
         vault auth enable userpass
-        vault write auth/userpass/users/{{VAULT_admin_username | default("admin")}} password=${PLATYS_VAULT_ADMIN_PASSWORD:-abc123!} policies=root
+        vault write auth/userpass/users/{{VAULT_admin_username | default("admin")}} password=${PLATYS_VAULT_PASSWORD:-abc123!} policies=read-write-policy
     init: true
     restart: "no"    
   {% endif %}   {#  VAULT_enable #}
