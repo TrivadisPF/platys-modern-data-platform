@@ -9459,7 +9459,8 @@ services:
     {% endif %}
     {%if MINIO_enable or external['S3_enable'] | default(false) %}
       - aws-credentials-vol:/opt/nifi/nifi-current/.aws:RO
-    {% endif %}        
+    {% endif %}
+      - nifi-config-vol:/opt/nifi/nifi-current/conf
     {%if NIFI2_python_provide_requirements_file  | default(false) %}
       - ./custom-conf/nifi2/requirements.txt:/opt/nifi/nifi-current/requirements.txt
     {% endif -%}    {#  NIFI2_python_provide_requirements_file #}
@@ -23773,6 +23774,9 @@ services:
     volumes:
       - ./data-transfer:/data-transfer
       - ./init/platys-mdp-init:/docker-entrypoint-init.d/
+    {%if NIFI2_enable | default(false) %}
+      - nifi-config-vol:/opt/nifi/conf/:RO
+    {% endif -%}      
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -23793,6 +23797,9 @@ volumes:
 {% endif %}
 {%if MINIO_enable or external['S3_enable'] | default(false) %}
   aws-credentials-vol:
+{% endif %}
+{%if NIFI2_enable | default(false) %}
+  nifi-config-vol:
 {% endif %}
 {%if SPARK_enable %}
   spark-{{__SPARK_version | replace('.','-')}}-vol:
