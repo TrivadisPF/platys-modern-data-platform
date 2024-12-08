@@ -19405,7 +19405,7 @@ services:
       # these two env variables are also needed for the s3-credentials.properties file gen to work! 
       AWS_ACCESS_KEY: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
       AWS_SECRET_ACCESS_KEY: {{s3SecretAccessKey}}
-      MC_HOST_minio-1: http://{{MINIO_access_key}}:{{MINIO_secret_key}}@minio-1:9000    
+      MC_HOST_minio-1: http://{{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}:{{s3SecretAccessKey}}@minio-1:9000    
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -23744,7 +23744,7 @@ services:
     {% endif -%}   {#  NIFI2_enable #}   
     environment:
     {% if MINIO_enable | default(false) %}    
-      MC_HOST_minio-1: http://{{MINIO_access_key}}:{{MINIO_secret_key}}@minio-1:9000
+      MC_HOST_minio-1: http://{{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}:{{s3SecretAccessKey}}@minio-1:9000    
       MINIO_URL: {{s3Endpoint}}
     {% endif -%}   {#  NIFI2_enable #}   
     {% if LAKEFS_enable | default(false) %}
@@ -23755,6 +23755,7 @@ services:
     {% endif -%}   {#  LAKEFS_enable #}   
     {% if NIFI2_enable | default(false) %}
       NIFI2_URL: https://nifi2-1:18083
+      NIFI2_VERSION: '2.0.0'
       NIFI2_USERNAME: '{{NIFI2_username}}'
       NIFI2_PASSWORD: '${PLATYS_NIFI2_PASSWORD:-{{NIFI2_password}}}'
     {% endif -%}   {#  NIFI2_enable #}   
