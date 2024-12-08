@@ -10835,6 +10835,12 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     user: "${AIRFLOW_UID:-50000}:${AIRFLOW_GID:-0}"
     restart: {{container_restart_policy}}
+    healthcheck:
+      test: [ "CMD", "curl", "--fail", "http://localhost:8080/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s    
 
   airflow-scheduler:
     image: {{AIRFLOW_custom_image_name if AIRFLOW_custom_image_name is defined and AIRFLOW_custom_image_name | length else ' apache/airflow'}}:{{__AIRFLOW_version}}
@@ -10919,7 +10925,13 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     user: "${AIRFLOW_UID:-50000}:${AIRFLOW_GID:-0}"
     restart: {{container_restart_policy}}
-
+    healthcheck:
+      test: [ "CMD", "curl", "--fail", "http://localhost:8974/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+      
   {% if (AIRFLOW_executor | lower) == 'celery'  %}
     {% for num in range(AIRFLOW_workers | default(1) ) %}
 
