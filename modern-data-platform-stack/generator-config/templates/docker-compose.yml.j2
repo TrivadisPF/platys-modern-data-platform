@@ -9427,6 +9427,9 @@ services:
     {% if VAULT_enable and VAULT_use_dev_mode | default(false) %}
       VAULT_TOKEN: {{VAULT_dev_mode_token}}
     {% endif -%}   {#  VAULT_use_dev_mode #}
+      # these config settings are custom ones and treated by the pre-start.sh script before the standard start.sh script of the NiFi docker image
+      NIFI_FLOW_CONFIGURATION_FILE: {{NIFI2_flow_configuration_file if NIFI2_flow_configuration_file is defined and NIFI2_flow_configuration_file and NIFI2_flow_configuration_file | length else omit}}
+      NIFI_FLOW_CONFIGURATION_ARCHIVE_DIR:  {{NIFI2_flow_configuration_archive_dir if NIFI2_flow_configuration_archive_dir is defined and NIFI2_flow_configuration_archive_dir and NIFI2_flow_configuration_archive_dir | length else omit}}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -9445,7 +9448,7 @@ services:
       {% endif -%}  {#  NIFI2_use_custom_certs #}
     {% endif -%}   {#  NIFI2_run_unsecure #}
     {% if NIFI2_volume_map_custom_config %}
-      - ./custom-conf/nifi2/config/nifi.properties:/tmp/nifi.properties.templ
+      - ./custom-conf/nifi2/config/nifi.properties:/tmp/nifi.properties.custom
     {% endif %}
     {% if NIFI2_volume_map_data %}
       - ./container-volume/nifi2-{{loop.index}}/database_repository:/opt/nifi/nifi-current/database_repository
@@ -9478,11 +9481,12 @@ services:
       - |
     {% if NIFI2_volume_map_custom_config %}
         # this indiretion is needed, to avoid a priviledge error when starting the container
-        cat /tmp/nifi.properties.templ > /opt/nifi/nifi-current/conf/nifi.properties
+        cat /tmp/nifi.properties.custom > /opt/nifi/nifi-current/conf/nifi.properties
     {% endif -%}
     {%if NIFI2_python_provide_requirements_file  | default(false) %}
         pip install -r /opt/nifi/nifi-current/requirements.txt
     {% endif -%}   {#  NIFI2_python_provide_requirements_file #}
+        /tmp/pre-start.sh        
         ../scripts/start.sh
     restart: {{container_restart_policy}}
   {% endfor %}
