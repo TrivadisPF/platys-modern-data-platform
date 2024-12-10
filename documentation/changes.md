@@ -42,7 +42,7 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
 
 ### Version upgrades
 
- * Update `postgresql` to `16` 
+ * Update `postgresql` to `17` 
  * Update `mongo` to `8.0` 
  * Update `solr` to `9.5` 
  * Update `janusgraph` to `1.0.0-20231010-065545.e3799d4`
@@ -100,7 +100,8 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Update `lakefs` to `1`
  * Update `vault` to `1.18`
  * Update `opa` to `0.71.0-dev`
- * Update `styra` to ` 1.30.0-80-debug`
+ * Update `styra` to `1.30.0-80-debug`
+ * Update `jikkou` ot `main` - to support Mac M1
 
 ### Enhancements
 
