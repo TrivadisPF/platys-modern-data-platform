@@ -1736,7 +1736,7 @@ For each service there might be some other settings, such as controlling the num
 | `PYTHON_enable` | `false` 	| 1.2.0 	| Generate Python 3 container |
 | `PYTHON_image` | `python` 	| 1.14.0 	| The docker image to use |
 | `PYTHON_artefacts_folder` |  			| 1.14.0  | path to the folder on host machine that will mapped to /tmp on container and from where the python script file and requirements file will be searched |
-| `PYTHON_script_file`|  			| 1.14.0 	| the filename of the python script to be executed (please note that the script should be in the folder mounted using `PYTHON_artefacts_folder`) |
+| `PYTHON_script_to_run`|  			| 1.18.0 	| the filename of the python script to be executed (please note that the script should be in the folder mounted using `PYTHON_artefacts_folder`) |
 | `PYTHON_requirements_file`|  			| 1.14.0 	| the filename of the requirements file to be used (please note that the script should be in the folder mounted using `PYTHON_artefacts_folder`) |
 | `PYTHON_python_packages`                       	| `` 	| 1.16.0 	| Python packages to install, as a space separated list of packages: `<package-1> <package-2>`                                                                                                                                           	|             	|                                	|
 | [**_Nuclio FaaS_**](./services/nuclio.md)  &nbsp;&nbsp;&nbsp;&nbsp;![x86-64](./images/x86-64.png)                             	|         	|       	|                                                                                                                                                                                     	|  

@@ -330,7 +330,10 @@ Update the `config.yml` with the following settings
       OFELIA_job_image: ''
       OFELIA_job_network:
       OFELIA_log_to_folder: false
-      OFELIA_environment: ''    
+      OFELIA_environment: ''   
+      
+      PYTHON_enable: true
+      PYTHON_requirements_file: 'requirements.txt' 
 ```
 
 and run `platys gen` followed by `docker compose up -d`.
