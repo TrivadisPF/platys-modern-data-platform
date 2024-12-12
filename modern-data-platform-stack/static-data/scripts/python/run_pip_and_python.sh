@@ -30,7 +30,8 @@ fi
 if [ -z "$python_script" ]
 then
   echo "No python script configured, just starting the python container without running an application!"
-  sleep infinity
 else
   python $python_script
 fi  
+
+sleep infinity
