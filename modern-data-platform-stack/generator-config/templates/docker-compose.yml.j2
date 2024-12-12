@@ -226,6 +226,8 @@ networks:
   {% set __AIRFLOW_version = ("slim-" if AIRFLOW_use_slim_image else "") ~ AIRFLOW_version  | default('latest') -%}
 {% endif -%}
 
+{% set __OFELIA_version = OFELIA_version | default('latest') -%}
+
 {%if (JUPYTER_edition | lower) == 'minimal' | default(false) %}
   {% set __JUPYTER_version = JUPYTER_MINIMAL_version | default('latest') -%}
 {%elif (JUPYTER_edition | lower) == 'r' | default(false) %}
@@ -11303,8 +11305,42 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     user: "0:0"
     init: true
-
 {% endif %}   {#  AIRFLOW_enable  #}
+
+{%if OFELIA_enable | default(false) %}
+  #  ================================== Ofelia ========================================== #
+  ofelia:
+    image: mcuadros/ofelia:{{__OFELIA_version}}
+    container_name: ofelia
+    hostname: ofelia
+    labels:
+      com.platys.name: 'ofelia'
+      com.platys.description: "Docker Job Scheduler"
+    {%if OFELIA_job_name is defined and OFELIA_job_name and OFELIA_job_name | length | default(false) %}
+      ofelia.{{OFELIA_job_type}}.{{OFELIA_job_name}}.schedule: "{{OFELIA_job_schedule if OFELIA_job_name is defined and OFELIA_job_name and OFELIA_job_name | length else omit}}"
+      ofelia.{{OFELIA_job_type}}.{{OFELIA_job_name}}.container: "{{OFELIA_job_container if OFELIA_job_container is defined and OFELIA_job_container and OFELIA_job_container | length else omit}}"
+      ofelia.{{OFELIA_job_type}}.{{OFELIA_job_name}}.image: "{{OFELIA_job_image if OFELIA_job_image is defined and OFELIA_job_image and OFELIA_job_image | length else omit}}"
+      ofelia.{{OFELIA_job_type}}.{{OFELIA_job_name}}.command: "{{OFELIA_job_command if OFELIA_job_command is defined and OFELIA_job_command and OFELIA_job_command | length else omit}}"
+      ofelia.{{OFELIA_job_type}}.{{OFELIA_job_name}}.network: "{{OFELIA_job_network if OFELIA_job_network is defined and OFELIA_job_network and OFELIA_job_network | length else omit}}"
+    {% endif -%}   {#  OFELIA_job_name #}
+    environment:
+      JUPYTER_TOKEN: {{ANACONDA_jupyter_token if ANACONDA_jupyter_token is defined and ANACONDA_jupyter_token | length else omit}}
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    command: daemon --docker
+    restart: {{container_restart_policy}}
+{% endif %}   {#  OFELIA_enable  #}
 
 {%if ZEPPELIN_enable | default(false) %}
   #  ================================== Zeppelin ========================================== #
