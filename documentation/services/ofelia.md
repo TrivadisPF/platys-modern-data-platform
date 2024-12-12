@@ -23,6 +23,8 @@ To add it to the ofelia service, configure the following settings
       OFELIA_job_container: <the name of the container, if job-exec>
 ```
 
+now generate the stack
+
 ```
 platys gen
 ```
