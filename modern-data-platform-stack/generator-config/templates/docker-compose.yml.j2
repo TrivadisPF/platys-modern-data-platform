@@ -23326,9 +23326,9 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
-      - ./scripts/python/run_pip_and_python.sh:/app/run_pip_and_python.sh:ro
+      - ./scripts/python/run_pip_and_python.sh:/scripts/run_pip_and_python.sh:ro
     {% if PYTHON_artefacts_folder is defined and PYTHON_artefacts_folder|length %}
-      - {{PYTHON_artefacts_folder}}:/tmp:ro
+      - {{PYTHON_artefacts_folder}}:/app:ro
     {% endif %}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
@@ -23342,10 +23342,10 @@ services:
     {% if PYTHON_python_packages is defined and PYTHON_python_packages|length  %}
         pip install {{PYTHON_python_packages}}
     {% endif -%}   {#  PYTHON_python_packages #}
-    {% if PYTHON_requirements_file is defined and PYTHON_requirements_file|length %}
-        /app/run_pip_and_python.sh /tmp/{{PYTHON_script_file}} /tmp/{{PYTHON_requirements_file}}
+    {% if PYTHON_requirements_file is defined and PYTHON_requirements_file | length %}
+        /scripts/run_pip_and_python.sh --requirement-file /app/{{PYTHON_requirements_file}} {{'--python-script /app/' ~ PYTHON_script_file if PYTHON_script_file is defined and PYTHON_script_file and PYTHON_script_file | lenght}} 
     {% else %}
-        /app/run_pip_and_python.sh /tmp/{{PYTHON_script_file}}
+        /scripts/run_pip_and_python.sh {{'--python-script /app/' ~ PYTHON_script_file if PYTHON_script_file is defined and PYTHON_script_file and PYTHON_script_file | lenght}} 
     {% endif -%}   {#  PYTHON_requirements_file #}
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
     <<: *logging
