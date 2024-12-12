@@ -41,6 +41,10 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * SFTPgo
  * Ofelia
 
+### New/Updated Cookbook Recipes
+
+ * [Schedule and execute commands in Docker containers using Ofelia](../cookbooks/recipes/scheduling-commands-on-docker-containers-with-ofelia/README.md)
+
 ### Version upgrades
 
  * Update `postgresql` to `17` 

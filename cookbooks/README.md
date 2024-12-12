@@ -4,6 +4,9 @@ Inhere we are documenting cookbooks on how to use the platform:
  * **Airflow**
    * [Schedule and Run Simple Python Application with Airflow](./recipes/airflow-schedule-python-app/README.md) - `1.16.0`
 
+ * **Ofelia**
+   * [Schedule and execute commands in Docker containers using Ofelia](./recipes/scheduling-commands-on-docker-containers-with-ofelia/README.md) - `1.18.0` 
+
  * **Trino (Formerly Presto SQL)**
    * [Trino, Spark and Delta Lake (Spark 2.4.7 & Delta Lake 0.6.1)](./recipes/delta-lake-and-trino-spark2.4/README.md) - `1.11.0`
    * [Trino, Spark and Delta Lake (Spark 3.0.1 & Delta Lake 0.7.0)](./recipes/delta-lake-and-trino-spark3.0/README.md) - `1.11.0`
