@@ -294,6 +294,57 @@ rtt min/avg/max/mdev = 8.456/10.801/13.146/2.345 ms
 2024-12-12T19:59:12.524Z  common.go:125 ▶ NOTICE [Job "run-ping-every-30s" (5c705f9191bc)] Finished in "2.523322483s", failed: false, skipped: false, error: none
 ```
 
+## 5. Execute a Python script in the `python` container
 
+In this sample we will execute a python script ever 30 seconds in the existing `python` container. 
 
+First let's write a simple python application which calculates pi and prints it to the console:
 
+Create a new file `pi.py` (located where the `config.yml` is) and add
+
+```python
+from mpmath import mp
+
+# Set desired precision (e.g., 50 decimal places)
+mp.dps = 50
+pi = mp.pi
+print(f"Pi using mpmath with high precision: {pi}")
+```
+
+Also create a `requirements.txt` file and add the `mpmath` libarary
+
+```
+mpmath
+```
+
+Update the `config.yml` with the following settings
+
+```yaml
+      OFELIA_enable: true
+      OFELIA_job_name: 'run-ping-every-30s'
+      # either 'job-exec' or 'job-run' or 'job-local'      
+      OFELIA_job_type: job-exec
+      OFELIA_job_command: 'python /app/pi.py'
+      OFELIA_job_schedule: '@every 30s'
+      OFELIA_job_container: 'python-1'
+      OFELIA_job_image: ''
+      OFELIA_job_network:
+      OFELIA_log_to_folder: false
+      OFELIA_environment: ''    
+```
+
+and run `platys gen` followed by `docker compose up -d`.
+
+If we now check the logs of `ofelia`, we can see the result of the executing of our python application:
+
+```bash
+> docker logs -f ofelia
+2024-12-12T20:49:47.659Z  scheduler.go:44 ▶ NOTICE New job registered "run-ping-every-30s" - "python /app/pi.py" - "@every 30s"
+2024-12-12T20:49:47.659Z  scheduler.go:55 ▶ DEBUG Starting scheduler with 1 jobs
+2024-12-12T20:50:20.529Z  common.go:125 ▶ NOTICE [Job "run-ping-every-30s" (88349c8ba8d1)] Started - python /app/pi.py
+2024-12-12T20:50:20.687Z  common.go:125 ▶ NOTICE [Job "run-ping-every-30s" (88349c8ba8d1)] StdOut: Pi using mpmath with high precision: 3.1415926535897932384626433832795028841971693993751
+2024-12-12T20:50:20.687Z  common.go:125 ▶ NOTICE [Job "run-ping-every-30s" (88349c8ba8d1)] Finished in "158.188785ms", failed: false, skipped: false, error: none
+2024-12-12T20:50:50.013Z  common.go:125 ▶ NOTICE [Job "run-ping-every-30s" (542c64ec9c16)] Started - python /app/pi.py
+2024-12-12T20:50:50.164Z  common.go:125 ▶ NOTICE [Job "run-ping-every-30s" (542c64ec9c16)] StdOut: Pi using mpmath with high precision: 3.1415926535897932384626433832795028841971693993751
+2024-12-12T20:50:50.164Z  common.go:125 ▶ NOTICE [Job "run-ping-every-30s" (542c64ec9c16)] Finished in "150.775025ms", failed: false, skipped: false, error: none
+``
