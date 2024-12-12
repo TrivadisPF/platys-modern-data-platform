@@ -347,4 +347,6 @@ If we now check the logs of `ofelia`, we can see the result of the executing of 
 2024-12-12T20:50:50.013Z  common.go:125 ▶ NOTICE [Job "run-ping-every-30s" (542c64ec9c16)] Started - python /app/pi.py
 2024-12-12T20:50:50.164Z  common.go:125 ▶ NOTICE [Job "run-ping-every-30s" (542c64ec9c16)] StdOut: Pi using mpmath with high precision: 3.1415926535897932384626433832795028841971693993751
 2024-12-12T20:50:50.164Z  common.go:125 ▶ NOTICE [Job "run-ping-every-30s" (542c64ec9c16)] Finished in "150.775025ms", failed: false, skipped: false, error: none
-``
+```
+
+Alternatively the python script could be "baked" into a docker image and then started similar to example 4. 
