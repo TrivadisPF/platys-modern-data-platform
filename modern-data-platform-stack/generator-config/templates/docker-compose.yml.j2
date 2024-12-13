@@ -19944,11 +19944,12 @@ services:
     {% endif -%}   {#  LAKEFS_blockstore_type #}
       LAKEFS_ACTIONS_ENABLED: {{LAKEFS_actions_enabled}}
       LAKEFS_ACTIONS_LUA_NET_HTTP_ENABLED: {{LAKEFS_actions_lua_net_http_enabled}}
-      LAKEFS_ACTIONS_ENV_ENABLED: true
+      LAKEFS_ACTIONS_ENV_ENABLED: {{LAKEFS_actions_env_enabled | default(false) }}
       LAKEFS_ACTIONS_ENV_PREFIX: {{LAKEFS_actions_env_prefix if LAKEFS_actions_env_prefix is defined and LAKEFS_actions_env_prefix != None and LAKEFS_actions_env_prefix | length else 'LAKEFSACTION_'}}
       LAKEFS_AUTH_ENCRYPT_SECRET_KEY: {{LAKEFS_auth_encrypt_secret_key if LAKEFS_auth_encrypt_secret_key is defined and LAKEFS_auth_encrypt_secret_key != None and LAKEFS_auth_encrypt_secret_key | length else "some random secret string"}}
       LAKEFS_LOGGING_FORMAT: text
       LAKEFS_LOGGING_LEVEL: {{LAKEFS_logging_level | default(INFO) }}
+      LAKEFS_LOGGING_AUDIT_LOG_LEVEL: {{LAKEFS_logging_audit_log_level | default(INFO) }}
       LAKEFS_STATS_ENABLED: true
       LAKEFS_USAGE_REPORT_ENABLED: false
       LAKEFS_COMMITTED_LOCAL_CACHE_DIR: {{LAKEFS_commited_local_cache_dir if LAKEFS_commited_local_cache_dir is defined and LAKEFS_commited_local_cache_dir != None and LAKEFS_commited_local_cache_dir | length else omit }}
@@ -19967,10 +19968,8 @@ services:
       - ./data-transfer:/data-transfer
     {% if LAKEFS_blockstore_type == 'local' and LAKEFS_volume_map_data | default(false) %}
       - ./container-volume/lakefs/data:/home/lakefs/lakefs/data
-    {% endif -%} {# LAKEFS_blockstore_type == 'local' and LAKEFS_volume_map_data #}      
-    {% if LAKEFS_database_type == 'local' and LAKEFS_volume_map_data | default(false) %}
       - ./container-volume/lakefs/metadata:/home/lakefs/lakefs/metadata
-    {% endif -%} {# NESSIE_volume_map_data #}      
+    {% endif -%} {# LAKEFS_blockstore_type == 'local' and LAKEFS_volume_map_data #}      
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
