@@ -124,6 +124,7 @@ networks:
 
 {% set __OPA_version = OPA_version | default('latest') -%}
 {% set __STYRA_EOPA_version = STYRA_EOPA_version | default('latest') -%}
+{% set __CEDAR_version = CEDAR_version | default('latest') -%}
 {% set __OPAL_version = OPAL_version | default('latest') -%}
 
 {% set __ATLAS_version = ATLAS_version | default('latest') -%}
@@ -745,6 +746,7 @@ networks:
   {% set RANGER_POSTGRES_enable = false -%}
   {% set OPA_enable = false -%}
   {% set STYRA_EOPA_enable = false -%}
+  {% set CEDAR_enable = false -%}
   {% set OPAL_enable = false -%}
   {% set ATLAS_enable = false -%}
   {% set DATAHUB_enable = false -%}
@@ -6812,6 +6814,40 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  STYRA_EOPA_enable #}
+
+{% if CEDAR_enable  | default(false) %}
+  #  ================================== Cedar Policy Agent ========================================== #
+  cedar:
+    image: permitio/cedar-agent:{{__CEDAR_version}}
+    container_name: cedar
+    hostname: cedar
+    labels:
+      com.platys.name: "cedar"
+      com.platys.description: "Cedar Policy Agent"
+      com.platys.restapi.title: "Cedar Policy Agent REST API"
+      com.platys.restapi.url: "http://dataplatform:28409/rapidoc"
+    ports:
+      - "28409:8180"
+    environment:
+      CEDAR_AGENT_AUTHENTICATION: {{CEDAR_agent_authentication if CEDAR_agent_authentication is defined and CEDAR_agent_authentication and CEDAR_agent_authentication | lenght else omit}}
+      CEDAR_AGENT_LOG_LEVEL: {{CEDAR_log_level | lower if CEDAR_log_level is defined and CEDAR_log_level and CEDAR_log_level | lenght else omit}}
+      CEDAR_AGENT_SCHEMA: {{CEDAR_schema if CEDAR_schema is defined and CEDAR_schema and CEDAR_schema | lenght else omit}}
+      CEDAR_AGENT_DATA: {{CEDAR_data if CEDAR_data is defined and CEDAR_data and CEDAR_data | lenght else omit}}
+      CEDAR_AGENT_POLICIES: {{CEDAR_policies if CEDAR_policies is defined and CEDAR_policies and CEDAR_policies | lenght else omit}}
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  CEDAR_enable #}
 
 {% if OPAL_enable  | default(false) %}
   #  ================================== Open Policy Administration Layer (opa) ========================================== #

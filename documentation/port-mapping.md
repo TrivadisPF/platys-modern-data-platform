@@ -694,6 +694,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28406 | 3001 | perplexica-frontend |
 28407 | 7000 | opal-client |
 28408 | 8181 | opal-client |
+28409 | 8180 | cedar |
 
 ## Ports > 28500
 
