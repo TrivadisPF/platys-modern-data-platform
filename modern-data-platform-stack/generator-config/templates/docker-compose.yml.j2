@@ -6827,13 +6827,13 @@ services:
     ports:
       - "7002:7002"
     environment:
-    {%if OPAL_with_broadcast and OPAL_broadcast_type=='postgres' | default(false) %}
+    {%if OPAL_broadcast_enabled and OPAL_broadcast_type=='postgres' | default(false) %}
       - OPAL_BROADCAST_URI=postgres://postgres:abc123!@postgresql:5432/postgres
       - UVICORN_NUM_WORKERS=2
-    {%elif OPAL_with_broadcast and OPAL_broadcast_type=='kafka' | default(false) %}
+    {%elif OPAL_broadcast_enabled and OPAL_broadcast_type=='kafka' | default(false) %}
       - OPAL_BROADCAST_URI=kafka://kafka-1:19092
       - UVICORN_NUM_WORKERS=2
-    {% endif -%}   {#  OPAL_with_broadcast #}
+    {% endif -%}   {#  OPAL_broadcast_enabled #}
       - OPAL_POLICY_REPO_URL={{OPAL_policy_repo_url}}
       - OPAL_POLICY_REPO_SSH_KEY={{OPAL_policy_repo_ssh_key if OPAL_policy_repo_ssh_key is defined and OPAL_policy_repo_ssh_key and OPAL_policy_repo_ssh_key | length else omit}}
       - OPAL_POLICY_REPO_MAIN_BRANCH={{OPAL_policy_repo_main_branch}}
@@ -6862,12 +6862,14 @@ services:
       com.platys.name: "opal"
       com.platys.description: "Open Policy Administration Layer"
       com.platys.restapi.title: "Open Policy Agent (OPA) REST API"
-      com.platys.restapi.url: "https://dataplatform:28407"
+      com.platys.restapi.url: "http://dataplatform:28407"
     depends_on:
       - opal-server
     ports:
       - "28407:7000"
+    {%if OPAL_inline_opa_enabled | default(false) %}
       - "28408:8181"      
+    {% endif -%}   {#  OPAL_inline_opa_enabled #}
     environment:
       - OPAL_SERVER_URL=http://opal-server:7002
       - OPAL_LOG_FORMAT_INCLUDE_PID=true
@@ -6875,14 +6877,14 @@ services:
       # - OPAL_OFFLINE_MODE_ENABLED=true
       - OPAL_DATA_TOPICS=policy_data
       - POLICY_UPDATER_ENABLED=true
-    {%if OPA_enable | default(false) %}
-      # we automatically disable the local inline OPA instance, if there is a standalone OPA 
-      - INLINE_OPA_ENABLED=false
-      - OPAL_POLICY_STORE_URL=http://opa:8181
-    {% else -%}
+      - INLINE_OPA_ENABLED={{OPAL_inline_opa_enabled}}
+    {%if OPAL_inline_opa_enabled | default(false) %}
       # - OPAL_INLINE_OPA_CONFIG=
       - OFFLINE_MODE_ENABLED=false
-    {% endif -%}   {#  use_timezone #}
+    {% endif -%}   {#  OPAL_inline_opa_enabled #}
+    {%if OPA_enable | default(false) %}
+      - OPAL_POLICY_STORE_URL=http://opa:8181
+    {% endif -%}   {#  OPA_enable #}
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
