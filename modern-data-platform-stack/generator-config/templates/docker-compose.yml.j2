@@ -6827,16 +6827,17 @@ services:
     ports:
       - "7002:7002"
     environment:
-    {%if OPAL_broadcast | default(false) %}
-      - OPAL_BROADCAST_URI=postgres://postgres:postgres@${BROADCAST_CHANNEL_HOST}:5432/postgres
-      - UVICORN_NUM_WORKERS=4
-    {% endif -%}   {#  use_timezone #}
-
-      - OPAL_POLICY_REPO_URL=https://github.com/nadavgross/trino-opa-example
-      - OPAL_POLICY_REPO_SSH_KEY=
-      - OPAL_POLICY_REPO_MAIN_BRANCH=master
-      - OPAL_POLICY_REPO_POLLING_INTERVAL=30
-
+    {%if OPAL_with_broadcast and OPAL_broadcast_type=='postgres' | default(false) %}
+      - OPAL_BROADCAST_URI=postgres://postgres:abc123!@postgresql:5432/postgres
+      - UVICORN_NUM_WORKERS=2
+    {%if OPAL_with_broadcast and OPAL_broadcast_type=='kafka' | default(false) %}
+      - OPAL_BROADCAST_URI=kafka://kafka-1:19092
+      - UVICORN_NUM_WORKERS=2
+    {% endif -%}   {#  OPAL_with_broadcast #}
+      - OPAL_POLICY_REPO_URL={{OPAL_policy_repo_url}}
+      - OPAL_POLICY_REPO_SSH_KEY={{OPAL_policy_repo_ssh_key}}
+      - OPAL_POLICY_REPO_MAIN_BRANCH={{OPAL_policy_repo_main_branch}}
+      - OPAL_POLICY_REPO_POLLING_INTERVAL={{OPAL_policy_repo_polling_interval}}
       - OPAL_DATA_CONFIG_SOURCES={"config":{"entries":[{"url":"http://opal_server:7002/policy-data","topics":["policy_data"],"dst_path":"/static"}]}}
       - OPAL_LOG_FORMAT_INCLUDE_PID=true
     {%if use_timezone | default(false) %}
@@ -6873,8 +6874,14 @@ services:
       - OPAL_INLINE_OPA_LOG_FORMAT=http
       # - OPAL_OFFLINE_MODE_ENABLED=true
       - OPAL_DATA_TOPICS=policy_data
+      - POLICY_UPDATER_ENABLED=true
     {%if OPA_enable | default(false) %}
+      # we automatically disable the local inline OPA instance, if there is a standalone OPA 
+      - INLINE_OPA_ENABLED=false
       - OPAL_POLICY_STORE_URL=http://opal:8181
+    {% else -%}
+      # - OPAL_INLINE_OPA_CONFIG=
+      - OFFLINE_MODE_ENABLED=false
     {% endif -%}   {#  use_timezone #}
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
