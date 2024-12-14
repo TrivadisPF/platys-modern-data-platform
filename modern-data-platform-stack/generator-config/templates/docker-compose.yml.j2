@@ -6850,7 +6850,7 @@ services:
 {% endif %}   {#  CEDAR_enable #}
 
 {% if OPAL_enable  | default(false) %}
-  #  ================================== Open Policy Administration Layer (opa) ========================================== #
+  #  ================================== Open Policy Administration Layer (OPAL) ========================================== #
   opal-server:
     image: permitio/opal-server:{{__OPAL_version}}
     container_name: opal-server
@@ -6872,7 +6872,8 @@ services:
       # number of uvicorn workers to run inside the opal-server container
       - UVICORN_NUM_WORKERS=2
     {% endif -%}   {# OPAL_broadcast_enabled #}
-      - OPAL_POLICY_SOURCE_TYPE={{OPAL_policy_source_type | lower if OPAL_policy_source_type is defined and OPAL_policy_source_type and OPAL_policy_source_type | length else omit}}
+      - OPAL_POLICY_SOURCE_TYPE={{OPAL_policy_source_type | upper if OPAL_policy_source_type is defined and OPAL_policy_source_type and OPAL_policy_source_type | length else omit}}
+      - OPAL_POLICY_REPO_POLLING_INTERVAL={{OPAL_policy_repo_polling_interval}}
     {%if OPAL_policy_source_type | lower == 'git' | default(false) %}
       - OPAL_POLICY_REPO_URL={{OPAL_policy_repo_url}}
       - OPAL_POLICY_REPO_SSH_KEY={{OPAL_policy_repo_ssh_key if OPAL_policy_repo_ssh_key is defined and OPAL_policy_repo_ssh_key and OPAL_policy_repo_ssh_key | length else omit}}
@@ -6883,6 +6884,7 @@ services:
     {% endif -%}   {#  OPAL_policy_engine #}
       - OPAL_DATA_CONFIG_SOURCES={"config":{"entries":[{"url":"http://opal-server:7002/policy-data","topics":["policy_data"],"dst_path":"/static"}]}}
       - OPAL_LOG_FORMAT_INCLUDE_PID=true
+      - OPAL_POLICY_REPO_WEBHOOK_SECRET=1THQSpwrTz_Km41OGsGPAu2bgzP0WYhBt4eVnTtYVrc
     {%if OPAL_policy_engine | lower == 'cedar' | default(false) %}
       # By default, the OPAL server looks for OPA rego files. Configure it to look for cedar files.
       - OPAL_FILTER_FILE_EXTENSIONS=.cedar
