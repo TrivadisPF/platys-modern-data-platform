@@ -40,6 +40,8 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Infinity
  * SFTPgo
  * Ofelia
+ * Cedar Agent
+ * Open Policy Administration Layer (OPAL)
 
 ### New/Updated Cookbook Recipes
 

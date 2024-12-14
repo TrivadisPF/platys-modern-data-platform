@@ -6872,10 +6872,15 @@ services:
       # number of uvicorn workers to run inside the opal-server container
       - UVICORN_NUM_WORKERS=2
     {% endif -%}   {# OPAL_broadcast_enabled #}
+      - OPAL_POLICY_SOURCE_TYPE={{OPAL_policy_source_type | lower if OPAL_policy_source_type is defined and OPAL_policy_source_type and OPAL_policy_source_type | length else omit}}
+    {%if OPAL_policy_source_type | lower == 'git' | default(false) %}
       - OPAL_POLICY_REPO_URL={{OPAL_policy_repo_url}}
       - OPAL_POLICY_REPO_SSH_KEY={{OPAL_policy_repo_ssh_key if OPAL_policy_repo_ssh_key is defined and OPAL_policy_repo_ssh_key and OPAL_policy_repo_ssh_key | length else omit}}
       - OPAL_POLICY_REPO_MAIN_BRANCH={{OPAL_policy_repo_main_branch}}
       - OPAL_POLICY_REPO_POLLING_INTERVAL={{OPAL_policy_repo_polling_interval}}
+    {%elif OPAL_policy_source_type == 'api' | default(false) %}
+      - OPAL_POLICY_BUNDLE_URL={{OPAL_policy_bundle_url}}
+    {% endif -%}   {#  OPAL_policy_engine #}
       - OPAL_DATA_CONFIG_SOURCES={"config":{"entries":[{"url":"http://opal-server:7002/policy-data","topics":["policy_data"],"dst_path":"/static"}]}}
       - OPAL_LOG_FORMAT_INCLUDE_PID=true
     {%if OPAL_policy_engine | lower == 'cedar' | default(false) %}
