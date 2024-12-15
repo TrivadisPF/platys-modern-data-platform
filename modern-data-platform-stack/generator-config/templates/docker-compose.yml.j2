@@ -19422,12 +19422,18 @@ services:
       MINIO_COMPRESSION_ENABLE: "off"
       MINIO_PROMETHEUS_AUTH_TYPE: public
       MINIO_PROMETHEUS_URL: "http://prometheus-1:9090"
-    {% if MINIO_key_encryption_service_enable | default(false) %}
+    {% if MINIO_key_encryption_service_enabled | default(false) %}
       MINIO_KMS_KES_ENDPOINT: "https://minio-kes:7373"
       MINIO_KMS_KES_KEY_FILE: /root/.minio/certs/private.key
       MINIO_KMS_KES_CERT_FILE: /root/.minio/certs/public.crt
       MINIO_KMS_KES_KEY_NAME: my-minio-key
-    {% endif -%}   {#  MINIO_key_encryption_service_enable #}
+    {% endif -%}   {#  MINIO_key_encryption_service_enabled #}
+    {% if MINIO_policy_plugin_enabled and MINIO_policy_type | lower == 'opa' | default(false) %}
+      MINIO_POLICY_PLUGIN_URL: "http://opa:8181/v1/data/{{MINIO_policy_namespace}}allow"
+      MINIO_POLICY_PLUGIN_AUTH_TOKEN: {{"Bearer "  ~ MINIO_policy_token if MINIO_policy_token is defined and MINIO_policy_token and MINIO_policy_token | length else omit}}
+      MINIO_POLICY_PLUGIN_ENABLE_HTTP2: "OFF"
+      MINIO_POLICY_PLUGIN_COMMENT: "External Access Management using OPA"
+    {% endif -%}   {#  MINIO_policy_plugin_enabled #}
     {% if MINIO_audit_webhook_enable | default(false) %}
       MINIO_AUDIT_WEBHOOK_ENABLE_primary: 'on'
       MINIO_AUDIT_WEBHOOK_ENDPOINT_primary: {{MINIO_audit_webhook_endpoint}}
