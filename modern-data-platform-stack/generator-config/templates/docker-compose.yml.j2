@@ -14914,8 +14914,8 @@ services:
     depends_on: {"kibana": {"condition": "service_healthy"}}
     {% if ELASTICSEARCH_security_enabled | default(false) %}     
     environment:
-      KIBANA_USERNAME: elastic
-      KIBANA_PASSWORD: ${PLATYS_KIBANA_PASSWORD:-{{KIBANA_password}}} 
+      ELASTICSEARCH_USERNAME: elastic
+      ELASTICSEARCH_PASSWORD: ${PLATYS_ELASTICSEARCH_PASSWORD:-{{ELASTICSEARCH_password}}} 
     {% endif -%}   {#  ELASTICSEARCH_security_enabled #}        
     volumes:
       - ./data-transfer:/data-transfer
@@ -14933,11 +14933,15 @@ services:
         do
           if [ -f "$file" ]; then
             echo "Uploading dashboard: $file"        
-            response=$(curl -s -o /dev/null -X POST -u $$KIBANA_USER:$$KIBANA_PASSWORD -F 'file=@/dashboards/$$dashboard.ndjson' -H 'kbn-xsrf:reporting' "http://kibana:5601/api/saved_objects/_import?overwrite=true")
+            response=$(curl -s -o /dev/null -X POST -u $$ELASTICSEARCH_USERNAME:$$ELASTICSEARCH_PASSWORD -F 'file=@/dashboards/$$dashboard.ndjson' -H 'kbn-xsrf:reporting' "http://kibana:5601/api/saved_objects/_import?overwrite=true")
           else
             echo "No .ndjson files found in $DASHBOARD_DIR"
           fi
         done
+    {% if (ASPIRE_enable) | default(false) %}
+        echo "Uploading dashboard for Aspire"        
+        response=$(curl -s -o /dev/null -X POST -u $$ELASTICSEARCH_USERNAME:$$ELASTICSEARCH_PASSWORD -F 'file=@/dashboards/aspire/export.ndjson' -H 'kbn-xsrf:reporting' "http://kibana:5601/api/saved_objects/_import?overwrite=true")
+    {% endif -%}   {#  use_timezone #}
     restart: "no"
     init: true
 {% endif %}   {#  KIBANA_enable #}
