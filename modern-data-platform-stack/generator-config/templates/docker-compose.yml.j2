@@ -10518,7 +10518,7 @@ services:
     volumes:
       - ./data-transfer:/data-transfer
       - ./licenses/aspire/AspireLicense.lic:/config/AspireLicense.lic
-      - ./conf/aspire/settings.json.lic:/config/settings.json    
+      - ./conf/aspire/settings.json:/config/settings.json    
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -14902,15 +14902,13 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
     healthcheck:
-      test:
-        - CMD-SHELL
-        - curl -u beats:testing -s http://localhost:5601/api/status?v8format=true | grep -q '\"overall\":{\"level\":\"available\"'
+      test: curl --cacert /ca/ca.crt -s https://localhost:5601 >/dev/null; if [[ $$? == 52 ]]; then echo 0; else echo 1; fi
       retries: 600
 
   kibana-init:
     image: alpine/curl
-    container_name: kibana-setup
-    hostname: kibana-setup
+    container_name: kibana-init
+    hostname: kibana-init
     depends_on: {"kibana": {"condition": "service_healthy"}}
     {% if ELASTICSEARCH_security_enabled | default(false) %}     
     environment:
@@ -14929,7 +14927,7 @@ services:
       - -c
       - |
         echo "Installing Kibana Dashboards"
-        for file in /dashboards/*.ndjson; do
+        for file in /dashboards/*.ndjson;
         do
           if [ -f "$file" ]; then
             echo "Uploading dashboard: $file"        
