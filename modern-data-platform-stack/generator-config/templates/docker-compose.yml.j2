@@ -14914,8 +14914,8 @@ services:
     depends_on: {"kibana": {"condition": "service_healthy"}}
     {% if ELASTICSEARCH_security_enabled | default(false) %}     
     environment:
-      ELASTICSEARCH_USERNAME: elastic
-      ELASTICSEARCH_PASSWORD: ${PLATYS_ELASTICSEARCH_PASSWORD:-{{ELASTICSEARCH_password}}} 
+      KIBANA_USERNAME: elastic
+      KIBANA_PASSWORD: ${PLATYS_KIBANA_PASSWORD:-{{KIBANA_password}}} 
     {% endif -%}   {#  ELASTICSEARCH_security_enabled #}        
     volumes:
       - ./data-transfer:/data-transfer
@@ -14925,16 +14925,19 @@ services:
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
     entrypoint: 
-      - bash
+      - sh
       - -c
       - |
-     {% if KIBANA_dashboards is defined and KIBANA_dashboards and KIBANA_dashboards | length %}
         echo "Installing Kibana Dashboards"
-        for dashboard in $$(echo "{{KIBANA_init_dashboards}}" | sed "s/,/ /g")
+        for file in /dashboards/*.ndjson; do
         do
-          curl -k -u $$ELASTICSEARCH_USER:$$ELASTICSEARCH_PASSWORD -F 'file=@/dashboards/$$dashboard.ndjson' -H 'kbn-xsrf:reporting' \"http://kibana:5601/api/saved_objects/_import?overwrite=true\"
+          if [ -f "$file" ]; then
+            echo "Uploading dashboard: $file"        
+            response=$(curl -s -o /dev/null -X POST -u $$KIBANA_USER:$$KIBANA_PASSWORD -F 'file=@/dashboards/$$dashboard.ndjson' -H 'kbn-xsrf:reporting' "http://kibana:5601/api/saved_objects/_import?overwrite=true")
+          else
+            echo "No .ndjson files found in $DASHBOARD_DIR"
+          fi
         done
-    {% endif -%}   {#  KIBANA_dashboards #}
     restart: "no"
     init: true
 {% endif %}   {#  KIBANA_enable #}
