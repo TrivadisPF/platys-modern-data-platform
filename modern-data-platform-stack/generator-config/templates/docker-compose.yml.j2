@@ -14588,11 +14588,23 @@ services:
       discovery.type: "single-node"
       xpack.security.enabled: {{ELASTICSEARCH_security_enabled | default(false)}}
       xpack.monitoring.collection.enabled: "false"
-      xpack.security.http.ssl.enabled: false
-      xpack.security.transport.ssl.enabled: false
     {% if ELASTICSEARCH_security_enabled | default(false) %}     
       ELASTIC_PASSWORD: ${PLATYS_ELASTICSEARCH_PASSWORD:-{{ELASTICSEARCH_password}}} 
-    {% endif -%}   {#  ELASTICSEARCH_security_enabled #}  
+    {% endif -%}   {#  ELASTICSEARCH_security_enabled #}
+    {% if ELASTICSEARCH_run_secure | default(false) %}     
+      xpack.security.http.ssl.enabled: true # <2>
+      xpack.security.http.ssl.key: $CERTS_DIR/aspire-quickstart-elastic/aspire-quickstart-elastic.key
+      xpack.security.http.ssl.certificate_authorities: $CERTS_DIR/ca/ca.crt
+      xpack.security.http.ssl.certificate: $CERTS_DIR/aspire-quickstart-elastic/aspire-quickstart-elastic.crt
+      xpack.security.transport.ssl.enabled: true # <3>
+      xpack.security.transport.ssl.verification_mode: certificate # <4>
+      xpack.security.transport.ssl.certificate_authorities: $CERTS_DIR/ca/ca.crt
+      xpack.security.transport.ssl.certificate: $CERTS_DIR/aspire-quickstart-elastic/aspire-quickstart-elastic.crt
+      xpack.security.transport.ssl.key: $CERTS_DIR/aspire-quickstart-elastic/aspire-quickstart-elastic.key
+    {% else -%}   {#  ELASTICSEARCH_run_secure #}
+      xpack.security.http.ssl.enabled: false
+      xpack.security.transport.ssl.enabled: false
+    {% endif -%}   {#  ELASTICSEARCH_run_secure #}
       http.cors.enabled: "true"
       http.cors.allow-origin: "http://${DOCKER_HOST_IP}:28275,http://${PUBLIC_IP}:28275,http://dejavu:1358,http://dataplatform:28125,http://dataplatform:28125,http://${PUBLIC_IP}:28125,http://${DOCKER_HOST_IP}:28125,http://127.0.0.1:1358"
       http.cors.allow-headers: "X-Requested-With,X-Auth-Token,Content-Type,Content-Length,Authorization"
@@ -14758,6 +14770,10 @@ services:
     environment:
       discovery.type: "single-node"
       ELASTICSEARCH_HOSTS: http://elasticsearch-1:9200
+    {% if ELASTICSEARCH_security_enabled | default(false) %}     
+      ELASTICSEARCH_USERNAME: elastic
+      ELASTICSEARCH_PASSWORD: ${PLATYS_ELASTICSEARCH_PASSWORD:-{{ELASTICSEARCH_password}}} 
+    {% endif -%}   {#  ELASTICSEARCH_security_enabled #}  
       SERVER_HOST: "0.0.0.0"
       SERVER_NAME: "kibana"
       XPACK_GRAPH_enabled: "false"
