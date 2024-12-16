@@ -10497,13 +10497,20 @@ services:
       ASPIRE_WORKER_NODE: 'false'
       aspire_dashboards_enabled: 'true'
       aspire_dashboards_base: 'https://kibana:5601/app/dashboards#/view/'
+
       # ASPIRE_SSL_KEYSTORE_PASS: 123456
       # ASPIRE_SSL_KEYSTORE: /opt/aspire/ssl/certificates/self-signed.jks
       # ASPIRE_SSL_CA: /opt/aspire/ssl/certificates/ca/ca.crt
       ASPIRE_LICENSE_PATH: /config/AspireLicense.lic
       ASPIRE_SETTINGS_PATH: /config/settings.json
       ASPIRE_JWT_SECRET: 12345678901234567890123456789012
-      ASPIRE_REMOTE_DEBUG: true       
+      ASPIRE_REMOTE_DEBUG: true    
+      aspire_noSql_elastic_server: http://elasticsearch-1:9200
+      aspire_noSql_elastic_authentication_basic: true
+      aspire_noSql_elastic_user: elastic
+      aspire_noSql_elastic_password: ${PLATYS_ELASTICSEARCH_PASSWORD:-abc123!}
+      aspire_ldap_bind_dn_password: Adm1n!
+      aspire_security_https_only: true         
     {%if use_timezone | default(false) %}
     environment:
       TZ: {{use_timezone}}
@@ -10539,6 +10546,21 @@ services:
       ASPIRE_PORT: 50443
       ASPIRE_MANAGER_NODE: 'false'
       ASPIRE_WORKER_NODE: 'true'
+
+      # ASPIRE_SSL_KEYSTORE_PASS: 123456
+      # ASPIRE_SSL_KEYSTORE: /opt/aspire/ssl/certificates/self-signed.jks
+      # ASPIRE_SSL_CA: /opt/aspire/ssl/certificates/ca/ca.crt
+      ASPIRE_LICENSE_PATH: /config/AspireLicense.lic
+      ASPIRE_SETTINGS_PATH: /config/settings.json
+      ASPIRE_JWT_SECRET: 12345678901234567890123456789012
+      ASPIRE_REMOTE_DEBUG: true    
+      aspire_noSql_elastic_server: http://elasticsearch-1:9200
+      aspire_noSql_elastic_authentication_basic: true
+      aspire_noSql_elastic_user: elastic
+      aspire_noSql_elastic_password: ${PLATYS_ELASTICSEARCH_PASSWORD:-abc123!}
+      aspire_ldap_bind_dn_password: Adm1n!
+      aspire_security_https_only: true         
+        
     {%if use_timezone | default(false) %}
     environment:
       TZ: {{use_timezone}}
@@ -14884,8 +14906,38 @@ services:
         - CMD-SHELL
         - curl -u beats:testing -s http://localhost:5601/api/status?v8format=true | grep -q '\"overall\":{\"level\":\"available\"'
       retries: 600
+
+  kibana-init:
+    image: alpine/curl
+    container_name: kibana-setup
+    hostname: kibana-setup
+    depends_on: {"kibana": {"condition": "service_healthy"}}
+    {% if ELASTICSEARCH_security_enabled | default(false) %}     
+    environment:
+      ELASTICSEARCH_USERNAME: elastic
+      ELASTICSEARCH_PASSWORD: ${PLATYS_ELASTICSEARCH_PASSWORD:-{{ELASTICSEARCH_password}}} 
+    {% endif -%}   {#  ELASTICSEARCH_security_enabled #}        
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./init/kibana/dashboards:/dashboards
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    entrypoint: 
+      - bash
+      - -c
+      - |
+     {% if KIBANA_dashboards is defined and KIBANA_dashboards and KIBANA_dashboards | length %}
+        echo "Installing Kibana Dashboards"
+        for dashboard in $$(echo "{{KIBANA_init_dashboards}}" | sed "s/,/ /g")
+        do
+          curl -k -u $$ELASTICSEARCH_USER:$$ELASTICSEARCH_PASSWORD -F 'file=@/dashboards/$$dashboard.ndjson' -H 'kbn-xsrf:reporting' \"http://kibana:5601/api/saved_objects/_import?overwrite=true\"
+        done
+    {% endif -%}   {#  KIBANA_dashboards #}
+    restart: "no"
+    init: true
 {% endif %}   {#  KIBANA_enable #}
-{# #}
 
 {% if OPENSEARCH_enable | default(false) %}
   #  ================================== OpenSearch ========================================== #
