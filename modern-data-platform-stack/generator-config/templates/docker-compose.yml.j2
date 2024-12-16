@@ -219,6 +219,8 @@ networks:
 {% set __SPRING_DATAFLOW_version = SPRING_DATAFLOW_version | default('latest') -%}
 {% set __SPRING_SKIPPER_version = SPRING_SKIPPER_version | default('latest') -%}
 
+{% set __ASPIRE_version = ASPIRE_version | default('latest') -%}
+
 {% set __AIRBYTE_version = AIRBYTE_version | default('latest') -%}
 
 {% if AIRFLOW_python_version and AIRFLOW_python_version is defined %}
@@ -766,6 +768,7 @@ networks:
   {% set STREAMSHEETS_enable = false -%}
   {% set CONDUIT_enable = false -%}
   {% set SPRING_DATAFLOW_enable = false -%}
+  {% set ASPIRE_enable = false -%}
   {% set AIRBYTE_enable = false -%}
   {% set AIRFLOW_enable = false -%}
   {% set ZEPPELIN_enable = false -%}
@@ -10469,6 +10472,88 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  SPRING_DATAFLOW_enable #}
+
+{% if (ASPIRE_enable) | default(false) %}
+  #  ================================== Aspire ========================================== #
+  aspire-manager:
+    image: docker.repository.sca.accenture.com/docker/aspire:{{__ASPIRE_version}}
+    container_name: aspire-manager
+    hostname: aspire-manager
+    labels:
+      com.platys.name: 'aspire-manager'
+      com.platys.description: ""
+      com.platys.webui.title: 'Streamsheets UI'
+      com.platys.webui.url: "http://dataplatform:50443"
+    ports:
+      - 50443:50443
+      - 58000:58000
+    stdin_open: true 
+    tty: true      
+    mem_limit: 3g    
+    environment:
+      com_accenture_aspire_server_hostname: 'aspire-manager'
+      ASPIRE_PORT: 50443
+      ASPIRE_MANAGER_NODE: 'true'
+      ASPIRE_WORKER_NODE: 'false'
+      aspire_dashboards_enabled: 'true'
+      aspire_dashboards_base: 'https://kibana:5601/app/dashboards#/view/'
+      # ASPIRE_SSL_KEYSTORE_PASS: 123456
+      # ASPIRE_SSL_KEYSTORE: /opt/aspire/ssl/certificates/self-signed.jks
+      # ASPIRE_SSL_CA: /opt/aspire/ssl/certificates/ca/ca.crt
+      ASPIRE_LICENSE_PATH: /config/AspireLicense.lic
+      ASPIRE_SETTINGS_PATH: /config/settings.json
+      ASPIRE_JWT_SECRET: 12345678901234567890123456789012
+      ASPIRE_REMOTE_DEBUG: true       
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./licenses/aspire/AspireLicense.lic:/config/AspireLicense.lic
+      - ./conf/aspire/settings.json.lic:/config/settings.json    
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+
+  aspire-worker:
+    image: docker.repository.sca.accenture.com/docker/aspire:{{__ASPIRE_version}}
+    container_name: aspire-worker
+    hostname: aspire-worker
+    labels:
+      com.platys.name: 'aspire-worker'
+      com.platys.description: ""
+    ports:
+      - 51443:50443
+      - 58001:58000
+    stdin_open: true 
+    tty: true      
+    mem_limit: 3g    
+    environment:
+      com_accenture_aspire_server_hostname: 'aspire-worker'
+      ASPIRE_PORT: 50443
+      ASPIRE_MANAGER_NODE: 'false'
+      ASPIRE_WORKER_NODE: 'true'
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  ASPIRE_enable #}
 
 {%if AIRBYTE_enable | default(false) %}
   #  ================================== Airbyte ========================================== #
