@@ -44,6 +44,7 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Open Policy Administration Layer (OPAL)
  * Oracle Database Free (Oracle official)
  * Oracle Autonomous Database Free
+ * Git Web
 
 ### New/Updated Cookbook Recipes
 
