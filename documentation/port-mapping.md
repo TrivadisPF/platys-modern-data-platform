@@ -32,6 +32,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 1522 | 1521 | oracledb-xe |
 1523 | 1521 | oracledb-oci-free |
 1524 | 1521 | oracledb-free |
+1525 | 1521 | oracle-adb |
+1526 | 1522 | oracle-adb |
 1095 | 1095 | ksqldb-server-1 (jmx) |
 1096 | 1096 | ksqldb-server-2 (jmx) |
 1097 | 1097 | ksqldb-server-3 (jmx) |
@@ -213,6 +215,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 8443 | 8443 | kong (proxy ssl) |
 8444 | 8444 | kong (admin api ssl) |
 8446 | 8443 | curity |
+8447 | 8443 | oracle-adb |
 8501 | 8501 | crewai-studio | 
 8585 | 8585 | openmetadata-server |
 8586 | 8586 | openmetadata-server |
@@ -372,6 +375,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 27018 | 27017 | mongodb-2 |
 27019 | 27017 | mongodb-3 |
 27020 | 27017 | mongodb-3 |
+27022 | 27017 | oracle-adb |
 28080 | 8080 | zeppelin |
 28081 | 8080 | presto-1 |
 28082 | 8080 | trino-1 |

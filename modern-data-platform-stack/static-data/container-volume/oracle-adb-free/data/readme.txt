@@ -1,0 +1,1 @@
+Contains the data of Oracle Autonomous Database Free service, if flag ORACLE_FREE_volume_map_data is set to true.
