@@ -559,6 +559,7 @@ networks:
 {% set __GLANCES_version = GLANCES_version | default('latest') -%}
 {% set __DOCKER_REGISTRY_version = DOCKER_REGISTRY_version | default('latest') -%}
 {% set __DOCKER_REGISTRY_UI_version = DOCKER_REGISTRY_UI_version | default('latest') -%}
+{% set __GIT_WEB_version = GIT_WEB_version | default('latest') -%}
 {% set __HAWTIO_version = HAWTIO_version | default('latest') -%}
 {% set __SPRING_BOOT_ADMIN_version = SPRING_BOOT_ADMIN_version | default('latest') -%}
 {% set __WETTY_version = WETTY_version | default('latest') -%}
@@ -946,6 +947,7 @@ networks:
   {% set GLANCES_enable = false -%}  
   {% set DOCKER_REGISTRY_enable = false -%}
   {% set DOCKER_REGISTRY_UI_enable = false -%}
+  {% set GIT_WEB_enable = false -%}
   {% set HAWTIO_enable = false -%}
   {% set SPRING_BOOT_ADMIN_enable = false -%}
   {% set WETTY_enable = false -%}
@@ -23547,6 +23549,35 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
 {% endif %}   {# DOCKER_REGISTRY_enable #}
+
+{% if GIT_WEB_enable | default(false) %}
+  #  ================================== GitWeb ========================================== #
+  git-web:
+    image: rockstorm/gitweb:{{__GIT_WEB_version}}
+    container_name: git-web
+    hostname: git-web
+    labels:
+      com.platys.name: "git-web"
+      com.platys.description: "Visualize and serve git repositories over HTTP "
+      com.platys.webui.title: "Git Web UI"
+      com.platys.webui.url: "http://dataplatform:28250"
+    ports:
+      - "28250:80"
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+{% endif %}   {# GIT_WEB_enable #}
 
 {% if HAWTIO_enable | default(false) %}
   #  ================================== Hawtio ========================================== #
