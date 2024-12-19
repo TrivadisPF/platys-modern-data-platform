@@ -17107,25 +17107,29 @@ services:
 
 {% if ORACLE_EE_enable | default(false) %}
   #  ================================== Oracle EE ========================================== #
-  oracledb-ee:
+  {% for num in range(ORACLE_EE_nodes | default(1) ) %}
+    {% set external_1521_port = 1530 + loop.index - 1 %}
+    {% set external_8080_port = 28410 + loop.index - 1 %}
+    {% set external_5500_port = 5500 + loop.index - 1 %}
+  oracledb-ee-{{loop.index}}:
     image: {{private_docker_repository_name}}/ora_db:{{__ORACLE_EE_version}}
-    container_name: oracledb-ee
-    hostname: oracledb-ee
+    container_name: oracledb-ee-{{loop.index}}
+    hostname: oracledb-ee-{{loop.index}}
     labels:
       com.platys.name: "oracledb-ee"
       com.platys.description: "Relational Database"
       com.platys.webui.title: "Oracle UI"
-      com.platys.webui.url: "http://dataplatform:28250/ords"
+      com.platys.webui.url: "http://dataplatform:{{external_8080_port}}/ords"
     ports:
-      - "1521:1521"
-      - "28250:8080"
-      - "5500:5500"
+      - "{{external_1521_port}}:1521"
+      - "{{external_8080_port}}:8080"
+      - "{{external_5500_port}}:5500"
     environment:
       CONTAINER: '{{ORACLE_EE_container_enable}}'
       ORACLE_SID: ORCLCDB
       ORACLE_PDB: ORCLPDB1
       ORACLE_PWD: {{ORACLE_EE_password}}
-      ORACLE_CHARACTERSET: AL32UTF8
+      ORACLE_CHARACTERSET: {{ORACLE_EE_characterset}}
       INSTANCE_INIT: '/u01/config'
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
@@ -17133,10 +17137,10 @@ services:
     volumes:
       - ./data-transfer:/data-transfer
     {% if ORACLE_EE_volume_map_data %}
-      - ./container-volume/oracle/data:/u01
+      - ./container-volume/oracle-ee-{{loop.index}}/data:/u01
     {% endif %}
-      - ./init/oracle/startup:/u01/config/startup
-      - ./init/oracle/setup:/u01/config/setup
+      - ./init/oracle-ee-{{loop.index}}/startup:/u01/config/startup
+      - ./init/oracle-ee-{{loop.index}}/setup:/u01/config/setup
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -17145,6 +17149,7 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
+  {% endfor %}    
 {% endif %}   {#  ORACLE_EE_enable #}
 
 {% if ORACLE_XE_enable | default(false) %}

@@ -28,12 +28,14 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 1275 | 1234 | nifi2-3 (prometheus exporter) | 
 1337 | 1337 | konga | 
 1433 | 1433 | sqlserver |
-1521 | 1521 | oracledb-ee |
 1522 | 1521 | oracledb-xe |
 1523 | 1521 | oracledb-oci-free |
 1524 | 1521 | oracledb-free |
 1525 | 1521 | oracle-adb |
 1526 | 1522 | oracle-adb |
+1530 | 1521 | oracledb-ee-1 |
+1531 | 1521 | oracledb-ee-2 |
+1532 | 1521 | oracledb-ee-3 |
 1095 | 1095 | ksqldb-server-1 (jmx) |
 1096 | 1096 | ksqldb-server-2 (jmx) |
 1097 | 1097 | ksqldb-server-3 (jmx) |
@@ -116,8 +118,9 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 5434 | 5432 | marquez-db |
 5435 | 5432 | dataverse-postgresql |
 5436 | 5432 | infinity (postgresql) |
-5500 | 5500 | oracledb-ee |
-5501 | 5500 | oracledb-xe |
+5500 | 5500 | oracledb-ee-1 |
+5501 | 5500 | oracledb-ee-1 |
+5502 | 5500 | oracledb-ee-1 |
 \-     | 5432 | hive-metastore-db |
 \-     | 5432 | hue-db |
 5555 | 5555 | airflow-flower |
@@ -541,7 +544,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28245 | 8008 | gridgain-cc-frontend |
 28246 | 8080 | debezium-server |
 28247 | 80 | pgadmin |
-28250 | 8888 | oracle-ee |
+28250 |  | <not-used> |
 28251 | 8888 | oracle-xe |
 28252 | 8888 | oracle-rest-1 |
 28253 | 8888 | kouncil |
@@ -700,6 +703,9 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28407 | 7000 | opal-client |
 28408 | 8181 | opal-client |
 28409 | 8180 | cedar |
+28410 | 8080 | oracledb-ee-1 |
+28411 | 8080 | oracledb-ee-2 |
+28412 | 8080 | oracledb-ee-3 |
 
 ## Ports > 28500
 
