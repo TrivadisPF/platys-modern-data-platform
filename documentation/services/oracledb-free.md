@@ -13,7 +13,10 @@ platys gen
 
 ## Initialize database
 
-You can initialize the database automatically by putting the necessary scripts in `./init/oracle-free/setup` or `./init/oracle-free/startup`:
+You can initialize the database automatically by putting the necessary scripts in 
+
+ * `./init/oracle-free/startup` - scripts to be run after database startup
+ * `./init/oracle-free/setup` - scripts to be run after database setup.
 
 ## How to use it?
 
