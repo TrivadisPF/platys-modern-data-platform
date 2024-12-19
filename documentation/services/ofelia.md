@@ -36,9 +36,12 @@ you can also add it to any existing service, by adding labels using an override 
 `docker-compose.override.yml`
 
 ```yml
-minio-mc:
-  labels:
-    ofelia.enabled: "true"
-    ofelia.job-exec.disk-usage.schedule: "@every 1m"
-    ofelia.job-exec.disk-usage.command: "mc du --depth=2 minio-1/"
+services:
+  minio-mc:
+    labels:
+      ofelia.enabled: "true"
+      ofelia.job-exec.disk-usage.schedule: "@every 1m"
+      ofelia.job-exec.disk-usage.command: "mc du --depth=2 minio-1/"
 ```
+
+See this cookbook recipe for more working examples.
