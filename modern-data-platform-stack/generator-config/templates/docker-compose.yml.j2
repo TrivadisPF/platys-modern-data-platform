@@ -406,6 +406,7 @@ networks:
 {% set __TILE38_version = TILE38_version | default('latest') -%}
 
 {% set __ORACLE_XE_version = ORACLE_XE_version | default('latest') -%}
+{% set __ORACLE_OCI_FREE_version = ORACLE_OCI_FREE_version | default('latest') -%}
 {% set __ORACLE_FREE_version = ORACLE_FREE_version | default('latest') -%}
 {% set __ORACLE_EE_version = ORACLE_EE_version | default('latest') -%}
 {% set __ORACLE_SQLCL_version = ORACLE_SQLCL_version | default('latest') -%}
@@ -845,6 +846,7 @@ networks:
   {% set TILE38_enable = false -%}
   {% set POSTGREST_enable = false -%}
   {% set ORACLE_XE_enable = false -%}
+  {% set ORACLE_OCI_FREE_enable = false -%}
   {% set ORACLE_FREE_enable = false -%}
   {% set ORACLE_EE_enable = false -%}
   {% set ORACLE_SQLCL_enable = false -%}
@@ -17186,36 +17188,80 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {#  ORACLE_XE_enable #}
 
-{% if ORACLE_FREE_enable | default(false) %}
-  #  ================================== Oracle Database Free ========================================== #
-  oracledb-free:
-    image: gvenzl/oracle-free:{{__ORACLE_FREE_version}}{{"-" ~ ORACLE_FREE_edition if ORACLE_FREE_edition is defined and ORACLE_FREE_edition != 'regular'}}{{'-faststart' if ORACLE_FREE_use_faststart}}
-    container_name: oracledb-free
-    hostname: oracledb-free
+{% if ORACLE_OCI_FREE_enable | default(false) %}
+  #  ================================== Oracle Database Free (OCI) ========================================== #
+  oracledb-oci-free:
+    image: container-registry.oracle.com/database/free:{{__ORACLE_OCI_FREE_version}}{{"-" ~ ORACLE_OCI_FREE_edition if ORACLE_OCI_FREE_edition is defined and ORACLE_OCI_FREE_edition != 'regular'}}{{'-faststart' if ORACLE_OCI_FREE_use_faststart}}
+    container_name: oracledb-oci-free
+    hostname: oracledb-oci-free
     labels:
-      com.platys.name: "oracledb-free"
-      com.platys.description: "Relational Database"
+      com.platys.name: "oracledb-oci-free"
+      com.platys.description: "Oracle Relational Database"
+      com.platys.password.envvars: "PLATYS_ORACLE_OCI_FREE_PASSWORD"
     ports:
       - "1523:1521"
     environment:
-    {% if ORACLE_FREE_database is defined and ORACLE_FREE_database | length %}
-      ORACLE_DATABASE: {{ORACLE_FREE_database}}
-    {% endif -%}   {#  ORACLE_FREE_database #}
-      ORACLE_PASSWORD: {{ORACLE_FREE_password}}
-    {% if ORACLE_FREE_random_password is defined and ORACLE_FREE_random_password | length %}
-      ORACLE_RANDOM_PASSWORD: '{{ORACLE_FREE_random_password}}'
-    {% endif -%}   {#  ORACLE_FREE_random_password #}
-    {% if ORACLE_FREE_app_user is defined and ORACLE_FREE_app_user | length %}
-      APP_USER: {{ORACLE_FREE_app_user}}
-      APP_USER_PASSWORD: {{ORACLE_FREE_app_user_password}}
-    {% endif -%}   {#  ORACLE_FREE_app_user #}
+    {% if ORACLE_OCI_FREE_database is defined and ORACLE_OCI_FREE_database and ORACLE_OCI_FREE_database | length %}
+      ORACLE_DATABASE: {{ORACLE_OCI_FREE_database}}
+    {% endif -%}   {#  ORACLE_OCI_FREE_database #}    
+    {% if ORACLE_OCI_FREE_random_password | default(false) %}
+      ORACLE_RANDOM_PASSWORD: '{{ORACLE_OCI_FREE_random_password}}'
+    {% else -%}   {#  ORACLE_OCI_FREE_random_password #}
+      ORACLE_PASSWORD: '${PLATYS_POSTGRESQL_MULTIPLE_PASSWORD:-{{ORACLE_OCI_FREE_password}}}'
+    {% endif -%}   {#  ORACLE_OCI_FREE_random_password #}
+    {% if ORACLE_OCI_FREE_app_user is defined and ORACLE_OCI_FREE_app_user | length %}
+      APP_USER: {{ORACLE_OCI_FREE_app_user}}
+      APP_USER_PASSWORD: {{ORACLE_OCI_FREE_app_user_password}}
+    {% endif -%}   {#  ORACLE_OCI_FREE_app_user #}
       ORACLE_CHARACTERSET: AL32UTF8
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
-      - ./init/oracle-free:/container-entrypoint-initdb.d/
+      - ./init/oracle-oci-free:/container-entrypoint-initdb.d/
+    {% if ORACLE_OCI_FREE_volume_map_data %}
+      - ./container-volume/oracle-oci-free/data:/opt/oracle/oradata
+    {% endif %}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  ORACLE_OCI_FREE_enable #}
+
+{% if ORACLE_FREE_enable | default(false) %}
+  #  ================================== Oracle Database Free (official) ========================================== #
+  oracledb-free:
+    image: container-registry.oracle.com/database/free:{{__ORACLE_FREE_version}}{{"-" ~ ORACLE_FREE_edition if ORACLE_FREE_edition is defined and ORACLE_FREE_edition != 'regular'}}
+    container_name: oracledb-free
+    hostname: oracledb-free
+    labels:
+      com.platys.name: "oracledb-free"
+      com.platys.description: "Oracle Relational Database"
+      com.platys.password.envvars: "PLATYS_ORACLE_FREE_PASSWORD"
+    ports:
+      - "1524:1521"
+    environment:
+      ORACLE_PWD: ${PLATYS_POSTGRESQL_MULTIPLE_PASSWORD:-{{ORACLE_FREE_password}}}
+    {% if ORACLE_FREE_app_user is defined and ORACLE_FREE_app_user | length %}
+    {% endif -%}   {#  ORACLE_FREE_app_user #}
+      ENABLE_ARCHIVELOG: {{ORACLE_FREE_enable_archivelog}}
+      ENABLE_FORCE_LOGGING: {{ORACLE_FREE_enable_force_logging}}
+      {{ORACLE_OCI_FREE_app_user}}
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./init/oracle-free/startup:/opt/oracle/scripts/startup
+      - ./init/oracle-free/setup:/opt/oracle/scripts/setup
+    {% if ORACLE_FREE_volume_map_custom_conf %}
+      - ./custom-conf/oracle-free/data:/opt/oracle/custom-conf
+    {% endif %}
     {% if ORACLE_FREE_volume_map_data %}
       - ./container-volume/oracle-free/data:/opt/oracle/oradata
     {% endif %}

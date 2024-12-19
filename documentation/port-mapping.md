@@ -30,7 +30,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 1433 | 1433 | sqlserver |
 1521 | 1521 | oracledb-ee |
 1522 | 1521 | oracledb-xe |
-1523 | 1521 | oracledb-free |
+1523 | 1521 | oracledb-oci-free |
+1524 | 1521 | oracledb-free |
 1095 | 1095 | ksqldb-server-1 (jmx) |
 1096 | 1096 | ksqldb-server-2 (jmx) |
 1097 | 1097 | ksqldb-server-3 (jmx) |
