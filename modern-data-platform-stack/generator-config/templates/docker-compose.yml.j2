@@ -23552,14 +23552,14 @@ services:
 
 {% if GIT_WEB_enable | default(false) %}
   #  ================================== GitWeb ========================================== #
-  git-web:
+  gitweb:
     image: rockstorm/gitweb:{{__GIT_WEB_version}}
-    container_name: git-web
-    hostname: git-web
+    container_name: gitweb
+    hostname: gitweb
     labels:
-      com.platys.name: "git-web"
+      com.platys.name: "gitweb"
       com.platys.description: "Visualize and serve git repositories over HTTP "
-      com.platys.webui.title: "Git Web UI"
+      com.platys.webui.title: "GitWeb UI"
       com.platys.webui.url: "http://dataplatform:28250"
     ports:
       - "28250:80"
@@ -23570,6 +23570,12 @@ services:
     volumes:
       - ./data-transfer:/data-transfer
       - {{GIT_WEB_path_to_repo}}:/srv/git:ro
+    {% if GIT_WEB_volume_map_custom_config %}
+      - ./custom-conf/gitweb/gitweb.conf:/etc/gitweb.conf:ro
+    {% endif %}
+    {% if GIT_WEB_volume_map_theme %}
+      - ./plugins/gitweb/theme:/usr/share/gitweb/theme:ro
+    {% endif %}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
