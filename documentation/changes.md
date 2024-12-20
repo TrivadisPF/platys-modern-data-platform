@@ -77,8 +77,8 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Update `single-store` to `0.2.18`
  * Update `timescaledb` to `2.14.2-pg16`
  * Update `hazelcast` to `5.4`
- * Update `trino` to `467`
- * Update `starburstdata` to `462-e.1`
+ * Update `trino` to `468`
+ * Update `starburstdata` to `462-e.2`
  * Update `prestodb` to `0.286`
  * Update `ahana` to `0.286`
  * Update `dremio` to `25.2`
