@@ -5684,6 +5684,17 @@ services:
     environment:
       KYUUBI_DEFAULTS_CONF_kyuubi_authentication: 'NONE'
       KYUUBI_DEFAULTS_CONF_kyuubi_frontend_protocols: {{KYUUBI_frontend_protocols if KYUUBI_frontend_protocols is defined and KYUUBI_frontend_protocols and KYUUBI_frontend_protocols | length else omit}}
+      KYUUBI_DEFAULTS_CONF_kyuubi_session_engine_type: {{KYUUBI_engine_type | upper if KYUUBI_engine_type is defined and KYUUBI_engine_type and KYUUBI_engine_type | length else omit}}
+    {%if KYUUBI_engine_type | upper == 'TRINO' | default(false) %}
+      KYUUBI_DEFAULTS_CONF_kyuubi_session_engine_trino_connection_url: trino-1:8080
+      KYUUBI_DEFAULTS_CONF_kyuubi_session_engine_trino_connection_catalog: minio
+      KYUUBI_DEFAULTS_CONF_kyuubi_session_engine_trino_connection_user: trino
+    {% endif -%}   {#  KYUUBI_engine_type  #}    
+    {% if (KAFKA_enable or external['KAFKA_enable']) and 'streams' in NEO4J_download_plugins | default(false) %}
+      KYUUBI_DEFAULTS_CONF_kyuubi_backend_server_event_loggers: KAFKA
+      KYUUBI_DEFAULTS_CONF_kyuubi_backend_server_event_kafka_bootstrap_servers: {{ns.bootstrapServers}}
+      KYUUBI_DEFAULTS_CONF_kyuubi_backend_server_event_kafka_topic: kyuubi-log
+    {% endif -%}   {#  KAFKA_enable #}
     {%if KYUUBI_use_local_spark | default(false) %}
       SPARK_MASTER_URL: 'local[*]'
     {% else %}
