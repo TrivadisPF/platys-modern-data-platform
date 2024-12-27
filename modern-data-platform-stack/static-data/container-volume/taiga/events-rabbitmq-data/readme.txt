@@ -1,0 +1,1 @@
+Contains the rabbitmq data of the Taiga Message Broker service, if flag TAIGA_volume_map_data is set to true.
