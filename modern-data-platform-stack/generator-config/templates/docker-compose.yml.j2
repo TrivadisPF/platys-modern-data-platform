@@ -21931,7 +21931,6 @@ services:
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}      
-    hostname: "taiga-async-rabbitmq"
     volumes:
       - ./data-transfer:/home/coder/data-transfer
       #- taiga-async-rabbitmq-data:/var/lib/rabbitmq
@@ -21952,6 +21951,9 @@ services:
       RABBITMQ_USER: "taiga"
       RABBITMQ_PASS: "abc123!"
       TAIGA_SECRET_KEY: "{{TAIGA_secret_key}}"
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}            
     volumes:
       - ./data-transfer:/home/coder/data-transfer
     {%if use_timezone | default(false) %}
@@ -21965,12 +21967,16 @@ services:
 
   taiga-events-rabbitmq:
     image: rabbitmq:3.8-management-alpine
+    container_name: taiga-events-rabbitmq
     hostname: taiga-events-rabbitmq
     environment:
       RABBITMQ_ERLANG_COOKIE: "secret-erlang-cookie"
       RABBITMQ_DEFAULT_USER: "taiga"
       RABBITMQ_DEFAULT_PASS: "abc123!"
       RABBITMQ_DEFAULT_VHOST: "taiga"
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}            
     volumes:
       - ./data-transfer:/home/coder/data-transfer    
       # - taiga-events-rabbitmq-data:/var/lib/rabbitmq
@@ -21985,11 +21991,24 @@ services:
 
   taiga-protected:
     image: taigaio/taiga-protected:latest
+    container_name: taiga-protected
+    hostname: taiga-protected
     environment:
       MAX_AGE: "360"
       SECRET_KEY: "{{TAIGA_secret_key}}"
-    networks:
-      - taiga
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}            
+    volumes:
+      - ./data-transfer:/home/coder/data-transfer    
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
 
   taiga-db:
     image: postgres:15
