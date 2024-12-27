@@ -299,6 +299,8 @@ networks:
 
 {% set __RAGFLOW_version = RAGFLOW_version | default('latest') -%}
 
+{% set __NEO4j_KG_BUILDER_version = NEO4j_KG_BUILDER_version | default('latest') -%}
+
 {% set __KIE_SERVER_version = KIE_SERVER_version | default('latest') -%}
 
 {% set __PROMTAIL_version = PROMTAIL_version | default('latest') -%}
@@ -797,6 +799,7 @@ networks:
   {% set GPT_RESEARCHER_enable = false -%}
   {% set VERBA_enable = false -%}
   {% set RAGFLOW_enable = false -%}
+  {% set NEO4j_KG_BUILDER_enable = false -%}
   {% set DATAIKU_DSS_enable = false -%}
   {% set KIE_SERVER_enable = false -%}
   {% set METABASE_enable = false -%}
@@ -12949,6 +12952,107 @@ services:
     command: redis-server --requirepass ${PLATYS_RAGFLOW_REDIS_PASSWORD:-{{RAGFLOW_redis_password}}} --maxmemory 128mb --maxmemory-policy allkeys-lru
     restart: {{container_restart_policy}} 
 {% endif %}   {# RAGFLOW_enable  #}
+
+{%if NEO4j_KG_BUILDER_enable | default(false) %}
+  #  ================================== Neo4j Knowledge Graph Builder  ========================================== #
+  neo4j-kg-builder-backend:
+    image: trivadis/llm-graph-builder-backend:{{__NEO4j_KG_BUILDER_version}}                
+    container_name: neo4j-kg-builder-backend
+    hostname: neo4j-kg-builder-backend
+    labels:
+      com.platys.name: 'neo4j-kg-builder'
+      com.platys.description: "Knowledge Graph Builder"
+      com.platys.webui.title: "Knowledge Graph Builder UI"
+      com.platys.webui.url: "http://dataplatform:28396"        
+    ports:
+      - 8000:8000
+    extra_hosts:
+      - "host.docker.internal:host-gateway"    
+    environment:
+      - NEO4J_URI=neo4j://neo4j-1:7687
+      - NEO4J_PASSWORD=
+      - NEO4J_USERNAME=
+      - OPENAI_API_KEY={{NEO4J_KG_BUILDER_openai_api_key}}
+      - DIFFBOT_API_KEY={{NEO4J_KG_BUILDER_diffbot_api_key}}
+      - EMBEDDING_MODEL={{NEO4J_KG_BUILDER_embedding_model}}
+      - LANGCHAIN_ENDPOINT=https://api.smith.langchain.com
+      - LANGCHAIN_TRACING_V2=false
+      - LANGCHAIN_PROJECT=""
+      - LANGCHAIN_API_KEY=""
+      - KNN_MIN_SCORE={{NEO4J_KG_BUILDER_knn_min_score}}
+      - IS_EMBEDDING={{NEO4J_KG_BUILDER_is_embedding}}
+      - GEMINI_ENABLED=false
+      - GCP_LOG_METRICS_ENABLED=false
+      - UPDATE_GRAPH_CHUNKS_PROCESSED=20
+      - NUMBER_OF_CHUNKS_TO_COMBINE=6
+      - ENTITY_EMBEDDING=false
+      - GCS_FILE_CACHE=false
+#      - LLM_MODEL_CONFIG_anthropic_claude_35_sonnet=${LLM_MODEL_CONFIG_anthropic_claude_35_sonnet-}
+#      - LLM_MODEL_CONFIG_fireworks_llama_v3_70b=${LLM_MODEL_CONFIG_fireworks_llama_v3_70b-}
+#      - LLM_MODEL_CONFIG_azure_ai_gpt_4o=${LLM_MODEL_CONFIG_azure_ai_gpt_4o-}
+#      - LLM_MODEL_CONFIG_azure_ai_gpt_35=${LLM_MODEL_CONFIG_azure_ai_gpt_35-}
+#      - LLM_MODEL_CONFIG_groq_llama3_70b=${LLM_MODEL_CONFIG_groq_llama3_70b-}
+#      - LLM_MODEL_CONFIG_bedrock_claude_3_5_sonnet=${LLM_MODEL_CONFIG_bedrock_claude_3_5_sonnet-}
+#     - LLM_MODEL_CONFIG_fireworks_qwen_72b=${LLM_MODEL_CONFIG_fireworks_qwen_72b-}
+      - LLM_MODEL_CONFIG_ollama_llama3={{NEO4J_KG_BUILDER_ollama_model}},http://host.docker.internal:11434
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+#      - ./backend:/code
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+
+  neo4j-kg-builder-frontend:
+    image: trivadis/llm-graph-builder-frontend:{{__RNEO4j_KG_BUILDER_version}}                
+    container_name: neo4j-kg-builder-frontend
+    hostname: neo4j-kg-builder-frontend
+    labels:
+      com.platys.name: 'neo4j-kg-builder'
+      com.platys.description: "Knowledge Graph Builder"
+      com.platys.webui.title: "Knowledge Graph Builder UI"
+      com.platys.webui.url: "http://dataplatform:28396"        
+    ports:
+      - 8000:8000
+    extra_hosts:
+      - "host.docker.internal:host-gateway"    
+    environment:
+      - VITE_BACKEND_API_URL="http://${PUBLIC_IP}:8000"
+      - VITE_BLOOM_URL="https://workspace-preview.neo4j.io/workspace/explore?connectURL={CONNECT_URL}&search=Show+me+a+graph&featureGenAISuggestions=true&featureGenAISuggestionsInternal=true"
+      - VITE_REACT_APP_SOURCES="local,youtube,wiki,s3,web"
+      - VITE_LLM_MODELS="diffbot,openai_gpt_3.5,openai_gpt_4o"
+      - VITE_ENV="DEV"
+      - VITE_TIME_PER_PAGE=50
+      - VITE_CHUNK_SIZE=5242880
+      - VITE_LARGE_FILE_SIZE=5242880
+      - VITE_GOOGLE_CLIENT_ID=""
+      - VITE_CHAT_MODES=""
+      - VITE_BATCH_SIZE=2
+      - VITE_LLM_MODELS_PROD="openai_gpt_4o,openai_gpt_4o_mini,diffbot,gemini_1.5_flash"
+      - VITE_FRONTEND_HOSTNAME="${PUBLIC_IP}:8080"
+      - VITE_SEGMENT_API_URL=""
+   {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./frontend:/app
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+{% endif %}   {# NEO4j_KG_BUILDER_enable  #}
 
 {%if KIE_SERVER_enable | default(false) %}
   #  ================================== Drools KIE Server  ========================================== #
