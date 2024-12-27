@@ -20986,13 +20986,14 @@ services:
       com.platys.description: "Message Broker"
       com.platys.webui.title: "RabbitMQ UI"
       com.platys.webui.url: "http://dataplatform:15672"
+      com.platys.password.envvars: "PLATYS_RABBITMQ_PASSWORD"         
     ports:
       - 5673:5672
       - 15672:15672
     environment:
       RABBITMQ_ERLANG_COOKIE: "62cd4092-dbb3-4e7a-ac6d-ffd7cee850ee"
       RABBITMQ_DEFAULT_USER: rabbitmq
-      RABBITMQ_DEFAULT_PASS: abc123!
+      RABBITMQ_DEFAULT_PASS: ${PLATYS_RABBITMQ_PASSWORD:-{{RABBITMQ_password}}}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -21829,7 +21830,9 @@ services:
     image: taigaio/taiga-back:{{__TAIGA_version}}
     container_name: taiga-backend
     hostname: taiga-backend
-    command: "init_and_serve"
+    labels:
+      com.platys.name: "taiga"
+      com.platys.description: "Project management for cross-functional agile teams"
     environment:
       # Taiga settings
       TAIGA_LANG: "en_us"
@@ -21877,6 +21880,10 @@ services:
     container_name: taiga-async
     hostname: taiga-async
     entrypoint: ["/taiga-back/docker/async_entrypoint.sh"]
+    labels:
+    labels:
+      com.platys.name: "taiga"
+      com.platys.description: "Project management for cross-functional agile teams"
     environment:
       # Taiga settings
       TAIGA_LANG: "en_us"
@@ -21925,7 +21932,7 @@ services:
     hostname: taiga-async-rabbitmq    
     labels:
       com.platys.name: "rabbitmq"
-      com.platys.description: "Message Queue"
+      com.platys.description: "Taiga Message Broker"
       com.platys.password.envvars: "PLATYS_TAIGA_RABBITMQ_PASSWORD"    
     environment:
       RABBITMQ_ERLANG_COOKIE: "62cd4092-dbb3-4e7a-ac6d-ffd7cee850ee"
@@ -21951,6 +21958,9 @@ services:
     image: taigaio/taiga-events:{{__TAIGA_version}}
     container_name: taiga-events
     hostname: taiga-events
+    labels:
+      com.platys.name: "taiga"
+      com.platys.description: ""    
     environment:
       RABBITMQ_USER: "taiga"
       RABBITMQ_PASS: "abc123!"
@@ -21975,7 +21985,7 @@ services:
     hostname: taiga-events-rabbitmq
     labels:
       com.platys.name: "rabbitmq"
-      com.platys.description: "Message Queue"
+      com.platys.description: "Taiga Message Broker"
       com.platys.password.envvars: "PLATYS_TAIGA_RABBITMQ_PASSWORD"    
     environment:
       RABBITMQ_ERLANG_COOKIE: "62cd4092-dbb3-4e7a-ac6d-ffd7cee850ee"
@@ -22001,6 +22011,9 @@ services:
     image: taigaio/taiga-protected:latest
     container_name: taiga-protected
     hostname: taiga-protected
+    labels:
+      com.platys.name: "taiga"
+      com.platys.description: ""
     environment:
       MAX_AGE: "360"
       SECRET_KEY: "{{TAIGA_secret_key}}"
