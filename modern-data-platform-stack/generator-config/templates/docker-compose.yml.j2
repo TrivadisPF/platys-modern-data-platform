@@ -21847,13 +21847,13 @@ services:
       EMAIL_HOST_USER: {{TAIGA_email_host_user}}
       EMAIL_HOST_PASSWORD: {{TAIGA_email_host_password}}
       # Database settings
-      POSTGRES_HOST: "taiga-db"
-      POSTGRES_DB: "{{TAIGA_db_database}}"
-      POSTGRES_USER: "{{TAIGA_db_username}}"
-      POSTGRES_PASSWORD: "{{TAIGA_db_password}}"
+      POSTGRES_HOST: taiga-db
+      POSTGRES_DB: {{TAIGA_db_database}}
+      POSTGRES_USER: {{TAIGA_db_username}}
+      POSTGRES_PASSWORD: ${PLATYS_TAIGA_DB_PASSWORD:-{{TAIGA_db_password}}}
       # Rabbitmq settings
-      RABBITMQ_USER: "taiga"
-      RABBITMQ_PASS: "abc123!"
+      RABBITMQ_USER: {{TAIGA_rabbitmq_user}} 
+      RABBITMQ_PASS: ${PLATYS_TAIGA_RABBITMQ_PASSWORD:-{{TAIGA_rabbitmq_password}}}
       # Telemetry settings
       ENABLE_TELEMETRY: {{TAIGA_enable_telemetry}}
     {%if use_timezone | default(false) %}
@@ -21894,13 +21894,13 @@ services:
       EMAIL_HOST_USER: {{TAIGA_email_host_user}}
       EMAIL_HOST_PASSWORD: {{TAIGA_email_host_password}}
       # Database settings
-      POSTGRES_HOST: "taiga-db"
-      POSTGRES_DB: "{{TAIGA_db_database}}"
-      POSTGRES_USER: "{{TAIGA_db_username}}"
-      POSTGRES_PASSWORD: "{{TAIGA_db_password}}"
+      POSTGRES_HOST: taiga-db
+      POSTGRES_DB: {{TAIGA_db_database}}
+      POSTGRES_USER: {{TAIGA_db_username}}
+      POSTGRES_PASSWORD: ${PLATYS_TAIGA_DB_PASSWORD:-{{TAIGA_db_password}}}
       # Rabbitmq settings
-      RABBITMQ_USER: "taiga"
-      RABBITMQ_PASS: "abc123!"
+      RABBITMQ_USER: {{TAIGA_rabbitmq_user}} 
+      RABBITMQ_PASS: ${PLATYS_TAIGA_RABBITMQ_PASSWORD:-{{TAIGA_rabbitmq_password}}}
       # Telemetry settings
       ENABLE_TELEMETRY: {{TAIGA_enable_telemetry}}
     {%if use_timezone | default(false) %}
@@ -21923,10 +21923,14 @@ services:
     image: rabbitmq:3.8-management-alpine
     container_name: taiga-async-rabbitmq
     hostname: taiga-async-rabbitmq    
+    labels:
+      com.platys.name: "rabbitmq"
+      com.platys.description: "Message Queue"
+      com.platys.password.envvars: "PLATYS_TAIGA_RABBITMQ_PASSWORD"    
     environment:
-      RABBITMQ_ERLANG_COOKIE: "secret-erlang-cookie"
-      RABBITMQ_DEFAULT_USER: "taiga"
-      RABBITMQ_DEFAULT_PASS: "abc123!"
+      RABBITMQ_ERLANG_COOKIE: "62cd4092-dbb3-4e7a-ac6d-ffd7cee850ee"
+      RABBITMQ_DEFAULT_USER: {{TAIGA_rabbitmq_user}} 
+      RABBITMQ_DEFAULT_PASS: ${PLATYS_TAIGA_RABBITMQ_PASSWORD:-{{TAIGA_rabbitmq_password}}}
       RABBITMQ_DEFAULT_VHOST: "taiga"
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
@@ -21969,10 +21973,14 @@ services:
     image: rabbitmq:3.8-management-alpine
     container_name: taiga-events-rabbitmq
     hostname: taiga-events-rabbitmq
+    labels:
+      com.platys.name: "rabbitmq"
+      com.platys.description: "Message Queue"
+      com.platys.password.envvars: "PLATYS_TAIGA_RABBITMQ_PASSWORD"    
     environment:
-      RABBITMQ_ERLANG_COOKIE: "secret-erlang-cookie"
-      RABBITMQ_DEFAULT_USER: "taiga"
-      RABBITMQ_DEFAULT_PASS: "abc123!"
+      RABBITMQ_ERLANG_COOKIE: "62cd4092-dbb3-4e7a-ac6d-ffd7cee850ee"
+      RABBITMQ_DEFAULT_USER: {{TAIGA_rabbitmq_user}} 
+      RABBITMQ_DEFAULT_PASS: ${PLATYS_TAIGA_RABBITMQ_PASSWORD:-{{TAIGA_rabbitmq_password}}}
       RABBITMQ_DEFAULT_VHOST: "taiga"
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
@@ -22017,10 +22025,11 @@ services:
     labels:
       com.platys.name: "taiga"
       com.platys.description: "Relational Database"
+      com.platys.password.envvars: "PLATYS_TAIGA_DB_PASSWORD"
     environment:
       POSTGRES_DB: "{{TAIGA_db_database}}"
       POSTGRES_USER: "{{TAIGA_db_username}}"
-      POSTGRES_PASSWORD: "{{TAIGA_db_password}}"
+      POSTGRES_PASSWORD: ${PLATYS_TAIGA_DB_PASSWORD:-{{TAIGA_db_password}}}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
