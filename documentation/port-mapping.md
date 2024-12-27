@@ -616,8 +616,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28320 | 25 | akhq (dc1) |
 28321 | 25 | akhq (dc1) |
 28322 | 80 | asyncapi-studio |
-28323 | 80 | taiga |
-28324 | 8000 | focalboard |
+28323 | 80 | taiga-front |
+28324 | 80 | taiga-gateway |
 28325 | 8025 | mailhog |
 28326 | 25 | mailhog |
 28327 | 3000 | ioevent-cockpit-ui |
@@ -706,6 +706,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28410 | 8080 | oracledb-ee-1 |
 28411 | 8080 | oracledb-ee-2 |
 28412 | 8080 | oracledb-ee-3 |
+28413 | 8000 | focalboard |
 
 ## Ports > 28500
 

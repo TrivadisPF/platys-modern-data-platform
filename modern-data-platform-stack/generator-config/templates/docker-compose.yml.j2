@@ -21809,9 +21809,10 @@ services:
     ports:
       - 28323:80
     environment:
-      TAIGA_URL: "http://${PUBLIC_IP}:9000"
-      TAIGA_WEBSOCKETS_URL: "ws://${PUBLIC_IP}:9000"
+      TAIGA_URL: "http://${PUBLIC_IP}:28324"
+      TAIGA_WEBSOCKETS_URL: "ws://${PUBLIC_IP}:28324"
       TAIGA_SUBPATH: ""
+      PUBLIC_REGISTER_ENABLED: true      
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -21826,10 +21827,10 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
 
-  taiga-backend:
+  taiga-back:
     image: taigaio/taiga-back:{{__TAIGA_version}}
-    container_name: taiga-backend
-    hostname: taiga-backend
+    container_name: taiga-back
+    hostname: taiga-back
     labels:
       com.platys.name: "taiga"
       com.platys.description: "Project management for cross-functional agile teams"
@@ -21838,7 +21839,7 @@ services:
       TAIGA_LANG: "en_us"
       TAIGA_SECRET_KEY: "{{TAIGA_secret_key}}"
       TAIGA_SITES_SCHEME: "http"
-      TAIGA_SITES_DOMAIN: "${PUBLIC_IP}:9000"
+      TAIGA_SITES_DOMAIN: "${PUBLIC_IP}:28324"
       TAIGA_SUBPATH: ""
       # Email settings.
       EMAIL_BACKEND: {{TAIGA_email_backend}}
@@ -21859,6 +21860,7 @@ services:
       RABBITMQ_PASS: ${PLATYS_TAIGA_RABBITMQ_PASSWORD:-{{TAIGA_rabbitmq_password}}}
       # Telemetry settings
       ENABLE_TELEMETRY: {{TAIGA_enable_telemetry}}
+      PUBLIC_REGISTER_ENABLED: "True"      
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}      
@@ -21888,7 +21890,7 @@ services:
       TAIGA_LANG: "en_us"
       TAIGA_SECRET_KEY: "{{TAIGA_secret_key}}"
       TAIGA_SITES_SCHEME: "http"
-      TAIGA_SITES_DOMAIN: "${PUBLIC_IP}:9000"
+      TAIGA_SITES_DOMAIN: "${PUBLIC_IP}:28324"
       TAIGA_SUBPATH: ""
       # Email settings.
       EMAIL_BACKEND: {{TAIGA_email_backend}}
@@ -21909,6 +21911,7 @@ services:
       RABBITMQ_PASS: ${PLATYS_TAIGA_RABBITMQ_PASSWORD:-{{TAIGA_rabbitmq_password}}}
       # Telemetry settings
       ENABLE_TELEMETRY: {{TAIGA_enable_telemetry}}
+      PUBLIC_REGISTER_ENABLED: "True"         
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}      
@@ -22030,6 +22033,36 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
 
+  taiga-gateway:
+    image: nginx:1.19-alpine
+    container_name: taiga-gateway
+    hostname: taiga-gateway
+    labels:
+      com.platys.name: "taiga"
+      com.platys.description: "Taiga Gateway"
+    ports:
+      - "28324:80"
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/home/coder/data-transfer
+      - ./conf/taiga/taiga-gateway/taiga.conf:/etc/nginx/conf.d/default.conf
+      #- taiga-static-data:/taiga/static
+      #- taiga-media-data:/taiga/media  
+    {% if  TAIGA_volume_map_db_data | default(false) %}
+      - ./container-volume/taiga/db-data:/var/lib/postgresql/data
+    {% endif -%}   {#  TAIGA_volume_map_db_data #}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+
   taiga-db:
     image: postgres:15
     container_name: taiga-db
@@ -22045,11 +22078,6 @@ services:
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U {{TAIGA_db_username}}"]
-      interval: 2s
-      timeout: 15s
-      retries: 5
     volumes:
       - ./data-transfer:/home/coder/data-transfer
     {% if  TAIGA_volume_map_db_data | default(false) %}
@@ -22063,6 +22091,11 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U {{TAIGA_db_username}}" -d {{TAIGA_db_database}}]
+      interval: 2s
+      timeout: 15s
+      retries: 5
 
 {% endif %}   {# TAIGA_enable #}
 
@@ -22140,9 +22173,9 @@ services:
       com.platys.name: "focalboard"
       com.platys.description: "Project management tool"
       com.platys.webui.title: "Focalboard UI"
-      com.platys.webui.url: "http://dataplatform:28324"
+      com.platys.webui.url: "http://dataplatform:28413"
     ports:
-      - 28324:8000
+      - 28413:8000
     environment:
       - VIRTUAL_HOST=focalboard.local
       - VIRTUAL_PORT=8000
