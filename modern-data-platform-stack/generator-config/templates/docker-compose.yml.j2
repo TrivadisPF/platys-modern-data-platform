@@ -7931,14 +7931,26 @@ services:
       SERVER_HOST_API_URL: "http://openmetadata-server:8585/api"
       PIPELINE_SERVICE_CLIENT_VERIFY_SSL: "no-ssl"
       PIPELINE_SERVICE_CLIENT_SSL_CERT_PATH: ""
+  {% if OPENMETADATA_database_type == 'mysql' | default(false) %}      
       # Database configuration for MySQL
-      DB_DRIVER_CLASS: "com.mysql.cj.jdbc.Driver"
+      DB_DRIVER_CLASS: com.mysql.cj.jdbc.Driver
       DB_SCHEME: mysql
       DB_PARAMS: allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
       DB_USER: openmetadata_user
       DB_USER_PASSWORD: abc123!
       DB_HOST: openmetadata-mysql
       DB_PORT: 3306
+  {% endif %}    
+  {% if OPENMETADATA_database_type == 'postgres' | default(false) %}      
+      # Database configuration for PostgreSQL
+      DB_DRIVER_CLASS: org.postgresql.Driver
+      DB_SCHEME: postgresql
+      DB_PARAMS: allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
+      DB_USER: openmetadata_user
+      DB_USER_PASSWORD: abc123!
+      DB_HOST: openmetadata-postgresql
+      DB_PORT: 5432      
+  {% endif %}    
       OM_DATABASE: openmetadata_db
       # ElasticSearch Configurations
       ELASTICSEARCH_HOST: openmetadata-elasticsearch
@@ -8100,6 +8112,7 @@ services:
       SERVER_HOST_API_URL: http://openmetadata-server:8585/api
       PIPELINE_SERVICE_CLIENT_VERIFY_SSL: "no-ssl"
       PIPELINE_SERVICE_CLIENT_SSL_CERT_PATH: ""
+  {% if OPENMETADATA_database_type == 'mysql' | default(false) %}      
       # Database configuration for MySQL
       DB_DRIVER_CLASS: com.mysql.cj.jdbc.Driver
       DB_SCHEME: mysql
@@ -8108,6 +8121,17 @@ services:
       DB_USER_PASSWORD: abc123!
       DB_HOST: openmetadata-mysql
       DB_PORT: 3306
+  {% endif %}    
+  {% if OPENMETADATA_database_type == 'postgres' | default(false) %}      
+      # Database configuration for PostgreSQL
+      DB_DRIVER_CLASS: org.postgresql.Driver
+      DB_SCHEME: postgresql
+      DB_PARAMS: allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
+      DB_USER: openmetadata_user
+      DB_USER_PASSWORD: abc123!
+      DB_HOST: openmetadata-postgresql
+      DB_PORT: 5432      
+  {% endif %}    
       OM_DATABASE: openmetadata_db
       # ElasticSearch Configurations
       ELASTICSEARCH_HOST: openmetadata-elasticsearch
@@ -8204,17 +8228,18 @@ services:
     healthcheck:
       test: [ "CMD", "wget", "-q", "--spider",  "http://localhost:8586/healthcheck" ]
 
+  {% if OPENMETADATA_database_type == 'mysql' | default(false) %}
   openmetadata-mysql:
     hostname: openmetadata-mysql
     container_name: openmetadata-mysql
-    image: docker.getcollate.io/openmetadata/db:1.4.0-SNAPSHOT
+    image: docker.getcollate.io/openmetadata/db:{{__OPENMETADATA_version}}
     labels:
       com.platys.name: "mysql"
       com.platys.description: "OpenMetadata Data Catalog MySQL Instance"
     expose:
       - 3306
     ports:
-      - "3306:3306"
+      - "3310:3306"
     environment:
       MYSQL_ROOT_PASSWORD: password
     {%if use_timezone | default(false) %}
@@ -8239,9 +8264,43 @@ services:
       interval: 15s
       timeout: 10s
       retries: 10
+  {% endif %}    {#  OPENMETADATA_database_type == 'mysql' #}
+
+  {% if OPENMETADATA_database_type == 'postgres' | default(false) %}
+  openmetadata-postgresql:
+    image: docker.getcollate.io/openmetadata/postgresql:{{__OPENMETADATA_version}}
+    container_name: openmetadata_postgresql
+    hostname: openmetadata_postgresql
+    labels:
+      com.platys.name: "postgresql"
+      com.platys.description: "OpenMetadata Data Catalog PostgreSQL Instance"
+    expose:
+      - 5432
+    ports:
+      - "5437:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}      
+    volumes:
+    {% if OPENMETADATA_volume_map_data %}
+      - ./container-volume/openmetadata/postgresql:/var/lib/postgresql/data      
+    {% endif %}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}    
+    command: "--work_mem=10MB"
+    restart: {{container_restart_policy}}
+  {% endif %}    {#  OPENMETADATA_database_type == 'postgres' #}
 
   openmetadata-elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.10.2
+    image: docker.elastic.co/elasticsearch/elasticsearch::8.11.4
     hostname: openmetadata-elasticsearch
     container_name: openmetadata-elasticsearch
     labels:
@@ -8299,17 +8358,34 @@ services:
       AIRFLOW__API__AUTH_BACKENDS: "airflow.api.auth.backend.basic_auth,airflow.api.auth.backend.session"
       AIRFLOW__CORE__EXECUTOR: LocalExecutor
       AIRFLOW__OPENMETADATA_AIRFLOW_APIS__DAG_GENERATED_CONFIGS: "/opt/airflow/dag_generated_configs"
+  {% if OPENMETADATA_database_type == 'mysql' | default(false) %}      
+      # Database configuration for MySQL
       DB_HOST: openmetadata-mysql
       DB_PORT: 3306
       AIRFLOW_DB: airflow_db
-      DB_SCHEME: mysql+pymysql
       DB_USER: airflow_user
+      DB_SCHEME: mysql+pymysql
       DB_PASSWORD: abc123!
       # extra connection-string properties for the database
       # EXAMPLE
       # require SSL (only for Postgres)
       # properties: "?sslmode=require"
+      DB_PROPERTIES: ""      
+  {% endif %}    
+  {% if OPENMETADATA_database_type == 'postgres' | default(false) %}      
+      # Database configuration for PostgreSQL
+      DB_HOST: openmetadata-postgresql
+      DB_PORT: 5432      
+      AIRFLOW_DB: airflow_db
+      DB_USER: airflow_user
+      DB_SCHEME: postgresql+psycopg2
+      DB_PASSWORD: abc123!
+        # extra connection-string properties for the database
+      # EXAMPLE
+      # require SSL (only for Postgres)
+      # properties: "?sslmode=require"
       DB_PROPERTIES: ""
+  {% endif %}    
       # To test the lineage backend
       # AIRFLOW__LINEAGE__BACKEND: airflow_provider_openmetadata.lineage.backend.OpenMetadataLineageBackend
       # AIRFLOW__LINEAGE__AIRFLOW_SERVICE_NAME: local_airflow

@@ -82,6 +82,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 3307 | 3306 | datahub-mysql |
 3308 | 3306 | single-store |
 3309 | 3306 | mariadb |
+3310 | 3306 | openmetadata-mysql |
 3333 | 3333 | taskcafe |
 3355 | 3355 | vector-admin | 
 3838 | 3838 | shiny-server |
@@ -118,6 +119,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 5434 | 5432 | marquez-db |
 5435 | 5432 | dataverse-postgresql |
 5436 | 5432 | infinity (postgresql) |
+5437 | 5432 | openmetadata-postgresql |
 5500 | 5500 | oracledb-ee-1 |
 5501 | 5500 | oracledb-ee-1 |
 5502 | 5500 | oracledb-ee-1 |
