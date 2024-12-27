@@ -709,6 +709,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28411 | 8080 | oracledb-ee-2 |
 28412 | 8080 | oracledb-ee-3 |
 28413 | 8000 | focalboard |
+28414 | 8000 | neo4j-kg-builder-backend |
+28415 | 8000 | neo4j-kg-builder-frontend |
 
 ## Ports > 28500
 
