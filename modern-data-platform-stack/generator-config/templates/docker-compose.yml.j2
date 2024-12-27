@@ -5691,7 +5691,7 @@ services:
     {% endif -%}   {#  KAFKA_enable #}
       KYUUBI_DEFAULTS_CONF_kyuubi_engine_type: {{KYUUBI_engine_type | upper if KYUUBI_engine_type is defined and KYUUBI_engine_type and KYUUBI_engine_type | length else omit}}
     {%if KYUUBI_engine_type | upper == 'TRINO' | default(false) %}
-      KYUUBI_DEFAULTS_CONF_kyuubi_session_engine_trino_connection_url: trino-1:8080
+      KYUUBI_DEFAULTS_CONF_kyuubi_session_engine_trino_connection_url: http://trino-1:8080
       KYUUBI_DEFAULTS_CONF_kyuubi_session_engine_trino_connection_catalog: minio
       KYUUBI_DEFAULTS_CONF_kyuubi_session_engine_trino_connection_user: trino
     {% endif -%}   {#  KYUUBI_engine_type  #}    
@@ -21791,13 +21791,13 @@ services:
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
-    restart: unless-stopped
+    restart: {{container_restart_policy}}
 {% endif %}   {# CODE_SERVER_enable #}
 
 {% if TAIGA_enable | default(false) %}
   #  ================================== Taiga ================= #
   taiga-front:
-    image: taigaio/frontend:{{__TAIGA_version}}
+    image: taigaio/taiga-front:{{__TAIGA_version}}
     container_name: taiga-front
     hostname: taiga-front
     labels:
@@ -21808,17 +21808,57 @@ services:
     ports:
       - 28323:80
     environment:
-      TAIGA_BACKEND_URL: "http://taiga-backend:9000"
-      TAIGA_EVENTS_URL: "ws://${PUBLIC_IP}:28323/events/"
-      TAIGA_SUPPORT_EMAIL: ""
-      # Social auth
-      TAIGA_GITHUB_CLIENT_ID: ""
-      TAIGA_GITLAB_URL: ""
-      TAIGA_GITLAB_CLIENT_ID: ""
-      TAIGA_GOOGLE_CLIENT_ID: ""
+      TAIGA_URL: "http://${PUBLIC_IP}:9000"
+      TAIGA_WEBSOCKETS_URL: "ws://${PUBLIC_IP}:9000"
+      TAIGA_SUBPATH: ""
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/home/coder/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+
+  taiga-backend:
+    image: taigaio/taigo-back:{{__TAIGA_version}}
+    container_name: taiga-backend
+    hostname: taiga-backend
+    command: "init_and_serve"
+    environment:
+      # Taiga settings
+      TAIGA_LANG: "en_us"
+      TAIGA_SECRET_KEY: "{{TAIGA_secret_key}}"
+      TAIGA_SITES_SCHEME: "http"
+      TAIGA_SITES_DOMAIN: "${PUBLIC_IP}:9000"
+      TAIGA_SUBPATH: ""
+      # Email settings.
+      EMAIL_BACKEND: {{TAIGA_email_backend}}
+      DEFAULT_FROM_EMAIL: changeme@example.com
+      EMAIL_USE_TLS: false
+      EMAIL_USE_SSL: false
+      EMAIL_HOST: "maildev"
+      EMAIL_PORT: "22"
+      EMAIL_HOST_USER: "user"
+      EMAIL_HOST_PASSWORD: "üasswprd"
+      # Database settings
+      POSTGRES_HOST: "taiga-db"
+      POSTGRES_DB: "taiga"
+      POSTGRES_USER: "taiga"
+      POSTGRES_PASSWORD: "abc123!"
+      # Rabbitmq settings
+      RABBITMQ_USER: "taiga"
+      RABBITMQ_PASS: "abc123!"
+      # Telemetry settings
+      ENABLE_TELEMETRY: {{TAIGA_enable_telemetry}}
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}      
     volumes:
       - ./data-transfer:/home/coder/data-transfer
       - ./container-volume/taiga/static-data:/taiga/static
@@ -21830,46 +21870,42 @@ services:
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
-    restart: unless-stopped
+    restart: {{container_restart_policy}}
 
-  taiga-backend:
-    image: taigaio/backend:alpha
-    container_name: taiga-backend
-    hostname: taiga-backend
-    command: "init_and_serve"
+  taiga-async:
+    image: taigaio/taigo-back:{{__TAIGA_version}}
+    container_name: taiga-async
+    hostname: taiga-async
+    entrypoint: ["/taiga-back/docker/async_entrypoint.sh"]
     environment:
       # Taiga settings
       TAIGA_LANG: "en_us"
-      TAIGA_SECRET_KEY: "${TAIGA_SECRET_KEY}"
-      TAIGA_BACKEND_URL: "http://${PUBLIC_IP}:9000"
-      TAIGA_FRONTEND_URL: "http://${PUBLIC_IP}:9000"
-      TAIGA_SUPPORT_EMAIL: ""
-      TAIGA_STATIC_ROOT: "/taiga/static"
-      TAIGA_MEDIA_ROOT: "/taiga/media"
+      TAIGA_SECRET_KEY: "{{TAIGA_secret_key}}"
+      TAIGA_SITES_SCHEME: "http"
+      TAIGA_SITES_DOMAIN: "${PUBLIC_IP}:9000"
+      TAIGA_SUBPATH: ""
+      # Email settings.
+      EMAIL_BACKEND: {{TAIGA_email_backend}}
+      DEFAULT_FROM_EMAIL: changeme@example.com
+      EMAIL_USE_TLS: false
+      EMAIL_USE_SSL: false
+      EMAIL_HOST: "maildev"
+      EMAIL_PORT: "22"
+      EMAIL_HOST_USER: "user"
+      EMAIL_HOST_PASSWORD: "üasswprd"
       # Database settings
-      TAIGA_DB_HOST: "taiga-db"
-      TAIGA_DB_NAME: "taiga"
-      TAIGA_DB_USER: "taiga_db"
-      TAIGA_DB_PASSWORD: "abc123!"
-      # Social auth
-      TAIGA_GITHUB_CLIENT_ID: ""
-      TAIGA_GITHUB_CLIENT_SECRET: ""
-      TAIGA_GITLAB_URL: ""
-      TAIGA_GITLAB_CLIENT_ID: ""
-      TAIGA_GITLAB_CLIENT_SECRET: ""
-      TAIGA_GOOGLE_CLIENT_ID: ""
-      TAIGA_GOOGLE_CLIENT_SECRET: ""
-      # Email settings
-      TAIGA_EMAIL__BACKEND: ""
-      TAIGA_EMAIL__DEFAULT_SENDER: ""
-      TAIGA_EMAIL__SERVER: ""
-      TAIGA_EMAIL__USERNAME: ""
-      TAIGA_EMAIL__PASSWORD: ""
-      TAIGA_EMAIL__PORT: ""
-      TAIGA_EMAIL__USE_TLS: ""
-      TAIGA_EMAIL__USE_SSL: ""
-      # Redis settings
-      TAIGA_EVENTS__REDIS_HOST: "taiga-redis"
+      POSTGRES_HOST: "taiga-db"
+      POSTGRES_DB: "taiga"
+      POSTGRES_USER: "taiga"
+      POSTGRES_PASSWORD: "abc123!"
+      # Rabbitmq settings
+      RABBITMQ_USER: "taiga"
+      RABBITMQ_PASS: "abc123!"
+      # Telemetry settings
+      ENABLE_TELEMETRY: {{TAIGA_enable_telemetry}}
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}      
     volumes:
       - ./data-transfer:/home/coder/data-transfer
       - ./container-volume/taiga/static-data:/taiga/static
@@ -21878,53 +21914,82 @@ services:
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
 
-  taiga-worker:
-    image: taigaio/backend:alpha
-    container_name: taiga-worker
-    hostname: taiga-worker
-    command: "tasksqueue worker -n main -c 4"
+  taiga-async-rabbitmq:
+    image: rabbitmq:3.8-management-alpine
+    container_name: taiga-async-rabbitmq
+    hostname: taiga-async-rabbitmq    
     environment:
-      # Taiga settings
-      TAIGA_LANG: "en_us"
-      TAIGA_SECRET_KEY: "${TAIGA_SECRET_KEY}"
-      TAIGA_BACKEND_URL: "http://taiga-backend:9000"
-      TAIGA_FRONTEND_URL: "http://${PUBLIC_IP}:9000"
-      TAIGA_SUPPORT_EMAIL: ""
-      TAIGA_STATIC_ROOT: "/taiga/static"
-      TAIGA_MEDIA_ROOT: "/taiga/media"
-      # Database settings
-      TAIGA_DB_HOST: "taiga-db"
-      TAIGA_DB_NAME: "taiga"
-      TAIGA_DB_USER: "taiga"
-      TAIGA_DB_PASSWORD: "abc123!"
-      # Social auth
-      TAIGA_GITHUB_CLIENT_ID: ""
-      TAIGA_GITHUB_CLIENT_SECRET: ""
-      TAIGA_GITLAB_URL: ""
-      TAIGA_GITLAB_CLIENT_ID: ""
-      TAIGA_GITLAB_CLIENT_SECRET: ""
-      TAIGA_GOOGLE_CLIENT_ID: ""
-      TAIGA_GOOGLE_CLIENT_SECRET: ""
-      # Email settings
-      TAIGA_EMAIL__BACKEND: ""
-      TAIGA_EMAIL__DEFAULT_SENDER: ""
-      TAIGA_EMAIL__SERVER: ""
-      TAIGA_EMAIL__USERNAME: ""
-      TAIGA_EMAIL__PASSWORD: ""
-      TAIGA_EMAIL__PORT: ""
-      TAIGA_EMAIL__USE_TLS: ""
-      TAIGA_EMAIL__USE_SSL: ""
-      # Redis settings
-      TAIGA_EVENTS__REDIS_HOST: "taiga-redis"
+      RABBITMQ_ERLANG_COOKIE: "secret-erlang-cookie"
+      RABBITMQ_DEFAULT_USER: "taiga"
+      RABBITMQ_DEFAULT_PASS: "abc123!"
+      RABBITMQ_DEFAULT_VHOST: "taiga"
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}      
+    hostname: "taiga-async-rabbitmq"
     volumes:
       - ./data-transfer:/home/coder/data-transfer
-      - ./container-volume/taiga/static-data:/taiga/static
-      - ./container-volume/taiga/media-data:/taiga/media
+      #- taiga-async-rabbitmq-data:/var/lib/rabbitmq
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+
+  taiga-events:
+    image: taigaio/taiga-events:{{__TAIGA_version}}
+    container_name: taiga-events
+    hostname: taiga-events
+    environment:
+      RABBITMQ_USER: "taiga"
+      RABBITMQ_PASS: "abc123!"
+      TAIGA_SECRET_KEY: "{{TAIGA_secret_key}}"
+    volumes:
+      - ./data-transfer:/home/coder/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+
+  taiga-events-rabbitmq:
+    image: rabbitmq:3.8-management-alpine
+    hostname: taiga-events-rabbitmq
+    environment:
+      RABBITMQ_ERLANG_COOKIE: "secret-erlang-cookie"
+      RABBITMQ_DEFAULT_USER: "taiga"
+      RABBITMQ_DEFAULT_PASS: "abc123!"
+      RABBITMQ_DEFAULT_VHOST: "taiga"
+    volumes:
+      - ./data-transfer:/home/coder/data-transfer    
+      # - taiga-events-rabbitmq-data:/var/lib/rabbitmq
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+
+  taiga-protected:
+    image: taigaio/taiga-protected:latest
+    environment:
+      MAX_AGE: "360"
+      SECRET_KEY: "{{TAIGA_secret_key}}"
+    networks:
+      - taiga
 
   taiga-db:
     image: postgres:15
@@ -21954,23 +22019,11 @@ services:
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
 
-  taiga-redis:
-    image: redis:7
-    container_name: taiga-redis
-    hostname: taiga-redis
-    labels:
-      com.platys.name: "redis"
-      com.platys.description: "Key-Value datastore"
-    {%if use_timezone | default(false) %}
-    environment:
-      TZ: {{use_timezone}}
-    {% endif -%}   {#  use_timezone #}
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 2s
-      timeout: 15s
-      retries: 5
 {% endif %}   {# TAIGA_enable #}
 
 {% if TASKCAFE_enable | default(false) %}
