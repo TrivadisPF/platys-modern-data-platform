@@ -13045,9 +13045,12 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"    
     environment:
+  {% if NEO4J_enable | default(false) %}    
       - NEO4J_URI=neo4j://neo4j-1:7687
-      - NEO4J_PASSWORD=
-      - NEO4J_USERNAME=
+      - NEO4J_PASSWORD=${PLATYS_NEO4J_PASSWORD:-{{NEO4J_password}}}
+      - NEO4J_USERNAME=neo4j
+      - NEO4J_DATABASE=neo4j
+  {% endif %}
       - OPENAI_API_KEY={{NEO4J_KG_BUILDER_openai_api_key}}
       - DIFFBOT_API_KEY={{NEO4J_KG_BUILDER_diffbot_api_key}}
       - EMBEDDING_MODEL={{NEO4J_KG_BUILDER_embedding_model}}
@@ -15420,7 +15423,7 @@ services:
       com.platys.description: "Native graph database management system"
       com.platys.webui.title: "Neo4J UI"
       com.platys.webui.url: "http://dataplatform:{{external_port_neo4j}}"
-      com.platys.password.envvars: "PLATYS_NEO4J_ADMIN_PASSWORD"
+      com.platys.password.envvars: "PLATYS_NEO4J_PASSWORD"
     ports:
       - "{{external_port_neo4j}}:7474"
       - "{{external_port_bolt}}:7687"
@@ -15429,7 +15432,7 @@ services:
     {% if (NEO4J_edition | lower) == 'enterprise'  %}
       - NEO4J_ACCEPT_LICENSE_AGREEMENT=yes
     {% endif -%}   {#  use_timezone #}
-      - NEO4J_AUTH=neo4j/${PLATYS_NEO4J_ADMIN_PASSWORD:-{{NEO4J_admin_password}}}
+      - NEO4J_AUTH=neo4j/${PLATYS_NEO4J_PASSWORD:-{{NEO4J_password}}}
     {% if (NEO4J_major_version | lower) == '5' %}
       {% if not NEO4J_server_config_strict_validation_enabled %}
       - NEO4J_server_config_strict__validation_enabled=false

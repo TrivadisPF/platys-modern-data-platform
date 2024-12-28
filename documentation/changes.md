@@ -56,7 +56,7 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Update `mongo` to `8.0` 
  * Update `solr` to `9.5` 
  * Update `janusgraph` to `1.0.0-20231010-065545.e3799d4`
- * Update `neo4j` to `5.19`
+ * Update `neo4j` to `5.26`
  * Update `memgraph` to `2.16.0`
  * Update `memgraph-mage` to `1.16-memgraph-2.16-dev`
  * Update `arcadedb` to `24.2.1`
@@ -137,8 +137,9 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Support for Spark versions `2.4`, `3.1` and `3.2` removed
  * Remove the `NIFI_major_version` config setting, as there is now support to run both NiFi v1 and v2 in parallel (`NIFI_enable` vs. `NIFI2_enable`)
  * both in Apache NiFi v1 and v2 support, the `/plugins/nifi/jars/` / `/plugins/nifi2/jars/` is now mapped to `/opt/nifi/nifi-current/addl-jars/` and no longer to `/extra-jars` inside the docker container.
- * Rename config parameter `PYTHON_script_file` to `PYTHON_script_to_run`
+ * Rename config setting `PYTHON_script_file` to `PYTHON_script_to_run`
  * Rename `ORACLE_FREE_xxx` to `ORACLE_OCI_FREE_xxx` and use `ORACLE_FREE_xxx` for the Oracle official docker image. 
+ * Rename config setting `NEO4J_admin_password` to `NEO4J_password`
  
 ## What's new in 1.17.1
 
