@@ -12823,17 +12823,15 @@ services:
     hostname: langwatch-app
     labels:
       com.platys.name: 'langwatch'
-      com.platys.description: 'LLM engineering platform'
-      com.platys.webui.title: 'Langfuse UI'
-      com.platys.webui.url: "http://dataplatform:28366"
-      com.platys.restapi.title: 'Langfuse REST API'
-      com.platys.restapi.url: "http://dataplatform:28366/api/public/health"
+      com.platys.description: 'LLMOps platform'
+      com.platys.webui.title: 'LangWatch UI'
+      com.platys.webui.url: "http://dataplatform:5560"
     ports:
       - "5560:5560"
     environment:
       SKIP_ENV_VALIDATION: true
       DISABLE_PII_REDACTION: true
-      DATABASE_URL: postgresql://prisma:prisma@postgres:5432/mydb?schema=mydb
+      DATABASE_URL: postgresql://prisma:prisma@langwatch-postgresql:5432/mydb?schema=mydb
       ELASTICSEARCH_NODE_URL: http://langwatch-opensearch:9200
       IS_OPENSEARCH: true
       REDIS_URL: redis://langwatch-redis:6379
@@ -12859,13 +12857,13 @@ services:
     hostname: langwatch-nlp
     labels:
       com.platys.name: 'langwatch'
-      com.platys.description: 'LLM engineering platform'
-      com.platys.webui.title: 'Langfuse UI'
-      com.platys.webui.url: "http://dataplatform:28366"
-      com.platys.restapi.title: 'Langfuse REST API'
-      com.platys.restapi.url: "http://dataplatform:28366/api/public/health"
+      com.platys.description: 'LLMOps platform'
+      com.platys.webui.title: 'LangWatch NLP service'
+      com.platys.webui.url: "http://dataplatform:28416"
+      com.platys.restapi.title: 'LangWatch NLP service REST API'
+      com.platys.restapi.url: "http://dataplatform:28416/api/public/health"
     ports:
-      - "8080:8080"
+      - "28416:8080"
     environment:
       - LANGWATCH_ENDPOINT: http://langwatch-app:5560
     {%if use_timezone | default(false) %} 
@@ -12882,15 +12880,15 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
 
-  langwatch-postgres:
+  langwatch-postgresql:
     image: postgres:16
-    container_name: langwatch-postgres
-    hostname: langwatch-postgres
+    container_name: langwatch-postgresql
+    hostname: langwatch-postgresql
     labels:
       com.platys.name: 'postgresql'
       com.platys.description: 'LangWatch Postgresql'
     ports:
-      - "5432:5432"    
+      - "5438:5432"    
     environment:
       POSTGRES_DB: mydb
       POSTGRES_USER: prisma
@@ -12923,7 +12921,7 @@ services:
       com.platys.name: 'redis'
       com.platys.description: 'LangWatch Redis'    
     ports:
-      - "6379:6379"
+      - "6388:6379"
     volumes:
       - ./data-transfer:/data-transfer    
     #  - redis-data:/data
@@ -12956,8 +12954,8 @@ services:
         soft: 65536
         hard: 65536    
     ports:
-      - "9200:9200"
-      - "9600:9600"
+      - "9201:9200"
+      - "9601:9600"
     environment:
       - discovery.type=single-node
       - DISABLE_SECURITY_PLUGIN=true

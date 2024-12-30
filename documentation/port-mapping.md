@@ -120,12 +120,14 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 5435 | 5432 | dataverse-postgresql |
 5436 | 5432 | infinity (postgresql) |
 5437 | 5432 | openmetadata-postgresql |
+5438 | 5432 | langwatch-postgresql |
 5500 | 5500 | oracledb-ee-1 |
 5501 | 5500 | oracledb-ee-1 |
 5502 | 5500 | oracledb-ee-1 |
 \-     | 5432 | hive-metastore-db |
 \-     | 5432 | hue-db |
 5555 | 5555 | airflow-flower |
+5560 | 5560 | langwatch-app |
 5601 | 5601 | kibana |
 5602 | 5601 | datahub-kibana |
 5603 | 5601 | opensearch-dashboards |
@@ -156,6 +158,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 6385 | 6379 | redash-redis |
 6386 | 6379 | tyk-redis |
 6387 | 6379 | ragflow-redis |
+6388 | 6379 | langwatch-redis |
 6389 | 6379 | valkey-1 (if not redis ports are used) |
 6390 | 6379 | valkey-replica-1 |
 6391 | 6379 | valkey-replica-2 |
@@ -249,6 +252,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 9103 | 9003 | mosquitto-3 |
 9121 | 9121 | redis-exporter |
 9200 | 9200 | elasticsearch-1 |
+9201 | 9200 | langwatch-opensearch |
 9300 | 9300 | elasticsearch-1 |
 9160 | 9160 | cassandra-1 |
 9161 | 9160 | cassandra-2 |
@@ -277,6 +281,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 9413 | 9413 | pitchfork |
 9443 | 9443 | lfh-fhir |
 9600 | 9600 | zeebe-1 |
+9601 | 9600 | langwatch-opensearch  |
 9851 | 9851 | tile38 |
 9870 | 9870 | namenode |
 9864 | 9864 | datanode-1 |
@@ -711,6 +716,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28413 | 8000 | focalboard |
 28414 | 8000 | neo4j-kg-builder-backend |
 28415 | 8000 | neo4j-kg-builder-frontend |
+28416 | 8080 | langwatch-nlp |
+
 
 ## Ports > 28500
 
