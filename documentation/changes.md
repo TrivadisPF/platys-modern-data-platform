@@ -45,6 +45,8 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Oracle Database Free (Oracle official)
  * Oracle Autonomous Database Free
  * Git Web
+ * LangWatch
+ * LangEvals
 
 ### New/Updated Cookbook Recipes
 

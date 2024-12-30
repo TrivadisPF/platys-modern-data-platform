@@ -292,6 +292,8 @@ networks:
 {% set __FLOWISE_version = FLOWISE_version | default('latest') -%}
 {% set __LANGFLOW_version = LANGFLOW_version | default('latest') -%}
 {% set __LANGFUSE_version = LANGFUSE_version | default('latest') -%}
+{% set __LANGWATCH_version = LANGWATCH_version | default('latest') -%}
+{% set __LANGEVALS_version = LANGEVALS_version | default('latest') -%}
 
 {% set __GPT_RESEARCHER_version = GPT_RESEARCHER_version | default('latest') -%}
 
@@ -796,6 +798,8 @@ networks:
   {% set FLOWISE_enable = false -%}
   {% set LANGFLOW_enable = false -%}
   {% set LANGFUSE_enable = false -%}  
+  {% set LANGWATCH_enable = false -%}   
+  {% set LANGEVALS_enable = false -%} 
   {% set GPT_RESEARCHER_enable = false -%}
   {% set VERBA_enable = false -%}
   {% set RAGFLOW_enable = false -%}
@@ -12810,6 +12814,225 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
 {% endif %}   {# LANGFUSE_enable  #}
+
+{%if LANGWATCH_enable | default(false) %}
+  #  ================================== LangWatch  ========================================== #
+  langwatch-app:
+    image: langwatch/langwatch:{{__LANGWATCH_version}}
+    container_name: langwatch-app
+    hostname: langwatch-app
+    labels:
+      com.platys.name: 'langwatch'
+      com.platys.description: 'LLM engineering platform'
+      com.platys.webui.title: 'Langfuse UI'
+      com.platys.webui.url: "http://dataplatform:28366"
+      com.platys.restapi.title: 'Langfuse REST API'
+      com.platys.restapi.url: "http://dataplatform:28366/api/public/health"
+    ports:
+      - "5560:5560"
+    environment:
+      SKIP_ENV_VALIDATION: true
+      DISABLE_PII_REDACTION: true
+      DATABASE_URL: postgresql://prisma:prisma@postgres:5432/mydb?schema=mydb
+      ELASTICSEARCH_NODE_URL: http://langwatch-opensearch:9200
+      IS_OPENSEARCH: true
+      REDIS_URL: redis://langwatch-redis:6379
+      LANGWATCH_NLP_SERVICE: http://langwatch-nlp:8080
+      LANGEVALS_ENDPOINT: http://langevals:8000
+   {%if use_timezone | default(false) %} 
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+
+  langwatch-nlp:
+    image: langwatch/langwatch_nlp:{{__LANGWATCH_version}}
+    container_name: langwatch-nlp
+    hostname: langwatch-nlp
+    labels:
+      com.platys.name: 'langwatch'
+      com.platys.description: 'LLM engineering platform'
+      com.platys.webui.title: 'Langfuse UI'
+      com.platys.webui.url: "http://dataplatform:28366"
+      com.platys.restapi.title: 'Langfuse REST API'
+      com.platys.restapi.url: "http://dataplatform:28366/api/public/health"
+    ports:
+      - "8080:8080"
+    environment:
+      - LANGWATCH_ENDPOINT: http://langwatch-app:5560
+    {%if use_timezone | default(false) %} 
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+
+  langwatch-postgres:
+    image: postgres:16
+    container_name: langwatch-postgres
+    hostname: langwatch-postgres
+    labels:
+      com.platys.name: 'postgresql'
+      com.platys.description: 'LangWatch Postgresql'
+    ports:
+      - "5432:5432"    
+    environment:
+      POSTGRES_DB: mydb
+      POSTGRES_USER: prisma
+      POSTGRES_PASSWORD: prisma
+    {%if use_timezone | default(false) %} 
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}      
+    volumes:
+      - ./data-transfer:/data-transfer    
+    #  - db-data:/var/lib/postgresql/data
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}      
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U prisma -d mydb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  langwatch-redis:
+    image: redis:alpine
+    container_name: langwatch-redis
+    hostname: langwatch-redis
+    labels:
+      com.platys.name: 'redis'
+      com.platys.description: 'LangWatch Redis'    
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./data-transfer:/data-transfer    
+    #  - redis-data:/data
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}    
+    restart: {{container_restart_policy}}         
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  langwatch-opensearch:
+    image: opensearchproject/opensearch:2.17.1
+    container_name: langwatch-opensearch
+    hostname: langwatch-opensearch
+    labels:
+      com.platys.name: 'opensearch'
+      com.platys.description: 'LangWatch Opensearch'        
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536    
+    ports:
+      - "9200:9200"
+      - "9600:9600"
+    environment:
+      - discovery.type=single-node
+      - DISABLE_SECURITY_PLUGIN=true
+      # Disable specific plugins
+      - "plugins.anomaly_detection.enabled=false"
+      - "plugins.flow_framework.enabled=false"
+      - "plugins.security_analytics.ioc_finding_enabled=false"
+      - "plugins.sql.enabled=false"
+      - "plugins.rollup.enabled=false"
+      # Performance settings
+      - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m -XX:+UseG1GC -XX:-UseSerialGC -XX:G1ReservePercent=25 -XX:+AlwaysPreTouch -XX:InitiatingHeapOccupancyPercent=30"
+      - "cluster.routing.allocation.disk.threshold_enabled=false"
+      - "bootstrap.memory_lock=false" # Changed from true to avoid memory locking warnings
+      # Disk settings
+      - "cluster.routing.allocation.disk.watermark.low=95%"
+      - "cluster.routing.allocation.disk.watermark.high=96%"
+      - "cluster.routing.allocation.disk.watermark.flood_stage=97%"
+      - "cluster.info.update.interval=1m"
+      - OPENSEARCH_INITIAL_ADMIN_PASSWORD=Some-random-password-which-is-greater-than-16-chars-long~
+      # System limits
+      - "node.store.allow_mmap=false"
+    {%if use_timezone | default(false) %} 
+      TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}      
+    volumes:
+      - ./data-transfer:/data-transfer        
+      #- opensearch-data:/usr/share/opensearch/data
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}    
+    restart: {{container_restart_policy}}       
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s http://localhost:9200 || exit 1"]
+      interval: 30s
+      timeout: 30s
+      retries: 3
+      start_period: 40s
+
+{% endif %}   {# LANGWATCH_enable  #}
+
+{%if LANGEVALS_enable | default(false) %}
+  #  ================================== LangEvals  ========================================== #
+  langevals:
+    image: langwatch/langevals:{{__LANGWATCH_version}}
+    container_name: langevals
+    hostname: langevals
+    labels:
+      com.platys.name: 'langevals'
+      com.platys.description: 'LLM engineering platform'
+      com.platys.webui.title: 'Langfuse UI'
+      com.platys.webui.url: "http://dataplatform:28366"
+      com.platys.restapi.title: 'Langfuse REST API'
+      com.platys.restapi.url: "http://dataplatform:28366/api/public/health"
+    ports:
+      - "8000:8000"
+    environment:
+      - DISABLE_EVALUATORS_PRELOAD: true
+   {%if use_timezone | default(false) %} 
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+{% endif %}   {# LANGEVALS_enable  #}
 
 {%if GPT_RESEARCHER_enable | default(false) %}
   #  ================================== GPT Researcher  ========================================== #
