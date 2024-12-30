@@ -1,0 +1,1 @@
+Contains the redis-data of the LangWatch service, if flag LANGWATCH_volume_map_data is set to true.
