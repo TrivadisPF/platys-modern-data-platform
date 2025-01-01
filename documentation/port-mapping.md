@@ -717,6 +717,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28414 | 8000 | neo4j-kg-builder-backend |
 28415 | 8000 | neo4j-kg-builder-frontend |
 28416 | 8080 | langwatch-nlp |
+28417 | 8000 | langevals |
 
 
 ## Ports > 28500
