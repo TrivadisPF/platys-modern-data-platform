@@ -287,6 +287,8 @@ networks:
 
 {% set __CREWAI_STUDIO_version = CREWAI_STUDIO_version | default('latest') -%}
 
+{% set __AGENT_ZERO_version = AGENT_ZERO_STUDIO_version | default('latest') -%}
+
 {% set __LITELLM_version = LITELLM_version | default('latest') -%}
 
 {% set __FLOWISE_version = FLOWISE_version | default('latest') -%}
@@ -794,6 +796,7 @@ networks:
   {% set BIG_AGI_enable = false -%}
   {% set AUTOGEN_STUDIO_enable = false -%}
   {% set CREWAI_STUDIO_enable = false -%}  
+  {% set AGENT_ZERO_enable = false -%}  
   {% set LITELLM_enable = false -%}
   {% set FLOWISE_enable = false -%}
   {% set LANGFLOW_enable = false -%}
@@ -12623,6 +12626,52 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
 {% endif %}   {# CREWAI_STUDIO_enable  #}
+
+{%if AGENT_ZERO_enable | default(false) %}
+  #  ================================== Agent Zero  ========================================== #
+  agent-zero:
+    image: tham0nk/crewai-studio:{{__CREWAI_STUDIO_version}}
+    container_name: agent-zero
+    hostname: agent-zero
+    labels:
+      com.platys.name: 'agent-zero'
+      com.platys.description: "Agent Zero AI framework "
+      com.platys.webui.title: "Agent Zero UI"
+      com.platys.webui.url: "http://dataplatform:28418"
+    ports:
+      - "28418:80"
+    environment:
+      WEB_UI_PORT: 80
+      WEB_UI_HOST: 0.0.0.0
+    {% if (OLLAMA_enable or external['OLLAMA_enable']) | default(false) %}
+      OLLAMA_BASE_URL: {{ns.ollamaUrl}}
+    {% endif -%}   {#  OLLAMA_enable #}
+    {% if ( external['OPENAI_enable']) | default(false) %}
+      API_KEY_OPENAI: external['OPENAI_api_key'])
+    {% endif -%}   {#  OPENAI_enable #}
+    {% if ( external['GROQ_enable']) | default(false) %}
+      API_KEY_GROQ: external['GROQ_api_key'])
+    {% endif -%}   {#  GROQ_enable #}
+    {% if ( external['OPENROUTER_enable']) | default(false) %}
+      API_KEY_OPENROUTER: external['OPENROUTER_api_key'])
+    {% endif -%}   {#  GROQ_enable #}
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {% if AGENT_ZERO_volume_map_data %}
+      - ./containter-volume/agent-zero:/a0
+    {% endif -%}   {#  AGENT_ZERO_volume_map_data #}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+{% endif %}   {# AGENT_ZERO_enable  #}
 
 {%if LITELLM_enable | default(false) %}
   #  ================================== LiteLLM  ========================================== #
