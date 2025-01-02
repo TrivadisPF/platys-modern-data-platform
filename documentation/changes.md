@@ -47,6 +47,7 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Git Web
  * LangWatch
  * LangEvals
+ * Agent Zero
 
 ### New/Updated Cookbook Recipes
 
