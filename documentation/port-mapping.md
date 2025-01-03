@@ -113,6 +113,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 5011 | 5001 | marquez |
 5020 | 5000 | docker-registry |
 5050 | 5050 | zeppelin |
+5051 | 5050 | data-product-portal-backend |
 5115 | 5115 | arroyo |
 5432 | 5432 | postgresql |
 5433 | 5432 | timescaledb |
@@ -121,6 +122,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 5436 | 5432 | infinity (postgresql) |
 5437 | 5432 | openmetadata-postgresql |
 5438 | 5432 | langwatch-postgresql |
+5439 | 5432 | data-product-portal-postgresql |
 5500 | 5500 | oracledb-ee-1 |
 5501 | 5500 | oracledb-ee-1 |
 5502 | 5500 | oracledb-ee-1 |
@@ -719,7 +721,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28416 | 8080 | langwatch-nlp |
 28417 | 8000 | langevals |
 28418 | 80 | agent-zero |
-
+28419 | 8080 | data-product-portal-frontend |
 
 ## Ports > 28500
 
