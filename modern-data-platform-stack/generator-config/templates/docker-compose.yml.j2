@@ -138,6 +138,8 @@ networks:
 {% set __AMUNDSEN_SEARCH_version = AMUNDSEN_SEARCH_version | default('latest') -%}
 {% set __AMUNDSEN_METADATA_version = AMUNDSEN_METADATA_version | default('latest') -%}
 
+{% set __DATA_PRODUCT_PORTAL_version = DATA_PRODUCT_PORTAL_version | default('latest') -%}
+
 {% set __MARQUEZ_version = MARQUEZ_version | default('latest') -%}
 {% set __MARQUEZ_WEB_version = MARQUEZ_WEB_version | default('latest') -%}
 
@@ -762,6 +764,7 @@ networks:
   {% set ATLAS_enable = false -%}
   {% set DATAHUB_enable = false -%}
   {% set AMUNDSEN_enable = false -%}
+  {% set DATA_PRODUCT_PORTAL_enable = false -%}
   {% set MARQUEZ_enable = false -%}
   {% set CKAN_enable = false -%}
   {% set DATAVERSE_enable = false -%}
@@ -8581,6 +8584,111 @@ services:
   {% endif %}   {#  AMUNDSEN_edition #}
 {% endif %}   {#  AMUNDSEN_enable #}
 
+{% if DATA_PRODUCT_PORTAL_enable  | default(false) %}
+  #  ================================== Data Product Portal ========================================== #
+  data-product-portal-backend:
+    image: public.ecr.aws/conveyordata/data-product-portal/backend:{{__DATA_PRODUCT_PORTAL_version}}
+    container_name: data-product-portal-backend
+    hostname: amundsedata-product-portal-backend
+    labels:
+      com.platys.name: "data-product-portal"
+    depends_on:
+      data-product-portal-postgresql:
+        condition: service_healthy
+    ports:
+      - 5050:5050
+    environment:
+      - POSTGRES_PORT=5432
+      - POSTGRES_SERVER=data-product-portal-postgresql
+      - POSTGRES_DB=data-product-portal
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=abc123!
+      - CORS_ALLOWED_ORIGINS=
+      - AWS_DEFAULT_REGION=eu-west-1
+      - OIDC_ENABLED=false
+      - LOGGING_DIRECTORY=./logs
+      - INFRASTRUCTURE_LAMBDA_ARN=
+      - SANDBOX=true
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    command: >
+      bash -c "python -m app.db_tool init --force sample_data.sql
+      && uvicorn app.main:app --host 0.0.0.0 --port 5050"    
+    restart: {{container_restart_policy}}
+
+  data-product-portal-frontend:
+    image: public.ecr.aws/conveyordata/data-product-portal/frontend:{{__DATA_PRODUCT_PORTAL_version}}
+    container_name: data-product-portal-frontend
+    hostname: amundsedata-product-portal-frontend
+    labels:
+      com.platys.name: "data-product-portal"
+    depends_on:
+      data-product-portal-postgresql:
+        condition: service_healthy
+    ports:
+      - 8080:8080
+    {%if use_timezone | default(false) %}
+    environment:
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./conf/data-product-portal/frontend/config.docker.js:/app/dist/config.js      
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #} 
+    restart: {{container_restart_policy}}
+
+  data-product-portal-postgresql:
+    image: postgres:16
+    container_name: data-product-portal-postgresql
+    hostname: data-product-portal-postgresql
+    labels:
+      com.platys.name: 'postgresql'
+      com.platys.description: 'Data Prodcut Catalog Postgresql'
+    ports:
+      - "5439:5432"    
+    environment:
+      POSTGRES_DB: data-product-portal
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: abc123!
+    {%if use_timezone | default(false) %} 
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}      
+    volumes:
+      - ./data-transfer:/data-transfer    
+    {%if DATA_PRODUCT_PORTAL_volume_map_data | default(false) %} 
+      - ./container-volume/data-product-portal/postgresql-data:/var/lib/postgresql/data
+    {% endif -%}   {#  LANGWATCH_volume_map_data #}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}      
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 120
+{% endif %}   {#  DATA_PRODUCT_PORTAL_enable #}
+
 {% if MARQUEZ_enable  | default(false) %}
   #  ================================== Marquez ========================================== #
   marquez-web:
@@ -12982,7 +13090,7 @@ services:
     volumes:
       - ./data-transfer:/data-transfer    
     {%if LANGWATCH_volume_map_data | default(false) %} 
-      - ./container-volume/postgresql-data:/var/lib/postgresql/data
+      - ./container-volume/langwatch/postgresql-data:/var/lib/postgresql/data
     {% endif -%}   {#  LANGWATCH_volume_map_data #}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
@@ -12993,7 +13101,7 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}      
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U prisma -d mydb"]
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 10s
       timeout: 5s
       retries: 5
