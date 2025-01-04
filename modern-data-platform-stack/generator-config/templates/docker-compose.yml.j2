@@ -21848,17 +21848,16 @@ services:
       com.platys.name: "sftpgo"
       com.platys.description: "SFTPgo Server"
       com.platys.webui.title: ""
-      com.platys.webui.url: "http://dataplatform:28382"
+      com.platys.webui.url: "http://dataplatform:28420"
       com.platys.password.envvars: "PLATYS_SFTPGO_ADMIN_PASSWORD"
     environment:
       - SFTPGO_DEFAULT_ADMIN_USERNAME={{SFTPGO_admin_username}}
       - SFTPGO_DEFAULT_ADMIN_PASSWORD=${PLATYS_SFTPGO_ADMIN_PASSWORD:-{{SFTPGO_admin_password}}}
-      
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     ports:
-      - "28382:8080"    
+      - "28420:8080"    
       - "2022:2022"
     volumes:
       - ./data-transfer:/data-transfer
@@ -23394,6 +23393,70 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {#  ASYNCAPI_STUDIO_enable #}
 
+{% if DATA_MESH_MANAGER_enable | default(false) %}
+  #  ================================== Data Mesh Manager ================= #
+  data-mesh-manager:
+    image: datameshmanager/datamesh-manager-ce:{{__DATA_MESH_MANAGER_version}}
+    container_name: data-mesh-manager
+    hostname: data-mesh-manager
+    labels:
+      com.platys.name: "data-mesh-manager"
+      com.platys.description: "Data Mesh Manager"
+      com.platys.webui.title: "Data Mesh Manager UI"
+      com.platys.webui.url: "http://dataplatform:28381"      
+    ports:
+      - 28381:8080
+    environment:
+      - APPLICATION_HOST_WEB=http://${PUBLIC_IP}:28381
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://data-mesh-manager-postgresql:5432/data_mesh_mgr_db
+      - SPRING_DATASOURCE_USERNAME={{DATA_MESH_MANAGER_postgres_username}}
+      - SPRING_DATASOURCE_PASSWORD=${PLATYS_DATA_MESH_MANAGER_POSTGRESQL_PASSWORD:-{{DATA_MESH_MANAGER_postgres_password}}}
+      - SPRING_MAIL_HOST={{DATA_MESH_MANAGER_mail_host}}
+      - SPRING_MAIL_PORT={{DATA_MESH_MANAGER_mail_port}}
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+
+  data-mesh-manager-postgresql:
+    image: pgvector/pgvector:pg16
+    container_name: data-mesh-manager-postgresql
+    hostname: data-mesh-manager-postgresql
+    labels:
+      com.platys.name: "postgresql"
+      com.platys.description: "Data Mesh Manager Postgresql"
+      com.platys.password.envvars: "PLATYS_DATA_MESH_MANAGER_POSTGRESQL_PASSWORD"    
+    environment:
+      - POSTGRES_DB=data_mesh_mgr_db
+      - POSTGRES_USER={{DATA_MESH_MANAGER_postgres_username}}
+      - POSTGRES_PASSWORD=${PLATYS_DATA_CONTRACT_MANAGER_POSTGRESQL_PASSWORD:-{{DATA_MESH_MANAGER_postgres_password}}}
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer    
+    {% if DATA_MESH_MANAGER_volume_map_data %}      
+      - ./container-volume/data-mesh-manager/postgresql-data:/var/lib/postgresql/data
+    {% endif -%}   {#  DATA_MESH_MANAGER_volume_map_data #}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  DATA_MESH_MANAGER_enable #}
+
 {% if DATA_CONTRACT_MANAGER_enable | default(false) %}
   #  ================================== Data Contract Manager ================= #
   data-contract-manager:
@@ -23404,12 +23467,12 @@ services:
       com.platys.name: "data-contract-manager"
       com.platys.description: "Data Contract Manager"
       com.platys.webui.title: "Data Contract Manager UI"
-      com.platys.webui.url: "http://dataplatform:28381"      
+      com.platys.webui.url: "http://dataplatform:28382"      
     ports:
-      - 28381:8080
+      - 28382:8080
     environment:
-      - APPLICATION_HOST_WEB=http://${PUBLIC_IP}:28381
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://data-contract-manager-postgresql:5432/data_mgr_db
+      - APPLICATION_HOST_WEB=http://${PUBLIC_IP}:28382
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://data-contract-manager-postgresql:5432/data_contract_mgr_db
       - SPRING_DATASOURCE_USERNAME={{DATA_CONTRACT_MANAGER_postgres_username}}
       - SPRING_DATASOURCE_PASSWORD=${PLATYS_DATA_CONTRACT_MANAGER_POSTGRESQL_PASSWORD:-{{DATA_CONTRACT_MANAGER_postgres_password}}}
       - SPRING_MAIL_HOST={{DATA_CONTRACT_MANAGER_mail_host}}
@@ -23435,10 +23498,10 @@ services:
     hostname: data-contract-manager-postgresql
     labels:
       com.platys.name: "postgresql"
-      com.platys.description: "Data Mesh & Contract Maanger Postgresql"
+      com.platys.description: "Data Contract Manager Postgresql"
       com.platys.password.envvars: "PLATYS_DATA_CONTRACT_MANAGER_POSTGRESQL_PASSWORD"    
     environment:
-      - POSTGRES_DB=data_mgr_db
+      - POSTGRES_DB=data_contract_mgr_db
       - POSTGRES_USER={{DATA_CONTRACT_MANAGER_postgres_username}}
       - POSTGRES_PASSWORD=${PLATYS_DATA_CONTRACT_MANAGER_POSTGRESQL_PASSWORD:-{{DATA_CONTRACT_MANAGER_postgres_password}}}
     {%if use_timezone | default(false) %}

@@ -683,8 +683,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28378 | 4042 | jupyter (spark UI)  |
 28379 | 4043 | jupyter (spark UI)  |
 28380 | 4044 | jupyter (spark UI)  |
-28381 | 8080 | data-contract-manager  |
-28382 | 8080 | sftpgo (webui) |
+28381 | 8080 | data-mesh-manager  |
+28382 | 8080 | data-contract-manager  |
 28383 | 61208 | glances  |
 28384 | 61209 | glances  |
 28385 | 4040 | kyuubi (spark ui)  |
@@ -722,6 +722,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28417 | 8000 | langevals |
 28418 | 80 | agent-zero |
 28419 | 8080 | data-product-portal-frontend |
+28420 | 8080 | sftpgo (webui) |
 
 ## Ports > 28500
 

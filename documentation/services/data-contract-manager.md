@@ -1,13 +1,13 @@
 # Data Contract Manager
 
-Data Mesh Manager (Community Edition).
+Data Contract Manager (Community Edition).
 
-**[Website](https://www.datamesh-manager.com/)** | **[Documentation](https://docs.datamesh-manager.com/)** | **[GitHub](https://github.com/datamesh-manager/datamesh-manager-ce)**
+**[Website](https://www.datacontract-manager.com/)** | **[Documentation](https://docs.datacontract-manager.com/)** | **[GitHub](https://github.com/datacontract-manager)**
 
 ## How to enable?
 
 ```bash
-platys init --enable-services DATA_CONTRACT_MANAGER MAILHOG, POSTGRESQL
+platys init --enable-services DATA_CONTRACT_MANAGER MAILHOG
 ```
 
 Add the following settings to `config.yml`
@@ -24,4 +24,4 @@ platys gen
 
 ## How to use it?
 
-Navigate to <http://dataplatform:28381>.
+Navigate to <http://dataplatform:28382>.

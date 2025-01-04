@@ -1,0 +1,1 @@
+Contains the postgresql-data of the Data Mesh Manager Postgres service, if flag DATA_MESH_MANAGER_volume_map_data is set to true.
