@@ -2454,30 +2454,33 @@ services:
       com.platys.webui.title: "Risingwave UI"
       com.platys.webui.url: "http://dataplatform:5691"
     depends_on:
-      - etcd-1
+      - posgresql
       - minio-1
     expose:
       - "6660"
-      - "1260"
       - "4566"
       - "5688"
-      - "1222"
       - "5690"
       - "1250"
       - "5691"
-      - "2222"
     ports:
       - "4566:4566"
       - "5690:5690"
       - "5691:5691"
-      - "1222:1222"
       - "1250:1250"
-      - "1260:1260"
-      - "12222:2222"
     environment:
       - RUST_BACKTRACE="1"
       # If ENABLE_TELEMETRY is not set, telemetry will start by default
       - ENABLE_TELEMETRY={{RISINGWAVE_telemetry_enable | default(false) }}
+      - RW_TELEMETRY_TYPE="docker-compose"
+      - RW_SECRET_STORE_PRIVATE_KEY_HEX=0123456789abcdef0123456789abcdef
+      - RW_LICENSE_KEY=
+    {%if external['S3_enable'] | default(false) %}
+      - RW_S3_ENDPOINT={{s3Endpoint | default(omit) }}
+      - AWS_REGION: {{s3DefaultRegion | default(omit) }}
+      - AWS_ACCESS_KEY_ID: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
+      - AWS_SECRET_ACCESS_KEY: {{s3SecretAccessKey}}
+    {% endif %}      
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -2494,35 +2497,38 @@ services:
                       --advertise-addr 0.0.0.0:5690 \
                       --dashboard-host 0.0.0.0:5691 \
                       --prometheus-host 0.0.0.0:1250 \
-                      --connector-rpc-endpoint 0.0.0.0:50051 \
-                      --backend etcd \
-                      --etcd-endpoints etcd-1:2379 \
+                      --prometheus-endpoint http://prometheus-1:9090 \
+                      --backend sql \
+                      --sql-endpoint postgres://postgres:@postgresql:5432/metadata \
                       --state-store hummock+minio://{{s3AccessKey}}:{{s3SecretAccessKey}}@minio-1:9000/risingwave-bucket \
                       --data-directory platys_001 \
                       --config-path /risingwave.toml\" \
                     --compute-opts=\" \
                       --config-path /risingwave.toml \
                       --listen-addr 0.0.0.0:5688 \
-                      --prometheus-listener-addr 0.0.0.0:1222 \
+                      --prometheus-listener-addr 0.0.0.0:1250 \
                       --advertise-addr 0.0.0.0:5688 \
                       --async-stack-trace verbose \
                       --connector-rpc-endpoint 0.0.0.0:50051 \
-                      #--parallelism 4 \
-                      #--total-memory-bytes 8589934592 \
+                      --parallelism 8 \
+                      --total-memory-bytes 21474836480 \
                       --role both \
-                      --meta-address http://0.0.0.0:5690\" \
+                      --meta-address http://0.0.0.0:5690 \
+                      --memory-manager-target-bytes 22333829939 \" \
                     --frontend-opts=\" \
                       --config-path /risingwave.toml \
                       --listen-addr 0.0.0.0:4566 \
                       --advertise-addr 0.0.0.0:4566 \
-                      --prometheus-listener-addr 0.0.0.0:12222 \
+                      --prometheus-listener-addr 0.0.0.0:1250 \
                       --health-check-listener-addr 0.0.0.0:6786 \
-                      --meta-addr http://0.0.0.0:5690\" \
+                      --meta-addr http://0.0.0.0:5690 \ 
+                      --frontend-total-memory-bytes=4294967296\" \
                     --compactor-opts=\" \
                       --listen-addr 0.0.0.0:6660 \
-                      --prometheus-listener-addr 0.0.0.0:1260 \
+                      --prometheus-listener-addr 0.0.0.0:1250 \
                       --advertise-addr 0.0.0.0:6660 \
-                      --meta-address http://0.0.0.0:5690\""
+                      --meta-address http://0.0.0.0:5690 \
+                      --compactor-total-memory-bytes=4294967296\""
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
