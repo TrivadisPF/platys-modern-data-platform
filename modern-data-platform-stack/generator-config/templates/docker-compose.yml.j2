@@ -23395,23 +23395,23 @@ services:
 {% endif %}   {#  ASYNCAPI_STUDIO_enable #}
 
 {% if DATA_CONTRACT_MANAGER_enable | default(false) %}
-  #  ================================== AsyncAPI Studio ================= #
+  #  ================================== Data Contract Manager ================= #
   data-contract-manager:
-    image: datameshmanager/datamesh-manager-ce:{{__DATA_CONTRACT_MANAGER_version}}
+    image: datacontractmanager/datacontract-manager-ce:{{__DATA_CONTRACT_MANAGER_version}}
     container_name: data-contract-manager
     hostname: data-contract-manager
     labels:
       com.platys.name: "data-contract-manager"
       com.platys.description: "Data Contract Manager"
-      com.platys.webui.title: "AsyncAPI Studio UI"
+      com.platys.webui.title: "Data Contract Manager UI"
       com.platys.webui.url: "http://dataplatform:28381"      
     ports:
       - 28381:8080
     environment:
       - APPLICATION_HOST_WEB=http://${PUBLIC_IP}:28381
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://{{DATA_CONTRACT_MANAGER_postgres_host}}:{{DATA_CONTRACT_MANAGER_postgres_port}}/{{DATA_CONTRACT_MANAGER_postgres_db}}
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://data-contract-manager-postgresql:5432/data_mgr_db
       - SPRING_DATASOURCE_USERNAME={{DATA_CONTRACT_MANAGER_postgres_username}}
-      - SPRING_DATASOURCE_PASSWORD={{DATA_CONTRACT_MANAGER_postgres_password}}
+      - SPRING_DATASOURCE_PASSWORD=${PLATYS_DATA_CONTRACT_MANAGER_POSTGRESQL_PASSWORD:-{{DATA_CONTRACT_MANAGER_postgres_password}}}
       - SPRING_MAIL_HOST={{DATA_CONTRACT_MANAGER_mail_host}}
       - SPRING_MAIL_PORT={{DATA_CONTRACT_MANAGER_mail_port}}
     {%if use_timezone | default(false) %}
@@ -23420,6 +23420,33 @@ services:
     volumes:
       - ./data-transfer:/data-transfer
       - {{DATA_CONTRACT_CLI_home_dir}}:/home/datacontract
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+
+  data-contract-manager-postgresql:
+    image: pgvector/pgvector:pg16
+    container_name: data-contract-manager-postgresql
+    hostname: data-contract-manager-postgresql
+    labels:
+      com.platys.name: "postgresql"
+      com.platys.description: "Data Mesh & Contract Maanger Postgresql"
+      com.platys.password.envvars: "PLATYS_DATA_CONTRACT_MANAGER_POSTGRESQL_PASSWORD"    
+    environment:
+      - POSTGRES_DB=data_mgr_db
+      - POSTGRES_USER={{DATA_CONTRACT_MANAGER_postgres_username}}
+      - POSTGRES_PASSWORD=${PLATYS_DATA_CONTRACT_MANAGER_POSTGRESQL_PASSWORD:-{{DATA_CONTRACT_MANAGER_postgres_password}}}
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer    
+      - ./container-volume/data-contract-manager/postgresql-data:/var/lib/postgresql/data
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"

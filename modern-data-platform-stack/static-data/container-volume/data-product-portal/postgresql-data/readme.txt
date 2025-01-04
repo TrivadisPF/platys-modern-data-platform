@@ -1,1 +1,1 @@
-Contains the postgresql-data of the LangWatch service, if flag LANGWATCH_volume_map_data is set to true.
+Contains the postgresql-data of the LangWatch service, if flag DATA_PRODUCT_PORTAL_volume_map_data is set to true.
