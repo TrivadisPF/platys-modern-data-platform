@@ -2499,8 +2499,16 @@ services:
                       --prometheus-host 0.0.0.0:1250 \
                       --prometheus-endpoint http://prometheus-1:9090 \
                       --backend sql \
-                      --sql-endpoint postgres://postgres:@postgresql:5432/metadata \
-                      --state-store hummock+minio://{{s3AccessKey}}:{{s3SecretAccessKey}}@minio-1:9000/risingwave-bucket \
+    {%if RISINGWAVE_db_type | lower == 'sqlite' | default(false) %}
+                      --sql-endpoint sqlite:///meta-data/metadata.db?mode=rwc \
+    {% else %}      
+                      --sql-endpoint postgres://{{RISINGWAVE_db_username}}:${PLATYS_POSTGRESQL_PASSWORD:-{{POSTGRESQL_password | default('abc123!') }}}@postgresql:5432/{{RISINGWAVE_db_database}} \
+    {% endif -%}      
+    {%if external['S3_enable'] and external['S3_enable'] == 's3.amazonaws.com' | default(false) %}
+                      --state-store hummock+s3://{{RISINGWAVE_s3_bucket_name}} \
+    {% else %}      
+                      --state-store hummock+minio://{{s3AccessKey}}:{{s3SecretAccessKey}}@minio-1:9000/{{RISINGWAVE_s3_bucket_name}} \
+    {% endif -%}      
                       --data-directory platys_001 \
                       --config-path /risingwave.toml\" \
                     --compute-opts=\" \
@@ -18172,11 +18180,11 @@ services:
     labels:
       com.platys.name: "postgresql"
       com.platys.description: "Open-Source object-relational database system"
-      com.platys.password.envvars: "PLATYS_AIRFLOW_POSTGRESQL_PASSWORD,PLATYS_POSTGRESQL_MULTIPLE_PASSWORD"
+      com.platys.password.envvars: "PLATYS_POSTGRESQL_PASSWORD,PLATYS_POSTGRESQL_MULTIPLE_PASSWORD"
     ports:
       - "5432:5432"
     environment:
-      - POSTGRES_PASSWORD=${PLATYS_AIRFLOW_POSTGRESQL_PASSWORD:-{{POSTGRESQL_password | default('abc123!') }}}
+      - POSTGRES_PASSWORD=${PLATYS_POSTGRESQL_PASSWORD:-{{POSTGRESQL_password | default('abc123!') }}}
       - POSTGRES_USER={{POSTGRESQL_user | default('demo') }}
       - POSTGRES_DB={{POSTGRESQL_database | default('demodb') }}
     {% if POSTGRESQL_multiple_databases is defined and POSTGRESQL_multiple_databases | length %}
