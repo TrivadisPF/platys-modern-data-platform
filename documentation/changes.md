@@ -97,7 +97,7 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Update `stardog` to `latest`
  * Update `minio` to `RELEASE.2024-11-07T00-52-20Z`
  * Update `datahub` to `v0.14.1`
- * Update `risingwave` to `v1.10.1`
+ * Update `risingwave` to `v2.1.0`
  * Update `portainer` to `alpine-sts`
  * Update `flowise` to `2.2.3`
  * Update `nifi` to `2.0.0`
@@ -116,11 +116,11 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Update `vault` to `1.18`
  * Update `opa` to `0.71.0-dev`
  * Update `styra` to `1.30.0-80-debug`
- * Update `jikkou` ot `main` - to support Mac M1
+ * Update `jikkou` to `main` - to support Mac M1
 
 ### Enhancements
 
- * a README.md file is generated which lists all the services contained in the `docker-compose.yml` file
+ * a `README.md` file is generated which lists all the services contained in the `docker-compose.yml` file
  * Refactored Spark (Master, Worker, History and Thriftserver) to use the bitnami docker images
  * Refactored Zeppelin to use the Dockerfile provided by the Apache Zeppelin project
  * Option to overrite the Postgres standard, official image by one with an additional extension, such as `PGVector` or `age` or with your own docker image
