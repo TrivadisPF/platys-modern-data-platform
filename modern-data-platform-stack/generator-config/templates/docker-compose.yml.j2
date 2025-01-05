@@ -2474,8 +2474,9 @@ services:
       - RW_TELEMETRY_TYPE="docker-compose"
       - RW_SECRET_STORE_PRIVATE_KEY_HEX=0123456789abcdef0123456789abcdef
       - RW_LICENSE_KEY=
-    {%if external['S3_enable'] | default(false) %}
+    {%if MINIO_enable or external['S3_enable'] | default(false) %}
       - RW_S3_ENDPOINT={{s3Endpoint | default(omit) }}
+      - RW_IS_FORCE_PATH_STYLE={{s3PathStyleAccess | default(omit) }}
       - AWS_REGION: {{s3DefaultRegion | default(omit) }}
       - AWS_ACCESS_KEY_ID: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
       - AWS_SECRET_ACCESS_KEY: {{s3SecretAccessKey}}
@@ -2499,15 +2500,11 @@ services:
                       --prometheus-endpoint http://prometheus-1:9090 \
                       --backend sql \
     {%if RISINGWAVE_db_type | lower == 'sqlite' | default(false) %}
-                      --sql-endpoint sqlite:///meta-data/metadata.db?mode=rwc \
+                      --sql-endpoint sqlite:///tmp/metadata.db?mode=rwc \
     {% else %}      
                       --sql-endpoint postgres://{{RISINGWAVE_db_username}}:${PLATYS_POSTGRESQL_PASSWORD:-{{POSTGRESQL_password | default('abc123!') }}}@postgresql:5432/{{RISINGWAVE_db_database}} \
-    {% endif -%}      
-    {%if external['S3_enable'] and external['S3_enable'] == 's3.amazonaws.com' | default(false) %}
+    {% endif %}      
                       --state-store hummock+s3://{{RISINGWAVE_s3_bucket_name}} \
-    {% else %}      
-                      --state-store hummock+minio://{{s3AccessKey}}:{{s3SecretAccessKey}}@minio-1:9000/{{RISINGWAVE_s3_bucket_name}} \
-    {% endif -%}      
                       --data-directory platys_001 \
                       --config-path /risingwave.toml\" \
                     --compute-opts=\" \
@@ -2552,7 +2549,6 @@ services:
         - bash -c 'printf \"GET / HTTP/1.1\n\n\" > /dev/tcp/127.0.0.1/5690; exit $$?;'
       interval: 1s
       timeout: 5s
-
   {% endif %}  {#  RISINGWAVE_edition == 'standalone' #}
 
   {% if RISINGWAVE_edition == 'cluster' | default(false) %}
