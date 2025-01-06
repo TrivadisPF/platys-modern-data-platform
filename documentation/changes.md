@@ -88,7 +88,7 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Update `ahana` to `0.286`
  * Update `dremio` to `25.2`
  * Update `hasura` to `v2.38.1-ce`
- * Update `marquez` and `marquez-web` to `0.46.0`
+ * Update `marquez` and `marquez-web` to `0.50.0`
  * Update `datastax` to `6.8.44`
  * Update `elasticsearch` to `7.17.20` and `8.13.0`
  * Update `kibana` to `7.17.20` and `8.13.0`
