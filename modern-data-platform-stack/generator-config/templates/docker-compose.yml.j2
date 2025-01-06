@@ -8606,7 +8606,7 @@ services:
       com.platys.name: "data-product-portal"
       com.platys.description: "Data Product Portal Backend"
       com.platys.restapi.title: "Data Product Portal REST API"
-      com.platys.restapi.url: "http://dataplatform:5051"      
+      com.platys.restapi.url: "http://dataplatform:5051/api/docs#"
     depends_on:
       data-product-portal-postgresql:
         condition: service_healthy
@@ -8634,9 +8634,14 @@ services:
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
-    command: >
-      bash -c "python -m app.db_tool init --force sample_data.sql
-      && uvicorn app.main:app --host 0.0.0.0 --port 5050"    
+    command:
+      - bash 
+      - -c
+      - |
+    {% if DATA_PRODUCT_PORTAL_provision_sample_data | default(false) %}
+        python -m app.db_tool init --force sample_data.sql
+    {% endif -%}   {#  DATA_PRODUCT_PORTAL_provision_sample_data #}
+        uvicorn app.main:app --host 0.0.0.0 --port 5050       
     restart: {{container_restart_policy}}
 
   data-product-portal-frontend:
@@ -8651,13 +8656,14 @@ services:
     depends_on:
       data-product-portal-postgresql:
         condition: service_healthy
-    {%if use_timezone | default(false) %}
     environment:
+      - PUBLIC_IP=${PUBLIC_IP}
+    {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
-      - ./conf/data-product-portal/frontend/config.docker.js:/app/dist/config.js      
+      - ./conf/data-product-portal/frontend/config.docker.js:/tmp/config.docker.js.templ
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -8665,6 +8671,14 @@ services:
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #} 
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        eval "echo \"$$(cat /tmp/config.docker.js.templ)\"" >> /app/dist/config.js
+        cat /app/dist/config.js
+        # we cannot invoke /app/entrypoint.sh so we just copy the command from it
+        nginx -g 'daemon off;'      
     restart: {{container_restart_policy}}
 
   data-product-portal-postgresql:
@@ -8673,7 +8687,7 @@ services:
     hostname: data-product-portal-postgresql
     labels:
       com.platys.name: 'postgresql'
-      com.platys.description: 'Data Prodcut Portal Postgresql'
+      com.platys.description: 'Data Product Portal Postgresql'
     ports:
       - "5439:5432"    
     environment:
@@ -8694,7 +8708,7 @@ services:
     {% endif -%}   {#  use_timezone #}
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
     <<: *logging
-    {% endif -%}   {#  logging_driver is defined ... #}
+    {% endif -%}   {#  logging_driver is defined ... #}  
     restart: {{container_restart_policy}}      
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
@@ -8708,9 +8722,7 @@ services:
     hostname: data-product-portal-nginx
     labels:
       com.platys.name: "data-product-portal"
-      com.platys.description: "Data Product Portal Frontend"
-      com.platys.webui.title: "Data Product Portal UI"
-      com.platys.webui.url: "http://dataplatform:28419"     
+      com.platys.description: "Data Product Portal Gateway"   
     ports:
       - 28419:80
       - 5051:5050
