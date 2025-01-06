@@ -231,6 +231,8 @@ networks:
   {% set __AIRFLOW_version = ("slim-" if AIRFLOW_use_slim_image else "") ~ AIRFLOW_version  | default('latest') -%}
 {% endif -%}
 
+{% set __MAGE_version = MAGE_version | default('latest') -%}
+
 {% set __OFELIA_version = OFELIA_version | default('latest') -%}
 
 {%if (JUPYTER_edition | lower) == 'minimal' | default(false) %}
@@ -784,6 +786,7 @@ networks:
   {% set ASPIRE_enable = false -%}
   {% set AIRBYTE_enable = false -%}
   {% set AIRFLOW_enable = false -%}
+  {% set MAGE_AI_enable = false -%}
   {% set ZEPPELIN_enable = false -%}
   {% set JUPYTER_enable = false -%}
   {% set JUPYTERHUB_enable = false -%}
@@ -11747,6 +11750,38 @@ services:
     init: true
 {% endif %}   {#  AIRFLOW_enable  #}
 
+{%if MAGE_AI_enable | default(false) %}
+  #  ================================== Mage AI ========================================== #
+  mage-ai:
+    image: mageai/mageai:{{__MAGE_AI_version}}
+    container_name: mage-ai
+    hostname: mage-ai
+    labels:
+      com.platys.name: 'mage-ai'
+      com.platys.description: "Orchestration Engine"
+      com.platys.webui.title: "Mage AI UI"
+      com.platys.webui.url: "http://dataplatform:6789"
+    ports:
+      - "6789:6789"      
+    environment:
+      USER_CODE_PATH: /home/src/{{MAGE_AI_project_name}}
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./scripts/mage-ai/:/home/src/
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    command: mage start {{MAGE_AI_project_name}}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  MAGE_AI_enable  #}
+
 {%if OFELIA_enable | default(false) %}
   #  ================================== Ofelia ========================================== #
   ofelia:
@@ -11766,7 +11801,6 @@ services:
     {%if OFELIA_log_to_folder | default(false) %}
       ofelia.save-folder: /var/log/
     {% endif -%}   {#  OFELIA_log_to_folder #}
-    {%if use_timezone | default(false) %}
     environment:
       DUMMY: make-it-valid
     {% if OFELIA_environment is defined and OFELIA_environment and OFELIA_environment | length | default(false) %}
@@ -11774,6 +11808,7 @@ services:
       {{envvar.split('=')[0]}}: "{{envvar.split('=')[1]}}"
       {% endfor %}
     {% endif -%}   {#  OFELIA_environment #}       
+    {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:

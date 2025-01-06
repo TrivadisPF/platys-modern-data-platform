@@ -168,6 +168,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 6570 | 6570 | hserver-1 |
 6831 | 6831 | jaeger (udp) |
 6749 | 6749 | curity |
+6789 | 6789 | mage-ai |
 6832 | 6832 | jaeger (udp) |
 6875 | 6875 | materialize-1 |
 7000 | 7000 | yb-master |

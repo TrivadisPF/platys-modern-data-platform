@@ -50,6 +50,7 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * LangEvals
  * Agent Zero
  * Data Product Portal
+ * Mage AI
 
 ### New/Updated Cookbook Recipes
 
