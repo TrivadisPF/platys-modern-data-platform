@@ -78,6 +78,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 3030 | 3030 | jena-fuseki |
 3100 | 3100 | loki |
 3200 | 3200 | tempo |
+3218 | 3218 | proton-server (HTTP streaming)
 3306 | 3306 | mysql |
 3307 | 3306 | datahub-mysql |
 3308 | 3306 | single-store |
@@ -123,6 +124,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 5437 | 5432 | openmetadata-postgresql |
 5438 | 5432 | langwatch-postgresql |
 5439 | 5432 | data-product-portal-postgresql |
+5440 | 5432 | proton-server (postgres batch) |
 5500 | 5500 | oracledb-ee-1 |
 5501 | 5500 | oracledb-ee-1 |
 5502 | 5500 | oracledb-ee-1 |
@@ -188,6 +190,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 7476 | 7474 | neo4j-3 |
 7477 | 7474 | neo4j-4 |
 7577 | 7577 | spring-skipper-server |
+7587 | 7587 | proton-server (TCP batch)
 7687 | 7687 | neo4j-1 |
 7688 | 7687 | neo4j-2 |
 7689 | 7687 | neo4j-3 |
@@ -216,7 +219,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 8089 | 8088 | ksqldb-server-2 |
 8090 | 8088 | ksqldb-server-3 |
 8100 | 8100 | kong-map |
-8123 | 8123 | proton-server |
+8123 | 8123 | proton-server (HTTP batch) |
 8124 | 8124 | axon-server |
 8161 | 8161 | activemq |
 8182 | 8182 | janusgraph |
@@ -228,6 +231,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 8444 | 8444 | kong (admin api ssl) |
 8446 | 8443 | curity |
 8447 | 8443 | oracle-adb |
+8463 | 8463 | proton-server (TCP streaming)
 8501 | 8501 | crewai-studio | 
 8585 | 8585 | openmetadata-server |
 8586 | 8586 | openmetadata-server |
@@ -242,7 +246,6 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 9001 | 9000 | minio-2 |
 9002 | 9000 | minio-3 |
 9003 | 9000 | minio-4 |
-9005 | 9000 | proton-server |
 9009 | 9009 | questdb |
 9010 | 9010 | minio-1 ui |
 9011 | 9011 | minio-2 ui |
@@ -280,6 +283,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 9192 | 9192 | lenses-box     |
 9292 | 9292 | pact-broker     |
 9343 | 9343 | klaw-cluster-api |
+9363 | 9363 | proton-server (Prometheus Metrics) |
 9393 | 9393 | spring-dataflow-server |
 9411 | 9411 | zipkin |
 9412 | 9412 | jaeger |
