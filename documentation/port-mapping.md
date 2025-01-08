@@ -216,6 +216,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 8089 | 8088 | ksqldb-server-2 |
 8090 | 8088 | ksqldb-server-3 |
 8100 | 8100 | kong-map |
+8123 | 8123 | proton-server |
 8124 | 8124 | axon-server |
 8161 | 8161 | activemq |
 8182 | 8182 | janusgraph |
@@ -241,6 +242,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 9001 | 9000 | minio-2 |
 9002 | 9000 | minio-3 |
 9003 | 9000 | minio-4 |
+9005 | 9000 | proton-server |
 9009 | 9009 | questdb |
 9010 | 9010 | minio-1 ui |
 9011 | 9011 | minio-2 ui |

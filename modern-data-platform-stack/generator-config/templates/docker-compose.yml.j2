@@ -28,6 +28,7 @@ networks:
 {% set __HSTREAMDB_version = HSTREAMDB_version | default('latest') -%}
 {% set __BENTHOS_version = BENTHOS_version | default('latest') -%}
 {% set __RISINGWAVE_version = RISINGWAVE_version | default('latest') -%}
+{% set __PROTON_version = PROTON_version | default('latest') -%}
 {% set __ARROYO_version = ARROYO_version | default('latest') -%}
 
 {% set __SCHEMA_REGISTRY_UI_version = SCHEMA_REGISTRY_UI_version | default('latest') -%}
@@ -722,6 +723,7 @@ networks:
   {% set HSTREAMDB_enable = false -%}
   {% set BENTHOS_enable = false -%}
   {% set RISINGWAVE_enable = false -%}
+  {% set PROTON_enable = false -%}
   {% set ARROYO_enable = false -%}
   {% set KAFKA_REPLICATOR_enable = false -%}
   {% set KAFKA_MM2_enable = false -%}
@@ -2746,6 +2748,47 @@ services:
       timeout: 5s
   {% endif %}  {#  RISINGWAVE_edition == 'cluster' #}
 {% endif %}   {#  RISINGWAVE_enable #}
+
+{% if PROTON_enable | default(false) %}
+  #  ================================== Timeplus Proton ========================================== #
+  proton-server:
+    image: d.timeplus.com/timeplus-io/proton:{{__PROTON_version}}
+    hostname: proton-server
+    container_name: proton-server
+    cap_add:
+      - SYS_PTRACE    
+    labels:
+      com.platys.name: "proton"
+      com.platys.description: "Proton Streaming DB"
+      com.platys.webui.title: "Proton UI"
+      com.platys.webui.url: "http://dataplatform:8123"
+    ports:
+      - "8123:8123" # HTTP
+      - "9005:9000" # TCP      
+    environment:
+      - STREAM_STORAGE_BROKERS={{ns.bootstrapServers}}
+      - STREAM_STORAGE_QUEUE_BUFFERING_MAX_MS=50 # Control producer latency
+      - STREAM_STORAGE_FETCH_WAIT_MAX_MS=500 # Control consumer latency
+      - STREAM_STORAGE_TYPE=kafka # log type
+      - STREAM_STORAGE_CLUSTER_ID=default-sys-kafka-cluster-id
+      - STREAM_STORAGE_SECURITY_PROTOCOL=PLAINTEXT
+      - ENABLE_LOG_STREAM=true # log stream    
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    command: >
+      /bin/bash -c "sleep 2; /entrypoint.sh"    
+    restart: {{container_restart_policy}}
+{% endif %}  {#  PROTON_enable #}
 
 {% if ARROYO_enable | default(false) %}
   #  ================================== Arroyo ========================================== #
