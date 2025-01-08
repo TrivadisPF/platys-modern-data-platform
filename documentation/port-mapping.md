@@ -75,6 +75,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 3005 | 3000 | marquez-web |
 3010 | 3000 | postman |
 3006 | 3000 | retool-api |
+3007 | 3000 | gpt-researcher-nextjs |
 3030 | 3030 | jena-fuseki |
 3100 | 3100 | loki |
 3200 | 3200 | tempo |
