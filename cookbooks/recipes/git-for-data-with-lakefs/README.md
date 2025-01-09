@@ -230,7 +230,7 @@ platys-mdp-init  |
 
 ## Using LakeFS to crate a Branch
 
-Navigate to <http://dataplatform:28220> and login as `admin` with password `abc123abc123!`. You should see the two repositories `admin` and `demo`.
+Navigate to <http://dataplatform:28220> and login as `admin` with password `abc123abc123!`. You should see the two repositories `admin` and `demo`, which confirms that the automatic setup of Minio and LakeFS has worked!
 
 Click on `demo` and on the next page navigate to the `branches` tab. 
 
