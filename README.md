@@ -1,6 +1,6 @@
 # Platform Stack: `modern-data-platform` - v1.17.1
 
-This Platform Stack defines the set of services for a Modern Data Platform that can be used with the [Platys](http://github.com/trivadispf/platys) platform generator.
+This Platform Stack defines the set of services for a Modern Data Platform that can be used with the [Platys](http://github.com/trivadispf/platys) platform generator. Make sure to [install](https://github.com/TrivadisPF/platys/blob/master/documentation/install.md)  the `platys` CLI first, before you continue.
 
 ## Which services can I use? 
 
