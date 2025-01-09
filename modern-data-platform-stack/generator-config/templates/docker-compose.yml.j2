@@ -21028,7 +21028,10 @@ services:
       com.platys.webui.title: "LakeFS UI"
       com.platys.webui.url: "http://dataplatform:28220"
       com.platys.restapi.title: "LakeFS UI"
-      com.platys.restapi.url: "http://dataplatform:28220/api/v1/repositories"      
+      com.platys.restapi.url: "http://dataplatform:28220/api/v1/repositories" 
+    {%if not LAKEFS_database_type == 'local' %}
+      com.platys.password.envvars: PLATYS_LAKEFS_DATABASE_PASSWORD
+    {% endif -%}   {#  LAKEFS_database_type #}
     ports:
       - 28220:8000
     depends_on:
@@ -21041,7 +21044,7 @@ services:
       LAKEFS_DATABASE_LOCAL_ENABLE_LOGGING: false
     {%elif LAKEFS_database_type == 'postgresql' %}
       LAKEFS_DATABASE_TYPE: postgres
-      LAKEFS_DATABASE_POSTGRES_CONNECTION_STRING: "postgres://{{POSTGRESQL_user}}:{{POSTGRESQL_password}}@postgresql:5432/{{POSTGRESQL_database}}"
+      LAKEFS_DATABASE_POSTGRES_CONNECTION_STRING: "postgres://{{LAKEFS_database_user}}:{{LAKEFS_database_password}}@postgresql:5432/{{LAKEFS_database_dbname}}"
     {% endif -%}   {#  LAKEFS_database_type #}
       LAKEFS_BLOCKSTORE_TYPE: {{LAKEFS_blockstore_type | default(local) }}
     {%if LAKEFS_blockstore_type == 'local' %}
