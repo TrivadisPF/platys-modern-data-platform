@@ -20,6 +20,9 @@ Inhere we are documenting cookbooks on how to use the platform:
  * **MinIO**
    * [Serving a static Web application from MinIO](./recipes/serving-static-html-app-from-minio/README.md)
 
+ * **LakeFS**
+   * [Git for Data with LakeFS](./recipes/git-for-data-with-lakefs/README.md)
+
  * **MQTT**
    * [Using Confluent MQTT Proxy](./recipes/using-mqtt-proxy/README.md)
    * [Using HiveMQ with Kafka Extensions](./recipes/using-hivemq-with-kafka-extension/README.md) - `1.12.0`
