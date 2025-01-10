@@ -15,5 +15,9 @@ platys gen
 
 Navigate to <http://dataplatform:5115>.
 
+### Using the CLI
 
+```bash
+docker exec -ti arroyo ./arroyo
+```
 
