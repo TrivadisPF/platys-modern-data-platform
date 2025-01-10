@@ -52,6 +52,7 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Data Product Portal
  * Mage AI
  * Timeplus
+ * Aspire
 
 ### New/Updated Cookbook Recipes
 
