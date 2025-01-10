@@ -2408,16 +2408,16 @@ services:
 {% endif %}   {#  BENTHOS_enable #}
 
 {% if RISINGWAVE_enable | default(false) %}
-  #  ================================== Risingwave ========================================== #
-  {% if RISINGWAVE_edition == 'playground' | default(false) %}
+  #  ================================== RisingWave ========================================== #
+  {% if RISINGWAVE_flavor == 'playground' | default(false) %}
   risingwave:
     image: risingwavelabs/risingwave:{{__RISINGWAVE_version}}
     hostname: risingwave
     container_name: risingwave
     labels:
       com.platys.name: "risingwave"
-      com.platys.description: "Risingwave Streaming DB"
-      com.platys.webui.title: "Risingwave UI"
+      com.platys.description: "RisingWave Streaming DB"
+      com.platys.webui.title: "RisingWave UI"
       com.platys.webui.url: "http://dataplatform:5691"
     expose:
       - "4566"
@@ -2447,9 +2447,9 @@ services:
         - bash -c 'printf \"GET / HTTP/1.1\n\n\" > /dev/tcp/127.0.0.1/5690; exit $$?;'
       interval: 1s
       timeout: 5s
-  {% endif %}  {#  RISINGWAVE_edition == 'playground' #}
+  {% endif %}  {#  RISINGWAVE_flavor == 'playground' #}
 
-  {% if RISINGWAVE_edition == 'standalone' | default(false) %}
+  {% if RISINGWAVE_flavor == 'standalone' | default(false) %}
   risingwave:
     image: risingwavelabs/risingwave:{{__RISINGWAVE_version}}
     hostname: risingwave
@@ -2459,6 +2459,7 @@ services:
       com.platys.description: "Risingwave Streaming DB"
       com.platys.webui.title: "Risingwave UI"
       com.platys.webui.url: "http://dataplatform:5691"
+      com.platys.password.envvars: "PLATYS_RISINGWAVE_DATABASE_PASSWORD"
     depends_on:
       - minio-1
     expose:
@@ -2507,8 +2508,10 @@ services:
                       --backend sql \
     {%- if RISINGWAVE_db_type | lower == 'sqlite' | default(false) %}
                       --sql-endpoint sqlite:///tmp/metadata.db?mode=rwc \
-    {%- else %}      
-                      --sql-endpoint postgres://{{RISINGWAVE_db_username}}:${PLATYS_POSTGRESQL_PASSWORD:-{{POSTGRESQL_password | default('abc123!') }}}@postgresql:5432/{{RISINGWAVE_db_database}} \
+    {%- elif RISINGWAVE_db_type | lower == 'postgresql' | default(false) %}      
+                      --sql-endpoint postgres://{{RISINGWAVE_db_username}}:${PLATYS_RISINGWAVE_DATABASE_PASSWORD:-{{RISINGWAVE_db_password | default('abc123!') }}}@postgresql:5432/{{RISINGWAVE_db_database}} \
+    {%- elif RISINGWAVE_db_type | lower == 'mysql' | default(false) %}      
+                      --sql-endpoint mysql://{{RISINGWAVE_db_username}}:${PLATYS_RISINGWAVE_DATABASE_PASSWORD:-{{RISINGWAVE_db_password | default('abc123!') }}}@mysql:3306/{{RISINGWAVE_db_database}} \
     {% endif %}      
                       --state-store hummock+s3://{{RISINGWAVE_s3_bucket_name}} \
                       --data-directory platys_001 \
@@ -2555,9 +2558,9 @@ services:
         - bash -c 'printf \"GET / HTTP/1.1\n\n\" > /dev/tcp/127.0.0.1/5690; exit $$?;'
       interval: 1s
       timeout: 5s
-  {% endif %}  {#  RISINGWAVE_edition == 'standalone' #}
+  {% endif %}  {#  RISINGWAVE_flavor == 'standalone' #}
 
-  {% if RISINGWAVE_edition == 'cluster' | default(false) %}
+  {% if RISINGWAVE_flavor == 'cluster' | default(false) %}
   risingwave-compactor-1:
     image: risingwavelabs/risingwave:{{__RISINGWAVE_version}}
     hostname: risingwave-compactor-1
@@ -2747,7 +2750,7 @@ services:
         - bash -c 'printf \"GET / HTTP/1.1\n\n\" > /dev/tcp/127.0.0.1/5690; exit $$?;'
       interval: 1s
       timeout: 5s
-  {% endif %}  {#  RISINGWAVE_edition == 'cluster' #}
+  {% endif %}  {#  RISINGWAVE_flavor == 'cluster' #}
 {% endif %}   {#  RISINGWAVE_enable #}
 
 {% if TIMEPLUS_enable | default(false) %}
