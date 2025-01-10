@@ -2504,7 +2504,9 @@ services:
                       --advertise-addr 0.0.0.0:5690 \
                       --dashboard-host 0.0.0.0:5691 \
                       --prometheus-host 0.0.0.0:1250 \
+    {%- if PROMETHEUS_enable | default(false) %}
                       --prometheus-endpoint http://prometheus-1:9090 \
+    {% endif %}      
                       --backend sql \
     {%- if RISINGWAVE_meta_store_type | lower == 'sqlite' | default(false) %}
                       --sql-endpoint sqlite:///tmp/metadata.db?mode=rwc \
@@ -2651,7 +2653,7 @@ services:
     command:
       - compute-node
       - "--listen-addr=0.0.0.0:5688"
-      - "--advertise-addr=risingwave-compute-1:5688"
+      - "--advertise-addr=risingwave-compute-1:5688"      
       - "--prometheus-listener-addr=0.0.0.0:1222"
       - "--meta-address=http://risingwave-meta-1:5690"
       - "--config-path=/risingwave.toml"
@@ -2756,6 +2758,10 @@ services:
       - "--advertise-addr=risingwave-meta-1:5690"
       - "--dashboard-host=0.0.0.0:5691"
       - "--prometheus-host=0.0.0.0:1250"
+    {%- if PROMETHEUS_enable | default(false) %}
+      - "--prometheus-endpoint"
+      - "http://prometheus-1:9090"      
+    {% endif %}      
       - "--backend"      
       - "sql"
       - "--sql-endpoint"
