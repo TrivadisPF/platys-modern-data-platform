@@ -2921,18 +2921,14 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
     command:
-      # In the command section, $ are replaced with $$ to avoid the error 'Invalid interpolation format for "command" option'
-      - sh
-      - -c
-      - |    
-    {% if SQL_FLOW_scripts is defined and SQL_FLOW_scripts and SQL_FLOW_scripts | length | default(false) -%}
-        run 
+    {%- if SQL_FLOW_scripts is defined and SQL_FLOW_scripts and SQL_FLOW_scripts | length | default(false) -%}
+        {{" "}}bash -c "run 
       {%- for script in SQL_FLOW_scripts.split(",") -%}
-        {{" "}}/tmp/scripts/{{script}}
+        {{" "}}/tmp/scripts/{{script}}{% if loop.last %}"{% endif %}
       {%- endfor %}
     {% else -%}
-        sleep infinity     
-    {% endif -%}   {#  SQL_FLOW_scripts #}    
+        {{" "}}bash -c "sleep infinity"   
+    {% endif -%}   {#  SQL_FLOW_scripts #}        
     restart: {{container_restart_policy}}
 {% endif %}  {#  SQL_FLOW_enable #}
 
