@@ -2925,12 +2925,14 @@ services:
       - sh
       - -c
       - |    
-      run \
-    {% if SQL_FLOW_scripts is defined and SQL_FLOW_scripts and SQL_FLOW_scripts | length | default(false) %}
-      {% for script in SQL_FLOW_scripts.split(",") %}
-      /tmp/scripts/{{script}} {% if not loop.last %}\{% endif %}
-      {% endfor %}
-    {% endif -%}   {#  SQL_FLOW_scripts #}      
+    {% if SQL_FLOW_scripts is defined and SQL_FLOW_scripts and SQL_FLOW_scripts | length | default(false) -%}
+        run 
+      {%- for script in SQL_FLOW_scripts.split(",") -%}
+        {{" "}}/tmp/scripts/{{script}}
+      {%- endfor %}
+    {% else -%}
+        sleep infinity     
+    {% endif -%}   {#  SQL_FLOW_scripts #}    
     restart: {{container_restart_policy}}
 {% endif %}  {#  SQL_FLOW_enable #}
 
