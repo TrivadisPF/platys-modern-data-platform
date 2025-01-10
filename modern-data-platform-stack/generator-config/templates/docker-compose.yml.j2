@@ -2903,8 +2903,12 @@ services:
     labels:
       com.platys.name: "sql-flow"
       com.platys.description: "SQLFlow Streaming DB"
-    {%if use_timezone | default(false) %}
     environment:
+      - SQLFLOW_LOG_LEVEL=INFO
+    {%if KAFKA_enable or external['KAFKA_enable'] | default(false) %}
+      - SQLFLOW_KAFKA_BOOTSTRAP_SERVERS='{{ns.bootstrapServers}}'
+    {% endif -%}   {#  KAFKA_enable #}
+    {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
@@ -2920,15 +2924,11 @@ services:
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
-    command:
     {%- if SQL_FLOW_scripts is defined and SQL_FLOW_scripts and SQL_FLOW_scripts | length | default(false) -%}
-        {{" "}}bash -c "run 
+    command: run 
       {%- for script in SQL_FLOW_scripts.split(",") -%}
         {{" "}}/tmp/scripts/{{script}}{% if loop.last %}"{% endif %}
-      {%- endfor %}
-    {% else -%}
-        {{" "}}bash -c "sleep infinity"   
-    {% endif -%}   {#  SQL_FLOW_scripts #}        
+      {%- endfor %}      
     restart: {{container_restart_policy}}
 {% endif %}  {#  SQL_FLOW_enable #}
 
