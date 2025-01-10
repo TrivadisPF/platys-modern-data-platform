@@ -28,7 +28,8 @@ networks:
 {% set __HSTREAMDB_version = HSTREAMDB_version | default('latest') -%}
 {% set __BENTHOS_version = BENTHOS_version | default('latest') -%}
 {% set __RISINGWAVE_version = RISINGWAVE_version | default('latest') -%}
-{% set __PROTON_version = PROTON_version | default('latest') -%}
+{% set __TIMEPLUS_ENTERPRISE_version = TIMEPLUS_ENTERPRISE_version | default('latest') -%}
+{% set __TIMEPLUS_PROTON_version = TIMEPLUS_PROTON_version | default('latest') -%}
 {% set __ARROYO_version = ARROYO_version | default('latest') -%}
 
 {% set __SCHEMA_REGISTRY_UI_version = SCHEMA_REGISTRY_UI_version | default('latest') -%}
@@ -723,7 +724,7 @@ networks:
   {% set HSTREAMDB_enable = false -%}
   {% set BENTHOS_enable = false -%}
   {% set RISINGWAVE_enable = false -%}
-  {% set PROTON_enable = false -%}
+  {% set TIMEPLUS_enable = false -%}
   {% set ARROYO_enable = false -%}
   {% set KAFKA_REPLICATOR_enable = false -%}
   {% set KAFKA_MM2_enable = false -%}
@@ -2749,18 +2750,29 @@ services:
   {% endif %}  {#  RISINGWAVE_edition == 'cluster' #}
 {% endif %}   {#  RISINGWAVE_enable #}
 
-{% if PROTON_enable | default(false) %}
-  #  ================================== Timeplus Proton ========================================== #
-  proton-server:
-    image: d.timeplus.com/timeplus-io/proton:{{__PROTON_version}}
-    hostname: proton-server
-    container_name: proton-server
+{% if TIMEPLUS_enable | default(false) %}
+  #  ================================== Timeplus OSS (Proton) or Enterprise ========================================== #
+  timeplus-server:
+  {% if (TIMEPLUS_edition | lower) == 'enterprise'  %}
+    image: timeplus/timeplus-enterprise:{{__TIMEPLUS_ENTERPRISE_version}}
+  {% elif (TIMEPLUS_edition | lower) == 'oss' %}
+    image: d.timeplus.com/timeplus-io/proton:{{__TIMEPLUS_PROTON_version}}
+  {% endif -%}   {#  TIMEPLUS_edition #}    
+    hostname: timeplus-server
+    container_name: timeplus-server
     cap_add:
       - SYS_PTRACE    
     labels:
-      com.platys.name: "proton"
-      com.platys.description: "Proton Streaming DB"
+      com.platys.name: "timeplus"
+      com.platys.description: "Timeplus Streaming DB"
+  {% if (TIMEPLUS_edition | lower) == 'enterprise'  %}
+      com.platys.webui.title: "Timeplus UI"
+      com.platys.webui.url: "http://dataplatform:28421"  
+  {% endif -%}   {#  TIMEPLUS_edition #}    
     ports:
+  {% if (TIMEPLUS_edition | lower) == 'enterprise'  %}
+      - "28421:8000" # App (only for Enterprise)
+  {% endif -%}   {#  TIMEPLUS_edition #}    
       - "8463:8463" # TCP (Streaming)
       - "8123:8123" # HTTP (Batch)
       - "3218:3218" # HTTP (Streaming)
@@ -2768,6 +2780,10 @@ services:
       - "5440:5432" # Postgres (Batch)    
       - "9363:9363" # Prometheus Metrics  
     environment:
+  {% if (TIMEPLUS_edition | lower) == 'enterprise'  %}
+      - ENABLE_AUTHENTICATION=true
+      - TIMEPLUSD_ADMIN_PASSWORD=abc123!    
+  {% endif -%}   {#  TIMEPLUS_edition #}    
       - STREAM_STORAGE_BROKERS={{ns.bootstrapServers}}
       - STREAM_STORAGE_QUEUE_BUFFERING_MAX_MS=50 # Control producer latency
       - STREAM_STORAGE_FETCH_WAIT_MAX_MS=500 # Control consumer latency
@@ -2790,7 +2806,13 @@ services:
     command: >
       /bin/bash -c "sleep 2; /entrypoint.sh"    
     restart: {{container_restart_policy}}
-{% endif %}  {#  PROTON_enable #}
+    healthcheck:
+      test: ["CMD", "curl", "http://localhost:3218/timeplusd/ping"]
+      interval: 2s
+      timeout: 10s
+      retries: 3
+      start_period: 10s    
+{% endif %}  {#  TIMEPLUS_enable #}
 
 {% if ARROYO_enable | default(false) %}
   #  ================================== Arroyo ========================================== #

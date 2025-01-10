@@ -1,4 +1,4 @@
-# Proton
+# Timeplus
 
 High-performance, low-footprint SQL database written in C++. Process millions of rows per second from Kafka, Pulsar, or ClickHouse, and seamlessly write results back. Supports powerful features like JOIN, CDC, UPSERT, and LOOKUP, enabling real-time analytics and ETL at scale. 
 
@@ -7,10 +7,10 @@ High-performance, low-footprint SQL database written in C++. Process millions of
 ## How to enable?
 
 ```
-platys init --enable-services PROTON
+platys init --enable-services TIMEPLUS
 platys gen
 ```
 
 ## How to use it?
 
-Navigate to <http://dataplatform:8123>.
+
