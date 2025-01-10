@@ -30,12 +30,12 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Data Mesh Manager (CE)
  * Glances
  * Starrocks
- * CrewAI Studio <--
+ * CrewAI Studio 
  * Jikkou Server
  * SearXNG
  * Draw.io
  * Unity Catalog & Unity Catalog UI
- * RAGFlow
+ * RAGFlow 
  * Valkey
  * Authelia
  * Infinity
@@ -51,7 +51,7 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Agent Zero
  * Data Product Portal
  * Mage AI
- * Proton
+ * Timeplus
 
 ### New/Updated Cookbook Recipes
 
