@@ -732,6 +732,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28419 | 8080 | data-product-portal-nginx |
 28420 | 8080 | sftpgo (webui) |
 28421 | 8000 | timeplus (enterprise) |
+28242 | 3000 | openlit |
 
 ## Ports > 28500
 

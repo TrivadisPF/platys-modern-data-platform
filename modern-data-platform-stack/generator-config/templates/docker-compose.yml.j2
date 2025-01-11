@@ -301,6 +301,7 @@ networks:
 {% set __FLOWISE_version = FLOWISE_version | default('latest') -%}
 {% set __LANGFLOW_version = LANGFLOW_version | default('latest') -%}
 {% set __LANGFUSE_version = LANGFUSE_version | default('latest') -%}
+{% set __OPENLIT_version = OPENLIT_version | default('latest') -%}
 {% set __LANGWATCH_version = LANGWATCH_version | default('latest') -%}
 {% set __LANGEVALS_version = LANGEVALS_version | default('latest') -%}
 
@@ -813,6 +814,7 @@ networks:
   {% set FLOWISE_enable = false -%}
   {% set LANGFLOW_enable = false -%}
   {% set LANGFUSE_enable = false -%}  
+  {% set OPENLIT_enable = false -%}  
   {% set LANGWATCH_enable = false -%}   
   {% set LANGEVALS_enable = false -%} 
   {% set GPT_RESEARCHER_enable = false -%}
@@ -2928,7 +2930,7 @@ services:
     {%- if SQL_FLOW_scripts is defined and SQL_FLOW_scripts and SQL_FLOW_scripts | length | default(false) -%}
     {{' '}}run 
       {%- for script in SQL_FLOW_scripts.split(",") -%}
-        {{" "}}/tmp/scripts/{{script}}{% if loop.last %}"{% endif %}
+        {{" "}}/tmp/scripts/{{script}}
       {%- endfor %}      
     {% endif -%}   {#  SQL_FLOW_scripts #}
     restart: {{container_restart_policy}}
@@ -13222,6 +13224,49 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
 {% endif %}   {# LANGFUSE_enable  #}
+
+{%if OPENLIT_enable | default(false) %}
+  #  ================================== OpenLIT  ========================================== #
+  openlit:
+    image: ghcr.io/openlit/openlit:{{__OPENLIT_version}}
+    container_name: openlit
+    hostname: openlit
+    labels:
+      com.platys.name: 'openlit'
+      com.platys.description: 'LLM engineering platform'
+      com.platys.webui.title: 'OpenLIT UI'
+      com.platys.webui.url: "http://dataplatform:28242"
+      com.platys.restapi.title: 'OpenLIT REST API'
+      com.platys.restapi.url: "http://dataplatform:28242/api/"
+    depends_on:
+      - clickhouse
+    ports:
+      - "28242:3000"
+    environment:
+      TELEMETRY_ENABLED: true
+      INIT_DB_HOST: clickhouse
+      INIT_DB_PORT: 8123
+      INIT_DB_DATABASE: openlit
+      INIT_DB_USERNAME: openlit
+      INIT_DB_PASSWORD: abc123!
+      SQLITE_DATABASE_URL: file:/app/client/data/data.db
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if OPENLIT_volume_map_data | default(false) %}  
+      - ./container-volume/openlit/data:/app/client/data
+    {% endif -%}   {#  OPENLIT_volume_map_data #}      
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+{% endif %}   {# OPENLIT_enable  #}
 
 {%if LANGWATCH_enable | default(false) %}
   #  ================================== LangWatch  ========================================== #
