@@ -1,0 +1,1 @@
+Contains the data of ClickHouse service, if flag CLICKHOUSE_volume_map_data is set to true.

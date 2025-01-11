@@ -409,6 +409,8 @@ networks:
 
 {% set __STARROCKS_version = STARROCKS_version | default('latest') -%}
 
+{% set __CLICKHOUSE_version = CLICKHOUSE_version | default('latest') -%}
+
 {% set __IGNITE_version = IGNITE_version | default('latest') -%}
 {% set __GRIDGAIN_CC_version = GRIDGAIN_CC_version | default('latest') -%}
 
@@ -857,6 +859,7 @@ networks:
   {% set DRUID_enable = false -%}
   {% set PINOT_enable = false -%}
   {% set STARROCKS_enable = false -%}
+  {% set CLICKHOUSE_password_enable = false -%}
   {% set IGNITE_enable = false -%}
   {% set JANUSGRAPH_enable = false -%}
   {% set INVANA_ENGINE_enable = false -%}
@@ -17671,8 +17674,43 @@ services:
         /opt/starrocks/cn/bin/start_cn.sh
     restart: {{container_restart_policy}}
   {% endif %}  {#  STARROCKS_edition == 'standalone' #}
-
 {% endif %}   {# STARROCKS_enable #}
+
+{% if CLICKHOUSE_enable | default(false) %}
+  #  ================================== ClickHouse ========================================== #
+  clickhouse:
+    image: clickhouse/clickhouse-server:{{__CLICKHOUSE_version}}
+    hostname: clickhouse
+    container_name: clickhouse
+    labels:
+      com.platys.name: "clickhouse"
+      com.platys.description: "Real-time analytics database"
+      com.platys.password.envvars: "PLATYS_CLICKHOUSE_PASSWORD"      
+    ports:
+      - "28243:8123"       
+      - "28244:9000" 
+    environment:
+      - CLICKHOUSE_DB={{CLICKHOUSE_db}}
+      - CLICKHOUSE_USER={{CLICKHOUSE_username}}
+      - CLICKHOUSE_PASSWORD=${PLATYS_CLICKHOUSE_PASSWORD:-{{CLICKHOUSE_password}}}
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./init/clickhouse:/docker-entrypoint-initdb.d      
+    {%if CLICKHOUSE_volume_map_data | default(false) %}  
+      - ./container-volume/clickhouse/data:/var/lib/clickhouse
+    {% endif -%}   {#  CLICKHOUSE_volume_map_data #}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+{% endif %}  {#  CLICKHOUSE_enable #}
 
 {% if IGNITE_enable | default(false) %}
   #  ================================== Apache Ignite ========================================== #

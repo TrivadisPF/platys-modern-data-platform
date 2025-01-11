@@ -733,6 +733,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28420 | 8080 | sftpgo (webui) |
 28421 | 8000 | timeplus (enterprise) |
 28242 | 3000 | openlit |
+28243 | 8123 | clickhouse |
+28244 | 9000 | clickhouse |
 
 ## Ports > 28500
 
