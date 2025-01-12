@@ -11970,24 +11970,7 @@ services:
     ports:
       - "28245:8080"      
       - "28246:8081"      
-    environment:
-      STORAGE_TYPE: {{KESTRA_storage_type}}
-  {%if KESTRA_storage_type == 'local' %}
-      STORAGE_LOCAL_BASEPATH: "/app/storage" 
-  {%elif KESTRA_storage_type == 's3' and external['S3_enable'] | default(false) %}
-      STORAGE_S3_REGION: {{s3DefaultRegion if s3DefaultRegion is defined and s3DefaultRegion else omit}} 
-      STORAGE_S3_ACCESS_KEY: {{KESTRA_bucket_name}}
-      STORAGE_S3_SECRET_KEY: ${PLATYS_AWS_SECRET_ACCESS_KEY:-{{MINIO_secret_key}}}
-      STORAGE_S3_BUCKET: {{KESTRA_bucket_name}}
-  {%elif KESTRA_storage_type == 'minio' and MINIO_enable | default(false) %}
-      STORAGE_MINIO_ENDPOINT: "{{minioEndpoint | default(omit) }}"
-      STORAGE_MINIO_PORT: 9000
-      STORAGE_MINIO_ACCESS_KEY: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
-      STORAGE_MINIO_SECRET_KEY: ${PLATYS_AWS_SECRET_ACCESS_KEY:-{{MINIO_secret_key}}}
-      STORAGE_MINIO_REGION: {{s3DefaultRegion if s3DefaultRegion is defined and s3DefaultRegion else omit}}
-      STORAGE_MINIO_BUCKET: {{KESTRA_bucket_name}}
-      # STORAGE_MINIO_PARTSIZE: 
-  {% endif -%}   {#  KESTRA_storage_type #}      
+    environment:  
       KESTRA_CONFIGURATION: |
         datasources:
           postgres:
@@ -12003,6 +11986,21 @@ services:
               password: ${PLATYS_KESTRA_PASSWORD:-{{KESTRA_password}}}
           repository:
             type: {{KESTRA_database_type}}
+          storage:
+            type: {{KESTRA_storage_type}}            
+  {%if KESTRA_storage_type == 'local' %}
+            local:
+              basePath: "/app/storage"
+  {% endif -%}   {#  KESTRA_storage_type = local #}            
+  {%if KESTRA_storage_type == 'minio' and MINIO_enable | default(false) %}
+            minio:
+              endpoint: "{{minioEndpoint | default(omit) }}"
+              port: 9000
+              accessKey: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
+              secretKey: ${PLATYS_AWS_SECRET_ACCESS_KEY:-{{MINIO_secret_key}}}
+              region: {{s3DefaultRegion if s3DefaultRegion is defined and s3DefaultRegion else omit}}
+              bucket: {{KESTRA_bucket_name}}
+  {% endif -%}   {#  KESTRA_storage_type = 'minio' #}      
           queue:
             type: {{KESTRA_database_type}}
           tasks:
