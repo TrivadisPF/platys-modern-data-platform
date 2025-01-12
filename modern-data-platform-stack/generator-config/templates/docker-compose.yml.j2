@@ -11963,6 +11963,7 @@ services:
       com.platys.description: "Orchestration Engine"
       com.platys.webui.title: "Kestra UI"
       com.platys.webui.url: "http://dataplatform:28245"
+      com.platys.password.envvars: "PLATYS_KESTRA_PASSWORD"
     depends_on:
       postgresql:
         condition: service_started    
@@ -11970,6 +11971,23 @@ services:
       - "28245:8080"      
       - "28246:8081"      
     environment:
+      STORAGE_TYPE: {{KESTRA_storage_type}}
+  {%if KESTRA_storage_type == 'local' %}
+      STORAGE_LOCAL_BASEPATH: "/app/storage" 
+  {%elif KESTRA_storage_type == 's3' and external['S3_enable'] | default(false) %}
+      STORAGE_S3_REGION: {{s3DefaultRegion if s3DefaultRegion is defined and s3DefaultRegion else omit}} 
+      STORAGE_S3_ACCESS_KEY: {{KESTRA_bucket_name}}
+      STORAGE_S3_SECRET_KEY: ${PLATYS_AWS_SECRET_ACCESS_KEY:-{{MINIO_secret_key}}}
+      STORAGE_S3_BUCKET: {{KESTRA_bucket_name}}
+  {%elif KESTRA_storage_type == 'minio' and MINIO_enable | default(false) %}
+      STORAGE_MINIO_ENDPOINT: "{{minioEndpoint | default(omit) }}"
+      STORAGE_MINIO_PORT: 9000
+      STORAGE_MINIO_ACCESS_KEY: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
+      STORAGE_MINIO_SECRET_KEY: ${PLATYS_AWS_SECRET_ACCESS_KEY:-{{MINIO_secret_key}}}
+      STORAGE_MINIO_REGION: {{s3DefaultRegion if s3DefaultRegion is defined and s3DefaultRegion else omit}}
+      STORAGE_MINIO_BUCKET: {{KESTRA_bucket_name}}
+      # STORAGE_MINIO_PARTSIZE: 
+  {% endif -%}   {#  KESTRA_storage_type #}      
       KESTRA_CONFIGURATION: |
         datasources:
           postgres:
@@ -11980,13 +11998,13 @@ services:
         kestra:
           server:
             basicAuth:
-              enabled: false
-              username: "admin@kestra.io" # it must be a valid email address
-              password: kestra
+              enabled: {{KESTRA_auth_enabled | default(false)}}
+              username: {{KESTRA_username if KESTRA_username is defined and KESTRA_username and KESTRA_username | length else 'kestra'}} # it must be a valid email address
+              password: ${PLATYS_KESTRA_PASSWORD:-{{KESTRA_password}}}
           repository:
             type: {{KESTRA_database_type}}
           storage:
-            type: local
+            type: {{KESTRA_storage_type}}            
             local:
               basePath: "/app/storage"
           queue:
@@ -11994,14 +12012,23 @@ services:
           tasks:
             tmpDir:
               path: /tmp/kestra-wd/tmp
+          tutorialFlows:
+            enabled: {{KESTRA_provision_tutorial_flows | default(false)}}    
+          variables:
+            envVarsPrefix: KESTRA_    
+              globals:                  
           url: http://${PUBLIC_IP}:28245/
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
+    {% if KESTRA_volume_map_data | default(false) %}  
       - ./container-volume/kestra/data:/app/storage
+    {% endif %}  
+    {% if KESTRA_volume_map_temp | default(false) %}  
       - ./container-volume/kestra/tmp/kestra-wd:/tmp/kestra-wd
+    {% endif %}  
       - /var/run/docker.sock:/var/run/docker.sock
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
