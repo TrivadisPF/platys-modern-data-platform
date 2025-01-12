@@ -11963,6 +11963,8 @@ services:
       com.platys.description: "Orchestration Engine"
       com.platys.webui.title: "Kestra UI"
       com.platys.webui.url: "http://dataplatform:28245"
+      com.platys.restapi.title: Kestra UI
+      com.platys.restapi.url: http://dataplatform:28245/api/v1/usages/all      
       com.platys.password.envvars: "PLATYS_KESTRA_PASSWORD"
     depends_on:
       postgresql:
@@ -12035,8 +12037,14 @@ services:
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
-    command: server standalone
+    command: server standalone --worker-thread=40 --log-level=INFO --no-tutorials
     restart: {{container_restart_policy}}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s    
 {% endif %}   {#  KESTRA_enable  #}
 
 {%if OFELIA_enable | default(false) %}
