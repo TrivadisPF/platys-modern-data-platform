@@ -2767,19 +2767,16 @@ services:
       - "--prometheus-endpoint"
       - "http://prometheus-1:9090"      
     {% endif %}      
-      - "--backend"      
-      - "sql"
-      - "--sql-endpoint"
+      - "--backend=sql"      
     {%- if RISINGWAVE_meta_store_type | lower == 'sqlite' | default(false) %}
-      - "sqlite:///tmp/metadata.db?mode=rwc"
+      - "--sql-endpoint=sqlite:///tmp/metadata.db?mode=rwc"
     {%- elif RISINGWAVE_meta_store_type | lower == 'postgresql' | default(false) %}      
-      - "postgres://{{RISINGWAVE_meta_store_username}}:${PLATYS_RISINGWAVE_DATABASE_PASSWORD:-{{RISINGWAVE_meta_store_password | default('abc123!') }}}@postgresql:5432/{{RISINGWAVE_meta_store_database}}"
+      - "--sql-endpoint=postgres://{{RISINGWAVE_meta_store_username}}:${PLATYS_RISINGWAVE_DATABASE_PASSWORD:-{{RISINGWAVE_meta_store_password | default('abc123!') }}}@postgresql:5432/{{RISINGWAVE_meta_store_database}}"
     {%- elif RISINGWAVE_meta_store_type | lower == 'mysql' | default(false) %}      
-      - "mysql://{{RISINGWAVE_meta_store_username}}:${PLATYS_RISINGWAVE_DATABASE_PASSWORD:-{{RISINGWAVE_meta_store_password | default('abc123!') }}}@mysql:3306/{{RISINGWAVE_meta_store_database}}"
+      - "--sql-endpoint=mysql://{{RISINGWAVE_meta_store_username}}:${PLATYS_RISINGWAVE_DATABASE_PASSWORD:-{{RISINGWAVE_meta_store_password | default('abc123!') }}}@mysql:3306/{{RISINGWAVE_meta_store_database}}"
     {% endif %}      
-      - "--state-store" 
-    {%- if RISINGWAVE_state_store_type | lower == 's3' | default(false) %}
-      - "hummock+s3://{{RISINGWAVE_s3_bucket_name}}"
+    {%if- RISINGWAVE_state_store_type | lower == 's3' | default(false) %}
+      - "--state-store=hummock+s3://{{RISINGWAVE_s3_bucket_name}}"
     {% endif %}            
       - "--data-directory={{RISINGWAVE_data_directory}}"
       - "--config-path=/risingwave.toml"
