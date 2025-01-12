@@ -31,7 +31,7 @@ networks:
 {% set __TIMEPLUS_ENTERPRISE_version = TIMEPLUS_ENTERPRISE_version | default('latest') -%}
 {% set __TIMEPLUS_PROTON_version = TIMEPLUS_PROTON_version | default('latest') -%}
 {% set __ARROYO_version = ARROYO_version | default('latest') -%}
-{% set __SQL_FLOW_version = SQL_FLOW_version | default('latest') -%}
+{% set __SQLFLOW_version = SQLFLOW_version | default('latest') -%}
 
 {% set __SCHEMA_REGISTRY_UI_version = SCHEMA_REGISTRY_UI_version | default('latest') -%}
 
@@ -730,7 +730,7 @@ networks:
   {% set RISINGWAVE_enable = false -%}
   {% set TIMEPLUS_enable = false -%}
   {% set ARROYO_enable = false -%}
-  {% set SQL_FLOW_enable = false -%}
+  {% set SQLFLOW_enable = false -%}
   {% set KAFKA_REPLICATOR_enable = false -%}
   {% set KAFKA_MM2_enable = false -%}
   {% set LENSES_BOX_enable = false -%}
@@ -2899,14 +2899,14 @@ services:
       start_period: 5s
 {% endif %}  {#  ARROYO_enable #}
 
-{% if SQL_FLOW_enable | default(false) %}
+{% if SQLFLOW_enable | default(false) %}
   #  ================================== SqlFlow ========================================== #
-  sql-flow:
-    image: turbolytics/sql-flow:{{__SQL_FLOW_version}}
-    hostname: sql-flow
-    container_name: sql-flow
+  sqlflow:
+    image: turbolytics/sqlflow:{{__SQLFLOW_version}}
+    hostname: sqlflow
+    container_name: sqlflow
     labels:
-      com.platys.name: "sql-flow"
+      com.platys.name: "sqlflow"
       com.platys.description: "SQLFlow Streaming DB"
     environment:
       - SQLFLOW_LOG_LEVEL=INFO
@@ -2919,9 +2919,9 @@ services:
     volumes:
       - ./data-transfer:/data-transfer
       - ./scripts/sqlflow:/tmp/scripts
-    {%if SQL_FLOW_volume_map_data | default(false) %}  
+    {%if SQLFLOW_volume_map_data | default(false) %}  
       - ./container-volume/sqlflow:/tmp/sqlflow
-    {% endif -%}   {#  SQL_FLOW_volume_map_data #}
+    {% endif -%}   {#  SQLFLOW_volume_map_data #}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -2930,14 +2930,14 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
     command: 
-    {%- if SQL_FLOW_scripts is defined and SQL_FLOW_scripts and SQL_FLOW_scripts | length | default(false) -%}
+    {%- if SQLFLOW_scripts is defined and SQLFLOW_scripts and SQLFLOW_scripts | length | default(false) -%}
     {{' '}}run 
-      {%- for script in SQL_FLOW_scripts.split(",") -%}
+      {%- for script in SQLFLOW_scripts.split(",") -%}
         {{" "}}/tmp/scripts/{{script}}
       {%- endfor %}      
-    {% endif -%}   {#  SQL_FLOW_scripts #}
+    {% endif -%}   {#  SQLFLOW_scripts #}
     restart: {{container_restart_policy}}
-{% endif %}  {#  SQL_FLOW_enable #}
+{% endif %}  {#  SQLFLOW_enable #}
 
 {% if ((KAFKA_enable or external['KAFKA_enable']) and KAFKA_RESTPROXY_enable) | default(false) %}
   #  ================================== Confluent REST Proxy ========================================== #
