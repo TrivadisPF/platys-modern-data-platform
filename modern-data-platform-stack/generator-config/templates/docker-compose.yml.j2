@@ -11970,7 +11970,7 @@ services:
     ports:
       - "28245:8080"      
       - "28246:8081"      
-    environment:  
+    environment:
       KESTRA_CONFIGURATION: |
         datasources:
           postgres:
@@ -12012,6 +12012,11 @@ services:
             envVarsPrefix: KESTRA_    
               globals:                  
           url: http://${PUBLIC_IP}:28245/
+    {% if KESTRA_environment is defined and KESTRA_environment and KESTRA_environment | length | default(false) %}
+      {% for envvar in KESTRA_environment.split(",") %}
+      {{"KESTRA_"}}{{envvar.split('=')[0]}}: "{{envvar.split('=')[1]}}"
+      {% endfor %}
+    {% endif -%}   {#  KESTRA_environment #}        
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
