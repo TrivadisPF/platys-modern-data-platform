@@ -236,6 +236,8 @@ networks:
 
 {% set __MAGE_AI_version = MAGE_AI_version | default('latest') -%}
 
+{% set __KESTRA_version = KESTRA_version | default('latest') -%}
+
 {% set __OFELIA_version = OFELIA_version | default('latest') -%}
 
 {%if (JUPYTER_edition | lower) == 'minimal' | default(false) %}
@@ -795,6 +797,7 @@ networks:
   {% set AIRBYTE_enable = false -%}
   {% set AIRFLOW_enable = false -%}
   {% set MAGE_AI_enable = false -%}
+  {% set KESTRA_enable = false -%}
   {% set ZEPPELIN_enable = false -%}
   {% set JUPYTER_enable = false -%}
   {% set JUPYTERHUB_enable = false -%}
@@ -11948,6 +11951,68 @@ services:
     command: mage start {{MAGE_AI_project_name}}
     restart: {{container_restart_policy}}
 {% endif %}   {#  MAGE_AI_enable  #}
+
+{%if KESTRA_enable | default(false) %}
+  #  ================================== Kestra ========================================== #
+  kestra:
+    image: kestra/kestra:{{__KESTRA_version}}
+    container_name: kestra
+    hostname: kestra
+    labels:
+      com.platys.name: 'kestra'
+      com.platys.description: "Orchestration Engine"
+      com.platys.webui.title: "Kestra UI"
+      com.platys.webui.url: "http://dataplatform:28245"
+    depends_on:
+      postgres:
+        condition: service_started    
+    ports:
+      - "28245:8080"      
+      - "28246:8081"      
+    environment:
+      KESTRA_CONFIGURATION: |
+        datasources:
+          postgres:
+            url: jdbc:postgresql://postgres:5432/kestra
+            driverClassName: org.postgresql.Driver
+            username: kestra
+            password: k3str4
+        kestra:
+          server:
+            basicAuth:
+              enabled: false
+              username: "admin@kestra.io" # it must be a valid email address
+              password: kestra
+          repository:
+            type: postgres
+          storage:
+            type: local
+            local:
+              basePath: "/app/storage"
+          queue:
+            type: postgres
+          tasks:
+            tmpDir:
+              path: /tmp/kestra-wd/tmp
+          url: http://${PUBLIC_IP}:28245/
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./container-volume/kestra/data:/app/storage
+      - ./container-volume/kestra/tmp/kestra-wd:/tmp/kestra-wd
+      - /var/run/docker.sock:/var/run/docker.sock
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    command: server standalone
+    restart: {{container_restart_policy}}
+{% endif %}   {#  KESTRA_enable  #}
 
 {%if OFELIA_enable | default(false) %}
   #  ================================== Ofelia ========================================== #

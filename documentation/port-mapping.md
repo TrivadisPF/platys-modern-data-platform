@@ -735,6 +735,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28242 | 3000 | openlit |
 28243 | 8123 | clickhouse |
 28244 | 9000 | clickhouse |
+28245 | 8080 | kestra |
+28246 | 8081 | kestra |
 
 ## Ports > 28500
 
