@@ -11991,26 +11991,31 @@ services:
     depends_on:
       postgresql:
         condition: service_started    
-{% endif -%}   {#  KESTRA_flavour  #}
+  {% endif -%}   {#  KESTRA_flavour  #}
     ports:
       - "28245:8080"      
       - "28246:8081"      
     environment:
       KESTRA_CONFIGURATION: |
+
         datasources:
+  {% if KESTRA_flavour | default('standalone') == 'standalone' %}
           postgres:
             url: jdbc:postgresql://postgresql:5432/{{KESTRA_database_name}}
             driverClassName: org.postgresql.Driver
             username: {{KESTRA_database_user}}
             password: {{KESTRA_database_password}}
+  {% endif -%}   {#  KESTRA_flavour  #}
         kestra:
           server:
             basicAuth:
               enabled: {{KESTRA_auth_enabled | default(false)}}
               username: {{KESTRA_username if KESTRA_username is defined and KESTRA_username and KESTRA_username | length else 'kestra'}} # it must be a valid email address
               password: ${PLATYS_KESTRA_PASSWORD:-{{KESTRA_password}}}
+  {% if KESTRA_flavour | default('standalone') == 'standalone' %}
           repository:
             type: {{KESTRA_database_type}}
+  {% endif -%}   {#  KESTRA_flavour  #}
           storage:
             type: {{KESTRA_storage_type}}            
   {%if KESTRA_storage_type == 'local' %}
