@@ -573,6 +573,7 @@ networks:
 {% set __DOCKER_EXEC_WEBCONSOLE_version = DOCKER_EXEC_WEBCONSOLE_version | default('latest') -%}
 {% set __RANCHER_version = RANCHER_version | default('latest') -%}
 {% set __CETUSGUARD_version = CETUSGUARD_version | default('latest') -%}
+{% set __NGROK_version = NGROK_version | default('latest') -%}
 {% set __CADVISOR_version = CADVISOR_version | default('latest') -%}
 {% set __GLANCES_version = GLANCES_version | default('latest') -%}
 {% set __DOCKER_REGISTRY_version = DOCKER_REGISTRY_version | default('latest') -%}
@@ -24814,6 +24815,47 @@ services:
     read_only: true
     restart: {{container_restart_policy}}
 {% endif %}   {# CETUSGUARD_enable #}
+
+{% if NGROK_enable | default(false) %}
+  #  ================================== ngrok ========================================== #
+  ngrok:
+    image: ngrok/ngrok:{{__NGROK_version}}
+    container_name: ngrok
+    hostname: ngrok
+    labels:
+      com.platys.name: "ngrok"
+      com.platys.description: "Globally distributed reverse proxy"
+      com.platys.webui.title: "ngrok UI"
+      com.platys.webui.url: "https://dataplatform:28247"
+      com.platys.password.envvars: "PLATYS_NGROK_AUTH_TOKEN"
+    ports:
+      - 28247:4040
+    environment:
+      NGROK_PORTS: {{NGROK_expose_ports}}
+      NGROK_AUTHTOKEN: ${PLATYS_NGROK_AUTH_TOKEN:-{{NGROK_auth_token}}}
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    command: >
+      sh -c 'printf "tunnels:\n" > /tmp/ngrok.yml && 
+      IFS="," read -ra PORT <<< "$NGROK_PORTS"; 
+      for port in "${PORT[@]}"; do 
+          printf "  app${port}:\n    proto: http\n    addr: host.docker.internal:%s\n" $port >> /tmp/ngrok.yml; 
+      done && 
+      cat /tmp/ngrok.yml && 
+      ngrok start --config /tmp/ngrok.yml --all'    
+    restart: {{container_restart_policy}}
+{% endif %}   {# NGROK_enable #}
 
 {% if CADVISOR_enable | default(false) %}
   #  ================================== cAdvisor ========================================== #

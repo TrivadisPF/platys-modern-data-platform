@@ -737,6 +737,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28244 | 9000 | clickhouse |
 28245 | 8080 | kestra |
 28246 | 8081 | kestra |
+28247 | 4040 | ngrok |
 
 ## Ports > 28500
 
