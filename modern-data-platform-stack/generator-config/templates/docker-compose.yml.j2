@@ -10241,6 +10241,12 @@ services:
       N8N_PERSONALIZATION_ENABLED: false
       N8N_AI_ENABLED: {{true if N8N_ai_enabled is defined and N8N_ai_enabled else omit}}
       OLLAMA_HOST: {{ns.ollamaUrl}}
+      EXECUTIONS_MODE: {{N8N_execution_mode | default('regular') }}
+    {% if (N8N_execution_mode | lower) == 'queue' %}
+      QUEUE_BULL_REDIS_HOST: n8n-redis
+      QUEUE_HEALTH_CHECK_ACTIVE: true
+      N8N_ENCRYPTION_KEY: {{N8N_encryption_key}}
+    {% endif -%}   {#  N8N_execution_mode #}
       DB_TYPE: '{{N8N_db_type | lower}}'
     {% if (N8N_db_type | lower) == 'sqlite' %}
       DB_SQLITE_VACUUM_ON_STARTUP: {{true if N8N_sqlite_vacum_on_startup_enabled is defined and N8N_sqlite_vacum_on_startup_enabled else omit}}
@@ -10290,6 +10296,112 @@ services:
       - {{'mysql' if (N8N_db_type | lower) == 'mysqldb' else omit }}    
     {% endif -%}   {#  N8N_db_type #}
     restart: {{container_restart_policy}}
+
+  {% if (N8N_execution_mode | lower) == 'queue' %}
+  {% for num in range(N8N_workers | default(0) ) %}
+  n8n-worker-{{loop.index}}:
+    image: docker.n8n.io/n8nio/n8n:{{__N8N_version}}
+    container_name: n8n-worker-{{loop.index}}
+    hostname: n8n-worker-{{loop.index}}
+    labels:
+      com.platys.name: "n8n-worker-{{loop.index}}"
+      com.platys.description: "Workflow automation tool (worker-{{loop.index}})"
+    ports:
+      - 5678:5678
+    extra_hosts:
+      - "host.docker.internal:host-gateway"      
+    environment:
+      N8N_USER_FOLDER: '/home/node/.n8n'
+      N8N_SECURE_COOKIE: false
+      N8N_PREVIEW_MODE: false
+      N8N_METRICS: false
+      N8N_DIAGNOSTICS_ENABLED: false
+      N8N_HIRING_BANNER_ENABLED: false
+      N8N_PUBLIC_API_SWAGGERUI_DISABLED: true
+      N8N_VERSION_NOTIFICATIONS_ENABLED: false
+      N8N_TEMPLATES_ENABLED: false
+      N8N_PERSONALIZATION_ENABLED: false
+      N8N_AI_ENABLED: {{true if N8N_ai_enabled is defined and N8N_ai_enabled else omit}}
+      OLLAMA_HOST: {{ns.ollamaUrl}}
+      EXECUTIONS_MODE: {{N8N_execution_mode | default('regular') }}
+    {% if (N8N_execution_mode | lower) == 'queue' %}
+      QUEUE_BULL_REDIS_HOST: n8n-redis
+      QUEUE_HEALTH_CHECK_ACTIVE: true
+      N8N_ENCRYPTION_KEY: {{N8N_encryption_key}}
+    {% endif -%}   {#  N8N_execution_mode #}
+      DB_TYPE: '{{N8N_db_type | lower}}'
+    {% if (N8N_db_type | lower) == 'sqlite' %}
+      DB_SQLITE_VACUUM_ON_STARTUP: {{true if N8N_sqlite_vacum_on_startup_enabled is defined and N8N_sqlite_vacum_on_startup_enabled else omit}}
+    {% elif (N8N_db_type | lower) == 'postgresdb' %}
+      DB_POSTGRESDB_DATABASE: {{N8N_postgres_dbname}}
+      DB_POSTGRESDB_HOST: postgresql
+      DB_POSTGRESDB_PORT: 5432
+      DB_POSTGRESDB_USER: {{N8N_postgres_user}}
+      DB_POSTGRESDB_PASSWORD: {{N8N_postgres_password}}
+      DB_POSTGRESDB_SCHEMA: {{N8N_postgres_schema}}
+    {% elif (N8N_db_type | lower) == 'mysqldb' %}
+      DB_MYSQLDB_DATABASE: {{N8N_mysql_dbname}}
+      DB_MYSQLDB_HOST: mysql
+      DB_MYSQLDB_PORT: 3306
+      DB_MYSQLDB_USER: {{N8N_mysql_user}}
+      DB_MYSQLDB_PASSWORD: {{N8N_mysql_password}}
+    {% endif -%}   {#  N8N_db_type #}
+      N8N_AVAILABLE_BINARY_DATA_MODES: {{N8N_available_binary_data_modes}}
+      N8N_DEFAULT_BINARY_DATA_MODE: {{N8N_default_binary_data_mode}}
+      N8N_BINARY_DATA_STORAGE_PATH: '/home/node/.n8n/binaryData'
+    {%if MINIO_enable or external['S3_enable'] | default(false) %}
+      N8N_EXTERNAL_STORAGE_S3_HOST: {{s3Endpoint | default(omit) }}
+      N8N_EXTERNAL_STORAGE_S3_BUCKET_NAME: {{N8N_s3_bucket_name}}
+      N8N_EXTERNAL_STORAGE_S3_BUCKET_REGION: {{s3DefaultRegion}}
+      N8N_EXTERNAL_STORAGE_S3_ACCESS_KEY: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
+      N8N_EXTERNAL_STORAGE_S3_ACCESS_SECRET: {{s3SecretAccessKey}}
+    {% endif %}    
+    {%if use_timezone | default(false) %}
+      GENERIC_TIMEZONE: {{use_timezone}}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if N8N_volume_map_data %}
+      - ./container-volume/n8n/data:/home/node/.n8n
+    {% endif -%}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    {% if (N8N_db_type | lower) == 'postgres' or (N8N_db_type | lower) == 'mysql' %}
+    links:
+      - {{'postgresql' if (N8N_db_type | lower) == 'postgresdb' else omit }}
+      - {{'mysql' if (N8N_db_type | lower) == 'mysqldb' else omit }}    
+    {% endif -%}   {#  N8N_db_type #}
+    command: worker
+    restart: {{container_restart_policy}}
+  {% endfor %}  
+
+  n8n-redis:
+    image: redis:6-alpine
+    container_name: n8n-redis
+    hostname: n8n-redis
+    labels:
+      com.platys.name: redis
+      com.platys.description: "Key-value store"
+    {%if use_timezone | default(false) %}
+    environment:
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}          
+    volumes:
+      - ./data-transfer:/data-transfer
+      - redis_storage:/data
+    restart: {{container_restart_policy}}
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 5s
+      retries: 10    
+  {% endif -%}   {#  N8N_execution_mode #}
 {% endif %}   {#  N8N_enable  #}
 
 {%if STREAMPIPES_enable | default(false) %}
