@@ -24847,14 +24847,21 @@ services:
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
-    command: >
-      sh -c 'printf "tunnels:\n" > /tmp/ngrok.yml && 
-      IFS="," read -ra PORT <<< "$$NGROK_PORTS"; 
-      for port in "$${PORT[@]}"; do 
-          printf "  app${port}:\n    proto: http\n    addr: host.docker.internal:%s\n" $port >> /tmp/ngrok.yml; 
-      done && 
-      cat /tmp/ngrok.yml && 
-      ngrok start --config /tmp/ngrok.yml --all'    
+    {% if NGROK_expose_ports is defined and NGROK_expose_ports and NGROK_expose_ports | length %}
+    entrypoint:
+      # In the command section, $ are replaced with $$ to avoid the error 'Invalid interpolation format for "command" option'
+      - bash
+      - -c
+      - |
+        printf "version: 2\n\n" > /tmp/ngrok.yml
+        printf "tunnels:\n" >> /tmp/ngrok.yml
+        for port in $$(echo {{NGROK_expose_ports}} | sed "s/,/ /g")
+        do
+          printf "  app-$${port}:\n    proto: http\n    addr: host.docker.internal: %s\n" $$port >> /tmp/ngrok.yml;
+        done
+        cat /tmp/ngrok.yml
+        ngrok start --config /tmp/ngrok.yml --all
+    {% endif -%}   {#  NGROK_expose_ports #}
     restart: {{container_restart_policy}}
 {% endif %}   {# NGROK_enable #}
 
