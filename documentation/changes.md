@@ -57,6 +57,7 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * ClickHouse
  * Kestra
  * ngrok
+ * Arize Phoenix
 
 ### New/Updated Cookbook Recipes
 

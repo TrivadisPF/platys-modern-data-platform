@@ -306,6 +306,7 @@ networks:
 {% set __OPENLIT_version = OPENLIT_version | default('latest') -%}
 {% set __LANGWATCH_version = LANGWATCH_version | default('latest') -%}
 {% set __LANGEVALS_version = LANGEVALS_version | default('latest') -%}
+{% set __ARIZE_PHOENIX_version = ARIZE_PHOENIX_version | default('latest') -%}
 
 {% set __GPT_RESEARCHER_version = GPT_RESEARCHER_version | default('latest') -%}
 
@@ -823,6 +824,7 @@ networks:
   {% set OPENLIT_enable = false -%}  
   {% set LANGWATCH_enable = false -%}   
   {% set LANGEVALS_enable = false -%} 
+  {% set ARIZE_PHOENIX_enable = false -%}  
   {% set GPT_RESEARCHER_enable = false -%}
   {% set VERBA_enable = false -%}
   {% set RAGFLOW_enable = false -%}
@@ -13753,6 +13755,37 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
 {% endif %}   {# LANGEVALS_enable  #}
+
+{%if ARIZE_PHOENIX_enable | default(false) %}
+  #  ================================== Arize Phoenix  ========================================== #
+  arize-phoenix:
+    image: arizephoenix/phoenix:{{__ARIZE_PHOENIX_version}}
+    container_name: arize-phoenix
+    hostname: arize-phoenix
+    labels:
+      com.platys.name: 'arize-phoenix'
+      com.platys.description: 'LLM engineering platform'
+      com.platys.webui.title: 'Airze Phoneix UI'
+      com.platys.webui.url: "http://dataplatform:6006"
+    ports:
+      - "6006:6006"
+      - "4318:4317"
+    environment:
+      PHOENIX_SQL_DATABASE_URL: postgresql://postgres:abc123!@postgresql:5432/postgres
+   {%if use_timezone | default(false) %} 
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+{% endif %}   {# ARIZE_PHOENIX_enable  #}
 
 {%if GPT_RESEARCHER_enable | default(false) %}
   #  ================================== GPT Researcher  ========================================== #

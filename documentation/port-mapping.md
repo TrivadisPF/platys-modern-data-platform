@@ -105,6 +105,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 4200 | 4200 | cribl-master |
 4222 | 4222 | nats-1 |
 4317 | 4317 | otel-collector |
+4318 | 4317 | arize-phoenix |
 4466 | 4466 | curity |
 4566 | 4566 | risingwave |
 5000 | 5000 | amundsenfrontend |
@@ -149,6 +150,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 5801 | 5800 | firefox |
 5820 | 5820 | stardog-1 |
 5900 | 5900 | filezilla |  
+6006 | 6006 | arize-phoenix |
 6060 | 6060 | zeppelin |
 6066 | 6066 | spark-master |
 6080 | 6080 | ranger-admin |
