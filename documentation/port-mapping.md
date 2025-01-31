@@ -323,6 +323,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 10099 | 10099 | kyuubi |
 11211 | 11211 | memcached |
 11212 | 11211 | ignite-1 |
+11235 | 11235 | crawl4ai |
 11434 | 11434 | ollama |
 11435 | 11434 | litellm |
 12222 | 2222 | risingwave |

@@ -111,6 +111,8 @@ networks:
 
 {% set __SEARXNG_version = SEARXNG_version | default('latest') -%}
 
+{% set __CRAWL4AI_version = CRAWL4AI_version | default('latest') -%}
+
 {% set __HIVE_version = HIVE_version | default('latest') -%}
 {% set __HIVE_version_suffix = HIVE_version_suffix | default('postgresql-metastore-s3') -%}
 {% set __HIVE_METASTORE_DB_version = HIVE_METASTORE_DB_version | default('latest') -%}
@@ -765,6 +767,7 @@ networks:
   {% set TIKA_enable = false -%}
   {% set NLM_INGESTOR_enable = false -%}
   {% set UNSTRUCTURED_enable = false -%}
+  {% set CRAWL4AI_enable = false -%}
   {% set HIVE_enable = false -%}
   {% set AVRO_TOOLS_enable = false -%}
   {% set OPENLDAP_enable = false -%}
@@ -6594,6 +6597,42 @@ services:
     restart: always
     command: valkey-server --save 30 1 --loglevel warning
 {% endif %}   {#  SEARXNG_enable #}
+
+{% if CRAWL4AI_enable | default(false) %}
+  #  ================================== Crawl4AI ========================================== #
+  crawl4ai:
+    image: unclecode/crawl4ai:{{__CRAWL4AI_version}}
+    container_name: crawl4ai
+    hostname: crawl4ai
+    labels:
+      com.platys.name: 'crawl4ai'
+      com.platys.description: "LLM Web Crawler & Scraper"
+      com.platys.restapi.title: "Crawl4ai API"
+      com.platys.restapi.url: "http://dataplatform:28389"
+    ports:
+      - "11235:11235"
+    environment:
+      CRAWL4AI_API_TOKEN: {{CRAWL4AI_api_token if CRAWL4AI_api_token is defined and CRAWL4AI_api_token and CRAWL4AI_api_token | length else omit }}
+      MAX_CONCURRENT_TASKS: 5
+      # LLM Provider Keys
+      OPENAI_API_KEY: {{CRAWL4AI_openai_api_key if CRAWL4AI_openai_api_key is defined and CRAWL4AI_openai_api_key and CRAWL4AI_openai_api_key | length else omit }}
+      ANTHROPIC_API_KEY:  {{CRAWL4AI_anthropic_api_key if CRAWL4AI_anthropic_api_key is defined and CRAWL4AI_anthropic_api_key and CRAWL4AI_anthropic_api_key | length else omit }}
+      GROQ_API_KEY:  {{CRAWL4AI_groq_api_key if CRAWL4AI_groq_api_key is defined and CRAWL4AI_groq_api_key and CRAWL4AI_groq_api_key | length else omit }}
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - /dev/shm:/dev/shm
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: always
+{% endif %}   {#  CRAWL4AI_enable #}
 
 {% if HIVE_SERVER_enable | default(false) %}
   #  ================================== Apache Hive Server ========================================== #
