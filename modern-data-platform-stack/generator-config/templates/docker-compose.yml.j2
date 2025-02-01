@@ -7451,6 +7451,7 @@ services:
     ports:
       - "28142:8080"
     environment:
+      - DATAHUB_SERVER_TYPE={{DATAHUB_server_type | default('quickstart') }}
       - DATAHUB_TELEMETRY_ENABLED={{DATAHUB_telemetry_enabled | default(false)}}
       - DATAHUB_UPGRADE_HISTORY_KAFKA_CONSUMER_GROUP_ID=generic-duhe-consumer-job-client-gms
       - EBEAN_DATASOURCE_DRIVER=com.mysql.jdbc.Driver
@@ -7492,6 +7493,7 @@ services:
         {% endif -%}   {#  KAFKA_ssl_client_authentication_enable #}
       {% endif -%}   {#  ns.securityProtocol #}
     {% endif -%}   {#  secureKafkaEnabled #}
+      - KAFKA_CONSUMER_STOP_ON_DESERIALIZATION_ERROR=true
       - KAFKA_SCHEMAREGISTRY_URL={{ns.schemaRegistryUrl}}
     {%if not DATAHUB_mae_consumer_standalone | default(true) %}
       - MAE_CONSUMER_ENABLED=true
@@ -7499,12 +7501,12 @@ services:
     {%if not DATAHUB_mce_consumer_standalone | default(true) %}
       - MCE_CONSUMER_ENABLED=true
     {% endif -%}   {#  not DATAHUB_mce_consumer_standalone #}
+      - METADATA_SERVICE_AUTH_ENABLED=false
+      - AUTH_POLICIES_ENABLED={{DATAHUB_auth_policies_enabled | lower | default(false)}}
       - PE_CONSUMER_ENABLED=true
       - UI_INGESTION_ENABLED={{DATAHUB_ui_ingestion_enabled | lower | default(false)}}
       - UI_INGESTION_DEFAULT_CLI_VERSION={{__DATAHUB_version}}
-      - AUTH_POLICIES_ENABLED={{DATAHUB_auth_policies_enabled | lower | default(false)}}
       - DATAHUB_ANALYTICS_ENABLED={{DATAHUB_analytics_enabled | lower | default(false)}}
-      - METADATA_SERVICE_AUTH_ENABLED=false
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -7531,6 +7533,8 @@ services:
       com.platys.name: "datahub"
       com.platys.description: "Datahub Data Catalog Action Service"
     environment:
+#      - ACTIONS_EXTRA_PACKAGES=
+#      - ACTIONS_CONFIG=    
       - DATAHUB_GMS_HOST=datahub-gms
       - DATAHUB_GMS_PORT=8080
       - DATAHUB_GMS_PROTOCOL=http
@@ -7557,8 +7561,6 @@ services:
       - METADATA_AUDIT_EVENT_NAME=MetadataAuditEvent_v4
       - METADATA_CHANGE_LOG_VERSIONED_TOPIC_NAME=MetadataChangeLog_Versioned_v1
       - SCHEMA_REGISTRY_URL=http://schema-registry-1:8081
-#      - ACTIONS_EXTRA_PACKAGES=
-#      - ACTIONS_CONFIG=
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -7808,6 +7810,12 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
+    healthcheck:
+      interval: 1s
+      retries: 5
+      start_period: 5s
+      test: wget http://datahub-neo4j:7474
+      timeout: 5s    
   {% endif -%}   {#  DATAHUB_graph_service_impl #}
 
   {%if DATAHUB_search_service_impl == 'elasticsearch' %}
@@ -7947,28 +7955,30 @@ services:
     depends_on:
       - datahub-mysql
     environment:
+      - BACKFILL_BROWSE_PATHS_V2=true
+      - DATAHUB_GMS_HOST=datahub-gms
+      - DATAHUB_GMS_PORT=8080       
+      - EBEAN_DATASOURCE_DRIVER=com.mysql.jdbc.Driver
+      - EBEAN_DATASOURCE_HOST=datahub-mysql:3306
       - EBEAN_DATASOURCE_USERNAME=datahub
       - EBEAN_DATASOURCE_PASSWORD=datahub
-      - EBEAN_DATASOURCE_HOST=datahub-mysql:3306
       - EBEAN_DATASOURCE_URL=jdbc:mysql://datahub-mysql:3306/datahub?verifyServerCertificate=false&useSSL=true&useUnicode=yes&characterEncoding=UTF-8&enabledTLSProtocols=TLSv1.2
-      - EBEAN_DATASOURCE_DRIVER=com.mysql.jdbc.Driver
-      - KAFKA_BOOTSTRAP_SERVER={{ns.bootstrapServers}}
-      - KAFKA_SCHEMAREGISTRY_URL={{ns.schemaRegistryUrl}}
       - ELASTICSEARCH_HOST={{'datahub-elasticsearch' if DATAHUB_search_service_impl == 'elasticsearch' else 'datahub-opensearch'}}
       - ELASTICSEARCH_PORT=9200
       - ELASTICSEARCH_INDEX_BUILDER_MAPPINGS_REINDEX=true
       - ELASTICSEARCH_INDEX_BUILDER_SETTINGS_REINDEX=true
       - ELASTICSEARCH_BUILD_INDICES_CLONE_INDICES=false
+      - ENTITY_REGISTRY_CONFIG_PATH=/datahub/datahub-gms/resources/entity-registry.yml
       - GRAPH_SERVICE_IMPL={{DATAHUB_graph_service_impl}}
+      - KAFKA_BOOTSTRAP_SERVER={{ns.bootstrapServers}}
+      - KAFKA_SCHEMAREGISTRY_URL={{ns.schemaRegistryUrl}}
     {%if (DATAHUB_graph_service_impl | lower) == 'neo4j'  | default(true) %}
       - NEO4J_HOST=datahub-neo4j:7474
       - NEO4J_URI=bolt://${PUBLIC_IP}:17688
       - NEO4J_USERNAME=neo4j
       - NEO4J_PASSWORD=abc123!
     {% endif -%}   {#  DATAHUB_graph_service_impl #}
-      - DATAHUB_GMS_HOST=datahub-gms
-      - DATAHUB_GMS_PORT=8080
-      - ENTITY_REGISTRY_CONFIG_PATH=/datahub/datahub-gms/resources/entity-registry.yml
+      - REPROCESS_DEFAULT_BROWSE_PATHS_V2=false
     command:
       - -u
       - SystemUpdate
