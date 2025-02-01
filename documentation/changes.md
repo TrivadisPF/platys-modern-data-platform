@@ -106,7 +106,7 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Update `redis-stack` to `7.2.0-v10`
  * Update `stardog` to `latest`
  * Update `minio` to `RELEASE.2024-11-07T00-52-20Z`
- * Update `datahub` to `v0.14.1`
+ * Update `datahub` to `v1.0.0rc1`
  * Update `risingwave` to `v2.1.0`
  * Update `portainer` to `alpine-sts`
  * Update `flowise` to `2.2.4`
