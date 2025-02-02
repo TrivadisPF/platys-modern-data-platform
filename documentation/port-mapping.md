@@ -538,7 +538,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28214 | 8098 | pinot-server-3 |
 28220 | 8000 | lakefs |
 28221 | 5000 | lakefs-webhook |
-28222 | |  |
+28222 | 9000 | whisper |
 28223 | | |
 28224 | |  |
 28225 | |  |
@@ -741,6 +741,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28245 | 8080 | kestra |
 28246 | 8081 | kestra |
 28247 | 4040 | ngrok |
+
 
 ## Ports > 28500
 

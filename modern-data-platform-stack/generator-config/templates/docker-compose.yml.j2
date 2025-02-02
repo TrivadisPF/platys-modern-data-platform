@@ -113,6 +113,8 @@ networks:
 
 {% set __CRAWL4AI_version = CRAWL4AI_version | default('latest') -%}
 
+{% set __WHISPER_version = WHISPER_version | default('latest') -%}
+
 {% set __HIVE_version = HIVE_version | default('latest') -%}
 {% set __HIVE_version_suffix = HIVE_version_suffix | default('postgresql-metastore-s3') -%}
 {% set __HIVE_METASTORE_DB_version = HIVE_METASTORE_DB_version | default('latest') -%}
@@ -768,6 +770,7 @@ networks:
   {% set NLM_INGESTOR_enable = false -%}
   {% set UNSTRUCTURED_enable = false -%}
   {% set CRAWL4AI_enable = false -%}
+  {% set WHISPER_enable = false -%}
   {% set HIVE_enable = false -%}
   {% set AVRO_TOOLS_enable = false -%}
   {% set OPENLDAP_enable = false -%}
@@ -6633,6 +6636,44 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: always
 {% endif %}   {#  CRAWL4AI_enable #}
+
+{% if WHISPER_enable | default(false) %}
+  #  ================================== Whisper ========================================== #
+  whisper:
+    image: onerahmet/openai-whisper-asr-webservice:{{__WHISPER_version}}{{'-gpu' if WHISPER_gpu_enabled is defined and WHISPER_gpu_enabled }}
+    container_name: whisper
+    hostname: whisper
+    labels:
+      com.platys.name: 'whisper'
+      com.platys.description: "General-purpose speech recognition"
+      com.platys.restapi.title: "Whisper API"
+      com.platys.restapi.url: "http://dataplatform:28222"
+    {%if WHISPER_gpu_enabled | default(false) %}      
+    runtime: nvidia      
+    {% endif -%}   {#  WHISPER_gpu_enabled #}
+    ports:
+      - "28222:9000"
+    environment:
+      ASR_MODEL: {{WHISPER_model if WHISPER_model is defined and WHISPER_model and WHISPER_model | length else 'turbo'}}
+      ASR_ENGINE: {{WHISPER_engine if WHISPER_engine is defined and WHISPER_engine and WHISPER_engine | length else 'openai_whisper' }}
+      NVIDIA_VISIBLE_DEVICES: all  # Allows use of all available GPUs if uncommented (for GPU-enabled versions)
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if WHISPER_volume_map_data | default(false) %}  
+      - ./container-volume/whisper/model:/root/.cache/whisper    
+    {% endif -%}   {#  WHISPER_volume_map_data #}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: always
+{% endif %}   {#  WHISPER_enable #}
 
 {% if HIVE_SERVER_enable | default(false) %}
   #  ================================== Apache Hive Server ========================================== #
