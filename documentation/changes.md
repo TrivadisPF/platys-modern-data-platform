@@ -60,6 +60,7 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Arize Phoenix
  * Crawl4AI
  * Whisper
+ * Audio-Transcriber
 
 ### New/Updated Cookbook Recipes
 
