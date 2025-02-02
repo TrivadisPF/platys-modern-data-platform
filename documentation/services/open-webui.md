@@ -1,4 +1,4 @@
-# Ollama WebUI
+# Open WebUI
 
 User-friendly WebUI for LLMs (Formerly Ollama WebUI). 
 

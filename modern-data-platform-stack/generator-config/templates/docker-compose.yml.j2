@@ -284,7 +284,7 @@ networks:
 
 {% set __LOCAL_AI_version = LOCAL_AI_version | default('latest') -%}
 
-{% set __OLLAMA_WEBUI_version = OLLAMA_WEBUI_version | default('latest') -%}
+{% set __OPEN_WEBUI_version = OPEN_WEBUI_version | default('latest') -%}
 
 {% set __ALPACA_WEBUI_version = ALPACA_WEBUI_version | default('latest') -%}
 
@@ -812,7 +812,7 @@ networks:
   {% set OPTUNA_enable = false -%}
   {% set MINDSDB_enable = false -%}
   {% set OLLAMA_enable = false -%}
-  {% set OLLAMA_WEBUI_enable = false -%}
+  {% set OPEN_WEBUI_enable = false -%}
   {% set ALPACA_WEBUI_enable = false -%}
   {% set ANYTHING_LLM_enable = false -%}
   {% set PERPLEXICA_enable = false -%}
@@ -12965,16 +12965,16 @@ services:
 
 {% endif %}   {# LOCAL_AI_enable  #}
 
-{%if OLLAMA_WEBUI_enable | default(false) %}
-  #  ================================== Ollama WebUI  ========================================== #
-  ollama-webui:
-    image: ghcr.io/open-webui/open-webui:{{__OLLAMA_WEBUI_version}}
-    container_name: ollama-webui
-    hostname: ollama-webui
+{%if OPEN_WEBUI_enable | default(false) %}
+  #  ================================== Open WebUI  ========================================== #
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:{{__OPEN_WEBUI_version}}
+    container_name: open-webui
+    hostname: open-webui
     labels:
-      com.platys.name: 'ollama-webui'
+      com.platys.name: 'open-webui'
       com.platys.description: "User-friendly WebUI for LLMs"
-      com.platys.webui.title: "Ollama Web UI"
+      com.platys.webui.title: "Open Web UI"
       com.platys.webui.url: "http://dataplatform:28338"
       com.centurylinklabs.watchtower.enable: {{true if MARKDOWN_MADNESS_watchtower_enable else omit}}      
     ports:
@@ -12986,21 +12986,21 @@ services:
       DEFAULT_MODELS: llama3
       ENABLE_MODEL_FILTER: false
       MODEL_FILTER_LIST: ''
-      WEBUI_SECRET_KEY: {{OLLAMA_WEBUI_secret_key if OLLAMA_WEBUI_secret_key is defined and OLLAMA_WEBUI_secret_key and OLLAMA_WEBUI_secret_key | length else omit}}
-    {% if (OLLAMA_WEBUI_database_type | lower) == 'postgres' %}
-      DATABASE_URL: postgresql://{{OLLAMA_WEBUI_database_user}}:{{OLLAMA_WEBUI_database_password}}@postgresql:5432/{{OLLAMA_WEBUI_database_name}}
-#    {% elif (OLLAMA_WEBUI_database_type | lower) == 'mysql' %}
+      WEBUI_SECRET_KEY: {{OPEN_WEBUI_secret_key if OPEN_WEBUI_secret_key is defined and OPEN_WEBUI_secret_key and OPEN_WEBUI_secret_key | length else omit}}
+    {% if (OPEN_WEBUI_database_type | lower) == 'postgres' %}
+      DATABASE_URL: postgresql://{{OPEN_WEBUI_database_user}}:{{OPEN_WEBUI_database_password}}@postgresql:5432/{{OPEN_WEBUI_database_name}}
+#    {% elif (OPEN_WEBUI_database_type | lower) == 'mysql' %}
 #      DATABASE_URL: mysql://root:mysql@localhost:3306/mysql
-    {% endif -%}   {#  OLLAMA_WEBUI_database_type #}
+    {% endif -%}   {#  OPEN_WEBUI_database_type #}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
-      # - ./container-volume/ollama-webui:/app/backend/data
-    {% if OLLAMA_WEBUI_volume_map_data %}
-      - ./container-volume/ollama-webui/data:/app/backend/data
-    {% endif -%}   {#  OLLAMA_WEBUI_volume_map_data #}
+      # - ./container-volume/open-webui:/app/backend/data
+    {% if OPEN_WEBUI_volume_map_data %}
+      - ./container-volume/open-webui/data:/app/backend/data
+    {% endif -%}   {#  OPEN_WEBUI_volume_map_data #}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -13008,7 +13008,7 @@ services:
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
-{% endif %}   {# OLLAMA_WEBUI_enable  #}
+{% endif %}   {# OPEN_WEBUI_enable  #}
 
 {%if ALPACA_WEBUI_enable | default(false) %}
   #  ================================== Alpaca WebUI  ========================================== #
@@ -13031,7 +13031,7 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
-      # - ./container-volume/ollama-webui:/app/backend/data
+      # - ./container-volume/open-webui:/app/backend/data
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"

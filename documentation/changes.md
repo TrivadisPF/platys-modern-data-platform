@@ -156,6 +156,7 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Rename `ORACLE_FREE_xxx` to `ORACLE_OCI_FREE_xxx` and use `ORACLE_FREE_xxx` for the Oracle official docker image. 
  * Rename config setting `NEO4J_admin_password` to `NEO4J_password`
  * Rename config setting `STREAMLIT_environment` to `STREAMLIT_env_variables`
+ * Ollama WebUI renamed to Open WebUI (`OPEN_WEBUI_xxx` and no longer `OLLAMA_WEBUI_xxx`)
  
 ## What's new in 1.17.1
 
