@@ -539,7 +539,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28220 | 8000 | lakefs |
 28221 | 5000 | lakefs-webhook |
 28222 | 9000 | whisper |
-28223 | | |
+28223 | 80 | audio-transcriber |
 28224 | |  |
 28225 | |  |
 28226 | 9000 | questdb |

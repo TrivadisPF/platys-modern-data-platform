@@ -13021,18 +13021,41 @@ services:
     ports:
       - 28338:8080
     environment:
-      OLLAMA_BASE_URL: {{ns.ollamaUrl}}
       WEBUI_AUTH: false
-      ENABLE_SIGNUP: false
-      DEFAULT_MODELS: llama3
-      ENABLE_MODEL_FILTER: false
-      MODEL_FILTER_LIST: ''
       WEBUI_SECRET_KEY: {{OPEN_WEBUI_secret_key if OPEN_WEBUI_secret_key is defined and OPEN_WEBUI_secret_key and OPEN_WEBUI_secret_key | length else omit}}
+      ENABLE_SIGNUP: false
+      ENABLE_OLLAMA_API: true
+      OLLAMA_BASE_URL: {{ns.ollamaUrl}}
+      USE_OLLAMA_DOCKER: false
+      ENABLE_OPENAI_API: true
+      OPENAI_API_BASE_URL: https://api.openai.com/v1
+      OPENAI_API_KEY:       
+      DEFAULT_MODELS: llama3
+      RAG_EMBEDDING_ENGINE: ollama
+      VECTOR_DB: {{OPEN_WEBUI_vector_db if OPEN_WEBUI_vector_db is defined and OPEN_WEBUI_vector_db and OPEN_WEBUI_vector_db | length else omit}}
+      AUDIO_STT_ENGINE: {{OPEN_WEBUI_audio_stt_engine if OPEN_WEBUI_audio_stt_engine is defined and OPEN_WEBUI_audio_stt_engine and OPEN_WEBUI_audio_stt_engine | length else omit}}  
+      AUDIO_STT_MODEL: whisper-1
+      AUDIO_STT_OPENAI_API_BASE_URL: 'http://${PUBLIC_IP}:'
+      AUDIO_STT_OPENAI_API_KEY: ''
+      USE_CUDA_DOCKER: {{OPEN_WEBUI_gpu_enabled | default(false)}}      
     {% if (OPEN_WEBUI_database_type | lower) == 'postgres' %}
       DATABASE_URL: postgresql://{{OPEN_WEBUI_database_user}}:{{OPEN_WEBUI_database_password}}@postgresql:5432/{{OPEN_WEBUI_database_name}}
 #    {% elif (OPEN_WEBUI_database_type | lower) == 'mysql' %}
 #      DATABASE_URL: mysql://root:mysql@localhost:3306/mysql
     {% endif -%}   {#  OPEN_WEBUI_database_type #}
+    {% if TIKA_enable | default(false) %}
+       TIKA_SERVER_URL: http://tika-server:9998
+    {% endif -%}   {#  TIKA_enable #}
+    {% if CHROMA_enable | default(false) %}
+       CHROMA_HTTP_HOST: chroma
+       CHROMA_HTTP_PORT: 8000
+    {% endif -%}   {#  CHROMA_enable #}
+    {% if MILVUS_enable | default(false) %}
+       MILVUS_URI: http://milvus:19530
+    {% endif -%}   {#  MILVUS_enable #}
+    {% if QDRANT_enable | default(false) %}
+       QDRANT_URI: http://qdrant:6333
+    {% endif -%}   {#  MILVUS_enable #}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -13049,6 +13072,41 @@ services:
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+
+  {%if OPEN_WEBUI_audio_transcriber_enabled and WHISPER_enable | default(false) %}
+  audio-transcriber:
+    image: didevlab/audio-transcriber-whisper-api:1.0.0
+    container_name: audio-transcriber
+    hostname: audio-transcriber
+    labels:
+      com.platys.name: 'audio-transcriber'
+      com.platys.description: "User-friendly WebUI for LLMs (audio transcriber)"
+      com.platys.restui.title: "Transcribrer API"
+      com.platys.webui.url: "http://dataplatform:28223/audio/transcriptions"
+      com.centurylinklabs.watchtower.enable: {{true if MARKDOWN_MADNESS_watchtower_enable else omit}}      
+    ports:
+      - "28223:80"
+    environment:
+      - PORT=80
+      - API_WHISPER_URL=whisper  # Whisper service address (e.g., 'whisper_api' or IP)
+      - API_WHISPER_PORT=9000
+      - API_WHISPER_TIMEOUT=360000  # 6 minutes timeout for Whisper response
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+  {% endif -%}   {#  OPEN_WEBUI_audio_transcriber_enabled and WHISPER_enable ... #}
+
 {% endif %}   {# OPEN_WEBUI_enable  #}
 
 {%if ALPACA_WEBUI_enable | default(false) %}
