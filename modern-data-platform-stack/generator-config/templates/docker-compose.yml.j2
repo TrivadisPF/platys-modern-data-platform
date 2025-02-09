@@ -815,6 +815,7 @@ networks:
   {% set OPTUNA_enable = false -%}
   {% set MINDSDB_enable = false -%}
   {% set OLLAMA_enable = false -%}
+  {% set NVIDIA_NIM_enable = false -%}
   {% set OPEN_WEBUI_enable = false -%}
   {% set ALPACA_WEBUI_enable = false -%}
   {% set ANYTHING_LLM_enable = false -%}
@@ -12965,6 +12966,50 @@ services:
     init: true
   {% endif -%}   {#  OLLAMA_llm is defined ... #}
 {% endif %}   {# OLLAMA_enable  #}
+
+{%if NVIDIA_NIM_enable | default(false) %}
+  #  ================================== Nvidia NIMs  ========================================== #
+  {% for image in NVIDIA_NIM_images.split(",") %}
+    {% set external_port = 28250 + loop.index - 1 %}
+  nvidia-nim-{{loop.index}}:
+    image: {{{image}}}
+  {% if NVIDIA_NIM_gpu_enabled | default(false) %}
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: {{NVIDIA_NIM_gpu_counts[loop.index-1] | default(1)}}
+              capabilities: [gpu]
+  {% endif -%}    {# OLLAMA_gpu_enabled  #}
+    container_name: nvidia-nim-{{loop.index}}
+    hostname: nvidia-nim-{{loop.index}}
+    labels:
+      com.platys.name: 'nvidia-nim'
+      com.platys.description: "Locally runs Nvidia NIM model(s)"
+      com.platys.restapi.title: "Nvidia NIM API"
+      com.platys.restapi.url: "http://dataplatform:{{external_port}}/v1"
+    ports:
+      - {{external_port}}:8000
+    environment:
+      NGC_API_KEY: {{NVIDIA_NIM_api_key}}
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {% if NVIDIA_NIM_volume_map_cache %}
+      ./container-volume/nvidia-nim/cache-{{loop.index}}:/opt/nim/.cache
+    {% endif %}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+{% endif %}   {# NVIDIA_NIM_enable  #}
 
 {%if LOCAL_AI_enable | default(false) %}
   #  ================================== LocalAI  ========================================== #

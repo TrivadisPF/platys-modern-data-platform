@@ -741,7 +741,14 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28245 | 8080 | kestra |
 28246 | 8081 | kestra |
 28247 | 4040 | ngrok |
-
+28248 | | |
+28249 | | |
+28250 | 4040 | nvidia-nim-1 |
+28251 | 4040 | nvidia-nim-2 |
+28252 | 4040 | nvidia-nim-3 |
+28253 | 4040 | nvidia-nim-4 |
+28254 | 4040 | nvidia-nim-5 |
+28256 | 4040 | nvidia-nim-6 |
 
 ## Ports > 28500
 
