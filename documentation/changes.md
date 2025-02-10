@@ -61,6 +61,7 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Crawl4AI
  * Whisper
  * Audio-Transcriber
+ * Nvidia NIMs
 
 ### New/Updated Cookbook Recipes
 
