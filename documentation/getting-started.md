@@ -290,7 +290,7 @@ See [here](./setup-environment-variables.md) for how to setup these variables.
 Having the environment variables in place, let's start the platform. In a terminal window, execute 
 
 ```
-docker-compose up -d
+docker compose up -d
 ```
 
 to start the docker compose platform stack in the background (`-d` option). 
@@ -322,13 +322,13 @@ If there is something wrong, you might want to consult the log of the platform s
 You can display the active log entries for the whole platform using
 
 ```
-docker-compose logs -f
+docker compose logs -f
 ```
 
-To only see the log of selected services, you can list them after the `docker-compose logs -f`
+To only see the log of selected services, you can list them after the `docker compose logs -f`
 
 ```
-docker-compose logs -f <service-name> <service-name>
+docker compose logs -f <service-name> <service-name>
 ```
 
 ## Step 5: Stopping the Platform
@@ -336,7 +336,7 @@ docker-compose logs -f <service-name> <service-name>
 To stop and remove the running platform stack, perform
 
 ```
-docker-compose down
+docker compose down
 ```
 
 **Note:** be aware that this completely removes the Docker containers and by that all the data within it. If you haven't mapped the data outside the container, then you might lose your work!
