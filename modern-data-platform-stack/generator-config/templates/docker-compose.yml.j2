@@ -6683,6 +6683,55 @@ services:
     restart: always
 {% endif %}   {#  WHISPER_enable #}
 
+
+{% if NLLB_enable | default(false) %}
+  #  ================================== NLLB (No Language Left Behind) ========================================== #
+  nllb:
+    image: ghcr.io/winstxnhdw/nllb-api:{{__NLLB_version}}
+    platform: linux/amd64
+    container_name: nllb
+    hostname: nllb
+    labels:
+      com.platys.name: 'nllb'
+      com.platys.description: "No Language Left Behind (NLLB) translation service"
+      com.platys.restapi.title: "NLLB API"
+      com.platys.restapi.url: "http://dataplatform:28257/api/schema/swagger"
+    {%if NLLB_gpu_enabled | default(false) %}      
+    runtime: nvidia
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]          
+    {% endif -%}   {#  NLLB_gpu_enabled #}
+    runtime: nvidia
+    ports:
+      - "28257:7860"
+    environment:
+      SERVER_PORT: 7860
+      OMP_NUM_THREADS: 5
+      TRANSLATOR_THREADS: 2
+      WORKER_COUNT: 1  
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if NLLB_volume_map_data | default(false) %}  
+      - ./container-volume/nllb/model:/home/user/.cache
+    {% endif -%}   {#  NLLB_volume_map_data #}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: always
+{% endif %}   {#  NLLB_enable #}
+
 {% if HIVE_SERVER_enable | default(false) %}
   #  ================================== Apache Hive Server ========================================== #
   hive-server:

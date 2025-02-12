@@ -749,6 +749,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28253 | 4040 | nvidia-nim-4 |
 28254 | 4040 | nvidia-nim-5 |
 28256 | 4040 | nvidia-nim-6 |
+28257 | 7860 | nllb |
 
 ## Ports > 28500
 
