@@ -113,7 +113,7 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Update `datahub` to `v1.0.0rc1`
  * Update `risingwave` to `v2.1.0`
  * Update `portainer` to `alpine-sts`
- * Update `flowise` to `2.2.4`
+ * Update `flowise` to `2.2.5`
  * Update `nifi` to `2.1.0`
  * Update `nifi` to `1.28.1`
  * Update `flink` to `1.20-scala_2.12-java17`
