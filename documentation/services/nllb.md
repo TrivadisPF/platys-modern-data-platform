@@ -18,7 +18,7 @@ REST API documentation available [here](http://dataplatform:28257/api/schema/swa
 Translate
 
 ```bash
-curl 'https://dataplatform:28257/api/v4/translator?text=Hello&source=eng_Latn&target=spa_Latn'
+curl 'http://dataplatform:28257/api/v4/translator?text=Hello&source=eng_Latn&target=spa_Latn'
 ```
 
 
