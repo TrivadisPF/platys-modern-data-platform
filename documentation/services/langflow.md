@@ -14,3 +14,11 @@ platys gen
 ## How to use it?
 
 Navigate to <http://dataplatform:7860>.
+
+### Load flows on startup
+
+Place flow JSON files to be loaded on startup into `./init/langflow/` folder. Note that this feature only works if `LANGFLOW_auth_enable` is disabled.
+
+### Provide custom components
+
+Place custom components into `./plugins/langflow` and set `LANGFLOW_volume_map_components` to `true`.
