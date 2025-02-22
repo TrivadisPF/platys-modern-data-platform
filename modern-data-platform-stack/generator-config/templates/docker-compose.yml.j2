@@ -315,6 +315,8 @@ networks:
 
 {% set __GPT_RESEARCHER_version = GPT_RESEARCHER_version | default('latest') -%}
 
+{% set __OLLAMA_DEEP_RESEARCHER_version = OLLAMA_DEEP_RESEARCHER_version | default('latest') -%}
+
 {% set __VERBA_version = VERBA_version | default('latest') -%}
 
 {% set __RAGFLOW_version = RAGFLOW_version | default('latest') -%}
@@ -836,6 +838,7 @@ networks:
   {% set LANGEVALS_enable = false -%} 
   {% set ARIZE_PHOENIX_enable = false -%}  
   {% set GPT_RESEARCHER_enable = false -%}
+  {% set OLLAMA_DEEP_RESEARCHER_enable = false -%}
   {% set VERBA_enable = false -%}
   {% set RAGFLOW_enable = false -%}
   {% set NEO4j_KG_BUILDER_enable = false -%}
@@ -14312,6 +14315,45 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}    
 {% endif %}   {# GPT_RESEARCHER_enable  #}
+
+{%if OLLAMA_DEEP_RESEARCHER_enable | default(false) %}
+  #  ================================== Ollama Deep Researcher  ========================================== #
+  ollama-deep-researcher:
+    image: ollama-deep-researcher:{{__OLLAMA_DEEP_RESEARCHER_version}}
+    container_name: ollama-deep-researcher
+    hostname: ollama-deep-researcher
+    labels:
+      com.platys.name: 'ollama-deep-researcher'
+      com.platys.description: "Local web research and report writing assistant"
+      com.platys.webui.title: "Ollama Deep Researcher UI"
+      com.platys.webui.url: "http://dataplatform:2024"
+    ports:
+      - 2024:2024
+    extra_hosts:
+      - "host.docker.internal:host-gateway"      
+    environment:
+      - TAVILY_API_KEY={{OLLAMA_DEEP_RESEARCHER_tavily_api_key if OLLAMA_DEEP_RESEARCHER_tavily_api_key is defined and OLLAMA_DEEP_RESEARCHER_tavily_api_key and OLLAMA_DEEP_RESEARCHER_tavily_api_key | length else omit}} 
+      - OLLAMA_BASE_URL={{ns.ollamaUrl}}
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+    healthcheck:
+      test: wget --no-verbose --tries=3 --spider http://localhost:2024 || exit 1
+      interval: 5s
+      timeout: 10s
+      retries: 5
+      start_period: 10s
+{% endif %}   {# OLLAMA_DEEP_RESEARCHER_enable  #}
 
 {%if VERBA_enable | default(false) %}
   #  ================================== Verba  ========================================== #

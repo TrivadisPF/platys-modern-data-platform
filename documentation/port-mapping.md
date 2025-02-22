@@ -53,6 +53,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 1891 | 1883 | emqx-1 |
 1892 | 1883 | solace-pubsub |
 2022 | 2022 | sftpgo (sftp) |
+2024 | 2024 | ollama-deep-researcher |
 2113 | 2113 | eventstore |
 2181 | 2181 | zookeeper-1 |
 2182 | 2182 | zookeeper-2 |
