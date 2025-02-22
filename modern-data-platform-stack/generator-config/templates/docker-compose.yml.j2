@@ -108,6 +108,8 @@ networks:
 
 {% set __SEARXNG_version = SEARXNG_version | default('latest') -%}
 
+{% set __FIRECRAWL_version = FIRECRAWL_version | default('latest') -%}
+
 {% set __CRAWL4AI_version = CRAWL4AI_version | default('latest') -%}
 
 {% set __WHISPER_version = WHISPER_version | default('latest') -%}
@@ -768,6 +770,7 @@ networks:
   {% set TIKA_enable = false -%}
   {% set NLM_INGESTOR_enable = false -%}
   {% set UNSTRUCTURED_enable = false -%}
+  {% set FIRECRAWL_enable = false -%}
   {% set CRAWL4AI_enable = false -%}
   {% set WHISPER_enable = false -%}
   {% set NLLB_enable = false -%}
@@ -6163,7 +6166,7 @@ services:
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
-    restart: always
+    restart: {{container_restart_policy}}
 {% endif %}   {#  SPARK_livy_enable #}
 
 {% if FLINK_enable | default(false) %}
@@ -6240,7 +6243,7 @@ services:
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
-    restart: always
+    restart: {{container_restart_policy}}
 
   {% for num in range(FLINK_taskmanagers | default(1) ) %}
 
@@ -6306,7 +6309,7 @@ services:
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
-    restart: always
+    restart: {{container_restart_policy}}
   {% endfor %}
 
   {% if FLINK_SQL_GATEWAY_enable | default(false) %}
@@ -6362,7 +6365,7 @@ services:
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
-    restart: always
+    restart: {{container_restart_policy}}
   {% endif -%}   {#  FLINK_SQL_GATEWAY_enable #}
 
   {% if FLINK_SQL_CLI_enable | default(false) %}
@@ -6470,7 +6473,7 @@ services:
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
-    restart: always
+    restart: {{container_restart_policy}}
 {% endif %}   {#  TIKA_enable #}
 
 {% if NLM_INGESTOR_enable | default(false) %}
@@ -6499,7 +6502,7 @@ services:
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
-    restart: always
+    restart: {{container_restart_policy}}
 {% endif %}   {#  NLM_INGESTOR_enable #}
 
 {% if UNSTRUCTURED_enable | default(false) %}
@@ -6531,7 +6534,7 @@ services:
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
-    restart: always
+    restart: {{container_restart_policy}}
 {% endif %}   {#  UNSTRUCTURED_enable #}
 
 {% if SEARXNG_enable | default(false) %}
@@ -6576,7 +6579,7 @@ services:
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
-    restart: always
+    restart: {{container_restart_policy}}
 
   searxng-redis:
     image: docker.io/valkey/valkey:8-alpine
@@ -6598,9 +6601,172 @@ services:
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
-    restart: always
+    restart: {{container_restart_policy}}
     command: valkey-server --save 30 1 --loglevel warning
 {% endif %}   {#  SEARXNG_enable #}
+
+{% if FIRECRAWL_enable | default(false) %}
+  #  ================================== Firecrawl ========================================== #
+  firecrawl-playwright:
+    image: ghcr.io/mendableai/playwright-service-ts:{{__FIRECRAWL_version}}
+    container_name: firecrawl-playwright
+    hostname: firecrawl-playwright
+    labels:
+      com.platys.name: 'firecrawl'
+      com.platys.description: "Scrape, crawl and extract data from web"
+      #com.platys.restapi.title: "Playwright API"
+      #com.platys.restapi.url: "http://dataplatform:3000"    
+    environment:
+      PORT: 3000
+      #PROXY_SERVER: ${PROXY_SERVER}
+      #PROXY_USERNAME: ${PROXY_USERNAME}
+      #PROXY_PASSWORD: ${PROXY_PASSWORD}
+      BLOCK_MEDIA: true
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}      
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+
+  firecrawl-api:
+    image: ghcr.io/mendableai/firecrawl:{{__FIRECRAWL_version}}
+    container_name: firecrawl-api
+    hostname: firecrawl-api
+    labels:
+      com.platys.name: 'firecrawl'
+      com.platys.description: "Scrape, crawl and extract data from web"
+      com.platys.restapi.title: "Firecrawl API"
+      com.platys.restapi.url: "http://dataplatform:28248"
+    ports:
+      - "28248:3002"
+    ulimits:
+      nofile:
+        soft: 65535
+        hard: 65535      
+    extra_hosts:
+      - "host.docker.internal:host-gateway"         
+    environment:
+      HOST: 0.0.0.0
+      PORT: 3002
+      FLY_PROCESS_GROUP: app
+
+      REDIS_URL: redis://firecrawl-redis:6379
+      REDIS_RATE_LIMIT_URL: redis://firecrawl-redis:6379
+      PLAYWRIGHT_MICROSERVICE_URL: http://firecrawl-playwright:3000/scrape
+      USE_DB_AUTHENTICATION: {{FIRECRAWL_use_db_authentication if FIRECRAWL_use_db_authentication is defined and FIRECRAWL_use_db_authentication and FIRECRAWL_use_db_authentication | length else omit }}
+      #OPENAI_API_KEY: ${OPENAI_API_KEY}
+      #OPENAI_BASE_URL: ${OPENAI_BASE_URL}
+      MODEL_NAME: {{FIRECRAWL_model_name if FIRECRAWL_model_name is defined and FIRECRAWL_model_name and FIRECRAWL_model_name | length else omit }} 
+      SLACK_WEBHOOK_URL: ${SLACK_WEBHOOK_URL}
+      BULL_AUTH_KEY: ${BULL_AUTH_KEY}
+      TEST_API_KEY: ${TEST_API_KEY}
+      POSTHOG_API_KEY: ${POSTHOG_API_KEY}
+      POSTHOG_HOST: ${POSTHOG_HOST}
+      SUPABASE_ANON_TOKEN: ${SUPABASE_ANON_TOKEN}
+      SUPABASE_URL: ${SUPABASE_URL}
+      SUPABASE_SERVICE_TOKEN: ${SUPABASE_SERVICE_TOKEN}
+      SCRAPING_BEE_API_KEY: ${SCRAPING_BEE_API_KEY}
+      SELF_HOSTED_WEBHOOK_URL: {{FIRECRAWL_self_hosted_webhook_url if FIRECRAWL_self_hosted_webhook_url is defined and FIRECRAWL_self_hosted_webhook_url and FIRECRAWL_self_hosted_webhook_url | length else omit }}  
+      SERPER_API_KEY: ${SERPER_API_KEY}
+      SEARCHAPI_API_KEY: ${SEARCHAPI_API_KEY}
+      LOGGING_LEVEL: INFO  
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    command: [ "pnpm", "run", "start:production" ]    
+    restart: {{container_restart_policy}}
+
+  firecrawl-worker:
+    image: ghcr.io/mendableai/firecrawl:{{__FIRECRAWL_version}}
+    container_name: firecrawl-worker
+    hostname: firecrawl-worker
+    labels:
+      com.platys.name: 'firecrawl'
+      com.platys.description: "Scrape, crawl and extract data from web"
+    ulimits:
+      nofile:
+        soft: 65535
+        hard: 65535      
+    extra_hosts:
+      - "host.docker.internal:host-gateway"         
+    environment:
+      FLY_PROCESS_GROUP: worker
+
+      REDIS_URL: redis://firecrawl-redis:6379
+      REDIS_RATE_LIMIT_URL: redis://firecrawl-redis:6379
+      PLAYWRIGHT_MICROSERVICE_URL: http://firecrawl-playwright:3000/scrape
+      USE_DB_AUTHENTICATION: {{FIRECRAWL_use_db_authentication if FIRECRAWL_use_db_authentication is defined and FIRECRAWL_use_db_authentication and FIRECRAWL_use_db_authentication | length else omit }}
+      #OPENAI_API_KEY: ${OPENAI_API_KEY}
+      #OPENAI_BASE_URL: ${OPENAI_BASE_URL}
+      MODEL_NAME: {{FIRECRAWL_model_name if FIRECRAWL_model_name is defined and FIRECRAWL_model_name and FIRECRAWL_model_name | length else omit }} 
+      SLACK_WEBHOOK_URL: ${SLACK_WEBHOOK_URL}
+      BULL_AUTH_KEY: ${BULL_AUTH_KEY}
+      TEST_API_KEY: ${TEST_API_KEY}
+      POSTHOG_API_KEY: ${POSTHOG_API_KEY}
+      POSTHOG_HOST: ${POSTHOG_HOST}
+      SUPABASE_ANON_TOKEN: ${SUPABASE_ANON_TOKEN}
+      SUPABASE_URL: ${SUPABASE_URL}
+      SUPABASE_SERVICE_TOKEN: ${SUPABASE_SERVICE_TOKEN}
+      SCRAPING_BEE_API_KEY: ${SCRAPING_BEE_API_KEY}
+      SELF_HOSTED_WEBHOOK_URL: {{FIRECRAWL_self_hosted_webhook_url if FIRECRAWL_self_hosted_webhook_url is defined and FIRECRAWL_self_hosted_webhook_url and FIRECRAWL_self_hosted_webhook_url | length else omit }}  
+      SERPER_API_KEY: ${SERPER_API_KEY}
+      SEARCHAPI_API_KEY: ${SEARCHAPI_API_KEY}
+      LOGGING_LEVEL: INFO
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    command: [ "pnpm", "run", "workers" ] 
+    restart: {{container_restart_policy}}
+
+  firecrawl-redis:
+    image: redis:alpine
+    container_name: firecrawl-redis
+    hostname: firecrawl-redis  
+    labels:
+      com.platys.name: 'redis'
+      com.platys.description: "Key-Value Store for Firecrawl"
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: always
+    command: redis-server --bind 0.0.0.0
+{% endif %}   {#  FIRECRAWL_enable #}
 
 {% if CRAWL4AI_enable | default(false) %}
   #  ================================== Crawl4AI ========================================== #
