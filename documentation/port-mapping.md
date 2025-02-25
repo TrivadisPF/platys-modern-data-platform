@@ -90,6 +90,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 3355 | 3355 | vector-admin | 
 3838 | 3838 | shiny-server |
 4000 | 4000 | graphql-mesh |
+4001 | 4000 | supabase-analytics |
 4004 | 4004 | log4brains |
 4040 | 4040 | spark-master (ui) |
 4041 | 4041 | spark-master (ui) |
@@ -128,6 +129,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 5438 | 5432 | langwatch-postgresql |
 5439 | 5432 | data-product-portal-postgresql |
 5440 | 5432 | proton-server (postgres batch) |
+5441 | 5432 | supabase-db |
 5500 | 5500 | oracledb-ee-1 |
 5501 | 5500 | oracledb-ee-1 |
 5502 | 5500 | oracledb-ee-1 |
@@ -171,6 +173,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 6390 | 6379 | valkey-replica-1 |
 6391 | 6379 | valkey-replica-2 |
 6392 | 6379 | valkey-replica-3 |
+6543 | 6543 | supabase-supavisor |
 6570 | 6570 | hserver-1 |
 6831 | 6831 | jaeger (udp) |
 6749 | 6749 | curity |

@@ -450,6 +450,20 @@ networks:
 {% set __POSTGRESQL_PGDUCKDB_version = POSTGRESQL_PGDUCKDB_version | default('latest') -%}
 
 {% set __POSTGREST_version = POSTGREST_version | default('latest') -%}
+
+{% set __SUPABASE_STUDIO_version = SUPABASE_STUDIO_version | default('latest') -%}
+{% set __SUPABASE_AUTH_version = SUPABASE_AUTH_version | default('latest') -%}
+{% set __SUPABASE_REST_version = SUPABASE_REST_version | default('latest') -%}
+{% set __SUPABASE_REALTIME_version = SUPABASE_REALTIME_version | default('latest') -%}
+{% set __SUPABASE_STORAGE_version = SUPABASE_STORAGE_version | default('latest') -%}
+{% set __SUPABASE_IMGPROXY = SUPABASE_IMGPROXY | default('latest') -%}
+{% set __SUPABASE_META_version = SUPABASE_META_version | default('latest') -%}
+{% set __SUPABASE_EDGE_RUNTIME_version = SUPABASE_EDGE_RUNTIME_version | default('latest') -%}
+{% set __SUPABASE_ANALYTICS_version = SUPABASE_ANALYTICS_version | default('latest') -%}
+{% set __SUPABASE_POSTGRESQL_version = SUPABASE_POSTGRESQL_version | default('latest') -%}
+{% set __SUPABASE_VECTOR_version = SUPABASE_VECTOR_version | default('latest') -%}
+{% set __SUPABASE_SUPAVISOR_version = SUPABASE_SUPAVISOR_version | default('latest') -%}
+
 {% set __TIMESCALEDB_version = TIMESCALEDB_version | default('latest') -%}
 {% set __SQLSERVER_version = SQLSERVER_version | default('latest') -%}
 {% set __YUGABYTE_version = YUGABYTE_version | default('latest') -%}
@@ -457,6 +471,7 @@ networks:
 
 {% set __PGADMIN_version = PGADMIN_version | default('latest') -%}
 {% set __ADMINER_version = ADMINER_version | default('latest') -%}
+
 {% set __CLOUDBEAVER_version = CLOUDBEAVER_version | default('latest') -%}
 {% set __SQLPAD_version = SQLPAD_version | default('latest') -%}
 {% set __SQLCHAT_version = SQLCHAT_version | default('latest') -%}
@@ -893,6 +908,7 @@ networks:
   {% set GRAPHDB_enable = false -%}
   {% set TILE38_enable = false -%}
   {% set POSTGREST_enable = false -%}
+  {% set SUPABASE_enable = false -%}
   {% set ORACLE_XE_enable = false -%}
   {% set ORACLE_FREE_enable = false -%}
   {% set ORACLE_OCI_FREE_enable = false -%}
@@ -9212,7 +9228,7 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}  
     restart: {{container_restart_policy}}      
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $postgres"]
       interval: 10s
       timeout: 5s
       retries: 120
@@ -14067,7 +14083,7 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}      
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $postgres"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -19352,6 +19368,613 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
 {% endif %}   {# PGADMIN_enable #}
+
+{% if SUPABASE_enable | default(false) %}
+  #  ================================== Supabase ========================================== #
+  supabase-studio:
+    image: supabase/studio:{{__SUPABASE_STUDIO_version}}
+    container_name: supabase-studio
+    hostname: supabase-studio
+    labels:
+      com.platys.name: "supabase"
+      com.platys.description: "Supabase Studio"
+    environment:
+      STUDIO_PG_META_URL: http://meta:8080
+      POSTGRES_PASSWORD: ${PLATYS_SUPABASE_DB_PASSWORD:-{{SUPABASE_db_password}}}
+
+      DEFAULT_ORGANIZATION_NAME: Default Organization
+      DEFAULT_PROJECT_NAME: Default Project
+    {% if ( external['OPENAI_enable']) | default(false) %}
+      OPENAI_API_KEY: external['OPENAI_api_key'])
+    {% endif -%}   {#  OPENAI_enable #}      
+
+      SUPABASE_URL: http://kong:8000
+      SUPABASE_PUBLIC_URL: http://${PUBLIC_IP}:8000
+      SUPABASE_ANON_KEY: {{SUPABASE_anon_key}}
+      SUPABASE_SERVICE_KEY: {{SUPABASE_service_role_key}}
+      AUTH_JWT_SECRET: {{SUPABASE_jwt_secret}}
+
+      LOGFLARE_API_KEY: {{SUPABASE_logflare_api_key}}
+      LOGFLARE_URL: http://supabase-analytics:4000
+      NEXT_PUBLIC_ENABLE_LOGS: true
+      # Comment to use Big Query backend for analytics
+      NEXT_ANALYTICS_BACKEND_PROVIDER: postgres
+      # Uncomment to use Big Query backend for analytics
+      # NEXT_ANALYTICS_BACKEND_PROVIDER: bigquery
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: always
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://supabase-studio:3000/api/platform/profile').then((r) => {if (r.status !== 200) throw new Error(r.status)})"
+        ]
+      timeout: 10s
+      interval: 5s
+      retries: 3
+
+  supabase-auth:
+    image: supabase/gotrue:{{__SUPABASE_AUTH_version}}
+    container_name: supabase-auth
+    hostname: supabase-auth
+    labels:
+      com.platys.name: "supabase"
+      com.platys.description: "Supabase Authentication"
+    environment:
+      GOTRUE_API_HOST: 0.0.0.0
+      GOTRUE_API_PORT: 9999
+      API_EXTERNAL_URL: http://${PUBLIC_IP}:8000
+
+      GOTRUE_DB_DRIVER: postgres
+      GOTRUE_DB_DATABASE_URL: postgres://supabase_auth_admin:${PLATYS_SUPABASE_DB_PASSWORD:-{{SUPABASE_db_password}}}@supabase-db:5432/postgres
+
+      GOTRUE_SITE_URL: http://${PUBLIC_IP}:3000
+      GOTRUE_URI_ALLOW_LIST: 
+      GOTRUE_DISABLE_SIGNUP: false
+
+      GOTRUE_JWT_ADMIN_ROLES: service_role
+      GOTRUE_JWT_AUD: authenticated
+      GOTRUE_JWT_DEFAULT_GROUP_NAME: authenticated
+      GOTRUE_JWT_EXP: 3600
+      GOTRUE_JWT_SECRET: {{SUPABASE_jwt_secret}}
+
+      GOTRUE_EXTERNAL_EMAIL_ENABLED: {{SUPABASE_email_enabled}}
+      GOTRUE_EXTERNAL_ANONYMOUS_USERS_ENABLED: false
+      GOTRUE_MAILER_AUTOCONFIRM: false
+
+      # Uncomment to bypass nonce check in ID Token flow. Commonly set to true when using Google Sign In on mobile.
+      # GOTRUE_EXTERNAL_SKIP_NONCE_CHECK: true
+
+      # GOTRUE_MAILER_SECURE_EMAIL_CHANGE_ENABLED: true
+      # GOTRUE_SMTP_MAX_FREQUENCY: 1s
+      GOTRUE_SMTP_ADMIN_EMAIL: admin@example.com
+      GOTRUE_SMTP_HOST: {{SUPABASE_email_host if SUPABASE_email_host is defined and SUPABASE_email_host and SUPABASE_email_host | length else omit}}
+      GOTRUE_SMTP_PORT: {{SUPABASE_email_port if SUPABASE_email_port is defined and SUPABASE_email_port and SUPABASE_email_port | length else omit}}
+      GOTRUE_SMTP_USER: {{SUPABASE_email_host_user if SUPABASE_email_host_user is defined and SUPABASE_email_host_user and SUPABASE_email_host_user | length else omit}}
+      GOTRUE_SMTP_PASS: {{SUPABASE_email_host_password if SUPABASE_email_host_password is defined and SUPABASE_email_host_password and SUPABASE_email_host_password | length else omit}}
+      GOTRUE_SMTP_SENDER_NAME: {{SUPABASE_email_from if SUPABASE_email_from is defined and SUPABASE_email_from and SUPABASE_email_from | length else omit}}
+      GOTRUE_MAILER_URLPATHS_INVITE: "/auth/v1/verify"
+      GOTRUE_MAILER_URLPATHS_CONFIRMATION: "/auth/v1/verify"
+      GOTRUE_MAILER_URLPATHS_RECOVERY: "/auth/v1/verify"
+      GOTRUE_MAILER_URLPATHS_EMAIL_CHANGE: "/auth/v1/verify"
+
+      GOTRUE_EXTERNAL_PHONE_ENABLED: true
+      GOTRUE_SMS_AUTOCONFIRM: true
+      # Uncomment to enable custom access token hook. Please see: https://supabase.com/docs/guides/auth/auth-hooks for full list of hooks and additional details about custom_access_token_hook
+
+      # GOTRUE_HOOK_CUSTOM_ACCESS_TOKEN_ENABLED: "true"
+      # GOTRUE_HOOK_CUSTOM_ACCESS_TOKEN_URI: "pg-functions://postgres/public/custom_access_token_hook"
+      # GOTRUE_HOOK_CUSTOM_ACCESS_TOKEN_SECRETS: "<standard-base64-secret>"
+
+      # GOTRUE_HOOK_MFA_VERIFICATION_ATTEMPT_ENABLED: "true"
+      # GOTRUE_HOOK_MFA_VERIFICATION_ATTEMPT_URI: "pg-functions://postgres/public/mfa_verification_attempt"
+
+      # GOTRUE_HOOK_PASSWORD_VERIFICATION_ATTEMPT_ENABLED: "true"
+      # GOTRUE_HOOK_PASSWORD_VERIFICATION_ATTEMPT_URI: "pg-functions://postgres/public/password_verification_attempt"
+
+      # GOTRUE_HOOK_SEND_SMS_ENABLED: "false"
+      # GOTRUE_HOOK_SEND_SMS_URI: "pg-functions://postgres/public/custom_access_token_hook"
+      # GOTRUE_HOOK_SEND_SMS_SECRETS: "v1,whsec_VGhpcyBpcyBhbiBleGFtcGxlIG9mIGEgc2hvcnRlciBCYXNlNjQgc3RyaW5n"
+
+      # GOTRUE_HOOK_SEND_EMAIL_ENABLED: "false"
+      # GOTRUE_HOOK_SEND_EMAIL_URI: "http://host.docker.internal:54321/functions/v1/email_sender"
+      # GOTRUE_HOOK_SEND_EMAIL_SECRETS: "v1,whsec_VGhpcyBpcyBhbiBleGFtcGxlIG9mIGEgc2hvcnRlciBCYXNlNjQgc3RyaW5n"
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: always
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--no-verbose",
+          "--tries=1",
+          "--spider",
+          "http://localhost:9999/health"
+        ]
+      timeout: 5s
+      interval: 5s
+      retries: 3
+
+  supabase-rest:
+    image: postgrest/postgrest:{{__SUPABASE_REST_version}}
+    container_name: supabase-rest
+    hostname: supabase-rest
+    labels:
+      com.platys.name: "supabase"
+      com.platys.description: "Supabase Authentication"
+    environment:
+      PGRST_DB_URI: postgres://authenticator:${PLATYS_SUPABASE_DB_PASSWORD:-{{SUPABASE_db_password}}}@supabase-db:5432/postgres
+      PGRST_DB_SCHEMAS: public,storage,graphql_public
+      PGRST_DB_ANON_ROLE: anon
+      PGRST_JWT_SECRET: {{SUPABASE_jwt_secret}}
+      PGRST_DB_USE_LEGACY_GUCS: "false"
+      PGRST_APP_SETTINGS_JWT_SECRET: {{SUPABASE_jwt_secret}}
+      PGRST_APP_SETTINGS_JWT_EXP: 3600
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    command:
+      [
+        "postgrest"
+      ] 
+    restart: always
+
+  supabase-realtime:
+    image: supabase/realtime:{{__SUPABASE_REALTIME_version}}
+    container_name: supabase-realtime
+    hostname: supabase-realtime
+    labels:
+      com.platys.name: "supabase"
+      com.platys.description: "Supabase Authentication"
+    environment:
+      PORT: 4000
+      DB_HOST: supabase-db
+      DB_PORT: 5432
+      DB_USER: supabase_admin
+      DB_PASSWORD: ${PLATYS_SUPABASE_DB_PASSWORD:-{{SUPABASE_db_password}}}
+      DB_NAME: postgres
+      DB_AFTER_CONNECT_QUERY: 'SET search_path TO _realtime'
+      DB_ENC_KEY: supabaserealtime
+      API_JWT_SECRET: {{SUPABASE_jwt_secret}}
+      SECRET_KEY_BASE: {{SUPABASE_secret_key_base}}
+      ERL_AFLAGS: -proto_dist inet_tcp
+      DNS_NODES: "''"
+      RLIMIT_NOFILE: "10000"
+      APP_NAME: realtime
+      SEED_SELF_HOST: true
+      RUN_JANITOR: true
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: always
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "curl",
+          "-sSfL",
+          "--head",
+          "-o",
+          "/dev/null",
+          "-H",
+          "Authorization: Bearer {{SUPABASE_anon_key}}",
+          "http://localhost:4000/api/tenants/realtime-dev/health"
+        ]
+      timeout: 5s
+      interval: 5s
+      retries: 3    
+
+  supabase-storage:
+    image: supabase/storage-api:{{__SUPABASE_STORAGE_version}}
+    container_name: supabase-storage
+    hostname: supabase-storage
+    labels:
+      com.platys.name: "supabase"
+      com.platys.description: "Supabase Storage"
+    environment:
+      ANON_KEY: {{SUPABASE_anon_key}}
+      SERVICE_KEY: {{SUPABASE_service_role_key}}
+      POSTGREST_URL: http://supabase-rest:3000
+      PGRST_JWT_SECRET: {{SUPABASE_jwt_secret}}
+      DATABASE_URL: postgres://supabase_storage_admin:${PLATYS_SUPABASE_DB_PASSWORD:-{{SUPABASE_db_password}}}@supabase-db:5432/postgres
+      FILE_SIZE_LIMIT: 52428800
+      STORAGE_BACKEND: file
+      FILE_STORAGE_BACKEND_PATH: /var/lib/storage
+      TENANT_ID: stub
+      # TODO: https://github.com/supabase/storage-api/issues/55
+      REGION: stub
+      GLOBAL_S3_BUCKET: stub
+      ENABLE_IMAGE_TRANSFORMATION: "true"
+      IMGPROXY_URL: http://imgproxy:5001
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: always
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--no-verbose",
+          "--tries=1",
+          "--spider",
+          "http://storage:5000/status"
+        ]
+      timeout: 5s
+      interval: 5s
+      retries: 3
+
+  supabase-imgproxy:
+    image: darthsim/imgproxy:{{__SUPABASE_IMGPROXY_version}}
+    container_name: supabase-imgproxy
+    hostname: supabase-imgproxy
+    labels:
+      com.platys.name: "supabase"
+      com.platys.description: "Supabase Storage"
+    environment:
+      IMGPROXY_BIND: ":5001"
+      IMGPROXY_LOCAL_FILESYSTEM_ROOT: /
+      IMGPROXY_USE_ETAG: "true"
+      IMGPROXY_ENABLE_WEBP_DETECTION: true
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "imgproxy",
+          "health"
+        ]
+      timeout: 5s
+      interval: 5s
+      retries: 3  
+
+  supabase-meta:
+    image: supabase/postgres-meta:{{__SUPABASE_META_version}}
+    container_name: supabase-meta
+    hostname: supabase-meta
+    labels:
+      com.platys.name: "supabase"
+      com.platys.description: "Supabase Meta"
+    environment:
+      PG_META_PORT: 8080
+      PG_META_DB_HOST: supabase-db
+      PG_META_DB_PORT: 5432
+      PG_META_DB_NAME: postgres
+      PG_META_DB_USER: supabase_admin
+      PG_META_DB_PASSWORD: ${PLATYS_SUPABASE_DB_PASSWORD:-{{SUPABASE_db_password}}}
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+
+  supabase-functions:
+    image: supabase/edge-runtime:{{__SUPABASE_EDGE_RUNTIME_version}}
+    container_name: supabase-functions
+    hostname: supabase-functions
+    labels:
+      com.platys.name: "supabase"
+      com.platys.description: "Supabase Functions"
+    environment:
+      JWT_SECRET: {{SUPABASE_jwt_secret}}
+      SUPABASE_URL: http://kong:8000
+      SUPABASE_ANON_KEY: {{SUPABASE_anon_key}}
+      SUPABASE_SERVICE_ROLE_KEY: {{SUPABASE_service_role_key}}
+      SUPABASE_DB_URL: postgresql://postgres:${PLATYS_SUPABASE_DB_PASSWORD:-{{SUPABASE_db_password}}}@supabase-db:5432/postgres
+      # TODO: Allow configuring VERIFY_JWT per function. This PR might help: https://github.com/supabase/cli/pull/786
+      VERIFY_JWT: false
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    command:
+      [
+        "start",
+        "--main-service",
+        "/home/deno/functions/main"
+      ]    
+    {% endif -%}   {#  logging_driver is defined ... #}
+
+  supabase-analytics:
+    image: supabase/logflare:{{__SUPABASE_ANALYTICS_version}}
+    container_name: supabase-analytics
+    hostname: supabase-analytics
+    labels:
+      com.platys.name: "supabase"
+      com.platys.description: "Supabase Analytics"
+    ports:
+      4001:4000
+    environment:
+      LOGFLARE_NODE_HOST: 127.0.0.1
+      DB_USERNAME: supabase_admin
+      DB_DATABASE: _supabase
+      DB_HOSTNAME: supabase-db
+      DB_PORT: 5432
+      DB_PASSWORD: ${PLATYS_SUPABASE_DB_PASSWORD:-{{SUPABASE_db_password}}}
+      DB_SCHEMA: _analytics
+      LOGFLARE_API_KEY: {{SUPABASE_logflare_api_key}}
+      LOGFLARE_SINGLE_TENANT: true
+      LOGFLARE_SUPABASE_MODE: true
+      LOGFLARE_MIN_CLUSTER_SIZE: 1
+
+      # Comment variables to use Big Query backend for analytics
+      POSTGRES_BACKEND_URL: postgresql://supabase_admin:${PLATYS_SUPABASE_DB_PASSWORD:-{{SUPABASE_db_password}}}@supabase-db:5432/_supabase
+      POSTGRES_BACKEND_SCHEMA: _analytics
+      LOGFLARE_FEATURE_FLAG_OVERRIDE: multibackend=true
+      # Uncomment to use Big Query backend for analytics
+      # GOOGLE_PROJECT_ID: 
+      # GOOGLE_PROJECT_NUMBER:
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging 
+    {% endif -%}   {#  logging_driver is defined ... #}    
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "curl",
+          "http://localhost:4000/health"
+        ]
+      timeout: 5s
+      interval: 5s
+      retries: 10    
+
+  supabase-db:
+    image: supabase/postgres:{{__SUPABASE_POSTGRESQL_version}}
+    container_name: supabase-db
+    hostname: supabase-db
+    labels:
+      com.platys.name: "supabase"
+      com.platys.description: "Supabase DB"
+      com.platys.password.envvars: "PLATYS_SUPABASE_DB_PASSWORD"
+    environment:
+      POSTGRES_HOST: /var/run/postgresql
+      PGPORT: 5432
+      POSTGRES_PORT: 5432
+      PGPASSWORD: ${PLATYS_SUPABASE_DB_PASSWORD:-{{SUPABASE_db_password}}}
+      POSTGRES_PASSWORD: ${PLATYS_SUPABASE_DB_PASSWORD:-{{SUPABASE_db_password}}}
+      PGDATABASE: postgres
+      POSTGRES_DB: postgres
+      JWT_SECRET: {{SUPABASE_jwt_secret}}
+      JWT_EXP: 3600
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./volumes/db/realtime.sql:/docker-entrypoint-initdb.d/migrations/99-realtime.sql:Z
+      # Must be superuser to create event trigger
+      - ./volumes/db/webhooks.sql:/docker-entrypoint-initdb.d/init-scripts/98-webhooks.sql:Z
+      # Must be superuser to alter reserved role
+      - ./volumes/db/roles.sql:/docker-entrypoint-initdb.d/init-scripts/99-roles.sql:Z
+      # Initialize the database settings with JWT_SECRET and JWT_EXP
+      - ./volumes/db/jwt.sql:/docker-entrypoint-initdb.d/init-scripts/99-jwt.sql:Z
+      # PGDATA directory is persisted between restarts
+      - ./volumes/db/data:/var/lib/postgresql/data:Z
+      # Changes required for internal supabase data such as _analytics
+      - ./volumes/db/_supabase.sql:/docker-entrypoint-initdb.d/migrations/97-_supabase.sql:Z
+      # Changes required for Analytics support
+      - ./volumes/db/logs.sql:/docker-entrypoint-initdb.d/migrations/99-logs.sql:Z
+      # Changes required for Pooler support
+      - ./volumes/db/pooler.sql:/docker-entrypoint-initdb.d/migrations/99-pooler.sql:Z
+      # Use named volume to persist pgsodium decryption key between restarts
+      - db-config:/etc/postgresql-custom      
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging 
+    {% endif -%}   {#  logging_driver is defined ... #}   
+    command:
+      [
+        "postgres",
+        "-c",
+        "config_file=/etc/postgresql/postgresql.conf",
+        "-c",
+        "log_min_messages=fatal" # prevents Realtime polling queries from appearing in logs
+      ]     
+    healthcheck:
+      test:
+        [
+        "CMD",
+        "pg_isready",
+        "-U",
+        "postgres",
+        "-h",
+        "localhost"
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 10 
+
+  supabase-vector:
+    image: timberio/vector:{{__SUPABASE_VECTOR_version}}
+    container_name: supabase-db
+    hostname: supabase-db
+    labels:
+      com.platys.name: "supabase"
+      com.platys.description: "Supabase DB"
+    environment:
+      LOGFLARE_API_KEY: {{SUPABASE_logflare_api_key}}
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./volumes/logs/vector.yml:/etc/vector/vector.yml:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro        
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging 
+    {% endif -%}   {#  logging_driver is defined ... #}   
+    command:
+      [
+        "--config",
+        "/etc/vector/vector.yml"
+      ]
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--no-verbose",
+          "--tries=1",
+          "--spider",
+          "http://vector:9001/health"
+        ]
+      timeout: 5s
+      interval: 5s
+      retries: 3
+
+  supabase-supavisor:
+    image: timberio/vector:{{__SUPABASE_SUPAVISOR_version}}
+    container_name: supabase-supavisor
+    hostname: supabase-supavisor
+    labels:
+      com.platys.name: "supabase"
+      com.platys.description: "Supabase Supavisor"
+    ports:
+      - 5441:5432
+      - 6543:6543
+    environment:
+      PORT: 4000
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: postgres
+      POSTGRES_PASSWORD: ${PLATYS_SUPABASE_DB_PASSWORD:-{{SUPABASE_db_password}}}
+      DATABASE_URL: ecto://supabase_admin:${PLATYS_SUPABASE_DB_PASSWORD:-{{SUPABASE_db_password}}}@db:5432/_supabase
+      CLUSTER_POSTGRES: true
+      SECRET_KEY_BASE: {{SUPABASE_secret_key_base}}
+      VAULT_ENC_KEY: {{SUPABASE_vault_enc_key}}
+      API_JWT_SECRET: {{SUPABASE_jwt_secret}}
+      METRICS_JWT_SECRET: {{SUPABASE_jwt_secret}}
+      REGION: local
+      ERL_AFLAGS: -proto_dist inet_tcp
+      POOLER_TENANT_ID: {{SUPABASE_tenant_id if SUPABASE_tenant_id is defined and SUPABASE_tenant_id and SUPABASE_tenant_id | length else omit}}
+      POOLER_DEFAULT_POOL_SIZE: 20
+      POOLER_MAX_CLIENT_CONN: 100
+      POOLER_POOL_MODE: transaction
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./volumes/pooler/pooler.exs:/etc/pooler/pooler.exs:ro     
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging 
+    {% endif -%}   {#  logging_driver is defined ... #}   
+    command:
+      [
+        "/bin/sh",
+        "-c",
+        "/app/bin/migrate && /app/bin/supavisor eval \"$$(cat /etc/pooler/pooler.exs)\" && /app/bin/server"
+      ]
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "curl",
+          "-sSfL",
+          "--head",
+          "-o",
+          "/dev/null",
+          "http://127.0.0.1:4000/api/health"
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+{% endif %}   {#  SUPABASE_enable #}
 
 {% if TIMESCALEDB_enable | default(false) %}
   #  ================================== Timescale DB ========================================== #
