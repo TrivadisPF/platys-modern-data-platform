@@ -19379,9 +19379,9 @@ services:
       com.platys.name: "supabase"
       com.platys.description: "Supabase Studio"
       com.platys.webui.title: "Supabase UI"
-      com.platys.webui.url: "http://dataplatform:28249"
+      com.platys.webui.url: "http://dataplatform:28260"
     ports:
-      - 28249:8082      
+      - 28260:8082      
     environment:
       STUDIO_PG_META_URL: http://supabase-meta:8080
       POSTGRES_PASSWORD: ${PLATYS_SUPABASE_DB_PASSWORD:-{{SUPABASE_db_password}}}
@@ -19417,7 +19417,7 @@ services:
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
-    restart: always
+    restart: {{container_restart_policy}}
     healthcheck:
       test:
         [
@@ -19429,6 +19429,47 @@ services:
       timeout: 10s
       interval: 5s
       retries: 3
+
+  supabase-kong:
+    image: kong:2.8.1
+    container_name: supabase-kong
+    hostname: supabase-kong
+    labels:
+      com.platys.name: "supabase"
+      com.platys.description: "Supabase Kong"
+      com.platys.webui.title: "Supabase UI"
+      com.platys.webui.url: "http://dataplatform:28258"
+      com.platys.password.envvars: "PLATYS_SUPABASE_DASHBOARD_PASSWORD"      
+    ports:
+      - 28258:8000/tcp
+      - 28259:8443/tcp      
+    environment:
+      KONG_DATABASE: "off"
+      KONG_DECLARATIVE_CONFIG: /home/kong/kong.yml
+      # https://github.com/supabase/cli/issues/14
+      KONG_DNS_ORDER: LAST,A,CNAME
+      KONG_PLUGINS: request-transformer,cors,key-auth,acl,basic-auth
+      KONG_NGINX_PROXY_PROXY_BUFFER_SIZE: 160k
+      KONG_NGINX_PROXY_PROXY_BUFFERS: 64 160k
+      SUPABASE_ANON_KEY: {{SUPABASE_anon_key}}
+      SUPABASE_SERVICE_KEY: {{SUPABASE_service_role_key}}
+      DASHBOARD_USERNAME: {{SUPABASE_dashboard_username}}
+      DASHBOARD_PASSWORD: ${PLATYS_SUPABASE_DASHBOARD_PASSWORD:-{{SUPABASE_dashboard_password}}}
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./conf/supabase/kong/kong.yml:/home/kong/temp.yml:ro
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    entrypoint: bash -c 'eval "echo \"$$(cat ~/temp.yml)\"" > ~/kong.yml && /docker-entrypoint.sh kong docker-start'
+    restart: {{container_restart_policy}}
 
   supabase-auth:
     image: supabase/gotrue:{{__SUPABASE_AUTH_version}}
@@ -19508,7 +19549,7 @@ services:
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
-    restart: always
+    restart: {{container_restart_policy}}
     healthcheck:
       test:
         [
@@ -19554,7 +19595,7 @@ services:
       [
         "postgrest"
       ] 
-    restart: always
+    restart: {{container_restart_policy}}
 
   supabase-realtime:
     image: supabase/realtime:{{__SUPABASE_REALTIME_version}}
@@ -19592,7 +19633,7 @@ services:
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
-    restart: always
+    restart: {{container_restart_policy}}
     healthcheck:
       test:
         [
@@ -19647,7 +19688,7 @@ services:
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
-    restart: always
+    restart: {{container_restart_policy}}
     healthcheck:
       test:
         [
@@ -19689,6 +19730,7 @@ services:
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
     healthcheck:
       test:
         [
@@ -19726,6 +19768,7 @@ services:
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
 
   supabase-functions:
     image: supabase/edge-runtime:{{__SUPABASE_EDGE_RUNTIME_version}}
@@ -19754,13 +19797,14 @@ services:
     {% endif -%}   {#  use_timezone #}
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
     <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
     command:
       [
         "start",
         "--main-service",
         "/home/deno/functions/main"
       ]    
-    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
 
   supabase-analytics:
     image: supabase/logflare:{{__SUPABASE_ANALYTICS_version}}
@@ -19803,6 +19847,7 @@ services:
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
     <<: *logging 
     {% endif -%}   {#  logging_driver is defined ... #}    
+    restart: {{container_restart_policy}}
     healthcheck:
       test:
         [
@@ -19878,6 +19923,7 @@ services:
         "-c",
         "log_min_messages=fatal" # prevents Realtime polling queries from appearing in logs
       ]     
+    restart: {{container_restart_policy}}
     healthcheck:
       test:
         [
@@ -19922,6 +19968,7 @@ services:
         "--config",
         "/etc/vector/vector.yml"
       ]
+    restart: {{container_restart_policy}}
     healthcheck:
       test:
         [
@@ -19982,6 +20029,7 @@ services:
         "-c",
         "/app/bin/migrate && /app/bin/supavisor eval \"$$(cat /etc/pooler/pooler.exs)\" && /app/bin/server"
       ]
+    restart: {{container_restart_policy}}
     healthcheck:
       test:
         [
