@@ -19378,8 +19378,12 @@ services:
     labels:
       com.platys.name: "supabase"
       com.platys.description: "Supabase Studio"
+      com.platys.webui.title: "Supabase UI"
+      com.platys.webui.url: "http://dataplatform:28249"
+    ports:
+      - 28249:8082      
     environment:
-      STUDIO_PG_META_URL: http://meta:8080
+      STUDIO_PG_META_URL: http://supabase-meta:8080
       POSTGRES_PASSWORD: ${PLATYS_SUPABASE_DB_PASSWORD:-{{SUPABASE_db_password}}}
 
       DEFAULT_ORGANIZATION_NAME: Default Organization
@@ -19633,6 +19637,9 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
+    {% if SUPABASE_volume_map_data | default(false) %}  
+      - ./container-volume/supabase/storage:/var/lib/storage:z
+    {% endif -%}   {#  SUPABASE_volume_map_data #}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -19672,6 +19679,9 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
+    {% if SUPABASE_volume_map_data | default(false) %}  
+      - ./container-volume/supabase/imgproxy:/var/lib/storage:z      
+    {% endif -%}   {#  SUPABASE_volume_map_data #}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -19737,6 +19747,7 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
+      - ./scripts/supabase/functions:/home/deno/functions:Z
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -19826,23 +19837,32 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
-      - ./volumes/db/realtime.sql:/docker-entrypoint-initdb.d/migrations/99-realtime.sql:Z
-      # Must be superuser to create event trigger
-      - ./volumes/db/webhooks.sql:/docker-entrypoint-initdb.d/init-scripts/98-webhooks.sql:Z
-      # Must be superuser to alter reserved role
-      - ./volumes/db/roles.sql:/docker-entrypoint-initdb.d/init-scripts/99-roles.sql:Z
-      # Initialize the database settings with JWT_SECRET and JWT_EXP
-      - ./volumes/db/jwt.sql:/docker-entrypoint-initdb.d/init-scripts/99-jwt.sql:Z
       # PGDATA directory is persisted between restarts
-      - ./volumes/db/data:/var/lib/postgresql/data:Z
+    {% if SUPABASE_volume_map_data | default(false) %}  
+      - ./container-volume/supabase/db:/var/lib/postgresql/data:Z
+    {% endif -%}   {#  SUPABASE_volume_map_data #}
+    {% if SUPABASE_volume_map_custom_conf | default(false) %}
+      # Use  volume to persist pgsodium decryption key between restarts      
+      - ./custom-conf/supabase:/etc/postgresql-custom      
+    {% endif -%}   {#  SUPABASE_volume_map_custom_conf #}
+
+      - ./init/supabase/db/realtime.sql:/docker-entrypoint-initdb.d/migrations/99-realtime.sql:Z
+      # Must be superuser to create event trigger
+      - ./init/supabase/db/webhooks.sql:/docker-entrypoint-initdb.d/init-scripts/98-webhooks.sql:Z
+      # Must be superuser to alter reserved role
+      - ./init/supabase/db/roles.sql:/docker-entrypoint-initdb.d/init-scripts/99-roles.sql:Z
+      # Initialize the database settings with JWT_SECRET and JWT_EXP
+      - ./init/supabase/db/jwt.sql:/docker-entrypoint-initdb.d/init-scripts/99-jwt.sql:Z
       # Changes required for internal supabase data such as _analytics
-      - ./volumes/db/_supabase.sql:/docker-entrypoint-initdb.d/migrations/97-_supabase.sql:Z
+      - ./init/supabase/db/_supabase.sql:/docker-entrypoint-initdb.d/migrations/97-_supabase.sql:Z
       # Changes required for Analytics support
-      - ./volumes/db/logs.sql:/docker-entrypoint-initdb.d/migrations/99-logs.sql:Z
+      - ./init/supabase/db/logs.sql:/docker-entrypoint-initdb.d/migrations/99-logs.sql:Z
       # Changes required for Pooler support
-      - ./volumes/db/pooler.sql:/docker-entrypoint-initdb.d/migrations/99-pooler.sql:Z
-      # Use named volume to persist pgsodium decryption key between restarts
-      - db-config:/etc/postgresql-custom      
+      - ./init/supabase/db/pooler.sql:/docker-entrypoint-initdb.d/migrations/99-pooler.sql:Z
+    {% if SUPABASE_db_provision_seed_data | default(false) %}
+      # Seed data should be inserted last (alphabetical order)
+      - ./init/supabase/db/seed/data.sql:/docker-entrypoint-initdb.d/999-seed.sql      
+    {% endif -%}   {#  SUPABASE_db_provision_seed_data #}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"

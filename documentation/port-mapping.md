@@ -746,7 +746,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28246 | 8081 | kestra |
 28247 | 4040 | ngrok |
 28248 | 3002 | firecrawl-api |
-28249 | | |
+28249 | 8082 | supabase-studio |
 28250 | 4040 | nvidia-nim-1 |
 28251 | 4040 | nvidia-nim-2 |
 28252 | 4040 | nvidia-nim-3 |
