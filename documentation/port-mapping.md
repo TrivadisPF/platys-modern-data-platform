@@ -242,6 +242,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 8501 | 8501 | crewai-studio | 
 8585 | 8585 | openmetadata-server |
 8586 | 8586 | openmetadata-server |
+8686 | 8686 | supabase-vector |
 8761 | 8761 | ioevent-cockpit-api |
 8787 | 8787 | r-studio |
 8812 | 8812 | questdb |
