@@ -13,4 +13,12 @@ platys gen
 
 ## How to use it?
 
+### Web UI
+
 Navigate to <http://dataplatform:28393>.
+
+### Unity Catalog CLI
+
+```bash
+docker exec -ti unity-catalog bin/uc table list --catalog unity --schema default
+```
