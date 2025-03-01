@@ -1270,7 +1270,7 @@ networks:
 {% elif (SPARK_base_version | lower) == '3.5'  %}
   {% set ns.sparkTableFormatJar = ("/opt/bitnami/spark/jars/delta-spark_2.12-3.2.1.jar,/opt/bitnami/spark/jars/delta-storage-3.2.1.jar" if SPARK_table_format_type == 'delta' else "/opt/bitnami/spark/jars/iceberg-spark-runtime-3.5_2.12-1.5.2.jar" if SPARK_table_format_type == 'iceberg' else "/opt/bitnami/spark/jars/hudi-spark3.3-bundle_2.12-0.15.0.jar" if SPARK_table_format_type == 'hudi') -%}
   {% set ns.sparkDeltaDependencies = "io.delta:delta-spark_2.12:3.2.1,io.delta:delta-storage:3.2.1" -%}
- {% if UNITY_CATALOG_enable | default(false) %}
+ {% if UNITY_CATALOG_enable and SPARK_table_format_type == 'delta' | default(false) %}
   {% set ns.sparkTableFormatJar = ns.sparkTableFormatJar ~ ",/opt/bitnami/spark/jars/unitycatalog-spark_2.13-0.2.1.jar" -%}
   {% set ns.sparkDeltaDependencies = ns.sparkDeltaDependencies ~ ",io.unitycatalog:unitycatalog-spark_2.12:0.2.1" -%}
  {% endif %}
@@ -5472,7 +5472,7 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: io.unitycatalog.spark.UCSingleCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_my__catalog: io.unitycatalog.spark.UCSingleCatalog
       SPARK_DEFAULTS_CONF_spark_sql_extensions: io.delta.sql.DeltaSparkSessionExtension
-      SPARK_DEFAULTS_CONF_spark_sql_catalog_my_catalog_uri: '{{s3Endpoint | default(omit) }}'     
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_my_catalog_uri: 'http://unity-catalog:8080'     
       SPARK_DEFAULTS_CONF_spark_sql_catalog_my_catalog_token: ''     
       SPARK_DEFAULTS_CONF_spark_sql_defaultCatalog: my_catalog      
     {%elif SPARK_table_format_type == 'hudi' | default(false) %}
