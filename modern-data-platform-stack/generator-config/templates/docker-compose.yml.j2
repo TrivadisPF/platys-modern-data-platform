@@ -25268,6 +25268,45 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {#  DATA_MESH_MANAGER_enable #}
 
+{% if DATA_MESH_MANAGER_CONNECTOR_DATABRICKS_enable | default(false) %}
+  #  ================================== Data Mesh Manager Connector Databricks ================= #
+  datamesh-manager-connector-databricks:
+    image: datameshmanager/datamesh-manager-connector-databricks:{{__DATA_MESH_MANAGER_version}}
+    container_name: datamesh-manager-connector-databricks
+    hostname: datamesh-manager-connector-databricks
+    labels:
+      com.platys.name: "data-mesh-manager"
+      com.platys.description: "Data Mesh Manager Connector Databricks"
+      com.platys.password.envvars: "PLATYS_DATA_MESH_MANAGER_POSTGRESQL_PASSWORD"    
+    environment:
+      - DATAMESHMANAGER_CLIENT_HOST=http://data-mesh-manager:8080
+      - DATAMESHMANAGER_CLIENT_APIKEY=
+      - DATAMESHMANAGER_CLIENT_DATABRICKS_WORKSPACE_HOST={{DATA_MESH_MANAGER_CONNECTOR_DATABRICKS_workspace_host}}
+      - DATAMESHMANAGER_CLIENT_DATABRICKS_WORKSPACE_CLIENTID={{DATA_MESH_MANAGER_CONNECTOR_DATABRICKS_workspace_clientid}}
+      - DATAMESHMANAGER_CLIENT_DATABRICKS_WORKSPACE_CLIENTSECRET=${PLATYS_DATA_MESH_MANAGER_POSTGRESQL_PASSWORD:-{{DATA_MESH_MANAGER_CONNECTOR_DATABRICKS_workspace_clientsecret}}}
+      - DATAMESHMANAGER_CLIENT_DATABRICKS_ACCOUNT_HOST={{DATA_MESH_MANAGER_CONNECTOR_DATABRICKS_account_host}}
+      - DATAMESHMANAGER_CLIENT_DATABRICKS_ACCOUNT_ACCOUNTID={{DATA_MESH_MANAGER_CONNECTOR_DATABRICKS_account_accountid}}
+      - DATAMESHMANAGER_CLIENT_DATABRICKS_ACCOUNT_CLIENTID={{DATA_MESH_MANAGER_CONNECTOR_DATABRICKS_account_clientid}}
+      - DATAMESHMANAGER_CLIENT_DATABRICKS_ACCOUNT_CLIENTSECRET=${PLATYS_DATA_MESH_MANAGER_POSTGRESQL_PASSWORD:-{{DATA_MESH_MANAGER_CONNECTOR_DATABRICKS_account_clientsecret}}}
+      - DATAMESHMANAGER_CLIENT_DATABRICKS_ASSETS_POLLINTERVAL=PT10M
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer    
+    {% if DATA_MESH_MANAGER_volume_map_data %}      
+      - ./container-volume/data-mesh-manager/postgresql-data:/var/lib/postgresql/data
+    {% endif -%}   {#  DATA_MESH_MANAGER_volume_map_data #}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}    
+{% endif %}   {#  DATA_MESH_MANAGER_CONNECTOR_DATABRICKS_enable #}
+
 {% if DATA_CONTRACT_MANAGER_enable | default(false) %}
   #  ================================== Data Contract Manager ================= #
   data-contract-manager:
