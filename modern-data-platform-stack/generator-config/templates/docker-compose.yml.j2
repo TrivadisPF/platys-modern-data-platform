@@ -22771,8 +22771,7 @@ services:
           lakefs run --local-settings &
     {%if LAKEFS_database_type == 'local' and LAKEFS_quickstart_enabled | default(false) %}
           wait-for -t 60 lakefs:8000 -- echo "---- Creating repository ----" &&  \
-              wget -q --header="Authorization: Basic $(echo -n "$$LAKEFS_INSTALLATION_ACCESS_KEY_ID:$$LAKEFS_INSTALLATION_SECRET_ACCESS_KEY" | base64 -w 0)" --header="Content-Type: application/json" --post-data='{"name": "{{LAKEFS_quickstart_repo_name | default('demo')}}", "storage_namespace": "{{LAKEFS_blockstore_type}}://{{LAKEFS_quickstart_bucket_name | default('lakefs-demo-bucket')}}/{{LAKEFS_quickstart_repo_name | default('demo')}}", "default_branch": "{{LAKEFS_quickstart_default_branch | default('main')}}",  "sample_data": {{LAKEFS_quickstart_with_demo_data | default(false) | lower}}, "read_only": false}' -O- "http://lakefs:8000/api/v1/repositories"                                 
-          # wait-for -t 60 lakefs:8000 -- lakectl repo create --default-branch {{LAKEFS_quickstart_default_branch | default(main)}} lakefs://{{LAKEFS_quickstart_repo_name | default(demo)}} s3://{{LAKEFS_quickstart_repo_name | default(demo)}} || true
+              lakectl repo create lakefs://{{LAKEFS_quickstart_repo_name | default(demo)}} {{LAKEFS_blockstore_type}}://{{LAKEFS_quickstart_bucket_name | default('lakefs-demo-bucket')}}/{{LAKEFS_quickstart_repo_name | default(demo)}} --default-branch {{LAKEFS_quickstart_default_branch | default(main)}} {{'--sample_data' if LAKEFS_quickstart_with_demo_data | default(false)}} || true
     {% endif -%}   {#  LAKEFS_quickstart_enabled  #}
           echo "-------- Let's go and have axolotl fun! --------"
           wait
