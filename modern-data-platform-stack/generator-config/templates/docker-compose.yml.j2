@@ -13752,18 +13752,30 @@ services:
     labels:
       com.platys.name: 'litellm'
       com.platys.description: "Proxy for calling all LLM APIs using OpenAI format"
+      com.platys.webui.title: "LiteLLM UI"
+      com.platys.webui.url: "http://dataplatform:/ui"
       com.platys.restapi.title: "LiteLLM API"
-      com.platys.restapi.url: "http://dataplatform:11435"
+      com.platys.restapi.url: "http://dataplatform:4002"
     ports:
-      - 11435:11434
+      - 4002:4000
     extra_hosts:
       - "host.docker.internal:host-gateway"
-    {%if use_timezone | default(false) %}
     environment:
+      LITELLM_MASTER_KEY: sk-1234
+      LITELLM_LOG: info
+      DISABLE_ADMIN_UI: false
+      UI_USERNAME: litellm
+      UI_PASSWORD: abc123!
+    {%if LITELLM_use_db | default(false) %}
+      DATABASE_URL: "postgresql://{{LITELLM_db_user}}:{{LITELLM_db_password}}@postgresql:5432/{{LITELLM_db_name}}"
+      STORE_MODEL_IN_DB: true
+    {% endif -%}   {#  LITELLM_use_db #}
+    {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
+      - ./custom-conf/litellm/config.yaml:/app/config.yaml
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -13771,8 +13783,7 @@ services:
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
-    command: ["/bin/sh", "-c", "pip install async_generator && litellm --model ollama/llama2 --api_base http://host.docker.internal:11434 --host 0.0.0.0 --port 11434"]
-    entrypoint: []
+    command: [{{'"--config", "/app/config.yaml",' if LITELLM_use_db}}"--port", "4000", "--num_workers", "8"]
     restart: {{container_restart_policy}}
 {% endif %}   {# LITELLM_enable  #}
 
@@ -22733,6 +22744,7 @@ services:
       LAKEFS_BLOCKSTORE_S3_CLIENT_LOG_REQUEST: {{LAKEFS_blockstore_s3_client_log_request | default(false) }}
       LAkEFS_BLOCKSTORE_S3_CLIENT_LOG_RETRIES: {{LAKEFS_blockstore_s3_client_log_retries | default(false) }}
     {% endif -%}   {#  LAKEFS_blockstore_type #}
+      LAKEFS_UI_ENABLED: true
       LAKEFS_ACTIONS_ENABLED: {{LAKEFS_actions_enabled}}
       LAKEFS_ACTIONS_LUA_NET_HTTP_ENABLED: {{LAKEFS_actions_lua_net_http_enabled}}
       LAKEFS_ACTIONS_ENV_ENABLED: {{LAKEFS_actions_env_enabled | default(false) }}
