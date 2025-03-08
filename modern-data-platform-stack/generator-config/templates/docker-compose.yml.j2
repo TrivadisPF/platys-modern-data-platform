@@ -13753,7 +13753,7 @@ services:
       com.platys.name: 'litellm'
       com.platys.description: "Proxy for calling all LLM APIs using OpenAI format"
       com.platys.webui.title: "LiteLLM UI"
-      com.platys.webui.url: "http://dataplatform:/ui"
+      com.platys.webui.url: "http://dataplatform:4002/ui"
       com.platys.restapi.title: "LiteLLM API"
       com.platys.restapi.url: "http://dataplatform:4002"
     ports:
@@ -13766,16 +13766,16 @@ services:
       DISABLE_ADMIN_UI: false
       UI_USERNAME: litellm
       UI_PASSWORD: abc123!
-    {%if LITELLM_use_db | default(false) %}
       DATABASE_URL: "postgresql://{{LITELLM_db_user}}:{{LITELLM_db_password}}@postgresql:5432/{{LITELLM_db_name}}"
       STORE_MODEL_IN_DB: true
-    {% endif -%}   {#  LITELLM_use_db #}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
+    {%if LITELLM_use_custom_config | default(false)%}  
       - ./custom-conf/litellm/config.yaml:/app/config.yaml
+    {% endif -%}   {#  LITELLM_use_custom_config #}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -13783,7 +13783,7 @@ services:
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
-    command: [{{'"--config", "/app/config.yaml",' if LITELLM_use_db}}"--port", "4000", "--num_workers", "8"]
+    command: [{{'"--config", "/app/config.yaml",' if LITELLM_use_custom_config}}"--port", "4000", "--num_workers", "8"]
     restart: {{container_restart_policy}}
 {% endif %}   {# LITELLM_enable  #}
 
