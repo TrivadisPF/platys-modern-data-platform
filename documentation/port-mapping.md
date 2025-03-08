@@ -91,6 +91,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 3838 | 3838 | shiny-server |
 4000 | 4000 | graphql-mesh |
 4001 | 4000 | supabase-analytics |
+4002 | 4000 | litellm |
 4004 | 4004 | log4brains |
 4040 | 4040 | spark-master (ui) |
 4041 | 4041 | spark-master (ui) |
@@ -330,7 +331,6 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 11212 | 11211 | ignite-1 |
 11235 | 11235 | crawl4ai |
 11434 | 11434 | ollama |
-11435 | 11434 | litellm |
 12222 | 2222 | risingwave |
 13133 | 13133 | otel-collector |
 14250 | 14250 | jaeger (model.proto port)
