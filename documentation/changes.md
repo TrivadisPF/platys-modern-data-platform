@@ -64,7 +64,7 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Nvidia NIMs
  * No Language Left Behind (NLLB)
  * Supabase
- * ollama-deep-researcher
+ * Local Deep Researcher
 
 ### New/Updated Cookbook Recipes
 
