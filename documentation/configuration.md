@@ -46,6 +46,10 @@ There are some overall settings which will control the behaviour for all or a gr
 | `DATAHUB_gms_url`                             	| `` 	| 1.16.0 | the web url of the external DataHub GMS service instance to connect to. |  
 | `OLLAMA_enable`                             	| `false` | 1.17.0 | Use external Ollama service. Specify the Ollama base URL through the `OLLAMA_url` property.  |  
 | `OLLAMA_url`                             	| `http://${PUBLIC_IP}:11434` 	| 1.17.0 | the base url of the Ollama service (in the format `http://<host>:<port>`) |  
+| `LMSTUDIO_enable`                             	| `false` | 1.18.0 | Use external LMStudio service. Specify the LMStuido base URL through the `LMSTUDIO_url` property.  |  
+| `LMSTUDIO_url`                             	| `http://${PUBLIC_IP}:1234/v1` 	| 1.18.0 | the base url of the LMStudio service (in the format `http://<host>:<port>`) |  
+| `SEARXNG_enable`                             	| `false` | 1.18.0 | Use external SearXNG service. Specify the SearXNG URL through the `SEARXNG_url ` property.  |  
+| `SEARXNG_url`                             	| `` 	| 1.18.0 | the url of the [SearXNG instance](https://searx.space/#). |
 
 ## Platform Services
 
