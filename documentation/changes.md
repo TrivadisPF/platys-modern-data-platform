@@ -120,7 +120,7 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Update `nifi` to `2.2.0`
  * Update `nifi` to `1.28.1`
  * Update `flink` to `1.20-scala_2.12-java17`
- * Update `Confluent Platform` to `7.7.0`
+ * Update `Confluent Platform` to `7.8.0`
  * Update `milvus` to `v2.4.11`
  * Update `attu` to `v2.4.8`
  * Update `postgresql` to `17`
