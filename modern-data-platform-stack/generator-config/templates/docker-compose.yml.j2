@@ -1549,7 +1549,7 @@ services:
     {% set dcName = 'rack1' %}
     {% set zookeeperPort = 2181 + (dataCenterId * ZOOKEEPER_nodes) %}
   {{serviceName}}:
-  {% if  (KAFKA_edition | lower) == 'enterprise' or (KAFKA_edition | lower) == 'community' | default(false) %}
+  {% if (KAFKA_edition | lower) == 'enterprise' or (KAFKA_edition | lower) == 'community' | default(false) %}
     image: confluentinc/{{ 'cp-server' if (KAFKA_edition | lower) == 'enterprise' else 'cp-kafka' }}:{{__CONFLUENT_PLATFORM_version}}
   {% else %}
     image: apache/kafka:{{__KAFKA_version}}
@@ -1702,7 +1702,9 @@ services:
       KAFKA_JMX_PORT: {{portJMX}}
       KAFKA_JMX_OPTS: '-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.rmi.port={{portJMX}}'
       KAFKA_JMX_HOSTNAME: '${PUBLIC_IP:-127.0.0.1}'
+    {% if (KAFKA_edition | lower) == 'enterprise' or (KAFKA_edition | lower) == 'community' | default(false) %}
       KAFKA_LOG4J_ROOT_LOGLEVEL: '{{KAFKA_log4j_root_level}}'
+    {% endif -%} {# KAFKA_edition == enterprise or community #}
     {% if KAFKA_log4j_loggers is defined and KAFKA_log4j_loggers %}
       KAFKA_LOG4J_LOGGERS: '{{KAFKA_log4j_loggers}}'
     {% endif -%} {# KAFKA_log4j_loggers #}
