@@ -18,6 +18,7 @@ networks:
 {% set __PROVISIONING_DATA_version = PROVISIONING_DATA_version | default('latest') -%}
 
 {% set __CONFLUENT_PLATFORM_version = CONFLUENT_PLATFORM_version | default('latest') -%}
+{% set __KAFKA_version = KAFKA_version | default('latest') -%}
 {% set __KAFKA_INIT_version = KAFKA_INIT_version | default('latest') -%}
 {% set __KAFKA_MM2_version = KAFKA_MM2_version | default('latest') -%}
 {% set __APICURIO_SCHEMA_REGISTRY_version = APICURIO_SCHEMA_REGISTRY_version | default('latest') -%}
@@ -1548,7 +1549,11 @@ services:
     {% set dcName = 'rack1' %}
     {% set zookeeperPort = 2181 + (dataCenterId * ZOOKEEPER_nodes) %}
   {{serviceName}}:
+    {% if  (KAFKA_edition | lower) == 'enterprise' or (KAFKA_edition | lower) == 'community' | default(false) %}
     image: confluentinc/{{ 'cp-server' if (KAFKA_edition | lower) == 'enterprise' else 'cp-kafka' }}:{{__CONFLUENT_PLATFORM_version}}
+    {% else %}
+    image: apache/kafka:{{__KAFKA_version}}
+    {% endif -%}
     container_name: {{serviceName}}
     hostname: {{serviceName}}
     labels:
