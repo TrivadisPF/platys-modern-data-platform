@@ -145,6 +145,7 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Support for `valkey` as an edition to the Redis service, to use Valkey (the fork of Redis with open source license) to use as a drop-in replacement
  * Update LakeFS to the latest version and add more configuration options
  * NiFi 2.0.0 can be run it in parallel to a 1.x version (`NIFI2_enable` config setting)
+ * Kafka Open Source docker images are now supported (use `KAFKA_edition` = `oss`)
 
 ### Breaking Changes
 
@@ -164,6 +165,7 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Rename config setting `NEO4J_admin_password` to `NEO4J_password`
  * Rename config setting `STREAMLIT_environment` to `STREAMLIT_env_variables`
  * Ollama WebUI renamed to Open WebUI (`OPEN_WEBUI_xxx` and no longer `OLLAMA_WEBUI_xxx`)
+ * `KAFKA_use_kraft_mode` now defaults to `true`
  
 ## What's new in 1.17.1
 
