@@ -106,7 +106,7 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Update `hasura` to `v2.38.1-ce`
  * Update `marquez` and `marquez-web` to `0.50.0`
  * Update `datastax` to `6.8.44`
- * Update `elasticsearch` to `7.17.20` and `8.13.0`
+ * Update `elasticsearch` to `7.17.28` and `8.17.4`
  * Update `kibana` to `7.17.20` and `8.13.0`
  * Update `memcached` to `1.6.26`
  * Update `redis-stack` to `7.2.0-v10`
@@ -1220,3 +1220,4 @@ The Modern Analytical Data Platform Stack version 1.2.0 contains the following n
 * Rename `broker-n` service to `kafka-n` to be more clear
 * Upgrade to Confluent Platform 5.4.0
 * Add [concept of edition](service-design.md) for Kafka and Jupyter services
+	
