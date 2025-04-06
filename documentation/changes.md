@@ -82,7 +82,8 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Update `memgraph-mage` to `1.16-memgraph-2.16-dev`
  * Update `arcadedb` to `24.2.1`
  * Update `dgraph` to `v23.1.1`
- * Update `graphdb` to `10.6.3`
+ * Update `graphdb-free` to `10.8.4`
+ * Update `graphdb` to `10.8.5`
  * Update `questdb` to `7.4.0`
  * Update `kudu` to `1.17`
  * Update `chroma` to `0.4.25.dev139`
@@ -107,7 +108,7 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Update `marquez` and `marquez-web` to `0.50.0`
  * Update `datastax` to `6.8.44`
  * Update `elasticsearch` to `7.17.28` and `8.17.4`
- * Update `kibana` to `7.17.20` and `8.13.0`
+ * Update `kibana` to `7.17.28` and `8.17.4`
  * Update `memcached` to `1.6.26`
  * Update `redis-stack` to `7.2.0-v10`
  * Update `stardog` to `latest`
@@ -134,7 +135,8 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Update `opa` to `0.71.0-dev`
  * Update `styra` to `1.30.0-80-debug`
  * Update `jikkou` to `main` - to support Mac M1
-
+ * Update `telegraf` to `1.34`
+ * 
 ### Enhancements
 
  * a `README.md` file is generated which lists all the services contained in the `docker-compose.yml` file
