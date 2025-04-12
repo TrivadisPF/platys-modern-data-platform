@@ -1,6 +1,8 @@
 #!/bin/sh
 
-cp -r /opt/mdps-gen/static-data/* /opt/mdps-gen/destination
+# we assume that the output volume is mapped to /opt/mdps-gen/destination
+
+#cp -r /opt/mdps-gen/static-data/* /opt/mdps-gen/destination
 
 if [ ${VERBOSE:-0} -eq 1 ]
 then
@@ -14,8 +16,6 @@ then
 else
    docker-compose-templer -f /opt/mdps-gen/stack-config.yml
 fi
-
-# we asume that the output volume is mapped to /opt/mdps-gen/destination
 
 if [ ${DEL_EMPTY_LINES:-0} -eq 1 ]
 then
@@ -47,5 +47,13 @@ jinja2 /opt/mdps-gen/README.md.j2 /opt/mdps-gen/destination/docker-compose.yml -
 jinja2 /opt/mdps-gen/dotenv-passsword.j2 /opt/mdps-gen/destination/docker-compose.yml --format=yaml --outfile /opt/mdps-gen/destination/.env-password
 #cat /opt/mdps-gen/destination/.env-password > /opt/mdps-gen/destination/.env-password
 
+# Generate the copy-static-data.sh file for the generated platform
+jinja2 /opt/mdps-gen/copy-static-data.j2 /opt/mdps-gen/destination/docker-compose.yml --format=yaml --outfile /opt/mdps-gen/destination/opy-static-data.sh
+
+# Copy the static data to the generated platform
+chmod +x /opt/mdps-gen/destination/opy-static-data.sh
+/opt/mdps-gen/destination/opy-static-data.sh
+
 # Create a .gitignore and add the .env to it, if it does not yet exists
 grep -qxF '.env' /opt/mdps-gen/destination/.gitignore || echo '.env' >> /opt/mdps-gen/destination/.gitignore
+
