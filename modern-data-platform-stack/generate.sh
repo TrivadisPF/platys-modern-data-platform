@@ -50,9 +50,9 @@ jinja2 /opt/mdps-gen/copy-static-data.j2 /opt/mdps-gen/destination/docker-compos
 
 # Copy the static data to the generated platform
 chmod +x /opt/mdps-gen/destination/copy-static-data.sh
-/opt/mdps-gen/destination/copy-static-data.sh
+# /opt/mdps-gen/destination/copy-static-data.sh
 
-#cp /opt/mdps-gen/static-data/* /opt/mdps-gen/destination
+cp -r /opt/mdps-gen/static-data/* /opt/mdps-gen/destination
 
 # Create a .gitignore and add the .env to it, if it does not yet exists
 grep -qxF '.env' /opt/mdps-gen/destination/.gitignore || echo '.env' >> /opt/mdps-gen/destination/.gitignore
