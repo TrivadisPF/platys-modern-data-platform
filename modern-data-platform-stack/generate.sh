@@ -50,7 +50,7 @@ jinja2 /opt/mdps-gen/copy-static-data.j2 /opt/mdps-gen/destination/docker-compos
 
 # Copy the static data to the generated platform
 chmod +x /opt/mdps-gen/destination/copy-static-data.sh
-# /opt/mdps-gen/destination/copy-static-data.sh
+/opt/mdps-gen/destination/copy-static-data.sh
 
 cp -r /opt/mdps-gen/static-data/* /opt/mdps-gen/destination
 
