@@ -55,5 +55,7 @@ chmod +x /tmp/copy-static-data.sh
 #cp -r /opt/mdps-gen/static-data/* /opt/mdps-gen/destination
 
 # Create a .gitignore and add the .env to it, if it does not yet exists
-grep -qxF '.env' /opt/mdps-gen/destination/.gitignore || echo '.env' >> /opt/mdps-gen/destination/.gitignore 2>/dev/null
+# Ensure the .gitignore file exists
+touch /opt/mdps-gen/destination/.gitignore
+grep -qxF '.env' /opt/mdps-gen/destination/.gitignore || echo '.env' >> /opt/mdps-gen/destination/.gitignore
 
