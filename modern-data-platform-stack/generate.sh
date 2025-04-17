@@ -46,11 +46,11 @@ jinja2 /opt/mdps-gen/dotenv-passsword.j2 /opt/mdps-gen/destination/docker-compos
 #cat /opt/mdps-gen/destination/.env-password > /opt/mdps-gen/destination/.env-password
 
 # Generate the copy-static-data.sh file for the generated platform
-jinja2 /opt/mdps-gen/copy-static-data.j2 /opt/mdps-gen/destination/docker-compose.yml --format=yaml --outfile /opt/mdps-gen/destination/copy-static-data.sh
+jinja2 /opt/mdps-gen/copy-static-data.j2 /opt/mdps-gen/destination/docker-compose.yml --format=yaml --outfile /tmp/copy-static-data.sh
 
 # Copy the static data to the generated platform
-chmod +x /opt/mdps-gen/destination/copy-static-data.sh
-/opt/mdps-gen/destination/copy-static-data.sh
+chmod +x /tmp/copy-static-data.sh
+/tmp/copy-static-data.sh
 
 #cp -r /opt/mdps-gen/static-data/* /opt/mdps-gen/destination
 
