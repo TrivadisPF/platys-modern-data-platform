@@ -1,0 +1,1 @@
+Contains the data of influxdb2 service, if flag INFLUXDB2_volume_map_data is set to true.
