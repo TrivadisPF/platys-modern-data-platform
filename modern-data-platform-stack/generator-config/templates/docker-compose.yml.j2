@@ -16411,11 +16411,13 @@ services:
       - 28123:8081
     environment:
       - ME_CONFIG_MONGODB_ENABLE_ADMIN=true
-      - ME_CONFIG_MONGODB_URL=mongodb://mongo-1:27017
     {%if MONGO_root_username is defined and MONGO_root_username and MONGO_root_username | length > 0 %}  
+      - ME_CONFIG_MONGODB_URL=mongodb://{{MONGO_root_username}}:${PLATYS_MONGO_PASSWORD:-{{MONGO_root_password}}}@mongo-1:27017
       - ME_CONFIG_MONGODB_ADMINUSERNAME={{MONGO_root_username}}
       - ME_CONFIG_MONGODB_ADMINPASSWORD=${PLATYS_MONGO_PASSWORD:-{{MONGO_root_password}}}
       - ME_CONFIG_MONGODB_AUTH_DATABASE=admin
+    {% else -%}
+      - ME_CONFIG_MONGODB_URL=mongodb://mongo-1:27017
     {% endif -%}   {#  MONGO_root_username #}
       - ME_CONFIG_MONGODB_ENABLE_ADMIN=true
     {%if MONGO_EXPRESS_username is defined and MONGO_EXPRESS_username and MONGO_EXPRESS_username | length > 0 %}  
