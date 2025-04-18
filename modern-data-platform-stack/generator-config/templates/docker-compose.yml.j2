@@ -1453,8 +1453,8 @@ services:
       - ./security/zookeeper/zookeeper.sasl.jaas.config:/etc/kafka/zookeeper_server_jaas.conf
     {% endif -%} {# KAFKA_sasl_mechanism = 'SCRAM-SHA-256' or 'SCRAM-SHA-512' #}
     {% if ZOOKEEPER_volume_map_data %}
-      - "./container-volume/zookeeper-{{loop.index}}/data:/var/lib/zookeeper/data"
-      - "./container-volume/zookeeper-{{loop.index}}/log:/var/lib/zookeeper/log"
+      - "./container-volume/zookeeper/zookeeper-{{loop.index}}/data:/var/lib/zookeeper/data"
+      - "./container-volume/zookeeper/zookeeper-{{loop.index}}/log:/var/lib/zookeeper/log"
     {% endif %}
     {% if jmx_monitoring_with_prometheus_enable %}
       - ./scripts/kafka/jmx-exporter/:/usr/share/jmx-exporter
@@ -1733,7 +1733,7 @@ services:
       {% endfor %}
     {% endif %}
     {% if KAFKA_volume_map_data %}
-      - "./container-volume/kafka-{{loop.index}}:/var/lib/kafka/data"
+      - "./container-volume/kafka/kafka-{{loop.index}}:/var/lib/kafka/data"
     {% endif %}
     {% if ns.secureKafkaEnabled and ns.securityProtocol == 'SASL_PLAINTEXT' %}
       {% if KAFKA_sasl_mechanism == 'SCRAM-SHA-256' or KAFKA_sasl_mechanism == 'SCRAM-SHA-512' %}
@@ -5201,7 +5201,7 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
-      - ./container-volume/namenode:/hadoop/dfs/name
+      - ./container-volume/hadoop/namenode:/hadoop/dfs/name
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -5237,7 +5237,7 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
-      - ./container-volume/datanode-{{loop.index}}:/hadoop/dfs/data
+      - ./container-volume/hadoop/datanode-{{loop.index}}:/hadoop/dfs/data
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -7115,7 +7115,7 @@ services:
     volumes:
       - ./data-transfer:/data-transfer
     {% if HIVE_METASTORE_volume_map_data %}
-      - ./container-volume/hive-metastore-db/data:/var/lib/postgresql/data/pgdata:Z
+      - ./container-volume/hive-metastore/data:/var/lib/postgresql/data/pgdata:Z
     {% endif %}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
@@ -10008,10 +10008,10 @@ services:
     volumes:
       - ./data-transfer:/data-transfer
     {% if STREAMSETS_volume_map_data %}
-      - ./container-volume/streamsets-1/data:/data:Z
+      - ./container-volume/streamsets/data:/data:Z
     {% endif %}
     {% if STREAMSETS_volume_map_logs %}
-      - ./container-volume/streamsets-1/logs:/logs:Z
+      - ./container-volume/streamsets/logs:/logs:Z
     {% endif %}
     {% if STREAMSETS_volume_map_security_policy %}
       - ./custom-conf/streamsets/sdc-security.policy:/etc/sdc/sdc-security.policy:Z
@@ -10249,14 +10249,14 @@ services:
       - ./custom-conf/nifi/config/nifi.properties:/tmp/nifi.properties.templ
     {% endif %}
     {% if NIFI_volume_map_data %}
-      - ./container-volume/nifi-{{loop.index}}/database_repository:/opt/nifi/nifi-current/database_repository
-      - ./container-volume/nifi-{{loop.index}}/flowfile_repository:/opt/nifi/nifi-current/flowfile_repository
-      - ./container-volume/nifi-{{loop.index}}/content_repository:/opt/nifi/nifi-current/content_repository
-      - ./container-volume/nifi-{{loop.index}}/provenance_repository:/opt/nifi/nifi-current/provenance_repository
-      - ./container-volume/nifi-{{loop.index}}/state:/opt/nifi/nifi-current/state
+      - ./container-volume/nifi/nifi-{{loop.index}}/database_repository:/opt/nifi/nifi-current/database_repository
+      - ./container-volume/nifi/nifi-{{loop.index}}/flowfile_repository:/opt/nifi/nifi-current/flowfile_repository
+      - ./container-volume/nifi/nifi-{{loop.index}}/content_repository:/opt/nifi/nifi-current/content_repository
+      - ./container-volume/nifi/nifi-{{loop.index}}/provenance_repository:/opt/nifi/nifi-current/provenance_repository
+      - ./container-volume/nifi/nifi-{{loop.index}}/state:/opt/nifi/nifi-current/state
     {% endif %}
     {% if NIFI_volume_map_logs %}
-      - ./container-volume/nifi-{{loop.index}}/logs:/opt/nifi/nifi-current/logs
+      - ./container-volume/nifi/nifi-{{loop.index}}/logs:/opt/nifi/nifi-current/logs
     {% endif %}
     {%if MINIO_enable or external['S3_enable'] | default(false) %}
       - aws-credentials-vol:/opt/nifi/nifi-current/.aws:RO
@@ -10394,14 +10394,14 @@ services:
       - ./custom-conf/nifi2/config/nifi.properties:/tmp/nifi.properties.custom
     {% endif %}
     {% if NIFI2_volume_map_data %}
-      - ./container-volume/nifi2-{{loop.index}}/database_repository:/opt/nifi/nifi-current/database_repository
-      - ./container-volume/nifi2-{{loop.index}}/flowfile_repository:/opt/nifi/nifi-current/flowfile_repository
-      - ./container-volume/nifi2-{{loop.index}}/content_repository:/opt/nifi/nifi-current/content_repository
-      - ./container-volume/nifi2-{{loop.index}}/provenance_repository:/opt/nifi/nifi-current/provenance_repository
-      - ./container-volume/nifi2-{{loop.index}}/state:/opt/nifi/nifi-current/state
+      - ./container-volume/nifi2/nifi2-{{loop.index}}/database_repository:/opt/nifi/nifi-current/database_repository
+      - ./container-volume/nifi2/nifi2-{{loop.index}}/flowfile_repository:/opt/nifi/nifi-current/flowfile_repository
+      - ./container-volume/nifi2/nifi2-{{loop.index}}/content_repository:/opt/nifi/nifi-current/content_repository
+      - ./container-volume/nifi2/nifi2-{{loop.index}}/provenance_repository:/opt/nifi/nifi-current/provenance_repository
+      - ./container-volume/nifi2/nifi2-{{loop.index}}/state:/opt/nifi/nifi-current/state
     {% endif %}
     {% if NIFI2_volume_map_logs %}
-      - ./container-volume/nifi2-{{loop.index}}/logs:/opt/nifi/nifi-current/logs
+      - ./container-volume/nifi2/nifi2-{{loop.index}}/logs:/opt/nifi/nifi-current/logs
     {% endif %}
     {%if MINIO_enable or external['S3_enable'] | default(false) %}
       - aws-credentials-vol:/opt/nifi/nifi-current/.aws:RO
@@ -10838,8 +10838,8 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
-      - ./container-volume/streampipes-backend:/root/.streampipes
-      - ./container-volume/streampipes-backend/files:/spImages
+      - ./container-volume/streampipes:/root/.streampipes
+      - ./container-volume/streampipes/files:/spImages
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -15784,7 +15784,7 @@ services:
     hostname: redis-replica-{{loop.index}}
     container_name: redis-replica-{{loop.index}}
     labels:
-      com.platys.name: "redis"
+      com.platys.name: "{{'redis' if REDIS_edition | lower == 'redis' else 'valkey'}}"
       com.platys.description: "Key-Value NoSQL datastore"
     ports:
       - {{external_port}}:6379
@@ -16378,10 +16378,10 @@ services:
       # seeding scripts
       - ./init/mongo:/docker-entrypoint-initdb.d
     {% if MONGO_volume_map_data %}
-      - ./container-volume/mongo-{{loop.index}}/data:/data/db
+      - ./container-volume/mongo/mongo-{{loop.index}}/data:/data/db
     {% endif -%}   {#  MONGO_volume_map_data #}
     {% if MONGO_volume_map_log %}
-      - ./container-volume/mongo-{{loop.index}}/log:/data/log
+      - ./container-volume/mongo/mongo-{{loop.index}}/log:/data/log
     {% endif -%}   {#  MONGO_volume_map_log #}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
@@ -16809,7 +16809,7 @@ services:
     volumes:
       - ./data-transfer:/data-transfer
     {% if OPENSEARCH_volume_map_data %}
-      - ./container-volume/opensearch-{{loop.index}}/data:/usr/share/opensearch/data
+      - ./container-volume/opensearch/opensearch-{{loop.index}}/data:/usr/share/opensearch/data
     {% endif -%}   {#  OPENSEARCH_volume_map_data #}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
@@ -17498,9 +17498,9 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
-      - ./conf/influxdata/influxdb/influxdb.conf:/etc/influxdb/influxdb.conf
+      - ./conf/influxdb/influxdb.conf:/etc/influxdb/influxdb.conf
     {% if INFLUXDB_volume_map_data %}
-      - "./container-volume/influxdata/influxdb:/var/lib/influxdb"
+      - "./container-volume/influxdb:/var/lib/influxdb"
     {% endif %}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
@@ -17560,7 +17560,7 @@ services:
     volumes:
       - ./data-transfer:/data-transfer
     {% if INFLUXDB_CHRONOGRAF_volume_map_data %}
-      - "./container-volume/influxdata/chronograf:/var/lib/chronograf"
+      - "./container-volume/chronograf:/var/lib/chronograf"
     {% endif %}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
@@ -17596,7 +17596,7 @@ services:
     volumes:
       - ./data-transfer:/data-transfer
     {% if INFLUXDB_KAPACITOR_volume_map_data %}
-      - "./container-volume/influxdata/kapacitor:/var/lib/kapacitor"
+      - "./container-volume/kapacitor:/var/lib/kapacitor"
     {% endif %}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
@@ -17636,7 +17636,7 @@ services:
     volumes:
       - ./data-transfer:/data-transfer
     {% if INFLUXDB_TELEGRAF_custom_conf_file is defined and INFLUXDB_TELEGRAF_custom_conf_file and INFLUXDB_TELEGRAF_custom_conf_file | length | default(false) %}
-      - ./custom-conf/influxdata/telegraf/{{INFLUXDB_TELEGRAF_custom_conf_file}}:/etc/telegraf/telegraf.conf
+      - ./custom-conf/telegraf/{{INFLUXDB_TELEGRAF_custom_conf_file}}:/etc/telegraf/telegraf.conf
     {% else %}
       - ./conf/telegraf/telegraf.conf:/etc/telegraf/telegraf.conf
     {% endif -%}   {#  INFLUXDB_TELEGRAF_custom_conf_file #}
@@ -23124,7 +23124,7 @@ services:
       - ./data-transfer:/data-transfer
       - ./conf/mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf
     {% if MOSQUITTO_volume_map_data %}
-      - "./container-volume/mosquitto-{{loop.index}}:/mosquitto/data/"
+      - "./container-volume/mosquitto/mosquitto-{{loop.index}}:/mosquitto/data/"
     {% endif %}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
