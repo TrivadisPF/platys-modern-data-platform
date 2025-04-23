@@ -95,7 +95,7 @@ platys gen
 
 # export the two variables if not 
 export DOCKER_HOST_IP=nnn.nnn.nnn.nnn
-export PUBLICH_IP=nnn.nnn.nnn.nnn
+export PUBLIC_IP=nnn.nnn.nnn.nnn
 
 docker compose up -d
 ```
@@ -119,7 +119,7 @@ wget https://gist.githubusercontent.com/gschmutz/6b9ec82c833d73981942e1d41228493
 platys gen
 
 export DOCKER_HOST_IP=nnn.nnn.nnn.nnn
-export PUBLICH_IP=nnn.nnn.nnn.nnn
+export PUBLIC_IP=nnn.nnn.nnn.nnn
 
 docker compose up -d
 ```
