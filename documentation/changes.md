@@ -136,7 +136,8 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Update `styra` to `1.30.0-80-debug`
  * Update `jikkou` to `main` - to support Mac M1
  * Update `telegraf` to `1.34`
- * 
+ * Update `cassandra` to `5.0`
+
 ### Enhancements
 
  * a `README.md` file is generated which lists all the services contained in the `docker-compose.yml` file
@@ -168,6 +169,7 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Rename config setting `STREAMLIT_environment` to `STREAMLIT_env_variables`
  * Ollama WebUI renamed to Open WebUI (`OPEN_WEBUI_xxx` and no longer `OLLAMA_WEBUI_xxx`)
  * `KAFKA_use_kraft_mode` now defaults to `true`
+ * Cassandra default major version set to `5`
  
 ## What's new in 1.17.1
 
