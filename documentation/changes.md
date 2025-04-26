@@ -171,6 +171,7 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Ollama WebUI renamed to Open WebUI (`OPEN_WEBUI_xxx` and no longer `OLLAMA_WEBUI_xxx`)
  * `KAFKA_use_kraft_mode` now defaults to `true`
  * `cassandra` default major version set to `5`
+ * `cassandra-web` has been removed due to missing support for latest Cassandra versions
  
 ## What's new in 1.17.1
 

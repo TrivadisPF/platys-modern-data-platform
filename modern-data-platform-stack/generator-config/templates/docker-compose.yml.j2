@@ -16185,38 +16185,6 @@ services:
     restart: {{container_restart_policy}}
   {% endfor %}
 
-  {% if CASSANDRA_WEB_enable | default(false) %}
-  cassandra-web:
-    image: trivadis/cassandra-web
-    container_name: cassandra-web
-    hostname: cassandra-web
-    labels:
-      com.platys.name: "cassandra-web"
-      com.platys.description: "Cassandra Web UI"
-      com.platys.webui.title: "Cassandra Web UI"
-      com.platys.webui.url: "http://dataplatform:28120"
-    ports:
-      - "28120:3000"
-    environment:
-      - CASSANDRA_HOSTNAME=cassandra-1
-      - CASSANDRA_PORT=9042
-      - CASSANDRA_USERNAME=cassandra
-      - CASSANDRA_PASSWORD=cassandra
-    {%if use_timezone | default(false) %}
-      - TZ={{use_timezone}}
-    {% endif -%}   {#  use_timezone #}
-    volumes:
-      - ./data-transfer:/data-transfer
-    {%if use_timezone | default(false) %}
-      - "./etc/timezone:/etc/timezone:ro"
-      - "./etc/localtime:/etc/localtime:ro"
-    {% endif -%}   {#  use_timezone #}
-    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
-    <<: *logging
-    {% endif -%}   {#  logging_driver is defined ... #}
-    restart: {{container_restart_policy}}
-  {% endif %}   {#  CASSANDRA_WEB_enable #}
-
   {% if REAPER_enable | default(false) %}
   reaper:
     image: thelastpickle/cassandra-reaper:{{__REAPER_version}}

@@ -468,7 +468,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28117 | 18080 | spark-history |
 28118 | 10000 | spark-thriftserver |
 28119 | 8081 | redis-commander |
-28120 | 3000 | cassandra-web |
+28120 | 3000 | dbgate |
 28121 | 9091 | dse-studio |
 28122 | 8888 | dse-opscenter |
 28123 | 8081 | mongo-express |
@@ -758,7 +758,6 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28258 | 8000 | supabase-kong |
 28259 | 8443 | supabase-kong |
 28260 | 8082 | supabase-studio |
-28261 | 3000 | dbgate |
 
 ## Ports > 28500
 
