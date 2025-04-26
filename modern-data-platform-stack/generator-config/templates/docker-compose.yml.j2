@@ -20499,12 +20499,15 @@ services:
       com.platys.description: "Open Source DB Management Tool"
       com.platys.webui.title: "DbGate UI"
       com.platys.webui.url: "http://dataplatform:28120"
+      com.platys.password.envvars: "PLATYS_DBGATE_PASSWORD"
     ports:
       - "28120:3000"
     environment:
       LOG_LEVEL: info
-      LOGIN: dbgate
-      PASSWORD: abc123!
+    {% if DBGATE_user is defined and DBGATE_user and DBGATE_user | length %}  
+      LOGIN: {{DBGATE_user}}
+      PASSWORD: ${PLATYS_DBGATE_PASSWORD:-{{DBGATE_password}}}
+    {% endif -%}   {#  DBGATE_user #}
       DBGATE_LICENSE: {{DBGATE_license if DBGATE_license is defined and DBGATE_license and DBGATE_license | length else omit}}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
