@@ -758,6 +758,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28258 | 8000 | supabase-kong |
 28259 | 8443 | supabase-kong |
 28260 | 8082 | supabase-studio |
+28261 | 3000 | dbgate |
 
 ## Ports > 28500
 

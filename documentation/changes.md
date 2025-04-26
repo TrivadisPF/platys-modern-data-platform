@@ -65,6 +65,7 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * No Language Left Behind (NLLB)
  * Supabase
  * Local Deep Researcher
+ * DbGate
 
 ### New/Updated Cookbook Recipes
 
@@ -169,7 +170,7 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Rename config setting `STREAMLIT_environment` to `STREAMLIT_env_variables`
  * Ollama WebUI renamed to Open WebUI (`OPEN_WEBUI_xxx` and no longer `OLLAMA_WEBUI_xxx`)
  * `KAFKA_use_kraft_mode` now defaults to `true`
- * Cassandra default major version set to `5`
+ * `cassandra` default major version set to `5`
  
 ## What's new in 1.17.1
 

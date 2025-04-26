@@ -477,6 +477,7 @@ networks:
 {% set __SQLPAD_version = SQLPAD_version | default('latest') -%}
 {% set __SQLCHAT_version = SQLCHAT_version | default('latest') -%}
 {% set __QUERYBOOK_version = QUERYBOOK_version | default('latest') -%}
+{% set __DBGATE_version = DBGATE_version | default('latest') -%}
 {% set __NOCODB_version = NOCODB_version | default('latest') -%}
 {% set __QUIX_version = QUIX_version | default('latest') -%}
 
@@ -20518,6 +20519,40 @@ services:
     restart: {{container_restart_policy}}
 
 {% endif %}   {#  QUERYBOOK_enable #}
+
+{% if DBGATE_enable | default(false) %}
+  #  ================================== DbGate ========================================== #
+  dbgate:
+    image: nocodb/nocodb:{{__DBGATE_version}}
+    container_name:   dbgate
+    hostname: dbgate
+    labels:
+      com.platys.name: "dbgate"
+      com.platys.description: "Open Source DB Management Tool"
+      com.platys.webui.title: "DbGate UI"
+      com.platys.webui.url: "http://dataplatform:28261"
+    ports:
+      - "28261:3000"
+    environment:
+      DUMMY: 1
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      {% if DBGATE_volume_map_data | default(false) %}
+      - ./container-volume/dbgate/data:/root/.dbgate
+      {% endif %}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  DBGATE_enable #}
+
 
 {% if NOCODB_enable | default(false) %}
   #  ================================== NocoDB ========================================== #
