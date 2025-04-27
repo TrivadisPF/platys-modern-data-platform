@@ -13,4 +13,10 @@ platys gen
 
 ## How to use it?
 
-Navigate to <http://dataplatform:28261>.
+Execute DuckDB queries using the HTTP POST/GET API (compatible with the ClickHouse HTTP API)
+
+```bash
+curl -X POST "http://dataplatform:28261" \
+   -H "Content-Type: application/json" \
+   -d 'SELECT version()'  
+```   
