@@ -414,6 +414,8 @@ networks:
 
 {% set __KUDU_version = KUDU_version | default('latest') -%}
 
+{% set __DUCKDB_version = __DUCKDB_version | default('latest') -%}
+
 {% set __DRUID_version = DRUID_version | default('latest') -%}
 
 {% set __PINOT_version = PINOT_version | default('latest') -%}
@@ -892,6 +894,7 @@ networks:
   {% set ATTU_enable = false -%}
   {% set INFINITY_enable = false -%}
   {% set VECTOR_ADMIN_enable = false -%}
+  {% set DUCKDB_enable = false -%}
   {% set DRUID_enable = false -%}
   {% set PINOT_enable = false -%}
   {% set STARROCKS_enable = false -%}
@@ -18089,6 +18092,37 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  VECTOR_ADMIN_enable #}
+
+{% if DUCKDB_enable | default(false) %}
+  duckdb:
+    image: ghcr.io/gschmutz/duckdb-ui-remote-docker:{{__DUCKDB_version}}
+    container_name: duckdb
+    hostname: duckdb
+    labels:
+      com.platys.name: "duckdb"
+      com.platys.description: "Analytical in-process SQL DBMS"
+    {%if DUCKDB_ui_enabled | default(false) %}  
+      com.platys.webui.title: "DuckDB UI"
+      com.platys.webui.url: "http://dataplatform:28249"
+    {% endif -%}   {#  DUCKDB_ui_enabled #}
+    ports:
+      - "28249:8443"
+    {% endif -%}   {#  DUCKDB_ui_enabled #}
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  DUCKDB_enable #}
 
 {% if DRUID_enable | default(false) %}
   #  ================================== Druid ========================================== #

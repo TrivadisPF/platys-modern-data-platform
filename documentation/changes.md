@@ -66,6 +66,7 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Supabase
  * Local Deep Researcher
  * DbGate
+ * DuckDB (optionally with UI)
 
 ### New/Updated Cookbook Recipes
 
