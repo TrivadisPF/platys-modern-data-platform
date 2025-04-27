@@ -18095,7 +18095,7 @@ services:
 
 {% if DUCKDB_enable | default(false) %}
   duckdb:
-    image: ghcr.io/gschmutz/duckdb-ui-remote-docker:{{__DUCKDB_version}}
+    image: {{'datacatering/duckdb' if NOT DUCKDB_ui_enabled else 'ghcr.io/gschmutz/duckdb-ui-remote-docker'}}:{{__DUCKDB_version}}
     container_name: duckdb
     hostname: duckdb
     labels:
@@ -18103,7 +18103,7 @@ services:
       com.platys.description: "Analytical in-process SQL DBMS"
     {%if DUCKDB_ui_enabled | default(false) %}  
       com.platys.webui.title: "DuckDB UI"
-      com.platys.webui.url: "http://dataplatform:28249"
+      com.platys.webui.url: "https://dataplatform:28249"
     ports:
       - "28249:8443"
     {% endif -%}   {#  DUCKDB_ui_enabled #}
@@ -18120,6 +18120,9 @@ services:
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
+    {%if not DUCKDB_ui_enabled | default(false) %}  
+    entrypoint: tail -F anything
+    {% endif -%}   {#  DUCKDB_ui_enabled #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  DUCKDB_enable #}
 
