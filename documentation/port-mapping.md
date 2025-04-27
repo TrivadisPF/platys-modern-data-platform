@@ -134,6 +134,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 5500 | 5500 | oracledb-ee-1 |
 5501 | 5500 | oracledb-ee-1 |
 5502 | 5500 | oracledb-ee-1 |
+5521 | 5521 | clickhouse-ui |
 \-     | 5432 | hive-metastore-db |
 \-     | 5432 | hue-db |
 5555 | 5555 | airflow-flower |

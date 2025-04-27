@@ -1685,6 +1685,10 @@ For each service there might be some other settings, such as controlling the num
 | `CLICKHOUSE_db_name`                    	| `clickhouse` 	| 1.18.0 	| Clickhouse database name.                                                                                                                                	|             	|                                	|
 | `CLICKHOUSE_username`                    	| `clickhouse` 	| 1.18.0 	| Clickhouse user name.                                                                                                                                	|             	|                                	|
 | `CLICKHOUSE_password`                    	| `abc123!` 	| 1.18.0 	| Password of the Clickhouse user.SQLFLOW                                                                                                                               	|             	|                                	|
+| [**_ClickHouse UI_**](./services/clickhouse-ui.md) &nbsp;&nbsp;&nbsp;&nbsp;![x86-64](./images/x86-64.png)                               	|         	|       	|                                                                                                                                                                                     	|     
+| `CLICKHOUSE_UI_enable`                             	| `false` 	| 1.18.0 	| Generate ClickHouse UI service                                                                                                                                                      	|             	|                                	|
+
+
 ### Internet of Things (IoT)
 
 | Config                                         	| Default 	| Since 	| Description                                                                                                                                                                        	                    	|

@@ -423,6 +423,7 @@ networks:
 {% set __STARROCKS_version = STARROCKS_version | default('latest') -%}
 
 {% set __CLICKHOUSE_version = CLICKHOUSE_version | default('latest') -%}
+{% set __CLICKHOUSE_UI_version = CLICKHOUSE_UI_version | default('latest') -%}
 
 {% set __IGNITE_version = IGNITE_version | default('latest') -%}
 {% set __GRIDGAIN_CC_version = GRIDGAIN_CC_version | default('latest') -%}
@@ -898,7 +899,8 @@ networks:
   {% set DRUID_enable = false -%}
   {% set PINOT_enable = false -%}
   {% set STARROCKS_enable = false -%}
-  {% set CLICKHOUSE_password_enable = false -%}
+  {% set CLICKHOUSE_enable = false -%}
+  {% set CLICKHOUSE_UI_enable = false -%}
   {% set IGNITE_enable = false -%}
   {% set JANUSGRAPH_enable = false -%}
   {% set INVANA_ENGINE_enable = false -%}
@@ -18607,6 +18609,38 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
 {% endif %}  {#  CLICKHOUSE_enable #}
+
+{% if CLICKHOUSE_UI_enable | default(false) %}
+  #  ================================== ClickHouse UI ========================================== #
+  clickhouse-ui:
+    image: ghcr.io/caioricciuti/ch-ui:{{__CLICKHOUSE_UI_version}}
+    hostname: clickhouse-ui
+    container_name: clickhouse-ui
+    labels:
+      com.platys.name: "clickhouse-ui"
+      com.platys.description: "Real-time analytics database UI"
+      com.platys.webui.title: "ClickHouse UI"
+      com.platys.webui.url: "http://dataplatform:5521"
+    ports:
+      - "5521:5521"       
+    environment:
+      - VITE_CLICKHOUSE_URL=http://clickhouse:8123
+      - VITE_CLICKHOUSE_USER={{CLICKHOUSE_username}}
+      - VITE_CLICKHOUSE_PASS=${PLATYS_CLICKHOUSE_PASSWORD:-{{CLICKHOUSE_password}}}
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+{% endif %}  {#  CLICKHOUSE_UI_enable #}
 
 {% if IGNITE_enable | default(false) %}
   #  ================================== Apache Ignite ========================================== #
