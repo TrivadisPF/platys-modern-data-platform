@@ -248,6 +248,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 8761 | 8761 | ioevent-cockpit-api |
 8787 | 8787 | r-studio |
 8812 | 8812 | questdb |
+8815 | 8815 | quackflight |
 8888 | 8888 | hue |
 8978 | 8978 | cloudbeaver |
 8983 | 8983 | solr |
@@ -759,6 +760,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28258 | 8000 | supabase-kong |
 28259 | 8443 | supabase-kong |
 28260 | 8082 | supabase-studio |
+28261 | 8123 | quackflight |
 
 ## Ports > 28500
 

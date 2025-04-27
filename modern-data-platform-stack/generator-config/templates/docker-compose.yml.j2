@@ -415,6 +415,7 @@ networks:
 {% set __KUDU_version = KUDU_version | default('latest') -%}
 
 {% set __DUCKDB_version = DUCKDB_version | default('latest') -%}
+{% set __QUACKFLIGHT_version = QUACKFLIGHT_version | default('latest') -%}
 
 {% set __DRUID_version = DRUID_version | default('latest') -%}
 
@@ -896,6 +897,7 @@ networks:
   {% set INFINITY_enable = false -%}
   {% set VECTOR_ADMIN_enable = false -%}
   {% set DUCKDB_enable = false -%}
+  {% set QUACKFLIGHT_enable = false -%}
   {% set DRUID_enable = false -%}
   {% set PINOT_enable = false -%}
   {% set STARROCKS_enable = false -%}
@@ -18130,6 +18132,38 @@ services:
     {% endif -%}   {#  DUCKDB_ui_enabled #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  DUCKDB_enable #}
+
+{% if QUACKFLIGHT_enable | default(false) %}
+  quackflight:
+    image: ghcr.io/quackscience/quackflight:{{__QUACKFLIGHT_version}}
+    container_name: quackflight
+    hostname: quackflight
+    labels:
+      com.platys.name: "quackflight"
+      com.platys.description: "DuckDB API Server"
+      com.platys.webui.title: "QuackFlight UI"
+      com.platys.webui.url: "https://dataplatform:28261"
+    ports:
+      - "28261:8123"
+      - "8815:8815"
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+#    {% if DUCKDB_db_folder is defined and DUCKDB_db_folder and DUCKDB_db_folder | length %}
+#      - {{DUCKDB_db_folder}}:/db
+#    {% endif %}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  QUACKFLIGHT_enable #}
 
 {% if DRUID_enable | default(false) %}
   #  ================================== Druid ========================================== #
