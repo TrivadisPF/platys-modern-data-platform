@@ -135,8 +135,8 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Update `projectnessie` to `0.100.0`
  * Update `lakefs` to `1`
  * Update `vault` to `1.18`
- * Update `opa` to `0.71.0-dev`
- * Update `styra` to `1.30.0-80-debug`
+ * Update `opa` to `1.4.0`
+ * Update `styra` to `1.39.1-83-debug`
  * Update `jikkou` to `main` - to support Mac M1
  * Update `telegraf` to `1.34`
  * Update `cassandra` to `5.0`
