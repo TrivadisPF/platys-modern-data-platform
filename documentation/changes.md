@@ -68,6 +68,8 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * DbGate
  * DuckDB (optionally with UI)
  * ClickHouse UI
+ * Docker in Docker (DinD)
+ * Jenkins
 
 ### New/Updated Cookbook Recipes
 
