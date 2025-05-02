@@ -605,6 +605,7 @@ networks:
 {% set __NGROK_version = NGROK_version | default('latest') -%}
 {% set __CADVISOR_version = CADVISOR_version | default('latest') -%}
 {% set __GLANCES_version = GLANCES_version | default('latest') -%}
+{% set __DOCKER_DIND_version = DOCKER_DIND_version | default('latest') -%}
 {% set __DOCKER_REGISTRY_version = DOCKER_REGISTRY_version | default('latest') -%}
 {% set __DOCKER_REGISTRY_UI_version = DOCKER_REGISTRY_UI_version | default('latest') -%}
 {% set __GITWEB_version = GITWEB_version | default('latest') -%}
@@ -1019,6 +1020,7 @@ networks:
   {% set NGROK_enable = false -%}
   {% set CADVISOR_enable = false -%}
   {% set GLANCES_enable = false -%}  
+  {% set DOCKER_DIND_enable = false -%}
   {% set DOCKER_REGISTRY_enable = false -%}
   {% set DOCKER_REGISTRY_UI_enable = false -%}
   {% set GITWEB_enable = false -%}
@@ -26456,6 +26458,37 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {# GLANCES_enable #}
 
+{% if DOCKER_IN_DOCKER_enable | default(false) %}
+  #  ================================== Docker in Docker (DinD) ========================================== #
+  docker-dind:
+    image: docker:dind:{{__DOCKER_IN_DOCKER_version}}
+    container_name: docker-dind
+    hostname: docker-dind
+    privileged: true    
+    labels:
+      com.platys.name: "docker-dind"
+      com.platys.description: "Docker in Docker"
+    ports:
+      - "2376:2376"
+    environment:
+      DOCKER_TLS_CERTDIR: /certs
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./security/docker-dind/certs:/certs/client
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+    command: --storage-driver overlay2
+{% endif %}   {# DOCKER_IN_DOCKER_enable  #}
+
 {% if DOCKER_REGISTRY_enable | default(false) %}
   #  ================================== Docker Registry ========================================== #
   docker-registry:
@@ -26533,6 +26566,7 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
 {% endif %}   {# DOCKER_REGISTRY_enable #}
+
 
 {% if GITWEB_enable | default(false) %}
   #  ================================== GitWeb ========================================== #
