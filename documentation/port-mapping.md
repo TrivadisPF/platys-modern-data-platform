@@ -442,6 +442,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 47335 | 47335 | mindsdb |
 47336 | 47336 | mindsdb |
 45678 | 45678 | dremio |
+50000 | 50000 | jenkins |
 50051 | 50051 | weaviate |
 50092 | 50092 | solace-kafka-proxy |
 61613 | 61613 | activemq (stomp) |
@@ -762,6 +763,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28259 | 8443 | supabase-kong |
 28260 | 8082 | supabase-studio |
 28261 | 8123 | quackflight |
+28262 | 8080 | jenkins |
 
 ## Ports > 28500
 

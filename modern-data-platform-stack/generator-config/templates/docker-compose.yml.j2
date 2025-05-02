@@ -605,9 +605,10 @@ networks:
 {% set __NGROK_version = NGROK_version | default('latest') -%}
 {% set __CADVISOR_version = CADVISOR_version | default('latest') -%}
 {% set __GLANCES_version = GLANCES_version | default('latest') -%}
-{% set __DOCKER_DIND_version = DOCKER_DIND_version | default('latest') -%}
+{% set __DOCKER_IN_DOCKER_version = DOCKER_IN_DOCKER_version | default('latest') -%}
 {% set __DOCKER_REGISTRY_version = DOCKER_REGISTRY_version | default('latest') -%}
 {% set __DOCKER_REGISTRY_UI_version = DOCKER_REGISTRY_UI_version | default('latest') -%}
+{% set __JENKINS_version = JENKINS_version | default('latest') -%}
 {% set __GITWEB_version = GITWEB_version | default('latest') -%}
 {% set __HAWTIO_version = HAWTIO_version | default('latest') -%}
 {% set __SPRING_BOOT_ADMIN_version = SPRING_BOOT_ADMIN_version | default('latest') -%}
@@ -1020,9 +1021,10 @@ networks:
   {% set NGROK_enable = false -%}
   {% set CADVISOR_enable = false -%}
   {% set GLANCES_enable = false -%}  
-  {% set DOCKER_DIND_enable = false -%}
+  {% set DOCKER_IN_DOCKER_enable = false -%}
   {% set DOCKER_REGISTRY_enable = false -%}
   {% set DOCKER_REGISTRY_UI_enable = false -%}
+  {% set JENKINS_enable = false -%}
   {% set GITWEB_enable = false -%}
   {% set HAWTIO_enable = false -%}
   {% set SPRING_BOOT_ADMIN_enable = false -%}
@@ -26567,6 +26569,44 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {# DOCKER_REGISTRY_enable #}
 
+{% if JENKINS_enable | default(false) %}
+  #  ================================== GitWeb ========================================== #
+  jenkins:
+    image: jenkins/jenkins:{{__JENKINS_version}}
+    container_name: jenkins
+    hostname: jenkins
+    labels:
+      com.platys.name: "jenkins"
+      com.platys.description: "Autmation sever (CI)"
+      com.platys.webui.title: "Jenkins UI"
+      com.platys.webui.url: "http://dataplatform:28262"
+    ports:
+      - "28262:8080"
+      - "50000:50000"
+    environment:
+      DOCKER_HOST: tcp://docker-dind:2376
+      DOCKER_CERT_PATH: /certs/client
+      DOCKER_TLS_VERIFY: 1   
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {% if DOCKER_IN_DOCKER_enable %}
+      - ./security/docker-in-docker/certs:/certs/client:ro
+    {% endif %}
+    {% if JENKINS_volume_map_data %}
+      - ./container-volume/jenkins/data:/var/jenkins_home
+    {% endif %}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+{% endif %}   {# JENKINS_enable #}
 
 {% if GITWEB_enable | default(false) %}
   #  ================================== GitWeb ========================================== #
