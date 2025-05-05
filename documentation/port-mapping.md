@@ -764,7 +764,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28260 | 8082 | supabase-studio |
 28261 | 8123 | quackflight |
 28262 | 8080 | jenkins |
-28263 | 9999 | influxdb3 |
+28263 | 8181 | influxdb3 |
 
 ## Ports > 28500
 
