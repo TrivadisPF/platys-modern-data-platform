@@ -395,6 +395,7 @@ networks:
 {% set __CHRONOGRAF_version = CHRONOGRAF_version | default('latest') -%}
 {% set __KAPACITOR_version = KAPACITOR_version | default('latest') -%}
 {% set __INFLUXDB2_version = INFLUXDB2_version | default('2.2.0-alpha') -%}
+{% set __INFLUXDB3_version = INFLUXDB3_version | default('core') -%}
 {% set __INFLUXDB_UI_version = INFLUXDB_UI_version | default('latest') -%}
 
 {% set __QUESTDB_version = QUESTDB_version | default('latest') -%}
@@ -889,6 +890,7 @@ networks:
   {% set KIBANA_enable = false -%}
   {% set SPLUNK_enable = false -%}
   {% set INFLUXDB2_enable = false -%}
+  {% set INFLUXDB3_enable = false -%}
   {% set QUESTDB_enable = false -%}
   {% set KUDU_enable = false -%}
   {% set CHROMA_enable = false -%}
@@ -17709,6 +17711,44 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
 {% endif %}   {# INFLUXDB2_enable #}
+
+{% if INFLUXDB3_enable | default(false) %}
+  #  ================================== InfluxDB 3 ========================================== #
+  influxdb3:
+    image: influxdb:{{__INFLUXDB3_version}}
+    hostname: influxdb3
+    container_name: influxdb3
+    labels:
+      com.platys.name: "influxdb3"
+      com.platys.description: "Timeseries Database"
+      com.platys.restapi.title: "InfluxDB 3.0 Rest API"
+      com.platys.restapi.url: "http://dataplatform:28263/api/v3"
+    ports:
+      - 28263:9999
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {% if INFLUXDB3_volume_map_data %}
+      - "./container-volume/influxdb3:/var/lib/influxdb3"
+    {% endif %}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+    command:
+      - influxdb3
+      - serve
+      - --node-id=node0
+      - --object-store=file
+      - --data-dir=/var/lib/influxdb3    
+{% endif %}   {# INFLUXDB3_enable #}
 
 {% if QUESTDB_enable | default(false) %}
   #  ================================== QuestDB Timeseries ========================================== #

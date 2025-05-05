@@ -70,6 +70,7 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * ClickHouse UI
  * Docker in Docker (DinD)
  * Jenkins
+ * InfluxDB 3 Core
 
 ### New/Updated Cookbook Recipes
 
