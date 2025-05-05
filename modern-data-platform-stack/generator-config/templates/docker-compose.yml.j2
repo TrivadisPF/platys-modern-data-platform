@@ -396,6 +396,7 @@ networks:
 {% set __KAPACITOR_version = KAPACITOR_version | default('latest') -%}
 {% set __INFLUXDB2_version = INFLUXDB2_version | default('2.2.0-alpha') -%}
 {% set __INFLUXDB3_version = INFLUXDB3_version | default('core') -%}
+{% set __INFLUXDB3_EXPLORER_version = INFLUXDB3_EXPLORER_version | default('core') -%}
 {% set __INFLUXDB_UI_version = INFLUXDB_UI_version | default('latest') -%}
 
 {% set __QUESTDB_version = QUESTDB_version | default('latest') -%}
@@ -891,6 +892,7 @@ networks:
   {% set SPLUNK_enable = false -%}
   {% set INFLUXDB2_enable = false -%}
   {% set INFLUXDB3_enable = false -%}
+  {% set INFLUXDB3_EXPLORER_enable = false -%}
   {% set QUESTDB_enable = false -%}
   {% set KUDU_enable = false -%}
   {% set CHROMA_enable = false -%}
@@ -17752,6 +17754,35 @@ services:
       - --object-store=file
       - --data-dir=/var/lib/influxdb3    
 {% endif %}   {# INFLUXDB3_enable #}
+
+{% if INFLUXDB3_EXPLORER_enable | default(false) %}
+  #  ================================== InfluxDB 3 Explorer ========================================== #
+  influxdb3-explorer:
+    image: quay.io/influxdb/influxdb3-explorer:{{__INFLUXDB3_EXPLORER_version}}
+    hostname: influxdb3-explorer
+    container_name: influxdb3-explorer
+    labels:
+      com.platys.name: "influxdb3-explorer"
+      com.platys.description: "Timeseries Database UI"
+      com.platys.webui.title: "InfluxDB 3.0 Explorer"
+      com.platys.webui.url: "http://dataplatform:28264"
+    ports:
+      - 28264:8888
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+{% endif %}   {# INFLUXDB3_EXPLORER_enable #}
 
 {% if QUESTDB_enable | default(false) %}
   #  ================================== QuestDB Timeseries ========================================== #

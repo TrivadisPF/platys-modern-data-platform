@@ -71,6 +71,7 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Docker in Docker (DinD)
  * Jenkins
  * InfluxDB 3 Core
+ * InfluxDB 3 Explorer (UI)
 
 ### New/Updated Cookbook Recipes
 

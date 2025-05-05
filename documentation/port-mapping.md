@@ -765,6 +765,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28261 | 8123 | quackflight |
 28262 | 8080 | jenkins |
 28263 | 8181 | influxdb3 |
+28264 | 8888 | influxdb3-explorer |
 
 ## Ports > 28500
 
