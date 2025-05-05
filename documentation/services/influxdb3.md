@@ -11,5 +11,12 @@ platys init --enable-services INFLUXDB3
 platys gen
 ```
 
+Create admin token
+
+```bash
+docker exec -it influxdb3 influxdb3 create token --admin
+```
+
 ## How to use it?
+
 
