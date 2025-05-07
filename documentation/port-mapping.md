@@ -132,6 +132,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 5439 | 5432 | data-product-portal-postgresql |
 5440 | 5432 | proton-server (postgres batch) |
 5441 | 5432 | supabase-db |
+5442 | 5432 | hive-metastore-db |
 5500 | 5500 | oracledb-ee-1 |
 5501 | 5500 | oracledb-ee-1 |
 5502 | 5500 | oracledb-ee-1 |
