@@ -119,7 +119,7 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Update `memcached` to `1.6.26`
  * Update `redis-stack` to `7.2.0-v10`
  * Update `stardog` to `latest`
- * Update `minio` to `RELEASE.2025-02-07T23-21-09Z`
+ * Update `minio` to `RELEASE.2025-04-22T22-12-26Z`
  * Update `minio-kes` to `2025-01-30T09-41-53Z`
  * Update `datahub` to `v1.0.0rc1`
  * Update `risingwave` to `v2.1.0`
