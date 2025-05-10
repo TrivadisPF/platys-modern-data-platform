@@ -144,6 +144,7 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Update `jikkou` to `main` - to support Mac M1
  * Update `telegraf` to `1.34`
  * Update `cassandra` to `5.0`
+ * Update `iceberg-rest-catalog` to `1.6.0`
 
 ### Enhancements
 
