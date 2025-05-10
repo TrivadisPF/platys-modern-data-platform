@@ -7079,12 +7079,6 @@ services:
       HIVE_SITE_CONF_fs_s3a_path_style_access: '{{s3PathStyleAccess}}'
       HIVE_SITE_CONF_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
       HIVE_SITE_CONF_hive_metastore_uris: thrift://hive-metastore:9083
-      HIVE_SITE_CONF_javax_jdo_option_ConnectionURL: jdbc:postgresql://hive-metastore-db/metastore_db
-      HIVE_SITE_CONF_javax_jdo_option_ConnectionDriverName: org.postgresql.Driver
-      HIVE_SITE_CONF_javax_jdo_option_ConnectionUserName: {{HIVE_METASTORE_db_user | default('hive') }}
-      HIVE_SITE_CONF_javax_jdo_option_ConnectionPassword: ${PLATYS_HMS_POSTGRESQL_PASSWORD:-{{HIVE_METASTORE_db_password | default('abc123!') }}} 
-      HIVE_SITE_CONF_datanucleus_autoCreateSchema: false
-      HIVE_SITE_CONF_hive_metastore_event_db_notification_api_auth: false          
   {%elif external['ADLS_enable'] | default(false) %}
       HIVE_SITE_CONF_fs_defaultFS: 'file:///tmp'
       HIVE_SITE_CONF_fs_azure_account_auth_type_gusstorage_dfs_core_windows_net: 'SharedKey'
@@ -7092,6 +7086,14 @@ services:
   {% else %}
       HIVE_SITE_CONF_fs_defaultFS: 'file:///tmp'
   {% endif -%}   {#  HADOOP_enable or MINIO_enable #}
+  {% if (HIVE_METASTORE_db_type  | lower)  == 'postgres' | default(false) %}
+      HIVE_SITE_CONF_javax_jdo_option_ConnectionURL: jdbc:postgresql://hive-metastore-db/metastore_db
+      HIVE_SITE_CONF_javax_jdo_option_ConnectionDriverName: org.postgresql.Driver
+      HIVE_SITE_CONF_javax_jdo_option_ConnectionUserName: {{HIVE_METASTORE_db_user | default('hive') }}
+      HIVE_SITE_CONF_javax_jdo_option_ConnectionPassword: ${PLATYS_HMS_POSTGRESQL_PASSWORD:-{{HIVE_METASTORE_db_password | default('abc123!') }}} 
+      HIVE_SITE_CONF_datanucleus_autoCreateSchema: false
+      HIVE_SITE_CONF_hive_metastore_event_db_notification_api_auth: false          
+  {% endif -%}   {#  HIVE_METASTORE_db_type == postgres #}
       # necessary for Trino to be able to read from Avro
       HIVE_SITE_CONF_metastore_storage_schema_reader_impl: "org.apache.hadoop.hive.metastore.SerDeStorageSchemaReader"
       SERVICE_PRECONDITION: "hive-metastore-db:5432"
@@ -7102,12 +7104,14 @@ services:
       HIVE_SITE_CONF_hive_exec_post_hooks: "org.apache.atlas.hive.hook.HiveHook"
       HIVE_AUX_JARS_PATH: "/opt/atlas/hook/hive"
   {% endif -%}   {#  ATLAS_install_hive_hook #}
-      DB_DRIVER: postgres
+      DB_DRIVER: {{HIVE_METASTORE_db_type}}
       SERVICE_NAME: 'metastore'
+  {% if (HIVE_METASTORE_db_type  | lower)  == 'postgres' | default(false) %}
       SERVICE_OPTS: '-Xmx1G -Djavax.jdo.option.ConnectionDriverName=org.postgresql.Driver
                      -Djavax.jdo.option.ConnectionURL=jdbc:postgresql://hive-metastore-db/metastore_db
                      -Djavax.jdo.option.ConnectionUserName={{HIVE_METASTORE_db_user | default('hive') }}
                      -Djavax.jdo.option.ConnectionPassword=${PLATYS_HMS_POSTGRESQL_PASSWORD:-{{HIVE_METASTORE_db_password | default('abc123!') }}}'       
+  {% endif -%}   {#  HIVE_METASTORE_db_type == postgres #}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -7126,6 +7130,7 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
 
+  {% if (HIVE_METASTORE_db_type  | lower)  == 'postgres' | default(false) %}
   hive-metastore-db:
     image: postgres
     container_name: hive-metastore-db
@@ -7166,6 +7171,8 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
+   {% endif -%}   {#  HIVE_METASTORE_db_type == postgres #}
+   
 {% endif %}   {#  HIVE_METASTORE_enable #}
 
 {% if AVRO_TOOLS_enable  | default(false) %}
