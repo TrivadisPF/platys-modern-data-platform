@@ -119,7 +119,6 @@ networks:
 
 {% set __HIVE_version = HIVE_version | default('latest') -%}
 {% set __HIVE_version_suffix = HIVE_version_suffix | default('postgresql-metastore-s3') -%}
-{% set __HIVE_METASTORE_DB_version = HIVE_METASTORE_DB_version | default('latest') -%}
 
 {% set __AVRO_TOOLS_version = AVRO_TOOLS_version | default('latest') -%}
 {% set __PARQUET_TOOLS_version = PARQUET_TOOLS_version | default('latest') -%}
@@ -7066,6 +7065,7 @@ services:
     ports:
       - "9083:9083"
     environment:
+      HIVE_VER: {{__HIVE_version}}
   {%if HADOOP_enable | default(false) %}
       CORE_CONF_fs_defaultFS: hdfs://namenode:9000
       HIVE_SITE_CONF_hive_metastore_dir: hdfs://namenode:9000/user/hive/warehouse
@@ -7079,10 +7079,10 @@ services:
       HIVE_SITE_CONF_fs_s3a_path_style_access: '{{s3PathStyleAccess}}'
       HIVE_SITE_CONF_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
       HIVE_SITE_CONF_hive_metastore_uris: thrift://hive-metastore:9083
-      HIVE_SITE_CONF_javax_jdo_option_ConnectionURL: jdbc:postgresql://hive-metastore-db/metastore
+      HIVE_SITE_CONF_javax_jdo_option_ConnectionURL: jdbc:postgresql://hive-metastore-db/metastore_db
       HIVE_SITE_CONF_javax_jdo_option_ConnectionDriverName: org.postgresql.Driver
-      HIVE_SITE_CONF_javax_jdo_option_ConnectionUserName: hive
-      HIVE_SITE_CONF_javax_jdo_option_ConnectionPassword: hive
+      HIVE_SITE_CONF_javax_jdo_option_ConnectionUserName: {{HIVE_METASTORE_db_user | default('hive') }}
+      HIVE_SITE_CONF_javax_jdo_option_ConnectionPassword: ${PLATYS_HMS_POSTGRESQL_PASSWORD:-{{HIVE_METASTORE_db_password | default('abc123!') }}} 
       HIVE_SITE_CONF_datanucleus_autoCreateSchema: false
       HIVE_SITE_CONF_hive_metastore_event_db_notification_api_auth: false          
   {%elif external['ADLS_enable'] | default(false) %}
@@ -7102,6 +7102,12 @@ services:
       HIVE_SITE_CONF_hive_exec_post_hooks: "org.apache.atlas.hive.hook.HiveHook"
       HIVE_AUX_JARS_PATH: "/opt/atlas/hook/hive"
   {% endif -%}   {#  ATLAS_install_hive_hook #}
+      DB_DRIVER: postgres
+      SERVICE_NAME: 'metastore'
+      SERVICE_OPTS: '-Xmx1G -Djavax.jdo.option.ConnectionDriverName=org.postgresql.Driver
+                     -Djavax.jdo.option.ConnectionURL=jdbc:postgresql://hive-metastore-db/metastore_db
+                     -Djavax.jdo.option.ConnectionUserName={{HIVE_METASTORE_db_user | default('hive') }}
+                     -Djavax.jdo.option.ConnectionPassword=${PLATYS_HMS_POSTGRESQL_PASSWORD:-{{HIVE_METASTORE_db_password | default('abc123!') }}}'       
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -7115,25 +7121,28 @@ services:
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
-    command: /opt/hive/bin/hive --service metastore
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
 
   hive-metastore-db:
-    image: trivadis/apache-hive-metastore-postgresql:{{__HIVE_METASTORE_DB_version}}
+    image: postgres
     container_name: hive-metastore-db
     hostname: hive-metastore-db
     labels:
       com.platys.name: 'hive-metastore'
       com.platys.description: "Hive Metastore DB"
+      com.platys.password.envvars: "PLATYS_HMS_POSTGRESQL_PASSWORD"
     ports:
       - "5442:5432"
-    {%if use_timezone | default(false) %}
     environment:
+      POSTGRES_DB: 'metastore_db'
+      POSTGRES_USER: {{HIVE_METASTORE_db_user | default('hive') }}
+      POSTGRES_PASSWORD: ${PLATYS_HMS_POSTGRESQL_PASSWORD:-{{HIVE_METASTORE_db_password | default('abc123!') }}}        
+    {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
-    {% endif -%}   {#  use_timezone #}
+    {% endif -%}   {#  use_timezone #}    
     volumes:
       - ./data-transfer:/data-transfer
     {% if HIVE_METASTORE_volume_map_data %}
@@ -7143,6 +7152,16 @@ services:
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
+    {%if HIVE_METASTORE_db_postgresql_wal_level is defined and HIVE_METASTORE_db_postgresql_wal_level and HIVE_METASTORE_db_postgresql_wal_level | length | default(false) %}
+    command:
+      - "postgres"
+      - "-c"
+      - "wal_level={{HIVE_METASTORE_db_postgresql_wal_level | lower }}"
+      - "-c"
+      - "max_replication_slots=10"
+      - "-c"
+      - "max_wal_senders=10"      
+    {% endif -%}   {#  HIVE_METASTORE_db_postgresql_wal_level #}
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
@@ -19577,6 +19596,10 @@ services:
       - "postgres"
       - "-c"
       - "wal_level={{POSTGRESQL_wal_level | lower }}"
+      - "-c"
+      - "max_replication_slots=10"
+      - "-c"
+      - "max_wal_senders=10"      
     {% endif -%}   {#  POSTGRESQL_wal_level #}
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
     <<: *logging
