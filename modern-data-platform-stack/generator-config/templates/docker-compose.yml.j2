@@ -21095,7 +21095,9 @@ services:
       HIVE_RUN_AS_INVOKER: '{{'true' if TRINO_hive_run_as_invoker else 'false'}}'
       HIVE_LEGACY_TRANSLATION: '{{'true' if TRINO_hive_legacy_translation else 'false'}}'
       NESSIE_CATALOG_WAREHOUSE_DIR: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined and SPARK_sql_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/nessie/warehouse'}}
-  {% endif %}
+      ICEBERG_REST_CATALOG_URI: http://iceberg-rest-catalog:8181
+      ICEBERG_REST_CATALOG_WAREHOUSE: {{ICEBERG_REST_CATALOG_warehouse_dir if ICEBERG_REST_CATALOG_warehouse_dir is defined and ICEBERG_REST_CATALOG_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
+{% endif %}
   {%if external['ADLS_enable'] | default(false) %}
       ADLS_STORAGE_ACCOUNT: {{adlsStorageAccount | default(omit) }}
       ADLS_ACCESS_KEY: {{adlsAccessKey}}
@@ -21184,11 +21186,13 @@ services:
   {% endif %}
   {%if MINIO_enable or external['S3_enable'] | default(false) %}
       - './conf/{{conf_dir}}/catalog/minio.properties:{{trino_etc_dir}}/catalog/minio.properties'
-    {%if SPARK_table_format_type == 'iceberg' | default(false) %}
+    {%if ICEBERG_REST_CATALOG_enable | default(false) %}
+      - './conf/{{conf_dir}}/catalog/iceberg-rest.properties:{{trino_etc_dir}}/catalog/iceberg-rest.properties'
+    {% endif %}
+    {%if SPARK_table_format_type == 'iceberg' or ICEBERG_REST_CATALOG_enable | default(false) %}
       - './conf/{{conf_dir}}/catalog/iceberg.properties:{{trino_etc_dir}}/catalog/iceberg.properties'
       {%if NESSIE_enable | default(false) %}
       - './conf/{{conf_dir}}/catalog/iceberg-nessie.properties:{{trino_etc_dir}}/catalog/iceberg-nessie.properties'
-      - './conf/{{conf_dir}}/catalog/iceberg-rest.properties:{{trino_etc_dir}}/catalog/iceberg-rest.properties'
       {% endif %}
     {%elif SPARK_table_format_type == 'delta' | default(false) %}
       - './conf/{{conf_dir}}/catalog/delta.properties:{{trino_etc_dir}}/catalog/delta.properties'
@@ -21406,11 +21410,13 @@ services:
       - ./conf/{{conf_dir}}/cluster/node.properties:{{trino_etc_dir}}/node.properties
   {%if MINIO_enable or external['S3_enable'] | default(false) %}
       - './conf/{{conf_dir}}/catalog/minio.properties:{{trino_etc_dir}}/catalog/minio.properties'
+    {%if ICEBERG_REST_CATALOG_enable | default(false) %}
+      - './conf/{{conf_dir}}/catalog/iceberg-rest.properties:{{trino_etc_dir}}/catalog/iceberg-rest.properties'
+    {% endif %}
     {%if SPARK_table_format_type == 'iceberg' | default(false) %}
       - './conf/{{conf_dir}}/catalog/iceberg.properties:{{trino_etc_dir}}/catalog/iceberg.properties'
       {%if NESSIE_enable | default(false) %}
       - './conf/{{conf_dir}}/catalog/iceberg-nessie.properties:{{trino_etc_dir}}/catalog/iceberg-nessie.properties'
-      - './conf/{{conf_dir}}/catalog/iceberg-rest.properties:{{trino_etc_dir}}/catalog/iceberg-rest.properties'
       {% endif %}
     {%elif SPARK_table_format_type == 'delta' | default(false) %}
       - './conf/{{conf_dir}}/catalog/delta.properties:{{trino_etc_dir}}/catalog/delta.properties'
@@ -22847,6 +22853,7 @@ services:
     ports:
       - 28287:8181
     environment:
+      REST_PORT: 8181
       CATALOG_IO__IMPL: org.apache.iceberg.aws.s3.S3FileIO
       AWS_ACCESS_KEY_ID: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
       AWS_SECRET_ACCESS_KEY: ${PLATYS_AWS_SECRET_ACCESS_KEY:-{{MINIO_secret_key}}}
