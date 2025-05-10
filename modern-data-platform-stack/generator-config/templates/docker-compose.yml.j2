@@ -22843,6 +22843,7 @@ services:
       com.platys.description: "Iceberg Rest Catalog"
       com.platys.restapi.title: "Iceberg REST Catalog"
       com.platys.restapi.url: "http://dataplatform:28287/v1/namespaces"
+      com.platys.password.envvars: "PLATYS_ICEBERG_REST_CATALOG_POSTGRESQL_PASSWORD"
     ports:
       - 28287:8181
     environment:
@@ -22854,9 +22855,13 @@ services:
       CATALOG_WAREHOUSE: {{ICEBERG_REST_CATALOG_warehouse_dir if ICEBERG_REST_CATALOG_warehouse_dir is defined and ICEBERG_REST_CATALOG_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
     {%if (ICEBERG_REST_CATALOG_type | lower) =='jdbc'  | default(false) %}
       CATALOG_CATALOG__IMPL: org.apache.iceberg.jdbc.JdbcCatalog
+      {%if (ICEBERG_REST_CATALOG_db_type | lower) =='sqlite'  | default(false) %}
       CATALOG_URI: jdbc:sqlite:file:/tmp/iceberg_rest_mode=memory
-      CATALOG_JDBC_USERNAME: user
-      CATALOG_JDBC_PASSWORD: password
+      {%elif (ICEBERG_REST_CATALOG_db_type | lower) =='postgres'  | default(false) %}
+      CATALOG_URI: jdbc:postgresql://postgresql/{{ICEBERG_REST_CATALOG_db_dbname}}
+      {% endif -%}   {#  ICEBERG_REST_CATALOG_db_type #}
+      CATALOG_JDBC_USERNAME: {{ICEBERG_REST_CATALOG_db_username}}
+      CATALOG_JDBC_PASSWORD: ${PLATYS_ICEBERG_REST_CATALOG_POSTGRESQL_PASSWORD:-{{ICEBERG_REST_CATALOG_db_password | default('abc123!') }}}
     {%elif (ICEBERG_REST_CATALOG_type | lower) =='hive'  | default(false) %}
       CATALOG_CATALOG__IMPL: org.apache.iceberg.hive.HiveCatalog      #
       CATALOG_URI: jdbc:sqlite:file:/tmp/iceberg_rest_mode=memory
