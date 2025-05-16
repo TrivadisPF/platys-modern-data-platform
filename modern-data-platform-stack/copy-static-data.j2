@@ -1,0 +1,51 @@
+#!/bin/sh
+
+SOURCE_BASE_DIR="/opt/mdps-gen/static-data"
+DEST_DIR="/opt/mdps-gen/destination"
+
+mkdir -p $DEST_DIR/applications
+mkdir -p $DEST_DIR/artefacts
+mkdir -p $DEST_DIR/bin
+mkdir -p $DEST_DIR/data-transfer
+mkdir -p $DEST_DIR/conf
+mkdir -p $DEST_DIR/container-volume
+mkdir -p $DEST_DIR/custom-conf
+mkdir -p $DEST_DIR/init
+mkdir -p $DEST_DIR/licenses
+mkdir -p $DEST_DIR/markdown
+mkdir -p $DEST_DIR/plugins
+mkdir -p $DEST_DIR/scripts
+mkdir -p $DEST_DIR/security
+
+cp -r $SOURCE_BASE_DIR/artefacts/* $DEST_DIR/artefacts 2>/dev/null
+cp -r $SOURCE_BASE_DIR/bin/* $DEST_DIR/bin 2>/dev/null
+cp -r $SOURCE_BASE_DIR/data-transfer/* $DEST_DIR/data-transfer 2>/dev/null
+cp -r $SOURCE_BASE_DIR/markdown/* $DEST_DIR/markdown 2>/dev/null
+
+cp -r $SOURCE_BASE_DIR/scripts/docker $DEST_DIR/scripts 2>/dev/null
+
+{% for service in services.items() | sort() %}
+ {%- if service[1].init is not defined %}
+ {%- if service[1].labels and service[1].labels['com.platys.name'] is defined -%} 
+cp -r $SOURCE_BASE_DIR/applications/{{ service[1].labels['com.platys.name'] }} $DEST_DIR/applications 2>/dev/null
+
+cp -r $SOURCE_BASE_DIR/conf/{{ service[1].labels['com.platys.name'] }} $DEST_DIR/conf 2>/dev/null
+
+cp -r $SOURCE_BASE_DIR/container-volume/{{ service[1].labels['com.platys.name'] }} $DEST_DIR/container-volume 2>/dev/null
+
+cp -r $SOURCE_BASE_DIR/custom-conf/{{ service[1].labels['com.platys.name'] }} $DEST_DIR/custom-conf 2>/dev/null
+
+cp -r $SOURCE_BASE_DIR/init/{{ service[1].labels['com.platys.name'] }} $DEST_DIR/init 2>/dev/null
+
+cp -r $SOURCE_BASE_DIR/licenses/{{ service[1].labels['com.platys.name'] }} $DEST_DIR/licenses 2>/dev/null
+
+cp -r $SOURCE_BASE_DIR/plugins/{{ service[1].labels['com.platys.name'] }} $DEST_DIR/plugins 2>/dev/null
+
+cp -r $SOURCE_BASE_DIR/scripts/{{ service[1].labels['com.platys.name'] }} $DEST_DIR/scripts 2>/dev/null
+
+cp -r $SOURCE_BASE_DIR/security/{{ service[1].labels['com.platys.name'] }} $DEST_DIR/security 2>/dev/null
+
+ {% endif %}
+ {%- endif -%} 
+{% endfor -%}
+

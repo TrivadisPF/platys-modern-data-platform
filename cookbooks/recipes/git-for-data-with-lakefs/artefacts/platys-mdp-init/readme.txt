@@ -1,0 +1,1 @@
+Place a NiFI v2 init script here.

@@ -6,6 +6,7 @@
 #
 FROM alpine:latest
 
+COPY airports-data /data/airports-data
 COPY flight-data /data/flight-data
 COPY graphdb-news /data/graphdb-news
 COPY wordcount /data/wordcount

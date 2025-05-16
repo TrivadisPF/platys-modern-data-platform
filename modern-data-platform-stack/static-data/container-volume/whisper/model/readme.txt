@@ -1,0 +1,1 @@
+Contains the model cache of whisper service, if flag WHISPER_volume_map_data is set to true.

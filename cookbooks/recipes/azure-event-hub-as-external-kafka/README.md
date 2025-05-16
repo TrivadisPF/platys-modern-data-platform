@@ -14,7 +14,7 @@ First [initialise a platys-supported data platform](../documentation/getting-sta
 
 ```bash
 export DATAPLATFORM_HOME=${PWD}
-platys init --enable-services KAFKA_CONNECT,AKHQ -s trivadis/platys-modern-data-platform -w 1.16.0
+platys init --enable-services KAFKA_CONNECT,AKHQ -s trivadis/platys-modern-data-platform -w 1.17.0
 ```
 
 Edit the `config.yml` 
@@ -41,7 +41,7 @@ nano .env
 and add the following environment variable to specify the password 
 
 ```bash
-PLATYS_KAFKA_PASSWORD=Endpoint=sb://fzageventhub.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=F1pPaMBrrSNaMyuxzhLgBG8LhkxQd/QEc+AEhO/DyKo=
+PLATYS_KAFKA_PASSWORD=Endpoint=sb://xxxxxxx.servicebus.windows.net/;SharedAccessKeyName=XXXXXXXXXXX;SharedAccessKey=XXXXXXXXXXXXXXXX
 ```
 
 Save the file and generate and start the data platform.

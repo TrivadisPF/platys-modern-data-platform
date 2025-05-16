@@ -1,0 +1,1 @@
+Contains the state data folder of nifi V2 service, if flag NIFI2_volume_map_data is set to true.

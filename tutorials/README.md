@@ -1,4 +1,4 @@
-# Modern Data Platform Tutorial  - v1.16.0
+# Modern Data Platform Tutorial  - v1.18.0
 
 Inhere we are documenting tutorials on how to use the modern data platform:
 

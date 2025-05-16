@@ -1,0 +1,1 @@
+Add scripts which should be executed upon initialisation of the ClickHouse database. When a container is started for the first time it will run any *.sql files, run any executable *.sh scripts, and source any non-executable *.sh scripts found in that directory to do further initialization before starting the service. 

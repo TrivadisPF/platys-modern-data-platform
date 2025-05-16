@@ -1,0 +1,1 @@
+Contains the data of the SFTPgo service, if flag SFTPGO_volume_map_data is set to true.

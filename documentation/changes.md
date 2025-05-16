@@ -2,6 +2,185 @@
 
 See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/platys/blob/master/documentation/upgrade-platform-stack.md) for how to upgrade to newer version.
 
+## What's new in 1.18.0
+
+The Modern Data Platform version 1.18.0 contains the following bug fixes and enhancements:
+
+### New Services
+
+ * Langflow 
+ * Langfuse
+ * Kyuubi
+ * NeoDash
+ * Fluent Bit
+ * NATS
+ * MQTTX Web & MQTTX CLI
+ * Web Protégé
+ * Jena-Fuseki
+ * Rancher
+ * NLM Ingestor
+ * Weaviate Verba
+ * Unstructured API
+ * gpt-researcher
+ * Docker Exec Web Console
+ * n8n
+ * Arroyo
+ * Data Contract CLI
+ * Data Contract Manager (CE)
+ * Data Mesh Manager (CE)
+ * Glances
+ * Starrocks
+ * CrewAI Studio 
+ * Jikkou Server
+ * SearXNG
+ * Draw.io
+ * Unity Catalog & Unity Catalog UI
+ * RAGFlow 
+ * Valkey
+ * Authelia
+ * Infinity
+ * SFTPgo
+ * Ofelia
+ * Cedar Agent
+ * Open Policy Administration Layer (OPAL)
+ * Oracle Database Free (Oracle official)
+ * Oracle Autonomous Database Free
+ * Git Web
+ * LangWatch
+ * LangEvals
+ * Agent Zero
+ * Data Product Portal
+ * Mage AI
+ * Timeplus
+ * Aspire
+ * OpenLIT
+ * ClickHouse
+ * Kestra
+ * ngrok
+ * Arize Phoenix
+ * Crawl4AI
+ * Whisper
+ * Audio-Transcriber
+ * Nvidia NIMs
+ * No Language Left Behind (NLLB)
+ * Local Deep Researcher
+ * DbGate
+ * DuckDB (optionally with UI)
+ * ClickHouse UI
+ * Docker in Docker (DinD)
+ * Jenkins
+ * InfluxDB 3 Core
+ * InfluxDB 3 Explorer (UI)
+
+### New/Updated Cookbook Recipes
+
+ * [Schedule and execute commands in Docker containers using Ofelia](../cookbooks/recipes/scheduling-commands-on-docker-containers-with-ofelia/README.md)
+ * [Git for Data with LakeFS](../cookbooks/recipes/git-for-data-with-lakefs/README.md)
+
+### Version upgrades
+
+ * Update `postgresql` to `17` 
+ * Update `mongo` to `8.0` 
+ * Update `solr` to `9.5` 
+ * Update `janusgraph` to `1.0.0-20231010-065545.e3799d4`
+ * Update `neo4j` to `5.26`
+ * Update `memgraph` to `2.16.0`
+ * Update `memgraph-mage` to `1.16-memgraph-2.16-dev`
+ * Update `arcadedb` to `24.2.1`
+ * Update `dgraph` to `v23.1.1`
+ * Update `graphdb-free` to `10.8.4`
+ * Update `graphdb` to `10.8.5`
+ * Update `questdb` to `7.4.0`
+ * Update `kudu` to `1.17`
+ * Update `chroma` to `0.4.25.dev139`
+ * Update `qdrant` to `v1.8.4`
+ * Update `weaviate` to `1.24.10`
+ * Update `druid` to `29.0.1`
+ * Update `pinot` to `1.1.0`
+ * Update `prometheus` to `v2.51.2`
+ * Update `prometheus-pushgateway` to `v1.8.0`
+ * Update `prometheus-alertmanager` to `v0.27.0`
+ * Update `tile38` to `1.32.2`
+ * Update `yugabyte` to `2.14.16.0-b17`
+ * Update `single-store` to `0.2.18`
+ * Update `timescaledb` to `2.14.2-pg16`
+ * Update `hazelcast` to `5.4`
+ * Update `trino` to `475`
+ * Update `starburstdata` to `472-e`
+ * Update `prestodb` to `0.286`
+ * Update `ahana` to `0.286`
+ * Update `dremio` to `25.2`
+ * Update `hasura` to `v2.38.1-ce`
+ * Update `marquez` and `marquez-web` to `0.50.0`
+ * Update `datastax` to `6.8.44`
+ * Update `elasticsearch` to `7.17.28` and `8.17.4`
+ * Update `kibana` to `7.17.28` and `8.17.4`
+ * Update `memcached` to `1.6.26`
+ * Update `redis-stack` to `7.2.0-v10`
+ * Update `stardog` to `latest`
+ * Update `minio` to `RELEASE.2025-04-22T22-12-26Z`
+ * Update `minio-kes` to `2025-01-30T09-41-53Z`
+ * Update `datahub` to `v1.0.0rc1`
+ * Update `risingwave` to `v2.1.0`
+ * Update `portainer` to `alpine-sts`
+ * Update `flowise` to `2.2.5`
+ * Update `nifi` to `2.2.0`
+ * Update `nifi` to `1.28.1`
+ * Update `flink` to `2.0.0-scala_2.12-java17`
+ * Update `Confluent Platform` to `7.8.0`
+ * Update `milvus` to `v2.4.11`
+ * Update `attu` to `v2.4.8`
+ * Update `postgresql` to `17`
+ * Update `dataverse` to `alpha`
+ * Update `airflow` to `2.10.2`
+ * Update `marquez` to `0.49.0`
+ * Update `spark` to `3.5.3`
+ * Update `projectnessie` to `0.100.0`
+ * Update `lakefs` to `1`
+ * Update `vault` to `1.18`
+ * Update `opa` to `1.4.0`
+ * Update `styra` to `1.39.1-83-debug`
+ * Update `jikkou` to `main` - to support Mac M1
+ * Update `telegraf` to `1.34`
+ * Update `cassandra` to `5.0`
+ * Update `iceberg-rest-catalog` to `1.6.0`
+
+### Enhancements
+
+ * a `README.md` file is generated which lists all the services contained in the `docker-compose.yml` file
+ * Refactored Spark (Master, Worker, History and Thriftserver) to use the bitnami docker images
+ * Refactored Zeppelin to use the Dockerfile provided by the Apache Zeppelin project
+ * Option to overrite the Postgres standard, official image by one with an additional extension, such as `PGVector` or `age` or with your own docker image
+ * Support for the deployment of Dataverse previewers added (see `DATAVERSE_previewers_xxxx` config settings)
+ * Support for `valkey` as an edition to the Redis service, to use Valkey (the fork of Redis with open source license) to use as a drop-in replacement
+ * Update LakeFS to the latest version and add more configuration options
+ * NiFi 2.0.0 can be run it in parallel to a 1.x version (`NIFI2_enable` config setting)
+ * Kafka Open Source docker images are now supported (use `KAFKA_edition` = `oss`)
+ * Hive Metastores docker image is now based on the `apache/hive` image and with that the underlying database can either be an embedded Derby or a separate Postgresql (using the standard docker image).
+ * `markdown-renderer` also includes a `docker-compose.override.yml` file for services to be rendered in the services list (if there are `com.platys.***` labels used). 
+
+### Breaking Changes
+
+ * Remove `NEO4J_dbms_logs_debug_level` setting from Neo4J
+ * Change to config settings to configure memory in Neo4J: `NEO4J_server_memory_pagecache_size`, `NEO4J_server_memory_heap_initial_size` and `NEO4J_server_memory_heap_max_size`
+ * Lenses no longer uses external port `3030` but `28369`
+ * `wetty` is no longer enabled by default in the initial `config.yml` file
+ * Neo4J config setting `NEO4J_plugins` renamed to `NEO4J_download_plugins` and added `NEO4J_mount_plugins` 
+ * Memgraph no longer uses external port `7690 ` but `7699`
+ * change default value for `TRINO_edition` to `oss`
+ * `dataverse` port changed to `28394` (used to be `28294` and by taht conflicting with `ckan`)
+ * Support for Spark versions `2.4`, `3.1` and `3.2` removed
+ * Remove the `NIFI_major_version` config setting, as there is now support to run both NiFi v1 and v2 in parallel (`NIFI_enable` vs. `NIFI2_enable`)
+ * both in Apache NiFi v1 and v2 support, the `/plugins/nifi/jars/` / `/plugins/nifi2/jars/` is now mapped to `/opt/nifi/nifi-current/addl-jars/` and no longer to `/extra-jars` inside the docker container.
+ * Rename config setting `PYTHON_script_file` to `PYTHON_script_to_run`
+ * Rename `ORACLE_FREE_xxx` to `ORACLE_OCI_FREE_xxx` and use `ORACLE_FREE_xxx` for the Oracle official docker image. 
+ * Rename config setting `NEO4J_admin_password` to `NEO4J_password`
+ * Rename config setting `STREAMLIT_environment` to `STREAMLIT_env_variables`
+ * Ollama WebUI renamed to Open WebUI (`OPEN_WEBUI_xxx` and no longer `OLLAMA_WEBUI_xxx`)
+ * `KAFKA_use_kraft_mode` now defaults to `true`
+ * `cassandra` default major version set to `5`
+ * `cassandra-web` has been removed due to missing support for latest Cassandra versions
+ 
 ## What's new in 1.17.1
 
 The Modern Data Platform version 1.17.1 contains no new services but a few small enhancements:
@@ -1055,3 +1234,4 @@ The Modern Analytical Data Platform Stack version 1.2.0 contains the following n
 * Rename `broker-n` service to `kafka-n` to be more clear
 * Upgrade to Confluent Platform 5.4.0
 * Add [concept of edition](service-design.md) for Kafka and Jupyter services
+	

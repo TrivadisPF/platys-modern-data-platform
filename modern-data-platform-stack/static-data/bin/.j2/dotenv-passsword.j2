@@ -1,0 +1,15 @@
+{% set ns = namespace(var_list=[]) -%}
+{% for service in services.items() | sort() -%}
+ {%- if service[1].init is not defined -%}
+{%- if service[1].labels and service[1].labels['com.platys.password.envvars'] is defined and service[1].labels['com.platys.password.envvars'] | length -%} {% for var in service[1].labels['com.platys.password.envvars'].split(',') -%}
+   {% if var not in ns.var_list -%}
+      {% set ns.var_list = ns.var_list + [var] -%}
+   {% endif -%}
+{% endfor -%}
+ {%- endif -%}  
+{%- endif -%}  
+{% endfor -%}
+
+{% for var in ns.var_list | sort() -%}
+  {{var}} = $(pwgen 12 1)
+{% endfor -%}

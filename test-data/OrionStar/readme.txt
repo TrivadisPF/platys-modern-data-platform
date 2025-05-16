@@ -1,0 +1,3 @@
+Orion Star Sports & Outdoors is a fictitious global sports and outdoors retailer with traditional stores, an online store, and a large catalog business.The corporate headquarters is located in the United States with offices and stores in many countries throughout the world.Orion Star has about 1,000 employees and 90,000 customers, processes approximately 150,000 orders annually, and purchases products from 64 suppliers.
+
+https://www.kaggle.com/datasets/chethanp11/orion-star-sports-and-outdoors-rdbms-dataset

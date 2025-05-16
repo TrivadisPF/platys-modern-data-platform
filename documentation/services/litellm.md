@@ -13,8 +13,10 @@ platys gen
 
 ## How to use it?
 
+
+
 ```bash
-curl --location 'http://localhost:11435/chat/completions' --header 'Content-Type: application/json' \
+curl --location 'http://localhost:4002/chat/completions' --header 'Content-Type: application/json' \
              --data ' {
                         "model": "gpt-3.5-turbo",
                         "messages": [

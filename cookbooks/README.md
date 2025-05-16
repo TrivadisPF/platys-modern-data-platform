@@ -1,8 +1,11 @@
-# Modern Data Platform Cookbooks  - v1.17.1
+# Modern Data Platform Cookbooks  - v1.18.0
 Inhere we are documenting cookbooks on how to use the platform:
 
  * **Airflow**
    * [Schedule and Run Simple Python Application with Airflow](./recipes/airflow-schedule-python-app/README.md) - `1.16.0`
+
+ * **Ofelia**
+   * [Schedule and execute commands in Docker containers using Ofelia](./recipes/scheduling-commands-on-docker-containers-with-ofelia/README.md) - `1.18.0` 
 
  * **Trino (Formerly Presto SQL)**
    * [Trino, Spark and Delta Lake (Spark 2.4.7 & Delta Lake 0.6.1)](./recipes/delta-lake-and-trino-spark2.4/README.md) - `1.11.0`
@@ -16,6 +19,9 @@ Inhere we are documenting cookbooks on how to use the platform:
 
  * **MinIO**
    * [Serving a static Web application from MinIO](./recipes/serving-static-html-app-from-minio/README.md)
+
+ * **LakeFS**
+   * [Git for Data with LakeFS](./recipes/git-for-data-with-lakefs/README.md)
 
  * **MQTT**
    * [Using Confluent MQTT Proxy](./recipes/using-mqtt-proxy/README.md)
