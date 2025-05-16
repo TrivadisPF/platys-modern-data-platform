@@ -1,8 +1,14 @@
 #!/usr/bin/env sh
 
-jinja2 /templates/services-v1.md.j2 /variables/docker-compose.yml --format=yaml --outfile /output/services-v1.md
-jinja2 /templates/services-v2.md.j2 /variables/docker-compose.yml --format=yaml --outfile /output/services-v2.md
-jinja2 /templates/index.md.j2 /variables/docker-compose.yml --format=yaml --outfile /output/index.md
+if [ -f "/variables/docker-compose.override.yml" ]; then
+  yq eval-all 'select(fileIndex == 0) * select(fileIndex == 1)' docker-compose.yml docker-compose.override.yml > /tmp/docker-compose.yml
+else
+  cp docker-compose.yml /tmp/docker-compose.yml
+fi
+
+jinja2 /templates/services-v1.md.j2 /tmp/docker-compose.yml --format=yaml --outfile /output/services-v1.md
+jinja2 /templates/services-v2.md.j2 /tmp/docker-compose.yml --format=yaml --outfile /output/services-v2.md
+jinja2 /templates/index.md.j2 /tmp/docker-compose.yml --format=yaml --outfile /output/index.md
 
 # in all .md files, replace dataplatform: by the environment variable
 cd /output
