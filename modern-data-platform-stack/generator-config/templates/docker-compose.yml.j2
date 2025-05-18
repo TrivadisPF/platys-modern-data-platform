@@ -12727,7 +12727,7 @@ services:
     {% endif -%}   {#  ZEPPELIN_use_local_spark #}
       SPARK_SUBMIT_OPTIONS: "{{ZEPPELIN_spark_submit_options}} --conf spark.ui.port=4050 --conf spark.driver.host=zeppelin --conf spark.driver.port=5050 --conf spark.driver.bindAddress=0.0.0.0 --conf spark.blockManager.port=6060 --conf spark.driver.extraJavaOptions=-Dcom.amazonaws.services.s3.enableV4 --conf spark.executor.extraJavaOptions=-Dcom.amazonaws.services.s3.enableV4"
       PYSPARK_PYTHON: "python3"
-      PYSPARK_DRIVER_PYTHON: "python3"
+      PYSPARK_DRIVER_PYTHON: "/opt/conda/envs/py312/bin/python3"
   {% endif -%}   {#  SPAR_enable #}
   {%if FLINK_enable | default(false) %}
       FLINK_HOME: /opt/flink
@@ -12775,6 +12775,11 @@ services:
       - bash
       - -c
       - |
+        conda clean --all -y
+        conda create -y --name py312 python=3.12.8
+        source /opt/conda/etc/profile.d/conda.sh
+        conda activate py312
+        pip install pyspark==3.5.3 boto3
         ./bin/zeppelin-init.sh
         ./bin/zeppelin.sh
     restart: {{container_restart_policy}}
