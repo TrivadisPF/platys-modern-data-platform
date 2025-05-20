@@ -2,6 +2,13 @@
 
 See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/platys/blob/master/documentation/upgrade-platform-stack.md) for how to upgrade to newer version.
 
+## What's new in 1.18.1
+
+### Bug Fixes
+
+ * fix error with service list no longer being rendered by markdown-renderer
+ * fix problem with healthchecks in spark and airflow services
+
 ## What's new in 1.18.0
 
 The Modern Data Platform version 1.18.0 contains the following bug fixes and enhancements:
