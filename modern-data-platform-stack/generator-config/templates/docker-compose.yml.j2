@@ -5564,10 +5564,11 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
     healthcheck:
-      test: ["CMD", "spark-submit", "--version"]
+      test: ["CMD-SHELL", "python3 -c 'import socket; socket.create_connection((\"localhost\", 28304), timeout=5)'"]
       interval: 30s
       timeout: 10s
-      retries: 5
+      retries: 10
+      start_period: 20s
 
   {% for num in range(SPARK_workers | default(1) ) %}
       {% set external_port = 28111 + loop.index - 1 %}
@@ -5711,7 +5712,12 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
-
+    healthcheck:
+      test: ["CMD-SHELL", "python3 -c 'import socket; socket.create_connection((\"localhost\", {{webui_port}}), timeout=5)'"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 20s
   {% endfor %}
 
   {% if SPARK_HISTORY_enable | default(false) %}
