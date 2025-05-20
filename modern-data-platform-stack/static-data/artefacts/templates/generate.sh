@@ -3,7 +3,7 @@
 if [ -f "/variables/docker-compose.override.yml" ]; then
   yq eval-all 'select(fileIndex == 0) * select(fileIndex == 1)' /variables/docker-compose.yml /variables/docker-compose.override.yml > /tmp/docker-compose.yml
 else
-  cp docker-compose.yml /tmp/docker-compose.yml
+  cp /variables/docker-compose.yml /tmp/docker-compose.yml
 fi
 
 jinja2 /templates/services-v1.md.j2 /tmp/docker-compose.yml --format=yaml --outfile /output/services-v1.md
