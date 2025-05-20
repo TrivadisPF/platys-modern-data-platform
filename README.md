@@ -3,7 +3,7 @@
 <img src="./platys.png" alt="Platys Logo" width="200" height="160">
 </p>
 
-## Platform Stack: `modern-data-platform` - v1.18.0 
+## Platform Stack: `modern-data-platform` - v1.18.1
 
 This platform stack outlines the services included in a Modern Data Platform, which can be generated using the [Platys](http://github.com/trivadispf/platys) platform generator. Ensure that the Platys CLI is [installed](https://github.com/TrivadisPF/platys/blob/master/documentation/install.md)  before proceeding.
 
