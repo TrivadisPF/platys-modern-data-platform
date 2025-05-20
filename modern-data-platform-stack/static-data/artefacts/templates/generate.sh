@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 
 if [ -f "/variables/docker-compose.override.yml" ]; then
-  yq eval-all 'select(fileIndex == 0) * select(fileIndex == 1)' docker-compose.yml docker-compose.override.yml > /tmp/docker-compose.yml
+  yq eval-all 'select(fileIndex == 0) * select(fileIndex == 1)' /variables/docker-compose.yml /variables/docker-compose.override.yml > /tmp/docker-compose.yml
 else
   cp docker-compose.yml /tmp/docker-compose.yml
 fi
