@@ -12,7 +12,10 @@ COPY graphdb-news /data/graphdb-news
 COPY wordcount /data/wordcount
 COPY adventureworks /data/adventureworks
 COPY imdb-movies /data/imdb-movies
+COPY movie-lens-small /data/movie-lens-small
 COPY platys-cookbooks /data/platys-cookbooks
+COPY nyc-film-permits /data/nyc-film-permits
+COPY orion-star /data/orion-star
 
 # copy the generator script and make it executable
 COPY run.sh /usr/local/bin/
