@@ -18080,6 +18080,11 @@ services:
     hostname: milvus
     labels:
       com.platys.name: "milvus"
+    security_opt:
+      - seccomp:unconfined
+    depends_on:
+      - etcd-1
+      - minio-1  
     ports:
       # grpc
       - "28341:19530"
@@ -18107,6 +18112,12 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     command: ["milvus", "run", "standalone"]
     restart: {{container_restart_policy}}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9091/healthz"]
+      interval: 30s
+      start_period: 90s
+      timeout: 20s
+      retries: 3
 
   {% if ATTU_enable | default(false) %}
   attu:
