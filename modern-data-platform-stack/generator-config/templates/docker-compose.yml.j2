@@ -27417,8 +27417,23 @@ services:
     labels:
       com.platys.name: "data-provisioning"
       com.platys.description: "Provisioning sample data"
+    environment:
+    {% if PROVISIONING_DATA_additional_data_folder is defined and PROVISIONING_DATA_additional_data_folder and PROVISIONING_DATA_additional_data_folder | length | default(false) %}
+      ADDITIONAL_DATA_FOLDER: /data-provisioning/additional-data
+    {% endif -%}   {#  PROVISIONING_DATA_additional_data_folder #}
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    {% if PROVISIONING_DATA_env_variables is defined and PROVISIONING_DATA_env_variables and PROVISIONING_DATA_env_variables | length | default(false) %}
+      {% for envvar in PROVISIONING_DATA_env_variables.split(",") %}
+      {{envvar.split('=')[0]}}: "{{envvar.split('=')[1]}}"
+      {% endfor %}
+    {% endif -%}   {#  PROVISIONING_DATA_env_variables #} 
     volumes:
       - ./data-transfer:/data-transfer
+    {% if PROVISIONING_DATA_additional_data_folder is defined and PROVISIONING_DATA_additional_data_folder and PROVISIONING_DATA_additional_data_folder | length | default(false) %}
+      - {{PROVISIONING_DATA_additional_data_folder}}:/data-provisioning/additional-data
+    {% endif -%}   {#  PROVISIONING_DATA_additional_data_folder #}
     init: true
 {% endif %}   {# PROVISIONING_DATA_enable #}
 

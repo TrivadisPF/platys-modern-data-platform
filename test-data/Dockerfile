@@ -17,7 +17,7 @@ COPY platys-cookbooks /data/platys-cookbooks
 COPY nyc-film-permits /data/nyc-film-permits
 COPY orion-star /data/orion-star
 
-# copy the generator script and make it executable
+# copy the run script and make it executable
 COPY run.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/run.sh
 
