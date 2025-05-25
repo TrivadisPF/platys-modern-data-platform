@@ -13922,6 +13922,7 @@ services:
       FLOWISE_FILE_SIZE_LIMIT: 50mb
       DEBUG: {{FLOWISE_debug | default(false) }}
       DATABASE_TYPE: {{FLOWISE_database_type}}
+      SHOW_COMMUNITY_NODES: true
   {% if (FLOWISE_database_type | lower) == 'mysql' %}
       DATABASE_PORT: 3306
       DATABASE_HOST: mysql
@@ -13936,6 +13937,15 @@ services:
       DATABASE_USER: {{FLOWISE_database_user}}
       DATABASE_PASSWORD: {{FLOWISE_database_password}}
   {% endif -%}   {#  FLOWISE_database_type == postgres #}
+  {% if (FLOWISE_storage_type | lower) == 's3' and (MINIO_enable or external['S3_enable']) %}
+      STORAGE_TYPE: s3
+      S3_STORAGE_BUCKET_NAME: {{FLOWISE_s3_storage_bucket_name}}
+      S3_ENDPOINT_URL: {{s3Endpoint | default(omit) }}
+      S3_STORAGE_ACCESS_KEY_ID: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
+      S3_STORAGE_SECRET_ACCESS_KEY: {{s3SecretAccessKey}}
+      S3_STORAGE_REGION: {{s3DefaultRegion | default(omit) }}
+      S3_FORCE_PATH_STYLE: '{{s3PathStyleAccess}}'
+  {% endif -%}   {#  FLOWISE_storage_type == s3 #}  
   {% if FLOWISE_langchain_tracing_v2 %}
       LANGCHAIN_TRACING_V2: {{FLOWISE_langchain_tracing_v2}}
       LANGCHAIN_ENDPOINT: {{FLOWISE_langchain_endpoint}}
@@ -13969,8 +13979,14 @@ services:
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
-    command: /bin/sh -c "sleep 3; flowise start"
+    entrypoint: /bin/sh -c "sleep 3; flowise start"
     restart: {{container_restart_policy}}
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:3000/api/v1/ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s    
 {% endif %}   {# FLOWISE_enable  #}
 
 {%if LANGFLOW_enable | default(false) %}

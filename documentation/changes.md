@@ -13,7 +13,9 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
 ### Version upgrades
 
  * Update `milvus` to `v2.5.12` 
-
+ * Update `langflow` to `1.4.2`
+ * Update `n8n` to `1.93.0`
+ * Update `flowise` to `3.0.0`
 
 ### Enhancements
 
