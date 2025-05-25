@@ -19,7 +19,7 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
 
 ### Enhancements
 
- *  
+ * Additional data can be copied into `/data-transfer` folder when using the `PROVISIONING_DATA_enable` functionality by specifying the folder in `PROVISIONING_DATA_additional_data_folder` setting
 
 ### Breaking Changes
 
