@@ -22881,6 +22881,43 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {#  MINIO_KES_enable #}
 
+{% if GARAGE_enable | default(false) %}
+  #  ================================== Garage (S3 Storage) ========================================== #
+  garage:
+    image: dxflrs/garage:{{__GARAGE_version}}
+    container_name: garage
+    hostname: garage
+    labels:
+      com.platys.name: "garage"
+      com.platys.description: "Software-defined Object Storage"
+      com.platys.restapi.title: "Garage API"
+      com.platys.restapi.url: "http://dataplatform:3903"
+    ports:
+      - 3900:3900
+      - 3901:3901
+      - 3902:3903
+      - 3903:3903
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./conf/garage/garage.toml:/etc/garage.toml
+    {%if GARAGE_volume_map_data | default(false) %}  
+      - ./container-volume/garage/meta:/var/lib/garage/meta
+      - ./container-volume/garage/data:/var/lib/garage/data
+    {% endif -%}   {#  GARAGE_volume_map_data #}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  MINIO_KES_enable #}
+
 {% if ICEBERG_REST_CATALOG_enable | default(false) %}
   #  ================================== Iceberg REST Catalog ========================================== #
   iceberg-rest-catalog:
