@@ -567,6 +567,10 @@ networks:
 {% set __ADMINIO_API_version = ADMINIO_API_version | default('latest') -%}
 {% set __MINIO_WEB_version = MINIO_WEB_version | default('latest') -%}
 {% set __MINIO_KES_version = MINIO_KES_version | default('latest') -%}
+
+{% set __GARAGE_version = GARAGE_version | default('latest') -%}
+{% set __GARAGE_WEBUI_version = GARAGE_WEBUI_version | default('latest') -%}
+
 {% set __S3MANAGER_version = S3MANAGER_version | default('latest') -%}
 {% set __FILESTASH_version = FILESTASH_version | default('latest') -%}
 {% set __AWSCLI_version = AWSCLI_version | default('latest') -%}
@@ -989,6 +993,8 @@ networks:
   {% set MINIO_MC_enable = false -%}
   {% set MINIO_CONSOLE_enable = false -%}
   {% set MINIO_WEB_enable = false -%}
+  {% set GARAGE_enable = false -%}
+  {% set GARAGE_WEBUI_enable = false -%}
   {% set LAKEFS_enable = false -%}
   {% set NESSIE_enable = false -%}
   {% set UNITY_CATALOG_enable = false -%}
@@ -22908,6 +22914,38 @@ services:
       - ./container-volume/garage/meta:/var/lib/garage/meta
       - ./container-volume/garage/data:/var/lib/garage/data
     {% endif -%}   {#  GARAGE_volume_map_data #}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  MINIO_KES_enable #}
+
+{% if GARAGE_WEBUI_enable | default(false) %}
+  #  ================================== Garage WebUI ========================================== #
+  garage-webui:
+    image: khairul169/garage-webui:{{__GARAGE_WEBUI_version}}
+    container_name: garage-webui
+    hostname: garage-webui
+    labels:
+      com.platys.name: "garage"
+      com.platys.description: "Software-defined Object Storage GUI"
+      com.platys.webui.title: "Garage WebUI"
+      com.platys.webui.url: "http://dataplatform:3903"
+    ports:
+      - 3909:3909
+    environment:
+      API_BASE_URL: "http://garage:3903"
+      S3_ENDPOINT_URL: "http://garage:3900"    
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./conf/garage/garage.toml:/etc/garage.toml
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
