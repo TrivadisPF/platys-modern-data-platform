@@ -13,7 +13,9 @@ platys gen
 
 ## How to use it?
 
-Navigate to <http://dataplatform:3909>.
+Navigate to <http://dataplatform:3909> for the Garage WebUI. 
+
+
 
 
 
