@@ -16,6 +16,7 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Update `langflow` to `1.4.2`
  * Update `n8n` to `1.93.0`
  * Update `flowise` to `3.0.0`
+ * Update `minio` to `RELEASE.2025-05-24T17-08-30Z`
 
 ### Enhancements
 
