@@ -562,7 +562,6 @@ networks:
 
 {% set __MINIO_version = MINIO_version | default('latest') -%}
 {% set __MINIO_MC_version = MINIO_MC_version | default('latest') -%}
-{% set __MINIO_CONSOLE_version = MINIO_CONSOLE_version | default('latest') -%}
 {% set __ADMINIO_UI_version = ADMINIO_UI_version | default('latest') -%}
 {% set __ADMINIO_API_version = ADMINIO_API_version | default('latest') -%}
 {% set __MINIO_WEB_version = MINIO_WEB_version | default('latest') -%}
@@ -22708,39 +22707,6 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  MINIO_enable #}
-
-{% if MINIO_CONSOLE_enable | default(false) %}
-  #  ================================== Minio Console ========================================== #
-  minio-console:
-    image: minio/console:{{__MINIO_CONSOLE_version}}
-    container_name: minio-console
-    hostname: minio-console
-    labels:
-      com.platys.name: "minio-console"
-      com.platys.description: "MinIO Console"
-      com.platys.webui.title: "Minio Console UI"
-      com.platys.webui.url: "http://dataplatform:28193"
-    ports:
-      - "28193:9090"
-    environment:
-      CONSOLE_MINIO_SERVER: "{{s3EndpointStorage if s3EndpointStorage is defined and s3EndpointStorage else omit}}"
-      CONSOLE_PBKDF_PASSPHRASE: abc123!
-      CONSOLE_PBKDF_SALT: abc123!
-    {%if use_timezone | default(false) %}
-      TZ: {{use_timezone}}
-    {% endif -%}   {#  use_timezone #}
-    volumes:
-      - ./data-transfer:/data-transfer
-    {%if use_timezone | default(false) %}
-      - "./etc/timezone:/etc/timezone:ro"
-      - "./etc/localtime:/etc/localtime:ro"
-    {% endif -%}   {#  use_timezone #}
-    command: server
-    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
-    <<: *logging
-    {% endif -%}   {#  logging_driver is defined ... #}
-    restart: {{container_restart_policy}}
-{% endif %}   {#  MINIO_CONSOLE_enable #}
 
 {% if ADMINIO_UI_enable | default(false) %}
   #  ================================== Adminio UI ========================================== #

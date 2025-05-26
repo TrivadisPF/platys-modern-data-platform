@@ -25,7 +25,7 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
 
 ### Breaking Changes
 
- *  
+ * `minio-console` removed as docker image is no longer available
 
 ## What's new in 1.18.1
 
