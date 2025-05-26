@@ -90,6 +90,11 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 3333 | 3333 | taskcafe |
 3355 | 3355 | vector-admin | 
 3838 | 3838 | shiny-server |
+3900 | 3900 | garage |
+3901 | 3901 | garage |
+3902 | 3902 | garage |
+3903 | 3903 | garage |
+3909 | 3909 | garage-webui |
 4000 | 4000 | graphql-mesh |
 4001 | 4000 | supabase-analytics |
 4002 | 4000 | litellm |
