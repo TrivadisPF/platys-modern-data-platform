@@ -8,7 +8,8 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
 
 ### New Services
 
- *
+ * Garage
+ * Garage WebUI
  
 ### Version upgrades
 
