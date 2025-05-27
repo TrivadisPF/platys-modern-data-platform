@@ -18,6 +18,8 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Update `n8n` to `1.93.0`
  * Update `flowise` to `3.0.0`
  * Update `minio` to `RELEASE.2025-05-24T17-08-30Z`
+ * Update `dgraph` to `v24.1.3`
+ * Update `memgraph` to `3.2.1`
 
 ### Enhancements
 
