@@ -10,6 +10,7 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
 
  * Garage
  * Garage WebUI
+ * MCP Toolbox for Databases
  
 ### Version upgrades
 
@@ -20,6 +21,7 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Update `minio` to `RELEASE.2025-05-24T17-08-30Z`
  * Update `dgraph` to `v24.1.3`
  * Update `memgraph` to `3.2.1`
+ * 
 
 ### Enhancements
 

@@ -533,7 +533,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28190 | 80 | adminio_ui |
 28191 | 8080 | adminio_api |
 28192 | 8334 | filestash |
-28193 | | |
+28193 | | 5000 | mcp-toolbox |
 28194 | 3000 | sqlpad |
 28195 | 80 | streams-explorer |
 28200 | 9090 | thingsbaord (http) |
