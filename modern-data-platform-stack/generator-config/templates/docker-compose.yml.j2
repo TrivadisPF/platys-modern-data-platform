@@ -14468,6 +14468,134 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {# ARIZE_PHOENIX_enable  #}
 
+{%if OPIK_enable | default(false) %}
+  #  ================================== Opik  ========================================== #
+  opik-backend:
+    image: ghcr.io/comet-ml/opik/opik-backend:{{__OPIK_version}}
+    container_name: opik-backend
+    hostname: opik-backend
+    labels:
+      com.platys.name: 'opik'
+      com.platys.description: 'LLM engineering platform'
+      com.platys.webui.title: 'Airze Phoneix UI'
+      com.platys.webui.url: "http://dataplatform:3003"
+    ports:
+      - "3003:3003"
+    environment:
+      # WARNING: Do not set OPIK_VERSION as env var here. It's a multi-stage build, so build and runtime values can differ.
+      DOCKER_BUILDKIT: 1
+      STATE_DB_PROTOCOL: "jdbc:mysql://"
+      STATE_DB_URL: "mysql:3306/opik?createDatabaseIfNotExist=true&rewriteBatchedStatements=true"
+      STATE_DB_DATABASE_NAME: opik
+      STATE_DB_USER: opik
+      STATE_DB_PASS: opik
+      ANALYTICS_DB_MIGRATIONS_URL: "jdbc:clickhouse://clickhouse:8123"
+      ANALYTICS_DB_MIGRATIONS_USER: opik
+      ANALYTICS_DB_MIGRATIONS_PASS: opik
+      ANALYTICS_DB_PROTOCOL: "HTTP"
+      ANALYTICS_DB_HOST: "clickhouse"
+      ANALYTICS_DB_PORT: 8123
+      ANALYTICS_DB_DATABASE_NAME: opik
+      ANALYTICS_DB_USERNAME: opik
+      ANALYTICS_DB_PASS: opik
+      JAVA_OPTS: "-Dliquibase.propertySubstitutionEnabled=true -XX:+UseG1GC -XX:MaxRAMPercentage=80.0"
+      REDIS_URL: redis://:opik@redis:6379/
+      OPIK_OTEL_SDK_ENABLED: false
+      OTEL_VERSION: 2.16.0
+      OTEL_PROPAGATORS: "tracecontext,baggage,b3"
+      OTEL_EXPERIMENTAL_EXPORTER_OTLP_RETRY_ENABLED: true
+      OTEL_EXPORTER_OTLP_METRICS_DEFAULT_HISTOGRAM_AGGREGATION: BASE2_EXPONENTIAL_BUCKET_HISTOGRAM
+      OTEL_EXPERIMENTAL_RESOURCE_DISABLED_KEYS: process.command_args
+      OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE: delta
+      OPIK_USAGE_REPORT_ENABLED: ${OPIK_USAGE_REPORT_ENABLED:-true}
+      S3_URL: '{{s3Endpoint | default(omit) }}'
+      AWS_ACCESS_KEY_ID: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
+      AWS_SECRET_ACCESS_KEY: {{s3SecretAccessKey}}
+      S3_BUCKET: 'opik-bucket'
+      PYTHON_EVALUATOR_URL: http://python-backend:8000
+      TOGGLE_GUARDRAILS_ENABLED: ${TOGGLE_GUARDRAILS_ENABLED:-"false"}
+    {%if use_timezone | default(false) %} 
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+    command: [ "bash", "-c", "./run_db_migrations.sh && ./entrypoint.sh" ]
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/health-check" ]
+      interval: 1s
+      timeout: 30s
+      retries: 30
+      start_period: 1s
+
+  opik-guardrails-backend:
+    image: ghcr.io/comet-ml/opik/opik-guardrails-backend:{{__OPIK_version}}
+    container_name: opik-guardrails-backend
+    hostname: opik-guardrails-backend
+    environment:
+      OPIK_VERSION: ${OPIK_VERSION:-latest}
+    {%if use_timezone | default(false) %} 
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+    healthcheck:
+      test: [ "CMD", "sh", "-c", "wget --spider --quiet http://127.0.0.1:5000/healthcheck" ]
+      interval: 2s
+      timeout: 60s
+      retries: 30
+      start_period: 10s
+
+  opik-frontend:
+    image: ghcr.io/comet-ml/opik/opik-frontend:{{__OPIK_version}}
+    container_name: opik-frontend
+    hostname: opik-frontend
+    labels:
+      com.platys.name: 'opik'
+      com.platys.description: "LLM engineering platform"
+      com.platys.webui.title: "Opik Frontend UI"
+      com.platys.webui.url: "http://dataplatform:5173"
+    ports:
+      - "5173:5173" # Frontend server port
+    environment:
+      OPIK_VERSION: {{__OPIK_version}}
+    {%if use_timezone | default(false) %} 
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./nginx_${OPIK_FRONTEND_FLAVOR:-default}_local.conf:/etc/nginx/conf.d/default.conf
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:5173" ]
+      interval: 1s
+      timeout: 30s
+      retries: 10
+      start_period: 1s
+
+{% endif %}   {# OPIK_enable  #}
+
 {%if GPT_RESEARCHER_enable | default(false) %}
   #  ================================== GPT Researcher  ========================================== #
   gpt-researcher:

@@ -74,6 +74,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 3000 | 3000 | grafana |
 3001 | 3000 | wetty (dc1) |
 3002 | 3000 | wetty (dc2 |
+3003 | 3003 | opik-backend |
 3005 | 3000 | marquez-web |
 3010 | 3000 | postman |
 3006 | 3000 | retool-api |
@@ -127,6 +128,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 5050 | 5050 | zeppelin |
 5051 | 5050 | data-product-portal-nginx |
 5115 | 5115 | arroyo |
+5173 | 5173 | opik-frontend |
 5432 | 5432 | postgresql |
 5433 | 5432 | timescaledb |
 5434 | 5432 | marquez-db |
