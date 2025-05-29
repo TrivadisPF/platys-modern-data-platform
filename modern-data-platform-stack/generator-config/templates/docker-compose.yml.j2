@@ -10908,6 +10908,59 @@ services:
       timeout: 5s
       retries: 10    
   {% endif -%}   {#  N8N_execution_mode #}
+
+  n8n-init:
+    image: docker.n8n.io/n8nio/n8n:{{__N8N_version}}
+    container_name: n8n-init
+    hostname: n8n-init
+    labels:
+      com.platys.name: "n8n"
+    environment:
+      N8N_USER_FOLDER: '/home/node/.n8n'
+      N8N_SECURE_COOKIE: false
+      N8N_PREVIEW_MODE: false
+      N8N_METRICS: false
+      N8N_DIAGNOSTICS_ENABLED: false
+      N8N_HIRING_BANNER_ENABLED: false
+      N8N_PUBLIC_API_SWAGGERUI_DISABLED: true
+      N8N_VERSION_NOTIFICATIONS_ENABLED: false
+      N8N_TEMPLATES_ENABLED: false
+      N8N_PERSONALIZATION_ENABLED: false
+      N8N_AI_ENABLED: {{true if N8N_ai_enabled is defined and N8N_ai_enabled else omit}}
+      N8N_RUNNERS_ENABLED: true
+      N8N_COMMUNITY_PACKAGES_ALLOW_TOOL_USAGE: true
+      WEBHOOK_URL: {{N8N_webhook_url if N8N_webhook_url is defined and N8N_webhook_url and N8N_webhook_url | length else omit }}
+      OLLAMA_HOST: {{ns.ollamaUrl}}
+      EXECUTIONS_MODE: {{N8N_execution_mode | default('regular') }}
+      DB_TYPE: '{{N8N_db_type | lower}}'
+    {% if (N8N_db_type | lower) == 'sqlite' %}
+      DB_SQLITE_VACUUM_ON_STARTUP: {{true if N8N_sqlite_vacum_on_startup_enabled is defined and N8N_sqlite_vacum_on_startup_enabled else omit}}
+    {% elif (N8N_db_type | lower) == 'postgresdb' %}
+      DB_POSTGRESDB_DATABASE: {{N8N_postgres_dbname}}
+      DB_POSTGRESDB_HOST: postgresql
+      DB_POSTGRESDB_PORT: 5432
+      DB_POSTGRESDB_USER: {{N8N_postgres_user}}
+      DB_POSTGRESDB_PASSWORD: {{N8N_postgres_password}}
+      DB_POSTGRESDB_SCHEMA: {{N8N_postgres_schema}}
+    {% elif (N8N_db_type | lower) == 'mysqldb' %}
+      DB_MYSQLDB_DATABASE: {{N8N_mysql_dbname}}
+      DB_MYSQLDB_HOST: mysql
+      DB_MYSQLDB_PORT: 3306
+      DB_MYSQLDB_USER: {{N8N_mysql_user}}
+      DB_MYSQLDB_PASSWORD: {{N8N_mysql_password}}
+    {% endif -%}   {#  N8N_db_type #}
+    {%if use_timezone | default(false) %}
+      GENERIC_TIMEZONE: {{use_timezone}}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+
+    volumes:
+      - ./init/n8n:/docker-entrypoint-initdb.d  
+    entrypoint: /bin/sh
+    command:
+      - "-c"
+      - "n8n import:credentials --separate --input=/docker-entrypoint-initdb.d/credentials && n8n import:workflow --separate --input=/docker-entrypoint-initdb.d/workflows"
+    init: true      
 {% endif %}   {#  N8N_enable  #}
 
 {%if STREAMPIPES_enable | default(false) %}
