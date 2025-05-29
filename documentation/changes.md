@@ -21,11 +21,15 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Update `minio` to `RELEASE.2025-05-24T17-08-30Z`
  * Update `dgraph` to `v24.1.3`
  * Update `memgraph` to `3.2.1`
- * 
+ * Update `airflow` to `2.11.0` and `3.0.1`
+ * Update `nifi` to `2.4.0`
+ * Update `nifi-registry` to `2.4.0`
+ * Update `nifi-toolkit` to `2.4.0`
 
 ### Enhancements
 
  * Additional data can be copied into `/data-transfer` folder when using the `PROVISIONING_DATA_enable` functionality by specifying the folder in `PROVISIONING_DATA_additional_data_folder` setting
+ * Add Support for Airflow 3.x
 
 ### Breaking Changes
 
