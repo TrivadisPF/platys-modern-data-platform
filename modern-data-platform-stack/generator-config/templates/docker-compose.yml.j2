@@ -5562,6 +5562,7 @@ services:
 #      - ./scripts/docker/maven-download.sh:/usr/src/app/maven-download.sh
     {%if AIRFLOW_enable or ZEPPELIN_enable or JUPYTER_enable | default(false) %}
       - spark-{{__SPARK_version | replace('.','-')}}-vol:/opt/bitnami/spark
+      - spark-{{__SPARK_version | replace('.','-')}}-java-vol:/opt/bitnami/java
     {% endif -%}   {#  AIRFLOW_enable or ZEPPELIN_enable or JUPYTER_enable  #}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
@@ -10953,7 +10954,6 @@ services:
       GENERIC_TIMEZONE: {{use_timezone}}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
-
     volumes:
       - ./init/n8n:/docker-entrypoint-initdb.d  
     entrypoint: /bin/sh
@@ -12099,7 +12099,8 @@ services:
       - AIRFLOW__SCHEDULER__DAG_DIR_LIST_INTERVAL={{AIRFLOW_dag_dir_list_interval}}
       - AIRFLOW__WEBSERVER__EXPOSE_CONFIG={{AIRFLOW_expose_config}}
     {%if SPARK_enable | default(false) %}
-      - SPARK_HOME=/opt/spark
+      - SPARK_HOME=/opt/bitnami/spark
+      - JAVA_HOME=/opt/bitnami/java      
     {% endif -%}   {#  SPARK_enable #}
     {%if MINIO_enable or external['S3_enable'] | default(false) %}
       - AIRFLOW_VAR_S3_ENDPOINT={{s3Endpoint | default(omit) }}
@@ -12124,7 +12125,7 @@ services:
       - AIRFLOW__OPENLINEAGE__TRANSPORT='{"type": "http", "url": "http://marquez:5000", "endpoint": "api/v1/lineage"}'
     {% else %}      
       - AIRFLOW__OPENLINEAGE__DISABLED=true      
-    {% endif %}      
+    {% endif %}
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -12137,7 +12138,9 @@ services:
       - ./container-volume/airflow/logs/webserver:/opt/airflow/logs:Z
     {% endif -%}   {#  AIRFLOW_volume_map_logs #}
     {%if SPARK_enable | default(false) %}
-      - spark-{{__SPARK_version | replace('.','-')}}-vol:/opt/spark:RO
+      - spark-{{__SPARK_version | replace('.','-')}}-vol:/opt/bitnami/spark:RO
+      - spark-{{__SPARK_version | replace('.','-')}}-java-vol:/opt/bitnami/java:RO
+      - ./container-volume/spark/logs/:/var/log/spark/logs       
     {% endif -%}   {#  SPARK_enable #}
     {%if MINIO_enable or external['S3_enable'] | default(false) %}
       - aws-credentials-vol:/home/airflow/.aws:RO
@@ -12196,7 +12199,8 @@ services:
       - AIRFLOW__SCHEDULER__DAG_DIR_LIST_INTERVAL={{AIRFLOW_dag_dir_list_interval}}
       - AIRFLOW__WEBSERVER__EXPOSE_CONFIG={{AIRFLOW_expose_config}}
     {%if SPARK_enable | default(false) %}
-      - SPARK_HOME=/opt/spark
+      - SPARK_HOME=/opt/bitnami/spark
+      - JAVA_HOME=/opt/bitnami/java   
     {% endif -%}   {#  SPARK_enable #}
     {%if MINIO_enable or external['S3_enable'] | default(false) %}
       - AIRFLOW_VAR_S3_ENDPOINT={{s3Endpoint | default(omit) }}
@@ -12229,7 +12233,9 @@ services:
       - ./container-volume/airflow/logs/scheduler:/opt/airflow/logs:Z
     {% endif -%}   {#  AIRFLOW_volume_map_logs #}
     {%if SPARK_enable | default(false) %}
-      - spark-{{__SPARK_version | replace('.','-')}}-vol:/opt/spark:RO
+      - spark-{{__SPARK_version | replace('.','-')}}-vol:/opt/bitnami/spark:RO
+      - spark-{{__SPARK_version | replace('.','-')}}-java-vol:/opt/bitnami/java:RO
+      - ./container-volume/spark/logs/:/var/log/spark/logs       
     {% endif -%}   {#  SPARK_enable #}
     {%if MINIO_enable or external['S3_enable'] | default(false) %}
       - aws-credentials-vol:/home/airflow/.aws:RO
@@ -12290,7 +12296,8 @@ services:
       - AIRFLOW__WEBSERVER__EXPOSE_CONFIG={{AIRFLOW_expose_config}}
       - DUMB_INIT_SETSID="0"
     {%if SPARK_enable | default(false) %}
-      - SPARK_HOME=/opt/spark
+      - SPARK_HOME=/opt/bitnami/spark
+      - JAVA_HOME=/opt/bitnami/java   
     {% endif -%}   {#  SPARK_enable #}
     {%if MINIO_enable or external['S3_enable'] | default(false) %}
       - AIRFLOW_VAR_S3_ENDPOINT={{s3Endpoint | default(omit) }}
@@ -12323,7 +12330,9 @@ services:
       - ./container-volume/airflow/logs/scheduler:/opt/airflow/logs:Z
     {% endif -%}   {#  AIRFLOW_volume_map_logs #}
     {%if SPARK_enable | default(false) %}
-      - spark-{{__SPARK_version | replace('.','-')}}-vol:/opt/spark:RO
+      - spark-{{__SPARK_version | replace('.','-')}}-vol:/opt/bitnami/spark:RO
+      - spark-{{__SPARK_version | replace('.','-')}}-java-vol:/opt/bitnami/java:RO
+      - ./container-volume/spark/logs/:/var/log/spark/logs       
     {% endif -%}   {#  SPARK_enable #}
     {%if MINIO_enable or external['S3_enable'] | default(false) %}
       - aws-credentials-vol:/home/airflow/.aws:RO
@@ -12370,7 +12379,8 @@ services:
       - AIRFLOW__SCHEDULER__DAG_DIR_LIST_INTERVAL={{AIRFLOW_dag_dir_list_interval}}
       - AIRFLOW__WEBSERVER__EXPOSE_CONFIG={{AIRFLOW_expose_config}}
     {%if SPARK_enable | default(false) %}
-      - SPARK_HOME=/opt/spark
+      - SPARK_HOME=/opt/bitnami/spark
+      - JAVA_HOME=/opt/bitnami/java   
     {% endif -%}   {#  SPARK_enable #}
     {%if MINIO_enable or external['S3_enable'] | default(false) %}
       - AIRFLOW_VAR_S3_ENDPOINT={{s3Endpoint | default(omit) }}
@@ -12402,7 +12412,9 @@ services:
       - ./container-volume/airflow/logs/triggerer:/opt/airflow/logs:Z
     {% endif -%}   {#  AIRFLOW_volume_map_logs #}
     {%if SPARK_enable | default(false) %}
-      - spark-{{__SPARK_version | replace('.','-')}}-vol:/opt/spark:RO
+      - spark-{{__SPARK_version | replace('.','-')}}-vol:/opt/bitnami/spark:RO
+      - spark-{{__SPARK_version | replace('.','-')}}-java-vol:/opt/bitnami/java:RO
+      - ./container-volume/spark/logs/:/var/log/spark/logs       
     {% endif -%}   {#  SPARK_enable #}
     {%if MINIO_enable or external['S3_enable'] | default(false) %}
       - aws-credentials-vol:/home/airflow/.aws:RO
@@ -27785,6 +27797,7 @@ volumes:
 {% endif %}
 {%if SPARK_enable %}
   spark-{{__SPARK_version | replace('.','-')}}-vol:
+  spark-{{__SPARK_version | replace('.','-')}}-java-vol:
 {% endif %}
 {%if AIRBYTE_volume_map_data %}
   airbyte-workspace-vol:
