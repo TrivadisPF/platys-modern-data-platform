@@ -1,0 +1,137 @@
+api:
+  name: Awesome Readonly API
+  description: ""
+  version: 1.0.0
+database:
+  type: postgres
+  connection: |
+    hosts:
+      - localhost
+    user: postgres
+    password: password
+    database: mydb
+    port: 5432
+  tables:
+    - name: gachi_teams
+      columns:
+        - name: id
+          type: integer
+          primary_key: false
+          pii: false
+        - name: team_name
+          type: string
+          primary_key: false
+          pii: false
+        - name: motto
+          type: string
+          primary_key: false
+          pii: false
+      endpoints:
+        - http_method: GET
+          http_path: /teams
+          mcp_method: list_teams
+          summary: Retrieve list of teams with pagination.
+          description: 'This endpoint returns an array of team records. Example: GET /teams?offset=0&limit=5.'
+          query: SELECT id, team_name, motto FROM gachi_teams ORDER BY id LIMIT :limit OFFSET :offset;
+          is_array_result: true
+          params:
+            - name: offset
+              type: integer
+              location: query
+              required: false
+              default: 0
+            - name: limit
+              type: integer
+              location: query
+              required: false
+              default: 5
+        - http_method: GET
+          http_path: /teams/{id}
+          mcp_method: get_team_by_id
+          summary: Retrieve a single team by its ID.
+          description: 'This endpoint returns a single team record based on the provided ID. Example: GET /teams/1 returns the team with ID 1.'
+          query: SELECT id, team_name, motto FROM gachi_teams WHERE id = :id LIMIT 1;
+          is_array_result: false
+          params:
+            - name: id
+              type: integer
+              location: path
+              required: true
+        - http_method: GET
+          http_path: /teams/total_count
+          mcp_method: get_teams_total_count
+          summary: Retrieve the total count of teams.
+          description: 'This endpoint returns the total number of teams. Example: GET /teams/total_count returns an object with total_count.'
+          query: SELECT count(*) AS total_count FROM gachi_teams;
+          is_array_result: false
+          params: []
+    - name: gachi_personas
+      columns:
+        - name: strength_level
+          type: integer
+          primary_key: false
+          pii: false
+        - name: id
+          type: integer
+          primary_key: false
+          pii: false
+        - name: team_id
+          type: integer
+          primary_key: false
+          pii: false
+        - name: battle_cry
+          type: string
+          primary_key: false
+          pii: false
+        - name: special_move
+          type: string
+          primary_key: false
+          pii: false
+        - name: name
+          type: string
+          primary_key: false
+          pii: false
+        - name: favorite_drink
+          type: string
+          primary_key: false
+          pii: false
+      endpoints:
+        - http_method: GET
+          http_path: /personas
+          mcp_method: list_personas
+          summary: Retrieve list of personas with pagination.
+          description: 'This endpoint returns a paginated array of persona records. Example: GET /personas?offset=0&limit=5 returns a list of personas.'
+          query: SELECT strength_level, id, team_id, battle_cry, special_move, name, favorite_drink FROM gachi_personas ORDER BY id LIMIT :limit OFFSET :offset;
+          is_array_result: true
+          params:
+            - name: offset
+              type: integer
+              location: query
+              required: false
+              default: 0
+            - name: limit
+              type: integer
+              location: query
+              required: false
+              default: 5
+        - http_method: GET
+          http_path: /personas/{id}
+          mcp_method: get_persona_by_id
+          summary: Retrieve a single persona by its ID.
+          description: 'This endpoint returns a single persona record based on the provided ID. Example: GET /personas/1 retrieves the persona with ID 1.'
+          query: SELECT strength_level, id, team_id, battle_cry, special_move, name, favorite_drink FROM gachi_personas WHERE id = :id LIMIT 1;
+          is_array_result: false
+          params:
+            - name: id
+              type: integer
+              location: path
+              required: true
+        - http_method: GET
+          http_path: /personas/total_count
+          mcp_method: get_personas_total_count
+          summary: Retrieve the total count of personas.
+          description: 'This endpoint returns the total number of persona records. Example: GET /personas/total_count returns an object with total_count.'
+          query: SELECT count(*) AS total_count FROM gachi_personas;
+          is_array_result: false
+          params: []
+plugins: {}

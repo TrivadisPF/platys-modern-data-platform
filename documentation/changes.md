@@ -12,6 +12,7 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Garage WebUI
  * MCP Toolbox for Databases
  * MCP Trino
+ * CentralMind API/MCP Gateway
  
 ### Version upgrades
 

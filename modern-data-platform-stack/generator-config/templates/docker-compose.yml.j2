@@ -6893,7 +6893,7 @@ services:
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
-    restart: always
+    restart: {{container_restart_policy}}
     command: redis-server --bind 0.0.0.0
 {% endif %}   {#  FIRECRAWL_enable #}
 
@@ -6930,7 +6930,7 @@ services:
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
-    restart: always
+    restart: {{container_restart_policy}}
 {% endif %}   {#  CRAWL4AI_enable #}
 
 {% if MCP_TOOLBOX_enable | default(false) %}
@@ -6941,8 +6941,8 @@ services:
     hostname: mcp-toolbox
     labels:
       com.platys.name: 'mcp-toolbox-for-dbs'
-      com.platys.description: "MCP Server for Databases"
-      com.platys.restapi.title: "Crawl4ai API"
+      com.platys.description: "MCP Toolbox for Databases"
+      com.platys.restapi.title: "MCP Toolbox for DB API"
       com.platys.restapi.url: "http://dataplatform:28193"
     ports:
       - "28193:5000"
@@ -6961,8 +6961,46 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
     command: [ "toolbox", "--tools-file", "/config/tools.yaml", "--address", "0.0.0.0"]
-    restart: always
+    restart: {{container_restart_policy}}
 {% endif %}   {#  MCP_TOOLBOX_enable #}
+
+{% if CENTRALMIND_GATEWAY_enable | default(false) %}
+  #  ================================== Centralmind API/MCP Gateway ========================================== #
+  centralmind-gateway:
+    image: ghcr.io/centralmind/gateway:{{__CENTRALMIND_GATEWAY_version}}
+    container_name: centralmind-gateway
+    hostname: centralmind-gateway
+    labels:
+      com.platys.name: 'centralmind-gateway'
+      com.platys.description: "MCP Server for Databases"
+      com.platys.restapi.title: "Crawl4ai API"
+      com.platys.restapi.url: "http://dataplatform:28224"
+    ports:
+      - "28224:8182"
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./custom-conf/centralmind-gateway/config.yaml:/usr/local/bin/config.yaml
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    command:
+      - start
+      - --config
+      - /usr/local/bin/config.yaml
+      - --addr
+      - ":8182"
+      - --rest-api
+      - --mcp
+    restart: {{container_restart_policy}}
+{% endif %}   {#  CENTRALMIND_GATEWAY_enable #}
 
 {% if MCP_TRINO_enable | default(false) %}
   #  ================================== MCP Trino ========================================== #
@@ -7002,7 +7040,7 @@ services:
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
-    restart: always
+    restart: {{container_restart_policy}}
 {% endif %}   {#  MCP_TRINO_enable #}
 
 {% if WHISPER_enable | default(false) %}
@@ -7047,7 +7085,7 @@ services:
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
-    restart: always
+    restart: {{container_restart_policy}}
 {% endif %}   {#  WHISPER_enable #}
 
 
@@ -7095,7 +7133,7 @@ services:
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
-    restart: always
+    restart: {{container_restart_policy}}
 {% endif %}   {#  NLLB_enable #}
 
 {% if HIVE_SERVER_enable | default(false) %}
