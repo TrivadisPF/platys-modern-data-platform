@@ -499,7 +499,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28136 | 80 | mqtt-ui |
 28137 | 9000 | portainer |
 28138 | 8080 | cadvisor |
-28139 | 8080 | airflow |
+28139 | 8080 | airflow (2.x) or airflow-apiserver (3.x) |
 28140 | 8080 | code-server |
 28141 | 8000 | kafka-topics-ui |
 28142 | 8080 | datahub-gms |
@@ -557,7 +557,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28221 | 5000 | lakefs-webhook |
 28222 | 9000 | whisper |
 28223 | 80 | audio-transcriber |
-28224 | 8080 | airflow-apiserver   |
+28224 | |   |
 28225 | |  |
 28226 | 9000 | questdb |
 28227 | 8080 | debezium-ui |
