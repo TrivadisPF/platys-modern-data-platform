@@ -275,6 +275,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 9043 | 9042 | dse-2 |
 9044 | 9042 | dse-3 |
 9047 | 9047 | dremio |
+9097 | 9097 | mcp-trino |
 9101 | 9001 | mosquitto-1 |
 9102 | 9002 | mosquitto-2 |
 9103 | 9003 | mosquitto-3 |

@@ -115,6 +115,8 @@ networks:
 
 {% set __MCP_TOOLBOX_version = __MCP_TOOLBOX_version | default('latest') -%}
 
+{% set __MCP_TRINO_version = __MCP_TRINO_version | default('latest') -%}
+
 {% set __WHISPER_version = WHISPER_version | default('latest') -%}
 
 {% set __NLLB_version = NLLB_version | default('latest') -%}
@@ -812,6 +814,7 @@ networks:
   {% set FIRECRAWL_enable = false -%}
   {% set CRAWL4AI_enable = false -%}
   {% set MCP_TOOLBOX_enable = false -%}
+  {% set MCP_TRINO_enable = false -%}
   {% set WHISPER_enable = false -%}
   {% set NLLB_enable = false -%}
   {% set HIVE_enable = false -%}
@@ -6931,7 +6934,7 @@ services:
 {% endif %}   {#  CRAWL4AI_enable #}
 
 {% if MCP_TOOLBOX_enable | default(false) %}
-  #  ================================== Crawl4AI ========================================== #
+  #  ================================== MCP Toolbox for Databases ========================================== #
   mcp-toolbox-for-dbs:
     image: us-central1-docker.pkg.dev/database-toolbox/toolbox/toolbox:{{__MCP_TOOLBOX_version}}
     container_name: mcp-toolbox-for-dbs
@@ -6960,6 +6963,45 @@ services:
     command: [ "toolbox", "--tools-file", "/config/tools.yaml", "--address", "0.0.0.0"]
     restart: always
 {% endif %}   {#  MCP_TOOLBOX_enable #}
+
+{% if MCP_TRINO_enable | default(false) %}
+  #  ================================== MCP Trino ========================================== #
+  mcp-trino:
+    image: ghcr.io/tuannvm/mcp-trino:{{__MCP_TRINO_version}}
+    container_name: mcp-trino
+    hostname: mcp-trino
+    labels:
+      com.platys.name: 'mcp-trino'
+      com.platys.description: "MCP Server for Trino"
+      com.platys.restapi.title: "MCP Trino API"
+      com.platys.restapi.url: "http://dataplatform:9097"
+    depends_on:
+      trino-1:
+        condition: service_healthy      
+    ports:
+      - "9097:9097"
+    environment:
+      - TRINO_HOST=trino-1
+      - TRINO_PORT=8080
+      - TRINO_USER=trino
+      - TRINO_CATALOG=minio
+      - TRINO_SCHEMA=default
+      - MCP_TRANSPORT=http
+      - MCP_PORT=9097    
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: always
+{% endif %}   {#  MCP_TRINO_enable #}
 
 {% if WHISPER_enable | default(false) %}
   #  ================================== Whisper ========================================== #
