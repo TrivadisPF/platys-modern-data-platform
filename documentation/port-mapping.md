@@ -557,7 +557,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28221 | 5000 | lakefs-webhook |
 28222 | 9000 | whisper |
 28223 | 80 | audio-transcriber |
-28224 | |  |
+28224 | 8080 | airflow-apiserver   |
 28225 | |  |
 28226 | 9000 | questdb |
 28227 | 8080 | debezium-ui |
