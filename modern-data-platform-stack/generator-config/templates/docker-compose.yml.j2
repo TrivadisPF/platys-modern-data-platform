@@ -816,6 +816,7 @@ networks:
   {% set FIRECRAWL_enable = false -%}
   {% set CRAWL4AI_enable = false -%}
   {% set MCP_TOOLBOX_enable = false -%}
+  {% set CENTRALMIND_GATEWAY_enable = false -%}
   {% set MCP_TRINO_enable = false -%}
   {% set WHISPER_enable = false -%}
   {% set NLLB_enable = false -%}
@@ -5754,6 +5755,9 @@ services:
       com.platys.webui.url: "http://dataplatform:28117"
       com.platys.restapi.title: "Spark History Server"
       com.platys.restapi.url: "http://dataplatform:28117/api/v1"
+    depends_on:
+      spark-master:
+        condition: service_healthy      
     expose:
       - 18080
     ports:
@@ -5883,6 +5887,9 @@ services:
       com.platys.description: "Spark Thriftserver"
       com.platys.webui.title: "Spark Thriftserver UI"
       com.platys.webui.url: "http://dataplatform:28298"
+    depends_on:
+      spark-master:
+        condition: service_healthy      
     ports:
       - "28118:10000"
       - "28298:4040"
@@ -6972,6 +6979,7 @@ services:
     image: ghcr.io/centralmind/gateway:{{__CENTRALMIND_GATEWAY_version}}
     container_name: centralmind-gateway
     hostname: centralmind-gateway
+    platform: linux/amd64
     labels:
       com.platys.name: 'centralmind-gateway'
       com.platys.description: "MCP Server for Databases"
