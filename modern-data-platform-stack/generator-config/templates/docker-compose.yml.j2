@@ -12243,7 +12243,7 @@ services:
       - ./plugins/airflow/:/opt/airflow/plugins:Z
       - ./scripts/docker/wait-for-it.sh:/usr/src/app/wait-for-it.sh
     {% if AIRFLOW_volume_map_logs | default(false) %}
-      - ./container-volume/airflow/logs/webserver:/opt/airflow/logs:Z
+      - ./container-volume/airflow/logs:/opt/airflow/logs:Z
     {% endif -%}   {#  AIRFLOW_volume_map_logs #}
     {% if AIRFLOW_volume_map_custom_conf | default(false) %}
       - ./custom-conf/airflow/:/opt/airflow/config
@@ -12304,7 +12304,7 @@ services:
       - "28139:8080"  
     environment:
     {% if AIRFLOW_major_version == 3 | default(false) %}    
-      - AIRFLOW__CORE__AUTH_MANAGER=airflow.providers.fab.auth_manager.fab_auth_manager.FabAuthManager
+      - AIRFLOW__CORE__AUTH_MANAGER={{AIRFLOW_auth_manager}}
       - AIRFLOW__CORE__EXECUTION_API_SERVER_URL='http://airflow-apiserver:8080/execution/'
     {% endif -%}   {#  AIRFLOW_major_version #}
       # provide a health service on port 8974
@@ -12362,7 +12362,7 @@ services:
       - ./plugins/airflow/:/opt/airflow/plugins:Z
       - ./scripts/docker/wait-for-it.sh:/usr/src/app/wait-for-it.sh
     {% if AIRFLOW_volume_map_logs %}
-      - ./container-volume/airflow/logs/scheduler:/opt/airflow/logs:Z
+      - ./container-volume/airflow/logs:/opt/airflow/logs:Z
     {% endif -%}   {#  AIRFLOW_volume_map_logs #}
     {% if AIRFLOW_volume_map_custom_conf | default(false) %}
       - ./custom-conf/airflow/:/opt/airflow/config
@@ -12418,7 +12418,7 @@ services:
   {% endif %}
     environment:
     {% if AIRFLOW_major_version == 3 | default(false) %}    
-      - AIRFLOW__CORE__AUTH_MANAGER=airflow.providers.fab.auth_manager.fab_auth_manager.FabAuthManager
+      - AIRFLOW__CORE__AUTH_MANAGER={{AIRFLOW_auth_manager}}
       - AIRFLOW__CORE__EXECUTION_API_SERVER_URL='http://airflow-apiserver:8080/execution/'
     {% endif -%}   {#  AIRFLOW_major_version #}
       # provide a health service on port 8974
@@ -12476,7 +12476,7 @@ services:
       - ./plugins/airflow/:/opt/airflow/plugins:Z
       - ./scripts/docker/wait-for-it.sh:/usr/src/app/wait-for-it.sh
     {% if AIRFLOW_volume_map_logs %}
-      - ./container-volume/airflow/logs/scheduler:/opt/airflow/logs:Z
+      - ./container-volume/airflow/logs:/opt/airflow/logs:Z
     {% endif -%}   {#  AIRFLOW_volume_map_logs #}
     {% if AIRFLOW_volume_map_custom_conf | default(false) %}
       - ./custom-conf/airflow/:/opt/airflow/config
@@ -12532,7 +12532,7 @@ services:
   {% endif %}
     environment:
     {% if AIRFLOW_major_version == 3 | default(false) %}    
-      - AIRFLOW__CORE__AUTH_MANAGER=airflow.providers.fab.auth_manager.fab_auth_manager.FabAuthManager
+      - AIRFLOW__CORE__AUTH_MANAGER={{AIRFLOW_auth_manager}}
       - AIRFLOW__CORE__EXECUTION_API_SERVER_URL='http://airflow-apiserver:8080/execution/'
     {% endif -%}   {#  AIRFLOW_major_version #}
       # provide a health service on port 8974
@@ -12590,7 +12590,7 @@ services:
       - ./plugins/airflow/:/opt/airflow/plugins:Z
       - ./scripts/docker/wait-for-it.sh:/usr/src/app/wait-for-it.sh
     {% if AIRFLOW_volume_map_logs %}
-      - ./container-volume/airflow/logs/scheduler:/opt/airflow/logs:Z
+      - ./container-volume/airflow/logs:/opt/airflow/logs:Z
     {% endif -%}   {#  AIRFLOW_volume_map_logs #}
     {% if AIRFLOW_volume_map_custom_conf | default(false) %}
       - ./custom-conf/airflow/:/opt/airflow/config
@@ -12650,7 +12650,7 @@ services:
   {% endif %}
     environment:
     {% if AIRFLOW_major_version == 3 | default(false) %}    
-      - AIRFLOW__CORE__AUTH_MANAGER=airflow.providers.fab.auth_manager.fab_auth_manager.FabAuthManager
+      - AIRFLOW__CORE__AUTH_MANAGER={{AIRFLOW_auth_manager}}
       - AIRFLOW__CORE__EXECUTION_API_SERVER_URL='http://airflow-apiserver:8080/execution/'
     {% endif -%}   {#  AIRFLOW_major_version #}
       - AIRFLOW__CORE__EXECUTOR={{airflow_executor}}
@@ -12707,7 +12707,7 @@ services:
       - ./plugins/airflow/:/opt/airflow/plugins:Z
       - ./scripts/docker/wait-for-it.sh:/usr/src/app/wait-for-it.sh
     {% if AIRFLOW_volume_map_logs | default(false) %}
-      - ./container-volume/airflow/logs/scheduler:/opt/airflow/logs:Z
+      - ./container-volume/airflow/logs:/opt/airflow/logs:Z
     {% endif -%}   {#  AIRFLOW_volume_map_logs #}
     {% if AIRFLOW_volume_map_custom_conf | default(false) %}
       - ./custom-conf/airflow/:/opt/airflow/config
@@ -12762,6 +12762,10 @@ services:
       - "$DOCKER_GROUP"
   {% endif %}
     environment:
+    {% if AIRFLOW_major_version == 3 | default(false) %}    
+      - AIRFLOW__CORE__AUTH_MANAGER={{AIRFLOW_auth_manager}}
+      - AIRFLOW__CORE__EXECUTION_API_SERVER_URL='http://airflow-apiserver:8080/execution/'
+    {% endif -%}   {#  AIRFLOW_major_version #}    
       - AIRFLOW__CORE__EXECUTOR={{airflow_executor}}
       - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:${PLATYS_AIRFLOW_POSTGRESQL_PASSWORD:-abc123!}@airflow-db/airflowdb
       # For backward compatibility, with Airflow <2.3
@@ -12811,7 +12815,7 @@ services:
       - ./scripts/airflow/dags:/opt/airflow/dags:Z
       - ./plugins/airflow/:/opt/airflow/plugins:Z
     {% if AIRFLOW_volume_map_logs | default(false) %}
-      - ./container-volume/airflow/logs/triggerer:/opt/airflow/logs:Z
+      - ./container-volume/airflow/logs:/opt/airflow/logs:Z
     {% endif -%}   {#  AIRFLOW_volume_map_logs #}
     {% if AIRFLOW_volume_map_custom_conf | default(false) %}
       - ./custom-conf/airflow/:/opt/airflow/config

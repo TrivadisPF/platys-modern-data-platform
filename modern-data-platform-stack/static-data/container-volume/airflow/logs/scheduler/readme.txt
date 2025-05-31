@@ -1,1 +1,0 @@
-Contains the logs of airflow service, if flag AIRFLOW_volume_map_logs is set to true.
