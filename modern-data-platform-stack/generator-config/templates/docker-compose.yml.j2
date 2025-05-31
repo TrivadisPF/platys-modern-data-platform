@@ -12185,6 +12185,12 @@ services:
       - "$DOCKER_GROUP"
   {% endif %}
     environment:
+    {% if AIRFLOW_major_version == 2 | default(false) %}    
+      - AIRFLOW__API__AUTH_BACKENDS={{AIRFLOW_auth_backends | default(omit)}}
+    {% elif AIRFLOW_major_version == 3 | default(false) %}    
+      - AIRFLOW__CORE__AUTH_MANAGER={{AIRFLOW_auth_manager}}
+      - AIRFLOW__CORE__EXECUTION_API_SERVER_URL='http://airflow-apiserver:8080/execution/'
+    {% endif -%}   {#  AIRFLOW_major_version #}    
       - AIRFLOW__CORE__EXECUTOR={{airflow_executor}}
       - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:${PLATYS_AIRFLOW_POSTGRESQL_PASSWORD:-abc123!}@airflow-db/airflowdb
       # For backward compatibility, with Airflow <2.3
@@ -12195,7 +12201,6 @@ services:
       - AIRFLOW__WEBSERVER__SECRET_KEY=${PLATYS_AIRFLOW_SECRET:-{{AIRFLOW_secret_key}}}
       - AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION={{AIRFLOW_dags_paused_at_creation}}
       - AIRFLOW__CORE__LOAD_EXAMPLES={{AIRFLOW_provision_examples}}
-      - AIRFLOW__API__AUTH_BACKENDS={{AIRFLOW_auth_backends | default(omit)}}
       - _PIP_ADDITIONAL_REQUIREMENTS={{AIRFLOW_additional_requirements}}
       - AIRFLOW__SCHEDULER__DAG_DIR_LIST_INTERVAL={{AIRFLOW_dag_dir_list_interval}}
     {% if AIRFLOW_major_version == 2 | default(false) %}    
@@ -12319,7 +12324,6 @@ services:
       - AIRFLOW__WEBSERVER__SECRET_KEY={{AIRFLOW_secret_key}}
       - AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION={{AIRFLOW_dags_paused_at_creation}}
       - AIRFLOW__CORE__LOAD_EXAMPLES={{AIRFLOW_provision_examples}}
-      - AIRFLOW__API__AUTH_BACKENDS={{AIRFLOW_auth_backends | default(omit)}}
       - _PIP_ADDITIONAL_REQUIREMENTS={{AIRFLOW_additional_requirements}}
       - AIRFLOW__SCHEDULER__DAG_DIR_LIST_INTERVAL={{AIRFLOW_dag_dir_list_interval}}
     {% if AIRFLOW_major_version == 2 | default(false) %}    
@@ -12433,7 +12437,6 @@ services:
       - AIRFLOW__WEBSERVER__SECRET_KEY={{AIRFLOW_secret_key}}
       - AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION={{AIRFLOW_dags_paused_at_creation}}
       - AIRFLOW__CORE__LOAD_EXAMPLES={{AIRFLOW_provision_examples}}
-      - AIRFLOW__API__AUTH_BACKENDS={{AIRFLOW_auth_backends | default(omit)}}
       - _PIP_ADDITIONAL_REQUIREMENTS={{AIRFLOW_additional_requirements}}
       - AIRFLOW__SCHEDULER__DAG_DIR_LIST_INTERVAL={{AIRFLOW_dag_dir_list_interval}}
     {% if AIRFLOW_major_version == 2 | default(false) %}    
@@ -12509,7 +12512,6 @@ services:
       start_period: 30s
   {% endif -%}   {#  AIRFLOW_major_version #}
 
-
   airflow-scheduler:
     image: {{AIRFLOW_custom_image_name if AIRFLOW_custom_image_name is defined and AIRFLOW_custom_image_name | length else ' apache/airflow'}}:{{__AIRFLOW_version}}
     container_name: airflow-scheduler
@@ -12531,7 +12533,9 @@ services:
       - "$DOCKER_GROUP"
   {% endif %}
     environment:
-    {% if AIRFLOW_major_version == 3 | default(false) %}    
+    {% if AIRFLOW_major_version == 2 | default(false) %}    
+      - AIRFLOW__API__AUTH_BACKENDS={{AIRFLOW_auth_backends | default(omit)}}
+    {% elif AIRFLOW_major_version == 3 | default(false) %}    
       - AIRFLOW__CORE__AUTH_MANAGER={{AIRFLOW_auth_manager}}
       - AIRFLOW__CORE__EXECUTION_API_SERVER_URL='http://airflow-apiserver:8080/execution/'
     {% endif -%}   {#  AIRFLOW_major_version #}
@@ -12547,7 +12551,6 @@ services:
       - AIRFLOW__WEBSERVER__SECRET_KEY={{AIRFLOW_secret_key}}
       - AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION={{AIRFLOW_dags_paused_at_creation}}
       - AIRFLOW__CORE__LOAD_EXAMPLES={{AIRFLOW_provision_examples}}
-      - AIRFLOW__API__AUTH_BACKENDS={{AIRFLOW_auth_backends | default(omit)}}
       - _PIP_ADDITIONAL_REQUIREMENTS={{AIRFLOW_additional_requirements}}
       - AIRFLOW__SCHEDULER__DAG_DIR_LIST_INTERVAL={{AIRFLOW_dag_dir_list_interval}}
     {% if AIRFLOW_major_version == 2 | default(false) %}    
@@ -12649,7 +12652,9 @@ services:
       - "$DOCKER_GROUP"
   {% endif %}
     environment:
-    {% if AIRFLOW_major_version == 3 | default(false) %}    
+    {% if AIRFLOW_major_version == 2 | default(false) %}    
+      - AIRFLOW__API__AUTH_BACKENDS={{AIRFLOW_auth_backends | default(omit)}}
+    {% elif AIRFLOW_major_version == 3 | default(false) %}    
       - AIRFLOW__CORE__AUTH_MANAGER={{AIRFLOW_auth_manager}}
       - AIRFLOW__CORE__EXECUTION_API_SERVER_URL='http://airflow-apiserver:8080/execution/'
     {% endif -%}   {#  AIRFLOW_major_version #}
@@ -12663,7 +12668,6 @@ services:
       - AIRFLOW__WEBSERVER__SECRET_KEY={{AIRFLOW_secret_key}}
       - AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION={{AIRFLOW_dags_paused_at_creation}}
       - AIRFLOW__CORE__LOAD_EXAMPLES={{AIRFLOW_provision_examples}}
-      - AIRFLOW__API__AUTH_BACKENDS={{AIRFLOW_auth_backends | default(omit)}}
       - _PIP_ADDITIONAL_REQUIREMENTS={{AIRFLOW_additional_requirements}}
       - AIRFLOW__SCHEDULER__DAG_DIR_LIST_INTERVAL={{AIRFLOW_dag_dir_list_interval}}
     {% if AIRFLOW_major_version == 2 | default(false) %}    
@@ -12762,11 +12766,12 @@ services:
       - "$DOCKER_GROUP"
   {% endif %}
     environment:
-    {% if AIRFLOW_major_version == 3 | default(false) %}    
+    {% if AIRFLOW_major_version == 2 | default(false) %}    
+      - AIRFLOW__API__AUTH_BACKENDS={{AIRFLOW_auth_backends | default(omit)}}
+    {% elif AIRFLOW_major_version == 3 | default(false) %}    
       - AIRFLOW__CORE__AUTH_MANAGER={{AIRFLOW_auth_manager}}
       - AIRFLOW__CORE__EXECUTION_API_SERVER_URL='http://airflow-apiserver:8080/execution/'
-    {% endif -%}   {#  AIRFLOW_major_version #}    
-      - AIRFLOW__CORE__EXECUTOR={{airflow_executor}}
+    {% endif -%}   {#  AIRFLOW_major_version #}      - AIRFLOW__CORE__EXECUTOR={{airflow_executor}}
       - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:${PLATYS_AIRFLOW_POSTGRESQL_PASSWORD:-abc123!}@airflow-db/airflowdb
       # For backward compatibility, with Airflow <2.3
       - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:${PLATYS_AIRFLOW_POSTGRESQL_PASSWORD:-abc123!}@airflow-db/airflowdb
@@ -12776,7 +12781,6 @@ services:
       - AIRFLOW__WEBSERVER__SECRET_KEY={{AIRFLOW_secret_key}}
       - AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION={{AIRFLOW_dags_paused_at_creation}}
       - AIRFLOW__CORE__LOAD_EXAMPLES={{AIRFLOW_provision_examples}}
-      - AIRFLOW__API__AUTH_BACKENDS={{AIRFLOW_auth_backends | default(omit)}}
       - _PIP_ADDITIONAL_REQUIREMENTS={{AIRFLOW_additional_requirements}}
       - AIRFLOW__SCHEDULER__DAG_DIR_LIST_INTERVAL={{AIRFLOW_dag_dir_list_interval}}
     {% if AIRFLOW_major_version == 2 | default(false) %}    
