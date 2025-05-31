@@ -12271,6 +12271,120 @@ services:
       retries: 5
       start_period: 30s    
   {% endif -%}   {#  AIRFLOW_major_version #}
+  
+  {% if AIRFLOW_major_version == 3 | default(false) %}    
+  airflow-dag-processor:
+    image: {{AIRFLOW_custom_image_name if AIRFLOW_custom_image_name is defined and AIRFLOW_custom_image_name | length else ' apache/airflow'}}:{{__AIRFLOW_version}}
+    container_name: airflow-processor
+    hostname: airflow-processor
+    labels:
+      com.platys.name: 'airflow'
+      com.platys.description: "Job Orchestration & Scheduler"
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
+        required: true
+      airflow-db:
+        condition: service_healthy
+        required: true      
+    command:
+      - dag-processor
+  {% if (AIRFLOW_volume_map_docker_daemon) %}
+    group_add:
+      - "$DOCKER_GROUP"
+  {% endif %}
+    environment:
+    {% if AIRFLOW_major_version == 3 | default(false) %}    
+      - AIRFLOW__CORE__AUTH_MANAGER=airflow.providers.fab.auth_manager.fab_auth_manager.FabAuthManager
+      - AIRFLOW__CORE__EXECUTION_API_SERVER_URL='http://airflow-apiserver:8080/execution/'
+    {% endif -%}   {#  AIRFLOW_major_version #}
+      # provide a health service on port 8974
+      - AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK=true
+      - AIRFLOW__CORE__EXECUTOR={{airflow_executor}}
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:${PLATYS_AIRFLOW_POSTGRESQL_PASSWORD:-abc123!}@airflow-db/airflowdb
+      # For backward compatibility, with Airflow <2.3
+      - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:${PLATYS_AIRFLOW_POSTGRESQL_PASSWORD:-abc123!}@airflow-db/airflowdb
+      - AIRFLOW__CELERY__RESULT_BACKEND=db+postgresql://airflow:${PLATYS_AIRFLOW_POSTGRESQL_PASSWORD:-abc123!}@airflow-db/airflowdb
+      - AIRFLOW__CELERY__BROKER_URL=redis://:@airflow-redis:6379/0
+      - AIRFLOW__CORE__FERNET_KEY= '{{AIRFLOW_fernet_key}}'
+      - AIRFLOW__WEBSERVER__SECRET_KEY={{AIRFLOW_secret_key}}
+      - AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION={{AIRFLOW_dags_paused_at_creation}}
+      - AIRFLOW__CORE__LOAD_EXAMPLES={{AIRFLOW_provision_examples}}
+      - AIRFLOW__API__AUTH_BACKENDS={{AIRFLOW_auth_backends | default(omit)}}
+      - _PIP_ADDITIONAL_REQUIREMENTS={{AIRFLOW_additional_requirements}}
+      - AIRFLOW__SCHEDULER__DAG_DIR_LIST_INTERVAL={{AIRFLOW_dag_dir_list_interval}}
+      - AIRFLOW__WEBSERVER__EXPOSE_CONFIG={{AIRFLOW_expose_config}}
+    {% if AIRFLOW_volume_map_custom_conf | default(false) %}
+      - AIRFLOW_CONFIG='/opt/airflow/config/airflow.cfg'      
+    {% endif -%}   {#  AIRFLOW_volume_map_custom_conf #}
+    {%if SPARK_enable | default(false) %}
+      - SPARK_HOME=/opt/bitnami/spark
+      - JAVA_HOME=/opt/bitnami/java   
+    {% endif -%}   {#  SPARK_enable #}
+    {%if MINIO_enable or external['S3_enable'] | default(false) %}
+      - AIRFLOW_VAR_S3_ENDPOINT={{s3Endpoint | default(omit) }}
+      - AIRFLOW_VAR_S3_ACCESS_KEY={{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
+      - AIRFLOW_VAR_S3_SECRET_ACCESS_KEY={{s3SecretAccessKey}}
+      - AIRFLOW_VAR_S3_PATH_STYLE_ACCESS='{{s3PathStyleAccess}}'
+    {% endif %}
+    {% if AIRFLOW_variables is defined and AIRFLOW_variables | length | default(false) %}
+      {% for variable in AIRFLOW_variables.split(',') %}
+      - AIRFLOW_VAR_{{variable}}
+      {% endfor %}
+    {% endif %}
+    {% if MARQUEZ_enable and AIRFLOW_openlineage_enabled | default(false) %}
+      - AIRFLOW__OPENLINEAGE__DISABLED=false
+      - AIRFLOW__OPENLINEAGE__INCLUDE_FULL_TASK_INFO=true
+      - AIRFLOW__OPENLINEAGE__DEBUG_MODE=false
+      - AIRFLOW__OPENLINEAGE__TRANSPORT='{"type": "http", "url": "http://marquez:5000", "endpoint": "api/v1/lineage"}'
+    {% else %}      
+      - AIRFLOW__OPENLINEAGE__DISABLED=true      
+    {% endif %}         
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./scripts/airflow/dags:/opt/airflow/dags:Z
+      - ./plugins/airflow/:/opt/airflow/plugins:Z
+      - ./scripts/docker/wait-for-it.sh:/usr/src/app/wait-for-it.sh
+    {% if AIRFLOW_volume_map_logs %}
+      - ./container-volume/airflow/logs/scheduler:/opt/airflow/logs:Z
+    {% endif -%}   {#  AIRFLOW_volume_map_logs #}
+    {% if AIRFLOW_volume_map_custom_conf | default(false) %}
+      - ./custom-conf/airflow/:/opt/airflow/config
+    {% endif -%}   {#  AIRFLOW_volume_map_custom_conf #}
+    {%if SPARK_enable | default(false) %}
+      - spark-{{__SPARK_version | replace('.','-')}}-vol:/opt/bitnami/spark:RO
+      - spark-{{__SPARK_version | replace('.','-')}}-java-vol:/opt/bitnami/java:RO
+      - ./container-volume/spark/logs/:/var/log/spark/logs       
+    {% endif -%}   {#  SPARK_enable #}
+    {%if MINIO_enable or external['S3_enable'] | default(false) %}
+      - aws-credentials-vol:/home/airflow/.aws:RO
+    {% endif %}      
+    {% if AIRFLOW_volume_map_docker_daemon %}
+      - /var/run/docker.sock:/var/run/docker.sock
+    {% endif -%}   {#  AIRFLOW_volume_map_docker_daemon #}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    user: "${AIRFLOW_UID:-50000}:${AIRFLOW_GID:-0}"
+    restart: {{container_restart_policy}}
+    healthcheck:
+      test: ["CMD-SHELL", 'airflow jobs check --job-type DagProcessorJob --hostname "$${HOSTNAME}"']
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+  {% endif -%}   {#  AIRFLOW_major_version #}
+
+  {% if (AIRFLOW_executor | lower) == 'celery'  %}
+    {% for num in range(AIRFLOW_workers | default(1) ) %}
+
 
   {% if AIRFLOW_major_version == 3 | default(false) %}    
   airflow-apiserver:
@@ -12494,120 +12608,7 @@ services:
       timeout: 10s
       retries: 5
       start_period: 30s
-  
-  {% if AIRFLOW_major_version == 3 | default(false) %}    
-  airflow-dag-processor:
-    image: {{AIRFLOW_custom_image_name if AIRFLOW_custom_image_name is defined and AIRFLOW_custom_image_name | length else ' apache/airflow'}}:{{__AIRFLOW_version}}
-    container_name: airflow-processor
-    hostname: airflow-processor
-    labels:
-      com.platys.name: 'airflow'
-      com.platys.description: "Job Orchestration & Scheduler"
-    depends_on:
-      airflow-init:
-        condition: service_completed_successfully
-        required: true
-      airflow-db:
-        condition: service_healthy
-        required: true      
-    command:
-      - dag-processor
-  {% if (AIRFLOW_volume_map_docker_daemon) %}
-    group_add:
-      - "$DOCKER_GROUP"
-  {% endif %}
-    environment:
-    {% if AIRFLOW_major_version == 3 | default(false) %}    
-      - AIRFLOW__CORE__AUTH_MANAGER=airflow.providers.fab.auth_manager.fab_auth_manager.FabAuthManager
-      - AIRFLOW__CORE__EXECUTION_API_SERVER_URL='http://airflow-apiserver:8080/execution/'
-    {% endif -%}   {#  AIRFLOW_major_version #}
-      # provide a health service on port 8974
-      - AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK=true
-      - AIRFLOW__CORE__EXECUTOR={{airflow_executor}}
-      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:${PLATYS_AIRFLOW_POSTGRESQL_PASSWORD:-abc123!}@airflow-db/airflowdb
-      # For backward compatibility, with Airflow <2.3
-      - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:${PLATYS_AIRFLOW_POSTGRESQL_PASSWORD:-abc123!}@airflow-db/airflowdb
-      - AIRFLOW__CELERY__RESULT_BACKEND=db+postgresql://airflow:${PLATYS_AIRFLOW_POSTGRESQL_PASSWORD:-abc123!}@airflow-db/airflowdb
-      - AIRFLOW__CELERY__BROKER_URL=redis://:@airflow-redis:6379/0
-      - AIRFLOW__CORE__FERNET_KEY= '{{AIRFLOW_fernet_key}}'
-      - AIRFLOW__WEBSERVER__SECRET_KEY={{AIRFLOW_secret_key}}
-      - AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION={{AIRFLOW_dags_paused_at_creation}}
-      - AIRFLOW__CORE__LOAD_EXAMPLES={{AIRFLOW_provision_examples}}
-      - AIRFLOW__API__AUTH_BACKENDS={{AIRFLOW_auth_backends | default(omit)}}
-      - _PIP_ADDITIONAL_REQUIREMENTS={{AIRFLOW_additional_requirements}}
-      - AIRFLOW__SCHEDULER__DAG_DIR_LIST_INTERVAL={{AIRFLOW_dag_dir_list_interval}}
-      - AIRFLOW__WEBSERVER__EXPOSE_CONFIG={{AIRFLOW_expose_config}}
-    {% if AIRFLOW_volume_map_custom_conf | default(false) %}
-      - AIRFLOW_CONFIG='/opt/airflow/config/airflow.cfg'      
-    {% endif -%}   {#  AIRFLOW_volume_map_custom_conf #}
-    {%if SPARK_enable | default(false) %}
-      - SPARK_HOME=/opt/bitnami/spark
-      - JAVA_HOME=/opt/bitnami/java   
-    {% endif -%}   {#  SPARK_enable #}
-    {%if MINIO_enable or external['S3_enable'] | default(false) %}
-      - AIRFLOW_VAR_S3_ENDPOINT={{s3Endpoint | default(omit) }}
-      - AIRFLOW_VAR_S3_ACCESS_KEY={{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
-      - AIRFLOW_VAR_S3_SECRET_ACCESS_KEY={{s3SecretAccessKey}}
-      - AIRFLOW_VAR_S3_PATH_STYLE_ACCESS='{{s3PathStyleAccess}}'
-    {% endif %}
-    {% if AIRFLOW_variables is defined and AIRFLOW_variables | length | default(false) %}
-      {% for variable in AIRFLOW_variables.split(',') %}
-      - AIRFLOW_VAR_{{variable}}
-      {% endfor %}
-    {% endif %}
-    {% if MARQUEZ_enable and AIRFLOW_openlineage_enabled | default(false) %}
-      - AIRFLOW__OPENLINEAGE__DISABLED=false
-      - AIRFLOW__OPENLINEAGE__INCLUDE_FULL_TASK_INFO=true
-      - AIRFLOW__OPENLINEAGE__DEBUG_MODE=false
-      - AIRFLOW__OPENLINEAGE__TRANSPORT='{"type": "http", "url": "http://marquez:5000", "endpoint": "api/v1/lineage"}'
-    {% else %}      
-      - AIRFLOW__OPENLINEAGE__DISABLED=true      
-    {% endif %}         
-    {%if use_timezone | default(false) %}
-      - TZ={{use_timezone}}
-    {% endif -%}   {#  use_timezone #}
-    volumes:
-      - ./data-transfer:/data-transfer
-      - ./scripts/airflow/dags:/opt/airflow/dags:Z
-      - ./plugins/airflow/:/opt/airflow/plugins:Z
-      - ./scripts/docker/wait-for-it.sh:/usr/src/app/wait-for-it.sh
-    {% if AIRFLOW_volume_map_logs %}
-      - ./container-volume/airflow/logs/scheduler:/opt/airflow/logs:Z
-    {% endif -%}   {#  AIRFLOW_volume_map_logs #}
-    {% if AIRFLOW_volume_map_custom_conf | default(false) %}
-      - ./custom-conf/airflow/:/opt/airflow/config
-    {% endif -%}   {#  AIRFLOW_volume_map_custom_conf #}
-    {%if SPARK_enable | default(false) %}
-      - spark-{{__SPARK_version | replace('.','-')}}-vol:/opt/bitnami/spark:RO
-      - spark-{{__SPARK_version | replace('.','-')}}-java-vol:/opt/bitnami/java:RO
-      - ./container-volume/spark/logs/:/var/log/spark/logs       
-    {% endif -%}   {#  SPARK_enable #}
-    {%if MINIO_enable or external['S3_enable'] | default(false) %}
-      - aws-credentials-vol:/home/airflow/.aws:RO
-    {% endif %}      
-    {% if AIRFLOW_volume_map_docker_daemon %}
-      - /var/run/docker.sock:/var/run/docker.sock
-    {% endif -%}   {#  AIRFLOW_volume_map_docker_daemon #}
-    {%if use_timezone | default(false) %}
-      - "./etc/timezone:/etc/timezone:ro"
-      - "./etc/localtime:/etc/localtime:ro"
-    {% endif -%}   {#  use_timezone #}
-    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
-    <<: *logging
-    {% endif -%}   {#  logging_driver is defined ... #}
-    user: "${AIRFLOW_UID:-50000}:${AIRFLOW_GID:-0}"
-    restart: {{container_restart_policy}}
-    healthcheck:
-      test: ["CMD-SHELL", 'airflow jobs check --job-type DagProcessorJob --hostname "$${HOSTNAME}"']
-      interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 30s
-  {% endif -%}   {#  AIRFLOW_major_version #}
-
-  {% if (AIRFLOW_executor | lower) == 'celery'  %}
-    {% for num in range(AIRFLOW_workers | default(1) ) %}
-
+      
   airflow-worker-{{loop.index}}:
     image: {{AIRFLOW_custom_image_name if AIRFLOW_custom_image_name is defined and AIRFLOW_custom_image_name | length else ' apache/airflow'}}:{{__AIRFLOW_version}}
     container_name: airflow-worker-{{loop.index}}
@@ -12914,7 +12915,7 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
     healthcheck:
-      test: ["CMD", "pg_isready", "-U", "airflow"]
+      test: ["CMD", "pg_isready", "-U", "airflow", "-p", "5432", "-d", "airflowdb"]
       interval: 10s
       retries: 5
       start_period: 5s
