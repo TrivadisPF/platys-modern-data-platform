@@ -32,6 +32,7 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
 
  * Additional data can be copied into `/data-transfer` folder when using the `PROVISIONING_DATA_enable` functionality by specifying the folder in `PROVISIONING_DATA_additional_data_folder` setting
  * Add Support for Airflow 3.x
+ * Add Support for writing the Airflow logs to S3 (MinIO) by setting `AIRFLOW_logging_strategy` to `s3`.
 
 ### Breaking Changes
 
