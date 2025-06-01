@@ -12185,71 +12185,79 @@ services:
   {% endif %}
     environment:
     {% if AIRFLOW_major_version == 2 | default(false) %}    
-      - AIRFLOW__API__AUTH_BACKENDS={{AIRFLOW_auth_backends | default(omit)}}
+      AIRFLOW__API__AUTH_BACKENDS: {{AIRFLOW_auth_backends | default(omit)}}
     {% elif AIRFLOW_major_version == 3 | default(false) %}    
-      - AIRFLOW__CORE__AUTH_MANAGER={{AIRFLOW_auth_manager | default(omit)}}
-      - AIRFLOW__CORE__EXECUTION_API_SERVER_URL=http://airflow-apiserver:8080/execution/
+      AIRFLOW__CORE__AUTH_MANAGER: {{AIRFLOW_auth_manager | default(omit)}}
+      AIRFLOW__CORE__EXECUTION_API_SERVER_URL: http://airflow-apiserver:8080/execution/
     {% endif -%}   {#  AIRFLOW_major_version #}    
-      - AIRFLOW__CORE__EXECUTOR={{airflow_executor}}
-      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:${PLATYS_AIRFLOW_POSTGRESQL_PASSWORD:-abc123!}@airflow-db/airflowdb
+      AIRFLOW__CORE__EXECUTOR: {{airflow_executor}}
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:${PLATYS_AIRFLOW_POSTGRESQL_PASSWORD:-abc123!}@airflow-db/airflowdb
       # For backward compatibility, with Airflow <2.3
-      - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:${PLATYS_AIRFLOW_POSTGRESQL_PASSWORD:-abc123!}@airflow-db/airflowdb
-      - AIRFLOW__CELERY__RESULT_BACKEND=db+postgresql://airflow:${PLATYS_AIRFLOW_POSTGRESQL_PASSWORD:-abc123!}@airflow-db/airflowdb
-      - AIRFLOW__CELERY__BROKER_URL=redis://:@airflow-redis:6379/0
-      - AIRFLOW__CORE__FERNET_KEY=${PLATYS_AIRFLOW_FERNET_KEY:-{{AIRFLOW_fernet_key}}}
-      - AIRFLOW__WEBSERVER__SECRET_KEY=${PLATYS_AIRFLOW_SECRET_KEY:-{{AIRFLOW_secret_key}}}
-      - AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION={{AIRFLOW_dags_paused_at_creation}}
-      - AIRFLOW__CORE__LOAD_EXAMPLES={{AIRFLOW_provision_examples}}
-      - _PIP_ADDITIONAL_REQUIREMENTS={{AIRFLOW_additional_requirements}}
-      - AIRFLOW__SCHEDULER__DAG_DIR_LIST_INTERVAL={{AIRFLOW_dag_dir_list_interval}}
-      - AIRFLOW__CORE__TEST_CONNECTION=Enabled
-      - AIRFLOW__LOGGING__LOGGING_LEVEL=INFO       
+      AIRFLOW__CORE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:${PLATYS_AIRFLOW_POSTGRESQL_PASSWORD:-abc123!}@airflow-db/airflowdb
+      AIRFLOW__CELERY__RESULT_BACKEND: db+postgresql://airflow:${PLATYS_AIRFLOW_POSTGRESQL_PASSWORD:-abc123!}@airflow-db/airflowdb
+      AIRFLOW__CELERY__BROKER_URL: redis://:@airflow-redis:6379/0
+      AIRFLOW__CORE__FERNET_KEY: ${PLATYS_AIRFLOW_FERNET_KEY:-{{AIRFLOW_fernet_key}}}
+      AIRFLOW__WEBSERVER__SECRET_KEY: ${PLATYS_AIRFLOW_SECRET_KEY:-{{AIRFLOW_secret_key}}}
+      AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: {{AIRFLOW_dags_paused_at_creation}}
+      AIRFLOW__CORE__LOAD_EXAMPLES: {{AIRFLOW_provision_examples}}
+      _PIP_ADDITIONAL_REQUIREMENTS: {{AIRFLOW_additional_requirements}}
+      AIRFLOW__SCHEDULER__DAG_DIR_LIST_INTERVAL: {{AIRFLOW_dag_dir_list_interval}}
+      AIRFLOW__CORE__TEST_CONNECTION: Enabled
+      AIRFLOW__LOGGING__LOGGING_LEVEL: INFO       
     {% if AIRFLOW_major_version == 2 | default(false) %}    
-      - AIRFLOW__WEBSERVER__EXPOSE_CONFIG={{AIRFLOW_expose_config}}
+      AIRFLOW__WEBSERVER__EXPOSE_CONFIG: {{AIRFLOW_expose_config}}
     {% elif AIRFLOW_major_version == 3 | default(false) %}
-      - AIRFLOW__API__EXPOSE_CONFIG={{AIRFLOW_expose_config}}   
+      AIRFLOW__API__EXPOSE_CONFIG: {{AIRFLOW_expose_config}}
     {% endif -%}   {#  AIRFLOW_major_version #}
     {% if AIRFLOW_volume_map_custom_conf | default(false) %}
-      - AIRFLOW_CONFIG='/opt/airflow/config/airflow.cfg'      
+      AIRFLOW_CONFIG: '/opt/airflow/config/airflow.cfg'      
     {% endif -%}   {#  AIRFLOW_volume_map_custom_conf #}
     {%if SPARK_enable | default(false) %}
-      - SPARK_HOME=/opt/bitnami/spark
-      - JAVA_HOME=/opt/bitnami/java      
+      SPARK_HOME: /opt/bitnami/spark
+      JAVA_HOME: /opt/bitnami/java      
     {% endif -%}   {#  SPARK_enable #}
     {%if MINIO_enable or external['S3_enable'] | default(false) %}
-      - AIRFLOW_VAR_S3_ENDPOINT={{s3Endpoint | default(omit) }}
-      - AIRFLOW_VAR_S3_ACCESS_KEY={{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
-      - AIRFLOW_VAR_S3_SECRET_ACCESS_KEY={{s3SecretAccessKey}}
-      - AIRFLOW_VAR_S3_PATH_STYLE_ACCESS='{{s3PathStyleAccess}}'
+      AIRFLOW_VAR_S3_ENDPOINT: {{s3Endpoint | default(omit) }}
+      AIRFLOW_VAR_S3_ACCESS_KEY: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
+      AIRFLOW_VAR_S3_SECRET_ACCESS_KEY: {{s3SecretAccessKey}}
+      AIRFLOW_VAR_S3_PATH_STYLE_ACCESS: '{{s3PathStyleAccess}}'
       {% if AIRFLOW_logging_strategy | lower == 's3' | default(false) %}
-      - AIRFLOW__LOGGING__REMOTE_LOGGING=True
-      - AIRFLOW__LOGGING__REMOTE_LOG_CONN_ID=log_s3_conn
-      - AIRFLOW__LOGGING__REMOTE_BASE_LOG_FOLDER=s3://{{AIRFLOW_logging_s3_bucket_name | default('admin-bucket')}}/{{AIRFLOW_logging_s3_key_prefix | default('')}}
-      - AIRFLOW_CONN_LOG_S3_CONN=aws://{{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') | urlencode }}:{{s3SecretAccessKey | urlencode }}@{{s3Endpoint | replace('http://','') | urlencode | default(omit) }}/?endpoint_url":"{{s3Endpoint | urlencode | default(omit) }}&region_name":"us-east-1"}
-      - AWS_ACCESS_KEY_ID={{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
-      - AWS_SECRET_ACCESS_KEY={{s3SecretAccessKey}}
+      AIRFLOW__LOGGING__REMOTE_LOGGING: True
+      AIRFLOW__LOGGING__REMOTE_LOG_CONN_ID: log_s3_conn
+      AIRFLOW__LOGGING__REMOTE_BASE_LOG_FOLDER: s3://{{AIRFLOW_logging_s3_bucket_name | default('admin-bucket')}}/{{AIRFLOW_logging_s3_key_prefix | default('')}}
+      AIRFLOW_CONN_LOG_S3_CONN: > 
+        { "conn_type": "aws", 
+          "host": "minio-1", 
+          "login": "{{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}", 
+          "password": "{{s3SecretAccessKey}}", 
+          "schema": "", 
+          "port": 9000, 
+          "extra": {"endpoint_url": "{{s3Endpoint}}", "region_name": "us-east-1"}
+        }
+      AWS_ACCESS_KEY_ID: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
+      AWS_SECRET_ACCESS_KEY: {{s3SecretAccessKey}}
       {% endif %}  {#  AIRFLOW_remote_logging_enabled #}      
     {% endif %}
     {% if AIRFLOW_variables is defined and AIRFLOW_variables and AIRFLOW_variables | length | default(false) %}
       {% for variable in AIRFLOW_variables.split(',') %}
-      - AIRFLOW_VAR_{{variable}}
+      AIRFLOW_VAR_{{variable}}
       {% endfor %}
     {% endif %}
     {% if AIRFLOW_connections is defined and AIRFLOW_connections and AIRFLOW_connections | length | default(false) %}
       {% for connection in AIRFLOW_connections.split(',') %}
-      - AIRFLOW_CONN_{{connection}}
+      AIRFLOW_CONN_{{connection}}
       {% endfor %}
     {% endif %}
     {% if MARQUEZ_enable and AIRFLOW_openlineage_enabled | default(false) %}
-      - AIRFLOW__OPENLINEAGE__DISABLED=false
-      - AIRFLOW__OPENLINEAGE__INCLUDE_FULL_TASK_INFO=true
-      - AIRFLOW__OPENLINEAGE__DEBUG_MODE=false
-      - AIRFLOW__OPENLINEAGE__TRANSPORT='{"type": "http", "url": "http://marquez:5000", "endpoint": "api/v1/lineage"}'
+      AIRFLOW__OPENLINEAGE__DISABLED: false
+      AIRFLOW__OPENLINEAGE__INCLUDE_FULL_TASK_INFO: true
+      AIRFLOW__OPENLINEAGE__DEBUG_MODE: false
+      AIRFLOW__OPENLINEAGE__TRANSPORT: '{"type": "http", "url": "http://marquez:5000", "endpoint": "api/v1/lineage"}'
     {% else %}      
-      - AIRFLOW__OPENLINEAGE__DISABLED=true      
+      AIRFLOW__OPENLINEAGE__DISABLED: true      
     {% endif %}
     {%if use_timezone | default(false) %}
-      - TZ={{use_timezone}}
+      TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
@@ -12317,67 +12325,82 @@ services:
     ports:
       - "28139:8080"  
     environment:
-    {% if AIRFLOW_major_version == 3 | default(false) %}    
-      - AIRFLOW__CORE__AUTH_MANAGER={{AIRFLOW_auth_manager | default(omit)}}
-      - AIRFLOW__CORE__EXECUTION_API_SERVER_URL=http://airflow-apiserver:8080/execution/
-    {% endif -%}   {#  AIRFLOW_major_version #}
-      # provide a health service on port 8974
-      - AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK=true
-      - AIRFLOW__CORE__EXECUTOR={{airflow_executor}}
-      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:${PLATYS_AIRFLOW_POSTGRESQL_PASSWORD:-abc123!}@airflow-db/airflowdb
-      # For backward compatibility, with Airflow <2.3
-      - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:${PLATYS_AIRFLOW_POSTGRESQL_PASSWORD:-abc123!}@airflow-db/airflowdb
-      - AIRFLOW__CELERY__RESULT_BACKEND=db+postgresql://airflow:${PLATYS_AIRFLOW_POSTGRESQL_PASSWORD:-abc123!}@airflow-db/airflowdb
-      - AIRFLOW__CELERY__BROKER_URL=redis://:@airflow-redis:6379/0
-      - AIRFLOW__CORE__FERNET_KEY=${PLATYS_AIRFLOW_FERNET_KEY:-{{AIRFLOW_fernet_key}}}
-      - AIRFLOW__WEBSERVER__SECRET_KEY=${PLATYS_AIRFLOW_SECRET_KEY:-{{AIRFLOW_secret_key}}}
-      - AIRFLOW__API_AUTH__JWT_SECRET=${PLATYS_AIRFLOW_JWT_SECRET:-{{AIRFLOW_jwt_secret}}}
-      - AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION={{AIRFLOW_dags_paused_at_creation}}
-      - AIRFLOW__CORE__LOAD_EXAMPLES={{AIRFLOW_provision_examples}}
-      - _PIP_ADDITIONAL_REQUIREMENTS={{AIRFLOW_additional_requirements}}
-      - AIRFLOW__SCHEDULER__DAG_DIR_LIST_INTERVAL={{AIRFLOW_dag_dir_list_interval}}
-      - AIRFLOW__CORE__TEST_CONNECTION=Enabled      
     {% if AIRFLOW_major_version == 2 | default(false) %}    
-      - AIRFLOW__WEBSERVER__EXPOSE_CONFIG={{AIRFLOW_expose_config}}
+      AIRFLOW__API__AUTH_BACKENDS: {{AIRFLOW_auth_backends | default(omit)}}
+    {% elif AIRFLOW_major_version == 3 | default(false) %}    
+      AIRFLOW__CORE__AUTH_MANAGER: {{AIRFLOW_auth_manager | default(omit)}}
+      AIRFLOW__CORE__EXECUTION_API_SERVER_URL: http://airflow-apiserver:8080/execution/
+    {% endif -%}   {#  AIRFLOW_major_version #}    
+      # provide a health service on port 8974
+      AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK: true
+      AIRFLOW__CORE__EXECUTOR: {{airflow_executor}}
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:${PLATYS_AIRFLOW_POSTGRESQL_PASSWORD:-abc123!}@airflow-db/airflowdb
+      # For backward compatibility, with Airflow <2.3
+      AIRFLOW__CORE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:${PLATYS_AIRFLOW_POSTGRESQL_PASSWORD:-abc123!}@airflow-db/airflowdb
+      AIRFLOW__CELERY__RESULT_BACKEND: db+postgresql://airflow:${PLATYS_AIRFLOW_POSTGRESQL_PASSWORD:-abc123!}@airflow-db/airflowdb
+      AIRFLOW__CELERY__BROKER_URL: redis://:@airflow-redis:6379/0
+      AIRFLOW__CORE__FERNET_KEY: ${PLATYS_AIRFLOW_FERNET_KEY:-{{AIRFLOW_fernet_key}}}
+      AIRFLOW__WEBSERVER__SECRET_KEY: ${PLATYS_AIRFLOW_SECRET_KEY:-{{AIRFLOW_secret_key}}}
+      AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: {{AIRFLOW_dags_paused_at_creation}}
+      AIRFLOW__CORE__LOAD_EXAMPLES: {{AIRFLOW_provision_examples}}
+      _PIP_ADDITIONAL_REQUIREMENTS: {{AIRFLOW_additional_requirements}}
+      AIRFLOW__SCHEDULER__DAG_DIR_LIST_INTERVAL: {{AIRFLOW_dag_dir_list_interval}}
+      AIRFLOW__CORE__TEST_CONNECTION: Enabled
+      AIRFLOW__LOGGING__LOGGING_LEVEL: INFO       
+    {% if AIRFLOW_major_version == 2 | default(false) %}    
+      AIRFLOW__WEBSERVER__EXPOSE_CONFIG: {{AIRFLOW_expose_config}}
     {% elif AIRFLOW_major_version == 3 | default(false) %}
-      - AIRFLOW__API__EXPOSE_CONFIG={{AIRFLOW_expose_config}}   
+      AIRFLOW__API__EXPOSE_CONFIG: {{AIRFLOW_expose_config}}
     {% endif -%}   {#  AIRFLOW_major_version #}
     {% if AIRFLOW_volume_map_custom_conf | default(false) %}
-      - AIRFLOW_CONFIG='/opt/airflow/config/airflow.cfg'      
+      AIRFLOW_CONFIG: '/opt/airflow/config/airflow.cfg'      
     {% endif -%}   {#  AIRFLOW_volume_map_custom_conf #}
     {%if SPARK_enable | default(false) %}
-      - SPARK_HOME=/opt/bitnami/spark
-      - JAVA_HOME=/opt/bitnami/java   
+      SPARK_HOME: /opt/bitnami/spark
+      JAVA_HOME: /opt/bitnami/java      
     {% endif -%}   {#  SPARK_enable #}
     {%if MINIO_enable or external['S3_enable'] | default(false) %}
-      - AIRFLOW_VAR_S3_ENDPOINT={{s3Endpoint | default(omit) }}
-      - AIRFLOW_VAR_S3_ACCESS_KEY={{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
-      - AIRFLOW_VAR_S3_SECRET_ACCESS_KEY={{s3SecretAccessKey}}
-      - AIRFLOW_VAR_S3_PATH_STYLE_ACCESS='{{s3PathStyleAccess}}'
+      AIRFLOW_VAR_S3_ENDPOINT: {{s3Endpoint | default(omit) }}
+      AIRFLOW_VAR_S3_ACCESS_KEY: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
+      AIRFLOW_VAR_S3_SECRET_ACCESS_KEY: {{s3SecretAccessKey}}
+      AIRFLOW_VAR_S3_PATH_STYLE_ACCESS: '{{s3PathStyleAccess}}'
       {% if AIRFLOW_logging_strategy | lower == 's3' | default(false) %}
-      - AIRFLOW__LOGGING__REMOTE_LOGGING=True
-      - AIRFLOW__LOGGING__REMOTE_LOG_CONN_ID=log_s3_conn
-      - AIRFLOW__LOGGING__REMOTE_BASE_LOG_FOLDER=s3://{{AIRFLOW_logging_s3_bucket_name | default('admin-bucket')}}/{{AIRFLOW_logging_s3_key_prefix | default('')}}
-      - AIRFLOW_CONN_LOG_S3_CONN=aws://{{s3AccessKey}}:{{s3SecretAccessKey}}@{{s3Endpoint | replace('http://','') }}/?endpoint_url={{s3Endpoint | urlencode | replace('/','%2F')}}&region_name=us-east-1}
-      - AWS_ACCESS_KEY_ID={{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
-      - AWS_SECRET_ACCESS_KEY={{s3SecretAccessKey}}
-      {% endif %}  {#  AIRFLOW_remote_logging_enabled #}
-    {% endif %}  {#  MINIO_enable or external['S3_enable'] #}
-    {% if AIRFLOW_variables is defined and AIRFLOW_variables | length | default(false) %}
+      AIRFLOW__LOGGING__REMOTE_LOGGING: True
+      AIRFLOW__LOGGING__REMOTE_LOG_CONN_ID: log_s3_conn
+      AIRFLOW__LOGGING__REMOTE_BASE_LOG_FOLDER: s3://{{AIRFLOW_logging_s3_bucket_name | default('admin-bucket')}}/{{AIRFLOW_logging_s3_key_prefix | default('')}}
+      AIRFLOW_CONN_LOG_S3_CONN: > 
+        { "conn_type": "aws", 
+          "host": "minio-1", 
+          "login": "{{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}", 
+          "password": "{{s3SecretAccessKey}}", 
+          "schema": "", 
+          "port": 9000, 
+          "extra": {"endpoint_url": "{{s3Endpoint}}", "region_name": "us-east-1"}
+        }
+      AWS_ACCESS_KEY_ID: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
+      AWS_SECRET_ACCESS_KEY: {{s3SecretAccessKey}}
+      {% endif %}  {#  AIRFLOW_remote_logging_enabled #}      
+    {% endif %}
+    {% if AIRFLOW_variables is defined and AIRFLOW_variables and AIRFLOW_variables | length | default(false) %}
       {% for variable in AIRFLOW_variables.split(',') %}
-      - AIRFLOW_VAR_{{variable}}
+      AIRFLOW_VAR_{{variable}}
+      {% endfor %}
+    {% endif %}
+    {% if AIRFLOW_connections is defined and AIRFLOW_connections and AIRFLOW_connections | length | default(false) %}
+      {% for connection in AIRFLOW_connections.split(',') %}
+      AIRFLOW_CONN_{{connection}}
       {% endfor %}
     {% endif %}
     {% if MARQUEZ_enable and AIRFLOW_openlineage_enabled | default(false) %}
-      - AIRFLOW__OPENLINEAGE__DISABLED=false
-      - AIRFLOW__OPENLINEAGE__INCLUDE_FULL_TASK_INFO=true
-      - AIRFLOW__OPENLINEAGE__DEBUG_MODE=false
-      - AIRFLOW__OPENLINEAGE__TRANSPORT='{"type": "http", "url": "http://marquez:5000", "endpoint": "api/v1/lineage"}'
+      AIRFLOW__OPENLINEAGE__DISABLED: false
+      AIRFLOW__OPENLINEAGE__INCLUDE_FULL_TASK_INFO: true
+      AIRFLOW__OPENLINEAGE__DEBUG_MODE: false
+      AIRFLOW__OPENLINEAGE__TRANSPORT: '{"type": "http", "url": "http://marquez:5000", "endpoint": "api/v1/lineage"}'
     {% else %}      
-      - AIRFLOW__OPENLINEAGE__DISABLED=true
-    {% endif %}         
+      AIRFLOW__OPENLINEAGE__DISABLED: true      
+    {% endif %}       
     {%if use_timezone | default(false) %}
-      - TZ={{use_timezone}}
+      - TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
@@ -12440,66 +12463,82 @@ services:
       - "$DOCKER_GROUP"
   {% endif %}
     environment:
-    {% if AIRFLOW_major_version == 3 | default(false) %}    
-      - AIRFLOW__CORE__AUTH_MANAGER={{AIRFLOW_auth_manager | default(omit)}}
-      - AIRFLOW__CORE__EXECUTION_API_SERVER_URL=http://airflow-apiserver:8080/execution/
-    {% endif -%}   {#  AIRFLOW_major_version #}
-      # provide a health service on port 8974
-      - AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK=true
-      - AIRFLOW__CORE__EXECUTOR={{airflow_executor}}
-      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:${PLATYS_AIRFLOW_POSTGRESQL_PASSWORD:-abc123!}@airflow-db/airflowdb
-      # For backward compatibility, with Airflow <2.3
-      - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:${PLATYS_AIRFLOW_POSTGRESQL_PASSWORD:-abc123!}@airflow-db/airflowdb
-      - AIRFLOW__CELERY__RESULT_BACKEND=db+postgresql://airflow:${PLATYS_AIRFLOW_POSTGRESQL_PASSWORD:-abc123!}@airflow-db/airflowdb
-      - AIRFLOW__CELERY__BROKER_URL=redis://:@airflow-redis:6379/0
-      - AIRFLOW__CORE__FERNET_KEY=${PLATYS_AIRFLOW_FERNET_KEY:-{{AIRFLOW_fernet_key}}}
-      - AIRFLOW__WEBSERVER__SECRET_KEY=${PLATYS_AIRFLOW_SECRET_KEY:-{{AIRFLOW_secret_key}}}
-      - AIRFLOW__API_AUTH__JWT_SECRET=${PLATYS_AIRFLOW_JWT_SECRET:-{{AIRFLOW_jwt_secret}}}
-      - AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION={{AIRFLOW_dags_paused_at_creation}}
-      - AIRFLOW__CORE__LOAD_EXAMPLES={{AIRFLOW_provision_examples}}
-      - _PIP_ADDITIONAL_REQUIREMENTS={{AIRFLOW_additional_requirements}}
-      - AIRFLOW__SCHEDULER__DAG_DIR_LIST_INTERVAL={{AIRFLOW_dag_dir_list_interval}}
     {% if AIRFLOW_major_version == 2 | default(false) %}    
-      - AIRFLOW__WEBSERVER__EXPOSE_CONFIG={{AIRFLOW_expose_config}}
+      AIRFLOW__API__AUTH_BACKENDS: {{AIRFLOW_auth_backends | default(omit)}}
+    {% elif AIRFLOW_major_version == 3 | default(false) %}    
+      AIRFLOW__CORE__AUTH_MANAGER: {{AIRFLOW_auth_manager | default(omit)}}
+      AIRFLOW__CORE__EXECUTION_API_SERVER_URL: http://airflow-apiserver:8080/execution/
+    {% endif -%}   {#  AIRFLOW_major_version #}    
+      # provide a health service on port 8974
+      AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK: true
+      AIRFLOW__CORE__EXECUTOR: {{airflow_executor}}
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:${PLATYS_AIRFLOW_POSTGRESQL_PASSWORD:-abc123!}@airflow-db/airflowdb
+      # For backward compatibility, with Airflow <2.3
+      AIRFLOW__CORE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:${PLATYS_AIRFLOW_POSTGRESQL_PASSWORD:-abc123!}@airflow-db/airflowdb
+      AIRFLOW__CELERY__RESULT_BACKEND: db+postgresql://airflow:${PLATYS_AIRFLOW_POSTGRESQL_PASSWORD:-abc123!}@airflow-db/airflowdb
+      AIRFLOW__CELERY__BROKER_URL: redis://:@airflow-redis:6379/0
+      AIRFLOW__CORE__FERNET_KEY: ${PLATYS_AIRFLOW_FERNET_KEY:-{{AIRFLOW_fernet_key}}}
+      AIRFLOW__WEBSERVER__SECRET_KEY: ${PLATYS_AIRFLOW_SECRET_KEY:-{{AIRFLOW_secret_key}}}
+      AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: {{AIRFLOW_dags_paused_at_creation}}
+      AIRFLOW__CORE__LOAD_EXAMPLES: {{AIRFLOW_provision_examples}}
+      _PIP_ADDITIONAL_REQUIREMENTS: {{AIRFLOW_additional_requirements}}
+      AIRFLOW__SCHEDULER__DAG_DIR_LIST_INTERVAL: {{AIRFLOW_dag_dir_list_interval}}
+      AIRFLOW__CORE__TEST_CONNECTION: Enabled
+      AIRFLOW__LOGGING__LOGGING_LEVEL: INFO       
+    {% if AIRFLOW_major_version == 2 | default(false) %}    
+      AIRFLOW__WEBSERVER__EXPOSE_CONFIG: {{AIRFLOW_expose_config}}
     {% elif AIRFLOW_major_version == 3 | default(false) %}
-      - AIRFLOW__API__EXPOSE_CONFIG={{AIRFLOW_expose_config}}   
+      AIRFLOW__API__EXPOSE_CONFIG: {{AIRFLOW_expose_config}}
     {% endif -%}   {#  AIRFLOW_major_version #}
     {% if AIRFLOW_volume_map_custom_conf | default(false) %}
-      - AIRFLOW_CONFIG='/opt/airflow/config/airflow.cfg'      
+      AIRFLOW_CONFIG: '/opt/airflow/config/airflow.cfg'      
     {% endif -%}   {#  AIRFLOW_volume_map_custom_conf #}
     {%if SPARK_enable | default(false) %}
-      - SPARK_HOME=/opt/bitnami/spark
-      - JAVA_HOME=/opt/bitnami/java   
+      SPARK_HOME: /opt/bitnami/spark
+      JAVA_HOME: /opt/bitnami/java      
     {% endif -%}   {#  SPARK_enable #}
     {%if MINIO_enable or external['S3_enable'] | default(false) %}
-      - AIRFLOW_VAR_S3_ENDPOINT={{s3Endpoint | default(omit) }}
-      - AIRFLOW_VAR_S3_ACCESS_KEY={{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
-      - AIRFLOW_VAR_S3_SECRET_ACCESS_KEY={{s3SecretAccessKey}}
-      - AIRFLOW_VAR_S3_PATH_STYLE_ACCESS='{{s3PathStyleAccess}}'
+      AIRFLOW_VAR_S3_ENDPOINT: {{s3Endpoint | default(omit) }}
+      AIRFLOW_VAR_S3_ACCESS_KEY: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
+      AIRFLOW_VAR_S3_SECRET_ACCESS_KEY: {{s3SecretAccessKey}}
+      AIRFLOW_VAR_S3_PATH_STYLE_ACCESS: '{{s3PathStyleAccess}}'
       {% if AIRFLOW_logging_strategy | lower == 's3' | default(false) %}
-      - AIRFLOW__LOGGING__REMOTE_LOGGING=True
-      - AIRFLOW__LOGGING__REMOTE_LOG_CONN_ID=log_s3_conn
-      - AIRFLOW__LOGGING__REMOTE_BASE_LOG_FOLDER=s3://{{AIRFLOW_logging_s3_bucket_name | default('admin-bucket')}}/{{AIRFLOW_logging_s3_key_prefix | default('')}}
-      - AIRFLOW_CONN_LOG_S3_CONN=aws://{{s3AccessKey}}:{{s3SecretAccessKey}}@{{s3Endpoint | replace('http://','') }}/?endpoint_url:{{s3Endpoint | urlencode | replace('/','%2F') | 'default(omit)}}&region_name:us-east-1}
-      - AIRFLOW_CONN_LOG_S3_CONN=aws://{{s3AccessKey}}:{{s3SecretAccessKey}}@{{s3Endpoint | replace('http://','') }}/?endpoint_url={{s3Endpoint | urlencode | replace('/','%2F')}}&region_name=us-east-1}
-      - AWS_SECRET_ACCESS_KEY={{s3SecretAccessKey}}
+      AIRFLOW__LOGGING__REMOTE_LOGGING: True
+      AIRFLOW__LOGGING__REMOTE_LOG_CONN_ID: log_s3_conn
+      AIRFLOW__LOGGING__REMOTE_BASE_LOG_FOLDER: s3://{{AIRFLOW_logging_s3_bucket_name | default('admin-bucket')}}/{{AIRFLOW_logging_s3_key_prefix | default('')}}
+      AIRFLOW_CONN_LOG_S3_CONN: > 
+        { "conn_type": "aws", 
+          "host": "minio-1", 
+          "login": "{{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}", 
+          "password": "{{s3SecretAccessKey}}", 
+          "schema": "", 
+          "port": 9000, 
+          "extra": {"endpoint_url": "{{s3Endpoint}}", "region_name": "us-east-1"}
+        }
+      AWS_ACCESS_KEY_ID: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
+      AWS_SECRET_ACCESS_KEY: {{s3SecretAccessKey}}
       {% endif %}  {#  AIRFLOW_remote_logging_enabled #}      
     {% endif %}
-    {% if AIRFLOW_variables is defined and AIRFLOW_variables | length | default(false) %}
+    {% if AIRFLOW_variables is defined and AIRFLOW_variables and AIRFLOW_variables | length | default(false) %}
       {% for variable in AIRFLOW_variables.split(',') %}
-      - AIRFLOW_VAR_{{variable}}
+      AIRFLOW_VAR_{{variable}}
+      {% endfor %}
+    {% endif %}
+    {% if AIRFLOW_connections is defined and AIRFLOW_connections and AIRFLOW_connections | length | default(false) %}
+      {% for connection in AIRFLOW_connections.split(',') %}
+      AIRFLOW_CONN_{{connection}}
       {% endfor %}
     {% endif %}
     {% if MARQUEZ_enable and AIRFLOW_openlineage_enabled | default(false) %}
-      - AIRFLOW__OPENLINEAGE__DISABLED=false
-      - AIRFLOW__OPENLINEAGE__INCLUDE_FULL_TASK_INFO=true
-      - AIRFLOW__OPENLINEAGE__DEBUG_MODE=false
-      - AIRFLOW__OPENLINEAGE__TRANSPORT='{"type": "http", "url": "http://marquez:5000", "endpoint": "api/v1/lineage"}'
+      AIRFLOW__OPENLINEAGE__DISABLED: false
+      AIRFLOW__OPENLINEAGE__INCLUDE_FULL_TASK_INFO: true
+      AIRFLOW__OPENLINEAGE__DEBUG_MODE: false
+      AIRFLOW__OPENLINEAGE__TRANSPORT: '{"type": "http", "url": "http://marquez:5000", "endpoint": "api/v1/lineage"}'
     {% else %}      
-      - AIRFLOW__OPENLINEAGE__DISABLED=true      
-    {% endif %}         
+      AIRFLOW__OPENLINEAGE__DISABLED: true      
+    {% endif %}       
     {%if use_timezone | default(false) %}
-      - TZ={{use_timezone}}
+      - TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
@@ -12562,67 +12601,81 @@ services:
   {% endif %}
     environment:
     {% if AIRFLOW_major_version == 2 | default(false) %}    
-      - AIRFLOW__API__AUTH_BACKENDS={{AIRFLOW_auth_backends | default(omit)}}
+      AIRFLOW__API__AUTH_BACKENDS: {{AIRFLOW_auth_backends | default(omit)}}
     {% elif AIRFLOW_major_version == 3 | default(false) %}    
-      - AIRFLOW__CORE__AUTH_MANAGER={{AIRFLOW_auth_manager | default(omit)}}
-      - AIRFLOW__CORE__EXECUTION_API_SERVER_URL=http://airflow-apiserver:8080/execution/
-    {% endif -%}   {#  AIRFLOW_major_version #}
+      AIRFLOW__CORE__AUTH_MANAGER: {{AIRFLOW_auth_manager | default(omit)}}
+      AIRFLOW__CORE__EXECUTION_API_SERVER_URL: http://airflow-apiserver:8080/execution/
+    {% endif -%}   {#  AIRFLOW_major_version #}    
       # provide a health service on port 8974
-      - AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK=true
-      - AIRFLOW__CORE__EXECUTOR={{airflow_executor}}
-      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:${PLATYS_AIRFLOW_POSTGRESQL_PASSWORD:-abc123!}@airflow-db/airflowdb
+      AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK: true
+      AIRFLOW__CORE__EXECUTOR: {{airflow_executor}}
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:${PLATYS_AIRFLOW_POSTGRESQL_PASSWORD:-abc123!}@airflow-db/airflowdb
       # For backward compatibility, with Airflow <2.3
-      - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:${PLATYS_AIRFLOW_POSTGRESQL_PASSWORD:-abc123!}@airflow-db/airflowdb
-      - AIRFLOW__CELERY__RESULT_BACKEND=db+postgresql://airflow:${PLATYS_AIRFLOW_POSTGRESQL_PASSWORD:-abc123!}@airflow-db/airflowdb
-      - AIRFLOW__CELERY__BROKER_URL=redis://:@airflow-redis:6379/0
-      - AIRFLOW__CORE__FERNET_KEY=${PLATYS_AIRFLOW_FERNET_KEY:-{{AIRFLOW_fernet_key}}}
-      - AIRFLOW__WEBSERVER__SECRET_KEY=${PLATYS_AIRFLOW_SECRET_KEY:-{{AIRFLOW_secret_key}}}
-      - AIRFLOW__API_AUTH__JWT_SECRET=${PLATYS_AIRFLOW_JWT_SECRET:-{{AIRFLOW_jwt_secret}}}
-      - AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION={{AIRFLOW_dags_paused_at_creation}}
-      - AIRFLOW__CORE__LOAD_EXAMPLES={{AIRFLOW_provision_examples}}
-      - _PIP_ADDITIONAL_REQUIREMENTS={{AIRFLOW_additional_requirements}}
-      - AIRFLOW__SCHEDULER__DAG_DIR_LIST_INTERVAL={{AIRFLOW_dag_dir_list_interval}}
+      AIRFLOW__CORE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:${PLATYS_AIRFLOW_POSTGRESQL_PASSWORD:-abc123!}@airflow-db/airflowdb
+      AIRFLOW__CELERY__RESULT_BACKEND: db+postgresql://airflow:${PLATYS_AIRFLOW_POSTGRESQL_PASSWORD:-abc123!}@airflow-db/airflowdb
+      AIRFLOW__CELERY__BROKER_URL: redis://:@airflow-redis:6379/0
+      AIRFLOW__CORE__FERNET_KEY: ${PLATYS_AIRFLOW_FERNET_KEY:-{{AIRFLOW_fernet_key}}}
+      AIRFLOW__WEBSERVER__SECRET_KEY: ${PLATYS_AIRFLOW_SECRET_KEY:-{{AIRFLOW_secret_key}}}
+      AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: {{AIRFLOW_dags_paused_at_creation}}
+      AIRFLOW__CORE__LOAD_EXAMPLES: {{AIRFLOW_provision_examples}}
+      _PIP_ADDITIONAL_REQUIREMENTS: {{AIRFLOW_additional_requirements}}
+      AIRFLOW__SCHEDULER__DAG_DIR_LIST_INTERVAL: {{AIRFLOW_dag_dir_list_interval}}
+      AIRFLOW__CORE__TEST_CONNECTION: Enabled
+      AIRFLOW__LOGGING__LOGGING_LEVEL: INFO       
     {% if AIRFLOW_major_version == 2 | default(false) %}    
-      - AIRFLOW__WEBSERVER__EXPOSE_CONFIG={{AIRFLOW_expose_config}}
+      AIRFLOW__WEBSERVER__EXPOSE_CONFIG: {{AIRFLOW_expose_config}}
     {% elif AIRFLOW_major_version == 3 | default(false) %}
-      - AIRFLOW__API__EXPOSE_CONFIG={{AIRFLOW_expose_config}}   
+      AIRFLOW__API__EXPOSE_CONFIG: {{AIRFLOW_expose_config}}
     {% endif -%}   {#  AIRFLOW_major_version #}
     {% if AIRFLOW_volume_map_custom_conf | default(false) %}
-      - AIRFLOW_CONFIG='/opt/airflow/config/airflow.cfg'      
+      AIRFLOW_CONFIG: '/opt/airflow/config/airflow.cfg'      
     {% endif -%}   {#  AIRFLOW_volume_map_custom_conf #}
     {%if SPARK_enable | default(false) %}
-      - SPARK_HOME=/opt/bitnami/spark
-      - JAVA_HOME=/opt/bitnami/java   
+      SPARK_HOME: /opt/bitnami/spark
+      JAVA_HOME: /opt/bitnami/java      
     {% endif -%}   {#  SPARK_enable #}
     {%if MINIO_enable or external['S3_enable'] | default(false) %}
-      - AIRFLOW_VAR_S3_ENDPOINT={{s3Endpoint | default(omit) }}
-      - AIRFLOW_VAR_S3_ACCESS_KEY={{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
-      - AIRFLOW_VAR_S3_SECRET_ACCESS_KEY={{s3SecretAccessKey}}
-      - AIRFLOW_VAR_S3_PATH_STYLE_ACCESS='{{s3PathStyleAccess}}'
+      AIRFLOW_VAR_S3_ENDPOINT: {{s3Endpoint | default(omit) }}
+      AIRFLOW_VAR_S3_ACCESS_KEY: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
+      AIRFLOW_VAR_S3_SECRET_ACCESS_KEY: {{s3SecretAccessKey}}
+      AIRFLOW_VAR_S3_PATH_STYLE_ACCESS: '{{s3PathStyleAccess}}'
       {% if AIRFLOW_logging_strategy | lower == 's3' | default(false) %}
-      - AIRFLOW__LOGGING__REMOTE_LOGGING=True
-      - AIRFLOW__LOGGING__REMOTE_LOG_CONN_ID=log_s3_conn
-      - AIRFLOW__LOGGING__REMOTE_BASE_LOG_FOLDER=s3://{{AIRFLOW_logging_s3_bucket_name | default('admin-bucket')}}/{{AIRFLOW_logging_s3_key_prefix | default('')}}
-      - AIRFLOW_CONN_LOG_S3_CONN=aws://{{s3AccessKey}}:{{s3SecretAccessKey}}@{{s3Endpoint | replace('http://','') }}/?endpoint_url={{s3Endpoint | urlencode | replace('/','%2F')}}&region_name=us-east-1}
-      - AWS_ACCESS_KEY_ID={{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
-      - AWS_SECRET_ACCESS_KEY={{s3SecretAccessKey}}
+      AIRFLOW__LOGGING__REMOTE_LOGGING: True
+      AIRFLOW__LOGGING__REMOTE_LOG_CONN_ID: log_s3_conn
+      AIRFLOW__LOGGING__REMOTE_BASE_LOG_FOLDER: s3://{{AIRFLOW_logging_s3_bucket_name | default('admin-bucket')}}/{{AIRFLOW_logging_s3_key_prefix | default('')}}
+      AIRFLOW_CONN_LOG_S3_CONN: > 
+        { "conn_type": "aws", 
+          "host": "minio-1", 
+          "login": "{{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}", 
+          "password": "{{s3SecretAccessKey}}", 
+          "schema": "", 
+          "port": 9000, 
+          "extra": {"endpoint_url": "{{s3Endpoint}}", "region_name": "us-east-1"}
+        }
+      AWS_ACCESS_KEY_ID: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
+      AWS_SECRET_ACCESS_KEY: {{s3SecretAccessKey}}
       {% endif %}  {#  AIRFLOW_remote_logging_enabled #}      
     {% endif %}
-    {% if AIRFLOW_variables is defined and AIRFLOW_variables | length | default(false) %}
+    {% if AIRFLOW_variables is defined and AIRFLOW_variables and AIRFLOW_variables | length | default(false) %}
       {% for variable in AIRFLOW_variables.split(',') %}
-      - AIRFLOW_VAR_{{variable}}
+      AIRFLOW_VAR_{{variable}}
+      {% endfor %}
+    {% endif %}
+    {% if AIRFLOW_connections is defined and AIRFLOW_connections and AIRFLOW_connections | length | default(false) %}
+      {% for connection in AIRFLOW_connections.split(',') %}
+      AIRFLOW_CONN_{{connection}}
       {% endfor %}
     {% endif %}
     {% if MARQUEZ_enable and AIRFLOW_openlineage_enabled | default(false) %}
-      - AIRFLOW__OPENLINEAGE__DISABLED=false
-      - AIRFLOW__OPENLINEAGE__INCLUDE_FULL_TASK_INFO=true
-      - AIRFLOW__OPENLINEAGE__DEBUG_MODE=false
-      - AIRFLOW__OPENLINEAGE__TRANSPORT='{"type": "http", "url": "http://marquez:5000", "endpoint": "api/v1/lineage"}'
+      AIRFLOW__OPENLINEAGE__DISABLED: false
+      AIRFLOW__OPENLINEAGE__INCLUDE_FULL_TASK_INFO: true
+      AIRFLOW__OPENLINEAGE__DEBUG_MODE: false
+      AIRFLOW__OPENLINEAGE__TRANSPORT: '{"type": "http", "url": "http://marquez:5000", "endpoint": "api/v1/lineage"}'
     {% else %}      
-      - AIRFLOW__OPENLINEAGE__DISABLED=true      
-    {% endif %}         
+      AIRFLOW__OPENLINEAGE__DISABLED: true      
+    {% endif %}       
     {%if use_timezone | default(false) %}
-      - TZ={{use_timezone}}
+      - TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
@@ -12689,67 +12742,83 @@ services:
       - "$DOCKER_GROUP"
   {% endif %}
     environment:
-    {% if AIRFLOW_major_version == 2 | default(false) %}    
-      - AIRFLOW__API__AUTH_BACKENDS={{AIRFLOW_auth_backends | default(omit)}}
-    {% elif AIRFLOW_major_version == 3 | default(false) %}    
-      - AIRFLOW__CORE__AUTH_MANAGER={{AIRFLOW_auth_manager | default(omit)}}
-      - AIRFLOW__CORE__EXECUTION_API_SERVER_URL=http://airflow-apiserver:8080/execution/
-    {% endif -%}   {#  AIRFLOW_major_version #}
-      - AIRFLOW__CORE__EXECUTOR={{airflow_executor}}
-      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:${PLATYS_AIRFLOW_POSTGRESQL_PASSWORD:-abc123!}@airflow-db/airflowdb
-      # For backward compatibility, with Airflow <2.3
-      - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:${PLATYS_AIRFLOW_POSTGRESQL_PASSWORD:-abc123!}@airflow-db/airflowdb
-      - AIRFLOW__CELERY__RESULT_BACKEND=db+postgresql://airflow:${PLATYS_AIRFLOW_POSTGRESQL_PASSWORD:-abc123!}@airflow-db/airflowdb
-      - AIRFLOW__CELERY__BROKER_URL=redis://:@airflow-redis:6379/0
-      - AIRFLOW__CORE__FERNET_KEY=${PLATYS_AIRFLOW_FERNET_KEY:-{{AIRFLOW_fernet_key}}}
-      - AIRFLOW__WEBSERVER__SECRET_KEY=${PLATYS_AIRFLOW_SECRET_KEY:-{{AIRFLOW_secret_key}}}
-      - AIRFLOW__API_AUTH__JWT_SECRET=${PLATYS_AIRFLOW_JWT_SECRET:-{{AIRFLOW_jwt_secret}}}
-      - AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION={{AIRFLOW_dags_paused_at_creation}}
-      - AIRFLOW__CORE__LOAD_EXAMPLES={{AIRFLOW_provision_examples}}
-      - _PIP_ADDITIONAL_REQUIREMENTS={{AIRFLOW_additional_requirements}}
-      - AIRFLOW__SCHEDULER__DAG_DIR_LIST_INTERVAL={{AIRFLOW_dag_dir_list_interval}}
-    {% if AIRFLOW_major_version == 2 | default(false) %}    
-      - AIRFLOW__WEBSERVER__EXPOSE_CONFIG={{AIRFLOW_expose_config}}
-    {% elif AIRFLOW_major_version == 3 | default(false) %}
-      - AIRFLOW__API__EXPOSE_CONFIG={{AIRFLOW_expose_config}}   
-    {% endif -%}   {#  AIRFLOW_major_version #}
       - DUMB_INIT_SETSID="0"
+    {% if AIRFLOW_major_version == 2 | default(false) %}    
+      AIRFLOW__API__AUTH_BACKENDS: {{AIRFLOW_auth_backends | default(omit)}}
+    {% elif AIRFLOW_major_version == 3 | default(false) %}    
+      AIRFLOW__CORE__AUTH_MANAGER: {{AIRFLOW_auth_manager | default(omit)}}
+      AIRFLOW__CORE__EXECUTION_API_SERVER_URL: http://airflow-apiserver:8080/execution/
+    {% endif -%}   {#  AIRFLOW_major_version #}    
+      # provide a health service on port 8974
+      AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK: true
+      AIRFLOW__CORE__EXECUTOR: {{airflow_executor}}
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:${PLATYS_AIRFLOW_POSTGRESQL_PASSWORD:-abc123!}@airflow-db/airflowdb
+      # For backward compatibility, with Airflow <2.3
+      AIRFLOW__CORE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:${PLATYS_AIRFLOW_POSTGRESQL_PASSWORD:-abc123!}@airflow-db/airflowdb
+      AIRFLOW__CELERY__RESULT_BACKEND: db+postgresql://airflow:${PLATYS_AIRFLOW_POSTGRESQL_PASSWORD:-abc123!}@airflow-db/airflowdb
+      AIRFLOW__CELERY__BROKER_URL: redis://:@airflow-redis:6379/0
+      AIRFLOW__CORE__FERNET_KEY: ${PLATYS_AIRFLOW_FERNET_KEY:-{{AIRFLOW_fernet_key}}}
+      AIRFLOW__WEBSERVER__SECRET_KEY: ${PLATYS_AIRFLOW_SECRET_KEY:-{{AIRFLOW_secret_key}}}
+      AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: {{AIRFLOW_dags_paused_at_creation}}
+      AIRFLOW__CORE__LOAD_EXAMPLES: {{AIRFLOW_provision_examples}}
+      _PIP_ADDITIONAL_REQUIREMENTS: {{AIRFLOW_additional_requirements}}
+      AIRFLOW__SCHEDULER__DAG_DIR_LIST_INTERVAL: {{AIRFLOW_dag_dir_list_interval}}
+      AIRFLOW__CORE__TEST_CONNECTION: Enabled
+      AIRFLOW__LOGGING__LOGGING_LEVEL: INFO       
+    {% if AIRFLOW_major_version == 2 | default(false) %}    
+      AIRFLOW__WEBSERVER__EXPOSE_CONFIG: {{AIRFLOW_expose_config}}
+    {% elif AIRFLOW_major_version == 3 | default(false) %}
+      AIRFLOW__API__EXPOSE_CONFIG: {{AIRFLOW_expose_config}}
+    {% endif -%}   {#  AIRFLOW_major_version #}
     {% if AIRFLOW_volume_map_custom_conf | default(false) %}
-      - AIRFLOW_CONFIG='/opt/airflow/config/airflow.cfg'      
+      AIRFLOW_CONFIG: '/opt/airflow/config/airflow.cfg'      
     {% endif -%}   {#  AIRFLOW_volume_map_custom_conf #}
     {%if SPARK_enable | default(false) %}
-      - SPARK_HOME=/opt/bitnami/spark
-      - JAVA_HOME=/opt/bitnami/java   
+      SPARK_HOME: /opt/bitnami/spark
+      JAVA_HOME: /opt/bitnami/java      
     {% endif -%}   {#  SPARK_enable #}
     {%if MINIO_enable or external['S3_enable'] | default(false) %}
-      - AIRFLOW_VAR_S3_ENDPOINT={{s3Endpoint | default(omit) }}
-      - AIRFLOW_VAR_S3_ACCESS_KEY={{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
-      - AIRFLOW_VAR_S3_SECRET_ACCESS_KEY={{s3SecretAccessKey}}
-      - AIRFLOW_VAR_S3_PATH_STYLE_ACCESS='{{s3PathStyleAccess}}'
+      AIRFLOW_VAR_S3_ENDPOINT: {{s3Endpoint | default(omit) }}
+      AIRFLOW_VAR_S3_ACCESS_KEY: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
+      AIRFLOW_VAR_S3_SECRET_ACCESS_KEY: {{s3SecretAccessKey}}
+      AIRFLOW_VAR_S3_PATH_STYLE_ACCESS: '{{s3PathStyleAccess}}'
       {% if AIRFLOW_logging_strategy | lower == 's3' | default(false) %}
-      - AIRFLOW__LOGGING__REMOTE_LOGGING=True
-      - AIRFLOW__LOGGING__REMOTE_LOG_CONN_ID=LogS3Conn
-      - AIRFLOW__LOGGING__REMOTE_BASE_LOG_FOLDER=s3://{{AIRFLOW_logging_s3_bucket_name | default('admin-bucket')}}/{{AIRFLOW_logging_s3_key_prefix | default('')}}
-      - AIRFLOW_CONN_LOG_S3_CONN=aws://{{s3AccessKey}}:{{s3SecretAccessKey}}@{{s3Endpoint | replace('http://','') }}/?endpoint_url={{s3Endpoint | urlencode | replace('/','%2F')}}&region_name=us-east-1}
-      - AWS_ACCESS_KEY_ID={{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
-      - AWS_SECRET_ACCESS_KEY={{s3SecretAccessKey}}
+      AIRFLOW__LOGGING__REMOTE_LOGGING: True
+      AIRFLOW__LOGGING__REMOTE_LOG_CONN_ID: log_s3_conn
+      AIRFLOW__LOGGING__REMOTE_BASE_LOG_FOLDER: s3://{{AIRFLOW_logging_s3_bucket_name | default('admin-bucket')}}/{{AIRFLOW_logging_s3_key_prefix | default('')}}
+      AIRFLOW_CONN_LOG_S3_CONN: > 
+        { "conn_type": "aws", 
+          "host": "minio-1", 
+          "login": "{{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}", 
+          "password": "{{s3SecretAccessKey}}", 
+          "schema": "", 
+          "port": 9000, 
+          "extra": {"endpoint_url": "{{s3Endpoint}}", "region_name": "us-east-1"}
+        }
+      AWS_ACCESS_KEY_ID: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
+      AWS_SECRET_ACCESS_KEY: {{s3SecretAccessKey}}
       {% endif %}  {#  AIRFLOW_remote_logging_enabled #}      
     {% endif %}
-    {% if AIRFLOW_variables is defined and AIRFLOW_variables | length | default(false) %}
+    {% if AIRFLOW_variables is defined and AIRFLOW_variables and AIRFLOW_variables | length | default(false) %}
       {% for variable in AIRFLOW_variables.split(',') %}
-      - AIRFLOW_VAR_{{variable}}
+      AIRFLOW_VAR_{{variable}}
+      {% endfor %}
+    {% endif %}
+    {% if AIRFLOW_connections is defined and AIRFLOW_connections and AIRFLOW_connections | length | default(false) %}
+      {% for connection in AIRFLOW_connections.split(',') %}
+      AIRFLOW_CONN_{{connection}}
       {% endfor %}
     {% endif %}
     {% if MARQUEZ_enable and AIRFLOW_openlineage_enabled | default(false) %}
-      - AIRFLOW__OPENLINEAGE__DISABLED=false
-      - AIRFLOW__OPENLINEAGE__INCLUDE_FULL_TASK_INFO=true
-      - AIRFLOW__OPENLINEAGE__DEBUG_MODE=false
-      - AIRFLOW__OPENLINEAGE__TRANSPORT='{"type": "http", "url": "http://marquez:5000", "endpoint": "api/v1/lineage"}'
+      AIRFLOW__OPENLINEAGE__DISABLED: false
+      AIRFLOW__OPENLINEAGE__INCLUDE_FULL_TASK_INFO: true
+      AIRFLOW__OPENLINEAGE__DEBUG_MODE: false
+      AIRFLOW__OPENLINEAGE__TRANSPORT: '{"type": "http", "url": "http://marquez:5000", "endpoint": "api/v1/lineage"}'
     {% else %}      
-      - AIRFLOW__OPENLINEAGE__DISABLED=true      
-    {% endif %}         
+      AIRFLOW__OPENLINEAGE__DISABLED: true      
+    {% endif %}       
     {%if use_timezone | default(false) %}
-      - TZ={{use_timezone}}
+      - TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
@@ -12813,61 +12882,81 @@ services:
   {% endif %}
     environment:
     {% if AIRFLOW_major_version == 2 | default(false) %}    
-      - AIRFLOW__API__AUTH_BACKENDS={{AIRFLOW_auth_backends | default(omit)}}
+      AIRFLOW__API__AUTH_BACKENDS: {{AIRFLOW_auth_backends | default(omit)}}
     {% elif AIRFLOW_major_version == 3 | default(false) %}    
-      - AIRFLOW__CORE__AUTH_MANAGER={{AIRFLOW_auth_manager | default(omit)}}
-      - AIRFLOW__CORE__EXECUTION_API_SERVER_URL=http://airflow-apiserver:8080/execution/
-    {% endif -%}   {#  AIRFLOW_major_version #}      - AIRFLOW__CORE__EXECUTOR={{airflow_executor}}
-      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:${PLATYS_AIRFLOW_POSTGRESQL_PASSWORD:-abc123!}@airflow-db/airflowdb
+      AIRFLOW__CORE__AUTH_MANAGER: {{AIRFLOW_auth_manager | default(omit)}}
+      AIRFLOW__CORE__EXECUTION_API_SERVER_URL: http://airflow-apiserver:8080/execution/
+    {% endif -%}   {#  AIRFLOW_major_version #}    
+      # provide a health service on port 8974
+      AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK: true
+      AIRFLOW__CORE__EXECUTOR: {{airflow_executor}}
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:${PLATYS_AIRFLOW_POSTGRESQL_PASSWORD:-abc123!}@airflow-db/airflowdb
       # For backward compatibility, with Airflow <2.3
-      - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:${PLATYS_AIRFLOW_POSTGRESQL_PASSWORD:-abc123!}@airflow-db/airflowdb
-      - AIRFLOW__CELERY__RESULT_BACKEND=db+postgresql://airflow:${PLATYS_AIRFLOW_POSTGRESQL_PASSWORD:-abc123!}@airflow-db/airflowdb
-      - AIRFLOW__CELERY__BROKER_URL=redis://:@airflow-redis:6379/0
-      - AIRFLOW__CORE__FERNET_KEY=${PLATYS_AIRFLOW_FERNET_KEY:-{{AIRFLOW_fernet_key}}}
-      - AIRFLOW__WEBSERVER__SECRET_KEY=${PLATYS_AIRFLOW_SECRET_KEY:-{{AIRFLOW_secret_key}}}
-      - AIRFLOW__API_AUTH__JWT_SECRET=${PLATYS_AIRFLOW_JWT_SECRET:-{{AIRFLOW_jwt_secret}}}
-      - AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION={{AIRFLOW_dags_paused_at_creation}}
-      - AIRFLOW__CORE__LOAD_EXAMPLES={{AIRFLOW_provision_examples}}
-      - _PIP_ADDITIONAL_REQUIREMENTS={{AIRFLOW_additional_requirements}}
-      - AIRFLOW__SCHEDULER__DAG_DIR_LIST_INTERVAL={{AIRFLOW_dag_dir_list_interval}}
+      AIRFLOW__CORE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:${PLATYS_AIRFLOW_POSTGRESQL_PASSWORD:-abc123!}@airflow-db/airflowdb
+      AIRFLOW__CELERY__RESULT_BACKEND: db+postgresql://airflow:${PLATYS_AIRFLOW_POSTGRESQL_PASSWORD:-abc123!}@airflow-db/airflowdb
+      AIRFLOW__CELERY__BROKER_URL: redis://:@airflow-redis:6379/0
+      AIRFLOW__CORE__FERNET_KEY: ${PLATYS_AIRFLOW_FERNET_KEY:-{{AIRFLOW_fernet_key}}}
+      AIRFLOW__WEBSERVER__SECRET_KEY: ${PLATYS_AIRFLOW_SECRET_KEY:-{{AIRFLOW_secret_key}}}
+      AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: {{AIRFLOW_dags_paused_at_creation}}
+      AIRFLOW__CORE__LOAD_EXAMPLES: {{AIRFLOW_provision_examples}}
+      _PIP_ADDITIONAL_REQUIREMENTS: {{AIRFLOW_additional_requirements}}
+      AIRFLOW__SCHEDULER__DAG_DIR_LIST_INTERVAL: {{AIRFLOW_dag_dir_list_interval}}
+      AIRFLOW__CORE__TEST_CONNECTION: Enabled
+      AIRFLOW__LOGGING__LOGGING_LEVEL: INFO       
     {% if AIRFLOW_major_version == 2 | default(false) %}    
-      - AIRFLOW__WEBSERVER__EXPOSE_CONFIG={{AIRFLOW_expose_config}}
+      AIRFLOW__WEBSERVER__EXPOSE_CONFIG: {{AIRFLOW_expose_config}}
     {% elif AIRFLOW_major_version == 3 | default(false) %}
-      - AIRFLOW__API__EXPOSE_CONFIG={{AIRFLOW_expose_config}}   
+      AIRFLOW__API__EXPOSE_CONFIG: {{AIRFLOW_expose_config}}
     {% endif -%}   {#  AIRFLOW_major_version #}
+    {% if AIRFLOW_volume_map_custom_conf | default(false) %}
+      AIRFLOW_CONFIG: '/opt/airflow/config/airflow.cfg'      
+    {% endif -%}   {#  AIRFLOW_volume_map_custom_conf #}
     {%if SPARK_enable | default(false) %}
-      - SPARK_HOME=/opt/bitnami/spark
-      - JAVA_HOME=/opt/bitnami/java   
+      SPARK_HOME: /opt/bitnami/spark
+      JAVA_HOME: /opt/bitnami/java      
     {% endif -%}   {#  SPARK_enable #}
     {%if MINIO_enable or external['S3_enable'] | default(false) %}
-      - AIRFLOW_VAR_S3_ENDPOINT={{s3Endpoint | default(omit) }}
-      - AIRFLOW_VAR_S3_ACCESS_KEY={{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
-      - AIRFLOW_VAR_S3_SECRET_ACCESS_KEY={{s3SecretAccessKey}}
-      - AIRFLOW_VAR_S3_PATH_STYLE_ACCESS='{{s3PathStyleAccess}}'
+      AIRFLOW_VAR_S3_ENDPOINT: {{s3Endpoint | default(omit) }}
+      AIRFLOW_VAR_S3_ACCESS_KEY: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
+      AIRFLOW_VAR_S3_SECRET_ACCESS_KEY: {{s3SecretAccessKey}}
+      AIRFLOW_VAR_S3_PATH_STYLE_ACCESS: '{{s3PathStyleAccess}}'
       {% if AIRFLOW_logging_strategy | lower == 's3' | default(false) %}
-      - AIRFLOW__LOGGING__REMOTE_LOGGING=True
-      - AIRFLOW__LOGGING__REMOTE_LOG_CONN_ID=LogS3Conn
-      - AIRFLOW__LOGGING__REMOTE_BASE_LOG_FOLDER=s3://{{AIRFLOW_logging_s3_bucket_name | default('admin-bucket')}}/{{AIRFLOW_logging_s3_key_prefix | default('')}}
-      - AIRFLOW_CONN_LOGS3CONN='aws://{{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}:{{s3SecretAccessKey}}@{{s3Endpoint | replace('http://','') | default(omit) }}?extra={"endpoint_url":"{{s3Endpoint | default(omit) }}","region_name":"us-east-1"}'
-      - AWS_ACCESS_KEY_ID={{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
-      - AWS_SECRET_ACCESS_KEY={{s3SecretAccessKey}}
+      AIRFLOW__LOGGING__REMOTE_LOGGING: True
+      AIRFLOW__LOGGING__REMOTE_LOG_CONN_ID: log_s3_conn
+      AIRFLOW__LOGGING__REMOTE_BASE_LOG_FOLDER: s3://{{AIRFLOW_logging_s3_bucket_name | default('admin-bucket')}}/{{AIRFLOW_logging_s3_key_prefix | default('')}}
+      AIRFLOW_CONN_LOG_S3_CONN: > 
+        { "conn_type": "aws", 
+          "host": "minio-1", 
+          "login": "{{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}", 
+          "password": "{{s3SecretAccessKey}}", 
+          "schema": "", 
+          "port": 9000, 
+          "extra": {"endpoint_url": "{{s3Endpoint}}", "region_name": "us-east-1"}
+        }
+      AWS_ACCESS_KEY_ID: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
+      AWS_SECRET_ACCESS_KEY: {{s3SecretAccessKey}}
       {% endif %}  {#  AIRFLOW_remote_logging_enabled #}      
     {% endif %}
-    {% if AIRFLOW_variables is defined and AIRFLOW_variables | length | default(false) %}
+    {% if AIRFLOW_variables is defined and AIRFLOW_variables and AIRFLOW_variables | length | default(false) %}
       {% for variable in AIRFLOW_variables.split(',') %}
-      - AIRFLOW_VAR_{{variable}}
+      AIRFLOW_VAR_{{variable}}
+      {% endfor %}
+    {% endif %}
+    {% if AIRFLOW_connections is defined and AIRFLOW_connections and AIRFLOW_connections | length | default(false) %}
+      {% for connection in AIRFLOW_connections.split(',') %}
+      AIRFLOW_CONN_{{connection}}
       {% endfor %}
     {% endif %}
     {% if MARQUEZ_enable and AIRFLOW_openlineage_enabled | default(false) %}
-      - AIRFLOW__OPENLINEAGE__DISABLED=false
-      - AIRFLOW__OPENLINEAGE__INCLUDE_FULL_TASK_INFO=true
-      - AIRFLOW__OPENLINEAGE__DEBUG_MODE=false
-      - AIRFLOW__OPENLINEAGE__TRANSPORT='{"type": "http", "url": "http://marquez:5000", "endpoint": "api/v1/lineage"}'
+      AIRFLOW__OPENLINEAGE__DISABLED: false
+      AIRFLOW__OPENLINEAGE__INCLUDE_FULL_TASK_INFO: true
+      AIRFLOW__OPENLINEAGE__DEBUG_MODE: false
+      AIRFLOW__OPENLINEAGE__TRANSPORT: '{"type": "http", "url": "http://marquez:5000", "endpoint": "api/v1/lineage"}'
     {% else %}      
-      - AIRFLOW__OPENLINEAGE__DISABLED=true      
-    {% endif %}         
+      AIRFLOW__OPENLINEAGE__DISABLED: true      
+    {% endif %}       
     {%if use_timezone | default(false) %}
-      - TZ={{use_timezone}}
+      - TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
@@ -12945,31 +13034,81 @@ services:
     command: celery flower
     environment:
     {% if AIRFLOW_major_version == 2 | default(false) %}    
-      - AIRFLOW__API__AUTH_BACKENDS={{AIRFLOW_auth_backends | default(omit)}}
+      AIRFLOW__API__AUTH_BACKENDS: {{AIRFLOW_auth_backends | default(omit)}}
     {% elif AIRFLOW_major_version == 3 | default(false) %}    
-      - AIRFLOW__CORE__AUTH_MANAGER={{AIRFLOW_auth_manager | default(omit)}}
-      - AIRFLOW__CORE__EXECUTION_API_SERVER_URL=http://airflow-apiserver:8080/execution/
+      AIRFLOW__CORE__AUTH_MANAGER: {{AIRFLOW_auth_manager | default(omit)}}
+      AIRFLOW__CORE__EXECUTION_API_SERVER_URL: http://airflow-apiserver:8080/execution/
     {% endif -%}   {#  AIRFLOW_major_version #}    
-      - AIRFLOW__CORE__EXECUTOR={{airflow_executor}}
-      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:${PLATYS_AIRFLOW_POSTGRESQL_PASSWORD:-abc123!}@airflow-db/airflowdb
+      # provide a health service on port 8974
+      AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK: true
+      AIRFLOW__CORE__EXECUTOR: {{airflow_executor}}
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:${PLATYS_AIRFLOW_POSTGRESQL_PASSWORD:-abc123!}@airflow-db/airflowdb
       # For backward compatibility, with Airflow <2.3
-      - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:${PLATYS_AIRFLOW_POSTGRESQL_PASSWORD:-abc123!}@airflow-db/airflowdb
-      - AIRFLOW__CELERY__RESULT_BACKEND=db+postgresql://airflow:${PLATYS_AIRFLOW_POSTGRESQL_PASSWORD:-abc123!}@airflow-db/airflowdb
-      - AIRFLOW__CELERY__BROKER_URL=redis://:@airflow-redis:6379/0
-      - AIRFLOW__CORE__FERNET_KEY=${PLATYS_AIRFLOW_FERNET_KEY:-{{AIRFLOW_fernet_key}}}
-      - AIRFLOW__WEBSERVER__SECRET_KEY=${PLATYS_AIRFLOW_SECRET_KEY:-{{AIRFLOW_secret_key}}}
-      - AIRFLOW__API_AUTH__JWT_SECRET=${PLATYS_AIRFLOW_JWT_SECRET:-{{AIRFLOW_jwt_secret}}}
-      - AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION={{AIRFLOW_dags_paused_at_creation}}
-      - AIRFLOW__CORE__LOAD_EXAMPLES={{AIRFLOW_provision_examples}}
-      - _PIP_ADDITIONAL_REQUIREMENTS={{AIRFLOW_additional_requirements}}
-      - AIRFLOW__SCHEDULER__DAG_DIR_LIST_INTERVAL={{AIRFLOW_dag_dir_list_interval}}
+      AIRFLOW__CORE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:${PLATYS_AIRFLOW_POSTGRESQL_PASSWORD:-abc123!}@airflow-db/airflowdb
+      AIRFLOW__CELERY__RESULT_BACKEND: db+postgresql://airflow:${PLATYS_AIRFLOW_POSTGRESQL_PASSWORD:-abc123!}@airflow-db/airflowdb
+      AIRFLOW__CELERY__BROKER_URL: redis://:@airflow-redis:6379/0
+      AIRFLOW__CORE__FERNET_KEY: ${PLATYS_AIRFLOW_FERNET_KEY:-{{AIRFLOW_fernet_key}}}
+      AIRFLOW__WEBSERVER__SECRET_KEY: ${PLATYS_AIRFLOW_SECRET_KEY:-{{AIRFLOW_secret_key}}}
+      AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: {{AIRFLOW_dags_paused_at_creation}}
+      AIRFLOW__CORE__LOAD_EXAMPLES: {{AIRFLOW_provision_examples}}
+      _PIP_ADDITIONAL_REQUIREMENTS: {{AIRFLOW_additional_requirements}}
+      AIRFLOW__SCHEDULER__DAG_DIR_LIST_INTERVAL: {{AIRFLOW_dag_dir_list_interval}}
+      AIRFLOW__CORE__TEST_CONNECTION: Enabled
+      AIRFLOW__LOGGING__LOGGING_LEVEL: INFO       
     {% if AIRFLOW_major_version == 2 | default(false) %}    
-      - AIRFLOW__WEBSERVER__EXPOSE_CONFIG={{AIRFLOW_expose_config}}
+      AIRFLOW__WEBSERVER__EXPOSE_CONFIG: {{AIRFLOW_expose_config}}
     {% elif AIRFLOW_major_version == 3 | default(false) %}
-      - AIRFLOW__API__EXPOSE_CONFIG={{AIRFLOW_expose_config}}   
+      AIRFLOW__API__EXPOSE_CONFIG: {{AIRFLOW_expose_config}}
     {% endif -%}   {#  AIRFLOW_major_version #}
+    {% if AIRFLOW_volume_map_custom_conf | default(false) %}
+      AIRFLOW_CONFIG: '/opt/airflow/config/airflow.cfg'      
+    {% endif -%}   {#  AIRFLOW_volume_map_custom_conf #}
+    {%if SPARK_enable | default(false) %}
+      SPARK_HOME: /opt/bitnami/spark
+      JAVA_HOME: /opt/bitnami/java      
+    {% endif -%}   {#  SPARK_enable #}
+    {%if MINIO_enable or external['S3_enable'] | default(false) %}
+      AIRFLOW_VAR_S3_ENDPOINT: {{s3Endpoint | default(omit) }}
+      AIRFLOW_VAR_S3_ACCESS_KEY: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
+      AIRFLOW_VAR_S3_SECRET_ACCESS_KEY: {{s3SecretAccessKey}}
+      AIRFLOW_VAR_S3_PATH_STYLE_ACCESS: '{{s3PathStyleAccess}}'
+      {% if AIRFLOW_logging_strategy | lower == 's3' | default(false) %}
+      AIRFLOW__LOGGING__REMOTE_LOGGING: True
+      AIRFLOW__LOGGING__REMOTE_LOG_CONN_ID: log_s3_conn
+      AIRFLOW__LOGGING__REMOTE_BASE_LOG_FOLDER: s3://{{AIRFLOW_logging_s3_bucket_name | default('admin-bucket')}}/{{AIRFLOW_logging_s3_key_prefix | default('')}}
+      AIRFLOW_CONN_LOG_S3_CONN: > 
+        { "conn_type": "aws", 
+          "host": "minio-1", 
+          "login": "{{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}", 
+          "password": "{{s3SecretAccessKey}}", 
+          "schema": "", 
+          "port": 9000, 
+          "extra": {"endpoint_url": "{{s3Endpoint}}", "region_name": "us-east-1"}
+        }
+      AWS_ACCESS_KEY_ID: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
+      AWS_SECRET_ACCESS_KEY: {{s3SecretAccessKey}}
+      {% endif %}  {#  AIRFLOW_remote_logging_enabled #}      
+    {% endif %}
+    {% if AIRFLOW_variables is defined and AIRFLOW_variables and AIRFLOW_variables | length | default(false) %}
+      {% for variable in AIRFLOW_variables.split(',') %}
+      AIRFLOW_VAR_{{variable}}
+      {% endfor %}
+    {% endif %}
+    {% if AIRFLOW_connections is defined and AIRFLOW_connections and AIRFLOW_connections | length | default(false) %}
+      {% for connection in AIRFLOW_connections.split(',') %}
+      AIRFLOW_CONN_{{connection}}
+      {% endfor %}
+    {% endif %}
+    {% if MARQUEZ_enable and AIRFLOW_openlineage_enabled | default(false) %}
+      AIRFLOW__OPENLINEAGE__DISABLED: false
+      AIRFLOW__OPENLINEAGE__INCLUDE_FULL_TASK_INFO: true
+      AIRFLOW__OPENLINEAGE__DEBUG_MODE: false
+      AIRFLOW__OPENLINEAGE__TRANSPORT: '{"type": "http", "url": "http://marquez:5000", "endpoint": "api/v1/lineage"}'
+    {% else %}      
+      AIRFLOW__OPENLINEAGE__DISABLED: true      
+    {% endif %}       
     {%if use_timezone | default(false) %}
-      - TZ={{use_timezone}}
+      - TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
@@ -13108,29 +13247,87 @@ services:
 
     # yamllint enable rule:line-length
     environment:
-    {% if AIRFLOW_major_version == 3 | default(false) %}    
-      - AIRFLOW__CORE__AUTH_MANAGER=airflow.providers.fab.auth_manager.fab_auth_manager.FabAuthManager
-      - AIRFLOW__CORE__EXECUTION_API_SERVER_URL=http://airflow-apiserver:8080/execution/
-    {% endif -%}   {#  AIRFLOW_major_version #}    
-      - AIRFLOW__CORE__EXECUTOR={{airflow_executor}}
-      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:${PLATYS_AIRFLOW_POSTGRESQL_PASSWORD:-abc123!}@airflow-db/airflowdb
-      # For backward compatibility, with Airflow <2.3
-      - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:${PLATYS_AIRFLOW_POSTGRESQL_PASSWORD:-abc123!}@airflow-db/airflowdb
-      - AIRFLOW__CELERY__RESULT_BACKEND=db+postgresql://airflow:${PLATYS_AIRFLOW_POSTGRESQL_PASSWORD:-abc123!}@airflow-db/airflowdb
-      - AIRFLOW__CELERY__BROKER_URL=redis://:@airflow-redis:6379/0
-      - AIRFLOW__CORE__FERNET_KEY=${PLATYS_AIRFLOW_FERNET_KEY:-{{AIRFLOW_fernet_key}}}
-      - AIRFLOW__WEBSERVER__SECRET_KEY=${PLATYS_AIRFLOW_SECRET_KEY:-{{AIRFLOW_secret_key}}}
-      - AIRFLOW__API_AUTH__JWT_SECRET=${PLATYS_AIRFLOW_JWT_SECRET:-{{AIRFLOW_jwt_secret}}}
-      - AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION={{AIRFLOW_dags_paused_at_creation}}
-      - AIRFLOW__CORE__LOAD_EXAMPLES={{AIRFLOW_provision_examples}}
-      - AIRFLOW__API__AUTH_BACKENDS={{AIRFLOW_auth_backends | default(omit)}}
-      - _PIP_ADDITIONAL_REQUIREMENTS={{AIRFLOW_additional_requirements}}
-      - AIRFLOW__SCHEDULER__DAG_DIR_LIST_INTERVAL={{AIRFLOW_dag_dir_list_interval}}
-      - AIRFLOW__WEBSERVER__EXPOSE_CONFIG={{AIRFLOW_expose_config}}
       - _AIRFLOW_DB_MIGRATE=True
       - _AIRFLOW_WWW_USER_CREATE=True
       - _AIRFLOW_WWW_USER_USERNAME={{AIRFLOW_admin_username}}
       - _AIRFLOW_WWW_USER_PASSWORD=${PLATYS_AIRFLOW_ADMIN_PASSWORD:-{{AIRFLOW_admin_password}}}
+    {% if AIRFLOW_major_version == 2 | default(false) %}    
+      AIRFLOW__API__AUTH_BACKENDS: {{AIRFLOW_auth_backends | default(omit)}}
+    {% elif AIRFLOW_major_version == 3 | default(false) %}    
+      AIRFLOW__CORE__AUTH_MANAGER: {{AIRFLOW_auth_manager | default(omit)}}
+      AIRFLOW__CORE__EXECUTION_API_SERVER_URL: http://airflow-apiserver:8080/execution/
+    {% endif -%}   {#  AIRFLOW_major_version #}    
+      # provide a health service on port 8974
+      AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK: true
+      AIRFLOW__CORE__EXECUTOR: {{airflow_executor}}
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:${PLATYS_AIRFLOW_POSTGRESQL_PASSWORD:-abc123!}@airflow-db/airflowdb
+      # For backward compatibility, with Airflow <2.3
+      AIRFLOW__CORE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:${PLATYS_AIRFLOW_POSTGRESQL_PASSWORD:-abc123!}@airflow-db/airflowdb
+      AIRFLOW__CELERY__RESULT_BACKEND: db+postgresql://airflow:${PLATYS_AIRFLOW_POSTGRESQL_PASSWORD:-abc123!}@airflow-db/airflowdb
+      AIRFLOW__CELERY__BROKER_URL: redis://:@airflow-redis:6379/0
+      AIRFLOW__CORE__FERNET_KEY: ${PLATYS_AIRFLOW_FERNET_KEY:-{{AIRFLOW_fernet_key}}}
+      AIRFLOW__WEBSERVER__SECRET_KEY: ${PLATYS_AIRFLOW_SECRET_KEY:-{{AIRFLOW_secret_key}}}
+      AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: {{AIRFLOW_dags_paused_at_creation}}
+      AIRFLOW__CORE__LOAD_EXAMPLES: {{AIRFLOW_provision_examples}}
+      _PIP_ADDITIONAL_REQUIREMENTS: {{AIRFLOW_additional_requirements}}
+      AIRFLOW__SCHEDULER__DAG_DIR_LIST_INTERVAL: {{AIRFLOW_dag_dir_list_interval}}
+      AIRFLOW__CORE__TEST_CONNECTION: Enabled
+      AIRFLOW__LOGGING__LOGGING_LEVEL: INFO       
+    {% if AIRFLOW_major_version == 2 | default(false) %}    
+      AIRFLOW__WEBSERVER__EXPOSE_CONFIG: {{AIRFLOW_expose_config}}
+    {% elif AIRFLOW_major_version == 3 | default(false) %}
+      AIRFLOW__API__EXPOSE_CONFIG: {{AIRFLOW_expose_config}}
+    {% endif -%}   {#  AIRFLOW_major_version #}
+    {% if AIRFLOW_volume_map_custom_conf | default(false) %}
+      AIRFLOW_CONFIG: '/opt/airflow/config/airflow.cfg'      
+    {% endif -%}   {#  AIRFLOW_volume_map_custom_conf #}
+    {%if SPARK_enable | default(false) %}
+      SPARK_HOME: /opt/bitnami/spark
+      JAVA_HOME: /opt/bitnami/java      
+    {% endif -%}   {#  SPARK_enable #}
+    {%if MINIO_enable or external['S3_enable'] | default(false) %}
+      AIRFLOW_VAR_S3_ENDPOINT: {{s3Endpoint | default(omit) }}
+      AIRFLOW_VAR_S3_ACCESS_KEY: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
+      AIRFLOW_VAR_S3_SECRET_ACCESS_KEY: {{s3SecretAccessKey}}
+      AIRFLOW_VAR_S3_PATH_STYLE_ACCESS: '{{s3PathStyleAccess}}'
+      {% if AIRFLOW_logging_strategy | lower == 's3' | default(false) %}
+      AIRFLOW__LOGGING__REMOTE_LOGGING: True
+      AIRFLOW__LOGGING__REMOTE_LOG_CONN_ID: log_s3_conn
+      AIRFLOW__LOGGING__REMOTE_BASE_LOG_FOLDER: s3://{{AIRFLOW_logging_s3_bucket_name | default('admin-bucket')}}/{{AIRFLOW_logging_s3_key_prefix | default('')}}
+      AIRFLOW_CONN_LOG_S3_CONN: > 
+        { "conn_type": "aws", 
+          "host": "minio-1", 
+          "login": "{{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}", 
+          "password": "{{s3SecretAccessKey}}", 
+          "schema": "", 
+          "port": 9000, 
+          "extra": {"endpoint_url": "{{s3Endpoint}}", "region_name": "us-east-1"}
+        }
+      AWS_ACCESS_KEY_ID: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
+      AWS_SECRET_ACCESS_KEY: {{s3SecretAccessKey}}
+      {% endif %}  {#  AIRFLOW_remote_logging_enabled #}      
+    {% endif %}
+    {% if AIRFLOW_variables is defined and AIRFLOW_variables and AIRFLOW_variables | length | default(false) %}
+      {% for variable in AIRFLOW_variables.split(',') %}
+      AIRFLOW_VAR_{{variable}}
+      {% endfor %}
+    {% endif %}
+    {% if AIRFLOW_connections is defined and AIRFLOW_connections and AIRFLOW_connections | length | default(false) %}
+      {% for connection in AIRFLOW_connections.split(',') %}
+      AIRFLOW_CONN_{{connection}}
+      {% endfor %}
+    {% endif %}
+    {% if MARQUEZ_enable and AIRFLOW_openlineage_enabled | default(false) %}
+      AIRFLOW__OPENLINEAGE__DISABLED: false
+      AIRFLOW__OPENLINEAGE__INCLUDE_FULL_TASK_INFO: true
+      AIRFLOW__OPENLINEAGE__DEBUG_MODE: false
+      AIRFLOW__OPENLINEAGE__TRANSPORT: '{"type": "http", "url": "http://marquez:5000", "endpoint": "api/v1/lineage"}'
+    {% else %}      
+      AIRFLOW__OPENLINEAGE__DISABLED: true      
+    {% endif %}       
+    {%if use_timezone | default(false) %}
+      - TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
     {%if use_timezone | default(false) %}
