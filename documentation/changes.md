@@ -27,6 +27,13 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Update `nifi` to `2.4.0`
  * Update `nifi-registry` to `2.4.0`
  * Update `nifi-toolkit` to `2.4.0`
+ * Update `ollama` to `0.9.0`
+ * Update `local-ai` to `v2.29.0`
+ * Update `anaconda` to `2024.10-1`
+ * Update `grafana` to `12.0.1`
+ * Update `memcached` to `1.6`
+ * Update `flowise` to `3.0.1`
+ * 
 
 ### Enhancements
 
