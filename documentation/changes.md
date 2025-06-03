@@ -41,9 +41,11 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Add Support for Airflow 3.x
  * Add Support for writing the Airflow logs to S3 (MinIO) by setting `AIRFLOW_logging_strategy` to `s3`.
 
+
 ### Breaking Changes
 
  * `minio-console` removed as docker image is no longer available
+ * `MINIO_browser_enable` renamed to `MINIO_browser_enabled` to be conforment with naming convention
 
 ## What's new in 1.18.1
 
