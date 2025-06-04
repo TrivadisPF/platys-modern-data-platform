@@ -383,6 +383,9 @@ networks:
 {% elif (NEO4J_major_version | lower) == '5'  %}
   {% set __NEO4J_version = NEO4J_5_version -%}
 {% endif -%}
+
+{% set __GRAPHITI_version = GRAPHITI_version | default('latest') -%}
+
 {% set __NEODASH_version = NEODASH_version | default('latest') -%}
 
 {% set __QUINE_version = QUINE_version | default('latest') -%}
@@ -933,6 +936,8 @@ networks:
   {% set INVANA_ENGINE_enable = false -%}
   {% set INVANA_STUDIO_enable = false -%}
   {% set NEO4J_enable = false -%}
+  {% set GRAPHITI_enable = false -%}
+  {% set NEODASH_enable = false -%}
   {% set QUINE_enable = false -%}
   {% set MEMGRAPH_enable = false -%}
   {% set ARCADEDB_enable = false -%}
@@ -1392,6 +1397,15 @@ networks:
     {% set ns.lmstudioUrl = external['LMSTUDIO_url'] %}
 {% else %}
     {% set ns.lmstudioUrl = 'http://localhost:1234/v1' %}
+{% endif %}   {# external['LMSTUDIO_enable'] #}
+
+{#  ================================== OpenAI Settings ========================================== #}
+
+{% if (external['OPENAI_enable']) | default(false) %}
+    {% set ns.openaiApiKey = external['OPENAI_api_key'] %}
+    {% set ns.openaiBaseUrl = external['OPENAI_base_url'] %}
+    {% set ns.openaiModelName = external['OPENAI_model_name'] %}
+    {% set ns.openaiSmallModelName = external['OPENAI_small_model_name'] %}
 {% endif %}   {# external['LMSTUDIO_enable'] #}
 
 {#  ================================== SearXNG Settings ========================================== #}
@@ -18157,7 +18171,7 @@ services:
 {% if GRAPHITI_enable | default(false) %}
   #  ================================== Graphiti ========================================== #
   graphiti:
-    image: neo4jlabs/neodash:{{__GRAPHITI_version}}
+    image: ghcr.io/gschmutz/graphiti:{{__GRAPHITI_version}}
     platform: linux/amd64    
     hostname: graphiti
     container_name: graphiti
@@ -18172,7 +18186,11 @@ services:
     ports:
       - "28265:8000"
     environment:
-      - OPENAI_API_KEY={{GRAPHITI_openai_api_key if GRAPHITI_openai_api_key is defined and GRAPHITI_openai_api_key and GRAPHITI_openai_api_key | length else omit }}
+      - OPENAI_API_KEY={{openaiApiKey if openaiApiKey is defined and openaiApiKey and openaiApiKey | length else omit }}
+      - OPENAI_BASE_URL={{openaiBaseUrl if openaiBaseUrl is defined and openaiBaseUrl and openaiBaseUrl | length else omit }}
+      - LLM_TEMPERATURE=0.7
+      - MODEL_NAME={{openaiModelName if openaiModelName is defined and openaiModelName and openaiModelName | length else omit }}
+      - SMALL_MODEL_NAME={{openaiSmallModelName if openaiSmallModelName is defined and openaiSmallModelName and openaiSmallModelName | length else omit }}
       - NEO4J_URI=bolt://neo4j-1:7687
       - NEO4J_USER=neo4j
       - NEO4J_PASSWORD=${PLATYS_NEO4J_PASSWORD:-{{NEO4J_password}}}
