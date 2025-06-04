@@ -582,7 +582,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28245 | 8008 | gridgain-cc-frontend |
 28246 | 8080 | debezium-server |
 28247 | 80 | pgadmin |
-28250 |  | git-web |
+28250 | 80 | gitweb |
 28251 | 8888 | oracle-xe |
 28252 | 8888 | oracle-rest-1 |
 28253 | 8888 | kouncil |
@@ -775,6 +775,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28262 | 8080 | jenkins |
 28263 | 8181 | influxdb3 |
 28264 | 8888 | influxdb3-explorer |
+28265 | 8000 | graphiti |
 
 ## Ports > 28500
 

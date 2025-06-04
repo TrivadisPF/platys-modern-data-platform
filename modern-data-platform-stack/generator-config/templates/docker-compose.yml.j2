@@ -18064,8 +18064,8 @@ services:
       com.platys.webui.url: "http://dataplatform:{{external_port_neo4j}}"
       com.platys.password.envvars: "PLATYS_NEO4J_PASSWORD"
     ports:
-      - "{{external_port_neo4j}}:7474"
-      - "{{external_port_bolt}}:7687"
+      - "{{external_port_neo4j}}:7474"    #  HTTP port #
+      - "{{external_port_bolt}}:7687"     #  Bolt port #
     environment:
       - NEO4J_server_bolt_listen__address=0.0.0.0:7687
     {% if (NEO4J_edition | lower) == 'enterprise'  %}
@@ -18153,6 +18153,55 @@ services:
         retries: 10
   {% endfor %}  {#  for NEO4J_nodes #}
 {% endif %}   {#  NEO4J_enable #}
+
+{% if GRAPHITI_enable | default(false) %}
+  #  ================================== Graphiti ========================================== #
+  graphiti:
+    image: neo4jlabs/neodash:{{__GRAPHITI_version}}
+    platform: linux/amd64    
+    hostname: graphiti
+    container_name: graphiti
+    labels:
+      com.platys.name: "graphiti"
+      com.platys.description: "Real-Time Knowledge Graphs"
+      com.platys.webui.title: "Graphiti UI"
+      com.platys.webui.url: "http://dataplatform:28265"
+    depends_on:
+      neo4j-1:
+        condition: service_healthy      
+    ports:
+      - "28265:8000"
+    environment:
+      - OPENAI_API_KEY={{GRAPHITI_openai_api_key if GRAPHITI_openai_api_key is defined and GRAPHITI_openai_api_key and GRAPHITI_openai_api_key | length else omit }}
+      - NEO4J_URI=bolt://neo4j-1:7687
+      - NEO4J_USER=neo4j
+      - NEO4J_PASSWORD=${PLATYS_NEO4J_PASSWORD:-{{NEO4J_password}}}
+      - PORT=8000
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://localhost:8000/healthcheck')",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 3    
+{% endif %}   {#  GRAPHITI_enable #}
 
 {% if NEODASH_enable | default(false) %}
   #  ================================== NeoDash ========================================== #
