@@ -776,6 +776,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28263 | 8181 | influxdb3 |
 28264 | 8888 | influxdb3-explorer |
 28265 | 8000 | graphiti |
+28266 | 8080 | trino-gateway |
 
 ## Ports > 28500
 
