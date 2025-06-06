@@ -22111,18 +22111,21 @@ services:
 {% endif %}   {#  enable #}
 
 {% if TRINO_enable | default(false) %}
-  {% set ns2 = namespace(eventListnerPropertyFiles='') %}
-  {% if TRINO_event_listeners is defined and TRINO_event_listeners | length | default(false) %}
-    {% for eventListener in TRINO_event_listeners.split(',') %}
-      {% if loop.first %}
-       {% set ns2.eventListnerPropertyFiles = '/etc/trino/' ~ eventListener ~ ".properties" %}
-      {% else %}
-       {% set ns2.eventListnerPropertyFiles = ns2.eventListnerPropertyFiles ~ ',/etc/trino/' ~ eventListener ~ ".properties" %}
-      {% endif %}
-    {% endfor %}
-  {% endif %}
+  {% for num in range(TRINO_clusters | default(1) ) %}  
+    {% set external_http_port = 28082 + loop.index - 1 %}
+    {% set external_https_port = 28087 + loop.index - 1 %}
+    {% set ns2 = namespace(eventListnerPropertyFiles='') %}
+    {% if TRINO_event_listeners is defined and TRINO_event_listeners | length | default(false) %}
+      {% for eventListener in TRINO_event_listeners.split(',') %}
+        {% if loop.first %}
+          {% set ns2.eventListnerPropertyFiles = '/etc/trino/' ~ eventListener ~ ".properties" %}
+        {% else %}
+          {% set ns2.eventListnerPropertyFiles = ns2.eventListnerPropertyFiles ~ ',/etc/trino/' ~ eventListener ~ ".properties" %}
+        {% endif %}
+      {% endfor %}
+    {% endif %}
   #  ================================== Trino ========================================== #
-  trino-1:
+  trino-{{loop.index}}:
   {% if (TRINO_edition | lower) == 'starburstdata'  %}
     image: {{TRINO_custom_image_name if TRINO_custom_image_name is defined and TRINO_custom_image_name | length else ' starburstdata/starburst-enterprise'}}:{{__STARBURSTDATA_version}}
     {% set trino_etc_dir = '/etc/starburst' %}
@@ -22132,16 +22135,16 @@ services:
     {% set trino_etc_dir = '/etc/trino' %}
     {% set conf_dir = 'trino' %}
   {% endif -%}   {#  TRINO_edition #}
-    hostname: trino-1
-    container_name: trino-1
+    hostname: trino-{{loop.index}}
+    container_name: trino-{{loop.index}}
     labels:
       com.platys.name: "trino"
       com.platys.description: "SQL Virtualization Engine"
       com.platys.webui.title: "Trino UI"
       com.platys.webui.url: "http{{"s" if TRINO_auth_enabled}}://dataplatform:{{28083 if TRINO_auth_enabled else 28082}}/{{'ui/preview' if (TRINO_edition | lower) == 'oss'}}"
     ports:
-      - '28082:8080'
-      - '28083:8443'
+      - '{{external_http_port}}:8080'
+      - '{{external_https_port}}:8443'
     environment:
       # this is only generated to keep the structure valid if no other env variables are present
       DUMMY: make-it-valid
@@ -22597,6 +22600,8 @@ services:
       retries: 5    
     {% endfor %}
   {% endif -%}   {#  TRINO_install #}
+
+  {% endfor %}   {#  TRINO_clusters #}
 
   {% if TRINO_CLI_enable | default(false) %}
   trino-cli:
