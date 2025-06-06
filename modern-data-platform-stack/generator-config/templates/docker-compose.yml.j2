@@ -22638,7 +22638,7 @@ services:
     depends_on:
       trino-1:
         condition: service_healthy    
-      postgres:
+      postgresql:
         condition: service_healthy    
     labels:
       com.platys.name: "trino-gateway"
@@ -22647,13 +22647,20 @@ services:
       com.platys.webui.url: "http://dataplatform:28266"
     ports:
       - "28266:8080"
-    {%if use_timezone | default(false) %}
     environment:
+      - RULES_ENGINE_ENABLED=false
+      - RULES_TYPE=FILE
+      - RULES_CONFIG_PATH=src/main/resources/rules/routing_rules.yml
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD={{TRINO_GATEWAY_postgresql_password | default('abc123!') }}
+      - POSTGRES_DB=postgres
+      - POSTGRES_HOST=postgres
+    {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
-      - ./custom-conf/trino-gateway/config.yaml:/etc/trino-gateway/config.yaml
+      - ./conf/trino-gateway/config.yaml:/etc/trino-gateway/config.yaml
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
