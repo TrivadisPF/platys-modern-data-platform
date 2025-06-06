@@ -22632,7 +22632,7 @@ services:
 {% if TRINO_GATEWAY_enable | default(false) %}
   #  ================================== Trino Gateway ========================================== #
   trino-gateway:
-    image: trino/trino-gateway:{{__TRINO_GATEWAY_version}}
+    image: trinodb/trino-gateway:{{__TRINO_GATEWAY_version}}
     container_name: trino-gateway
     hostname: trino-gateway
     depends_on:
@@ -22648,9 +22648,9 @@ services:
     ports:
       - "28266:8080"
     environment:
-      - RULES_ENGINE_ENABLED=false
-      - RULES_TYPE=FILE
-      - RULES_CONFIG_PATH=src/main/resources/rules/routing_rules.yml
+      - RULES_ENGINE_ENABLED={{TRINO_GATEWAY_rules_engine_enabled | default('false') }}
+      - RULES_TYPE=FILE{{TRINO_GATEWAY_rules_type if TRINO_GATEWAY_rules_type is defined and TRINO_GATEWAY_rules_type | length else omit }}
+      - RULES_CONFIG_PATH=app/config/routing_rules.yml
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD={{TRINO_GATEWAY_postgresql_password | default('abc123!') }}
       - POSTGRES_DB=postgres
