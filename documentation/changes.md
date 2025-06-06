@@ -33,7 +33,7 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Update `grafana` to `12.0.1`
  * Update `memcached` to `1.6`
  * Update `flowise` to `3.0.1`
- * 
+ * Update `trino` to `476`
 
 ### Enhancements
 
