@@ -13,13 +13,14 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * MCP Toolbox for Databases
  * MCP Trino
  * CentralMind API/MCP Gateway
+ * Trino Gateway
+ * Trino LB (Load Balancer)
  
 ### Version upgrades
 
  * Update `milvus` to `v2.5.12` 
  * Update `langflow` to `1.4.2`
- * Update `n8n` to `1.93.0`
- * Update `flowise` to `3.0.0`
+ * Update `n8n` to `1.95.3`
  * Update `minio` to `RELEASE.2025-05-24T17-08-30Z`
  * Update `dgraph` to `v24.1.3`
  * Update `memgraph` to `3.2.1`
