@@ -1,0 +1,27 @@
+trinoLb:
+  externalAddress: http://127.0.0.1:8080 # exposed docker port is 443
+  # When you enable authentication trino-clients enforce https encryption
+  tls:
+    enabled: "'false'"
+    #certPemFile: /self-signed-certs/cert.pem
+    #keyPemFile: /self-signed-certs/key.pem
+  # Use in-memory persistence which will loose all queued running queries on restart
+  persistence:
+    inMemory: {}
+trinoClusterGroups:
+  default:
+    # Once a cluster has more running queries than this no further queries will be send to it
+    # They will be queued in trino-lb instead
+    maxRunningQueries: 1
+    trinoClusters:
+      - name: trino-default-1
+        endpoint: http://192.168.1.112:8080
+        credentials:
+          username: trino
+          password: 
+# Your Trino probably does not have a globally trusted certificate
+trinoClusterGroupsIgnoreCert: true
+
+# Route all queries to the "default" cluster group
+routers: []
+routingFallback: default

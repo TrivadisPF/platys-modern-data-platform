@@ -513,6 +513,7 @@ networks:
 {% set __STARBURSTDATA_version = STARBURSTDATA_version | default('latest') -%}
 {% set __TRINO_CLI_version = TRINO_CLI_version | default('latest') -%}
 {% set __TRINO_GATEWAY_version = TRINO_GATEWAY_version | default('latest') -%}
+{% set __TRINO_LOADBALANCER_version = TRINO_LOADBALANCER_version | default('latest') -%}
 {% set __PRESTO_version = PRESTO_version | default('latest') -%}
 {% set __AHANA_version = AHANA_version | default('latest') -%}
 {% set __PRESTO_CLI_version = PRESTO_CLI_version | default('latest') -%}
@@ -972,6 +973,8 @@ networks:
   {% set EVENTSTORE_enable = false -%}
   {% set TRINO_enable = false -%}
   {% set TRINO_CLI_enable = false -%}
+  {% set TRINO_GATEWAY_enable = false -%}
+  {% set TRINO_LOADBALANCER_enable = false -%}
   {% set PRESTO_enable = false -%}
   {% set PRESTO_CLI_enable = false -%}
   {% set DREMIO_enable = false -%}
@@ -22652,7 +22655,7 @@ services:
       com.platys.description: "Trino Gateway"
       com.platys.webui.title: "Trino Gateway"
       com.platys.webui.url: "http://dataplatform:28266"
-      com.platys.restapi.title: "Trino Gateway"
+      com.platys.restapi.title: "Trino Gateway API"
       com.platys.restapi.url: "http://dataplatform:28266/entity/GATEWAY_BACKEND"
     ports:
       - "28266:8080"
@@ -22688,6 +22691,41 @@ services:
       timeout: 5s
       retries: 60
       start_period: 20s    
+{% endif %}   {#  TRINO_GATEWAY_enable #}
+
+{% if TRINO_LOADBALANCER_enable | default(false) %}
+  #  ================================== Trino-LB (Loadbalancer) ========================================== #
+  trino-loadbalancer:
+    image: trinodb/trino-gateway:{{__TRINO_GATEWAY_version}}
+    container_name: trino-loadbalancer
+    hostname: trino-loadbalancer
+    depends_on:
+      trino-1:
+        condition: service_healthy    
+      postgresql:
+        condition: service_healthy    
+    labels:
+      com.platys.name: "trino-loadbalancer"
+      com.platys.description: "Trino Load Balancer"
+    ports:
+      - "28267:8080"
+      - "28268:8443"
+    {%if use_timezone | default(false) %}
+    environment:
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./conf/trino-loadbalancer/simple-single-trino.yaml:/etc/trino-lb-config.yaml      
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    entrypoint: ["trino-lb", "--config-file", "/etc/trino-lb-config.yaml"]
+    restart: {{container_restart_policy}}
 {% endif %}   {#  TRINO_GATEWAY_enable #}
 
 {% if PRESTO_enable | default(false) %}
