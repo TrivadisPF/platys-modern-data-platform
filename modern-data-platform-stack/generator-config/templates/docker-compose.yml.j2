@@ -20203,13 +20203,14 @@ services:
       com.platys.webui.url: "http://dataplatform:28351"
       com.platys.restapi.title: "SingleStore Data API"
       com.platys.restapi.url: "http://dataplatform:28352"
+      com.platys.password.envvars: "PLATYS_SINGLE_STORE_PASSWORD"      
     ports:
       - 3308:3306
       - 28351:8080
       - 28352:9000
     environment:
       - SINGLESTORE_LICENSE={{SINGLE_STORE_license}}
-      - ROOT_PASSWORD=abc123!
+      - ROOT_PASSWORD=${PLATYS_SINGLE_STORE_PASSWORD:-{{SINGLE_STORE_password}}}
       - INIT_SQL=/tmp/init/init.sql
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
@@ -22223,6 +22224,10 @@ services:
       CLICKHOUSE_USER: {{CLICKHOUSE_username}}
       CLICKHOUSE_PASSWORD: ${PLATYS_CLICKHOUSE_PASSWORD:-{{CLICKHOUSE_password}}}
   {% endif %}
+  {% if SINGLE_STORE_enable | default(false) %}
+      SINGLE_STORE_USER: root
+      SINGLE_STORE_PASSWORD: ${PLATYS_SINGLE_STORE_PASSWORD:-{{SINGLE_STORE_password}}}
+  {% endif %}  
   {% if REDIS_enable | default(false) %}
       REDIS_TABLE_NAMES: '{{TRINO_redis_table_names if TRINO_redis_table_names is defined and TRINO_redis_table_names and TRINO_redis_table_names | length else '' }}'
       REDIS_NODES: redis-1:6379
@@ -22326,7 +22331,10 @@ services:
   {% if REDIS_STACK_enable | default(false) %}
       - './conf/{{conf_dir}}/catalog/redis-stack.properties:{{trino_etc_dir}}/catalog/redis-stack.properties'
       - './conf/{{conf_dir}}/catalog/redis-search.properties:{{trino_etc_dir}}/catalog/redis-search.properties'
-   {% endif %}
+  {% endif %}
+  {% if SINGLE_STORE_enable | default(false) %}
+      - './conf/{{conf_dir}}/catalog/singlestore.properties:{{trino_etc_dir}}/catalog/singlestore.properties'
+  {% endif %}
   {% if MONGO_enable | default(false) %}
       - './conf/{{conf_dir}}/catalog/mongo.properties:{{trino_etc_dir}}/catalog/mongo.properties'
   {% endif %}
@@ -22481,6 +22489,10 @@ services:
   {% if CLICKHOUSE_enable | default(false) %}
       CLICKHOUSE_USER: {{CLICKHOUSE_username}}
       CLICKHOUSE_PASSWORD: ${PLATYS_CLICKHOUSE_PASSWORD:-{{CLICKHOUSE_password}}}
+  {% endif %}
+  {% if SINGLE_STORE_enable | default(false) %}
+      SINGLE_STORE_USER: root
+      SINGLE_STORE_PASSWORD: ${PLATYS_SINGLE_STORE_PASSWORD:-{{SINGLE_STORE_password}}}
   {% endif %}  
   {% if REDIS_enable | default(false) %}
       REDIS_TABLE_NAMES: '{{TRINO_redis_table_names if TRINO_redis_table_names is defined and TRINO_redis_table_names and TRINO_redis_table_names | length else '' }}'
@@ -22576,6 +22588,9 @@ services:
       - './conf/{{conf_dir}}/catalog/redis-stack.properties:{{trino_etc_dir}}/catalog/redis-stack.properties'
       - './conf/{{conf_dir}}/catalog/redis-search.properties:{{trino_etc_dir}}/catalog/redis-search.properties'
   {% endif %}
+  {% if SINGLE_STORE_enable | default(false) %}
+      - './conf/{{conf_dir}}/catalog/singlestore.properties:{{trino_etc_dir}}/catalog/singlestore.properties'
+  {% endif %}  
   {% if MONGO_enable | default(false) %}
       - './conf/{{conf_dir}}/catalog/mongo.properties:{{trino_etc_dir}}/catalog/mongo.properties'
   {% endif %}
