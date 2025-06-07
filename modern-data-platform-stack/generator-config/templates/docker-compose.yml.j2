@@ -22710,13 +22710,17 @@ services:
     ports:
       - "28267:8080"
       - "28268:8443"
-    {%if use_timezone | default(false) %}
+      - "28269:9090"
     environment:
+      - TRINO_LB_TRACING_ENABLED=false
+      - TRINO_LB_PORT=8080
+      - TRINO_LB_SCHEME=htt
+    {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
-      - ./conf/trino-lb/simple-single-trino.yaml:/etc/trino-lb-config.yaml      
+      - ./conf/trino-lb/simple-single-trino.yaml:/tmp/trino-lb-config.yaml      
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -22724,7 +22728,12 @@ services:
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
-    entrypoint: ["trino-lb", "--config-file", "/etc/trino-lb-config.yaml"]
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        eval "echo \"$$(cat /tmp/trino-lb-config.yaml)\"" >> /etc/trino-lb-config.yaml
+        trino-lb --config-file /etc/trino-lb-config.yaml
     restart: {{container_restart_policy}}
 {% endif %}   {#  TRINO_LB_enable #}
 
@@ -27422,6 +27431,9 @@ services:
     {% if RISINGWAVE_enable | default(false) %}
       - ./scripts/grafana/dashboards/risingwave:/etc/grafana/provisioning/dashboards/risingwave
     {% endif -%}   {#  RISINGWAVE_enable #}
+    {% if TRINO_LB_enable | default(false) %}
+      - ./scripts/grafana/dashboards/trino-lb:/etc/grafana/provisioning/dashboards/trino-lb
+    {% endif -%}   {#  TRINO_LB_enable #}
     {% if PROMETHEUS_enable | default(false) %}
       - ./scripts/grafana/datasources/prometheus-datasource.yml:/etc/grafana/provisioning/datasources/prometheus-datasource.yml
     {% endif -%}   {#  PROMETHEUS_enable #}
