@@ -42,6 +42,13 @@ There are some overall settings which will control the behaviour for all or a gr
 | `S3_path_style_access`                             	| `false` | 1.9.0 | Use Path Style Access if set to `true`, otherwise the default of virtual hosted-style access is used. |
 | `ADLS_enable`                             	| `false` | 1.15.0 | Use external Azure Data Lake Storage Gen2 service. You have to configure two environment variables, `PLATYS_AZURE_ADLS_ACCESS_KEY` with the access key. This can be done on the on the docker host or in the `.env` file in the platform home (same folder where the `docker-compose.yml` is located). |  
 | `ADLS_storage_account`                             	| `` | 1.15.0 | The name of the storage account for the ADLS service. |  
+| `SNOWFLAKE_enable`                             	| `false` | 1.19.0 | Use external Snowflake service. |  
+| `SNOWFLAKE_account`                             	| `` | 1.19.0 | The Snowflake accout. |  
+| `SNOWFLAKE_user`                             	| `` | 1.19.0 | The Snowflake user. |  
+| `SNOWFLAKE_password`                             	| `` | 1.19.0 | The Snowflake password. |  
+| `SNOWFLAKE_database`                             	| `` | 1.19.0 | The Snowflake database. |  
+| `SNOWFLAKE_role`                             	| `` | 1.19.0 | The Snowflake role. |  
+| `SNOWFLAKE_warehouse`                             	| `` | 1.19.0 | The Snowflake warehouse. |  
 | `DATAHUB_enable`                             	| `false` | 1.16.0 | Use external DataHub service. Specify the DataHub GMS service through the `DATAHUB_gms_url` property.  |  
 | `DATAHUB_gms_url`                             	| `` 	| 1.16.0 | the web url of the external DataHub GMS service instance to connect to. |  
 | `OLLAMA_enable`                             	| `false` | 1.17.0 | Use external Ollama service. Specify the Ollama base URL through the `OLLAMA_url` property.  |  
