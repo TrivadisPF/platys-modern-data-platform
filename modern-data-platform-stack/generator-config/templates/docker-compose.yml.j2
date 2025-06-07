@@ -513,7 +513,7 @@ networks:
 {% set __STARBURSTDATA_version = STARBURSTDATA_version | default('latest') -%}
 {% set __TRINO_CLI_version = TRINO_CLI_version | default('latest') -%}
 {% set __TRINO_GATEWAY_version = TRINO_GATEWAY_version | default('latest') -%}
-{% set __TRINO_LOADBALANCER_version = TRINO_LOADBALANCER_version | default('latest') -%}
+{% set __TRINO_LB_version = TRINO_LB_version | default('latest') -%}
 {% set __PRESTO_version = PRESTO_version | default('latest') -%}
 {% set __AHANA_version = AHANA_version | default('latest') -%}
 {% set __PRESTO_CLI_version = PRESTO_CLI_version | default('latest') -%}
@@ -974,7 +974,7 @@ networks:
   {% set TRINO_enable = false -%}
   {% set TRINO_CLI_enable = false -%}
   {% set TRINO_GATEWAY_enable = false -%}
-  {% set TRINO_LOADBALANCER_enable = false -%}
+  {% set TRINO_LB_enable = false -%}
   {% set PRESTO_enable = false -%}
   {% set PRESTO_CLI_enable = false -%}
   {% set DREMIO_enable = false -%}
@@ -22693,19 +22693,19 @@ services:
       start_period: 20s    
 {% endif %}   {#  TRINO_GATEWAY_enable #}
 
-{% if TRINO_LOADBALANCER_enable | default(false) %}
+{% if TRINO_LB_enable | default(false) %}
   #  ================================== Trino-LB (Loadbalancer) ========================================== #
-  trino-loadbalancer:
+  trino-lb:
     image: trinodb/trino-gateway:{{__TRINO_GATEWAY_version}}
-    container_name: trino-loadbalancer
-    hostname: trino-loadbalancer
+    container_name: trino-lb
+    hostname: trino-lb
     depends_on:
       trino-1:
         condition: service_healthy    
       postgresql:
         condition: service_healthy    
     labels:
-      com.platys.name: "trino-loadbalancer"
+      com.platys.name: "trino-lb"
       com.platys.description: "Trino Load Balancer"
     ports:
       - "28267:8080"
@@ -22716,7 +22716,7 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
-      - ./conf/trino-loadbalancer/simple-single-trino.yaml:/etc/trino-lb-config.yaml      
+      - ./conf/trino-lb/simple-single-trino.yaml:/etc/trino-lb-config.yaml      
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -22726,7 +22726,7 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     entrypoint: ["trino-lb", "--config-file", "/etc/trino-lb-config.yaml"]
     restart: {{container_restart_policy}}
-{% endif %}   {#  TRINO_GATEWAY_enable #}
+{% endif %}   {#  TRINO_LB_enable #}
 
 {% if PRESTO_enable | default(false) %}
   #  ================================== Presto ========================================== #
