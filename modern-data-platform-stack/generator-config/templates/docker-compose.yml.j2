@@ -22145,6 +22145,7 @@ services:
       com.platys.description: "SQL Virtualization Engine"
       com.platys.webui.title: "Trino UI"
       com.platys.webui.url: "http{{"s" if TRINO_auth_enabled}}://dataplatform:{{external_https_port if TRINO_auth_enabled else external_http_port}}/{{'ui/preview' if (TRINO_edition | lower) == 'oss'}}"
+      com.platys.password.envvars: "PLATYS_GSHEET_CREDENTIALS_KEY"      
     ports:
       - '{{external_http_port}}:8080'
       - '{{external_https_port}}:8443'
@@ -22218,6 +22219,10 @@ services:
       ORACLE_USER: {{TRINO_oracle_user | default('demo') }}
       ORACLE_PASSWORD: {{TRINO_oracle_password | default('abc123!') }}
   {% endif %}
+  {% if CLICKHOUSE_enable | default(false) %}
+      CLICKHOUSE_USER: {{CLICKHOUSE_username}}
+      CLICKHOUSE_PASSWORD: ${PLATYS_CLICKHOUSE_PASSWORD:-{{CLICKHOUSE_password}}}
+  {% endif %}
   {% if REDIS_enable | default(false) %}
       REDIS_TABLE_NAMES: '{{TRINO_redis_table_names if TRINO_redis_table_names is defined and TRINO_redis_table_names and TRINO_redis_table_names | length else '' }}'
       REDIS_NODES: redis-1:6379
@@ -22232,6 +22237,10 @@ services:
       REDISEARCH_CASE_INSENSITIVE_NAMES: false
       REDISEARCH_CURSOR_COUNT: 1000
       REDISEARCH_DEFAULT_LIMIT: 10000
+  {% endif %}
+  {% if TRINO_with_gsheets_catalog | default(false) %}
+      GSHEETS_METADATA_SHEET_ID: '{{TRINO_gsheets_metadata_sheet_id if TRINO_gsheets_metadata_sheet_id is defined and TRINO_gsheets_metadata_sheet_id and TRINO_gsheets_metadata_sheet_id | length else '' }}'
+      GSHEETS_CREDENTIALS_KEY: ${PLATYS_GSHEET_CREDENTIALS_KEY:-{{TRINO_gsheets_credentials_key}}}
   {% endif %}
   {% if TRINO_event_listeners is defined and TRINO_event_listeners | length | default(false) %}
       EVENT_LISTENER_CONFIG_FILES: {{ns2.eventListnerPropertyFiles}}
@@ -22321,11 +22330,17 @@ services:
   {% if ELASTICSEARCH_enable | default(false) %}
       - './conf/{{conf_dir}}/catalog/elasticsearch.properties:{{trino_etc_dir}}/catalog/elasticsearch.properties'
   {% endif %}
+  {% if OPENSEARCH_enable | default(false) %}
+      - './conf/{{conf_dir}}/catalog/opensearch.properties:{{trino_etc_dir}}/catalog/opensearch.properties'
+  {% endif %}
   {% if PINOT_enable | default(false) %}
       - './conf/{{conf_dir}}/catalog/pinot.properties:{{trino_etc_dir}}/catalog/pinot.properties'
   {% endif %}
   {% if DRUID_enable | default(false) %}
       - './conf/{{conf_dir}}/catalog/druid.properties:{{trino_etc_dir}}/catalog/druid.properties'
+  {% endif %}
+  {% if CLICKHOUSE_enable | default(false) %}
+      - './conf/{{conf_dir}}/catalog/clickhouse.properties:{{trino_etc_dir}}/catalog/clickhouse.properties'
   {% endif %}
   {% if PROMETHEUS_enable | default(false) %}
       - './conf/{{conf_dir}}/catalog/prometheus.properties:{{trino_etc_dir}}/catalog/prometheus.properties'
@@ -22339,9 +22354,9 @@ services:
   {% if TRINO_with_memory_catalog | default(false) %}
       - './conf/{{conf_dir}}/catalog/memory.properties:{{trino_etc_dir}}/catalog/memory.properties'
   {% endif %}
-  {% if DRUID_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/druid.properties:{{trino_etc_dir}}/catalog/druid.properties'
-  {% endif %}
+  {% if TRINO_with_gsheets_catalog | default(false) %}
+      - './conf/{{conf_dir}}/catalog/gsheets.properties:{{trino_etc_dir}}/catalog/gsheets.properties'
+  {% endif %}  
   {% if TRINO_event_listeners is defined and TRINO_event_listeners | length | default(false) %}
     {% for eventListener in (TRINO_event_listeners.split(',')) %}
       - ./conf/trino/{{eventListener}}.properties:{{trino_etc_dir}}/{{eventListener}}.properties
@@ -22454,6 +22469,10 @@ services:
       ORACLE_USER: {{TRINO_oracle_user | default('demo') }}
       ORACLE_PASSWORD: {{TRINO_oracle_password | default('abc123!') }}
   {% endif %}
+  {% if CLICKHOUSE_enable | default(false) %}
+      CLICKHOUSE_USER: {{CLICKHOUSE_username}}
+      CLICKHOUSE_PASSWORD: ${PLATYS_CLICKHOUSE_PASSWORD:-{{CLICKHOUSE_password}}}
+  {% endif %}  
   {% if REDIS_enable | default(false) %}
       REDIS_TABLE_NAMES: '{{TRINO_redis_table_names if TRINO_redis_table_names is defined and TRINO_redis_table_names and TRINO_redis_table_names | length else '' }}'
       REDIS_NODES: redis-1:6379
@@ -22468,6 +22487,10 @@ services:
       REDISEARCH_CASE_INSENSITIVE_NAMES: false
       REDISEARCH_CURSOR_COUNT: 1000
       REDISEARCH_DEFAULT_LIMIT: 10000
+  {% endif %}
+  {% if TRINO_with_gsheets_catalog | default(false) %}
+      GSHEETS_METADATA_SHEET_ID: '{{TRINO_gsheets_metadata_sheet_id if TRINO_gsheets_metadata_sheet_id is defined and TRINO_gsheets_metadata_sheet_id and TRINO_gsheets_metadata_sheet_id | length else '' }}'
+      GSHEETS_CREDENTIALS_KEY: ${PLATYS_GSHEET_CREDENTIALS_KEY:-{{TRINO_gsheets_credentials_key}}}
   {% endif %}
   {% if TRINO_event_listeners is defined and TRINO_event_listeners | length | default(false) %}
       EVENT_LISTENER_CONFIG_FILES: {{ns2.eventListnerPropertyFiles}}
@@ -22547,11 +22570,17 @@ services:
   {% if ELASTICSEARCH_enable | default(false) %}
       - './conf/{{conf_dir}}/catalog/elasticsearch.properties:{{trino_etc_dir}}/catalog/elasticsearch.properties'
   {% endif %}
+  {% if OPENSEARCH_enable | default(false) %}
+      - './conf/{{conf_dir}}/catalog/opensearch.properties:{{trino_etc_dir}}/catalog/opensearch.properties'
+  {% endif %}
   {% if PINOT_enable | default(false) %}
       - './conf/{{conf_dir}}/catalog/pinot.properties:{{trino_etc_dir}}/catalog/pinot.properties'
   {% endif %}
   {% if DRUID_enable | default(false) %}
       - './conf/{{conf_dir}}/catalog/druid.properties:{{trino_etc_dir}}/catalog/druid.properties'
+  {% endif %}
+  {% if CLICKHOUSE_enable | default(false) %}
+      - './conf/{{conf_dir}}/catalog/clickhouse.properties:{{trino_etc_dir}}/catalog/clickhouse.properties'
   {% endif %}
   {% if PROMETHEUS_enable | default(false) %}
       - './conf/{{conf_dir}}/catalog/prometheus.properties:{{trino_etc_dir}}/catalog/prometheus.properties'
@@ -22565,6 +22594,9 @@ services:
   {% if TRINO_with_memory_catalog | default(false) %}
       - './conf/{{conf_dir}}/catalog/memory.properties:{{trino_etc_dir}}/catalog/memory.properties'
   {% endif %}
+  {% if TRINO_with_gsheets_catalog | default(false) %}
+      - './conf/{{conf_dir}}/catalog/gsheets.properties:{{trino_etc_dir}}/catalog/gsheets.properties'
+  {% endif %}    
   {% if TRINO_event_listeners is defined and TRINO_event_listeners | length | default(false) %}
     {% for eventListener in (TRINO_event_listeners.split(',')) %}
       - ./conf/trino/{{eventListener}}.properties:{{trino_etc_dir}}/{{eventListener}}.properties
