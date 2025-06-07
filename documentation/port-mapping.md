@@ -781,8 +781,9 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28264 | 8888 | influxdb3-explorer |
 28265 | 8000 | graphiti |
 28266 | 8080 | trino-gateway |
-28267 | 8080 | trino-loadbalancer (http) |
-28268 | 8443 | trino-loadbalancer (https) |
+28267 | 8080 | trino-lb (http) |
+28268 | 8443 | trino-lb (https) |
+28269 | 9090 | trino-lb (prometheus) |
 
 ## Ports > 28500
 
