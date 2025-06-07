@@ -22152,6 +22152,9 @@ services:
       - '{{external_https_port}}:8443'
     environment:
       TRINO_COORDINATOR_HOST: trino-{{loop.index}}
+      TRINO_CATALOG_MANAGEMENT: {{TRINO_catalog_management | default('static') }}
+      TRINO_CATALOG_STORE: {{TRINO_catalog_store | default('file') }}
+      TRINO_CATALOG_CONFIG_DIR: '/catalog'
   {% if (TRINO_edition | lower) == 'starburstdata' %}
       DATA_PRODUCT_ENABLED: '{{'true' if TRINO_starburstdata_enable_data_product is defined and TRINO_starburstdata_enable_data_product else 'false'}}'
   {% endif %}
@@ -22283,30 +22286,30 @@ services:
   {% endif %}
   {%if MINIO_enable or external['S3_enable'] | default(false) %}
     {%if HIVE_METASTORE_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/minio.properties:{{trino_etc_dir}}/catalog/minio.properties'
+      - './conf/{{conf_dir}}/catalog/minio.properties:/catalog/minio.properties'
     {% endif %}
     {%if ICEBERG_REST_CATALOG_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/iceberg-rest.properties:{{trino_etc_dir}}/catalog/iceberg_rest.properties'
+      - './conf/{{conf_dir}}/catalog/iceberg-rest.properties:/catalog/iceberg_rest.properties'
     {% endif %}
     {%if SPARK_table_format_type == 'iceberg' or ICEBERG_REST_CATALOG_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/iceberg.properties:{{trino_etc_dir}}/catalog/iceberg.properties'
+      - './conf/{{conf_dir}}/catalog/iceberg.properties:/catalog/iceberg.properties'
       {%if NESSIE_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/iceberg-nessie.properties:{{trino_etc_dir}}/catalog/iceberg_nessie.properties'
+      - './conf/{{conf_dir}}/catalog/iceberg-nessie.properties:/catalog/iceberg_nessie.properties'
       {% endif %}
     {%elif SPARK_table_format_type == 'delta' | default(false) %}
-      - './conf/{{conf_dir}}/catalog/delta.properties:{{trino_etc_dir}}/catalog/delta.properties'
+      - './conf/{{conf_dir}}/catalog/delta.properties:/catalog/delta.properties'
     {%elif SPARK_table_format_type == 'hudi' | default(false) %}
-      - './conf/{{conf_dir}}/catalog/hudi.properties:{{trino_etc_dir}}/catalog/hudi.properties'
+      - './conf/{{conf_dir}}/catalog/hudi.properties:/catalog/hudi.properties'
     {% endif %}
     {%if UNITY_CATALOG_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/iceberg-unity.properties:{{trino_etc_dir}}/catalog/iceberg_unity.properties'
+      - './conf/{{conf_dir}}/catalog/iceberg-unity.properties:/catalog/iceberg_unity.properties'
     {% endif %}
   {% endif %}
   {%if external['ADLS_enable'] | default(false) %}
-      - './conf/{{conf_dir}}/catalog/adls.properties:{{trino_etc_dir}}/catalog/adls.properties'
+      - './conf/{{conf_dir}}/catalog/adls.properties:/catalog/adls.properties'
   {% endif %}
   {% if TRINO_kafka_table_names is defined and TRINO_kafka_table_names|length and (KAFKA_enable or external['KAFKA_enable']) | default(false)  %}
-      - './conf/{{conf_dir}}/catalog/kafka.properties:{{trino_etc_dir}}/catalog/kafka.properties'
+      - './conf/{{conf_dir}}/catalog/kafka.properties:/catalog/kafka.properties'
       - './conf/{{conf_dir}}/kafka/:{{trino_etc_dir}}/kafka/'
     {% if ns.secureKafkaEnabled %}
       - './security/kafka/sasl-scram/client.properties:{{trino_etc_dir}}/kafka-configuration.properties'
@@ -22316,80 +22319,80 @@ services:
     {% endif -%} {#  ns.secureKafkaEnabled #}
   {% endif %}
   {%if HADOOP_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/hdfs.properties:{{trino_etc_dir}}/catalog/hdfs.properties'
+      - './conf/{{conf_dir}}/catalog/hdfs.properties:/catalog/hdfs.properties'
   {% endif %}
   {% if POSTGRESQL_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/postgresql.properties:{{trino_etc_dir}}/catalog/postgresql.properties'
+      - './conf/{{conf_dir}}/catalog/postgresql.properties:/catalog/postgresql.properties'
   {% endif %}
   {% if MYSQL_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/mysql.properties:{{trino_etc_dir}}/catalog/mysql.properties'
+      - './conf/{{conf_dir}}/catalog/mysql.properties:/catalog/mysql.properties'
   {% endif %}
   {% if MARIADB_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/mariadb.properties:{{trino_etc_dir}}/catalog/mariadb.properties'
+      - './conf/{{conf_dir}}/catalog/mariadb.properties:/catalog/mariadb.properties'
   {% endif %}
   {% if SQLSERVER_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/sqlserver.properties:{{trino_etc_dir}}/catalog/sqlserver.properties'
+      - './conf/{{conf_dir}}/catalog/sqlserver.properties:/catalog/sqlserver.properties'
   {% endif %}
   {% if ORACLE_EE_enable or ORACLE_XE_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/oracle.properties:{{trino_etc_dir}}/catalog/oracle.properties'
+      - './conf/{{conf_dir}}/catalog/oracle.properties:/catalog/oracle.properties'
   {% endif %}
   {% if IGNITE_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/ignite.properties:{{trino_etc_dir}}/catalog/ignite.properties'
+      - './conf/{{conf_dir}}/catalog/ignite.properties:/catalog/ignite.properties'
   {% endif %}
   {% if REDIS_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/redis.properties:{{trino_etc_dir}}/catalog/redis.properties'
+      - './conf/{{conf_dir}}/catalog/redis.properties:/catalog/redis.properties'
   {% endif %}
   {% if REDIS_STACK_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/redis-stack.properties:{{trino_etc_dir}}/catalog/redis-stack.properties'
-      - './conf/{{conf_dir}}/catalog/redis-search.properties:{{trino_etc_dir}}/catalog/redis-search.properties'
+      - './conf/{{conf_dir}}/catalog/redis-stack.properties:/catalog/redis-stack.properties'
+      - './conf/{{conf_dir}}/catalog/redis-search.properties:/catalog/redis-search.properties'
   {% endif %}
   {% if SINGLE_STORE_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/singlestore.properties:{{trino_etc_dir}}/catalog/singlestore.properties'
+      - './conf/{{conf_dir}}/catalog/singlestore.properties:/catalog/singlestore.properties'
   {% endif %}
   {% if MONGO_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/mongo.properties:{{trino_etc_dir}}/catalog/mongo.properties'
+      - './conf/{{conf_dir}}/catalog/mongo.properties:/catalog/mongo.properties'
   {% endif %}
   {% if ELASTICSEARCH_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/elasticsearch.properties:{{trino_etc_dir}}/catalog/elasticsearch.properties'
+      - './conf/{{conf_dir}}/catalog/elasticsearch.properties:/catalog/elasticsearch.properties'
   {% endif %}
   {% if OPENSEARCH_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/opensearch.properties:{{trino_etc_dir}}/catalog/opensearch.properties'
+      - './conf/{{conf_dir}}/catalog/opensearch.properties:/catalog/opensearch.properties'
   {% endif %}
   {% if PINOT_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/pinot.properties:{{trino_etc_dir}}/catalog/pinot.properties'
+      - './conf/{{conf_dir}}/catalog/pinot.properties:/catalog/pinot.properties'
   {% endif %}
   {% if DRUID_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/druid.properties:{{trino_etc_dir}}/catalog/druid.properties'
+      - './conf/{{conf_dir}}/catalog/druid.properties:/catalog/druid.properties'
   {% endif %}
   {% if CLICKHOUSE_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/clickhouse.properties:{{trino_etc_dir}}/catalog/clickhouse.properties'
+      - './conf/{{conf_dir}}/catalog/clickhouse.properties:/catalog/clickhouse.properties'
   {% endif %}
   {% if external['SNOWFLAKE_enable'] | default(false) %}
-      - './conf/{{conf_dir}}/catalog/snowflake.properties:{{trino_etc_dir}}/catalog/snowflake.properties'
+      - './conf/{{conf_dir}}/catalog/snowflake.properties:/catalog/snowflake.properties'
   {% endif %}    
   {% if PROMETHEUS_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/prometheus.properties:{{trino_etc_dir}}/catalog/prometheus.properties'
+      - './conf/{{conf_dir}}/catalog/prometheus.properties:/catalog/prometheus.properties'
   {% endif %}
   {% if LOKI_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/loki.properties:{{trino_etc_dir}}/catalog/loki.properties'
+      - './conf/{{conf_dir}}/catalog/loki.properties:/catalog/loki.properties'
   {% endif %}  
   {% if TRINO_with_faker_catalog | default(false) %}
-      - './conf/{{conf_dir}}/catalog/faker.properties:{{trino_etc_dir}}/catalog/faker.properties'
+      - './conf/{{conf_dir}}/catalog/faker.properties:/catalog/faker.properties'
   {% endif %}
   {% if TRINO_with_tpch_catalog | default(false) %}
-      - './conf/{{conf_dir}}/catalog/tpch.properties:{{trino_etc_dir}}/catalog/tpch.properties'
+      - './conf/{{conf_dir}}/catalog/tpch.properties:/catalog/tpch.properties'
   {% endif %}
   {% if TRINO_with_tpcds_catalog | default(false) %}
-      - './conf/{{conf_dir}}/catalog/tpcds.properties:{{trino_etc_dir}}/catalog/tpcds.properties'
+      - './conf/{{conf_dir}}/catalog/tpcds.properties:/catalog/tpcds.properties'
   {% endif %}
   {% if TRINO_with_memory_catalog | default(false) %}
-      - './conf/{{conf_dir}}/catalog/memory.properties:{{trino_etc_dir}}/catalog/memory.properties'
+      - './conf/{{conf_dir}}/catalog/memory.properties:/catalog/memory.properties'
   {% endif %}
   {% if TRINO_with_jmx_catalog | default(false) %}
-      - './conf/{{conf_dir}}/catalog/jmx.properties:{{trino_etc_dir}}/catalog/jmx.properties'
+      - './conf/{{conf_dir}}/catalog/jmx.properties:/catalog/jmx.properties'
   {% endif %}
   {% if TRINO_with_gsheets_catalog | default(false) %}
-      - './conf/{{conf_dir}}/catalog/gsheets.properties:{{trino_etc_dir}}/catalog/gsheets.properties'
+      - './conf/{{conf_dir}}/catalog/gsheets.properties:/catalog/gsheets.properties'
   {% endif %}  
   {% if TRINO_event_listeners is defined and TRINO_event_listeners | length | default(false) %}
     {% for eventListener in (TRINO_event_listeners.split(',')) %}
@@ -22413,7 +22416,7 @@ services:
   {% endif %}
   {% if TRINO_additional_catalogs is defined and TRINO_additional_catalogs | default(false) %}
     {% for catalogName in (TRINO_additional_catalogs.split(',')) %}
-      - './custom-conf/{{conf_dir}}/catalog/{{catalogName}}.properties:{{trino_etc_dir}}/catalog/{{catalogName}}.properties'
+      - './custom-conf/{{conf_dir}}/catalog/{{catalogName}}.properties:/catalog/{{catalogName}}.properties'
     {% endfor %}
   {% endif %}
   {% if TRINO_additional_plugins is defined and TRINO_additional_plugins | default(false) %}
@@ -22455,6 +22458,9 @@ services:
       com.platys.description: "SQL Virtualization Engine"
     environment:
       TRINO_COORDINATOR_HOST: trino-{{loop.parent.index}}
+      TRINO_CATALOG_MANAGEMENT: {{TRINO_catalog_management | default('static') }}
+      TRINO_CATALOG_STORE: {{TRINO_catalog_store | default('file') }}
+      TRINO_CATALOG_CONFIG_DIR: '/catalog'
   {%if MINIO_enable or external['S3_enable'] | default(false) %}
       S3_ENDPOINT: {{s3Endpoint | default(omit) }}
       S3_REGION: {{s3DefaultRegion | default(omit) }}
@@ -22559,110 +22565,110 @@ services:
       - ./conf/{{conf_dir}}/cluster/log-debug.properties:{{trino_etc_dir}}/log.properties
   {%if MINIO_enable or external['S3_enable'] | default(false) %}
     {%if HIVE_METASTORE_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/minio.properties:{{trino_etc_dir}}/catalog/minio.properties'
+      - './conf/{{conf_dir}}/catalog/minio.properties:/catalog/minio.properties'
     {% endif %}
     {%if ICEBERG_REST_CATALOG_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/iceberg-rest.properties:{{trino_etc_dir}}/catalog/iceberg_rest.properties'
+      - './conf/{{conf_dir}}/catalog/iceberg-rest.properties:/catalog/iceberg_rest.properties'
     {% endif %}
     {%if SPARK_table_format_type == 'iceberg' | default(false) %}
-      - './conf/{{conf_dir}}/catalog/iceberg.properties:{{trino_etc_dir}}/catalog/iceberg.properties'
+      - './conf/{{conf_dir}}/catalog/iceberg.properties:/catalog/iceberg.properties'
       {%if NESSIE_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/iceberg-nessie.properties:{{trino_etc_dir}}/catalog/iceberg_nessie.properties'
+      - './conf/{{conf_dir}}/catalog/iceberg-nessie.properties:/catalog/iceberg_nessie.properties'
       {% endif %}
     {%elif SPARK_table_format_type == 'delta' | default(false) %}
-      - './conf/{{conf_dir}}/catalog/delta.properties:{{trino_etc_dir}}/catalog/delta.properties'
+      - './conf/{{conf_dir}}/catalog/delta.properties:/catalog/delta.properties'
     {%elif SPARK_table_format_type == 'hudi' | default(false) %}
-      - './conf/{{conf_dir}}/catalog/hudi.properties:{{trino_etc_dir}}/catalog/hudi.properties'
+      - './conf/{{conf_dir}}/catalog/hudi.properties:/catalog/hudi.properties'
     {% endif %}
     {%if UNITY_CATALOG_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/iceberg-unity.properties:{{trino_etc_dir}}/catalog/iceberg_unity.properties'
+      - './conf/{{conf_dir}}/catalog/iceberg-unity.properties:/catalog/iceberg_unity.properties'
     {% endif %}    
   {% endif %}
   {%if external['ADLS_enable'] | default(false) %}
-      - './conf/{{conf_dir}}/catalog/adls.properties:{{trino_etc_dir}}/catalog/adls.properties'
+      - './conf/{{conf_dir}}/catalog/adls.properties:/catalog/adls.properties'
   {% endif %}
   {%if KAFKA_enable or external['KAFKA_enable'] | default(false) %}
-      - './conf/{{conf_dir}}/catalog/kafka.properties:{{trino_etc_dir}}/catalog/kafka.properties'
+      - './conf/{{conf_dir}}/catalog/kafka.properties:/catalog/kafka.properties'
       - './conf/{{conf_dir}}/kafka/:{{trino_etc_dir}}/kafka/'
     {% if ns.secureKafkaEnabled %}
       - './security/kafka/sasl-scram/client.properties:{{trino_etc_dir}}/kafka-configuration.properties'
     {% endif %}
   {% endif %}
   {%if HADOOP_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/hdfs.properties:{{trino_etc_dir}}/catalog/hdfs.properties'
+      - './conf/{{conf_dir}}/catalog/hdfs.properties:/catalog/hdfs.properties'
   {% endif %}
   {% if POSTGRESQL_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/postgresql.properties:{{trino_etc_dir}}/catalog/postgresql.properties'
+      - './conf/{{conf_dir}}/catalog/postgresql.properties:/catalog/postgresql.properties'
   {% endif %}
   {% if MYSQL_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/mysql.properties:{{trino_etc_dir}}/catalog/mysql.properties'
+      - './conf/{{conf_dir}}/catalog/mysql.properties:/catalog/mysql.properties'
   {% endif %}
   {% if MARIADB_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/mariadb.properties:{{trino_etc_dir}}/catalog/mariadb.properties'
+      - './conf/{{conf_dir}}/catalog/mariadb.properties:/catalog/mariadb.properties'
   {% endif %}
   {% if SQLSERVER_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/sqlserver.properties:{{trino_etc_dir}}/catalog/sqlserver.properties'
+      - './conf/{{conf_dir}}/catalog/sqlserver.properties:/catalog/sqlserver.properties'
   {% endif %}
   {% if ORACLE_EE_enable or ORACLE_XE_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/oracle.properties:{{trino_etc_dir}}/catalog/oracle.properties'
+      - './conf/{{conf_dir}}/catalog/oracle.properties:/catalog/oracle.properties'
   {% endif %}
   {% if IGNITE_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/ignite.properties:{{trino_etc_dir}}/catalog/ignite.properties'
+      - './conf/{{conf_dir}}/catalog/ignite.properties:/catalog/ignite.properties'
   {% endif %}  
   {% if REDIS_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/redis.properties:{{trino_etc_dir}}/catalog/redis.properties'
+      - './conf/{{conf_dir}}/catalog/redis.properties:/catalog/redis.properties'
   {% endif %}
   {% if REDIS_STACK_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/redis-stack.properties:{{trino_etc_dir}}/catalog/redis-stack.properties'
-      - './conf/{{conf_dir}}/catalog/redis-search.properties:{{trino_etc_dir}}/catalog/redis-search.properties'
+      - './conf/{{conf_dir}}/catalog/redis-stack.properties:/catalog/redis-stack.properties'
+      - './conf/{{conf_dir}}/catalog/redis-search.properties:/catalog/redis-search.properties'
   {% endif %}
   {% if SINGLE_STORE_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/singlestore.properties:{{trino_etc_dir}}/catalog/singlestore.properties'
+      - './conf/{{conf_dir}}/catalog/singlestore.properties:/catalog/singlestore.properties'
   {% endif %}  
   {% if MONGO_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/mongo.properties:{{trino_etc_dir}}/catalog/mongo.properties'
+      - './conf/{{conf_dir}}/catalog/mongo.properties:/catalog/mongo.properties'
   {% endif %}
   {% if ELASTICSEARCH_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/elasticsearch.properties:{{trino_etc_dir}}/catalog/elasticsearch.properties'
+      - './conf/{{conf_dir}}/catalog/elasticsearch.properties:/catalog/elasticsearch.properties'
   {% endif %}
   {% if OPENSEARCH_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/opensearch.properties:{{trino_etc_dir}}/catalog/opensearch.properties'
+      - './conf/{{conf_dir}}/catalog/opensearch.properties:/catalog/opensearch.properties'
   {% endif %}
   {% if PINOT_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/pinot.properties:{{trino_etc_dir}}/catalog/pinot.properties'
+      - './conf/{{conf_dir}}/catalog/pinot.properties:/catalog/pinot.properties'
   {% endif %}
   {% if DRUID_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/druid.properties:{{trino_etc_dir}}/catalog/druid.properties'
+      - './conf/{{conf_dir}}/catalog/druid.properties:/catalog/druid.properties'
   {% endif %}
   {% if CLICKHOUSE_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/clickhouse.properties:{{trino_etc_dir}}/catalog/clickhouse.properties'
+      - './conf/{{conf_dir}}/catalog/clickhouse.properties:/catalog/clickhouse.properties'
   {% endif %}
   {% if external['SNOWFLAKE_enable'] | default(false) %}
-      - './conf/{{conf_dir}}/catalog/snowflake.properties:{{trino_etc_dir}}/catalog/snowflake.properties'
+      - './conf/{{conf_dir}}/catalog/snowflake.properties:/catalog/snowflake.properties'
   {% endif %}  
   {% if PROMETHEUS_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/prometheus.properties:{{trino_etc_dir}}/catalog/prometheus.properties'
+      - './conf/{{conf_dir}}/catalog/prometheus.properties:/catalog/prometheus.properties'
   {% endif %}
   {% if LOKI_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/loki.properties:{{trino_etc_dir}}/catalog/loki.properties'
+      - './conf/{{conf_dir}}/catalog/loki.properties:/catalog/loki.properties'
   {% endif %}
   {% if TRINO_with_faker_catalog | default(false) %}
-      - './conf/{{conf_dir}}/catalog/faker.properties:{{trino_etc_dir}}/catalog/faker.properties'
+      - './conf/{{conf_dir}}/catalog/faker.properties:/catalog/faker.properties'
   {% endif %}  
   {% if TRINO_with_tpch_catalog | default(false) %}
-      - './conf/{{conf_dir}}/catalog/tpch.properties:{{trino_etc_dir}}/catalog/tpch.properties'
+      - './conf/{{conf_dir}}/catalog/tpch.properties:/catalog/tpch.properties'
   {% endif %}
   {% if TRINO_with_tpcds_catalog | default(false) %}
-      - './conf/{{conf_dir}}/catalog/tpcds.properties:{{trino_etc_dir}}/catalog/tpcds.properties'
+      - './conf/{{conf_dir}}/catalog/tpcds.properties:/catalog/tpcds.properties'
   {% endif %}
   {% if TRINO_with_memory_catalog | default(false) %}
-      - './conf/{{conf_dir}}/catalog/memory.properties:{{trino_etc_dir}}/catalog/memory.properties'
+      - './conf/{{conf_dir}}/catalog/memory.properties:/catalog/memory.properties'
   {% endif %}
   {% if TRINO_with_jmx_catalog | default(false) %}
-      - './conf/{{conf_dir}}/catalog/jmx.properties:{{trino_etc_dir}}/catalog/jmx.properties'
+      - './conf/{{conf_dir}}/catalog/jmx.properties:/catalog/jmx.properties'
   {% endif %}
   {% if TRINO_with_gsheets_catalog | default(false) %}
-      - './conf/{{conf_dir}}/catalog/gsheets.properties:{{trino_etc_dir}}/catalog/gsheets.properties'
+      - './conf/{{conf_dir}}/catalog/gsheets.properties:/catalog/gsheets.properties'
   {% endif %}    
   {% if TRINO_event_listeners is defined and TRINO_event_listeners | length | default(false) %}
     {% for eventListener in (TRINO_event_listeners.split(',')) %}
@@ -22686,7 +22692,7 @@ services:
   {% endif %}
   {% if TRINO_additional_catalogs is defined and TRINO_additional_catalogs | default(false) %}
     {% for catalogName in (TRINO_additional_catalogs.split(',')) %}
-      - './custom-conf/{{conf_dir}}/catalog/{{catalogName}}.properties:{{trino_etc_dir}}/catalog/{{catalogName}}.properties'
+      - './custom-conf/{{conf_dir}}/catalog/{{catalogName}}.properties:/catalog/{{catalogName}}.properties'
     {% endfor %}
   {% endif %}
   {% if TRINO_additional_plugins is defined and TRINO_additional_plugins | default(false) %}
@@ -22878,7 +22884,7 @@ services:
       - './conf/presto/catalog/minio.properties:{{presto_etc_dir}}/catalog/minio.properties'
   {% endif %}
   {%if HADOOP_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/hdfs.properties:{{trino_etc_dir}}/catalog/hdfs.properties'
+      - './conf/{{conf_dir}}/catalog/hdfs.properties:/catalog/hdfs.properties'
   {% endif %}
   {% if POSTGRESQL_enable | default(false) %}
       - './conf/presto/catalog/postgresql.properties:/usr/lib/presto/etc/catalog/postgresql.properties'
@@ -22916,7 +22922,7 @@ services:
       - './conf/presto/catalog/minio.properties:{{presto_etc_dir}}/catalog/minio.properties'
   {% endif %}
   {%if HADOOP_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/hdfs.properties:{{trino_etc_dir}}/catalog/hdfs.properties'
+      - './conf/{{conf_dir}}/catalog/hdfs.properties:/catalog/hdfs.properties'
   {% endif %}
   {% if POSTGRESQL_enable | default(false) %}
       - './conf/presto/catalog/postgresql.properties:/usr/lib/presto/etc/catalog/postgresql.properties'
