@@ -124,7 +124,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 5005 | 5005 | neodash |
 5010 | 5000 | marquez |
 5011 | 5001 | marquez |
-5020 | 5000 | docker-registry |
+5020 | 5020 | docker-registry |
 5050 | 5050 | zeppelin |
 5051 | 5050 | data-product-portal-nginx |
 5115 | 5115 | arroyo |

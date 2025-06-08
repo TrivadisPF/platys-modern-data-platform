@@ -27998,10 +27998,10 @@ services:
       com.platys.restapi.title: 'Docker Registry REST API'
       com.platys.restapi.url: "http://dataplatform:5020/v2"
     ports:
-      - 5020:5000
+      - 5020:5020
     environment:
       REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY: /var/lib/registry
-      REGISTRY_HTTP_ADDR: 0.0.0.0:5000
+      REGISTRY_HTTP_ADDR: 0.0.0.0:5020
       REGISTRY_HTTP_HEADERS_Access-Control-Allow-Origin: '["http://${PUBLIC_IP}:28307"]'
       REGISTRY_HTTP_HEADERS_Access-Control-Allow-Methods: '[HEAD,GET,OPTIONS,DELETE]'
       REGISTRY_HTTP_HEADERS_Access-Control-Allow-Credentials: '[true]'
@@ -28750,7 +28750,6 @@ services:
     init: true
 {% endif %}   {# PROVISIONING_DATA_enable #}
 
-
 {%if PLATYS_MDP_INIT_enable | default(false) %}
   #  ================================== Platys Modern Data Platform Init Service ========================================== #
   platys-mdp-init:
@@ -28814,6 +28813,39 @@ services:
     command: sleep 30
     restart: "no"
 {% endif %}   {#  PLATYS_MDP_INIT_enable  #}
+
+{%if PLATYS_MDP_DOCKER_DEPLOY_enable | default(false) %}
+  #  ================================== Platys Modern Data Platform Docker Build and Deploy Service ========================================== #
+  platys-mdp-docker-image-deploy:
+    image: docker:latest
+    container_name: platys-mdp-docker-image-deploy
+    hostname: platys-mdp-docker-image-deploy
+    environment:
+      DOCKER_REGISTRY: docker-registry:5020
+    {% if PLATYS_MDP_DOCKER_DEPLOY_env_variables is defined and PLATYS_MDP_DOCKER_DEPLOY_env_variables and PLATYS_MDP_DOCKER_DEPLOY_env_variables | length | default(false) %}
+      {% for envvar in PLATYS_MDP_DOCKER_DEPLOY_env_variables.split(",") %}
+      {{envvar.split('=')[0]}}: "{{envvar.split('=')[1]}}"
+      {% endfor %}
+    {% endif -%}   {#  PLATYS_MDP_DOCKER_DEPLOY_env_variables #}   
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./scripts/platys-mdp-docker-build:/app
+      - ./init/platys-mdp-docker-build:/docker-entrypoint-init.d/   
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    init: true
+    entrypoint: /app/docker-entrypoint.sh
+    restart: "no"
+{% endif %}   {#  PLATYS_MDP_DOCKER_DEPLOY_enable  #}
 
 volumes:
   data-transfer-vol:

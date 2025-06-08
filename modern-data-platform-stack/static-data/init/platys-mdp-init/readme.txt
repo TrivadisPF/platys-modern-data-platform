@@ -1,1 +1,1 @@
-Place a NiFI v2 init script here.
+Place platys-mdp-init scripts here.
