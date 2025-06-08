@@ -22841,12 +22841,17 @@ services:
       - TRINO_LB_EXTERNAL_IP=${PUBLIC_IP}
       - TRINO_LB_PORT=28267
       - TRINO_LB_SCHEME=http
+      - TRINO_LB_MAX_RUNNING_QUERIES=1
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
-      - ./conf/trino-lb/simple-single-trino.yaml:/tmp/trino-lb-config.yaml      
+    {% if TRINO_LB_volume_map_custom_config_file | default(false) %}
+      - ./custom-conf/trino-lb/trino-lb-config.yaml:/tmp/trino-lb-config.yaml
+    {% else %}
+      - ./conf/trino-lb/{{TRINO_LB_config_file_name | default('simple-single-trino.yaml')}}:/tmp/trino-lb-config.yaml
+    {% endif -%}   {#  TRINO_LB_volume_map_custom_config_file #}        
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"

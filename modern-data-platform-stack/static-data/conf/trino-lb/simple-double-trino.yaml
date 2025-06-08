@@ -29,19 +29,37 @@ trinoLb:
     metrics: 9090
 
 trinoClusterGroups:
-  default:
-    # Once a cluster has more running queries than this no further queries will be send to it
-    # They will be queued in trino-lb instead
+  s:
     maxRunningQueries: ${TRINO_LB_MAX_RUNNING_QUERIES}
     trinoClusters:
-      - name: trino-default-1
+      - name: trino-s-1
         endpoint: http://trino-1:8080
         credentials:
           username: trino
+          password:         
+  m:
+    maxRunningQueries: ${TRINO_LB_MAX_RUNNING_QUERIES}
+    trinoClusters:
+      - name: trino-m-1
+        endpoint: http://trino-2:8080
+        credentials:
+          username: trino
           password: 
+  trinoClusterGroupsIgnoreCert: true
+
 # Your Trino probably does not have a globally trusted certificate
 trinoClusterGroupsIgnoreCert: true
 
 # Route all queries to the "default" cluster group
-routers: []
-routingFallback: default
+routers:
+  - trinoRoutingGroupHeader:
+      headerName: X-Trino-Routing-Group
+  - pythonScript:
+      script: |
+        # Tested using Python 3.11
+        from typing import Optional
+
+        def targetClusterGroup(query: str, headers: dict[str, str]) -> Optional[str]:
+          return headers.get('x-trino-client-tags') # Will return None in case the header is not set
+
+routingFallback: m

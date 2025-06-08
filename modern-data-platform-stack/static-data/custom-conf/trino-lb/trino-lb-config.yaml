@@ -11,9 +11,16 @@ trinoLb:
   #persistence:
   #  redis:
   #    endpoint: redis://:redis@redis-1:6379/ 
+  #  redis:
+  #    clusterMode: true
+  #    endpoint: redis://:redis@trino-lb-redis-cluster.trino-lb.svc.cluster.local:6379/
+  # postgres:
+  #   # helm install postgres bitnami/postgresql --version 13.2.18 --set auth.username=trino-lb,auth.password=trino-lb,auth.database=trino_lb
+  #   url: postgres://trino-lb:trino-lb@postgres-postgresql.default.svc.cluster.local/trino_lb
+  #   maxConnections: 10
 
   refreshQueryCounterInterval: 30s # It is low for testing purpose and to get frequent running queries metrics
-
+  
   tracing:
     enabled: ${TRINO_LB_TRACING_ENABLED}
     # helm install jaeger jaegertracing/jaeger --set 'collector.service.otlp.grpc.name=otlp-grpc,collector.service.otlp.grpc.port=4317,collector.service.otlp.http.name=otlp-http,collector.service.otlp.http.port=4318'
@@ -32,7 +39,7 @@ trinoClusterGroups:
   default:
     # Once a cluster has more running queries than this no further queries will be send to it
     # They will be queued in trino-lb instead
-    maxRunningQueries: ${TRINO_LB_MAX_RUNNING_QUERIES}
+    maxRunningQueries: 1
     trinoClusters:
       - name: trino-default-1
         endpoint: http://trino-1:8080
