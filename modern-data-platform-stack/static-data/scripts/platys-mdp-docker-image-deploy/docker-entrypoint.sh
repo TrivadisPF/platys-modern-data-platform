@@ -31,5 +31,8 @@ fi
 # run all the shell scripts in the init folder once
 source /app/run-init
 
+# Mark container as ready
+touch /tmp/ready
+
 # execute command passed in as arguments.
 exec "$@"
