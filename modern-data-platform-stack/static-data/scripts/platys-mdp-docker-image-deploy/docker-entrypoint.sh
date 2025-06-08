@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.
@@ -21,15 +21,15 @@ if [[ "$VERBOSE" == "yes" ]]; then
 fi
 
 # if the DOCKER_REGISTRY is set
-if [[ -v DOCKER_REGISTRY && -n "$DOCKER_REGISTRY" ]]; then
-    apk add --no-cache wait4x 
+if [ -n "$DOCKER_REGISTRY" ]; then
+    apk add --no-cache wait4x
 
     # wait until docker registry is avalable
     wait4x http http://$DOCKER_REGISTRY --insecure-skip-tls-verify --timeout 400s --interval 5s
 fi
 
 # run all the shell scripts in the init folder once
-source run-init
+source /app/run-init
 
 # execute command passed in as arguments.
 exec "$@"
