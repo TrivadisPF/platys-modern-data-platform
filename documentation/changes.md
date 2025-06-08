@@ -45,6 +45,7 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Add Support for writing the Airflow logs to S3 (MinIO) by setting `AIRFLOW_logging_strategy` to `s3`.
  * Add support for external Snowflake
  * Add support for additional Trino connectors: `prometheus`, `jmx`, `opensearch`, `clickhouse`, `gsheets`, `ignite`, `singlestore`, `loki`, `snowflake` and `duckdb`
+ * only create the sub-folders for the enabled services (based on service name) within the `applications`, `init`, `conf`, `custom-conf`, `licenses`, `plugins`, `scripts` and `security` folders.
 
 ### Breaking Changes
 
