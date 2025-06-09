@@ -17,6 +17,8 @@ COPY platys-cookbooks /data/platys-cookbooks
 COPY nyc-film-permits /data/nyc-film-permits
 COPY orion-star /data/orion-star
 COPY duckdb /data/duckdb
+COPY dvdrental /data/dvdrental
+COPY ecommerce /data/ecommerce
 
 # copy the run script and make it executable
 COPY run.sh /usr/local/bin/
