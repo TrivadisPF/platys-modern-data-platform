@@ -18174,6 +18174,7 @@ services:
 
 {% if GRAPHITI_enable | default(false) %}
   #  ================================== Graphiti ========================================== #
+  {% if GRAPHITI_http_server_enabled | default(false) %}
   graphiti:
     image: ghcr.io/gschmutz/graphiti:{{__GRAPHITI_version}}
     platform: linux/amd64    
@@ -18222,7 +18223,49 @@ services:
         ]
       interval: 10s
       timeout: 5s
-      retries: 3    
+      retries: 3
+  {% endif -%}   {#  GRAPHITI_http_server_enabled #}
+
+  {% if GRAPHITI_mcp_server_enabled | default(false) %}
+  graphiti-mcp:
+    image: ghcr.io/gschmutz/graphiti-mcp:{{__GRAPHITI_version}}
+    platform: linux/amd64    
+    hostname: graphiti-mcp
+    container_name: graphiti-mcp
+    labels:
+      com.platys.name: "graphiti"
+      com.platys.description: "Real-Time Knowledge Graphs (MCP)"
+      com.platys.restapi.title: "Graphiti MCP Server"
+      com.platys.restapi.url: "http://dataplatform:28266/sse"
+    depends_on:
+      neo4j-1:
+        condition: service_healthy      
+    ports:
+      - "28266:8000"
+    environment:
+      - OPENAI_API_KEY={{ns.openaiApiKey if ns.openaiApiKey is defined and ns.openaiApiKey and ns.openaiApiKey | length else omit }}
+      - OPENAI_BASE_URL={{ns.openaiBaseUrl if ns.openaiBaseUrl is defined and ns.openaiBaseUrl and ns.openaiBaseUrl | length else omit }}
+      - LLM_TEMPERATURE=0.7
+      - MODEL_NAME={{ns.openaiModelName if ns.openaiModelName is defined and ns.openaiModelName and ns.openaiModelName | length else omit }}
+      - SMALL_MODEL_NAME={{ns.openaiSmallModelName if ns.openaiSmallModelName is defined and ns.openaiSmallModelName and ns.openaiSmallModelName | length else omit }}
+      - NEO4J_URI=bolt://neo4j-1:7687
+      - NEO4J_USER=neo4j
+      - NEO4J_PASSWORD=${PLATYS_NEO4J_PASSWORD:-{{NEO4J_password}}}
+      - PORT=8000
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}   
+  {% endif -%}   {#  GRAPHITI_mcp_server_enabled #}
 {% endif %}   {#  GRAPHITI_enable #}
 
 {% if NEODASH_enable | default(false) %}
@@ -22777,11 +22820,11 @@ services:
       com.platys.name: "trino-gateway"
       com.platys.description: "Trino Gateway"
       com.platys.webui.title: "Trino Gateway"
-      com.platys.webui.url: "http://dataplatform:28266"
+      com.platys.webui.url: "http://dataplatform:28270"
       com.platys.restapi.title: "Trino Gateway API"
-      com.platys.restapi.url: "http://dataplatform:28266/entity/GATEWAY_BACKEND"
+      com.platys.restapi.url: "http://dataplatform:28270/entity/GATEWAY_BACKEND"
     ports:
-      - "28266:8080"
+      - "28270:8080"
     environment:
       - RULES_ENGINE_ENABLED={{TRINO_GATEWAY_rules_engine_enabled | default('false') }}
       - RULES_TYPE={{TRINO_GATEWAY_rules_type if TRINO_GATEWAY_rules_type is defined and TRINO_GATEWAY_rules_type | length else '' }}
