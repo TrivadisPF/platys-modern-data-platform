@@ -16,6 +16,8 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Trino Gateway
  * Trino LB (Load Balancer)
  * Platys MDP Docker Deploy
+ * Presidio Analyzer
+ * Presidio Anonymizer
  
 ### Version upgrades
 
