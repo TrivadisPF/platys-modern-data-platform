@@ -15276,7 +15276,7 @@ services:
       com.platys.webui.url: "http://dataplatform:6006"
     ports:
       - "6006:6006"
-      - "4318:4317"
+      - "4321:4317"
     environment:
       PHOENIX_SQL_DATABASE_URL: postgresql://postgres:abc123!@postgresql:5432/postgres
    {%if use_timezone | default(false) %} 
@@ -27430,14 +27430,18 @@ services:
       com.platys.restapi.title: "Jaeger Zipkin API"
       com.platys.restapi.url: "http://dataplatform:{{JAEGER_zipkin_port}}/api/v2/spans"
     ports:
-      - 16686:16686
-      - 14271:14271
-      - 5778:5778
-      - 14250:14250
-      - 6831:6831/udp
-      - 6832:6832/udp
+      - 16686:16686     # Jaeger UI
+      - 14250:14250     # Jaeger GRPC
+      - 14271:14271     # Health check
+      - 5778:5778       # Jaeger Config Service
+      - 14268:14268     # OTLP HTTP
+      - 4319:4317       # OTLP gRPC receiver
+      - 4320:4318       # OTLP Protobuf or OTLP JSON      
+      - 6831:6831/udp   # Jaeger Thrift Compact
+      - 6832:6832/udp   # Jaeger Thrift Binary
       - {{JAEGER_zipkin_port}}:{{JAEGER_zipkin_port}}
     environment:
+      COLLECTOR_OLTP_ENABLED: true
       COLLECTOR_ZIPKIN_HOST_PORT: ":{{JAEGER_zipkin_port}}"
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}

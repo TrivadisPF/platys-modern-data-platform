@@ -117,7 +117,10 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 4200 | 4200 | cribl-master |
 4222 | 4222 | nats-1 |
 4317 | 4317 | otel-collector |
-4318 | 4317 | arize-phoenix |
+4318 | 4318 | otel-collector |
+4319 | 4317 | jaeger |
+4320 | 4318 | jaeger |
+4321 | 4317 | arize-phoenix |
 4466 | 4466 | curity |
 4566 | 4566 | risingwave |
 5000 | 5000 | amundsenfrontend |
@@ -349,7 +352,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 11434 | 11434 | ollama |
 12222 | 2222 | risingwave |
 13133 | 13133 | otel-collector |
-14250 | 14250 | jaeger (model.proto port)
+14250 | 14250 | jaeger (model.proto port) |
+14268 | 14268 | jaeger (otlp http port) |
 14271 | 14271 | jaeger (admin port) |
 14040 | 4040 | jupyter (spark ui) |
 14041 | 4041 | jupyter (spark ui) |
