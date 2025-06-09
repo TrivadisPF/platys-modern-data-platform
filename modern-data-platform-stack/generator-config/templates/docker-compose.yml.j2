@@ -119,6 +119,9 @@ networks:
 
 {% set __MCP_TRINO_version = MCP_TRINO_version | default('latest') -%}
 
+{% set __PRESIDIO_ANALYZER_version = PRESIDIO_ANALYZER_version | default('latest') -%}
+{% set __PRESIDIO_ANONYMIZER_version = PRESIDIO_ANONYMIZER_version | default('latest') -%}
+
 {% set __WHISPER_version = WHISPER_version | default('latest') -%}
 
 {% set __NLLB_version = NLLB_version | default('latest') -%}
@@ -826,6 +829,8 @@ networks:
   {% set MCP_TOOLBOX_enable = false -%}
   {% set CENTRALMIND_GATEWAY_enable = false -%}
   {% set MCP_TRINO_enable = false -%}
+  {% set PRESIDIO_ANALYZER_enable = false -%}
+  {% set PRESIDIO_ANONYMIZER_enable = false -%}
   {% set WHISPER_enable = false -%}
   {% set NLLB_enable = false -%}
   {% set HIVE_enable = false -%}
@@ -941,8 +946,9 @@ networks:
   {% set INVANA_ENGINE_enable = false -%}
   {% set INVANA_STUDIO_enable = false -%}
   {% set NEO4J_enable = false -%}
-  {% set GRAPHITI_enable = false -%}
+  {% set MCP_NEO4J_enable = false -%}
   {% set NEODASH_enable = false -%}
+  {% set GRAPHITI_enable = false -%}
   {% set QUINE_enable = false -%}
   {% set MEMGRAPH_enable = false -%}
   {% set ARCADEDB_enable = false -%}
@@ -7088,6 +7094,64 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  MCP_TRINO_enable #}
+
+{% if PRESIDIO_ANALYZER_enable | default(false) %}
+  #  ================================== Presidio Analyzer ========================================== #
+  presidio-analyzer:
+    image: mcr.microsoft.com/presidio-analyzer:{{__PRESIDIO_ANALYZER_version}}
+    container_name: presidio-analyzer
+    hostname: presidio-analyzer
+    labels:
+      com.platys.name: 'presidio-analyzer'
+      com.platys.description: "Presidio Analyzer"
+      com.platys.restapi.title: "Presidio Analyzer API"
+      com.platys.restapi.url: "http://dataplatform:28273"
+    ports:
+      - "28273:3000"
+    {%if use_timezone | default(false) %}
+    environment:
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  PRESIDIO_ANALYZER_enable #}
+
+{% if PRESIDIO_ANONYMIZER_enable | default(false) %}
+  #  ================================== Presidio Anonymizer ========================================== #
+  presidio-anonymizer:
+    image: mcr.microsoft.com/presidio-anonymizer:{{__PRESIDIO_ANONYMIZER_version}}
+    container_name: presidio-anonymizer
+    hostname: presidio-anonymizer
+    labels:
+      com.platys.name: 'presidio-anonymizer'
+      com.platys.description: "Presidio Anonymizer"
+      com.platys.restapi.title: "Presidio Anonymizer API"
+      com.platys.restapi.url: "http://dataplatform:28274"
+    ports:
+      - "28274:3000"
+    {%if use_timezone | default(false) %}
+    environment:
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  PRESIDIO_ANONYMIZER_enable #}
 
 {% if WHISPER_enable | default(false) %}
   #  ================================== Whisper ========================================== #
