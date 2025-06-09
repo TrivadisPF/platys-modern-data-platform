@@ -789,6 +789,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28268 | 8443 | trino-lb (https) |
 28269 | 9090 | trino-lb (prometheus) |
 28270 | 8080 | trino-gateway |
+28271 | 8000 | mcp-neo4j-cypher |
+28272 | 8000 | mcp-neo4j-memory |
 
 ## Ports > 28500
 

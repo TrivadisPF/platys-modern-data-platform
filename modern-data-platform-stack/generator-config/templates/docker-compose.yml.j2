@@ -384,6 +384,9 @@ networks:
   {% set __NEO4J_version = NEO4J_5_version -%}
 {% endif -%}
 
+{% set __MCP_NEO4J_CYPHER_version = MCP_NEO4J_CYPHER_version | default('latest') -%}
+{% set __MCP_NEO4J_MEMORY_version = MCP_NEO4J_MEMORY_version | default('latest') -%}
+
 {% set __GRAPHITI_version = GRAPHITI_version | default('latest') -%}
 
 {% set __NEODASH_version = NEODASH_version | default('latest') -%}
@@ -18171,6 +18174,67 @@ services:
         retries: 10
   {% endfor %}  {#  for NEO4J_nodes #}
 {% endif %}   {#  NEO4J_enable #}
+
+{% if MCP_NEO4J_enable | default(false) %}
+  #  ================================== MCP Neo4J ========================================== #
+  mcp-neo4j-cypher:
+    image: mcp/neo4j-cypher:{{__MCP_NEO4J_CYPHER_version}}
+    container_name: mcp-neo4j-cypher
+    hostname: mcp-neo4j-cypher
+    labels:
+      com.platys.name: "mcp-neo4j"
+      com.platys.description: "MCP Server for Neo4J (Cypher)"
+      com.platys.restapi.title: "MCP Server for Neo4J (Cypher)"
+      com.platys.restapi.url: "http://dataplatform:28271"
+    ports:
+      - "28271:8000"
+    environment:
+      NEO4J_URL: bolt://neo4j-1:7687
+      NEO4J_USERNAME: neo4j
+      NEO4J_PASSWORD: ${PLATYS_NEO4J_PASSWORD:-{{NEO4J_password}}}
+    {% if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+
+  mcp-neo4j-memory:
+    image: mcp/neo4j-memory:{{__MCP_NEO4J_MEMORY_version}}
+    container_name: mcp-neo4j-memory
+    hostname: mcp-neo4j-memory
+    labels:
+      com.platys.name: "mcp-neo4j"
+      com.platys.description: "MCP Server for Neo4J (Memory)"
+      com.platys.restapi.title: "MCP Server for Neo4J (Memory)"
+      com.platys.restapi.url: "http://dataplatform:28272"
+    ports:
+      - "28272:8000"
+    environment:
+      NEO4J_URL: bolt://neo4j-1:7687
+      NEO4J_USERNAME: neo4j
+      NEO4J_PASSWORD: ${PLATYS_NEO4J_PASSWORD:-{{NEO4J_password}}}
+    {% if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}    
+{% endif %}   {#  MCP_NEO4J_enable #}
 
 {% if GRAPHITI_enable | default(false) %}
   #  ================================== Graphiti ========================================== #
