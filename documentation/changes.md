@@ -39,7 +39,37 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Update `flowise` to `3.0.1`
  * Update `trino` to `476`
  * Update `risingwave` to `v2.4.1`
-
+ * Update `confluent-platform` to `7.9.1`
+ * Update `apicurio-registry` to `2.6.11.Final`
+ * Update `materialize` to `v0.146.1`
+ * Update `arroyo` to `0.14.0`
+ * Update `sqlflow` to `0.6.0`
+ * Update `timeplus-enterprise` to `2.8.1`
+ * Update `timeplus-proton` to `1.6.16-r`
+ * Update `burrow` to `v1.9.4`
+ * Update `debezium-server` to `3.0.0.Final`
+ * Update `tika` to `3.2.0.0-full`
+ * Update `opa` to `1.6.0-dev`
+ * Update `enterprise-opa` to `1.41.1-23-debug`
+ * Update `datahub` to `v1.1.0`
+ * Update `openmetadata` to `1.7.1`
+ * Update `amundsen-frontend` to `4.3.0`
+ * Update `amundsen-search` to `4.2.0`
+ * Update `amundsen-metadata` to `3.13.0`
+ * Update `data-product-portal` to `0.3.1`
+ * Update `marquez` to `0.51.1`
+ * Update `ckan` to `2.10`
+ * Update `ckan-datapusher` to `0.0.21`
+ * Update `mage-ai` to `0.9.76`
+ * Update `kestra` to `v0.22.13`
+ * Update `mlfow` to `v2.22.1`
+ * Update `dataiku` to `13.4.1`
+ * Update `tyk-gateway` to `v5.7`
+ * Update `tykio/tyk-pump-docker-pub` to `v1.12`
+ * Update `kong-gateway` to `3.10`
+ * Update `s3fs` to `1.95`
+ * Update `spring-boot-admin` to `3.4.1`
+ 
 ### Enhancements
 
  * Additional data can be copied into `/data-transfer` folder when using the `PROVISIONING_DATA_enable` functionality by specifying the folder in `PROVISIONING_DATA_additional_data_folder` setting
