@@ -22325,6 +22325,11 @@ services:
     {% set trino_etc_dir = '/etc/trino' %}
     {% set conf_dir = 'trino' %}
   {% endif -%}   {#  TRINO_edition #}
+  {% if (TRINO_install | lower) == 'cluster'  %}
+    {% set deployment_type = 'cluster' %}
+  {% else %}
+    {% set deployment_type = 'single' %}
+  {% endif %}
     hostname: trino-{{loop.index}}
     container_name: trino-{{loop.index}}
     labels:
@@ -22464,15 +22469,9 @@ services:
   {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
-  {% if (TRINO_install | lower) == 'cluster'  %}
-      - ./conf/{{conf_dir}}/cluster/coordinator.config{{'-dp' if TRINO_starburstdata_enable_data_product is defined and TRINO_starburstdata_enable_data_product else ''}}.properties:{{trino_etc_dir}}/config.properties
-      - ./conf/{{conf_dir}}/cluster/node.properties:{{trino_etc_dir}}/node.properties
-      - ./conf/{{conf_dir}}/cluster/log-debug.properties:{{trino_etc_dir}}/log.properties
-  {% else %}
-      - ./conf/{{conf_dir}}/single/config{{'-dp' if TRINO_starburstdata_enable_data_product is defined and TRINO_starburstdata_enable_data_product else ''}}{{'-auth' if TRINO_auth_enabled}}.properties:{{trino_etc_dir}}/config.properties
-      - ./conf/{{conf_dir}}/single/node.properties:{{trino_etc_dir}}/node.properties
-      - ./conf/{{conf_dir}}/single/log-debug.properties:{{trino_etc_dir}}/log.properties
-  {% endif %}
+      - ./conf/{{conf_dir}}/{{deployment_type}}/coordinator.config{{'-dp' if TRINO_starburstdata_enable_data_product is defined and TRINO_starburstdata_enable_data_product else ''}}.properties:{{trino_etc_dir}}/config.properties
+      - ./conf/{{conf_dir}}/{{deployment_type}}/node.properties:{{trino_etc_dir}}/node.properties
+      - ./conf/{{conf_dir}}/{{deployment_type}}/log-debug.properties:{{trino_etc_dir}}/log.properties
   {%if MINIO_enable or external['S3_enable'] | default(false) %}
     {%if HIVE_METASTORE_enable | default(false) %}
       - './conf/{{conf_dir}}/catalog/minio.properties:/catalog/minio.properties'
@@ -22605,6 +22604,12 @@ services:
   {% endif %}
   {% if TRINO_access_control_enabled and ((TRINO_access_control_method | lower) == 'file' or (TRINO_access_control_method | lower) == 'opa') | default(false) %}
       - ./security/{{conf_dir}}/access-control-{{TRINO_access_control_method | lower}}.properties:{{trino_etc_dir}}/access-control.properties
+  {% endif %}
+  {% if TRINO_resource_groups_enabled and ((TRINO_resource_groups_enabled | lower) == 'file' or (TRINO_resource_groups_enabled | lower) == 'opa') | default(false) %}
+      - ./conf/{{conf_dir}}/{{deployment_type}}/resource-groups.properties:{{trino_etc_dir}}/resource-groups.properties
+    {% if TRINO_resource_groups_type | lower == 'file'  | default(false) %}
+      - ./custom-conf/{{conf_dir}}/resource-groups.json:{{trino_etc_dir}}/resource-groups.json
+    {% endif %}    
   {% endif %}
   {% if TRINO_additional_catalogs is defined and TRINO_additional_catalogs | default(false) %}
     {% for catalogName in (TRINO_additional_catalogs.split(',')) %}
@@ -22755,9 +22760,9 @@ services:
   {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
-      - ./conf/{{conf_dir}}/cluster/worker.config.properties:{{trino_etc_dir}}/config.properties
-      - ./conf/{{conf_dir}}/cluster/node.properties:{{trino_etc_dir}}/node.properties
-      - ./conf/{{conf_dir}}/cluster/log-debug.properties:{{trino_etc_dir}}/log.properties
+      - ./conf/{{conf_dir}}/{{deployment_type}}/worker.config.properties:{{trino_etc_dir}}/config.properties
+      - ./conf/{{conf_dir}}/{{deployment_type}}/node.properties:{{trino_etc_dir}}/node.properties
+      - ./conf/{{conf_dir}}/{{deployment_type}}/log-debug.properties:{{trino_etc_dir}}/log.properties
   {%if MINIO_enable or external['S3_enable'] | default(false) %}
     {%if HIVE_METASTORE_enable | default(false) %}
       - './conf/{{conf_dir}}/catalog/minio.properties:/catalog/minio.properties'
@@ -22887,6 +22892,12 @@ services:
   {% endif %}
   {% if TRINO_access_control_enabled and ((TRINO_access_control_method | lower) == 'file' or (TRINO_access_control_method | lower) == 'opa') | default(false) %}
       - ./security/{{conf_dir}}/access-control-{{TRINO_access_control_method | lower}}.properties:{{trino_etc_dir}}/access-control.properties
+  {% endif %}
+  {% if TRINO_resource_groups_enabled and ((TRINO_resource_groups_enabled | lower) == 'file' or (TRINO_resource_groups_enabled | lower) == 'opa') | default(false) %}
+      - ./conf/{{conf_dir}}/{{deployment_type}}/resource-groups.properties:{{trino_etc_dir}}/resource-groups.properties
+    {% if TRINO_resource_groups_type | lower == 'file'  | default(false) %}
+      - ./custom-conf/{{conf_dir}}/resource-groups.json:{{trino_etc_dir}}/resource-groups.json
+    {% endif %}    
   {% endif %}
   {% if TRINO_additional_catalogs is defined and TRINO_additional_catalogs | default(false) %}
     {% for catalogName in (TRINO_additional_catalogs.split(',')) %}
