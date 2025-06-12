@@ -22616,9 +22616,11 @@ services:
       - ./security/{{conf_dir}}/access-control-{{TRINO_access_control_method | lower}}.properties:{{trino_etc_dir}}/access-control.properties
   {% endif %}
   {% if TRINO_resource_groups_enabled | default(false) %}
-      - ./conf/{{conf_dir}}/{{deployment_type}}/resource-groups.properties:{{trino_etc_dir}}/resource-groups.properties
     {% if TRINO_resource_groups_type | lower == 'file'  | default(false) %}
+      - ./conf/{{conf_dir}}/{{deployment_type}}/resource-groups-FILE.properties:{{trino_etc_dir}}/resource-groups.properties
       - ./custom-conf/{{conf_dir}}/resource-groups/resource-groups.json:{{trino_etc_dir}}/resource-groups.json
+    {% else %}    
+      - ./conf/{{conf_dir}}/{{deployment_type}}/resource-groups-DB.properties:{{trino_etc_dir}}/resource-groups.properties
     {% endif %}    
   {% endif %}
   {% if TRINO_additional_catalogs is defined and TRINO_additional_catalogs | default(false) %}
@@ -22764,6 +22766,16 @@ services:
   {% endif %}
   {% if OPA_enable | default(false) %}
       OPA_ENDPOINT: http://opa:8181
+  {% endif %}
+  {% if TRINO_resource_groups_enabled | default(false) %}
+    {% if TRINO_resource_groups_type | lower == 'db'  | default(false) %}
+      RESOURCE_GROUPS_DB_TYPE: postgresql 
+      RESOURCE_GROUPS_DB_HOST: postgresql
+      RESOURCE_GROUPS_DB_PORT: 5432
+      RESOURCE_GROUPS_DB_DATABASE: postgres
+      RESOURCE_GROUPS_DB_USER: postgres
+      RESOURCE_GROUPS_DB_PASSWORD: {{TRINO_GATEWAY_postgresql_password | default('abc123!') }}
+    {% endif %}    
   {% endif %}  
   {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
@@ -22904,9 +22916,11 @@ services:
       - ./security/{{conf_dir}}/access-control-{{TRINO_access_control_method | lower}}.properties:{{trino_etc_dir}}/access-control.properties
   {% endif %}
   {% if TRINO_resource_groups_enabled | default(false) %}
-      - ./conf/{{conf_dir}}/{{deployment_type}}/resource-groups.properties:{{trino_etc_dir}}/resource-groups.properties
     {% if TRINO_resource_groups_type | lower == 'file'  | default(false) %}
+      - ./conf/{{conf_dir}}/{{deployment_type}}/resource-groups-FILE.properties:{{trino_etc_dir}}/resource-groups.properties
       - ./custom-conf/{{conf_dir}}/resource-groups/resource-groups.json:{{trino_etc_dir}}/resource-groups.json
+    {% else %}    
+      - ./conf/{{conf_dir}}/{{deployment_type}}/resource-groups-DB.properties:{{trino_etc_dir}}/resource-groups.properties
     {% endif %}    
   {% endif %}
   {% if TRINO_additional_catalogs is defined and TRINO_additional_catalogs | default(false) %}
