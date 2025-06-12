@@ -1,24 +1,54 @@
 serverConfig:
   node.environment: test
   http-server.http.port: 8080
+  log.levels-file: ${ENV:LOG_LEVELS_FILE}
+  http-server.process-forwarded: true
 
 routingRules:
-  rulesEngineEnabled: False
-  #rulesRefreshPeriod: 60s   # default rule refresh period
-  rulesType: [FILE | EXTERNAL]
-  # rulesConfigPath: "src/main/resources/rules/routing_rules.yml"
-  # rulesExternalConfiguration:
-  #   urlPath: 
-  #   excludeHeaders:
-  #     - 'Authorization'
-  #     - 'Accept-Encoding'
+  rulesEngineEnabled: ${ENV:RULES_ENGINE_ENABLED}
+  rulesType: ${ENV:RULES_TYPE}
+  rulesConfigPath: ${ENV:RULES_CONFIG_PATH}
+  rulesExternalConfiguration:
+    urlPath: ${ENV:RULES_URL_PATH}
+    excludeHeaders:
+      - 'Authorization'
+      - 'Accept-Encoding'
 
 dataStore:
-  jdbcUrl: jdbc:postgresql://postgres:5432/trino_gateway_db
-  user: trino_gateway_db_admin
-  password: P0stG&es
+  jdbcUrl: jdbc:postgresql://${ENV:POSTGRES_HOST}:5432/${ENV:POSTGRES_DB}
+  user: ${ENV:POSTGRES_USER}
+  password: ${ENV:POSTGRES_PASSWORD}
   driver: org.postgresql.Driver
   queryHistoryHoursRetention: 24
+  runMigrationsEnabled: true
 
 clusterStatsConfiguration:
-  monitorType: INFO_API
+  monitorType: ${ENV:MONITOR_TYPE}
+
+# This can be adjusted based on the coordinator state
+monitor:
+  taskDelay: ${ENV:TASK_DELAY}       # interval for retrieving values from cluster
+  # queryTimeout: 10s
+  # explicitPrepare: true|false
+  # metricsEndpoint: /metrics
+  #metricMinimumValues:
+  #  trino_metadata_name_DiscoveryNodeManager_ActiveNodeCount: 1
+  #metricMaximumValues:
+  #  io_airlift_stats_name_GcMonitor_MajorGc_FiveMinutes_count: 2
+
+requestAnalyzerConfig:
+  analyzeRequest: ${ENV:ANALYZE_REQUEST}
+
+#uiConfiguration:
+#  disablePages:
+#    - 'routing-rules'  
+
+routing:
+  addXForwardedHeaders: false  
+
+backendState:
+  username: "trino"
+  password: 
+
+proxyResponseConfiguration:
+  responseSize: 32MB  
