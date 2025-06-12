@@ -22464,6 +22464,16 @@ services:
       OPA_ENDPOINT: http://opa:8181
       OPA_NAMESPACE: {{TRINO_opa_namespace if TRINO_opa_namespace is defined and TRINO_opa_namespace and TRINO_opa_namespace | length else 'trino'}}
   {% endif %}
+  {% if TRINO_resource_groups_enabled | default(false) %}
+    {% if TRINO_resource_groups_type | lower == 'db'  | default(false) %}
+      RESOURCE_GROUPS_DB_TYPE: postgresql 
+      RESOURCE_GROUPS_DB_HOST: postgresql
+      RESOURCE_GROUPS_DB_PORT: 5432
+      RESOURCE_GROUPS_DB_DATABASE: postgres
+      RESOURCE_GROUPS_DB_USER: postgres
+      RESOURCE_GROUPS_DB_PASSWORD: {{TRINO_GATEWAY_postgresql_password | default('abc123!') }}
+    {% endif %}    
+  {% endif %}
   {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
   {% endif -%}   {#  use_timezone #}
@@ -22605,7 +22615,7 @@ services:
   {% if TRINO_access_control_enabled and ((TRINO_access_control_method | lower) == 'file' or (TRINO_access_control_method | lower) == 'opa') | default(false) %}
       - ./security/{{conf_dir}}/access-control-{{TRINO_access_control_method | lower}}.properties:{{trino_etc_dir}}/access-control.properties
   {% endif %}
-  {% if TRINO_resource_groups_enabled and ((TRINO_resource_groups_enabled | lower) == 'file' or (TRINO_resource_groups_enabled | lower) == 'opa') | default(false) %}
+  {% if TRINO_resource_groups_enabled | default(false) %}
       - ./conf/{{conf_dir}}/{{deployment_type}}/resource-groups.properties:{{trino_etc_dir}}/resource-groups.properties
     {% if TRINO_resource_groups_type | lower == 'file'  | default(false) %}
       - ./custom-conf/{{conf_dir}}/resource-groups.json:{{trino_etc_dir}}/resource-groups.json
@@ -22893,7 +22903,7 @@ services:
   {% if TRINO_access_control_enabled and ((TRINO_access_control_method | lower) == 'file' or (TRINO_access_control_method | lower) == 'opa') | default(false) %}
       - ./security/{{conf_dir}}/access-control-{{TRINO_access_control_method | lower}}.properties:{{trino_etc_dir}}/access-control.properties
   {% endif %}
-  {% if TRINO_resource_groups_enabled and ((TRINO_resource_groups_enabled | lower) == 'file' or (TRINO_resource_groups_enabled | lower) == 'opa') | default(false) %}
+  {% if TRINO_resource_groups_enabled | default(false) %}
       - ./conf/{{conf_dir}}/{{deployment_type}}/resource-groups.properties:{{trino_etc_dir}}/resource-groups.properties
     {% if TRINO_resource_groups_type | lower == 'file'  | default(false) %}
       - ./custom-conf/{{conf_dir}}/resource-groups.json:{{trino_etc_dir}}/resource-groups.json
