@@ -22301,7 +22301,7 @@ services:
 {% endif %}   {#  enable #}
 
 {% if TRINO_enable | default(false) %}
-  {% for numClusters in range(TRINO_clusters | default(1) ) %}  
+  {% for numCluster in range(TRINO_clusters | default(1) ) %}  
     {% set external_http_port = 28082 + loop.index - 1 %}
     {% set external_https_port = 28087 + loop.index - 1 %}
     {% set ns2 = namespace(eventListnerPropertyFiles='') %}
@@ -22650,8 +22650,8 @@ services:
       retries: 5
 
   {% if (TRINO_install | lower) == 'cluster'  %}
-    {% for numWorkers in range(TRINO_workers | default(1) ) %}
-  trino-worker-{{loop.index}}:
+    {% for numWorker in range(TRINO_workers | default(1) ) %}
+  trino-worker-{{numCluster}}{{loop.index}}:
   {% if (TRINO_edition | lower) == 'starburstdata'  %}
     image: starburstdata/starburst-enterprise:{{__STARBURSTDATA_version}}
     {% set trino_etc_dir = '/etc/starburst' %}
@@ -22661,13 +22661,13 @@ services:
     {% set trino_etc_dir = '/etc/trino' %}
     {% set conf_dir = 'trino' %}
   {% endif -%}   {#  TRINO_edition #}
-    hostname: trino-worker-{{loop.index}}
-    container_name: trino-worker-{{loop.index}}
+    hostname: trino-worker-{{numCluster}}{{loop.index}}
+    container_name: trino-worker-{{numCluster}}{{loop.index}}
     labels:
       com.platys.name: "trino"
       com.platys.description: "SQL Virtualization Engine"
     environment:
-      COORDINATOR_HOST: trino-{{loop.parent.index}}
+      COORDINATOR_HOST: trino-{{numCluster}}
       CATALOG_MANAGEMENT: {{TRINO_catalog_management | default('static') }}
       CATALOG_CONFIG_DIR: '/catalog'
       #CATALOG_STORE: {{TRINO_catalog_store | default('file') }}
