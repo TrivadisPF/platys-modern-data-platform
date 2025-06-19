@@ -1,4 +1,4 @@
-# Uising the Trino Gateway
+# Using the Trino Gateway
 
 ```
 platys init --enable-services TRINO,TRINO_CLI,TRINO_GATEWAY,POSTGRESQL, -s trivadis/platys-modern-data-platform -w develop -f
@@ -155,7 +155,7 @@ Let's execute a batch query
 
 `./data-transfer/batch.sql`
 
-```
+```sql
 SELECT r.*, node_id FROM system.runtime.nodes, 
 (SELECT
   l_orderkey,
@@ -193,8 +193,9 @@ in the log for the trino-gateway you will see that it has been routed to `trino-
 2025-06-19T07:32:30.367Z	INFO	pool-4-thread-1	io.trino.gateway.ha.clustermonitor.ActiveClusterMonitor	Getting stats for all active clusters
 2025-06-19T07:32:31.096Z	INFO	pool-4-thread-1	io.trino.gateway.ha.router.RoutingManager	backend trino-1 isHealthy HEALTHY
 2025-06-19T07:34:07.004Z	INFO	http-worker-64	io.trino.gateway.ha.handler.RoutingTargetHandler	Rerouting [http://192.168.147.3:8080/v1/statement]--> [http://10.158.124.12:28083/v1/statement]
-```bash
+```
 
+Now execute a "dashboard" query:
 
 ```bash
 docker exec -ti trino-cli trino --server http://trino-gateway:8080  --user trino --execute "select node_id, c.nof from system.runtime.nodes, (SELECT count(*) nof FROM tpch.sf100.customer) as c" --client-info "fast-lane" --client-tags="fast-lane" --source="dashboard"
