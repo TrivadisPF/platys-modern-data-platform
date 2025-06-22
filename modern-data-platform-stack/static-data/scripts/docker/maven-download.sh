@@ -93,7 +93,7 @@ maven_dep() {
             mv "$DOWNLOAD_FILE" $MAVEN_DEP_DESTINATION || true
             ;;
         "coursier" )       
-            ./cs fetch --classpath $MVN_COORD | tr ':' '\n' | xargs -I {} cp {} $MAVEN_DEP_DESTINATION || true
+            ./cs fetch --repository https://packages.confluent.io/maven/ --classpath $MVN_COORD | tr ':' '\n' | xargs -I {} cp {} $MAVEN_DEP_DESTINATION || true
             ;;
       esac
 

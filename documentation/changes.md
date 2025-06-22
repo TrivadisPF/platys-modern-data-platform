@@ -78,6 +78,7 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Add support for external Snowflake
  * Add support for additional Trino connectors: `prometheus`, `jmx`, `opensearch`, `clickhouse`, `gsheets`, `ignite`, `singlestore`, `loki`, `snowflake` and `duckdb`
  * only create the sub-folders for the enabled services (based on service name) within the `applications`, `conf`, `container-volume`, `custom-conf`, `licenses`, `init`, `plugins`, `scripts` and `security` folders.
+ * Maven dependency download now also supports downloading transitive dependency (using strategy `coursier`). Currently only used with Flink.
 
 ### Breaking Changes
 
