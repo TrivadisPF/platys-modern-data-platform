@@ -3,7 +3,7 @@ INIT_DIR="/opt/sql-client/init"
 
 if [ ${FLINK_INSTALL_MAVEN_DEP} ]
 then
-  /platys-scripts/maven-download.sh central ${FLINK_INSTALL_MAVEN_DEP} /opt/flink/lib
+  /platys-scripts/maven-download.sh central ${FLINK_INSTALL_MAVEN_DEP} /opt/flink/lib coursier
 fi
 
 if [ ${FLINK_INSTALL_FILE_DEP} ]
