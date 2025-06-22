@@ -7,7 +7,7 @@
 #     - Repository (central or confluent)
 #     - Maven Coordiantes
 #     - Download destination
-#     - Download strategy (using curl, wget or python)
+#     - Download strategy (using curl, wget, python or coursier)
 # Author: Guido Schmutz <https://github.com/gschmutz>
 #
 set -e
@@ -52,6 +52,9 @@ maven_dep() {
     case $DOWNLOAD_STRATEGY in
         "python" ) shift
             pip install requests
+    case $DOWNLOAD_STRATEGY in
+        "coursier" ) shift
+            curl -fLo cs https://git.io/coursier-cli-linux && chmod +x cs   
     esac
 
     # Set IFS to a comma
@@ -78,16 +81,21 @@ maven_dep() {
       case $DOWNLOAD_STRATEGY in
         "curl" )
             curl -sfSL -o "$DOWNLOAD_FILE" "$DOWNLOAD_URL" || true
+            mv "$DOWNLOAD_FILE" $MAVEN_DEP_DESTINATION || true
             ;;
         "wget" )
             wget -q --show-progress --no-check-certificate -O "$DOWNLOAD_FILE" "$DOWNLOAD_URL" || true
+            mv "$DOWNLOAD_FILE" $MAVEN_DEP_DESTINATION || true
             ;;            
         "python" )
             download_file_using_python "$DOWNLOAD_FILE" "$DOWNLOAD_URL" || true
+            mv "$DOWNLOAD_FILE" $MAVEN_DEP_DESTINATION || true
+            ;;
+        "coursier" )       
+            ./cs fetch --classpath $MVN_COORD | tr ':' '\n' | xargs -I {} cp {} $MAVEN_DEP_DESTINATION || true
             ;;
       esac
 
-      mv "$DOWNLOAD_FILE" $MAVEN_DEP_DESTINATION || true
     done
 }
 
