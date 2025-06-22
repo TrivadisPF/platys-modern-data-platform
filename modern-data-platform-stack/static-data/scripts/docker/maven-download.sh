@@ -52,9 +52,10 @@ maven_dep() {
     case $DOWNLOAD_STRATEGY in
         "python" ) shift
             pip install requests
-    case $DOWNLOAD_STRATEGY in
+            ;;
         "coursier" ) shift
-            curl -fLo cs https://git.io/coursier-cli-linux && chmod +x cs   
+            curl -fLo cs https://git.io/coursier-cli-linux && chmod +x cs
+            ;;   
     esac
 
     # Set IFS to a comma
