@@ -8116,6 +8116,7 @@ services:
     ports:
       - "28142:8080"
     environment:
+      - SKIP_ELASTICSEARCH_CHECK=false
       - DATAHUB_SERVER_TYPE={{DATAHUB_server_type | default('quickstart') }}
       - DATAHUB_TELEMETRY_ENABLED={{DATAHUB_telemetry_enabled | default(false)}}
       - DATAHUB_UPGRADE_HISTORY_KAFKA_CONSUMER_GROUP_ID=generic-duhe-consumer-job-client-gms
@@ -8167,12 +8168,22 @@ services:
       - MCE_CONSUMER_ENABLED=true
     {% endif -%}   {#  not DATAHUB_mce_consumer_standalone #}
       - METADATA_SERVICE_AUTH_ENABLED=false
+      - JAVA_TOOL_OPTIONS=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5001
+      - BOOTSTRAP_SYSTEM_UPDATE_WAIT_FOR_SYSTEM_UPDATE=false
+      - SEARCH_SERVICE_ENABLE_CACHE=false
+      - LINEAGE_SEARCH_CACHE_ENABLED=false
+      - SHOW_BROWSE_V2=true
+      - ER_MODEL_RELATIONSHIP_FEATURE_ENABLED=false
+      - THEME_V2_DEFAULT=true
+      - THEME_V2_TOGGLEABLE=true
+      - SHOW_NAV_BAR_REDESIGN=true   
+      - PLATFORM_BROWSE_V2=true   
       - AUTH_POLICIES_ENABLED={{DATAHUB_auth_policies_enabled | lower | default(false)}}
       - PE_CONSUMER_ENABLED=true
       - UI_INGESTION_ENABLED={{DATAHUB_ui_ingestion_enabled | lower | default(false)}}
       - UI_INGESTION_DEFAULT_CLI_VERSION={{__DATAHUB_version}}
       - DATAHUB_ANALYTICS_ENABLED={{DATAHUB_analytics_enabled | lower | default(false)}}
-      - THEME_V2_DEFAULT=true
+
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
