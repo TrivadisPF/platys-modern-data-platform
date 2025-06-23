@@ -8101,13 +8101,8 @@ services:
     hostname: datahub-gms
     container_name: datahub-gms
     depends_on:
-      - {{'datahub-elasticsearch' if DATAHUB_search_service_impl == 'elasticsearch' else 'datahub-opensearch'}}
-      - datahub-mysql
-    {%if (DATAHUB_graph_service_impl | lower) == 'neo4j'  | default(true) %}
-      - datahub-neo4j
-    {% endif -%}   {#  DATAHUB_graph_service_impl #}
-      - kafka{{dataCenter}}-1
-      - {{ns.schemaRegistryServiceName}}
+      datahub-gms:
+        condition: service_healthy    
     labels:
       com.platys.name: "datahub"
       com.platys.description: "Datahub Data Catalog GMS Service"
@@ -8643,6 +8638,10 @@ services:
         condition: service_completed_successfully
       datahub-mysql-setup:
         condition: service_completed_successfully
+    {%if (DATAHUB_graph_service_impl | lower) == 'neo4j'  | default(true) %}
+      datahub-neo4j:
+        condition: serivice_healthy
+    {% endif -%}   {#  DATAHUB_graph_service_impl #}
     environment:
       - BACKFILL_BROWSE_PATHS_V2=true
       - DATAHUB_GMS_HOST=datahub-gms
@@ -8784,6 +8783,9 @@ services:
     container_name: datahub-ingestion
     labels:
       com.platys.name: "datahub"
+    depends_on:
+      datahub-gms:
+        condition: service_healthy        
     {%if use_timezone | default(false) %}
     environment:
       - TZ={{use_timezone}}
