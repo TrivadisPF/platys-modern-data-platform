@@ -8172,6 +8172,7 @@ services:
       - UI_INGESTION_ENABLED={{DATAHUB_ui_ingestion_enabled | lower | default(false)}}
       - UI_INGESTION_DEFAULT_CLI_VERSION={{__DATAHUB_version}}
       - DATAHUB_ANALYTICS_ENABLED={{DATAHUB_analytics_enabled | lower | default(false)}}
+      - THEME_V2_DEFAULT=true
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -8515,12 +8516,11 @@ services:
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     healthcheck:
-      retries: 4
-      start_period: 2m
-      test:
-      - CMD-SHELL
-      - curl -sS --fail 'http://localhost:9200/_cluster/health?wait_for_status=yellow&timeout=0s'
-        || exit 1
+      interval: 1s
+      retries: 3
+      start_period: 20s
+      test: curl -sS --fail http://datahub-elasticsearch:9200}/_cluster/health?wait_for_status=yellow&timeout=0s
+      timeout: 5s      
     mem_limit: 1g
     volumes:
       - ./data-transfer:/data-transfer
@@ -8589,7 +8589,7 @@ services:
       - "DISABLE_INSTALL_DEMO_CONFIG=true"   # disables execution of install_demo_configuration.sh bundled with security plugin, which installs demo certificates and security configurations to OpenSearch
       - "DISABLE_SECURITY_PLUGIN=true"   #  disables security plugin entirely in OpenSearch by setting plugins.security.disabled: true in opensearch.yml
       - "bootstrap.memory_lock=true" # along with the memlock settings below, disables swapping
-      - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m" # minimum and maximum Java heap size, recommend setting both to 50% of system RAM
+      - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m -Dlog4j2.formatMsgNoLookups=true" # minimum and maximum Java heap size, recommend setting both to 50% of system RAM
       - "http.cors.enabled=true"
       - http.cors.allow-origin="http://${DOCKER_HOST_IP}:28275,http://${PUBLIC_IP}:28275,http://dejavu:1358,http://dataplatform:28125,http://dataplatform:28125,http://${PUBLIC_IP}:28125,http://${DOCKER_HOST_IP}:28125,http://127.0.0.1:1358"
       - http.cors.allow-headers="X-Requested-With,X-Auth-Token,Content-Type,Content-Length,Authorization"
