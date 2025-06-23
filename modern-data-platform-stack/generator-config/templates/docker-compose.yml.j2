@@ -9377,6 +9377,7 @@ services:
     environment:
       - METADATASERVICE_BASE=http://amundsenmetadata:5000
       - SEARCHSERVICE_BASE=http://amundsensearch:5000
+      - FRONTEND_SVC_CONFIG_MODULE_CLASS=amundsen_application.config.TestConfig
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -9435,6 +9436,8 @@ services:
       com.platys.restapi.url: "http://dataplatform:5002"
     ports:
       - 5002:5000
+    depends_on:
+      - amundsen-neo4j    
     environment:
   {%if (AMUNDSEN_metastore | lower) == 'amundsen' | default(false) %}
       - PROXY_HOST=bolt://amundsen-neo4j
@@ -9462,7 +9465,7 @@ services:
 
   {%if (AMUNDSEN_metastore | lower) == 'amundsen' | default(false) %}
   amundsen-neo4j:
-    image: neo4j:3.3.0
+    image: neo4j:3.5.26
     container_name: amundsen-neo4j
     hostname: amundsen-neo4j
     labels:
@@ -9495,7 +9498,7 @@ services:
     restart: {{container_restart_policy}}
 
   amundsen-elasticsearch:
-    image: elasticsearch:6.7.0
+    image: elasticsearch:8.0.0
     container_name: amundsen-elasticsearch
     hostname: amundsen-elasticsearch
     labels:
@@ -9505,13 +9508,15 @@ services:
       com.platys.restapi.url: "http://dataplatform:19201"
     ports:
       - 19201:9200
-    {%if use_timezone | default(false) %}
     environment:
-      - TZ={{use_timezone}}
+      - discovery.type=single-node
+      - xpack.security.enabled=false
       - cluster.routing.allocation.disk.threshold_enabled='true'
       - cluster.routing.allocation.disk.watermark.low=2gb
       - cluster.routing.allocation.disk.watermark.high=1gb
       - cluster.routing.allocation.disk.watermark.flood_stage=512mb
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
