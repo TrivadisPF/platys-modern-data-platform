@@ -52,7 +52,7 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Update `opa` to `1.6.0-dev`
  * Update `enterprise-opa` to `1.41.1-23-debug`
  * Update `datahub` to `head`
- * Update `openmetadata` to `1.7.1`
+ * Update `openmetadata` to `1.8.1`
  * Update `amundsen-frontend` to `4.3.0`
  * Update `amundsen-search` to `4.2.0`
  * Update `amundsen-metadata` to `3.13.0`
