@@ -2108,6 +2108,7 @@ services:
     environment:
     {% if ( KSQLDB_edition | lower) == 'cp'  | default(false) %}
       KSQL_LOG4J_ROOT_LOGLEVEL: "INFO"
+      KSQL_LOG4J_OPTS: "-Dlog4j.configuration=file:/tmp/helper/log4j.properties"
       KSQL_LOG4J_LOGGERS: "org.apache.kafka.connect.runtime.rest=WARN,org.reflections=ERROR"
       KSQL_LOG4J_PROCESSING_LOG_TOPIC: '{{KSQLDB_log_topic}}'
       KSQL_LOG4J_PROCESSING_LOG_BROKERLIST: '{{ns.bootstrapServers}}'
@@ -2299,6 +2300,7 @@ services:
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
+    {% if ( KSQLDB_edition | lower) == 'oss'  | default(false) %}
     command:
       # In the command section, $ are replaced with $$ to avoid the error 'Invalid interpolation format for "command" option'
       - bash
@@ -2318,6 +2320,7 @@ services:
         /usr/bin/docker/run &
         #
         sleep infinity
+    {% endif -%}   {#  KSQLDB_edition #}
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
