@@ -7339,6 +7339,9 @@ services:
       com.platys.description: "Hive Metastore"
     ports:
       - "9083:9083"
+    depends_on:
+      hive-metastore-db:
+        condition: service_healthy      
     environment:
       HIVE_VER: {{__HIVE_METASTORE_version}}
   {%if HADOOP_enable | default(false) %}
@@ -7446,6 +7449,8 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
+    healthcheck:
+      test: ["CMD", "psql", "-U", "{{HIVE_METASTORE_db_user | default('hive') }}", "metastore_db"]    
    {% endif -%}   {#  HIVE_METASTORE_db_type == postgres #}
    
 {% endif %}   {#  HIVE_METASTORE_enable #}
