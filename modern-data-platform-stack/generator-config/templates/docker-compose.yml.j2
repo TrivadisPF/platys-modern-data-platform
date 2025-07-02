@@ -126,7 +126,7 @@ networks:
 
 {% set __NLLB_version = NLLB_version | default('latest') -%}
 
-{% set __HIVE_version = HIVE_version | default('latest') -%}
+{% set __HIVE_SERVER_version = HIVE_SERVER_version | default('latest') -%}
 {% set __HIVE_METASTORE_version = HIVE_METASTORE_version | default('latest') -%}
 {% set __HIVE_METASTORE_version_suffix = HIVE_METASTORE_version_suffix | default('postgresql-metastore-s3') -%}
 
@@ -7278,7 +7278,7 @@ services:
 {% if HIVE_SERVER_enable | default(false) %}
   #  ================================== Apache Hive Server ========================================== #
   hive-server:
-    image: trivadis/apache-hive:{{__HIVE_version}}-{{__HIVE_METASTORE_version_suffix}}
+    image: trivadis/apache-hive:{{__HIVE_SERVER_version}}-{{__HIVE_METASTORE_version_suffix}}
     container_name: hive-server
     hostname: hive-server
     labels:
@@ -7286,6 +7286,9 @@ services:
       com.platys.description: "Hive Server"
       com.platys.webui.title: "Hive Server UI"
       com.platys.webui.url: "http://dataplatform:10002"
+    depends_on:
+      hive-metastore:
+        condition: service_healthy          
     ports:
       - "10000:10000"
       - "10001:10001"
@@ -7329,6 +7332,11 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
+    healthcheck:
+      test: ["CMD", "nc", "-z", "hive-server", "10000"]    
+      interval: 30s
+      timeout: 10s
+      retries: 3
 {% endif %}   {#  HIVE_SERVER_enable #}
 
 {% if HIVE_METASTORE_enable | default(false) %}
@@ -7340,11 +7348,11 @@ services:
     labels:
       com.platys.name: 'hive-metastore'
       com.platys.description: "Hive Metastore"
-    ports:
-      - "9083:9083"
     depends_on:
       hive-metastore-db:
         condition: service_healthy      
+    ports:
+      - "9083:9083"
     environment:
       HIVE_VER: {{__HIVE_METASTORE_version}}
   {%if HADOOP_enable | default(false) %}
