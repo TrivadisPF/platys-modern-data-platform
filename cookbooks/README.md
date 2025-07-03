@@ -75,6 +75,7 @@ Inhere we are documenting cookbooks on how to use the platform:
    * [SASL/SCRAM Authentication with Zookeeper](./recipes/kafka-sasl-scram-authentication-zk/README.md) - `1.17.0`
    * [SASL/SCRAM Authentication with KRaft](./recipes/kafka-sasl-scram-authentication-kraft/README.md) - `1.17.0`
    * [SASL/PLAIN Authentication](./recipes/kafka-sasl-plain-authentication/README.md) - `1.17.0`
+   * [Working with real and synthetic data streams](./recipes/kafka-working-with-real-and-synthetic-streams/README.md) - `1.19.0`
 
  * **Confluent Enterprise Platform**
    * [Using Confluent Enterprise Tiered Storage](./recipes/confluent-tiered-storage/README.md) - `1.13.0`
