@@ -10,9 +10,8 @@ platys init -n platys-platform --stack trivadis/platys-modern-data-platform --st
 
 ```yaml
 KAFKA_enable: true
-KAFKA_CONNECT_enable: true
-KCAT_enable: true
 AKHQ_enable: true
+KAFKA_CONNECT_enable: true
 KAFKA_CONNECT_UI: true
 ELASTICSEARCH_enable: true
 KIBANA_enable: true
