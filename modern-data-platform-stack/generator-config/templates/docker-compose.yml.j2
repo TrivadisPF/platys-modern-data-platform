@@ -7407,6 +7407,11 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
+  {% if HIVE_METASTORE_plugin_jars is defined and HIVE_METASTORE_plugin_jars and HIVE_METASTORE_plugin_jars | length | default(false) %}
+    {% for pluginJar in (HIVE_METASTORE_plugin_jars.split(',')) %}
+      - ./plugins/hive-metastore/{{pluginJar}}:/opt/hive/lib/{{pluginJar}}
+    {% endfor %}
+  {% endif %} {#  HIVE_METASTORE_plugin_jars #}
   {% if ATLAS_hive_hook_enable | default(false) %}
       - ./conf/atlas/atlas-application.properties:/opt/hive/conf/atlas-application.properties
       - ./plugins/hive-server/apache-atlas-hive-hook/hook:/opt/atlas/hook
