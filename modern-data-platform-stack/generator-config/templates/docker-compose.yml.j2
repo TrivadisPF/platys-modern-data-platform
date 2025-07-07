@@ -7387,6 +7387,8 @@ services:
       SERVICE_PRECONDITION: "hive-metastore-db:5432"
   {% if HIVE_METASTORE_transactional_event_listener_enabled | default(false) %}
       HIVE_SITE_CONF_hive_metastore_transactional_event_listeners: {{HIVE_METASTORE_transactional_event_listeners}}
+      HIVE_SITE_CONF_hive_metastore_event_db_listener_timetolive: 86400   # 1 day
+      HIVE_SITE_CONF_hive_metastore_event_db_listener_clean_interval: 7200  # 2 hours
   {% endif -%}   {#  HIVE_METASTORE_transactional_event_listener_enabled #}
   {% if ATLAS_hive_hook_enable | default(false) %}
       HIVE_SITE_CONF_hive_exec_post_hooks: "org.apache.atlas.hive.hook.HiveHook"
@@ -7417,6 +7419,11 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
+    healthcheck:
+      test: ["CMD", "nc", "-z", "hive-metastore", "9083"]    
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   {% if (HIVE_METASTORE_db_type  | lower)  == 'postgres' | default(false) %}
   hive-metastore-db:
@@ -9766,7 +9773,7 @@ services:
     environment:
       - MARQUEZ_PORT=5000
       - MARQUEZ_ADMIN_PORT=5001
-      - MARQUEZ_CONFIG=/usr/src/app/config.yml
+#      - MARQUEZ_CONFIG=/usr/src/app/config.yml
       - POSTGRES_HOST=marquez-db
       - POSTGRES_PORT=5432
       - POSTGRES_DB=marquez
