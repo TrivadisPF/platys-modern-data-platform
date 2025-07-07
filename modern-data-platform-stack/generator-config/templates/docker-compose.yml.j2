@@ -159,7 +159,6 @@ networks:
 {% set __DATA_PRODUCT_PORTAL_version = DATA_PRODUCT_PORTAL_version | default('latest') -%}
 
 {% set __MARQUEZ_version = MARQUEZ_version | default('latest') -%}
-{% set __MARQUEZ_WEB_version = MARQUEZ_WEB_version | default('latest') -%}
 
 {% set __CKAN_version = CKAN_version | default('latest') -%}
 {% set __CKAN_DATAPUSHER_version = CKAN_DATAPUSHER_version | default('latest') -%}
@@ -9717,7 +9716,7 @@ services:
 {% if MARQUEZ_enable  | default(false) %}
   #  ================================== Marquez ========================================== #
   marquez-web:
-    image: marquezproject/marquez-web:{{__MARQUEZ_WEB_version}}
+    image: marquezproject/marquez-web:{{__MARQUEZ_version}}
     container_name: marquez-web
     hostname: marquez-web
     labels:
@@ -9726,12 +9725,14 @@ services:
       com.platys.webui.title: "Marquez UI"
       com.platys.webui.url: "http://dataplatform:3005"
     depends_on:
-      - marquez
+      - marquez-api
     ports:
       - "3005:3000"
     environment:
-      - MARQUEZ_HOST=marquez
+      - MARQUEZ_HOST=marquez-api
       - MARQUEZ_PORT=5000
+      - WEB_PORT=3000
+      - REACT_APP_ADVANCED_SEARCH={{MARQUEZ_search_enabled | default(false)}}
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -9746,10 +9747,10 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
 
-  marquez:
+  marquez-api:
     image: marquezproject/marquez:{{__MARQUEZ_version}}
-    container_name: marquez
-    hostname: marquez
+    container_name: marquez-api
+    hostname: marquez-api
     labels:
       com.platys.name: "marquez"
       com.platys.description: "Marquez Data Lineage"
@@ -9771,13 +9772,14 @@ services:
       - POSTGRES_DB=marquez
       - POSTGRES_USER=marquez
       - POSTGRES_PASSWORD=abc123!
+      - SEARCH_ENABLED={{MARQUEZ_search_enabled | default(false)}}
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
       - ./scripts/docker/wait-for-it.sh:/usr/src/app/wait-for-it.sh
-      - ./conf/marquez/marquez.yml:/usr/src/app/config.yml
+#      - ./conf/marquez/marquez.yml:/usr/src/app/config.yml
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -9789,7 +9791,7 @@ services:
     restart: {{container_restart_policy}}
 
   marquez-db:
-    image: "postgres:12.1.0"
+    image: "postgres:14"
     container_name: marquez-db
     hostname: marquez-db
     labels:
@@ -9809,6 +9811,7 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
+      - ./conf/marquez/postgresql/postgresql.conf:/etc/postgresql/postgresql.conf
       - ./init/marquez/postgresql/init-db.sh:/docker-entrypoint-initdb.d/init-db.sh
     {% if MARQUEZ_volume_map_data %}
       - "./container-volume/marquez/postgresql:/var/lib/postgresql/data"
@@ -9820,34 +9823,34 @@ services:
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
+    command: ["postgres", "-c", "config_file=/etc/postgresql/postgresql.conf"]
     restart: {{container_restart_policy}}
 
   {% if MARQUEZ_provision_marquez_sample_data | default(false) %}
   marquez-db-seed:
-    image: "celfring/jq"
+    image: marquezproject/marquez:{{__MARQUEZ_version}}
     container_name: marquez-db-seed
     hostname: marquez-db-seed
     labels:
       com.platys.name: "marquez"
     depends_on:
-      - marquez-db
+      - marquez-api
     environment:
-      - MARQUEZ_HOST=marquez
-      - MARQUEZ_PORT=5000
-      - MARQUEZ_ADMIN_PORT=5001
+      - MARQUEZ_URL=http://marquez-api:5000
+      - SEARCH_ENABLED={{MARQUEZ_search_enabled | default(false)}}
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
       - ./scripts/docker/wait-for-it.sh:/usr/src/app/wait-for-it.sh
-      - ./init/marquez/postgresql/seed-db.sh:/seed-db.sh
-      - ./init/marquez/postgresql/data:/data
+      - ./init/marquez/postgresql/seed.sh:/usr/src/app/seed.sh
+      - ./init/marquez/metadata/metadata.template.json:/usr/src/app/metadata.template.json
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
-    entrypoint: ["/usr/src/app/wait-for-it.sh", "marquez:5000", "--", "./seed-db.sh"]
+    entrypoint: ["/usr/src/app/wait-for-it.sh", "marquez-api:5000", "--", "./seed.sh"]
     init: true
   {% endif %}   {# MARQUEZ_provision_marquez_sample_data #}
 {% endif %}   {#  MARQUEZ_enable #}
