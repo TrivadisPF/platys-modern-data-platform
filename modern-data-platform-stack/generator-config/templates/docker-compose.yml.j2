@@ -7407,15 +7407,15 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
-  {% if HIVE_METASTORE_plugin_jars is defined and HIVE_METASTORE_plugin_jars and HIVE_METASTORE_plugin_jars | length | default(false) %}
-    {% for pluginJar in (HIVE_METASTORE_plugin_jars.split(',')) %}
-      - ./plugins/hive-metastore/{{pluginJar}}:/opt/hive/lib/{{pluginJar}}
-    {% endfor %}
-  {% endif %} {#  HIVE_METASTORE_plugin_jars #}
   {% if ATLAS_hive_hook_enable | default(false) %}
       - ./conf/atlas/atlas-application.properties:/opt/hive/conf/atlas-application.properties
       - ./plugins/hive-server/apache-atlas-hive-hook/hook:/opt/atlas/hook
   {% endif -%}   {#  ATLAS_install_hive_hook #}
+  {% if HIVE_METASTORE_plugin_jars is defined and HIVE_METASTORE_plugin_jars and HIVE_METASTORE_plugin_jars | length | default(false) %}
+    {% for pluginJar in (HIVE_METASTORE_plugin_jars.split(',')) %}
+      - ./plugins/hive-metastore/{{pluginJar}}:/opt/hive/lib/{{pluginJar}}
+    {% endfor %}
+  {% endif -%}   {#  HIVE_METASTORE_plugin_jars #}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -7424,6 +7424,11 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
+    healthcheck:
+      test: ["CMD", "nc", "-z", "hive-metastore", "9083"]    
+      interval: 30s
+      timeout: 10s
+      retries: 10
 
   {% if (HIVE_METASTORE_db_type  | lower)  == 'postgres' | default(false) %}
   hive-metastore-db:
