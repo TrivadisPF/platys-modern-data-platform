@@ -9766,10 +9766,10 @@ services:
     labels:
       com.platys.name: "marquez"
       com.platys.description: "Marquez Data Lineage"
-      com.platys.restapi.title: "Marquez REST API"
-      com.platys.restapi.url: "http://dataplatform:5010/api/v1"
       com.platys.webui.title: "Marquez UI"
       com.platys.webui.url: "http://dataplatform:5011"
+      com.platys.restapi.title: "Marquez REST API"
+      com.platys.restapi.url: "http://dataplatform:5010/api/v1"
     depends_on:
       - marquez-db
     ports:
@@ -9778,7 +9778,7 @@ services:
     environment:
       - MARQUEZ_PORT=5000
       - MARQUEZ_ADMIN_PORT=5001
-#      - MARQUEZ_CONFIG=/usr/src/app/config.yml
+      - MARQUEZ_CONFIG=/usr/src/app/config.yml
       - POSTGRES_HOST=marquez-db
       - POSTGRES_PORT=5432
       - POSTGRES_DB=marquez
@@ -9791,7 +9791,7 @@ services:
     volumes:
       - ./data-transfer:/data-transfer
       - ./scripts/docker/wait-for-it.sh:/usr/src/app/wait-for-it.sh
-#      - ./conf/marquez/marquez.yml:/usr/src/app/config.yml
+      - ./conf/marquez/marquez.yml:/usr/src/app/config.yml
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -9801,6 +9801,53 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
+  
+  {% if MARQUEZ_search_enabled | default(false) %}
+  marquez-opensearch:
+    image: opensearchproject/opensearch:2.5.0
+    container_name: marquez-opensearch
+    hostname: marquez-opensearch
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    cap_add:
+      - IPC_LOCK
+    labels:
+      com.platys.name: "opensearch"
+      com.platys.description: "Marquez Data Lineage"
+      com.platys.webui.title: "Marquez UI"
+      com.platys.webui.url: "http://dataplatform:5011"        
+      com.platys.restapi.title: "Marquez REST API"
+      com.platys.restapi.url: "http://dataplatform:5010/api/v1"
+    ports:
+      - "9200:9200"
+      - "9300:9300"  
+    environment:
+      - cluster.name=opensearch-cluster
+      - node.name=marquez-opensearch
+      - discovery.seed_hosts=marquez-opensearch
+      - cluster.initial_cluster_manager_nodes=marquez-opensearch
+      - bootstrap.memory_lock=true
+      - plugins.security.ssl.http.enabled=false
+      - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m"
+      - OPENSEARCH_PASSWORD=admin
+    volumes:
+      - ./data-transfer:/data-transfer    
+#      - opensearch-data:/usr/share/opensearch/data
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+
+  {% endif %}   {# MARQUEZ_search_enabled #}
 
   marquez-db:
     image: "postgres:14"
@@ -9817,6 +9864,7 @@ services:
       - POSTGRES_MULTIPLE_DATABASES=marquez
       - POSTGRES_MULTIPLE_USERS=marquez
       - POSTGRES_MULTIPLE_PASSWORDS=abc123!
+      - POSTGRES_MULTIPLE_ADDL_ROLES=marquez
       - ALLOW_EMPTY_PASSWORD=true
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
