@@ -1668,7 +1668,11 @@ For each service there might be some other settings, such as controlling the num
 | `UNITY_CATALOG_UI_enable`                                 	| `false` 	| 1.18.0 	| Generate Unity Catalog UI service                                                                                                                                                              	|    
 | [**_Lakekeeper_**](./services/lakekeeper.md)   &nbsp;&nbsp;&nbsp;&nbsp;![x86-64](./images/x86-64.png)                        	|         	|
 | `LAKEKEEPER_enable`                                 	| `false` 	| 1.19.0 	| Generate Lakekeeper service                                                                                                                                                              	|    
-
+| `LAKEKEEPER_secret_backend`                                 	| `postgres` 	| 1.19.0 	| The secret backend to use, either `postgres` or `kv2` (hashicorp vault). For `kv2` you need to set `VAULT_enable` to `true`.                                                                                                                                              	|    
+| `LAKEKEEPER_publish_events_enabled`                                 	| `false` 	| 1.19.0 	| Publish events to an event store? Set the event store in the `LAKEKEEPER_publish_events_to` configuratio setting.                                                                                                                                             	|    
+| `LAKEKEEPER_publish_events_to`                                 	| `kafka` 	| 1.19.0 	| The event store to use for publishing events, either `kafka` or `nats`.                                                                                                                                 	|  
+| `LAKEKEEPER_log_events_enabled`                                 	| `false` 	| 1.19.0 	| Log the events?                                                                                                                               	|   
+  
 ### Query Engines
 
 | Config                                         	| Default 	| Since 	| Description                                                                                                                                                                        	                    	|
