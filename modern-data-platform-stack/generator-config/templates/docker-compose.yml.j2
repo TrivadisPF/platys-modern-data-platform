@@ -25193,10 +25193,11 @@ services:
       - LAKEKEEPER__PG_DATABASE_URL_READ=postgresql://postgres:abc123!@postgresql:5432/postgres
       - LAKEKEEPER__PG_DATABASE_URL_WRITE=postgresql://postgres:abc123!@postgresql:5432/postgres
       - LAKEKEEPER__AUTHZ_BACKEND=allowall
-    {%if KAFKA_enable or external['KAFKA_enable'] | default(false) %}
+    {%if LAKEKEEPER_publish_events_enabled | default(false) and KAFKA_enable or external['KAFKA_enable'] | default(false) %}
       - LAKEKEEPER__KAFKA_TOPIC='lakekeeper'
       - LAKEKEEPER__KAFKA_CONFIG='{"bootstrap.servers"="{{ns.bootstrapServers}}","security.protocol"="{{ns.securityProtocolBROKER}}"}'
-    {% endif -%}   {#  KAFKA_enable #}      
+    {% endif -%}   {#  LAKEKEEPER_publish_events_enabled and  KAFKA_enable #}
+      - LAKEKEEPER__LOG_CLOUDEVENTS={{LAKEKEEPER_log_events_enabled | default(false) }}      
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
