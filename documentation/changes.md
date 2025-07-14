@@ -18,6 +18,7 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Platys MDP Docker Deploy
  * Presidio Analyzer
  * Presidio Anonymizer
+ * Lakekeeper
  
 ### Version upgrades
 
