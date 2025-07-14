@@ -797,6 +797,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28272 | 8000 | mcp-neo4j-memory |
 28273 | 3000 | presidio-analyzer |
 28274 | 8000 | presidio-anonymizer |
+28275 | 8181 | lakekeeper |
 
 ## Ports > 28500
 

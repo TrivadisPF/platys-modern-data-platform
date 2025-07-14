@@ -610,6 +610,8 @@ networks:
 {% set __UNITY_CATALOG_version = UNITY_CATALOG_version | default('latest') -%}
 {% set __UNITY_CATALOG_UI_version = UNITY_CATALOG_UI_version | default('latest') -%}
 
+{% set __LAKEKEEPER_version = LAKEKEEPER_version | default('latest') -%}
+
 {% set __DBT_version = DBT_version | default('latest') -%}
 
 {% set __TAIGA_version = TAIGA_version | default('latest') -%}
@@ -25168,8 +25170,83 @@ services:
         yarn start            
     restart: {{container_restart_policy}}
   {% endif %}   {#  UNITY_CATALOG_UI_enable #}
-
 {% endif %}   {#  UNITY_CATALOG_enable #}
+
+{% if LAKEKEEPER_enable | default(false) %}
+  #  ================================== Lakekeeper ========================================== #
+  lakekeeper:
+    image: quay.io/lakekeeper/catalog:{{__LAKEKEEPER_version}}
+    container_name: lakekeeper
+    hostname: lakekeeper
+    labels:
+      com.platys.name: "lakekeeper"
+      com.platys.description: "Secure, fast and easy to use Iceberg REST Catalog"
+      com.platys.restapi.title: "Lakekeeper REST API"
+      com.platys.restapi.url: "http://dataplatform:28275"
+    depends_on:
+      lakekeeper-init:
+        condition: service_completed_successfully      
+    ports:
+      - 28275:8181
+    environment:
+      - LAKEKEEPER__PG_ENCRYPTION_KEY=This-is-NOT-Secure!
+      - LAKEKEEPER__PG_DATABASE_URL_READ=postgresql://postgres:abc123!@postgresql:5432/postgres
+      - LAKEKEEPER__PG_DATABASE_URL_WRITE=postgresql://postgres:abc123!@postgresql:5432/postgres
+      - LAKEKEEPER__AUTHZ_BACKEND=allowall
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    command: [ "serve" ]
+    restart: {{container_restart_policy}}
+    healthcheck:
+      test: [ "CMD", "/home/nonroot/lakekeeper", "healthcheck" ]
+      interval: 1s
+      timeout: 10s
+      retries: 3
+      start_period: 3s
+
+  lakekeeper-init:
+    image: quay.io/lakekeeper/catalog:{{__LAKEKEEPER_version}}
+    container_name: lakekeeper-init
+    hostname: lakekeeper-init
+    labels:
+      com.platys.name: "lakekeeper"
+    depends_on:
+      postgresql:
+        condition: service_healthy  
+    ports:
+      - 28275:8181
+    environment:
+      - LAKEKEEPER__PG_ENCRYPTION_KEY=This-is-NOT-Secure!
+      - LAKEKEEPER__PG_DATABASE_URL_READ=postgresql://postgres:abc123!@postgresql:5432/postgres
+      - LAKEKEEPER__PG_DATABASE_URL_WRITE=postgresql://postgres:abc123!@postgresql:5432/postgres
+      - LAKEKEEPER__AUTHZ_BACKEND=allowall
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    command: [ "migrate" ]
+    init: true
+    restart:  no
+
+{% endif %}   {#  LAKEKEEPER_enable #}
 
 {% if MOSQUITTO_enable | default(false) %}
   #  ================================== Mosquitto ========================================== #
