@@ -25189,10 +25189,22 @@ services:
     ports:
       - 28275:8181
     environment:
+      - LAKEKEEPER__METRICS_PORT=9000
+      - LAKEKEEPER__LISTEN_PORT=8181
       - LAKEKEEPER__PG_ENCRYPTION_KEY=This-is-NOT-Secure!
       - LAKEKEEPER__PG_DATABASE_URL_READ=postgresql://postgres:abc123!@postgresql:5432/postgres
       - LAKEKEEPER__PG_DATABASE_URL_WRITE=postgresql://postgres:abc123!@postgresql:5432/postgres
       - LAKEKEEPER__AUTHZ_BACKEND=allowall
+      - LAKEKEEPER__SERVE_SWAGGER_UI=true
+    {% if LAKEKEEPER_secret_backend == 'kv2' VAULT_enable | default(false) %}
+      - LAKEKEEPER__SECRET_BACKEND=kv2
+      - LAKEKEEPER__KV2__URL=http://vault:8200
+      - LAKEKEEPER__KV2__USER:='{{VAULT_username}}'
+      - LAKEKEEPER__KV2__PASSWORD='${PLATYS_VAULT_PASSWORD:-{{VAULT_password}}}'
+      - LAKEKEEPER__KV2__SECRET_MOUNT='kv/data/iceberg'
+    {% else -%}   {#  VAULT_enable #}   
+      - LAKEKEEPER__SECRET_BACKEND=postgres
+    {% endif -%}   {#  VAULT_enable #}   
     {%if LAKEKEEPER_publish_events_enabled | default(false) and KAFKA_enable or external['KAFKA_enable'] | default(false) %}
       - LAKEKEEPER__KAFKA_TOPIC='lakekeeper'
       - LAKEKEEPER__KAFKA_CONFIG='{"bootstrap.servers"="{{ns.bootstrapServers}}","security.protocol"="{{ns.securityProtocolBROKER}}"}'
