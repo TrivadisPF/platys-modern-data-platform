@@ -798,6 +798,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28273 | 3000 | presidio-analyzer |
 28274 | 8000 | presidio-anonymizer |
 28275 | 8181 | lakekeeper |
+28276 | 8080 | mcp-inspector |
+28277 | 8081 | mcp-inspector |
 
 ## Ports > 28500
 

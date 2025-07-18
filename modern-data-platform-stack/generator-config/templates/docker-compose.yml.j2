@@ -113,6 +113,8 @@ networks:
 
 {% set __CRAWL4AI_version = CRAWL4AI_version | default('latest') -%}
 
+{% set __MCP_INSPECTOR_version = MCP_INSPECTOR_version | default('latest') -%}
+
 {% set __MCP_TOOLBOX_version = MCP_TOOLBOX_version | default('latest') -%}
 
 {% set __CENTRALMIND_GATEWAY_version = CENTRALMIND_GATEWAY_version | default('latest') -%}
@@ -828,6 +830,7 @@ networks:
   {% set UNSTRUCTURED_enable = false -%}
   {% set FIRECRAWL_enable = false -%}
   {% set CRAWL4AI_enable = false -%}
+  {% set MCP_INSPECTOR_enable = false -%}
   {% set MCP_TOOLBOX_enable = false -%}
   {% set CENTRALMIND_GATEWAY_enable = false -%}
   {% set MCP_TRINO_enable = false -%}
@@ -6998,6 +7001,39 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  CRAWL4AI_enable #}
+
+{% if MCP_INSPECTOR_enable | default(false) %}
+  #  ================================== MCP Inspector ========================================== #
+  mcp-inspector:
+    image: ghcr.io/modelcontextprotocol/inspector:{{__MCP_INSPECTOR_version}}
+    container_name: mcp-inspector
+    hostname: mcp-inspector
+    labels:
+      com.platys.name: 'mcp-inspector'
+      com.platys.description: "MCP Inspector"
+      com.platys.webui.title: "MCP Inspector UI"
+      com.platys.webui.url: "http://dataplatform:28276"
+    ports:
+      - "28276:8080"
+      - "28277:8081"
+    environment:
+      CLIENT_PORT: 8080
+      SERVER_PORT: 8081
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./custom-conf/mcp-toolbox-for-dbs/:/config:ro
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  MCP_INSPECTOR_enable #}
 
 {% if MCP_TOOLBOX_enable | default(false) %}
   #  ================================== MCP Toolbox for Databases ========================================== #
@@ -22523,6 +22559,8 @@ services:
       NESSIE_CATALOG_WAREHOUSE_DIR: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined and SPARK_sql_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/nessie/warehouse'}}
       ICEBERG_REST_CATALOG_URI: http://iceberg-rest-catalog:8181
       ICEBERG_REST_CATALOG_WAREHOUSE: {{ICEBERG_REST_CATALOG_warehouse_dir if ICEBERG_REST_CATALOG_warehouse_dir is defined and ICEBERG_REST_CATALOG_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
+      ICEBERG_LAKEKEEPER_CATALOG_URI: http://lakekeeper:8181/catalog
+      ICEBERG_LAKEKEEPER_CATALOG_WAREHOUSE: {{ICEBERG_REST_CATALOG_warehouse_dir if ICEBERG_REST_CATALOG_warehouse_dir is defined and ICEBERG_REST_CATALOG_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
 {% endif %}
   {%if external['ADLS_enable'] | default(false) %}
       ADLS_STORAGE_ACCOUNT: {{adlsStorageAccount | default(omit) }}
@@ -22659,6 +22697,9 @@ services:
     {% endif %}
     {%if ICEBERG_REST_CATALOG_enable | default(false) %}
       - './conf/{{conf_dir}}/catalog/iceberg-rest.properties:/catalog/iceberg_rest.properties'
+    {% endif %}
+    {%if LAKEKEEPER_enable | default(false) %}
+      - './conf/{{conf_dir}}/catalog/iceberg-lakekeeper.properties:/catalog/iceberg_lakekeeper.properties'
     {% endif %}
     {%if SPARK_table_format_type == 'iceberg' or ICEBERG_REST_CATALOG_enable | default(false) %}
       - './conf/{{conf_dir}}/catalog/iceberg.properties:/catalog/iceberg.properties'
@@ -22982,6 +23023,9 @@ services:
     {%if ICEBERG_REST_CATALOG_enable | default(false) %}
       - './conf/{{conf_dir}}/catalog/iceberg-rest.properties:/catalog/iceberg_rest.properties'
     {% endif %}
+    {%if LAKEKEEPER_enable | default(false) %}
+      - './conf/{{conf_dir}}/catalog/iceberg-lakekeeper.properties:/catalog/iceberg_lakekeeper.properties'
+    {% endif %}    
     {%if SPARK_table_format_type == 'iceberg' | default(false) %}
       - './conf/{{conf_dir}}/catalog/iceberg.properties:/catalog/iceberg.properties'
       {%if NESSIE_enable | default(false) %}
