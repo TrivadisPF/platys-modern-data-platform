@@ -28695,6 +28695,56 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {# JENKINS_enable #}
 
+{% if ALLURE_enable | default(false) %}
+  #  ================================== Allure Report ========================================== #
+  allure:
+    image: frankescobar/allure-docker-service:{{__ALLURE_version}}
+    container_name: allure
+    hostname: allure
+    labels:
+      com.platys.name: "allure"
+      com.platys.description: "Allure Report"
+      com.platys.restapi.title: "Allure API"
+      com.platys.restapi.url: "http://dataplatform:28278"
+    ports:
+      - "28278:5050"
+    environment:
+      CHECK_RESULTS_EVERY_SECONDS: 1
+      KEEP_HISTORY: 1
+      KEEP_HISTORY_LATEST: 25
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {% if ALLURE_results_dir is defined and ALLURE_results_dir and ALL %}
+      - {{ALLURE_results_dir}}:/app/allure-results
+    {% endif %}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+
+  allure-ui:
+    image: frankescobar/allure-docker-service-ui:{{__ALLURE_version}}
+    container_name: allure-ui
+    hostname: allure-ui
+    labels:
+      com.platys.name: "allure"
+      com.platys.description: "Allure Report"
+      com.platys.webui.title: "Allure UI"
+      com.platys.webui.url: "http://dataplatform:28279"       
+    environment:
+      ALLURE_DOCKER_PUBLIC_API_URL: "http://${PUBLIC_IP}:28278"
+      ALLURE_DOCKER_PUBLIC_API_URL_PREFIX: ""
+    ports:
+      - "28279:5252"
+{% endif %}   {# ALLURE_enable #}
+
 {% if GITWEB_enable | default(false) %}
   #  ================================== GitWeb ========================================== #
   gitweb:

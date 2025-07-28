@@ -800,6 +800,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28275 | 8181 | lakekeeper |
 28276 | 8080 | mcp-inspector |
 28277 | 8081 | mcp-inspector |
+28278 | 5050 | allure |
+28279 | 5252 | allure-ui |
 
 ## Ports > 28500
 
