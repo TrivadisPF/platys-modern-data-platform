@@ -28711,9 +28711,15 @@ services:
     ports:
       - "28278:5050"
     environment:
-      CHECK_RESULTS_EVERY_SECONDS: 1
+      CHECK_RESULTS_EVERY_SECONDS: {{ALLURE_check_results_every_seconds if ALLURE_check_results_every_seconds is defined and ALLURE_check_results_every_seconds and ALLURE_check_results_every_seconds | length else 'NONE'}}
       KEEP_HISTORY: 1
       KEEP_HISTORY_LATEST: 25
+      SECURITY_ENABLED: {{1 if ALLURE_security_enabled else omit}}
+      SECURITY_USER: admin
+      SECURITY_PASS: abc123!
+      SECURITY_VIEWER_USER: viewer
+      SECURITY_VIEWER_PASS: abc123!
+      MAKE_VIEWER_ENDPOINTS_PUBLIC: 1
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -28721,6 +28727,9 @@ services:
       - ./data-transfer:/data-transfer
     {% if ALLURE_results_dir is defined and ALLURE_results_dir and ALLURE_results_dir | length > 0 %}
       - {{ALLURE_results_dir}}:/app/allure-results
+    {% endif %}
+    {% if ALLURE_projects_dir is defined and ALLURE_projects_dir and ALLURE_projects_dir | length > 0 %}
+      - {{ALLURE_projects_dir}}:/app/projects
     {% endif %}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
