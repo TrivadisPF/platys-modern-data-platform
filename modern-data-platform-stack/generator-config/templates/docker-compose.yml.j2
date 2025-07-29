@@ -1711,11 +1711,11 @@ services:
       KAFKA_SSL_KEY_PASSWORD: 'abc123!'
       KAFKA_SSL_TRUSTSTORE_LOCATION: '/certs/server.ts.p12'
       KAFKA_SSL_TRUSTSTORE_PASSWORD: 'abc123!'
-      {% if KAFKA_ssl_client_authentication_enable | default(false) %}
+      {% if KAFKA_ssl_client_authentication_enabled | default(false) %}
       KAFKA_SSL_CLIENT_AUTH: 'required'
-      {% endif -%} {# KAFKA_ssl_client_authentication_enable #}
+      {% endif -%} {# KAFKA_ssl_client_authentication_enabled #}
     {% endif -%}   {# ns.secureKafkaEnabled #}
-    {% if KAFKA_authorizer_enable and ns.secureKafkaEnabled | default(false) %}
+    {% if KAFKA_authorizer_enabled and ns.secureKafkaEnabled | default(false) %}
       KAFKA_ALLOW_EVERYONE_IF_NO_ACL_FOUND: "{{KAFKA_allow_everyone_if_no_acl_found | lower }}"
       {% if not KAFKA_use_kraft_mode | default(false) %}
       KAFKA_AUTHORIZER_CLASS_NAME: "kafka.security.authorizer.AclAuthorizer"
@@ -1725,7 +1725,7 @@ services:
       {% if KAFKA_super_users is defined and KAFKA_super_users and KAFKA_super_users | length %}
       KAFKA_SUPER_USERS: "{% for user in KAFKA_super_users.split(',') -%}User:{{ user }}{% if not loop.last %};{% endif %} {%- endfor %}"
       {% endif -%} {# KAFKA_super_users #}
-    {% endif -%} {# KAFKA_authorizer_enable and ns.secureKafkaEnabled #}
+    {% endif -%} {# KAFKA_authorizer_enabled and ns.secureKafkaEnabled #}
     {% if KAFKA_CCC_enable and (KAFKA_edition | lower) == 'enterprise' | default(false) %}
       KAFKA_METRIC_REPORTERS: io.confluent.metrics.reporter.ConfluentMetricsReporter
       KAFKA_CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: '{{ns.bootstrapServers}}'
@@ -1735,11 +1735,11 @@ services:
       {% if KAFKA_confluent_log_placement_constraints is defined and KAFKA_confluent_log_placement_constraints %}
       KAFKA_CONFLUENT_LOG_PLACEMENT_CONSTRAINTS: '{{KAFKA_confluent_log_placement_constraints}}'
       {% endif %}
-      {%if KAFKA_confluent_tier_enable | default(false) %}
-      KAFKA_CONFLUENT_CLUSTER_LINK_ENABLE: '{{KAFKA_confluent_cluster_link_enable | default(omit) }}'
-      {% endif -%} {# KAFKA_confluent_tier_enable #}
-      {%if KAFKA_confluent_tier_enable | default(false) %}
-      KAFKA_CONFLUENT_TIER_ENABLE: '{{KAFKA_confluent_tier_enable | default(omit) }}'
+      {%if KAFKA_confluent_tier_enabled | default(false) %}
+      KAFKA_CONFLUENT_CLUSTER_LINK_ENABLE: '{{KAFKA_confluent_cluster_link_enabled | default(omit) }}'
+      {% endif -%} {# KAFKA_confluent_tier_enabled #}
+      {%if KAFKA_confluent_tier_enabled | default(false) %}
+      KAFKA_CONFLUENT_TIER_ENABLE: '{{KAFKA_confluent_tier_enabled | default(omit) }}'
       KAFKA_CONFLUENT_TIER_FEATURE: '{{KAFKA_confluent_tier_feature | default(omit) }}'
       KAFKA_CONFLUENT_TIER_BACKEND: {{KAFKA_confluent_tier_backend | default(omit) }}
       KAFKA_CONFLUENT_TIER_S3_BUCKET: '{{KAFKA_confluent_tier_s3_bucket| default('kafka-logs') }}'
@@ -1758,7 +1758,7 @@ services:
       #KAFKA_CONFLUENT_TIER_S3_AWS_SECRET_ACCESS_KEY: {{s3SecretAccessKey}}
       AWS_ACCESS_KEY_ID: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
       AWS_SECRET_ACCESS_KEY: {{s3SecretAccessKey}}
-      {% endif -%} {# KAFKA_confluent_tier_enable #}
+      {% endif -%} {# KAFKA_confluent_tier_enabled #}
     {% endif -%} {# KAFKA_edition == ENTERPRISE #}
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: {{KAFKA_internal_replication_factor | default(1)}}
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
@@ -1771,8 +1771,8 @@ services:
       KAFKA_LOG_RETENTION_HOURS: {{KAFKA_log_retention_hours | default(omit) }}
       KAFKA_LOG_RETENTION_BYTES: {{KAFKA_log_retention_bytes | default(omit) }}
       KAFKA_MIN_INSYNC_REPLICAS: {{KAFKA_min_insync_replicas | default(1) }}
-      KAFKA_DELETE_TOPIC_ENABLE: '{{ KAFKA_delete_topic_enable | default(omit) }}'
-      KAFKA_AUTO_CREATE_TOPICS_ENABLE: '{{ KAFKA_auto_create_topics_enable | default(omit) }}'
+      KAFKA_DELETE_TOPIC_ENABLE: '{{ KAFKA_delete_topic_enabled | default(omit) }}'
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: '{{ KAFKA_auto_create_topics_enabled | default(omit) }}'
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 100
       KAFKA_JMX_PORT: {{portJMX}}
       KAFKA_JMX_OPTS: '-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.rmi.port={{portJMX}}'
@@ -2037,7 +2037,7 @@ services:
       CONNECT_CONSUMER_SSL_TRUSTSTORE_PASSWORD: {{KAFKA_client_truststore_password}}
       CONNECT_PRODUCER_SSL_TRUSTSTORE_LOCATION: /certs/client.ts.p12
       CONNECT_PRODUCER_SSL_TRUSTSTORE_PASSWORD: {{KAFKA_client_truststore_password}}
-        {% if KAFKA_ssl_client_authentication_enable | default(false) %}
+        {% if KAFKA_ssl_client_authentication_enabled | default(false) %}
       CONNECT_SSL_KEYSTORE_TYPE: "PKCS12"
       CONNECT_SSL_KEYSTORE_LOCATION: /certs/client.ks.p12
       CONNECT_SSL_KEYSTORE_PASSWORD: {{KAFKA_client_keystore_password}}
@@ -2050,7 +2050,7 @@ services:
       CONNECT_PRODUCER_SSL_KEYSTORE_LOCATION: /certs/client.ks.p12
       CONNECT_PRODUCER_SSL_KEYSTORE_PASSWORD: {{KAFKA_client_keystore_password}}
       CONNECT_PRODUCER_SSL_KEY_PASSWORD: {{KAFKA_client_key_password}}
-        {% endif -%}   {#  KAFKA_ssl_client_authentication_enable #}
+        {% endif -%}   {#  KAFKA_ssl_client_authentication_enabled #}
       {% endif -%}   {#  ns.securityProtocol #}
     {% else -%}   {#  ns.secureKafkaEnabled #}
       CONNECT_SECURITY_PROTOCOL: "PLAINTEXT"
@@ -2210,12 +2210,12 @@ services:
       {% elif ns.securityProtocolBROKER == 'SSL' %}
       KSQL_SSL_TRUSTSTORE_LOCATION: /certs/client.ts.p12
       KSQL_SSL_TRUSTSTORE_PASSWORD: {{KAFKA_client_truststore_password}}
-        {% if KAFKA_ssl_client_authentication_enable | default(false) %}
+        {% if KAFKA_ssl_client_authentication_enabled | default(false) %}
       KSQL_SSL_KEYSTORE_TYPE: "PKCS12"
       KSQL_SSL_KEYSTORE_LOCATION: /certs/client.ks.p12
       KSQL_SSL_KEYSTORE_PASSWORD: {{KAFKA_client_keystore_password}}
       KSQL_SSL_KEY_PASSWORD: {{KAFKA_client_key_password}}
-        {% endif -%}   {#  KAFKA_ssl_client_authentication_enable #}
+        {% endif -%}   {#  KAFKA_ssl_client_authentication_enabled #}
       {% endif -%}   {#  ns.securityProtocol #}
       KSQL_PRODUCER__SSL_TRUSTSTORE_LOCATION: /certs/client.ts.p12
       KSQL_PRODUCER__SSL_TRUSTSTORE_PASSWORD: {{KAFKA_client_truststore_password}}
@@ -2304,7 +2304,7 @@ services:
       KSQL_CONNECT_CONSUMER_SSL_TRUSTSTORE_PASSWORD: {{KAFKA_client_truststore_password}}
       KSQL_CONNECT_PRODUCER_SSL_TRUSTSTORE_LOCATION: /certs/client.ts.p12
       KSQL_CONNECT_PRODUCER_SSL_TRUSTSTORE_PASSWORD: {{KAFKA_client_truststore_password}}
-          {% if KAFKA_ssl_client_authentication_enable | default(false) %}
+          {% if KAFKA_ssl_client_authentication_enabled | default(false) %}
       KSQL_CONNECT_SSL_KEYSTORE_TYPE: "PKCS12"
       KSQL_CONNECT_SSL_KEYSTORE_LOCATION: /certs/client.ks.p12
       KSQL_CONNECT_SSL_KEYSTORE_PASSWORD: {{KAFKA_client_keystore_password}}
@@ -2317,7 +2317,7 @@ services:
       KSQL_CONNECT_PRODUCER_SSL_KEYSTORE_LOCATION: /certs/client.ks.p12
       KSQL_CONNECT_PRODUCER_SSL_KEYSTORE_PASSWORD: {{KAFKA_client_keystore_password}}
       KSQL_CONNECT_PRODUCER_SSL_KEY_PASSWORD: {{KAFKA_client_key_password}}
-          {% endif -%}   {#  KAFKA_ssl_client_authentication_enable #}
+          {% endif -%}   {#  KAFKA_ssl_client_authentication_enabled #}
         {% endif -%}   {#  ns.securityProtocol #}
       {% endif -%}   {#  ns.secureKafkaEnabled #}
     {% endif -%}   {#  KSQLDB_use_embedded_connect #}
@@ -2664,7 +2664,7 @@ services:
     environment:
       - RUST_BACKTRACE="1"
       # If ENABLE_TELEMETRY is not set, telemetry will start by default
-      - ENABLE_TELEMETRY={{RISINGWAVE_telemetry_enable | default(false) }}
+      - ENABLE_TELEMETRY={{RISINGWAVE_telemetry_enabled | default(false) }}
       - RW_TELEMETRY_TYPE="docker-compose"
       - RW_SECRET_STORE_PRIVATE_KEY_HEX=0123456789abcdef0123456789abcdef
       - RW_LICENSE_KEY=
@@ -2774,7 +2774,7 @@ services:
     environment:
       - RUST_BACKTRACE="1"
       # If ENABLE_TELEMETRY is not set, telemetry will start by default
-      - ENABLE_TELEMETRY={{RISINGWAVE_telemetry_enable | default(false) }}
+      - ENABLE_TELEMETRY={{RISINGWAVE_telemetry_enabled | default(false) }}
     {%if MINIO_enable or external['S3_enable'] | default(false) %}
       - RW_S3_ENDPOINT={{s3Endpoint | default(omit) }}
       - RW_IS_FORCE_PATH_STYLE={{s3PathStyleAccess | default(omit) }}
@@ -2833,7 +2833,7 @@ services:
     environment:
       - RUST_BACKTRACE="1"
       # If ENABLE_TELEMETRY is not set, telemetry will start by default
-      - ENABLE_TELEMETRY={{RISINGWAVE_telemetry_enable | default(false) }}
+      - ENABLE_TELEMETRY={{RISINGWAVE_telemetry_enabled | default(false) }}
     {%if MINIO_enable or external['S3_enable'] | default(false) %}
       - RW_S3_ENDPOINT={{s3Endpoint | default(omit) }}
       - RW_IS_FORCE_PATH_STYLE={{s3PathStyleAccess | default(omit) }}
@@ -2892,7 +2892,7 @@ services:
     environment:
       - RUST_BACKTRACE="1"
       # If ENABLE_TELEMETRY is not set, telemetry will start by default
-      - ENABLE_TELEMETRY={{RISINGWAVE_telemetry_enable | default(false) }}
+      - ENABLE_TELEMETRY={{RISINGWAVE_telemetry_enabled | default(false) }}
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -2940,7 +2940,7 @@ services:
     environment:
       - RUST_BACKTRACE="1"
       # If ENABLE_TELEMETRY is not set, telemetry will start by default
-      - ENABLE_TELEMETRY={{RISINGWAVE_telemetry_enable | default(false) }}
+      - ENABLE_TELEMETRY={{RISINGWAVE_telemetry_enabled | default(false) }}
     {%if MINIO_enable or external['S3_enable'] | default(false) %}
       - RW_S3_ENDPOINT={{s3Endpoint | default(omit) }}
       - RW_IS_FORCE_PATH_STYLE={{s3PathStyleAccess | default(omit) }}
@@ -3167,12 +3167,12 @@ services:
       {% elif ns.securityProtocolBROKER == 'SSL' %}
       KAFKA_REST_SSL_TRUSTSTORE_LOCATION: /certs/client.ts.p12
       KAFKA_REST_SSL_TRUSTSTORE_PASSWORD: {{KAFKA_client_truststore_password}}
-        {% if KAFKA_ssl_client_authentication_enable | default(false) %}
+        {% if KAFKA_ssl_client_authentication_enabled | default(false) %}
       KAFKA_REST_SSL_KEYSTORE_TYPE: "PKCS12"
       KAFKA_REST_SSL_KEYSTORE_LOCATION: /certs/client.ks.p12
       KAFKA_REST_SSL_KEYSTORE_PASSWORD: {{KAFKA_client_keystore_password}}
       KAFKA_REST_SSL_KEY_PASSWORD: {{KAFKA_client_key_password}}
-        {% endif -%}   {#  KAFKA_ssl_client_authentication_enable #}
+        {% endif -%}   {#  KAFKA_ssl_client_authentication_enabled #}
       {% endif -%}   {#  ns.securityProtocol #}
     {% endif -%}   {#  ns.secureKafkaEnabled #}
     {% if jmx_monitoring_with_prometheus_enable %}
@@ -3226,12 +3226,12 @@ services:
       {% elif ns.securityProtocolBROKER == 'SSL' %}
       KAFKA_MQTT_PRODUCER_SSL_TRUSTSTORE_LOCATION: /certs/client.ts.p12
       KAFKA_MQTT_PRODUCER_SSL_TRUSTSTORE_PASSWORD: {{KAFKA_client_truststore_password}}
-        {% if KAFKA_ssl_client_authentication_enable | default(false) %}
+        {% if KAFKA_ssl_client_authentication_enabled | default(false) %}
       KAFKA_MQTT_PRODUCER_SSL_KEYSTORE_TYPE: "PKCS12"
       KAFKA_MQTT_PRODUCER_SSL_KEYSTORE_LOCATION: /certs/client.ks.p12
       KAFKA_MQTT_PRODUCER_SSL_KEYSTORE_PASSWORD: {{KAFKA_client_keystore_password}}
       KAFKA_MQTT_PRODUCER_SSL_KEY_PASSWORD: {{KAFKA_client_key_password}}
-        {% endif -%}   {#  KAFKA_ssl_client_authentication_enable #}
+        {% endif -%}   {#  KAFKA_ssl_client_authentication_enabled #}
       {% endif -%}   {#  ns.securityProtocol #}
     {% endif -%}   {#  ns.secureKafkaEnabled #}
 
@@ -3327,12 +3327,12 @@ services:
       {% elif ns.securityProtocolBROKER == 'SSL' %}
       SCHEMA_REGISTRY_KAFKASTORE_SSL_TRUSTSTORE_LOCATION: /certs/client.ts.p12
       SCHEMA_REGISTRY_KAFKASTORE_SSL_TRUSTSTORE_PASSWORD: {{KAFKA_client_truststore_password}}
-        {% if KAFKA_ssl_client_authentication_enable | default(false) %}
+        {% if KAFKA_ssl_client_authentication_enabled | default(false) %}
       SCHEMA_REGISTRY_KAFKASTORE_SSL_KEYSTORE_TYPE: "PKCS12"
       SCHEMA_REGISTRY_KAFKASTORE_SSL_KEYSTORE_LOCATION: /certs/client.ks.p12
       SCHEMA_REGISTRY_KAFKASTORE_SSL_KEYSTORE_PASSWORD: {{KAFKA_client_keystore_password}}
       SCHEMA_REGISTRY_KAFKASTORE_SSL_KEY_PASSWORD: {{KAFKA_client_key_password}}
-        {% endif -%}   {#  KAFKA_ssl_client_authentication_enable #}
+        {% endif -%}   {#  KAFKA_ssl_client_authentication_enabled #}
       {% endif -%}   {#  ns.securityProtocol #}
     {% else %}
       SCHEMA_REGISTRY_KAFKASTORE_SECURITY_PROTOCOL: "PLAINTEXT"
@@ -3500,12 +3500,12 @@ services:
     {% elif ns.securityProtocolBROKER == 'SSL' %}
       CONTROL_CENTER_STREAMS_SSL_TRUSTSTORE_LOCATION: /certs/client.ts.p12
       CONTROL_CENTER_STREAMS_SSL_TRUSTSTORE_PASSWORD: {{KAFKA_client_truststore_password}}
-      {% if KAFKA_ssl_client_authentication_enable | default(false) %}
+      {% if KAFKA_ssl_client_authentication_enabled | default(false) %}
       CONTROL_CENTER_STREAMS_SSL_KEYSTORE_TYPE: "PKCS12"
       CONTROL_CENTER_STREAMS_SSL_KEYSTORE_LOCATION: /certs/client.ks.p12
       CONTROL_CENTER_STREAMS_SSL_KEYSTORE_PASSWORD: {{KAFKA_client_keystore_password}}
       CONTROL_CENTER_STREAMS_SSL_KEY_PASSWORD: {{KAFKA_client_key_password}}
-      {% endif -%}   {#  KAFKA_ssl_client_authentication_enable #}
+      {% endif -%}   {#  KAFKA_ssl_client_authentication_enabled #}
     {% endif -%}   {#  ns.securityProtocolBROKER #}
   {% endif -%}   {#  ns.secureKafkaEnabled #}
   {% if ( KAFKA_CONNECT_enable or KSQLDB_use_embedded_connect) | default(false) %}
@@ -3600,7 +3600,7 @@ services:
       CONNECT_CONSUMER_SSL_TRUSTSTORE_PASSWORD: {{KAFKA_client_truststore_password}}
       CONNECT_PRODUCER_SSL_TRUSTSTORE_LOCATION: /certs/client.ts.p12
       CONNECT_PRODUCER_SSL_TRUSTSTORE_PASSWORD: {{KAFKA_client_truststore_password}}
-        {% if KAFKA_ssl_client_authentication_enable | default(false) %}
+        {% if KAFKA_ssl_client_authentication_enabled | default(false) %}
       CONNECT_SSL_KEYSTORE_TYPE: "PKCS12"
       CONNECT_SSL_KEYSTORE_LOCATION: /certs/client.ks.p12
       CONNECT_SSL_KEYSTORE_PASSWORD: {{KAFKA_client_keystore_password}}
@@ -3613,7 +3613,7 @@ services:
       CONNECT_PRODUCER_SSL_KEYSTORE_LOCATION: /certs/client.ks.p12
       CONNECT_PRODUCER_SSL_KEYSTORE_PASSWORD: {{KAFKA_client_keystore_password}}
       CONNECT_PRODUCER_SSL_KEY_PASSWORD: {{KAFKA_client_key_password}}
-        {% endif -%}   {#  KAFKA_ssl_client_authentication_enable #}
+        {% endif -%}   {#  KAFKA_ssl_client_authentication_enabled #}
       {% endif -%}   {#  ns.securityProtocol #}
     {% endif -%}   {#  ns.secureKafkaEnabled #}
     {%if use_timezone | default(false) %}
@@ -3746,12 +3746,12 @@ services:
       {% elif ns.securityProtocolBROKER == 'SSL' %}
       SSL_TRUSTSTORE_LOCATION: /certs/client.ts.p12
       SSL_TRUSTSTORE_PASSWORD: {{KAFKA_client_truststore_password}}
-        {% if KAFKA_ssl_client_authentication_enable | default(false) %}
+        {% if KAFKA_ssl_client_authentication_enabled | default(false) %}
       SSL_KEYSTORE_TYPE: "PKCS12"
       SSL_KEYSTORE_LOCATION: /certs/client.ks.p12
       SSL_KEYSTORE_PASSWORD: {{KAFKA_client_keystore_password}}
       SSL_KEY_PASSWORD: {{KAFKA_client_key_password}}
-        {% endif -%}   {#  KAFKA_ssl_client_authentication_enable #}
+        {% endif -%}   {#  KAFKA_ssl_client_authentication_enabled #}
       {% endif -%}   {#  ns.securityProtocol #}
     {% endif -%}   {#  ns.secureKafkaEnabled #}
     {%if use_timezone | default(false) %}
@@ -3830,12 +3830,12 @@ services:
       {% elif ns.securityProtocolBROKER == 'SSL' %}
       JIKKOU_DEFAULT_KAFKA_SSL_TRUSTSTORE_LOCATION: /certs/client.ts.p12
       JIKKOU_DEFAULT_KAFKA_TRUSTSTORE_PASSWORD: {{KAFKA_client_truststore_password}}
-        {% if KAFKA_ssl_client_authentication_enable | default(false) %}
+        {% if KAFKA_ssl_client_authentication_enabled | default(false) %}
       JIKKOU_DEFAULT_KAFKA_SSL_KEYSTORE_TYPE: "PKCS12"
       JIKKOU_DEFAULT_KAFKA_SSL_KEYSTORE_LOCATION: /certs/client.ks.p12
       JIKKOU_DEFAULT_KAFKA_SSL_KEYSTORE_PASSWORD: {{KAFKA_client_keystore_password}}
       JIKKOU_DEFAULT_KAFKA_SSL_KEY_PASSWORD: {{KAFKA_client_key_password}}
-        {% endif -%}   {#  KAFKA_ssl_client_authentication_enable #}
+        {% endif -%}   {#  KAFKA_ssl_client_authentication_enabled #}
       {% endif -%}   {#  ns.securityProtocol #}
     {% endif -%}   {#  ns.secureKafkaEnabled #}
     {% if (SCHEMA_REGISTRY_enable or external['SCHEMA_REGISTRY_enable']) | default(false) %}
@@ -4147,11 +4147,11 @@ services:
       SECURITY_PROTOCOL: SSL
       TRUST_STORE_LOCATION: /certs/client.ts.p12
       TRUST_STORE_PASSWORD: {{KAFKA_client_truststore_password}}
-        {% if KAFKA_ssl_client_authentication_enable | default(false) %}
+        {% if KAFKA_ssl_client_authentication_enabled | default(false) %}
       KEY_STORE_LOCATION: /certs/client.ks.p12
       KEY_STORE_PASSWORD: {{KAFKA_client_keystore_password}}
       KEY_PASSWORD: {{KAFKA_client_key_password}}
-        {% endif -%}   {#  KAFKA_ssl_client_authentication_enable #}
+        {% endif -%}   {#  KAFKA_ssl_client_authentication_enabled #}
       {% endif -%}   {#  ns.securityProtocol #}
     {% endif -%}   {#  ns.secureKafkaEnabled #}
     {%if use_timezone | default(false) %}
@@ -4193,7 +4193,7 @@ services:
       - {{monitoringExternalPort}}:28081
     environment:
       AKHQ_CONFIGURATION: |
-    {% if AKHQ_auth_enable | default(false) %}
+    {% if AKHQ_auth_enabled | default(false) %}
         micronaut:
           security:
             enabled: true
@@ -4204,7 +4204,7 @@ services:
           security:
             default-group: reader
     {% endif -%}   {#  AKHQ_read_only_mode #}
-    {% if AKHQ_auth_enable and AKHQ_auth_type == 'basic' | default(false) %}
+    {% if AKHQ_auth_enabled and AKHQ_auth_type == 'basic' | default(false) %}
           security:
             enabled: true
             default-group: no-roles
@@ -4243,12 +4243,12 @@ services:
       {% elif ns.securityProtocolBROKER == 'SSL' %}
                 ssl.truststore.location: /certs/client.ts.p12
                 ssl.truststore.password: {{KAFKA_client_truststore_password}}
-        {% if KAFKA_ssl_client_authentication_enable | default(false) %}
+        {% if KAFKA_ssl_client_authentication_enabled | default(false) %}
                 ssl.keystore.type: "PKCS12"
                 ssl.keystore.location: /certs/client.ks.p12
                 ssl.keystore.password: {{KAFKA_client_keystore_password}}
                 ssl.key.password: {{KAFKA_client_key_password}}
-        {% endif -%}   {#  KAFKA_ssl_client_authentication_enable #}
+        {% endif -%}   {#  KAFKA_ssl_client_authentication_enabled #}
       {% endif -%}   {#  ns.securityProtocol #}
     {% endif -%}   {#  ns.secureKafkaEnabled #}
     {% if (SCHEMA_REGISTRY_enable or external['SCHEMA_REGISTRY_enable']) | default(false) %}
@@ -4321,12 +4321,12 @@ services:
       KAFKA_CLUSTERS_0_PROPERTIES_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: 'https'
       KAFKA_CLUSTERS_0_SSL_TRUSTSTORE_LOCATION: /certs/client.ts.p12
       KAFKA_CLUSTERS_0_SSL_TRUSTSTORE_PASSWORD: {{KAFKA_client_truststore_password}}
-        {% if KAFKA_ssl_client_authentication_enable | default(false) %}
+        {% if KAFKA_ssl_client_authentication_enabled | default(false) %}
       KAFKA_CLUSTERS_0_SSL_KEYSTORE_TYPE: "PKCS12"
       KAFKA_CLUSTERS_0_SSL_KEYSTORE_LOCATION: /certs/client.ks.p12
       KAFKA_CLUSTERS_0_SSL_KEYSTORE_PASSWORD: {{KAFKA_client_keystore_password}}
       KAFKA_CLUSTERS_0_SSL_KEY_PASSWORD: {{KAFKA_client_key_password}}
-        {% endif -%}   {#  KAFKA_ssl_client_authentication_enable #}
+        {% endif -%}   {#  KAFKA_ssl_client_authentication_enabled #}
       {% endif -%}   {#  ns.securityProtocol #}
     {% endif -%}   {#  ns.secureKafkaEnabled #}
     {% if (SCHEMA_REGISTRY_enable or external['SCHEMA_REGISTRY_enable']) | default(false) %}
@@ -4629,12 +4629,12 @@ services:
       - SSL_ENDPOINT_IDENTIFICATION_ALGORITHM='https'
       - SSL_TRUSTSTORE_LOCATION=/certs/client.ts.p12
       - SSL_TRUSTSTORE_PASSWORD={{KAFKA_client_truststore_password}}
-        {% if KAFKA_ssl_client_authentication_enable | default(false) %}
+        {% if KAFKA_ssl_client_authentication_enabled | default(false) %}
       - SSL_KEYSTORE_TYPE="PKCS12"
       - SSL_KEYSTORE_LOCATION=/certs/client.ks.p12
       - SSL_KEYSTORE_PASSWORD={{KAFKA_client_keystore_password}}
       - SSL_KEY_PASSWORD={{KAFKA_client_key_password}}
-        {% endif -%}   {#  KAFKA_ssl_client_authentication_enable #}
+        {% endif -%}   {#  KAFKA_ssl_client_authentication_enabled #}
       {% endif -%}   {#  ns.securityProtocol #}
     {% endif -%}   {#  secureKafkaEnabled #}
     {% if (KPOW_edition | lower) == 'ce' or (KPOW_edition | lower) == 'se' or (KPOW_edition | lower) == 'ee' %}
@@ -4741,12 +4741,12 @@ services:
       - SSL_ENDPOINT_IDENTIFICATION_ALGORITHM='https'
       - SSL_TRUSTSTORE_LOCATION=/certs/client.ts.p12
       - SSL_TRUSTSTORE_PASSWORD={{KAFKA_client_truststore_password}}
-        {% if KAFKA_ssl_client_authentication_enable | default(false) %}
+        {% if KAFKA_ssl_client_authentication_enabled | default(false) %}
       - SSL_KEYSTORE_TYPE="PKCS12"
       - SSL_KEYSTORE_LOCATION=/certs/client.ks.p12
       - SSL_KEYSTORE_PASSWORD={{KAFKA_client_keystore_password}}
       - SSL_KEY_PASSWORD={{KAFKA_client_key_password}}
-        {% endif -%}   {#  KAFKA_ssl_client_authentication_enable #}
+        {% endif -%}   {#  KAFKA_ssl_client_authentication_enabled #}
       {% endif -%}   {#  ns.securityProtocol #}
     {% endif -%}   {#  ns.secureKafkaEnabled #}
     {% if (SCHEMA_REGISTRY_enable or external['SCHEMA_REGISTRY_enable']) | default(false) %}
@@ -4852,12 +4852,12 @@ services:
       - APP_KAFKA_PROPERTIES_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM='https'
       - APP_KAFKA_PROPERTIES_SSL_TRUSTSTORE_LOCATION=/certs/client.ts.p12
       - APP_KAFKA_PROPERTIES_SSL_TRUSTSTORE_PASSWORD={{KAFKA_client_truststore_password}}
-        {% if KAFKA_ssl_client_authentication_enable | default(false) %}
+        {% if KAFKA_ssl_client_authentication_enabled | default(false) %}
       - APP_KAFKA_PROPERTIES_SSL_KEYSTORE_TYPE="PKCS12"
       - APP_KAFKA_PROPERTIES_SSL_KEYSTORE_LOCATION=/certs/client.ks.p12
       - APP_KAFKA_PROPERTIES_SSL_KEYSTORE_PASSWORD={{KAFKA_client_keystore_password}}
       - APP_KAFKA_PROPERTIES_SSL_KEY_PASSWORD={{KAFKA_client_key_password}}
-        {% endif -%}   {#  KAFKA_ssl_client_authentication_enable #}
+        {% endif -%}   {#  KAFKA_ssl_client_authentication_enabled #}
       {% endif -%}   {#  ns.securityProtocol #}
     {% endif -%}   {#  ns.secureKafkaEnabled #}
     {% if use_timezone | default(false) %}
@@ -4905,7 +4905,7 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:h2:file:/klaw/klawprodb;DB_CLOSE_ON_EXIT=FALSE;DB_CLOSE_DELAY=-1;MODE=MySQL;CASE_INSENSITIVE_IDENTIFIERS=TRUE;
       - KLAW_CORAL_ENABLED=true
       - KLAW_UIAPI_SERVERS=http://klaw-core:9097
-      - KLAW_QUICKSTART_ENABLED={{KLAW_quickstart_enable | default(false)}}
+      - KLAW_QUICKSTART_ENABLED={{KLAW_quickstart_enabled | default(false)}}
       - KLAW_DOCKER_INTERNAL_HOST=host.docker.internal
       - KLAW_DOCKER_CLUSTERAPI_HOST=http://klaw-cluster-api:9343
       - KLAW_DOCKER_KAFKA_CLUSTER={{ns.bootstrapServers}}
@@ -4976,12 +4976,12 @@ services:
       - {{KLAW_cluster_id}}_KAFKASASL_TRUSTSTORE_TYPE="PKCS12"
       - {{KLAW_cluster_id}}_KAFKASASL_TRUSTSTORE_LOCATION=/certs/client.ts.p12
       - {{KLAW_cluster_id}}_KAFKASASL_TRUSTSTORE_PWD={{KAFKA_client_truststore_password}}
-        {% if KAFKA_ssl_client_authentication_enable | default(false) %}
+        {% if KAFKA_ssl_client_authentication_enabled | default(false) %}
       - {{KLAW_cluster_id}}_KAFKASASL_KEYSTORE_TYPE="PKCS12"
       - {{KLAW_cluster_id}}_KAFKASASL_KEYSTORE_LOCATION=/certs/client.ks.p12
       - {{KLAW_cluster_id}}_KAFKASASL_KEYSTORE_PWD={{KAFKA_client_keystore_password}}
       - {{KLAW_cluster_id}}_KAFKASASL_KEY_PWD={{KAFKA_client_key_password}}
-        {% endif -%}   {#  KAFKA_ssl_client_authentication_enable #}
+        {% endif -%}   {#  KAFKA_ssl_client_authentication_enabled #}
       {% endif -%}   {#  ns.securityProtocol #}
     {% endif -%}   {#  ns.secureKafkaEnabled #}
       - LOGGING_LEVEL_ROOT={{KLAW_logging_level | default(info)}}
@@ -5570,7 +5570,7 @@ services:
       SPARK_DEFAULTS_CONF_spark_executor_memory: {{SPARK_executor_memory if SPARK_executor_memory is defined and SPARK_executor_memory else omit }}
 #      SPARK_DEFAULTS_CONF_spark_sql_extensions: {{SPARK_sql_extensions if SPARK_sql_extensions is defined and SPARK_sql_extensions else omit }}
 #      SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: {{SPARK_sql_catalog_spark_catalog if SPARK_sql_catalog_spark_catalog is defined and SPARK_sql_catalog_spark_catalog else omit }}
-    {%if (DATAHUB_enable or external['DATAHUB_enable'] and SPARK_datahub_agent_enable) | default(false) %}
+    {%if (DATAHUB_enable or external['DATAHUB_enable'] and SPARK_datahub_agent_enabled) | default(false) %}
       SPARK_DEFAULTS_CONF_spark_extraListeners: 'datahub.spark.DatahubSparkListener'
       SPARK_DEFAULTS_CONF_spark_datahub_rest_server: {{ns.gmsUrl}}
       SPARK_DEFAULTS_CONF_spark_datahub_metadata_dataset_env: {{env}}
@@ -5624,7 +5624,7 @@ services:
       SPARK_DEFAULTS_CONF_spark_jars_repositories: {{SPARK_jars_repositories}}
       SPARK_DEFAULTS_CONF_spark_jars_packages: "{{SPARK_jars_packages}}"
       SPARK_DEFAULTS_CONF_spark_jars_excludes: {{SPARK_jars_excludes}}
-    {%if (DATAHUB_enable or external['DATAHUB_enable'] and SPARK_datahub_agent_enable) | default(false) %}
+    {%if (DATAHUB_enable or external['DATAHUB_enable'] and SPARK_datahub_agent_enabled) | default(false) %}
       # specifies the JARs to be downloaded to the jars folder by maven-download-sh script (triggered in the init script)
       SPARK_INSTALL_JARS_PACKAGES: '{{SPARK_install_jars_packages}},{{ns.sparkDeltaDependencies}},{{ns.sparkIcebergDependencies}},{{ns.sparkHudiDependencies}},{{ns.datahubSparkPluginDependencies}}'
       SPARK_DEFAULTS_CONF_spark_jars: {{SPARK_jars}}{{',' if SPARK_jars | length}}{{ns.sparkTableFormatJar | default('')}}{{',' if ns.sparkTableFormatJar | length}}{{ns.datahubSparkPluginJar | default('')}}
@@ -5726,7 +5726,7 @@ services:
       SPARK_DEFAULTS_CONF_spark_executor_extraJavaOptions: {{SPARK_executor_extraJavaOptions}}
       SPARK_DEFAULTS_CONF_spark_cores_max: {{SPARK_cores_max if SPARK_cores_max is defined and SPARK_cores_max else omit }}
       SPARK_DEFAULTS_CONF_spark_executor_memory: {{SPARK_executor_memory if SPARK_executor_memory is defined and SPARK_executor_memory else omit }}
-    {%if (DATAHUB_enable or external['DATAHUB_enable'] and SPARK_datahub_agent_enable) | default(false) %}
+    {%if (DATAHUB_enable or external['DATAHUB_enable'] and SPARK_datahub_agent_enabled) | default(false) %}
       SPARK_DEFAULTS_CONF_spark_extraListeners: 'datahub.spark.DatahubSparkListener'
       SPARK_DEFAULTS_CONF_spark_datahub_rest_server: {{ns.gmsUrl}}
       SPARK_DEFAULTS_CONF_spark_datahub_metadata_dataset_env: {{env}}
@@ -5780,7 +5780,7 @@ services:
       SPARK_DEFAULTS_CONF_spark_jars_repositories: {{SPARK_jars_repositories}}
       SPARK_DEFAULTS_CONF_spark_jars_packages: "{{SPARK_jars_packages}}{{',' if SPARK_jars_packages | length}}{{SPARK_datahub_package | default('')}}"
       SPARK_DEFAULTS_CONF_spark_jars_excludes: {{SPARK_jars_excludes}}
-    {%if (DATAHUB_enable or external['DATAHUB_enable'] and SPARK_datahub_agent_enable) | default(false) %}
+    {%if (DATAHUB_enable or external['DATAHUB_enable'] and SPARK_datahub_agent_enabled) | default(false) %}
       # specifies the JARs to be downloaded to the jars folder by maven-download-sh script
       SPARK_INSTALL_JARS_PACKAGES: '{{SPARK_install_jars_packages}},{{ns.sparkDeltaDependencies}},{{ns.sparkIcebergDependencies}},{{ns.sparkHudiDependencies}},{{ns.datahubSparkPluginDependencies}}'
       SPARK_DEFAULTS_CONF_spark_jars: {{SPARK_jars}}{{',' if SPARK_jars | length}}{{ns.sparkTableFormatJar | default('')}}{{',' if ns.sparkTableFormatJar | length}}{{ns.datahubSparkPluginJar | default('')}}
@@ -5839,7 +5839,7 @@ services:
       SPARK_DEFAULTS_CONF_spark_jars_repositories: {{SPARK_jars_repositories}}
       SPARK_DEFAULTS_CONF_spark_jars_packages: "{{SPARK_jars_packages}}{{',' if SPARK_jars_packages | length}}{{SPARK_datahub_package | default('')}}"
       SPARK_DEFAULTS_CONF_spark_jars_excludes: {{SPARK_jars_excludes}}
-    {%if (DATAHUB_enable or external['DATAHUB_enable'] and SPARK_datahub_agent_enable) | default(false) %}
+    {%if (DATAHUB_enable or external['DATAHUB_enable'] and SPARK_datahub_agent_enabled) | default(false) %}
       # specifies the JARs to be downloaded to the jars folder by maven-download-sh script
       SPARK_INSTALL_JARS_PACKAGES: '{{SPARK_install_jars_packages}},{{ns.sparkDeltaDependencies}},{{ns.sparkIcebergDependencies}},{{ns.sparkHudiDependencies}},{{ns.datahubSparkPluginDependencies}}'
       SPARK_DEFAULTS_CONF_spark_jars: {{SPARK_jars}}{{',' if SPARK_jars | length}}{{ns.sparkTableFormatJar | default('')}}{{',' if ns.sparkTableFormatJar | length}}{{ns.datahubSparkPluginJar | default('')}}
@@ -5876,7 +5876,7 @@ services:
       SPARK_DEFAULTS_CONF_spark_executor_extraJavaOptions: {{SPARK_executor_extraJavaOptions}}
       SPARK_DEFAULTS_CONF_spark_cores_max: {{SPARK_cores_max if SPARK_cores_max is defined and SPARK_cores_max else omit }}
       SPARK_DEFAULTS_CONF_spark_executor_memory: {{SPARK_executor_memory if SPARK_executor_memory is defined and SPARK_executor_memory else omit }}
-    {%if (DATAHUB_enable or external['DATAHUB_enable'] and SPARK_datahub_agent_enable) | default(false) %}
+    {%if (DATAHUB_enable or external['DATAHUB_enable'] and SPARK_datahub_agent_enabled) | default(false) %}
       SPARK_DEFAULTS_CONF_spark_extraListeners: 'datahub.spark.DatahubSparkListener'
       SPARK_DEFAULTS_CONF_spark_datahub_rest_server: {{ns.gmsUrl}}
       SPARK_DEFAULTS_CONF_spark_datahub_metadata_dataset_env: {{env}}
@@ -5998,7 +5998,7 @@ services:
       SPARK_DEFAULTS_CONF_spark_hadoop_hive_metastore_uris: thrift://hive-metastore:9083
     {% endif -%}   {#  SPARK_catalog #}
 
-    {%if (DATAHUB_enable or external['DATAHUB_enable'] and SPARK_datahub_agent_enable) | default(false) %}
+    {%if (DATAHUB_enable or external['DATAHUB_enable'] and SPARK_datahub_agent_enabled) | default(false) %}
       SPARK_DEFAULTS_CONF_spark_extraListeners: 'datahub.spark.DatahubSparkListener'
       SPARK_DEFAULTS_CONF_spark_datahub_metadata_dataset_env: {{env}}
       SPARK_DEFAULTS_CONF_spark_datahub_rest_server: {{ns.gmsUrl}}
@@ -6056,7 +6056,7 @@ services:
       SPARK_DEFAULTS_CONF_spark_jars_repositories: {{SPARK_jars_repositories}}
       SPARK_DEFAULTS_CONF_spark_jars_packages: "{{SPARK_jars_packages}}{{',' if SPARK_jars_packages | length}}{{SPARK_datahub_package | default('')}}"
       SPARK_DEFAULTS_CONF_spark_jars_excludes: {{SPARK_jars_excludes}}
-    {%if (DATAHUB_enable or external['DATAHUB_enable'] and SPARK_datahub_agent_enable) | default(false) %}
+    {%if (DATAHUB_enable or external['DATAHUB_enable'] and SPARK_datahub_agent_enabled) | default(false) %}
       # specifies the JARs to be downloaded to the jars folder by maven-download-sh script
       SPARK_INSTALL_JARS_PACKAGES: '{{SPARK_install_jars_packages}},{{ns.sparkDeltaDependencies}},{{ns.sparkIcebergDependencies}},{{ns.sparkHudiDependencies}},{{ns.datahubSparkPluginDependencies}}'
       SPARK_DEFAULTS_CONF_spark_jars: {{SPARK_jars}}{{',' if SPARK_jars | length}}{{ns.sparkTableFormatJar | default('')}}{{',' if ns.sparkTableFormatJar | length}}{{ns.datahubSparkPluginJar | default('')}}
@@ -6152,7 +6152,7 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalogImplementation: hive
       SPARK_DEFAULTS_CONF_spark_hadoop_hive_metastore_uris: thrift://hive-metastore:9083
       {% endif -%}   {#  KYUUBI_local_spark_catalog #}
-      {%if (DATAHUB_enable or external['DATAHUB_enable'] and SPARK_datahub_agent_enable) | default(false) %}
+      {%if (DATAHUB_enable or external['DATAHUB_enable'] and SPARK_datahub_agent_enabled) | default(false) %}
       SPARK_DEFAULTS_CONF_spark_extraListeners: 'datahub.spark.DatahubSparkListener'
       SPARK_DEFAULTS_CONF_spark_datahub_rest_server: {{ns.gmsUrl}}
       SPARK_DEFAULTS_CONF_spark_datahub_metadata_dataset_env: {{env}}
@@ -6206,7 +6206,7 @@ services:
       SPARK_DEFAULTS_CONF_spark_jars_repositories: {{KYUUBI_local_spark_jars_repositories}}
       SPARK_DEFAULTS_CONF_spark_jars_packages: "{{KYUUBI_local_spark_jars_packages}}"
       SPARK_DEFAULTS_CONF_spark_jars_excludes: {{KYUUBI_local_spark_jars_excludes}}
-      {%if (DATAHUB_enable or external['DATAHUB_enable'] and SPARK_datahub_agent_enable) | default(false) %}
+      {%if (DATAHUB_enable or external['DATAHUB_enable'] and SPARK_datahub_agent_enabled) | default(false) %}
       # specifies the JARs to be downloaded to the jars folder by maven-download-sh script (triggered in the init script)
       SPARK_INSTALL_JARS_PACKAGES: '{{KYUUBI_local_spark_install_jars_packages}},{{ns.sparkDeltaDependencies}},{{ns.sparkIcebergDependencies}},{{ns.sparkHudiDependencies}},{{ns.datahubSparkPluginDependencies}}'
       SPARK_DEFAULTS_CONF_spark_jars: {{KYUUBI_local_spark_jars}}{{',' if KYUUBI_local_spark_jars | length}}{{ns.sparkTableFormatJar | default('')}}{{',' if ns.sparkTableFormatJar | length}}{{ns.datahubSparkPluginJar | default('')}}
@@ -6304,7 +6304,7 @@ services:
       SPARK_DEFAULTS_CONF_spark_executor_extraJavaOptions: {{SPARK_executor_extraJavaOptions}}
       SPARK_DEFAULTS_CONF_spark_cores_max: {{SPARK_cores_max if SPARK_cores_max is defined and SPARK_cores_max else omit }}
       SPARK_DEFAULTS_CONF_spark_executor_memory: {{SPARK_executor_memory if SPARK_executor_memory is defined and SPARK_executor_memory else omit }}
-  {%if (DATAHUB_enable or external['DATAHUB_enable'] and SPARK_datahub_agent_enable) | default(false) %}
+  {%if (DATAHUB_enable or external['DATAHUB_enable'] and SPARK_datahub_agent_enabled) | default(false) %}
       SPARK_DEFAULTS_CONF_spark_extraListeners: 'datahub.spark.DatahubSparkListener'
       SPARK_DEFAULTS_CONF_spark_datahub_rest_server: {{ns.gmsUrl}}
       SPARK_DEFAULTS_CONF_spark_datahub_metadata_dataset_env: {{env}}
@@ -6351,7 +6351,7 @@ services:
       SPARK_DEFAULTS_CONF_spark_jars_repositories: {{SPARK_jars_repositories}}
       SPARK_DEFAULTS_CONF_spark_jars_packages: "{{SPARK_jars_packages}}{{',' if SPARK_jars_packages | length}}{{SPARK_datahub_package | default('')}}"
       SPARK_DEFAULTS_CONF_spark_jars_excludes: {{SPARK_jars_excludes}}
-    {%if (DATAHUB_enable or external['DATAHUB_enable'] and SPARK_datahub_agent_enable) | default(false) %}
+    {%if (DATAHUB_enable or external['DATAHUB_enable'] and SPARK_datahub_agent_enabled) | default(false) %}
       # specifies the JARs to be downloaded by maven-download-sh script
       SPARK_INSTALL_JARS_PACKAGES: '{{SPARK_install_jars_packages}},{{ns.sparkDeltaDependencies}},{{ns.sparkIcebergDependencies}},{{ns.sparkHudiDependencies}},{{ns.datahubSparkPluginDependencies}}'
       SPARK_DEFAULTS_CONF_spark_jars: {{SPARK_jars}}{{',' if SPARK_jars | length}}{{ns.sparkTableFormatJar | default('')}}{{',' if ns.sparkTableFormatJar | length}}{{ns.datahubSparkPluginJar | default('')}}
@@ -7467,7 +7467,7 @@ services:
       HIVE_SITE_CONF_hive_metastore_event_db_listener_timetolive: 86400   # 1 day
       HIVE_SITE_CONF_hive_metastore_event_db_listener_clean_interval: 7200  # 2 hours
   {% endif -%}   {#  HIVE_METASTORE_transactional_event_listener_enabled #}
-  {% if ATLAS_hive_hook_enable | default(false) %}
+  {% if ATLAS_hive_hook_enabled | default(false) %}
       HIVE_SITE_CONF_hive_exec_post_hooks: "org.apache.atlas.hive.hook.HiveHook"
       HIVE_AUX_JARS_PATH: "/opt/atlas/hook/hive"
   {% endif -%}   {#  ATLAS_install_hive_hook #}
@@ -7484,7 +7484,7 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
-  {% if ATLAS_hive_hook_enable | default(false) %}
+  {% if ATLAS_hive_hook_enabled | default(false) %}
       - ./conf/atlas/atlas-application.properties:/opt/hive/conf/atlas-application.properties
       - ./plugins/hive-server/apache-atlas-hive-hook/hook:/opt/atlas/hook
   {% endif -%}   {#  ATLAS_install_hive_hook #}
@@ -8178,12 +8178,12 @@ services:
       - SPRING_KAFKA_PROPERTIES_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM='https'
       - SPRING_KAFKA_PROPERTIES_SSL_TRUSTSTORE_LOCATION=/certs/client.ts.p12
       - SPRING_KAFKA_PROPERTIES_SSL_TRUSTSTORE_PASSWORD={{KAFKA_client_truststore_password}}
-        {% if KAFKA_ssl_client_authentication_enable | default(false) %}
+        {% if KAFKA_ssl_client_authentication_enabled | default(false) %}
       - SPRING_KAFKA_PROPERTIES_SSL_KEYSTORE_TYPE="PKCS12"
       - SPRING_KAFKA_PROPERTIES_SSL_KEYSTORE_LOCATION=/certs/client.ks.p12
       - SPRING_KAFKA_PROPERTIES_SSL_KEYSTORE_PASSWORD={{KAFKA_client_keystore_password}}
       - SPRING_KAFKA_PROPERTIES_SSL_KEY_PASSWORD={{KAFKA_client_key_password}}
-        {% endif -%}   {#  KAFKA_ssl_client_authentication_enable #}
+        {% endif -%}   {#  KAFKA_ssl_client_authentication_enabled #}
       {% endif -%}   {#  ns.securityProtocol #}
     {% endif -%}   {#  secureKafkaEnabled #}
       - DATAHUB_TRACKING_TOPIC=DataHubUsageEvent_v1
@@ -8260,12 +8260,12 @@ services:
       - SPRING_KAFKA_PROPERTIES_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM='https'
       - SPRING_KAFKA_PROPERTIES_SSL_TRUSTSTORE_LOCATION=/certs/client.ts.p12
       - SPRING_KAFKA_PROPERTIES_SSL_TRUSTSTORE_PASSWORD={{KAFKA_client_truststore_password}}
-        {% if KAFKA_ssl_client_authentication_enable | default(false) %}
+        {% if KAFKA_ssl_client_authentication_enabled | default(false) %}
       - SPRING_KAFKA_PROPERTIES_SSL_KEYSTORE_TYPE="PKCS12"
       - SPRING_KAFKA_PROPERTIES_SSL_KEYSTORE_LOCATION=/certs/client.ks.p12
       - SPRING_KAFKA_PROPERTIES_SSL_KEYSTORE_PASSWORD={{KAFKA_client_keystore_password}}
       - SPRING_KAFKA_PROPERTIES_SSL_KEY_PASSWORD={{KAFKA_client_key_password}}
-        {% endif -%}   {#  KAFKA_ssl_client_authentication_enable #}
+        {% endif -%}   {#  KAFKA_ssl_client_authentication_enabled #}
       {% endif -%}   {#  ns.securityProtocol #}
     {% endif -%}   {#  secureKafkaEnabled #}
       - KAFKA_CONSUMER_STOP_ON_DESERIALIZATION_ERROR=true
@@ -8344,12 +8344,12 @@ services:
       - SPRING_KAFKA_PROPERTIES_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM='https'
       - SPRING_KAFKA_PROPERTIES_SSL_TRUSTSTORE_LOCATION=/certs/client.ts.p12
       - SPRING_KAFKA_PROPERTIES_SSL_TRUSTSTORE_PASSWORD={{KAFKA_client_truststore_password}}
-        {% if KAFKA_ssl_client_authentication_enable | default(false) %}
+        {% if KAFKA_ssl_client_authentication_enabled | default(false) %}
       - SPRING_KAFKA_PROPERTIES_SSL_KEYSTORE_TYPE="PKCS12"
       - SPRING_KAFKA_PROPERTIES_SSL_KEYSTORE_LOCATION=/certs/client.ks.p12
       - SPRING_KAFKA_PROPERTIES_SSL_KEYSTORE_PASSWORD={{KAFKA_client_keystore_password}}
       - SPRING_KAFKA_PROPERTIES_SSL_KEY_PASSWORD={{KAFKA_client_key_password}}
-        {% endif -%}   {#  KAFKA_ssl_client_authentication_enable #}
+        {% endif -%}   {#  KAFKA_ssl_client_authentication_enabled #}
       {% endif -%}   {#  ns.securityProtocol #}
     {% endif -%}   {#  secureKafkaEnabled #}
       - METADATA_AUDIT_EVENT_NAME=MetadataAuditEvent_v4
@@ -8360,9 +8360,9 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer:rw
-    {%if DATAHUB_ACTIONS_custom_actions_enable | default(false) %}
+    {%if DATAHUB_ACTIONS_custom_actions_enabled | default(false) %}
       - ./scripts/datahub/custom-actions:/etc/datahub/actions/conf
-    {% endif -%}   {#  DATAHUB_ACTIONS_custom_actions_enable #}
+    {% endif -%}   {#  DATAHUB_ACTIONS_custom_actions_enabled #}
     {% if ns.secureKafkaEnabled and ns.securityProtocol == 'SSL' %}
       - ./security/kafka/client-certs:/certs
     {% endif -%} {#  ns.secureKafkaEnabled #}
@@ -8408,12 +8408,12 @@ services:
       - SPRING_KAFKA_PROPERTIES_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM='https'
       - SPRING_KAFKA_PROPERTIES_SSL_TRUSTSTORE_LOCATION=/certs/client.ts.p12
       - SPRING_KAFKA_PROPERTIES_SSL_TRUSTSTORE_PASSWORD={{KAFKA_client_truststore_password}}
-        {% if KAFKA_ssl_client_authentication_enable | default(false) %}
+        {% if KAFKA_ssl_client_authentication_enabled | default(false) %}
       - SPRING_KAFKA_PROPERTIES_SSL_KEYSTORE_TYPE="PKCS12"
       - SPRING_KAFKA_PROPERTIES_SSL_KEYSTORE_LOCATION=/certs/client.ks.p12
       - SPRING_KAFKA_PROPERTIES_SSL_KEYSTORE_PASSWORD={{KAFKA_client_keystore_password}}
       - SPRING_KAFKA_PROPERTIES_SSL_KEY_PASSWORD={{KAFKA_client_key_password}}
-        {% endif -%}   {#  KAFKA_ssl_client_authentication_enable #}
+        {% endif -%}   {#  KAFKA_ssl_client_authentication_enabled #}
       {% endif -%}   {#  ns.securityProtocol #}
     {% endif -%}   {#  secureKafkaEnabled #}
       - KAFKA_SCHEMAREGISTRY_URL='{{ns.schemaRegistryUrl}}'
@@ -8491,12 +8491,12 @@ services:
       - SPRING_KAFKA_PROPERTIES_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM='https'
       - SPRING_KAFKA_PROPERTIES_SSL_TRUSTSTORE_LOCATION=/certs/client.ts.p12
       - SPRING_KAFKA_PROPERTIES_SSL_TRUSTSTORE_PASSWORD={{KAFKA_client_truststore_password}}
-        {% if KAFKA_ssl_client_authentication_enable | default(false) %}
+        {% if KAFKA_ssl_client_authentication_enabled | default(false) %}
       - SPRING_KAFKA_PROPERTIES_SSL_KEYSTORE_TYPE="PKCS12"
       - SPRING_KAFKA_PROPERTIES_SSL_KEYSTORE_LOCATION=/certs/client.ks.p12
       - SPRING_KAFKA_PROPERTIES_SSL_KEYSTORE_PASSWORD={{KAFKA_client_keystore_password}}
       - SPRING_KAFKA_PROPERTIES_SSL_KEY_PASSWORD={{KAFKA_client_key_password}}
-        {% endif -%}   {#  KAFKA_ssl_client_authentication_enable #}
+        {% endif -%}   {#  KAFKA_ssl_client_authentication_enabled #}
       {% endif -%}   {#  ns.securityProtocol #}
     {% endif -%}   {#  secureKafkaEnabled #}
       - KAFKA_SCHEMAREGISTRY_URL='{{ns.schemaRegistryUrl}}'
@@ -8866,12 +8866,12 @@ services:
       - SPRING_KAFKA_PROPERTIES_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM='https'
       - SPRING_KAFKA_PROPERTIES_SSL_TRUSTSTORE_LOCATION=/certs/client.ts.p12
       - SPRING_KAFKA_PROPERTIES_SSL_TRUSTSTORE_PASSWORD={{KAFKA_client_truststore_password}}
-        {% if KAFKA_ssl_client_authentication_enable | default(false) %}
+        {% if KAFKA_ssl_client_authentication_enabled | default(false) %}
       - SPRING_KAFKA_PROPERTIES_SSL_KEYSTORE_TYPE="PKCS12"
       - SPRING_KAFKA_PROPERTIES_SSL_KEYSTORE_LOCATION=/certs/client.ks.p12
       - SPRING_KAFKA_PROPERTIES_SSL_KEYSTORE_PASSWORD={{KAFKA_client_keystore_password}}
       - SPRING_KAFKA_PROPERTIES_SSL_KEY_PASSWORD={{KAFKA_client_key_password}}
-        {% endif -%}   {#  KAFKA_ssl_client_authentication_enable #}
+        {% endif -%}   {#  KAFKA_ssl_client_authentication_enabled #}
       {% endif -%}   {#  ns.securityProtocol #}
     {% endif -%}   {#  secureKafkaEnabled #}
       - KAFKA_ZOOKEEPER_CONNECT=zookeeper-1:2181
@@ -13905,7 +13905,7 @@ services:
       ZEPPELIN_INTERPRETER_CONNECT_TIMEOUT: 120000
       ZEPPELIN_INTERPRETER_DEP_MVNREPO: 'https://repo.maven.apache.org/maven2'
       ZEPPELIN_NOTEBOOK_DIR: '{{ZEPPELIN_notebook_dir}}'
-      ZEPPELIN_NOTEBOOK_CRON_ENABLE: '{{ZEPPELIN_notebook_cron_enable}}'
+      ZEPPELIN_NOTEBOOK_CRON_ENABLE: '{{ZEPPELIN_notebook_cron_enabled}}'
 
       # Will replace values in shiro.ini
       ZEPPELIN_ADMIN_USERNAME: {{ZEPPELIN_admin_username}}
@@ -14618,7 +14618,7 @@ services:
       com.platys.description: "User-friendly WebUI for LLMs"
       com.platys.webui.title: "Open Web UI"
       com.platys.webui.url: "http://dataplatform:28338"
-      com.centurylinklabs.watchtower.enable: {{true if MARKDOWN_MADNESS_watchtower_enable else omit}}      
+      com.centurylinklabs.watchtower.enable: {{true if MARKDOWN_MADNESS_watchtower_enabled else omit}}      
     ports:
       - 28338:8080
     environment:
@@ -14685,7 +14685,7 @@ services:
       com.platys.description: "User-friendly WebUI for LLMs (audio transcriber)"
       com.platys.restui.title: "Transcribrer API"
       com.platys.restui.url: "http://dataplatform:28223/audio/transcriptions"
-      com.centurylinklabs.watchtower.enable: {{true if MARKDOWN_MADNESS_watchtower_enable else omit}}      
+      com.centurylinklabs.watchtower.enable: {{true if MARKDOWN_MADNESS_watchtower_enabled else omit}}      
     ports:
       - "28223:80"
     environment:
@@ -15179,13 +15179,13 @@ services:
     {% endif -%}   {#  LANGFLOW_database_type #}
       LANGFLOW_CONFIG_DIR: /app/langflow
       LANGFLOW_COMPONENTS_PATH: /tmp/langflow/components
-    {% if LANGFLOW_auth_enable | default(false) %}  
+    {% if LANGFLOW_auth_enabled | default(false) %}  
       LANGFLOW_AUTO_LOGIN: false
       LANGFLOW_SUPERUSER: {{LANGFLOW_superuser_username}}
       LANGFLOW_SUPERUSER_PASSWORD: ${PLATYS_LANGFLOW_SUPERUSER_PASSWORD:-{{LANGFLOW_superuser_password}}}
     {% else %}  
       LANGFLOW_LOAD_FLOWS_PATH: /tmp/langflow/flows
-    {% endif -%}  {#  LANGFLOW_auth_enable #}
+    {% endif -%}  {#  LANGFLOW_auth_enabled #}
       LANGFLOW_SECRET_KEY: {{LANGFLOW_secret_key | upper if LANGFLOW_secret_key is defined and LANGFLOW_secret_key and LANGFLOW_secret_key | length else omit}}
       LANGFLOW_NEW_USER_IS_ACTIVE: true
       LANGFLOW_BACKEND_ONLY: {{LANGFLOW_backend_only | default(false)}}
@@ -17112,11 +17112,11 @@ services:
       - {{'REDIS' if REDIS_edition | lower == 'redis' else 'VALKEY'}}_PASSWORD_FILE=/opt/bitnami/redis/mounted-etc/{{REDIS_password_file if REDIS_password_file is defined and REDIS_password_file and REDIS_password_file | length else omit }}
     {% endif -%}   {# not REDIS_allow_empty_password and REDIS_password or REDIS_PASSWORD_FILE #}
       - {{'REDIS' if REDIS_edition | lower == 'redis' else 'VALKEY'}}_ACLFILE=/{{REDIS_aclfile if REDIS_aclfile is defined and REDIS_aclfile and REDIS_aclfile | length else omit }}
-      - {{'REDIS' if REDIS_edition | lower == 'redis' else 'VALKEY'}}_AOF_ENABLED={{'yes' if REDIS_aof_enable else omit }}
-      - {{'REDIS' if REDIS_edition | lower == 'redis' else 'VALKEY'}}_RDB_POLICY={{REDIS_rdb_save_policy if REDIS_rdb_enable and REDIS_rdb_save_policy is defined and REDIS_rdb_save_policy and REDIS_rdb_save_policy | length else omit}}
-      - {{'REDIS' if REDIS_edition | lower == 'redis' else 'VALKEY'}}_RDB_POLICY_DISABLED={{'yes' if not REDIS_rdb_enable else omit }}
+      - {{'REDIS' if REDIS_edition | lower == 'redis' else 'VALKEY'}}_AOF_ENABLED={{'yes' if REDIS_aof_enabled else omit }}
+      - {{'REDIS' if REDIS_edition | lower == 'redis' else 'VALKEY'}}_RDB_POLICY={{REDIS_rdb_save_policy if REDIS_rdb_enabled and REDIS_rdb_save_policy is defined and REDIS_rdb_save_policy and REDIS_rdb_save_policy | length else omit}}
+      - {{'REDIS' if REDIS_edition | lower == 'redis' else 'VALKEY'}}_RDB_POLICY_DISABLED={{'yes' if not REDIS_rdb_enabled else omit }}
       - {{'REDIS' if REDIS_edition | lower == 'redis' else 'VALKEY'}}_IO_THREADS={{REDIS_io_threads if REDIS_io_threads is defined and REDIS_io_threads and REDIS_io_threads | length and REDIS_io_threads > 0 else omit }}
-      - {{'REDIS' if REDIS_edition | lower == 'redis' else 'VALKEY'}}_IO_THREADS_DO_READS={{'yes' if REDIS_io_threads_do_reads_enable else omit }}
+      - {{'REDIS' if REDIS_edition | lower == 'redis' else 'VALKEY'}}_IO_THREADS_DO_READS={{'yes' if REDIS_io_threads_do_reads_enabled else omit }}
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -17181,11 +17181,11 @@ services:
       - {{'REDIS' if REDIS_edition | lower == 'redis' else 'VALKEY'}}_PASSWORD_FILE=/opt/bitnami/redis/mounted-etc/{{REDIS_password_file if REDIS_password_file is defined and REDIS_password_file and REDIS_password_file | length else omit }}
     {% endif -%}   {# not REDIS_allow_empty_password and REDIS_password or REDIS_PASSWORD_FILE #}
       - {{'REDIS' if REDIS_edition | lower == 'redis' else 'VALKEY'}}_ACLFILE=/{{REDIS_aclfile if REDIS_aclfile is defined and REDIS_aclfile and REDIS_aclfile | length else omit }}
-      - {{'REDIS' if REDIS_edition | lower == 'redis' else 'VALKEY'}}_AOF_ENABLED={{'yes' if REDIS_aof_enable else omit }}
-      - {{'REDIS' if REDIS_edition | lower == 'redis' else 'VALKEY'}}_RDB_POLICY={{REDIS_rdb_save_policy if REDIS_rdb_enable and REDIS_rdb_save_policy is defined and REDIS_rdb_save_policy and REDIS_rdb_save_policy | length else omit}}
-      - {{'REDIS' if REDIS_edition | lower == 'redis' else 'VALKEY'}}_RDB_POLICY_DISABLED={{'yes' if not REDIS_rdb_enable else omit }}
+      - {{'REDIS' if REDIS_edition | lower == 'redis' else 'VALKEY'}}_AOF_ENABLED={{'yes' if REDIS_aof_enabled else omit }}
+      - {{'REDIS' if REDIS_edition | lower == 'redis' else 'VALKEY'}}_RDB_POLICY={{REDIS_rdb_save_policy if REDIS_rdb_enabled and REDIS_rdb_save_policy is defined and REDIS_rdb_save_policy and REDIS_rdb_save_policy | length else omit}}
+      - {{'REDIS' if REDIS_edition | lower == 'redis' else 'VALKEY'}}_RDB_POLICY_DISABLED={{'yes' if not REDIS_rdb_enabled else omit }}
       - {{'REDIS' if REDIS_edition | lower == 'redis' else 'VALKEY'}}_IO_THREADS={{REDIS_io_threads if REDIS_io_threads is defined and REDIS_io_threads and REDIS_io_threads | length and REDIS_io_threads > 0 else omit }}
-      - {{'REDIS' if REDIS_edition | lower == 'redis' else 'VALKEY'}}_IO_THREADS_DO_READS={{'yes' if REDIS_io_threads_do_reads_enable else omit }}
+      - {{'REDIS' if REDIS_edition | lower == 'redis' else 'VALKEY'}}_IO_THREADS_DO_READS={{'yes' if REDIS_io_threads_do_reads_enabled else omit }}
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -17399,11 +17399,11 @@ services:
       - VALKEY_PASSWORD_FILE=/opt/bitnami/valkey/mounted-etc/{{VALKEY_password_file if VALKEY_password_file is defined and VALKEY_password_file and VALKEY_password_file | length else omit }}
     {% endif -%}   {# not VALKEY_allow_empty_password and VALKEY_password or VALKEY_PASSWORD_FILE #}
       - VALKEY_ACLFILE=/{{VALKEY_aclfile if VALKEY_aclfile is defined and VALKEY_aclfile and VALKEY_aclfile | length else omit }}
-      - VALKEY_AOF_ENABLED={{'yes' if VALKEY_aof_enable else omit }}
-      - VALKEY_RDB_POLICY={{VALKEY_rdb_save_policy if VALKEY_rdb_enable and VALKEY_rdb_save_policy is defined and VALKEY_rdb_save_policy and VALKEY_rdb_save_policy | length else omit}}
-      - VALKEY_RDB_POLICY_DISABLED={{'yes' if not VALKEY_rdb_enable else omit }}
+      - VALKEY_AOF_ENABLED={{'yes' if VALKEY_aof_enabled else omit }}
+      - VALKEY_RDB_POLICY={{VALKEY_rdb_save_policy if VALKEY_rdb_enabled and VALKEY_rdb_save_policy is defined and VALKEY_rdb_save_policy and VALKEY_rdb_save_policy | length else omit}}
+      - VALKEY_RDB_POLICY_DISABLED={{'yes' if not VALKEY_rdb_enabled else omit }}
       - VALKEY_IO_THREADS={{VALKEY_io_threads if VALKEY_io_threads is defined and VALKEY_io_threads and VALKEY_io_threads | length and VALKEY_io_threads > 0 else omit }}
-      - VALKEY_IO_THREADS_DO_READS={{'yes' if VALKEY_io_threads_do_reads_enable else omit }}
+      - VALKEY_IO_THREADS_DO_READS={{'yes' if VALKEY_io_threads_do_reads_enabled else omit }}
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -17468,11 +17468,11 @@ services:
       - VALKEY_PASSWORD_FILE=/opt/bitnami/valkey/mounted-etc/{{VALKEY_password_file if VALKEY_password_file is defined and VALKEY_password_file and VALKEY_password_file | length else omit }}
     {% endif -%}   {# not VALKEY_allow_empty_password and VALKEY_password or VALKEY_PASSWORD_FILE #}
       - VALKEY_ACLFILE=/{{VALKEY_aclfile if VALKEY_aclfile is defined and VALKEY_aclfile and VALKEY_aclfile | length else omit }}
-      - VALKEY_AOF_ENABLED={{'yes' if VALKEY_aof_enable else omit }}
-      - VALKEY_RDB_POLICY={{VALKEY_rdb_save_policy if VALKEY_rdb_enable and VALKEY_rdb_save_policy is defined and VALKEY_rdb_save_policy and VALKEY_rdb_save_policy | length else omit}}
-      - VALKEY_RDB_POLICY_DISABLED={{'yes' if not VALKEY_rdb_enable else omit }}
+      - VALKEY_AOF_ENABLED={{'yes' if VALKEY_aof_enabled else omit }}
+      - VALKEY_RDB_POLICY={{VALKEY_rdb_save_policy if VALKEY_rdb_enabled and VALKEY_rdb_save_policy is defined and VALKEY_rdb_save_policy and VALKEY_rdb_save_policy | length else omit}}
+      - VALKEY_RDB_POLICY_DISABLED={{'yes' if not VALKEY_rdb_enabled else omit }}
       - VALKEY_IO_THREADS={{VALKEY_io_threads if VALKEY_io_threads is defined and VALKEY_io_threads and VALKEY_io_threads | length and VALKEY_io_threads > 0 else omit }}
-      - VALKEY_IO_THREADS_DO_READS={{'yes' if VALKEY_io_threads_do_reads_enable else omit }}
+      - VALKEY_IO_THREADS_DO_READS={{'yes' if VALKEY_io_threads_do_reads_enabled else omit }}
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -20670,7 +20670,7 @@ services:
       - "{{external_8080_port}}:8080"
       - "{{external_5500_port}}:5500"
     environment:
-      CONTAINER: '{{ORACLE_EE_container_enable}}'
+      CONTAINER: '{{ORACLE_EE_container_enabled}}'
       ORACLE_SID: ORCLCDB
       ORACLE_PDB: ORCLPDB1
       ORACLE_PWD: {{ORACLE_EE_password}}
@@ -22616,12 +22616,12 @@ services:
       KAFKA_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: "https"
       KAFKA_SSL_TRUSTSTORE_LOCATION: /certs/client.ts.p12
       KAFKA_SSL_TRUSTSTORE_PASSWORD: {{KAFKA_client_truststore_password}}
-        {% if KAFKA_ssl_client_authentication_enable | default(false) %}
+        {% if KAFKA_ssl_client_authentication_enabled | default(false) %}
       KAFKA_SSL_KEYSTORE_TYPE: "PKCS12"
       KAFKA_SSL_KEYSTORE_LOCATION: /certs/client.ks.p12
       KAFKA_SSL_KEYSTORE_PASSWORD: {{KAFKA_client_keystore_password}}
       KAFKA_SSL_KEY_PASSWORD: {{KAFKA_client_key_password}}
-        {% endif -%}   {#  KAFKA_ssl_client_authentication_enable #}
+        {% endif -%}   {#  KAFKA_ssl_client_authentication_enabled #}
       {% endif -%}   {#  ns.securityProtocol #}
     {% endif -%}   {#  secureKafkaEnabled #}
       KAFKA_TABLE_NAMES: {{TRINO_kafka_table_names}}
@@ -24311,12 +24311,12 @@ services:
       MINIO_POLICY_PLUGIN_ENABLE_HTTP2: "OFF"
       MINIO_POLICY_PLUGIN_COMMENT: "External Access Management using OPA"
     {% endif -%}   {#  MINIO_policy_plugin_enabled #}
-    {% if MINIO_audit_webhook_enable | default(false) %}
+    {% if MINIO_audit_webhook_enabled | default(false) %}
       MINIO_AUDIT_WEBHOOK_ENABLE_primary: 'on'
       MINIO_AUDIT_WEBHOOK_ENDPOINT_primary: {{MINIO_audit_webhook_endpoint}}
       MINIO_AUDIT_WEBHOOK_AUTH_TOKEN_primary: {{MINIO_audit_webhook_auth_token if MINIO_audit_webhook_auth_token is defined and MINIO_audit_webhook_auth_token and MINIO_audit_webhook_auth_token | length else omit}}
-    {% endif -%}   {#  MINIO_audit_webhook_enable #}
-    {% if (KAFKA_enable or external['KAFKA_enable']) and MINIO_audit_kafka_enable | default(false) %}
+    {% endif -%}   {#  MINIO_audit_webhook_enabled #}
+    {% if (KAFKA_enable or external['KAFKA_enable']) and MINIO_audit_kafka_enabled | default(false) %}
       MINIO_AUDIT_KAFKA_ENABLE: 'on'
       MINIO_AUDIT_KAFKA_BROKERS: '{{ns.bootstrapServers}}'
     {% if ns.secureKafkaEnabled %}
@@ -24328,22 +24328,22 @@ services:
       {% elif ns.securityProtocolBROKER == 'SSL' %}
       MINIO_AUDIT_KAFKA_TLS: 'on'
       MINIO_AUDIT_KAFKA_TLS_SKIP_VERIFY: "off"
-        {% if KAFKA_ssl_client_authentication_enable | default(false) %}
+        {% if KAFKA_ssl_client_authentication_enabled | default(false) %}
       MINIO_AUDIT_KAFKA_TLS_CLIENT_AUTH: 1
       MINIO_AUDIT_KAFKA_CLIENT_TLS_CERT: /certs/client.pem
       MINIO_AUDIT_KAFKA_CLIENT_TLS_KEY: /certs/client.key
-        {% endif -%}   {#  KAFKA_ssl_client_authentication_enable #}
+        {% endif -%}   {#  KAFKA_ssl_client_authentication_enabled #}
       {% endif -%}   {#  ns.securityProtocol #}
     {% endif -%}   {#  ns.secureKafkaEnabled #}
       MINIO_AUDIT_KAFKA_TOPIC: '{{MINIO_audit_kafka_topic}}'
-    {% endif -%}   {#  MINIO_audit_kafka_enable #}
-      MINIO_API_SYNC_EVENTS: {{'on' if MINIO_notify_snyc_enable else omit}}
-    {% if MINIO_notify_webhook_enable | default(false) %}
+    {% endif -%}   {#  MINIO_audit_kafka_enabled #}
+      MINIO_API_SYNC_EVENTS: {{'on' if MINIO_notify_snyc_enabled else omit}}
+    {% if MINIO_notify_webhook_enabled | default(false) %}
       MINIO_NOTIFY_WEBHOOK_ENABLE_primary: 'on'
       MINIO_NOTIFY_WEBHOOK_ENDPOINT_primary: {{MINIO_notify_webhook_endpoint}}
       MINIO_NOTIFY_WEBHOOK_AUTH_TOKEN_primary: {{MINIO_notify_webhook_auth_token if MINIO_notify_webhook_auth_token is defined and MINIO_notify_webhook_auth_token and MINIO_notify_webhook_auth_token | length else omit}}
-    {% endif -%}   {#  MINIO_notify_webhook_enable #}
-    {% if (KAFKA_enable or external['KAFKA_enable']) and MINIO_notify_kafka_enable | default(false) %}
+    {% endif -%}   {#  MINIO_notify_webhook_enabled #}
+    {% if (KAFKA_enable or external['KAFKA_enable']) and MINIO_notify_kafka_enabled | default(false) %}
       MINIO_NOTIFY_KAFKA_ENABLE_primary: 'on'
       MINIO_NOTIFY_KAFKA_BROKERS_primary: '{{ns.bootstrapServers}}'
     {% if ns.secureKafkaEnabled %}
@@ -24355,16 +24355,16 @@ services:
       {% elif ns.securityProtocolBROKER == 'SSL' %}
       MINIO_NOTIFY_KAFKA_TLS_primary: 'on'
       MINIO_NOTIFY_KAFKA_TLS_SKIP_VERIFY_primary: "off"
-        {% if KAFKA_ssl_client_authentication_enable | default(false) %}
+        {% if KAFKA_ssl_client_authentication_enabled | default(false) %}
       MINIO_NOTIFY_KAFKA_TLS_CLIENT_AUTH_primary: 1
       MINIO_NOTIFY_KAFKA_CLIENT_TLS_CERT_primary: /certs/client.pem
       MINIO_NOTIFY_KAFKA_CLIENT_TLS_KEY_primary: /certs/client.key
-        {% endif -%}   {#  KAFKA_ssl_client_authentication_enable #}
+        {% endif -%}   {#  KAFKA_ssl_client_authentication_enabled #}
       {% endif -%}   {#  ns.securityProtocol #}
     {% endif -%}   {#  ns.secureKafkaEnabled #}
       MINIO_NOTIFY_KAFKA_TOPIC_primary: '{{MINIO_notify_kafka_topic}}'
     {% endif -%}   {#  MINIO_notify_kafka_enable #}
-    {% if MINIO_notify_mqtt_enable | default(false) %}
+    {% if MINIO_notify_webhook_enabled MINIO_notify_mqtt_enabled | default(false) %}
       MINIO_NOTIFY_MQTT_ENABLE_primary: 'on'
       MINIO_NOTIFY_MQTT_BROKERS_primary: '{{MINIO_notify_mqtt_broker_endpoint}}'
       MINIO_NOTIFY_MQTT_USERNAME: '{{MINIO_notify_mqtt_username if MINIO_notify_mqtt_username is defined and MINIO_notify_mqtt_username and MINIO_notify_mqtt_username | length else omit}}'
@@ -24372,18 +24372,18 @@ services:
       MINIO_NOTIFY_MQTT_TOPIC: '{{MINIO_notify_mqtt_topic}}'
       MINIO_NOTIFY_MQTT_QOS: 0
     {% endif -%}   {#  MINIO_notify_kafka_enable #}
-    {% if MINIO_notify_redis_enable | default(false) %}
+    {% if MINIO_notify_redis_enabled | default(false) %}
       MINIO_NOTIFY_REDIS_ENABLE_primary: 'on'
       MINIO_NOTIFY_REDIS_ADDRESS_primary: '{{MINIO_notify_redis_endpoint}}'
       MINIO_NOTIFY_REDIS_KEY: '{{MINIO_notify_redis_key}}'
       MINIO_NOTIFY_REDIS_FORMAT: '{{MINIO_notify_redis_format}}'
       MINIO_NOTIFY_MQTT_PASSWORD: '{{MINIO_notify_redis_password if MINIO_notify_redis_password is defined and MINIO_notify_redis_password and MINIO_notify_redis_password | length else omit}}'
-    {% endif -%}   {#  MINIO_notify_redis_enable #}
-    {% if MINIO_lambda_webhook_enable | default(false) %}
+    {% endif -%}   {#  MINIO_notify_redis_enabled #}
+    {% if MINIO_lambda_webhook_enabled | default(false) %}
       MINIO_LAMBDA_WEBHOOK_ENABLE_primary: 'on'
       MINIO_LAMBDA_WEBHOOK_ENDPOINT_primary: {{MINIO_lambda_webhook_endpoint}}
       MINIO_LAMBDA_WEBHOOK_AUTH_TOKEN_primary: {{MINIO_lambda_webhook_auth_token if MINIO_lambda_webhook_auth_token is defined and MINIO_lambda_webhook_auth_token and MINIO_lambda_webhook_auth_token | length else omit}}
-    {% endif -%}   {#  MINIO_lambda_webhook_enable #}
+    {% endif -%}   {#  MINIO_lambda_webhook_enabled #}
 
     {%if not MINIO_browser_enabled | default(false) %}
       MINIO_BROWSER: "off"
@@ -25663,12 +25663,12 @@ services:
       - TB_QUEUE_KAFKA_CONFLUENT_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM='https'
       - TB_QUEUE_KAFKA_CONFLUENT_SSL_TRUSTSTORE_LOCATION=/certs/client.ts.p12
       - TB_QUEUE_KAFKA_CONFLUENT_SSL_TRUSTSTORE_PASSWORD={{KAFKA_client_truststore_password}}
-        {% if KAFKA_ssl_client_authentication_enable | default(false) %}
+        {% if KAFKA_ssl_client_authentication_enabled | default(false) %}
       - TB_QUEUE_KAFKA_CONFLUENT_SSL_KEYSTORE_TYPE="PKCS12"
       - TB_QUEUE_KAFKA_CONFLUENT_SSL_KEYSTORE_LOCATION=/certs/client.ks.p12
       - TB_QUEUE_KAFKA_CONFLUENT_SSL_KEYSTORE_PASSWORD={{KAFKA_client_keystore_password}}
       - TB_QUEUE_KAFKA_CONFLUENT_SSL_KEY_PASSWORD={{KAFKA_client_key_password}}
-        {% endif -%}   {#  KAFKA_ssl_client_authentication_enable #}
+        {% endif -%}   {#  KAFKA_ssl_client_authentication_enabled #}
       {% endif -%}   {#  ns.securityProtocol #}
     {% endif -%}   {#  secureKafkaEnabled #}
     {%if use_timezone | default(false) %}
@@ -27328,10 +27328,10 @@ services:
           - keycloak.platysplatform.io   #create a DNS alias within the network (add the same alias to your /etc/hosts to get a working OIDC flow)
     command:
       - start-dev
-    {%if KEYCLOAK_import_realm_enable | default(false) %}
+    {%if KEYCLOAK_import_realm_enabled | default(false) %}
       - --import-realm
       - --http-port=28204   # change port to 8090, so within the network and external the same port is used
-    {% endif -%}   {#  KEYCLOAK_import_realm_enable #}
+    {% endif -%}   {#  KEYCLOAK_import_realm_enabled #}
     restart: {{container_restart_policy}}
     healthcheck:
       test: "exec 3<>/dev/tcp/localhost/9000 && echo -e 'GET /health/ready HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n' >&3 && cat <&3 | grep -q '200 OK'"
@@ -29003,7 +29003,7 @@ services:
       com.platys.description: {{MARKDOWN_MADNESS_description | default("Markdown Viewer") }}
       com.platys.webui.title: "Markdown Madness Server UI"
       com.platys.webui.url: "http://dataplatform:28312"
-      com.centurylinklabs.watchtower.enable: {{true if MARKDOWN_MADNESS_watchtower_enable else omit}}
+      com.centurylinklabs.watchtower.enable: {{true if MARKDOWN_MADNESS_watchtower_enabled else omit}}
     ports:
       - "28312:3000"
     {%if use_timezone | default(false) %}
@@ -29137,18 +29137,18 @@ services:
       - DUMMY=true
       - WATCHTOWER_POLL_INTERVAL={{WATCHTOWER_poll_interval if WATCHTOWER_poll_interval is defined and WATCHTOWER_poll_interval else omit}}
       - WATCHTOWER_SCHEDULE={{WATCHTOWER_schedule if WATCHTOWER_schedule is defined and WATCHTOWER_schedule and WATCHTOWER_schedule | length else omit}}
-      - WATCHTOWER_CLEANUP={{true if WATCHTOWER_cleanup_enable else omit}}
-      - WATCHTOWER_DEBUG={{true if WATCHTOWER_debug_enable else omit}}
-      - WATCHTOWER_TRACE={{true if WATCHTOWER_trace_enable else omit}}
-      - WATCHTOWER_MONITOR_ONLY={{true if WATCHTOWER_monitor_only_enable else omit}}
-      - WATCHTOWER_NO_RESTART={{true if WATCHTOWER_no_restart_enable else omit}}
-      - WATCHTOWER_ROLLING_RESTART={{true if WATCHTOWER_rolling_restart_enable else omit}}
-      - WATCHTOWER_LABEL_ENABLE={{true if WATCHTOWER_label_enable else omit}}
+      - WATCHTOWER_CLEANUP={{true if WATCHTOWER_cleanup_enabled else omit}}
+      - WATCHTOWER_DEBUG={{true if WATCHTOWER_debug_enabled else omit}}
+      - WATCHTOWER_TRACE={{true if WATCHTOWER_trace_enabled else omit}}
+      - WATCHTOWER_MONITOR_ONLY={{true if WATCHTOWER_monitor_only_enabled else omit}}
+      - WATCHTOWER_NO_RESTART={{true if WATCHTOWER_no_restart_enabled else omit}}
+      - WATCHTOWER_ROLLING_RESTART={{true if WATCHTOWER_rolling_restart_enabled else omit}}
+      - WATCHTOWER_LABEL_ENABLE={{true if WATCHTOWER_label_enabled else omit}}
       - WATCHTOWER_SCOPE={{WATCHTOWER_scope if WATCHTOWER_scope is defined and WATCHTOWER_scope and WATCHTOWER_scope | length else omit}}
-      - WATCHTOWER_HTTP_API_UPDATE={{true if WATCHTOWER_http_api_update_enable else omit}}
+      - WATCHTOWER_HTTP_API_UPDATE={{true if WATCHTOWER_http_api_update_enabled else omit}}
       - WATCHTOWER_HTTP_API_TOKEN={{WATCHTOWER_http_api_token if WATCHTOWER_http_api_token is defined and WATCHTOWER_http_api_token and WATCHTOWER_http_api_token | length else omit}}
-      - WATCHTOWER_HTTP_API_PERIODIC_POLLS={{true if WATCHTOWER_http_api_period_polls_enable else omit}}
-      - WATCHTOWER_HTTP_API_METRICS={{true if WATCHTOWER_http_api_metrics_enable else omit}}
+      - WATCHTOWER_HTTP_API_PERIODIC_POLLS={{true if WATCHTOWER_http_api_period_polls_enabled else omit}}
+      - WATCHTOWER_HTTP_API_METRICS={{true if WATCHTOWER_http_api_metrics_enabled else omit}}
       - WATCHTOWER_TIMEOUT={WATCHTOWER_timeout if WATCHTOWER_timeout is defined and WATCHTOWER_timeout else omit}}
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
