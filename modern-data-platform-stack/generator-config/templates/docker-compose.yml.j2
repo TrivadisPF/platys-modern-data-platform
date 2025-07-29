@@ -1803,14 +1803,15 @@ services:
       KAFKA_INKLESS_CONSUME_CACHE_MAX_COUNT: "100"
 
       ## Control Plane
-      ### Postgresql
-      #KAFKA_INKLESS_CONTROL_PLANE_CLASS: "io.aiven.inkless.control_plane.postgres.PostgresControlPlane"
-      #AFKA_INKLESS_CONTROL_PLANE_CONNECTION_STRING: "jdbc:postgresql://postgres:5432/inkless"
-      #AFKA_INKLESS_CONTROL_PLANE_USERNAME: "admin"
-      #AFKA_INKLESS_CONTROL_PLANE_PASSWORD: "admin"
-
+      {% if (KAFKA_inkless_control_plane_type | lower) == 'postgres' | default(false)  %}
+      KAFKA_INKLESS_CONTROL_PLANE_CLASS: "io.aiven.inkless.control_plane.postgres.PostgresControlPlane"
+      KAFKA_INKLESS_CONTROL_PLANE_CONNECTION_STRING: "jdbc:postgresql://postgresql:5432/{{KAFKA_inkless_control_plane_db_dbname | default('postgres') }}"
+      KAFKA_INKLESS_CONTROL_PLANE_USERNAME: {{KAFKA_inkless_control_plane_db_username | default('postgres') }}
+      KAFKA_INKLESS_CONTROL_PLANE_PASSWORD: {{KAFKA_inkless_control_plane_db_password | default('abc123!') }}
+      {% else %}
       ## In-memory control plane
       KAFKA_INKLESS_CONTROL_PLANE_CLASS: "io.aiven.inkless.control_plane.InMemoryControlPlane"
+      {% endif -%}   {#  KAFKA_inkless_control_plane_type #}
 
       ### In-memory storage
       #KAFKA_INKLESS_STORAGE_BACKEND_CLASS: "io.aiven.inkless.storage_backend.in_memory.InMemoryStorage"    
