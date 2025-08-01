@@ -22609,11 +22609,10 @@ services:
   {% if TRINO_kafka_descriptor_supplier is defined and TRINO_kafka_descriptor_supplier and TRINO_kafka_descriptor_supplier | length and (KAFKA_enable or external['KAFKA_enable']) | default(false)  %}
       KAFKA_NODES: {{ns.bootstrapServers}}
       KAFKA_SCHEMA_REGISTRY_URL: {{ns.schemaRegistryUrl if ns.schemaRegistryUrl is defined and ns.schemaRegistryUrl | length else omit}}
+      KAFKA_CONFIG_RESOURCES: '{{trino_etc_dir}}/kafka-configuration.properties'
     {% if ns.secureKafkaEnabled %}
       KAFKA_SECURITY_PROTOCOL: '{{ns.securityProtocolBROKER}}'
-      {% if ns.securityProtocolBROKER == 'SASL_PLAINTEXT' %}
-      KAFKA_CONFIG_RESOURCES: '{{trino_etc_dir}}/kafka-configuration.properties'
-      {% elif ns.securityProtocolBROKER == 'SSL' %}
+      {% if ns.securityProtocolBROKER == 'SSL' %}
       KAFKA_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: "https"
       KAFKA_SSL_TRUSTSTORE_LOCATION: /certs/client.ts.p12
       KAFKA_SSL_TRUSTSTORE_PASSWORD: {{KAFKA_client_truststore_password}}
@@ -22764,7 +22763,7 @@ services:
   {%if TRINO_kafka_descriptor_supplier is defined and TRINO_kafka_descriptor_supplier and TRINO_kafka_descriptor_supplier | length > 0 and KAFKA_enable or external['KAFKA_enable'] | default(false) %}
       - ./conf/{{conf_dir}}/catalog/kafka-{{'file' if TRINO_kafka_descriptor_supplier | lower == 'file' else 'schema-registry'}}.properties:/catalog/kafka.properties
       - './conf/{{conf_dir}}/kafka/descriptor:{{trino_etc_dir}}/kafka/'
-    {% if ns.secureKafkaEnabled %}
+    {% if ns.secureKafkaEnabled and ns.securityProtocolBROKER == 'SASL_PLAINTEXT' %}
       - './security/kafka/sasl-scram/client.properties:{{trino_etc_dir}}/kafka-configuration.properties'
     {% else %}
       - './conf/{{conf_dir}}/kafka/client.properties:{{trino_etc_dir}}/kafka-configuration.properties'
@@ -22952,11 +22951,10 @@ services:
   {% if TRINO_kafka_descriptor_supplier is defined and TRINO_kafka_descriptor_supplier and TRINO_kafka_descriptor_supplier | length and (KAFKA_enable or external['KAFKA_enable']) | default(false)  %}
       KAFKA_NODES: {{ns.bootstrapServers}}
       KAFKA_SCHEMA_REGISTRY_URL: {{ns.schemaRegistryUrl if ns.schemaRegistryUrl is defined and ns.schemaRegistryUrl | length else omit}}
+      KAFKA_CONFIG_RESOURCES: '{{trino_etc_dir}}/kafka-configuration.properties'
     {% if ns.secureKafkaEnabled %}
       KAFKA_SECURITY_PROTOCOL: '{{ns.securityProtocolBROKER}}'
-      {% if ns.securityProtocolBROKER == 'SASL_PLAINTEXT' %}
-      KAFKA_CONFIG_RESOURCES: '{{trino_etc_dir}}/kafka-configuration.properties'
-      {% elif ns.securityProtocolBROKER == 'SSL' %}
+      {% if ns.securityProtocolBROKER == 'SSL' %}
       KAFKA_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: "https"
       KAFKA_SSL_TRUSTSTORE_LOCATION: /certs/client.ts.p12
       KAFKA_SSL_TRUSTSTORE_PASSWORD: {{KAFKA_client_truststore_password}}
@@ -23106,7 +23104,7 @@ services:
   {%if TRINO_kafka_descriptor_supplier is defined and TRINO_kafka_descriptor_supplier and TRINO_kafka_descriptor_supplier | length > 0 and KAFKA_enable or external['KAFKA_enable'] | default(false) %}
       - ./conf/{{conf_dir}}/catalog/kafka-{{'file' if TRINO_kafka_descriptor_supplier | lower == 'file' else 'schema-registry'}}.properties:/catalog/kafka.properties
       - './conf/{{conf_dir}}/kafka/descriptor/:{{trino_etc_dir}}/kafka/'
-    {% if ns.secureKafkaEnabled %}
+    {% if ns.secureKafkaEnabled and ns.securityProtocolBROKER == 'SASL_PLAINTEXT' %}
       - './security/kafka/sasl-scram/client.properties:{{trino_etc_dir}}/kafka-configuration.properties'
     {% else %}
       - './conf/{{conf_dir}}/kafka/client.properties:{{trino_etc_dir}}/kafka-configuration.properties'
