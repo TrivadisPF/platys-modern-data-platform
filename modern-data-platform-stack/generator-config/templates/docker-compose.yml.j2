@@ -22606,8 +22606,9 @@ services:
       ADLS_STORAGE_ACCOUNT: {{adlsStorageAccount | default(omit) }}
       ADLS_ACCESS_KEY: {{adlsAccessKey}}
   {% endif -%}   {#  external['ADLS_enable'] #}
-  {% if TRINO_kafka_table_names is defined and TRINO_kafka_table_names|length and (KAFKA_enable or external['KAFKA_enable']) | default(false)  %}
+  {% if TRINO_kafka_descriptor_supplier is defined and TRINO_kafka_descriptor_supplier and TRINO_kafka_descriptor_supplier | length and (KAFKA_enable or external['KAFKA_enable']) | default(false)  %}
       KAFKA_NODES: {{ns.bootstrapServers}}
+      KAFKA_SCHEMA_REGISTRY_URL: {{ns.schemaRegistryUrl if ns.schemaRegistryUrl is defined and ns.schemaRegistryUrl | length else omit}}
     {% if ns.secureKafkaEnabled %}
       KAFKA_SECURITY_PROTOCOL: '{{ns.securityProtocolBROKER}}'
       {% if ns.securityProtocolBROKER == 'SASL_PLAINTEXT' %}
@@ -22623,6 +22624,8 @@ services:
       KAFKA_SSL_KEY_PASSWORD: {{KAFKA_client_key_password}}
         {% endif -%}   {#  KAFKA_ssl_client_authentication_enabled #}
       {% endif -%}   {#  ns.securityProtocol #}
+    {% else -%}   {#  secureKafkaEnabled #}
+      KAFKA_SECURITY_PROTOCOL: '{{ns.securityProtocolBROKER}}'
     {% endif -%}   {#  secureKafkaEnabled #}
       KAFKA_TABLE_NAMES: {{TRINO_kafka_table_names}}
       KAFKA_DEFAULT_SCHEMA: {{TRINO_kafka_default_schema}}
@@ -22758,11 +22761,13 @@ services:
   {%if external['ADLS_enable'] | default(false) %}
       - './conf/{{conf_dir}}/catalog/adls.properties:/catalog/adls.properties'
   {% endif %}
-  {% if TRINO_kafka_table_names is defined and TRINO_kafka_table_names|length and (KAFKA_enable or external['KAFKA_enable']) | default(false)  %}
-      - './conf/{{conf_dir}}/catalog/kafka.properties:/catalog/kafka.properties'
-      - './conf/{{conf_dir}}/kafka/:{{trino_etc_dir}}/kafka/'
+  {%if TRINO_kafka_descriptor_supplier is defined and TRINO_kafka_descriptor_supplier and TRINO_kafka_descriptor_supplier | length > 0 and KAFKA_enable or external['KAFKA_enable'] | default(false) %}
+      - ./conf/{{conf_dir}}/catalog/kafka-{{'file' if TRINO_kafka_descriptor_supplier | lower == 'file' else 'schema-registry'}}.properties:/catalog/kafka.properties
+      - './conf/{{conf_dir}}/kafka/descriptor:{{trino_etc_dir}}/kafka/'
     {% if ns.secureKafkaEnabled %}
       - './security/kafka/sasl-scram/client.properties:{{trino_etc_dir}}/kafka-configuration.properties'
+    {% else %}
+      - './conf/{{conf_dir}}/kafka/client.properties:{{trino_etc_dir}}/kafka-configuration.properties'
     {% endif %}
     {% if ns.secureKafkaEnabled and ns.securityProtocol == 'SSL' %}
       - ./security/kafka/client-certs:/certs
@@ -22944,11 +22949,26 @@ services:
       ADLS_STORAGE_ACCOUNT: {{adlsStorageAccount | default(omit) }}
       ADLS_ACCESS_KEY: {{adlsAccessKey}}
   {% endif -%}   {#  external['ADLS_enable'] #}
-  {% if (KAFKA_enable or external['KAFKA_enable']) | default(false) %}
+  {% if TRINO_kafka_descriptor_supplier is defined and TRINO_kafka_descriptor_supplier and TRINO_kafka_descriptor_supplier | length and (KAFKA_enable or external['KAFKA_enable']) | default(false)  %}
       KAFKA_NODES: {{ns.bootstrapServers}}
+      KAFKA_SCHEMA_REGISTRY_URL: {{ns.schemaRegistryUrl if ns.schemaRegistryUrl is defined and ns.schemaRegistryUrl | length else omit}}
     {% if ns.secureKafkaEnabled %}
       KAFKA_SECURITY_PROTOCOL: '{{ns.securityProtocolBROKER}}'
+      {% if ns.securityProtocolBROKER == 'SASL_PLAINTEXT' %}
       KAFKA_CONFIG_RESOURCES: '{{trino_etc_dir}}/kafka-configuration.properties'
+      {% elif ns.securityProtocolBROKER == 'SSL' %}
+      KAFKA_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: "https"
+      KAFKA_SSL_TRUSTSTORE_LOCATION: /certs/client.ts.p12
+      KAFKA_SSL_TRUSTSTORE_PASSWORD: {{KAFKA_client_truststore_password}}
+        {% if KAFKA_ssl_client_authentication_enabled | default(false) %}
+      KAFKA_SSL_KEYSTORE_TYPE: "PKCS12"
+      KAFKA_SSL_KEYSTORE_LOCATION: /certs/client.ks.p12
+      KAFKA_SSL_KEYSTORE_PASSWORD: {{KAFKA_client_keystore_password}}
+      KAFKA_SSL_KEY_PASSWORD: {{KAFKA_client_key_password}}
+        {% endif -%}   {#  KAFKA_ssl_client_authentication_enabled #}
+      {% endif -%}   {#  ns.securityProtocol #}
+    {% else -%}   {#  secureKafkaEnabled #}
+      KAFKA_SECURITY_PROTOCOL: '{{ns.securityProtocolBROKER}}'
     {% endif -%}   {#  secureKafkaEnabled #}
       KAFKA_TABLE_NAMES: {{TRINO_kafka_table_names}}
       KAFKA_DEFAULT_SCHEMA: {{TRINO_kafka_default_schema}}
@@ -23083,11 +23103,13 @@ services:
   {%if external['ADLS_enable'] | default(false) %}
       - './conf/{{conf_dir}}/catalog/adls.properties:/catalog/adls.properties'
   {% endif %}
-  {%if KAFKA_enable or external['KAFKA_enable'] | default(false) %}
-      - './conf/{{conf_dir}}/catalog/kafka.properties:/catalog/kafka.properties'
-      - './conf/{{conf_dir}}/kafka/:{{trino_etc_dir}}/kafka/'
+  {%if TRINO_kafka_descriptor_supplier is defined and TRINO_kafka_descriptor_supplier and TRINO_kafka_descriptor_supplier | length > 0 and KAFKA_enable or external['KAFKA_enable'] | default(false) %}
+      - ./conf/{{conf_dir}}/catalog/kafka-{{'file' if TRINO_kafka_descriptor_supplier | lower == 'file' else 'schema-registry'}}.properties:/catalog/kafka.properties
+      - './conf/{{conf_dir}}/kafka/descriptor/:{{trino_etc_dir}}/kafka/'
     {% if ns.secureKafkaEnabled %}
       - './security/kafka/sasl-scram/client.properties:{{trino_etc_dir}}/kafka-configuration.properties'
+    {% else %}
+      - './conf/{{conf_dir}}/kafka/client.properties:{{trino_etc_dir}}/kafka-configuration.properties'
     {% endif %}
   {% endif %}
   {%if HADOOP_enable | default(false) %}
