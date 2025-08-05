@@ -7466,6 +7466,11 @@ services:
       HIVE_SITE_CONF_hive_metastore_transactional_event_listeners: {{HIVE_METASTORE_transactional_event_listeners}}
       HIVE_SITE_CONF_hive_metastore_event_db_listener_timetolive: 86400   # 1 day
       HIVE_SITE_CONF_hive_metastore_event_db_listener_clean_interval: 7200  # 2 hours
+    {% if HIVE_METASTORE_transactional_event_listeners_variables is defined and HIVE_METASTORE_transactional_event_listeners_variables and HIVE_METASTORE_transactional_event_listeners_variables | length | default(false) %}
+      {% for variable in HIVE_METASTORE_transactional_event_listeners_variables.split(',') %}
+      HIVE_SITE_CONF_{{variable.split('=')[0]}}: {{variable.split('=')[1]}}
+      {% endfor %}
+    {% endif %}
   {% endif -%}   {#  HIVE_METASTORE_transactional_event_listener_enabled #}
   {% if ATLAS_hive_hook_enabled | default(false) %}
       HIVE_SITE_CONF_hive_exec_post_hooks: "org.apache.atlas.hive.hook.HiveHook"
