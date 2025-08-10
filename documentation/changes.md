@@ -42,7 +42,7 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Update `flowise` to `3.0.1`
  * Update `trino` to `476`
  * Update `risingwave` to `v2.4.1`
- * Update `confluent-platform` to `7.9.1`
+ * Update `confluent-platform` to `8.0.0`
  * Update `apicurio-registry` to `2.6.11.Final`
  * Update `materialize` to `v0.146.1`
  * Update `arroyo` to `0.14.0`
