@@ -21023,7 +21023,7 @@ services:
       - "1433:1433"
     environment:
       ACCEPT_EULA: "Y"
-      SA_PASSWORD: "abc123abc123!"
+      SA_PASSWORD: "{{SQLSERVER_password if SQLSERVER_password is defined and SQLSERVER_password and SQLSERVER_password | length else omit}}"
       MSSQL_PID: "{{SQLSERVER_edition if SQLSERVER_edition is defined and SQLSERVER_edition and SQLSERVER_edition | length | default('Express')}}"
       MSSQL_AGENT_ENABLED: {{SQLSERVER_agent_enabled | default(false)}}
       MSSQL_ENABLE_HADR: {{SQLSERVER_availability_groups_enabled | default(false)}}
@@ -21039,7 +21039,7 @@ services:
       - ./container-volume/sqlserver/data:/var/opt/mssql
     {% endif %}
     {% if SQLSERVER_volume_map_backup %}
-      - ./data/sqlserver/backups:/var/opt/mssql/backups
+      - {{SQLSERVER_backup_local_dir if SQLSERVER_backup_local_dir is defined and SQLSERVER_backup_local_dir and SQLSERVER_backup_local_dir | length else "./container-volume/sqlserver/backups"}}:/var/opt/mssql/backups
     {% endif %}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
