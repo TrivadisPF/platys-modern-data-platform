@@ -41,7 +41,7 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Update `memcached` to `1.6`
  * Update `flowise` to `3.0.1`
  * Update `trino` to `476`
- * Update `risingwave` to `v2.4.1`
+ * Update `risingwave` to `v2.5.1`
  * Update `confluent-platform` to `8.0.0`
  * Update `apicurio-registry` to `2.6.11.Final`
  * Update `materialize` to `v0.146.1`
@@ -72,6 +72,7 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Update `kong-gateway` to `3.10`
  * Update `s3fs` to `1.95`
  * Update `spring-boot-admin` to `3.4.1`
+ * Update `sqlserver` to `2022-latest`
  
 ### Enhancements
 
