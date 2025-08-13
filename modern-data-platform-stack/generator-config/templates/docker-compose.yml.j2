@@ -21024,12 +21024,23 @@ services:
     environment:
       ACCEPT_EULA: "Y"
       SA_PASSWORD: "abc123abc123!"
-      MSSQL_PID: "Express"
+      MSSQL_PID: "{{SQLSERVER_edition if SQLSERVER_edition is defined and SQLSERVER_edition and SQLSERVER_edition | length | default('Express')}}"
+      MSSQL_AGENT_ENABLED: {{SQLSERVER_agent_enabled | default(false)}}
+      MSSQL_ENABLE_HADR: {{SQLSERVER_availability_groups_enabled | default(false)}}
+      MSSQL_DATA_DIR: /var/opt/mssql
+      MSSQL_BACKUP_DIR: /var/opt/mssql/backups
+      MSSQL_LOG_DIR: /var/opt/mssql/logs
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
+    {% if SQLSERVER_volume_map_data %}
+      - ./container-volume/sqlserver/data:/var/opt/mssql
+    {% endif %}
+    {% if SQLSERVER_volume_map_backup %}
+      - ./data/sqlserver/backups:/var/opt/mssql/backups
+    {% endif %}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
