@@ -73,6 +73,7 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Update `s3fs` to `1.95`
  * Update `spring-boot-admin` to `3.4.1`
  * Update `sqlserver` to `2022-latest`
+ * Update `dremio` to `26.0`
  
 ### Enhancements
 
