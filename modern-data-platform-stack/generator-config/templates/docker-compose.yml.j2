@@ -1933,6 +1933,9 @@ services:
     labels:
       com.platys.name: "kafka"
       com.platys.description: "Kafka Command Line utilities"
+    depends_on:
+      kafka-1:
+        condition: service_healthy      
     environment:
       BOOTSTRAP_SERVERS: '{{ns.bootstrapServers}}'
     {% if external['KAFKA_enable'] and external['KAFKA_sasl_mechanism'] is defined and external['KAFKA_sasl_mechanism'] | length %}
@@ -1975,6 +1978,9 @@ services:
       com.platys.restapi.url: "http://dataplatform:{{external_port}}"
     ports:
       - "{{external_port}}:{{port}}"
+    depends_on:
+      kafka-1:
+        condition: service_healthy      
     environment:
       CONNECT_BOOTSTRAP_SERVERS: '{{ns.bootstrapServers}}'
       CONNECT_LISTENERS: 'http://0.0.0.0:{{port}}'
@@ -3105,7 +3111,7 @@ services:
     container_name: sqlflow
     labels:
       com.platys.name: "sqlflow"
-      com.platys.description: "SQLFlow Streaming DB"
+      com.platys.description: "SQLFlow Streaming DB"  
     environment:
       - SQLFLOW_LOG_LEVEL=INFO
     {%if KAFKA_enable or external['KAFKA_enable'] | default(false) %}
@@ -3149,6 +3155,9 @@ services:
       com.platys.restapi.url: "http://dataplatform:18086"
     ports:
       - "18086:8086"
+    depends_on:
+      kafka-1:
+        condition: service_healthy         
     environment:
       KAFKA_REST_BOOTSTRAP_SERVERS: '{{ns.bootstrapServers}}'
       KAFKA_REST_LISTENERS: 'http://0.0.0.0:8086'
@@ -3210,6 +3219,9 @@ services:
       com.platys.description: "Confluent MQTT Proxy"
     ports:
       - "1882:1882"
+    depends_on:
+      kafka-1:
+        condition: service_healthy         
     environment:
       KAFKA_MQTT_TOPIC_REGEX_LIST: {{KAFKA_MQTTPROXY_topic_regex_list}}
       KAFKA_MQTT_LISTENERS: 0.0.0.0:1882
@@ -3300,6 +3312,9 @@ services:
       com.platys.restapi.url: "http://dataplatform:{{external_port}}"
     ports:
       - "{{external_port}}:{{port}}"
+    depends_on:
+      kafka-1:
+        condition: service_healthy      
     environment:
       SCHEMA_REGISTRY_HOST_NAME: schema-registry-{{loop.index}}
       SCHEMA_REGISTRY_LISTENERS: "http://0.0.0.0:{{port}}"
