@@ -40,7 +40,8 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Update `grafana` to `12.0.1`
  * Update `memcached` to `1.6`
  * Update `flowise` to `3.0.1`
- * Update `trino` to `476`
+ * Update `trino` to `477`
+ * Update `starburstdata` to `476-e.4`
  * Update `risingwave` to `v2.5.1`
  * Update `confluent-platform` to `8.0.0`
  * Update `apicurio-registry` to `2.6.11.Final`
@@ -74,6 +75,7 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Update `spring-boot-admin` to `3.4.1`
  * Update `sqlserver` to `2022-latest`
  * Update `dremio` to `26.0`
+ * Update `presto` to `0.294`
  
 ### Enhancements
 
