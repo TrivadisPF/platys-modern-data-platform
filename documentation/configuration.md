@@ -37,6 +37,9 @@ There are some overall settings which will control the behaviour for all or a gr
 | `KAFKA_sasl_password`                             	| `` 	| 1.17.0 | Password to use to authenticate against the external Kafka cluster. Can be left empty and defined using the `PLATYS_EXTERNAL_KAFKA_PASSWORD` environment variable (e.g. in `.env`) |  
 | `SCHEMA_REGISTRY_enable`                             	| `false` 	| 1.9.0 |  Use an external schema registry |  
 | `SCHEMA_REGISTRY_url`                             	| `` 	| 1.9.0 | The URL of the external schema registry |  
+| `HIVE_METASTORE_enable`                             	| `false` | 1.18.0 | Use external Hive Metastore service | 
+| `HIVE_METASTORE_host`                             	| `hive-metastore` | 1.18.0 | The host name of the external Hive Metastore service | 
+| `HIVE_METASTORE_port`                             	| `9083` | 1.18.0 | The port of the external Hive Metastore service | 
 | `S3_enable`                             	| `false` | 1.9.0 | Use external S3 service, such as AWS S3 cloud service or an on-premises S3 appliance. You have to configure two environment variables, `PLATYS_AWS_ACCESS_KEY` with the access key and `PLATYS_AWS_SECRET_ACCESS_KEY` with the access secret. This can be done on the on the docker host or in the `.env` file in the platform home (same folder where the `docker-compose.yml` is located). |  
 | `S3_endpoint`                             	| `s3.amazonaws.com` | 1.9.0 | The endpoint address of the S3 external service |  
 | `S3_path_style_access`                             	| `false` | 1.9.0 | Use Path Style Access if set to `true`, otherwise the default of virtual hosted-style access is used. |
