@@ -1358,15 +1358,16 @@ networks:
 {% set ns.datahubSparkPluginDependencies = "io.acryl:datahub-spark-lineage:" ~ __DATAHUB_version | replace("v", "") -%}
 
 {#  ================================== Hive Metastore Settings ========================================== #}
+
 {% if (external['HIVE_METASTORE_enable']) | default(false) %}
-    {% set hiveMetastoreHost = external['HIVE_METASTORE_host'] %}
-    {% set hiveMetastorePort = external['HIVE_METASTORE_port'] %}
-    {% set hiveMetastore = hiveMetastoreHost ~ ':' ~ hiveMetastorePort %}
+    {% set ns.hiveMetastoreHost = external['HIVE_METASTORE_host'] %}
+    {% set ns.hiveMetastorePort = external['HIVE_METASTORE_port'] %}
+    {% set ns.hiveMetastore = hiveMetastoreHost ~ ':' ~ hiveMetastorePort %}
 {% else %}
-    {% set hiveMetastoreHost = 'hive-metastore' %}
-    {% set hiveMetastorePort = 9083 %}
-    {% set hiveMetastore = '{{hiveMetastore}}' %}
-{% endif %}   {# external['s3Endpoint'] #}
+    {% set ns.hiveMetastoreHost = 'hive-metastore' %}
+    {% set ns.hiveMetastorePort = 9083 %}
+    {% set ns.hiveMetastore = '{{ns.hiveMetastore}}' %}
+{% endif %}   {# external['HIVE_METASTORE_enable'] #}
 
 {#  ================================== S3 Settings ========================================== #}
 
@@ -5588,7 +5589,7 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalogImplementation: in-memory
     {% else %}
       SPARK_DEFAULTS_CONF_spark_sql_catalogImplementation: hive
-      SPARK_DEFAULTS_CONF_spark_hadoop_hive_metastore_uris: thrift://{{hiveMetastore}}
+      SPARK_DEFAULTS_CONF_spark_hadoop_hive_metastore_uris: thrift://{{ns.hiveMetastore}}
     {% endif -%}   {#  SPARK_catalog #}
       SPARK_DEFAULTS_CONF_spark_driver_extraJavaOptions: {{SPARK_driver_extraJavaOptions}}
       SPARK_DEFAULTS_CONF_spark_executor_extraJavaOptions: {{SPARK_executor_extraJavaOptions}}
@@ -5607,7 +5608,7 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_extensions: org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions
       SPARK_DEFAULTS_CONF_spark_sql_catalog_iceberg: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_iceberg_type: hive
-      SPARK_DEFAULTS_CONF_spark_sql_catalog_iceberg_uri: thrift://{{hiveMetastore}}
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_iceberg_uri: thrift://{{ns.hiveMetastore}}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_iceberg_warehouse: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined and SPARK_sql_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
       SPARK_DEFAULTS_CONF_spark_sql_defaultCatalog: iceberg
     {% elif SPARK_table_format_type == 'iceberg' and NESSIE_enable | default(false) %}
@@ -5746,7 +5747,7 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalogImplementation: in-memory
     {% else %}
       SPARK_DEFAULTS_CONF_spark_sql_catalogImplementation: hive
-      SPARK_DEFAULTS_CONF_spark_hadoop_hive_metastore_uris: thrift://{{hiveMetastore}}
+      SPARK_DEFAULTS_CONF_spark_hadoop_hive_metastore_uris: thrift://{{ns.hiveMetastore}}
     {% endif -%}   {#  SPARK_catalog #}
       SPARK_DEFAULTS_CONF_spark_driver_extraJavaOptions: {{SPARK_driver_extraJavaOptions}}
       SPARK_DEFAULTS_CONF_spark_executor_extraJavaOptions: {{SPARK_executor_extraJavaOptions}}
@@ -5763,7 +5764,7 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_extensions: org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions
       SPARK_DEFAULTS_CONF_spark_sql_catalog_iceberg: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_iceberg_type: hive
-      SPARK_DEFAULTS_CONF_spark_sql_catalog_iceberg_uri: thrift://{{hiveMetastore}}
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_iceberg_uri: thrift://{{ns.hiveMetastore}}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_iceberg_warehouse: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined and SPARK_sql_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
       SPARK_DEFAULTS_CONF_spark_sql_defaultCatalog: iceberg
     {% elif SPARK_table_format_type == 'iceberg' and NESSIE_enable | default(false) %}
@@ -5913,7 +5914,7 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_extensions: org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions
       SPARK_DEFAULTS_CONF_spark_sql_catalog_iceberg: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_iceberg_type: hive
-      SPARK_DEFAULTS_CONF_spark_sql_catalog_iceberg_uri: thrift://{{hiveMetastore}}
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_iceberg_uri: thrift://{{ns.hiveMetastore}}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_iceberg_warehouse: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined and SPARK_sql_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
       SPARK_DEFAULTS_CONF_spark_sql_defaultCatalog: iceberg
     {% elif SPARK_table_format_type == 'iceberg' and NESSIE_enable | default(false) %}
@@ -6021,7 +6022,7 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalogImplementation: in-memory
     {% else %}
       SPARK_DEFAULTS_CONF_spark_sql_catalogImplementation: hive
-      SPARK_DEFAULTS_CONF_spark_hadoop_hive_metastore_uris: thrift://{{hiveMetastore}}
+      SPARK_DEFAULTS_CONF_spark_hadoop_hive_metastore_uris: thrift://{{ns.hiveMetastore}}
     {% endif -%}   {#  SPARK_catalog #}
 
     {%if (DATAHUB_enable or external['DATAHUB_enable'] and SPARK_datahub_agent_enabled) | default(false) %}
@@ -6035,7 +6036,7 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_extensions: org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions
       SPARK_DEFAULTS_CONF_spark_sql_catalog_iceberg: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_iceberg_type: hive
-      SPARK_DEFAULTS_CONF_spark_sql_catalog_iceberg_uri: thrift://{{hiveMetastore}}
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_iceberg_uri: thrift://{{ns.hiveMetastore}}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_iceberg_warehouse: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined and SPARK_sql_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
       SPARK_DEFAULTS_CONF_spark_sql_defaultCatalog: iceberg
     {% elif SPARK_table_format_type == 'iceberg' and NESSIE_enable | default(false) %}
@@ -6176,7 +6177,7 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalogImplementation: in-memory
       {% else %}
       SPARK_DEFAULTS_CONF_spark_sql_catalogImplementation: hive
-      SPARK_DEFAULTS_CONF_spark_hadoop_hive_metastore_uris: thrift://{{hiveMetastore}}
+      SPARK_DEFAULTS_CONF_spark_hadoop_hive_metastore_uris: thrift://{{ns.hiveMetastore}}
       {% endif -%}   {#  KYUUBI_local_spark_catalog #}
       {%if (DATAHUB_enable or external['DATAHUB_enable'] and SPARK_datahub_agent_enabled) | default(false) %}
       SPARK_DEFAULTS_CONF_spark_extraListeners: 'datahub.spark.DatahubSparkListener'
@@ -6189,7 +6190,7 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_extensions: org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions
       SPARK_DEFAULTS_CONF_spark_sql_catalog_iceberg: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_iceberg_type: hive
-      SPARK_DEFAULTS_CONF_spark_sql_catalog_iceberg_uri: thrift://{{hiveMetastore}}
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_iceberg_uri: thrift://{{ns.hiveMetastore}}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_iceberg_warehouse: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined and SPARK_sql_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
       SPARK_DEFAULTS_CONF_spark_sql_defaultCatalog: iceberg
       {% elif SPARK_table_format_type == 'iceberg' and NESSIE_enable | default(false) %}
@@ -6301,7 +6302,7 @@ services:
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_endpoint: '{{s3Endpoint | default(omit) }}'
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_path_style_access: '{{s3PathStyleAccess}}'
     {% endif %}
-      HIVE_SITE_CONF_hive_metastore_uris: thrift://{{hiveMetastore}}
+      HIVE_SITE_CONF_hive_metastore_uris: thrift://{{ns.hiveMetastore}}
       HIVE_SITE_CONF_javax_jdo_option_ConnectionURL: jdbc:postgresql://hive-metastore-db/metastore
       HIVE_SITE_CONF_javax_jdo_option_ConnectionDriverName: org.postgresql.Driver
       HIVE_SITE_CONF_javax_jdo_option_ConnectionUserName: hive
@@ -6341,7 +6342,7 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_extensions: org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions
       SPARK_DEFAULTS_CONF_spark_sql_catalog_iceberg: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_iceberg_type: hive
-      SPARK_DEFAULTS_CONF_spark_sql_catalog_iceberg_uri: thrift://{{hiveMetastore}}
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_iceberg_uri: thrift://{{ns.hiveMetastore}}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_iceberg_warehouse: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined and SPARK_sql_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
       SPARK_DEFAULTS_CONF_spark_sql_defaultCatalog: iceberg
   {% elif SPARK_table_format_type == 'iceberg' and NESSIE_enable | default(false) %}
@@ -6445,8 +6446,8 @@ services:
       - FLINK_PYTHON_PROVIDE_REQUIREMENTS_FILE=true
     {% endif -%}    {#  NIFI_python_provide_requirements_file #}
     {% if HIVE_METASTORE_enable | default(false) %}
-      - METASTORE_HOST={{hiveMetastoreHost}}
-      - METASTORE_PORT={{hiveMetastorePort}}
+      - METASTORE_HOST={{ns.hiveMetastoreHost}}
+      - METASTORE_PORT={{ns.hiveMetastorePort}}
     {% endif -%}   {#  HIVE_METASTORE_enable #}
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
@@ -6523,8 +6524,8 @@ services:
       - FLINK_PYTHON_PROVIDE_REQUIREMENTS_FILE=true
     {% endif -%}    {#  NIFI_python_provide_requirements_file #}
     {% if HIVE_METASTORE_enable | default(false) %}
-      - METASTORE_HOST={{hiveMetastoreHost}}
-      - METASTORE_PORT={{hiveMetastorePort}}
+      - METASTORE_HOST={{ns.hiveMetastoreHost}}
+      - METASTORE_PORT={{ns.hiveMetastorePort}}
     {% endif -%}   {#  HIVE_METASTORE_enable #}
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
@@ -6587,8 +6588,8 @@ services:
       - FLINK_PYTHON_PROVIDE_REQUIREMENTS_FILE=true
     {% endif -%}    {#  NIFI_python_provide_requirements_file #}
     {% if HIVE_METASTORE_enable | default(false) %}
-      - METASTORE_HOST={{hiveMetastoreHost}}
-      - METASTORE_PORT={{hiveMetastorePort}}
+      - METASTORE_HOST={{ns.hiveMetastoreHost}}
+      - METASTORE_PORT={{ns.hiveMetastorePort}}
     {% endif -%}   {#  HIVE_METASTORE_enable #}
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
@@ -6643,8 +6644,8 @@ services:
       - FLINK_PYTHON_PROVIDE_REQUIREMENTS_FILE=true
     {% endif -%}    {#  FLINK_python_provide_requirements_file #}
     {% if HIVE_METASTORE_enable | default(false) %}
-      - METASTORE_HOST={{hiveMetastoreHost}}
-      - METASTORE_PORT={{hiveMetastorePort}}
+      - METASTORE_HOST={{ns.hiveMetastoreHost}}
+      - METASTORE_PORT={{ns.hiveMetastorePort}}
     {% endif -%}   {#  HIVE_METASTORE_enable #}
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
@@ -7396,9 +7397,9 @@ services:
       - "10001:10001"
       - "10002:10002"
     environment:
-      SERVICE_PRECONDITION: "{{hiveMetastore}}"
+      SERVICE_PRECONDITION: "{{ns.hiveMetastore}}"
       SERVICE_NAME: hiveserver2
-      SERVICE_OPTS: "-Dhive.metastore.uris=thrift://{{hiveMetastore}}"
+      SERVICE_OPTS: "-Dhive.metastore.uris=thrift://{{ns.hiveMetastore}}"
       IS_RESUME: "true"
   {%if HADOOP_enable | default(false) %}
       CORE_CONF_fs_defaultFS: "hdfs://namenode:9000"
@@ -7412,7 +7413,7 @@ services:
       HIVE_SITE_CONF_fs_s3a_secret_key: {{s3SecretAccessKey}}
       HIVE_SITE_CONF_fs_s3a_path_style_access: '{{s3PathStyleAccess}}'
       HIVE_SITE_CONF_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
-      HIVE_SITE_CONF_hive_metastore_uris: thrift://{{hiveMetastore}}
+      HIVE_SITE_CONF_hive_metastore_uris: thrift://{{ns.hiveMetastore}}
       HIVE_SITE_CONF_javax_jdo_option_ConnectionURL: jdbc:postgresql://hive-metastore-db/metastore
       HIVE_SITE_CONF_javax_jdo_option_ConnectionDriverName: org.postgresql.Driver
       HIVE_SITE_CONF_javax_jdo_option_ConnectionUserName: hive
@@ -7469,7 +7470,7 @@ services:
       HIVE_SITE_CONF_fs_s3a_secret_key: {{s3SecretAccessKey}}
       HIVE_SITE_CONF_fs_s3a_path_style_access: '{{s3PathStyleAccess}}'
       HIVE_SITE_CONF_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
-      HIVE_SITE_CONF_hive_metastore_uris: thrift://{{hiveMetastore}}
+      HIVE_SITE_CONF_hive_metastore_uris: thrift://{{ns.hiveMetastore}}
   {%elif external['ADLS_enable'] | default(false) %}
       HIVE_SITE_CONF_fs_defaultFS: 'file:///tmp'
       HIVE_SITE_CONF_fs_azure_account_auth_type_gusstorage_dfs_core_windows_net: 'SharedKey'
