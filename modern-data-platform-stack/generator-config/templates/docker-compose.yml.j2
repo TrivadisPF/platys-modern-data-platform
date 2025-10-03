@@ -12577,6 +12577,10 @@ services:
     {% if AIRFLOW_volume_map_custom_conf | default(false) %}
       AIRFLOW_CONFIG: '/opt/airflow/config/airflow.cfg'      
     {% endif -%}   {#  AIRFLOW_volume_map_custom_conf #}
+      AIRFLOW__METRICS__STATSD_ON: "True"
+      AIRFLOW__METRICS__STATSD_HOST: "airflow-statsd-exporter"
+      AIRFLOW__METRICS__STATSD_PORT: "9125"
+      AIRFLOW__METRICS__STATSD_PREFIX: "airflow"    
     {%if SPARK_enable | default(false) %}
       SPARK_HOME: /opt/bitnami/spark
       JAVA_HOME: /opt/bitnami/java      
@@ -12720,7 +12724,11 @@ services:
       AIRFLOW__API__EXPOSE_CONFIG: {{AIRFLOW_expose_config}}
     {% endif -%}   {#  AIRFLOW_major_version #}
     {% if AIRFLOW_volume_map_custom_conf | default(false) %}
-      AIRFLOW_CONFIG: '/opt/airflow/config/airflow.cfg'      
+      AIRFLOW_CONFIG: '/opt/airflow/config/airflow.cfg' 
+      AIRFLOW__METRICS__STATSD_ON: "True"
+      AIRFLOW__METRICS__STATSD_HOST: "airflow-statsd-exporter"
+      AIRFLOW__METRICS__STATSD_PORT: "9125"
+      AIRFLOW__METRICS__STATSD_PREFIX: "airflow"               
     {% endif -%}   {#  AIRFLOW_volume_map_custom_conf #}
     {%if SPARK_enable | default(false) %}
       SPARK_HOME: /opt/bitnami/spark
@@ -12859,7 +12867,11 @@ services:
       AIRFLOW__API__EXPOSE_CONFIG: {{AIRFLOW_expose_config}}
     {% endif -%}   {#  AIRFLOW_major_version #}
     {% if AIRFLOW_volume_map_custom_conf | default(false) %}
-      AIRFLOW_CONFIG: '/opt/airflow/config/airflow.cfg'      
+      AIRFLOW_CONFIG: '/opt/airflow/config/airflow.cfg' 
+      AIRFLOW__METRICS__STATSD_ON: "True"
+      AIRFLOW__METRICS__STATSD_HOST: "airflow-statsd-exporter"
+      AIRFLOW__METRICS__STATSD_PORT: "9125"
+      AIRFLOW__METRICS__STATSD_PREFIX: "airflow"               
     {% endif -%}   {#  AIRFLOW_volume_map_custom_conf #}
     {%if SPARK_enable | default(false) %}
       SPARK_HOME: /opt/bitnami/spark
@@ -12997,7 +13009,11 @@ services:
       AIRFLOW__API__EXPOSE_CONFIG: {{AIRFLOW_expose_config}}
     {% endif -%}   {#  AIRFLOW_major_version #}
     {% if AIRFLOW_volume_map_custom_conf | default(false) %}
-      AIRFLOW_CONFIG: '/opt/airflow/config/airflow.cfg'      
+      AIRFLOW_CONFIG: '/opt/airflow/config/airflow.cfg'
+      AIRFLOW__METRICS__STATSD_ON: "True"
+      AIRFLOW__METRICS__STATSD_HOST: "airflow-statsd-exporter"
+      AIRFLOW__METRICS__STATSD_PORT: "9125"
+      AIRFLOW__METRICS__STATSD_PREFIX: "airflow"                
     {% endif -%}   {#  AIRFLOW_volume_map_custom_conf #}
     {%if SPARK_enable | default(false) %}
       SPARK_HOME: /opt/bitnami/spark
@@ -13141,7 +13157,11 @@ services:
       AIRFLOW__API__EXPOSE_CONFIG: {{AIRFLOW_expose_config}}
     {% endif -%}   {#  AIRFLOW_major_version #}
     {% if AIRFLOW_volume_map_custom_conf | default(false) %}
-      AIRFLOW_CONFIG: '/opt/airflow/config/airflow.cfg'      
+      AIRFLOW_CONFIG: '/opt/airflow/config/airflow.cfg' 
+      AIRFLOW__METRICS__STATSD_ON: "True"
+      AIRFLOW__METRICS__STATSD_HOST: "airflow-statsd-exporter"
+      AIRFLOW__METRICS__STATSD_PORT: "9125"
+      AIRFLOW__METRICS__STATSD_PREFIX: "airflow"               
     {% endif -%}   {#  AIRFLOW_volume_map_custom_conf #}
     {%if SPARK_enable | default(false) %}
       SPARK_HOME: /opt/bitnami/spark
@@ -13280,7 +13300,11 @@ services:
       AIRFLOW__API__EXPOSE_CONFIG: {{AIRFLOW_expose_config}}
     {% endif -%}   {#  AIRFLOW_major_version #}
     {% if AIRFLOW_volume_map_custom_conf | default(false) %}
-      AIRFLOW_CONFIG: '/opt/airflow/config/airflow.cfg'      
+      AIRFLOW_CONFIG: '/opt/airflow/config/airflow.cfg'     
+      AIRFLOW__METRICS__STATSD_ON: "True"
+      AIRFLOW__METRICS__STATSD_HOST: "airflow-statsd-exporter"
+      AIRFLOW__METRICS__STATSD_PORT: "9125"
+      AIRFLOW__METRICS__STATSD_PREFIX: "airflow"           
     {% endif -%}   {#  AIRFLOW_volume_map_custom_conf #}
     {%if SPARK_enable | default(false) %}
       SPARK_HOME: /opt/bitnami/spark
@@ -13431,6 +13455,10 @@ services:
       AIRFLOW__WEBSERVER__EXPOSE_CONFIG: {{AIRFLOW_expose_config}}
     {% elif AIRFLOW_major_version == 3 | default(false) %}
       AIRFLOW__API__EXPOSE_CONFIG: {{AIRFLOW_expose_config}}
+      AIRFLOW__METRICS__STATSD_ON: "True"
+      AIRFLOW__METRICS__STATSD_HOST: "airflow-statsd-exporter"
+      AIRFLOW__METRICS__STATSD_PORT: "9125"
+      AIRFLOW__METRICS__STATSD_PREFIX: "airflow"          
     {% endif -%}   {#  AIRFLOW_major_version #}
     {% if AIRFLOW_volume_map_custom_conf | default(false) %}
       AIRFLOW_CONFIG: '/opt/airflow/config/airflow.cfg'      
@@ -13526,6 +13554,19 @@ services:
       interval: 10s
       retries: 5
       start_period: 5s
+
+  airflow-statsd-exporter:
+    image: prom/statsd-exporter:v0.24.0
+    container_name: airflow-statsd-exporter
+    hostname: airflow-statsd-exporter
+    labels:
+      com.platys.name: 'statsd-exporter'
+      com.platys.description: "StatsD Exporter for Prometheus"
+    volumes:
+      - ./conf/airflow/statsd/statsd.yaml:/home/statsd-mapping-configs.yaml
+    entrypoint: ["/bin/sh", "-c", "--"]
+    command: ["statsd_exporter --statsd.listen-udp=:9125 --web.listen-address=:9102 --log.level debug --statsd.mapping-config=/home/statsd-mapping-configs.yaml"]
+    restart: {{container_restart_policy}}
 
   airflow-init:
     image: {{AIRFLOW_custom_image_name if AIRFLOW_custom_image_name is defined and AIRFLOW_custom_image_name | length else ' apache/airflow'}}:{{__AIRFLOW_version}}
@@ -28251,6 +28292,9 @@ services:
     {% if MINIO_enable | default(false) %}
       - ./scripts/grafana/dashboards/minio:/etc/grafana/provisioning/dashboards/minio
     {% endif -%}   {#  MINIO_enable #}
+    {% if AIRFLOW_enable | default(false) %}
+      - ./scripts/grafana/dashboards/airflow:/etc/grafana/provisioning/dashboards/airflow
+    {% endif -%}   {#  AIRFLOW_enable #}
     {% if RISINGWAVE_enable | default(false) %}
       - ./scripts/grafana/dashboards/risingwave:/etc/grafana/provisioning/dashboards/risingwave
     {% endif -%}   {#  RISINGWAVE_enable #}
@@ -28260,6 +28304,9 @@ services:
     {% if TRINO_LB_enable | default(false) %}
       - ./scripts/grafana/dashboards/trino-lb:/etc/grafana/provisioning/dashboards/trino-lb
     {% endif -%}   {#  TRINO_LB_enable #}
+    {% if METABASE_enable | default(false) %}
+      - ./scripts/grafana/dashboards/metabase:/etc/grafana/provisioning/dashboards/metabase
+    {% endif -%}   {#  METABASE_enable #}
     {% if PROMETHEUS_enable | default(false) %}
       - ./scripts/grafana/datasources/prometheus-datasource.yml:/etc/grafana/provisioning/datasources/prometheus-datasource.yml
     {% endif -%}   {#  PROMETHEUS_enable #}
