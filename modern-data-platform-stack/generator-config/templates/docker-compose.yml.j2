@@ -11438,10 +11438,11 @@ services:
     depends_on:
       - streampipes-couchdb
     environment:
-      CONSUL_LOCATION: streampipes-consul
       SP_BACKEND_HOST: streampipes-backend
       SP_CONNECT_CONTAINER_WORKER_HOST: streampipes-connect-worker
       SP_HTTP_SERVER_ADAPTER_ENDPOINT: streampipes-extensions-all-jvm:8090
+      SP_COUCHDB_HOST: streampipes-couchdb
+      SP_TS_STORAGE_HOST: streampipes-influxdb
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -11468,8 +11469,11 @@ services:
       - streampipes-consul
       - couchdb
     environment:
-      SP_BACKEND_HOST: backend
+      SP_BACKEND_HOST: streampipes-backend
       SP_CONNECT_CONTAINER_WORKER_HOST: streampipes-connect-worker
+      SP_HTTP_SERVER_ADAPTER_ENDPOINT: streampipes-extensions-all-jvm:8090
+      SP_COUCHDB_HOST: streampipes-couchdb
+      SP_TS_STORAGE_HOST: streampipes-influxdb      
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -11530,6 +11534,41 @@ services:
     volumes:
       - ./data-transfer:/data-transfer
 #      - couchdb:/opt/couchdb/data
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+
+  streampipes-influxdb:
+    image: influxdb:2.6
+    container_name: streampipes-influxdb
+    hostname: streampipes-influxdb
+    labels:
+      com.platys.name: 'influxdb'
+      com.platys.description: "StreamPipes Data Integration Engine InfluxDB Instance"
+    ports:
+      - "8087:8086"
+    environment:
+      INFLUXDB_DATA_ENGINE: tsm1
+      INFLUXDB_REPORTING_DISABLED: false
+      INFLUXDB_ADMIN_ENABLED: true
+      DOCKER_INFLUXDB_INIT_USERNAME: admin
+      DOCKER_INFLUXDB_INIT_PASSWORD: sp-admin
+      DOCKER_INFLUXDB_INIT_ADMIN_TOKEN: sp-admin
+      DOCKER_INFLUXDB_INIT_ORG: sp
+      DOCKER_INFLUXDB_INIT_BUCKET: sp
+      DOCKER_INFLUXDB_INIT_MODE: setup
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    #  - influxdb:/var/lib/influxdb
+    #  - influxdb2:/var/lib/influxdb2
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"

@@ -240,6 +240,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 8084 | 8084 | connect-2 |
 8085 | 8085 | connect-3 |
 8086 | 8086 | influxdb |
+8087 | 8086 | streampipes-influxdb |
 8088 | 8088 | ksqldb-server-1 |
 8089 | 8088 | ksqldb-server-2 |
 8090 | 8088 | ksqldb-server-3 |
