@@ -11428,27 +11428,26 @@ services:
 
 {%if STREAMPIPES_enable | default(false) %}
   #  ================================== Apache StreamPipes ========================================== #
-  backend:
+  streampipes-backend:
     image: apachestreampipes/backend:{{__STREAMPIPES_version}}
-    container_name: backend
-    hostname: backend
+    container_name: streampipes-backend
+    hostname: streampipes-backend
     labels:
       com.platys.name: 'streampipes'
       com.platys.description: "StreamPipes Data Integration Engine"
     depends_on:
-      - streampipes-consul
-      - couchdb
+      - streampipes-couchdb
     environment:
       CONSUL_LOCATION: streampipes-consul
-      SP_BACKEND_HOST: backend
+      SP_BACKEND_HOST: streampipes-backend
       SP_CONNECT_CONTAINER_WORKER_HOST: streampipes-connect-worker
+      SP_HTTP_SERVER_ADAPTER_ENDPOINT: streampipes-extensions-all-jvm:8090
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
       - ./container-volume/streampipes:/root/.streampipes
-      - ./container-volume/streampipes/files:/spImages
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -11496,68 +11495,16 @@ services:
       com.platys.webui.title: "StreamPipes Dashboard"
       com.platys.webui.url: "http://dataplatform:28255"
     ports:
-      - "28255:80"
+      - "28255:8088"
     depends_on:
-      - couchdb
-      - activemq
-      - streampipes-consul
-      - backend
+      - streampipes-couchdb
+      - streampipes-backend
     {%if use_timezone | default(false) %}
     environment:
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
-#      - connect:/data/
-    {%if use_timezone | default(false) %}
-      - "./etc/timezone:/etc/timezone:ro"
-      - "./etc/localtime:/etc/localtime:ro"
-    {% endif -%}   {#  use_timezone #}
-    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
-    <<: *logging
-    {% endif -%}   {#  logging_driver is defined ... #}
-    restart: {{container_restart_policy}}
-
-  streampipes-activemq:
-    image: fogsyio/activemq:5.15.9
-    container_name: streampipes-activemq
-    hostname: streampipes-activemq
-    labels:
-      com.platys.name: 'streampipes'
-      com.platys.description: "StreamPipes Data Integration Engine ActiveMQ Instance"
-    {%if use_timezone | default(false) %}
-    environment:
-      TZ: {{use_timezone}}
-    {% endif -%}   {#  use_timezone #}
-    volumes:
-      - ./data-transfer:/data-transfer
-#      - connect:/data/
-    {%if use_timezone | default(false) %}
-      - "./etc/timezone:/etc/timezone:ro"
-      - "./etc/localtime:/etc/localtime:ro"
-    {% endif -%}   {#  use_timezone #}
-    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
-    <<: *logging
-    {% endif -%}   {#  logging_driver is defined ... #}
-    restart: {{container_restart_policy}}
-
-  streampipes-consul:
-    image: fogsyio/consul:1.7.1
-    container_name: streampipes-consul
-    hostname: streampipes-consul
-    labels:
-      com.platys.name: 'streampipes'
-      com.platys.description: "StreamPipes Data Integration Engine Consul Instance"
-    environment:
-      - "CONSUL_LOCAL_CONFIG={\"disable_update_check\": true}"
-      - "CONSUL_BIND_INTERFACE=eth0"
-      - "CONSUL_HTTP_ADDR=0.0.0.0"
-    {%if use_timezone | default(false) %}
-      TZ: {{use_timezone}}
-    {% endif -%}   {#  use_timezone #}
-    volumes:
-      - ./data-transfer:/data-transfer
-#      - consul:/consul/data
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -11568,14 +11515,16 @@ services:
     restart: {{container_restart_policy}}
 
   streampipes-couchdb:
-    image: fogsyio/couchdb:2.3.1
+    image: couchdb:3.3.1
     container_name: streampipes-couchdb
     hostname: streampipes-couchdb
     labels:
       com.platys.name: 'streampipes'
       com.platys.description: "StreamPipes Data Integration Engine CouchDB Instance"
-    {%if use_timezone | default(false) %}
     environment:
+      COUCHDB_USER: admin
+      COUCHDB_PASSWORD: admin
+    {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
@@ -11590,23 +11539,21 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
 
-  streampipes-pipeline-elements-all-jvm:
-    image: apachestreampipes/pipeline-elements-all-jvm:{{__STREAMPIPES_version}}
-    container_name: streampipes-pipeline-elements-all-jvm
-    hostname: streampipes-pipeline-elements-all-jvm
+  streampipes-extensions-all-jvm:
+    image: apachestreampipes/extensions-all-jvm:{{__STREAMPIPES_version}}
+    container_name: streampipes-extensions-all-jvm
+    hostname: streampipes-extensions-all-jvm
     labels:
       com.platys.name: 'streampipes'
       com.platys.description: "StreamPipes Data Integration Engine"
     depends_on:
       - streampipes-consul
-    environment:
-      CONSUL_LOCATION: streampipes-consul
     {%if use_timezone | default(false) %}
+    environment:
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
-#      - files:/spImages
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"

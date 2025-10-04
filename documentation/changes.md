@@ -76,6 +76,7 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Update `sqlserver` to `2022-latest`
  * Update `dremio` to `26.0`
  * Update `presto` to `0.294`
+ * Update `streampipes` to `0.98.0-SNAPSHOT`
  
 ### Enhancements
 
