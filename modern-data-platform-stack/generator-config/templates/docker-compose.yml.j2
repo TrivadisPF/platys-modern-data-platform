@@ -11458,37 +11458,6 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
 
-  streampipes-connect-worker:
-    image: apachestreampipes/connect-worker:{{__STREAMPIPES_version}}
-    container_name: streampipes-connect-worker
-    hostname: streampipes-connect-worker
-    labels:
-      com.platys.name: 'streampipes'
-      com.platys.description: "StreamPipes Data Integration Engine"
-    depends_on:
-      - streampipes-consul
-      - couchdb
-    environment:
-      SP_BACKEND_HOST: streampipes-backend
-      SP_CONNECT_CONTAINER_WORKER_HOST: streampipes-connect-worker
-      SP_HTTP_SERVER_ADAPTER_ENDPOINT: streampipes-extensions-all-jvm:8090
-      SP_COUCHDB_HOST: streampipes-couchdb
-      SP_TS_STORAGE_HOST: streampipes-influxdb      
-    {%if use_timezone | default(false) %}
-      TZ: {{use_timezone}}
-    {% endif -%}   {#  use_timezone #}
-    volumes:
-      - ./data-transfer:/data-transfer
-#      - connect:/data/
-    {%if use_timezone | default(false) %}
-      - "./etc/timezone:/etc/timezone:ro"
-      - "./etc/localtime:/etc/localtime:ro"
-    {% endif -%}   {#  use_timezone #}
-    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
-    <<: *logging
-    {% endif -%}   {#  logging_driver is defined ... #}
-    restart: {{container_restart_policy}}
-
   streampipes-ui:
     image: apachestreampipes/ui:{{__STREAMPIPES_version}}
     container_name: streampipes-ui
@@ -11587,8 +11556,13 @@ services:
       com.platys.description: "StreamPipes Data Integration Engine"
     depends_on:
       - streampipes-consul
-    {%if use_timezone | default(false) %}
     environment:
+      SP_BACKEND_HOST: streampipes-backend
+      SP_CONNECT_CONTAINER_WORKER_HOST: streampipes-connect-worker
+      SP_HTTP_SERVER_ADAPTER_ENDPOINT: streampipes-extensions-all-jvm:8090
+      SP_COUCHDB_HOST: streampipes-couchdb
+      SP_TS_STORAGE_HOST: streampipes-influxdb
+    {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
