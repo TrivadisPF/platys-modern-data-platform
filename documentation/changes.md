@@ -21,7 +21,8 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Lakekeeper
  * MCP Inspector
  * Allure Report
- 
+ * Nimtable
+ * 
 ### Version upgrades
 
  * Update `milvus` to `v2.5.12` 
