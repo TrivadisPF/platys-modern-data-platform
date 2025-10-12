@@ -617,6 +617,8 @@ networks:
 
 {% set __LAKEKEEPER_version = LAKEKEEPER_version | default('latest') -%}
 
+{% set __NIMTABLE_version = NIMTABLE_version | default('latest') -%}
+
 {% set __DBT_version = DBT_version | default('latest') -%}
 
 {% set __TAIGA_version = TAIGA_version | default('latest') -%}
@@ -25434,6 +25436,70 @@ services:
     command: [ "migrate" ]
     init: true
     restart:  no
+
+{% endif %}   {#  LAKEKEEPER_enable #}
+
+{% if NIMTABLE_enable | default(false) %}
+  #  ================================== Nimtabe ========================================== #
+  nimtable-web:
+    image: ghcr.io/nimtable/nimtable-web:{{__NIMTABLE_version}}
+    container_name: nimtable-web
+    hostname: nimtable-web
+    labels:
+      com.platys.name: "nimtable"
+      com.platys.description: "Control Plane for Iceberg"
+      com.platys.webui.title: "Nimtable Web UI"
+      com.platys.webui.url: "http://dataplatform:28280"
+    depends_on:
+      nimtable:
+    ports:
+      - 28280:3000
+    environment:
+      - JAVA_API_URL=http://nimtable:8182
+      - DATABASE_URL=postgresql://postgres:abc123!@postgresql:5432/postgres
+      - JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
+      - ADMIN_USERNAME=admin
+      - ADMIN_PASSWORD=admin   
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+
+  nimtable:
+    image: ghcr.io/nimtable/nimtable:{{__NIMTABLE_version}}
+    container_name: nimtable
+    hostname: nimtable
+    labels:
+      com.platys.name: "nimtable"
+      com.platys.description: "Control Plane for Iceberg"
+    depends_on:
+      nimtable:
+    ports:
+      - 28281:8182
+    environment:
+      - JAVA_OPTS=-Xmx32g -Xms512m
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
 
 {% endif %}   {#  LAKEKEEPER_enable #}
 

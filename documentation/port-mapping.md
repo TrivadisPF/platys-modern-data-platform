@@ -803,6 +803,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28277 | 8081 | mcp-inspector |
 28278 | 5050 | allure |
 28279 | 5252 | allure-ui |
+28280 | 3000 | nimtable-web |
+28281 | 8182 | nimtable |
 
 ## Ports > 28500
 
