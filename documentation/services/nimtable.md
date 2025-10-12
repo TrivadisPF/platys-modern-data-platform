@@ -1,16 +1,16 @@
 # Nimtable
 
-Lakekeeper is an Apache-Licensed, secure, fast and easy to use Apache Iceberg REST Catalog written in Rust. 
+The Control Plane for Apache Iceberg. 
 
-**[Website](https://docs.lakekeeper.io/)** | **[Documentation](https://docs.lakekeeper.io/docs/nightly/concepts/)** | **[GitHub](https://github.com/lakekeeper/lakekeeper)**
+**[Documentation](https://github.com/nimtable/nimtable)** | **[GitHub](https://github.com/nimtable/nimtable)**
 
 ## How to enable?
 
 ```
-platys init --enable-services LAKEKEEPER,POSTGRESQL
+platys init --enable-services NIMTABLE,POSTGRESQL
 platys gen
 ```
 
 ## How to use it?
 
-Navigate to <http://dataplatform:28275>.
+Navigate to <http://dataplatform:28280>.
