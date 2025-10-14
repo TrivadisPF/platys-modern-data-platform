@@ -807,6 +807,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28280 | 3000 | nimtable-web |
 28281 | 8182 | nimtable |
 28282 | 8080 | ehrbase |
+28283 | 9000 | openehr-tool |
 
 ## Ports > 28500
 
