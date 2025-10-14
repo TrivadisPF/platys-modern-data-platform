@@ -29495,6 +29495,7 @@ services:
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}      
     volumes:
+      - ./data-transfer:/data-transfer
       - ./conf/ehrbase/db/createdb-docker.sql:/docker-entrypoint-initdb.d/createdb-docker.sql
     {%if EHRBASE_volume_map_data %}      
       # to persist the data
@@ -29509,6 +29510,42 @@ services:
       timeout: 5s
       retries: 12      
     restart: {{container_restart_policy}}
+
+  openehrtool:
+    image: surfercrs4/openehrtool:latest
+    container_name: openehrtool
+    hostname: openehrtool
+    labels:
+      com.platys.name: "openehrtool"
+      com.platys.description: "OpenEHR Tool"
+      com.platys.webui.title: "EHRBase Web UI"
+      com.platys.webui.url: "http://dataplatform:28283"      
+    ports:
+      - "28083:9000"
+    environment:
+      FLASK_APP: app.py
+      FLASK_ENV: development
+      SEND_FILE_MAX_AGE_DEFAULT: 0
+      REDISSERVER_hostname: openehrtool-redis
+      REDISSERVER_port: 6379
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}      
+    volumes:
+      - ./data-transfer:/data-transfer
+#      - ./:/code
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+
+  openehrtool-redis:
+    image: redis:alpine
+    ports:
+    - 6379:6379
+    command:  redis-server  /redis.conf
+    volumes:
+    - ./openehrtool/redis.conf:/redis.conf
 
 {% endif %}   {# EHRBASE_enable #}
 
