@@ -690,6 +690,7 @@ networks:
 {% set __WEB_PROTEGE_version = WEB_PROTEGE_version | default('3') -%}
 
 {% set __EHRBASE_version = EHRBASE_version | default('latest') -%}
+{% set __OPENEHR_TOOL_version = OPENEHR_TOOL_version | default('latest') -%}
 
 {% set __HAPI_FHIR_version = HAPI_FHIR_version | default('3') -%}
 {% set __BLAZE_FHIR_version = BLAZE_FHIR_version | default('3') -%}
@@ -29511,12 +29512,16 @@ services:
       retries: 12      
     restart: {{container_restart_policy}}
 
-  openehrtool:
-    image: surfercrs4/openehrtool:latest
-    container_name: openehrtool
-    hostname: openehrtool
+{% endif %}   {# EHRBASE_enable #}
+
+{% if OPENEHR_TOOL_enable | default(false) %}
+  #  ================================== OpenEHR Tool ========================================== #
+  openehr-tool:
+    image: surfercrs4/openehrtool:{{__OPENEHR_TOOL_version}}
+    container_name: openehr-tool
+    hostname: openehr-tool
     labels:
-      com.platys.name: "openehrtool"
+      com.platys.name: "openehr-tool"
       com.platys.description: "OpenEHR Tool"
       com.platys.webui.title: "EHRBase Web UI"
       com.platys.webui.url: "http://dataplatform:28283"      
@@ -29539,15 +29544,19 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
 
-  openehrtool-redis:
+  openehr-tool-redis:
     image: redis:alpine
+    container_name: openehr-tool-redis
+    hostname: openehr-tool-redis
+    labels:
+      com.platys.name: "openehr-tool"
+      com.platys.description: "OpenEHR Tool Redis DB"
     ports:
-    - 6379:6379
+      - 6379:6379
     command:  redis-server  /redis.conf
     volumes:
-    - ./openehrtool/redis.conf:/redis.conf
-
-{% endif %}   {# EHRBASE_enable #}
+      - ./openehr-tool/redis.conf:/redis.conf
+{% endif %}   {# OPENEHR_TOOL_enable #}
 
 {% if HAPI_FHIR_enable | default(false) %}
   #  ================================== Hapi FHIR Server ========================================== #
