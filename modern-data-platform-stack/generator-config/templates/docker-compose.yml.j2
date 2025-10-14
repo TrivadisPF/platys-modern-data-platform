@@ -29457,10 +29457,14 @@ services:
       MANAGEMENT_ENDPOINT_ENV_SHOWVALUES: ALWAYS
       MANAGEMENT_ENDPOINT_HEALTH_ENABLED: true
       MANAGEMENT_ENDPOINT_HEALTH_DATASOURCE_ENABLED: false
+      MANAGEMENT_ENDPOINT_HEALTH_PROBES_ENABLED: true
       MANAGEMENT_ENDPOINT_INFO_ENABLED: true
       MANAGEMENT_ENDPOINT_METRICS_ENABLED: true
       MANAGEMENT_ENDPOINT_PROMETHEUS_ENABLED: true
-      MANAGEMENT_ENDPOINT_HEALTH_PROBES_ENABLED: false
+      ADMIN_API_ACTIVE: true
+      ADMINAPI_ACTIVE: true
+      ADMINAPI_ALLOWDELETEALL: true
+      SYSTEM_ALLOW_TEMPLATE_OVERWRITE: true
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -29487,17 +29491,25 @@ services:
       EHRBASE_PASSWORD_ADMIN: ehrbase
       EHRBASE_USER: ehrbase_restricted
       EHRBASE_PASSWORD: ehrbase_restricted
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}      
     volumes:
       - ./conf/ehrbase/db/createdb-docker.sql:/docker-entrypoint-initdb.d/createdb-docker.sql
     {%if EHRBASE_volume_map_data %}      
       # to persist the data
       - ./container-volume/ehrbase/data:/var/lib/postgresql/data
     {% endif -%}   {#  EHRBASE_volume_map_data #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U postgres" ]
       interval: 5s
       timeout: 5s
       retries: 12      
+    restart: {{container_restart_policy}}
+
 {% endif %}   {# EHRBASE_enable #}
 
 {% if HAPI_FHIR_enable | default(false) %}
