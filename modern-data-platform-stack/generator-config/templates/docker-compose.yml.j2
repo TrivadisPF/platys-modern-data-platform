@@ -689,6 +689,8 @@ networks:
 
 {% set __WEB_PROTEGE_version = WEB_PROTEGE_version | default('3') -%}
 
+{% set __EHRBASE_version = EHRBASE_version | default('latest') -%}
+
 {% set __HAPI_FHIR_version = HAPI_FHIR_version | default('3') -%}
 {% set __BLAZE_FHIR_version = BLAZE_FHIR_version | default('3') -%}
 {% set __LFH_FHIR_version = LFH_FHIR_version | default('3') -%}
@@ -29411,6 +29413,86 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
 {% endif %}   {# WEB_PROTEGE_enable #}
+
+{% if EHRBASE_enable | default(false) %}
+  #  ================================== EHRBase ========================================== #
+  ehrbase:
+    image: ehrbase/ehrbase:{{__EHRBASE_version}}
+    container_name: ehrbase
+    hostname: ehrbase
+    labels:
+      com.platys.name: "ehrbase"
+      com.platys.description: "EHRBase server"
+      com.platys.webui.title: "EHRBase Web UI"
+      com.platys.webui.url: "http://dataplatform:28282"
+    ports:
+      - "28282:8080"
+    environment:
+      DB_URL: jdbc:postgresql://ehrbase-db:5432/ehrbase
+      DB_USER_ADMIN: ehrbase
+      DB_PASS_ADMIN: ehrbase
+      DB_USER: ehrbase_restricted
+      DB_PASS: ehrbase_restricted
+      EHRBASE_AQL_EXPERIMENTAL_AQLONFOLDER_ENABLED: 'true'
+      # CORS configuration
+      WEB_CORS_ALLOWEDORIGINS: "*"
+      WEB_CORS_ALLOWEDORIGINPATTERNS: "*"
+      WEB_CORS_ALLOWEDMETHODS: "GET,PUT,DELETE,POST,OPTIONS"
+      WEB_CORS_ALLOWCREDENTIALS: "false"
+      SERVER_NODENAME: local.ehrbase.org
+#      SECURITY_AUTHUSER: ehrbase-user
+#      SECURITY_AUTHPASSWORD: SuperSecretPassword
+#      SECURITY_AUTHADMINUSER: ehrbase-admin
+#      SECURITY_AUTHADMINPASSWORD: EvenMoreSecretPassword
+#      SECURITY_OAUTH2USERROLE: USER
+#      SECURITY_OAUTH2ADMINROLE: ADMIN
+      MANAGEMENT_ENDPOINTS_WEB_EXPOSURE: env,health,info,metrics,prometheus
+      MANAGEMENT_ENDPOINTS_WEB_BASEPATH: /management
+      MANAGEMENT_ENDPOINT_ENV_ENABLED: false
+      MANAGEMENT_ENDPOINT_HEALTH_ENABLED: false
+      MANAGEMENT_ENDPOINT_HEALTH_DATASOURCE_ENABLED: false
+      MANAGEMENT_ENDPOINT_INFO_ENABLED: false
+      MANAGEMENT_ENDPOINT_METRICS_ENABLED: false
+      MANAGEMENT_ENDPOINT_PROMETHEUS_ENABLED: false
+      MANAGEMENT_ENDPOINT_HEALTH_PROBES_ENABLED: false
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+
+  ehrbase-db:
+    image: postgres:16
+    container_name: ehrbase-db
+    hostname: ehrbase-db
+    labels:
+      com.platys.name: "postgresql"
+      com.platys.description: "EHRBase DB"
+    ports:
+      - "5443:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      EHRBASE_USER_ADMIN: ehrbase
+      EHRBASE_PASSWORD_ADMIN: ehrbase
+      EHRBASE_USER: ehrbase_restricted
+      EHRBASE_PASSWORD: ehrbase_restricted
+    volumes:
+      - ./ehrbase/db/createdb-docker.sql:/docker-entrypoint-initdb.d/createdb-docker.sql
+    {%if EHRBASE_volume_map_data %}      
+      # to persist the data
+      - ./container-volume/ehrbase/data:/var/lib/postgresql/data
+    {% endif -%}   {#  EHRBASE_volume_map_data #}
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 5s
+      timeout: 5s
+      retries: 12      
+{% endif %}   {# EHRBASE_enable #}
 
 {% if HAPI_FHIR_enable | default(false) %}
   #  ================================== Hapi FHIR Server ========================================== #

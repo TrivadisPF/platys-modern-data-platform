@@ -145,6 +145,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 5440 | 5432 | proton-server (postgres batch) |
 5441 | 5432 | supabase-db |
 5442 | 5432 | hive-metastore-db |
+5443 | 5432 | ehrbase-db |
 5500 | 5500 | oracledb-ee-1 |
 5501 | 5500 | oracledb-ee-1 |
 5502 | 5500 | oracledb-ee-1 |
@@ -805,6 +806,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28279 | 5252 | allure-ui |
 28280 | 3000 | nimtable-web |
 28281 | 8182 | nimtable |
+28282 | 8080 | ehrbase |
 
 ## Ports > 28500
 
