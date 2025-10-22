@@ -808,6 +808,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28281 | 8182 | nimtable |
 28282 | 8080 | ehrbase |
 28283 | 9000 | openehr-tool |
+28284 | 8081 | polaris |
+28285 | 8082 | polaris |
 
 ## Ports > 28500
 

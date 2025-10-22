@@ -610,17 +610,20 @@ networks:
 {% set __AWSCLI_version = AWSCLI_version | default('latest') -%}
 {% set __AZURECLI_version = AZURECLI_version | default('latest') -%}
 {% set __AZURE_STORAGE_EXPLORER_version = AZURE_STORAGE_EXPLORER_version | default('latest') -%}
-{% set __ICEBERG_REST_CATALOG_version = ICEBERG_REST_CATALOG_version | default('latest') -%}
 
 {% set __LAKEFS_version = LAKEFS_version | default('latest') -%}
 {% set __LAKEFS_HOOKS_version = LAKEFS_HOOKS_version | default('latest') -%}
 
 {% set __NESSIE_version = NESSIE_version | default('latest') -%}
 
+{% set __ICEBERG_REST_CATALOG_version = ICEBERG_REST_CATALOG_version | default('latest') -%}
+
 {% set __UNITY_CATALOG_version = UNITY_CATALOG_version | default('latest') -%}
 {% set __UNITY_CATALOG_UI_version = UNITY_CATALOG_UI_version | default('latest') -%}
 
 {% set __LAKEKEEPER_version = LAKEKEEPER_version | default('latest') -%}
+
+{% set __POLARIS_version = POLARIS_version | default('latest') -%}
 
 {% set __NIMTABLE_version = NIMTABLE_version | default('latest') -%}
 
@@ -1051,6 +1054,8 @@ networks:
   {% set LAKEFS_enable = false -%}
   {% set NESSIE_enable = false -%}
   {% set UNITY_CATALOG_enable = false -%}
+  {% set LAKEKEEPER_enable = false -%}
+  {% set POLARIS_enable = false -%}
   {% set ADMINIO_UI_enable = false -%}
   {% set ADMINIO_API_enable = false -%}
   {% set FILESTASH_enable = false -%}
@@ -24797,62 +24802,6 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {#  GARAGE_WEBUI_enable #}
 
-{% if ICEBERG_REST_CATALOG_enable | default(false) %}
-  #  ================================== Iceberg REST Catalog ========================================== #
-  iceberg-rest-catalog:
-    image: tabulario/iceberg-rest:{{__ICEBERG_REST_CATALOG_version}}
-    container_name: iceberg-rest-catalog
-    hostname: iceberg-rest-catalog
-    labels:
-      com.platys.name: "iceberg-rest-catalog"
-      com.platys.description: "Iceberg Rest Catalog"
-      com.platys.restapi.title: "Iceberg REST Catalog"
-      com.platys.restapi.url: "http://dataplatform:28287/v1/namespaces"
-      com.platys.password.envvars: "PLATYS_ICEBERG_REST_CATALOG_POSTGRESQL_PASSWORD"
-    ports:
-      - 28287:8181
-    environment:
-      REST_PORT: 8181
-      CATALOG_IO__IMPL: org.apache.iceberg.aws.s3.S3FileIO
-      AWS_ACCESS_KEY_ID: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
-      AWS_SECRET_ACCESS_KEY: ${PLATYS_AWS_SECRET_ACCESS_KEY:-{{MINIO_secret_key}}}
-      AWS_REGION: {{s3DefaultRegion if s3DefaultRegion is defined and s3DefaultRegion else omit}}
-      CATALOG_S3_PATH-STYLE-ACCESS: true
-      CATALOG_IO__IMPL: org.apache.iceberg.aws.s3.S3FileIO
-      CATALOG_S3_ENDPOINT: {{ s3Endpoint if s3Endpoint is defined and s3Endpoint else omit}}
-      CATALOG_WAREHOUSE: {{ICEBERG_REST_CATALOG_warehouse_dir if ICEBERG_REST_CATALOG_warehouse_dir is defined and ICEBERG_REST_CATALOG_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
-    {%if (ICEBERG_REST_CATALOG_type | lower) =='jdbc'  | default(false) %}
-      CATALOG_CATALOG__IMPL: org.apache.iceberg.jdbc.JdbcCatalog
-      {%if (ICEBERG_REST_CATALOG_db_type | lower) =='sqlite'  | default(false) %}
-      CATALOG_URI: jdbc:sqlite:file:/tmp/iceberg_rest_mode=memory
-      {%elif (ICEBERG_REST_CATALOG_db_type | lower) =='postgres'  | default(false) %}
-      CATALOG_URI: jdbc:postgresql://postgresql/{{ICEBERG_REST_CATALOG_db_dbname}}
-      {% endif -%}   {#  ICEBERG_REST_CATALOG_db_type #}
-      CATALOG_JDBC_USER: {{ICEBERG_REST_CATALOG_db_user}}
-      CATALOG_JDBC_PASSWORD: ${PLATYS_ICEBERG_REST_CATALOG_POSTGRESQL_PASSWORD:-{{ICEBERG_REST_CATALOG_db_password | default('abc123!') }}}
-    {%elif (ICEBERG_REST_CATALOG_type | lower) =='hive'  | default(false) %}
-      CATALOG_CATALOG__IMPL: org.apache.iceberg.hive.HiveCatalog      #
-      CATALOG_URI: jdbc:sqlite:file:/tmp/iceberg_rest_mode=memory
-    {%elif (ICEBERG_REST_CATALOG_type | lower) =='nessie'  | default(false) %}
-      CATALOG_CATALOG__IMPL: org.apache.iceberg.nessie.NessieCatalog
-      CATALOG_URI: http://nessie:19120/api/v1
-      CATALOG_REF: main
-    {% endif -%}   {#  ICEBERG_REST_CATALOG_type #}
-    {%if use_timezone | default(false) %}
-      TZ: {{use_timezone}}
-    {% endif -%}   {#  use_timezone #}
-    volumes:
-      - ./data-transfer:/data-transfer
-    {%if use_timezone | default(false) %}
-      - "./etc/timezone:/etc/timezone:ro"
-      - "./etc/localtime:/etc/localtime:ro"
-    {% endif -%}   {#  use_timezone #}
-    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
-    <<: *logging
-    {% endif -%}   {#  logging_driver is defined ... #}
-    restart: {{container_restart_policy}}
-{% endif %}   {#  ICEBERG_REST_CATALOG_enable #}
-
 {% if FILESTASH_enable | default(false) %}
   #  ================================== Filestash ========================================== #
   filestash:
@@ -25283,6 +25232,62 @@ services:
   {% endif %}   {#  NESSIE_CLI_enable #}
 {% endif %}   {#  NESSIE_enable #}
 
+{% if ICEBERG_REST_CATALOG_enable | default(false) %}
+  #  ================================== Iceberg REST Catalog ========================================== #
+  iceberg-rest-catalog:
+    image: tabulario/iceberg-rest:{{__ICEBERG_REST_CATALOG_version}}
+    container_name: iceberg-rest-catalog
+    hostname: iceberg-rest-catalog
+    labels:
+      com.platys.name: "iceberg-rest-catalog"
+      com.platys.description: "Iceberg Rest Catalog"
+      com.platys.restapi.title: "Iceberg REST Catalog"
+      com.platys.restapi.url: "http://dataplatform:28287/v1/namespaces"
+      com.platys.password.envvars: "PLATYS_ICEBERG_REST_CATALOG_POSTGRESQL_PASSWORD"
+    ports:
+      - 28287:8181
+    environment:
+      REST_PORT: 8181
+      CATALOG_IO__IMPL: org.apache.iceberg.aws.s3.S3FileIO
+      AWS_ACCESS_KEY_ID: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
+      AWS_SECRET_ACCESS_KEY: ${PLATYS_AWS_SECRET_ACCESS_KEY:-{{MINIO_secret_key}}}
+      AWS_REGION: {{s3DefaultRegion if s3DefaultRegion is defined and s3DefaultRegion else omit}}
+      CATALOG_S3_PATH-STYLE-ACCESS: true
+      CATALOG_IO__IMPL: org.apache.iceberg.aws.s3.S3FileIO
+      CATALOG_S3_ENDPOINT: {{ s3Endpoint if s3Endpoint is defined and s3Endpoint else omit}}
+      CATALOG_WAREHOUSE: {{ICEBERG_REST_CATALOG_warehouse_dir if ICEBERG_REST_CATALOG_warehouse_dir is defined and ICEBERG_REST_CATALOG_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
+    {%if (ICEBERG_REST_CATALOG_type | lower) =='jdbc'  | default(false) %}
+      CATALOG_CATALOG__IMPL: org.apache.iceberg.jdbc.JdbcCatalog
+      {%if (ICEBERG_REST_CATALOG_db_type | lower) =='sqlite'  | default(false) %}
+      CATALOG_URI: jdbc:sqlite:file:/tmp/iceberg_rest_mode=memory
+      {%elif (ICEBERG_REST_CATALOG_db_type | lower) =='postgres'  | default(false) %}
+      CATALOG_URI: jdbc:postgresql://postgresql/{{ICEBERG_REST_CATALOG_db_dbname}}
+      {% endif -%}   {#  ICEBERG_REST_CATALOG_db_type #}
+      CATALOG_JDBC_USER: {{ICEBERG_REST_CATALOG_db_user}}
+      CATALOG_JDBC_PASSWORD: ${PLATYS_ICEBERG_REST_CATALOG_POSTGRESQL_PASSWORD:-{{ICEBERG_REST_CATALOG_db_password | default('abc123!') }}}
+    {%elif (ICEBERG_REST_CATALOG_type | lower) =='hive'  | default(false) %}
+      CATALOG_CATALOG__IMPL: org.apache.iceberg.hive.HiveCatalog      #
+      CATALOG_URI: jdbc:sqlite:file:/tmp/iceberg_rest_mode=memory
+    {%elif (ICEBERG_REST_CATALOG_type | lower) =='nessie'  | default(false) %}
+      CATALOG_CATALOG__IMPL: org.apache.iceberg.nessie.NessieCatalog
+      CATALOG_URI: http://nessie:19120/api/v1
+      CATALOG_REF: main
+    {% endif -%}   {#  ICEBERG_REST_CATALOG_type #}
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  ICEBERG_REST_CATALOG_enable #}
+
 {% if UNITY_CATALOG_enable | default(false) %}
   #  ================================== Unity Catalog ========================================== #
   unity-catalog:
@@ -25447,6 +25452,56 @@ services:
     restart:  no
 
 {% endif %}   {#  LAKEKEEPER_enable #}
+
+{% if POLARIS_enable | default(false) %}
+  #  ================================== Polaris ========================================== #
+  polaris:
+    image: apache/polaris:{{__POLARIS_version}}
+    container_name: polaris
+    hostname: polaris
+    platform: linux/amd64
+    labels:
+      com.platys.name: "polaris"
+      com.platys.description: "Secure, fast and easy to use Iceberg REST Catalog"
+      com.platys.webui.title: "Polaris Web UI"
+      com.platys.webui.url: "http://dataplatform:28284"
+    depends_on:
+      lakekeeper-init:
+        condition: service_completed_successfully      
+    ports:
+      - 28284:8181
+      - 28285:8182
+    environment:
+    {%if MINIO_enable or external['S3_enable'] | default(false) %}
+      AWS_ACCESS_KEY_ID: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
+      AWS_SECRET_ACCESS_KEY: {{s3SecretAccessKey}}
+      AWS_REGION: {{s3DefaultRegion | default(omit) }}
+      AWS_ENDPOINT_URL_S3: {{s3Endpoint | default(omit) }}
+      AWS_ENDPOINT_URL_STS: {{s3Endpoint | default(omit) }}
+    {% endif %}      
+      POLARIS_BOOTSTRAP_CREDENTIALS: default,admin,password
+      polaris.realm-context.realms: default
+      polaris.features.DROP_WITH_PURGE_ENABLED: "true"
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    command: [ "serve" ]
+    restart: {{container_restart_policy}}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8181/healthcheck"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+{% endif %}   {# POLARIS_enable #}
 
 {% if NIMTABLE_enable | default(false) %}
   #  ================================== Nimtabe ========================================== #
