@@ -21139,6 +21139,7 @@ services:
       - POSTGRES_PASSWORD=${PLATYS_POSTGRESQL_PASSWORD:-{{POSTGRESQL_password | default('abc123!') }}}
       - POSTGRES_USER={{POSTGRESQL_user | default('demo') }}
       - POSTGRES_DB={{POSTGRESQL_database | default('demodb') }}
+#      - POSTGRES_INITDB_ARGS=--encoding=UTF8 --data-checksums      
     {% if POSTGRESQL_multiple_databases is defined and POSTGRESQL_multiple_databases | length %}
       - POSTGRES_MULTIPLE_DATABASES={{POSTGRESQL_multiple_databases}}
       - POSTGRES_MULTIPLE_USERS={{POSTGRESQL_multiple_users}}
@@ -25474,7 +25475,7 @@ services:
       com.platys.description: "Secure, fast and easy to use Iceberg REST Catalog"
       com.platys.webui.title: "Polaris Web UI"
       com.platys.webui.url: "http://dataplatform:28284"
-      com.platys.password.envvars: "PLATYS_POLARIS_DB_PASSWORD"       
+      com.platys.password.envvars: "PLATYS_POLARIS_DB_PASSWORD"
     ports:
       - 28284:8181
       - 28285:8182
@@ -25491,12 +25492,12 @@ services:
       POLARIS_PERSISTENCE_RELATIONAL_JDBC_MAX_RETRIES: 5
       POLARIS_PERSISTENCE_RELATIONAL_JDBC_INITIAL_DELAY_IN_MS: 100
       POLARIS_PERSISTENCE_RELATIONAL_JDBC_MAX_DURATION_IN_MS: 5000
-      QUARKUS_DATASOURCE_JDBC_URL: jdbc:postgresql://postgresql:5432/{{POLARIS_db_dbname | default('postgres')}}
+      QUARKUS_DATASOURCE_JDBC_URL: jdbc:postgresql://postgresql:5432/{{POLARIS_realm | default('postgres')}}
       QUARKUS_DATASOURCE_USERNAME: {{POLARIS_db_username | default('postgres')}}
       QUARKUS_DATASOURCE_PASSWORD: ${PLATYS_POLARIS_DB_PASSWORD:-{{POLARIS_db_password}}}
     {% endif %}
-      POLARIS_BOOTSTRAP_CREDENTIALS: POLARIS,root,s3cr3t
-      POLARIS_REALM_CONTEXT_REALMS: POLARIS
+      POLARIS_BOOTSTRAP_CREDENTIALS: {{POLARIS_realm | default('postgres')}},root,s3cr3t
+      POLARIS_REALM_CONTEXT_REALMS: {{POLARIS_realm | default('postgres')}}
       QUARKUS_OTEL_SDK_DISABLED: true
       polaris.features."ALLOW_INSECURE_STORAGE_TYPES": "true"
       polaris.features."SUPPORTED_CATALOG_STORAGE_TYPES": "[\"FILE\",\"S3\",\"GCS\",\"AZURE\"]"
@@ -25522,11 +25523,10 @@ services:
     
   {% if POLARIS_persistence_type == 'relational-jdbc' and POLARIS_db_type == 'postgresql' %}
 
-  polaris-setup:
+  polaris-db-setup:
     image: apache/polaris-admin-tool:latest
-    container_name: polaris-setup
-    hostname: polaris-setup
-    platform: linux/amd64   
+    container_name: polaris-db-setup
+    hostname: polaris-db-setup
     labels:
       com.platys.name: "polaris"
     depends_on:
@@ -25551,11 +25551,44 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     command:
       - "bootstrap"
-      - "--realm=POLARIS"
-      - "--credential=POLARIS,root,s3cr3t"   
+      - "--realm={{POLARIS_realm | default('postgres')}}"
+      - "--credential={{POLARIS_realm | default('postgres')}},root,s3cr3t"   
     init: true  
     restart:  no          
   {% endif %}  {# POLARIS_persistence_type == 'relational-jdbc' and POLARIS_db_type == 'postgresql #}
+
+  polaris-catalog-setup:
+    image: alpine/curl
+    container_name: polaris-catalog-setup
+    hostname: polaris-catalog-setup
+    depends_on:
+      polaris:
+        condition: service_healthy
+    environment:
+      - CLIENT_ID=root
+      - CLIENT_SECRET=s3cr3t
+    volumes:
+      - ./scripts/polaris/:/polaris
+    entrypoint: "/bin/sh"
+    command:
+      - "-c"
+      - >-
+        chmod +x /polaris/create-catalog.sh;
+        chmod +x /polaris/obtain-token.sh;
+        source /polaris/obtain-token.sh;
+        echo Creating catalog...;
+        export STORAGE_CONFIG_INFO='{"storageType":"S3",
+          "endpoint":"{{s3Endpoint | default(omit) }}",
+          "endpointInternal":"{{s3Endpoint | default(omit) }}",
+          "pathStyleAccess":true}';
+        export STORAGE_LOCATION='{{POLARIS_storage_location if POLARIS_storage_location is defined and POLARIS_storage_location | length else 's3://' ~ s3AdminBucketName}}';
+        /polaris/create-catalog.sh POLARIS $$TOKEN;
+        echo Extra grants...;
+        curl -H "Authorization: Bearer $$TOKEN" -H 'Content-Type: application/json' \
+          -X PUT \
+          http://polaris:8181/api/management/v1/catalogs/quickstart_catalog/catalog-roles/catalog_admin/grants \
+          -d '{"type":"catalog", "privilege":"CATALOG_MANAGE_CONTENT"}';
+        echo Done.;      
 {% endif %}   {# POLARIS_enable #}
 
 {% if NIMTABLE_enable | default(false) %}
