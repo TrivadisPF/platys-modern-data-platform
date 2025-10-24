@@ -22676,6 +22676,8 @@ services:
       ICEBERG_REST_CATALOG_WAREHOUSE: {{ICEBERG_REST_CATALOG_warehouse_dir if ICEBERG_REST_CATALOG_warehouse_dir is defined and ICEBERG_REST_CATALOG_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
       ICEBERG_LAKEKEEPER_CATALOG_URI: http://lakekeeper:8181/catalog
       ICEBERG_LAKEKEEPER_CATALOG_WAREHOUSE: {{ICEBERG_REST_CATALOG_warehouse_dir if ICEBERG_REST_CATALOG_warehouse_dir is defined and ICEBERG_REST_CATALOG_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
+      ICEBERG_POLARIS_CATALOG_URI: http://polaris:8181/api/catalog
+      ICEBERG_POLARIS_CATALOG_WAREHOUSE: {{ICEBERG_REST_CATALOG_warehouse_dir if ICEBERG_REST_CATALOG_warehouse_dir is defined and ICEBERG_REST_CATALOG_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
 {% endif %}
   {%if external['ADLS_enable'] | default(false) %}
       ADLS_STORAGE_ACCOUNT: {{adlsStorageAccount | default(omit) }}
@@ -22817,6 +22819,9 @@ services:
     {% endif %}
     {%if LAKEKEEPER_enable | default(false) %}
       - './conf/{{conf_dir}}/catalog/iceberg-lakekeeper.properties:/catalog/iceberg_lakekeeper.properties'
+    {% endif %}
+    {%if POLARIS_enable | default(false) %}
+      - './conf/{{conf_dir}}/catalog/iceberg-polaris.properties:/catalog/iceberg_polaris.properties'
     {% endif %}
     {%if SPARK_table_format_type == 'iceberg' or ICEBERG_REST_CATALOG_enable | default(false) %}
       - './conf/{{conf_dir}}/catalog/iceberg.properties:/catalog/iceberg.properties'
@@ -23018,6 +23023,8 @@ services:
       NESSIE_CATALOG_WAREHOUSE_DIR: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined and SPARK_sql_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/nessie/warehouse'}}
       ICEBERG_REST_CATALOG_URI: http://iceberg-rest-catalog:8181
       ICEBERG_REST_CATALOG_WAREHOUSE: {{ICEBERG_REST_CATALOG_warehouse_dir if ICEBERG_REST_CATALOG_warehouse_dir is defined and ICEBERG_REST_CATALOG_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
+      ICEBERG_POLARIS_CATALOG_URI: http://polaris:8181/api/catalog
+      ICEBERG_POLARIS_CATALOG_WAREHOUSE: {{ICEBERG_REST_CATALOG_warehouse_dir if ICEBERG_REST_CATALOG_warehouse_dir is defined and ICEBERG_REST_CATALOG_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
   {% endif %}
   {%if external['ADLS_enable'] | default(false) %}
       ADLS_STORAGE_ACCOUNT: {{adlsStorageAccount | default(omit) }}
@@ -23159,6 +23166,9 @@ services:
     {%if LAKEKEEPER_enable | default(false) %}
       - './conf/{{conf_dir}}/catalog/iceberg-lakekeeper.properties:/catalog/iceberg_lakekeeper.properties'
     {% endif %}    
+    {%if POLARIS_enable | default(false) %}
+      - './conf/{{conf_dir}}/catalog/iceberg-polaris.properties:/catalog/iceberg_polaris.properties'
+    {% endif %}       
     {%if SPARK_table_format_type == 'iceberg' | default(false) %}
       - './conf/{{conf_dir}}/catalog/iceberg.properties:/catalog/iceberg.properties'
       {%if NESSIE_enable | default(false) %}
@@ -25489,15 +25499,14 @@ services:
       QUARKUS_DATASOURCE_USERNAME: {{POLARIS_db_username | default('postgres')}}
       QUARKUS_DATASOURCE_PASSWORD: ${PLATYS_POLARIS_DB_PASSWORD:-{{POLARIS_db_password}}}
     {% endif %}
-      POLARIS_BOOTSTRAP_CREDENTIALS: default,admin,password
+      POLARIS_BOOTSTRAP_CREDENTIALS: POLARIS,root,s3cr3t
       POLARIS_REALM_CONTEXT_REALMS: POLARIS
       QUARKUS_OTEL_SDK_DISABLED: true
-      POLARIS_BOOTSTRAP_CREDENTIALS: POLARIS,$CLIENT_ID,$CLIENT_SECRET
       polaris.features."ALLOW_INSECURE_STORAGE_TYPES": "true"
       polaris.features."SUPPORTED_CATALOG_STORAGE_TYPES": "[\"FILE\",\"S3\",\"GCS\",\"AZURE\"]"
       polaris.readiness.ignore-severe-issues: "true"
     {%if use_timezone | default(false) %}
-      - TZ={{use_timezone}}
+      TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
@@ -25515,6 +25524,40 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    
+  {% if POLARIS_persistence_type == 'relational-jdbc' and POLARIS_db_type == 'postgresql' %}
+
+  polaris-setup:
+    image: apache/polaris-admin-tool:latest
+    container_name: polaris-setup
+    hostname: polaris-setup
+    platform: linux/amd64   
+    labels:
+      com.platys.name: "polaris"     
+    environment:
+      POLARIS_PERSISTENCE_TYPE: relational-jdbc
+      QUARKUS_DATASOURCE_JDBC_URL: jdbc:postgresql://postgresql:5432/{{POLARIS_db_dbname | default('postgres')}}
+      QUARKUS_DATASOURCE_USERNAME: {{POLARIS_db_username | default('postgres')}}
+      QUARKUS_DATASOURCE_PASSWORD: ${PLATYS_POLARIS_DB_PASSWORD:-{{POLARIS_db_password}}}
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    command:
+      - "bootstrap"
+      - "--realm=POLARIS"
+      - "--credential=POLARIS,root,s3cr3t"   
+    init: true  
+    restart:  no          
+  {% endif %}   {#  POLARIS_persistence_type == 'relational-jdbc' and POLARIS_db_type == 'postgresql' %}
 {% endif %}   {# POLARIS_enable #}
 
 {% if NIMTABLE_enable | default(false) %}
