@@ -22676,11 +22676,17 @@ services:
       NESSIE_CATALOG_WAREHOUSE_DIR: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined and SPARK_sql_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/nessie/warehouse'}}
       ICEBERG_REST_CATALOG_URI: http://iceberg-rest-catalog:8181
       ICEBERG_REST_CATALOG_WAREHOUSE: {{ICEBERG_REST_CATALOG_warehouse_dir if ICEBERG_REST_CATALOG_warehouse_dir is defined and ICEBERG_REST_CATALOG_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
+    {%if LAKEKEEPER_enable | default(false) %}
       ICEBERG_LAKEKEEPER_CATALOG_URI: http://lakekeeper:8181/catalog
       ICEBERG_LAKEKEEPER_CATALOG_WAREHOUSE: {{ICEBERG_REST_CATALOG_warehouse_dir if ICEBERG_REST_CATALOG_warehouse_dir is defined and ICEBERG_REST_CATALOG_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
+    {% endif %}
+    {%if POLARIS_enable | default(false) %}
       ICEBERG_POLARIS_CATALOG_URI: http://polaris:8181/api/catalog
       ICEBERG_POLARIS_CATALOG_WAREHOUSE: {{ICEBERG_REST_CATALOG_warehouse_dir if ICEBERG_REST_CATALOG_warehouse_dir is defined and ICEBERG_REST_CATALOG_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
-{% endif %}
+      CLIENT_ID: {{POLARIS_client_id | default('admin')}}
+      CLIENT_SECRET: ${PLATYS_POLARIS_CLIENT_SECRET:-{{POLARIS_client_secret | default('abc123!')}}} 
+    {% endif %}
+  {% endif %}
   {%if external['ADLS_enable'] | default(false) %}
       ADLS_STORAGE_ACCOUNT: {{adlsStorageAccount | default(omit) }}
       ADLS_ACCESS_KEY: {{adlsAccessKey}}
@@ -23025,8 +23031,16 @@ services:
       NESSIE_CATALOG_WAREHOUSE_DIR: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined and SPARK_sql_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/nessie/warehouse'}}
       ICEBERG_REST_CATALOG_URI: http://iceberg-rest-catalog:8181
       ICEBERG_REST_CATALOG_WAREHOUSE: {{ICEBERG_REST_CATALOG_warehouse_dir if ICEBERG_REST_CATALOG_warehouse_dir is defined and ICEBERG_REST_CATALOG_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
+    {%if LAKEKEEPER_enable | default(false) %}
+      ICEBERG_LAKEKEEPER_CATALOG_URI: http://lakekeeper:8181/catalog
+      ICEBERG_LAKEKEEPER_CATALOG_WAREHOUSE: {{ICEBERG_REST_CATALOG_warehouse_dir if ICEBERG_REST_CATALOG_warehouse_dir is defined and ICEBERG_REST_CATALOG_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
+    {% endif %}
+    {%if POLARIS_enable | default(false) %}
       ICEBERG_POLARIS_CATALOG_URI: http://polaris:8181/api/catalog
       ICEBERG_POLARIS_CATALOG_WAREHOUSE: {{ICEBERG_REST_CATALOG_warehouse_dir if ICEBERG_REST_CATALOG_warehouse_dir is defined and ICEBERG_REST_CATALOG_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
+      CLIENT_ID: {{POLARIS_client_id | default('admin')}}
+      CLIENT_SECRET: ${PLATYS_POLARIS_CLIENT_SECRET:-{{POLARIS_client_secret | default('abc123!')}}} 
+    {% endif %}
   {% endif %}
   {%if external['ADLS_enable'] | default(false) %}
       ADLS_STORAGE_ACCOUNT: {{adlsStorageAccount | default(omit) }}
@@ -25476,7 +25490,7 @@ services:
       com.platys.description: "Secure, fast and easy to use Iceberg REST Catalog"
       com.platys.webui.title: "Polaris Web UI"
       com.platys.webui.url: "http://dataplatform:28284"
-      com.platys.password.envvars: "PLATYS_POLARIS_DB_PASSWORD"
+      com.platys.password.envvars: "PLATYS_POLARIS_DB_PASSWORD,PLATYS_POLARIS_CLIENT_SECRET"
     ports:
       - 28284:8181
       - 28285:8182
@@ -25497,7 +25511,7 @@ services:
       QUARKUS_DATASOURCE_USERNAME: {{POLARIS_db_username | default('postgres')}}
       QUARKUS_DATASOURCE_PASSWORD: ${PLATYS_POLARIS_DB_PASSWORD:-{{POLARIS_db_password}}}
     {% endif %}
-      POLARIS_BOOTSTRAP_CREDENTIALS: {{POLARIS_realm | default('postgres')}},root,s3cr3t
+      POLARIS_BOOTSTRAP_CREDENTIALS: {{POLARIS_realm | default('postgres')}},{{POLARIS_client_id | default('admin')}},${PLATYS_POLARIS_CLIENT_SECRET:-{{POLARIS_client_secret | default('abc123!')}}}
       POLARIS_REALM_CONTEXT_REALMS: {{POLARIS_realm | default('postgres')}}
       QUARKUS_OTEL_SDK_DISABLED: true
       polaris.features."ALLOW_INSECURE_STORAGE_TYPES": "true"
@@ -25523,7 +25537,6 @@ services:
       retries: 5
     
   {% if POLARIS_persistence_type == 'relational-jdbc' and POLARIS_db_type == 'postgresql' %}
-
   polaris-db-setup:
     image: apache/polaris-admin-tool:latest
     container_name: polaris-db-setup
@@ -25553,7 +25566,7 @@ services:
     command:
       - "bootstrap"
       - "--realm={{POLARIS_realm | default('postgres')}}"
-      - "--credential={{POLARIS_realm | default('postgres')}},root,s3cr3t"   
+      - "--credential={{POLARIS_realm | default('postgres')}},{{POLARIS_client_id | default('admin')}},${PLATYS_POLARIS_CLIENT_SECRET:-{{POLARIS_client_secret | default('abc123!')}}}"   
     init: true  
     restart:  no          
   {% endif %}  {# POLARIS_persistence_type == 'relational-jdbc' and POLARIS_db_type == 'postgresql #}
