@@ -106,6 +106,7 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * `MINIO_browser_enable` renamed to `MINIO_browser_enabled` to be conforment with naming convention
  * Change internal port of `docker-registry` from `5000` to `5020`
  * Any config setting which does not enable a service renamed from `XXXX_ddd_enable` to `XXXX_ddd_enabled`
+ * Change all bitnami images to the `bitnamilegacy` docker repository, due to all the bitnami images no longer be available for free
 
 ## What's new in 1.18.1
 
