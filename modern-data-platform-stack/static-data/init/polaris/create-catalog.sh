@@ -24,6 +24,7 @@ apk add --no-cache jq
 realm=${1:-"POLARIS"}
 
 TOKEN=${2:-""}
+CATALOG_NAME=${3:-""}
 
 BASEDIR=$(dirname $0)
 
@@ -61,11 +62,11 @@ if [ -z "${STORAGE_CONFIG_INFO}" ]; then
 fi
 
 echo
-echo Creating a catalog named quickstart_catalog in realm $realm...
+echo Creating a catalog named $CATALOG_NAME in realm $realm...
 
 PAYLOAD='{
    "catalog": {
-     "name": "quickstart_catalog",
+     "name": "'$CATALOG_NAME'",
      "type": "INTERNAL",
      "readOnly": false,
      "properties": {

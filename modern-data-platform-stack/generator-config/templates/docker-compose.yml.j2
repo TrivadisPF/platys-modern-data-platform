@@ -25494,6 +25494,11 @@ services:
     ports:
       - 28284:8181
       - 28285:8182
+    {% if POLARIS_persistence_type == 'relational-jdbc' and POLARIS_db_type == 'postgresql' %}
+    depends_on:
+      postgresql:
+        condition: service_healthy
+    {% endif %}            
     environment:
     {%if MINIO_enable or external['S3_enable'] | default(false) %}
       AWS_ACCESS_KEY_ID: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
@@ -25544,8 +25549,8 @@ services:
     labels:
       com.platys.name: "polaris"
     depends_on:
-      - polaris
-      - postgresql           
+      postgresql:
+        condition: service_healthy      
     environment:
       POLARIS_PERSISTENCE_TYPE: relational-jdbc
       QUARKUS_DATASOURCE_JDBC_URL: jdbc:postgresql://postgresql:5432/{{POLARIS_realm | default('postgres')}}
@@ -25596,11 +25601,11 @@ services:
           "endpointInternal":"{{s3Endpoint | default(omit) }}",
           "pathStyleAccess":true}';
         export STORAGE_LOCATION='{{POLARIS_storage_location if POLARIS_storage_location is defined and POLARIS_storage_location | length else 's3://' ~ s3AdminBucketName}}';
-        /polaris/create-catalog.sh POLARIS $$TOKEN;
+        /polaris/create-catalog.sh POLARIS $$TOKEN {{POLARIS_catalog_name | default('polaris_catalog')}};
         echo Extra grants...;
         curl -H "Authorization: Bearer $$TOKEN" -H 'Content-Type: application/json' \
           -X PUT \
-          http://polaris:8181/api/management/v1/catalogs/quickstart_catalog/catalog-roles/catalog_admin/grants \
+          http://polaris:8181/api/management/v1/catalogs/{{POLARIS_catalog_name | default('polaris_catalog')}}/catalog-roles/catalog_admin/grants \
           -d '{"type":"catalog", "privilege":"CATALOG_MANAGE_CONTENT"}';
         echo Done.; 
     init: true  
