@@ -1416,6 +1416,16 @@ networks:
     {% set s3Endpoint = s3EndpointStorage %}
 {% endif %}   {# LAKEFS_enable #}
 
+{% if POLARIS_enable | default(false) %}
+    {% set polarisEndpoint = 'http://polaris:8181/api/catalog' %}
+    {% set polarisCatalogName = '{{POLARIS_CATALOG_NAME | default('polaris_catalog')}}' %}
+{% endif %}   {# POLARIS_enable #}
+
+{% if LAKEKEEPER_enable | default(false) %}
+    {% set lakekeeperEndpoint = 'http://lakekeeper:8181' %}
+    {% set lakekeeperCatalogName = '{{LAKEKEEPER_CATALOG_NAME | default('lakekeeper_catalog')}}' %}
+{% endif %}   {# LAKEKEEPER_enable #}
+
 {#  ================================== ADLS Settings ========================================== #}
 
 {% if (external['ADLS_enable']) | default(false) %}
@@ -22681,8 +22691,8 @@ services:
       ICEBERG_LAKEKEEPER_CATALOG_WAREHOUSE: {{ICEBERG_REST_CATALOG_warehouse_dir if ICEBERG_REST_CATALOG_warehouse_dir is defined and ICEBERG_REST_CATALOG_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
     {% endif %}
     {%if POLARIS_enable | default(false) %}
-      ICEBERG_POLARIS_CATALOG_URI: http://polaris:8181/api/catalog
-      ICEBERG_POLARIS_CATALOG_WAREHOUSE: {{POLARIS_catalog_name | default('polaris_catalog')}}
+      ICEBERG_POLARIS_CATALOG_URI: {{polarisEndpoint}}
+      ICEBERG_POLARIS_CATALOG_WAREHOUSE: {{polarisCatalogName}}
       CLIENT_ID: {{POLARIS_client_id | default('admin')}}
       CLIENT_SECRET: ${PLATYS_POLARIS_CLIENT_SECRET:-{{POLARIS_client_secret | default('abc123!')}}} 
     {% endif %}
@@ -23036,8 +23046,8 @@ services:
       ICEBERG_LAKEKEEPER_CATALOG_WAREHOUSE: {{ICEBERG_REST_CATALOG_warehouse_dir if ICEBERG_REST_CATALOG_warehouse_dir is defined and ICEBERG_REST_CATALOG_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
     {% endif %}
     {%if POLARIS_enable | default(false) %}
-      ICEBERG_POLARIS_CATALOG_URI: http://polaris:8181/api/catalog
-      ICEBERG_POLARIS_CATALOG_WAREHOUSE: {{POLARIS_catalog_name | default('polaris_catalog')}}
+      ICEBERG_POLARIS_CATALOG_URI: {{polarisEndpoint}}
+      ICEBERG_POLARIS_CATALOG_WAREHOUSE: {{polarisCatalogName}}
       CLIENT_ID: {{POLARIS_client_id | default('admin')}}
       CLIENT_SECRET: ${PLATYS_POLARIS_CLIENT_SECRET:-{{POLARIS_client_secret | default('abc123!')}}} 
     {% endif %}
