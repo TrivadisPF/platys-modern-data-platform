@@ -22162,11 +22162,12 @@ services:
     ports:
       - "28194:3000"
     environment:
-      SQLPAD_ADMIN: 'admin@sqlpad.com'
-      SQLPAD_ADMIN_PASSWORD: 'admin'
+      SQLPAD_ADMIN: 'admin'
+      SQLPAD_ADMIN_PASSWORD: 'abc123!'
       SQLPAD_APP_LOG_LEVEL: debug
       SQLPAD_WEB_LOG_LEVEL: warn
       SQLPAD_SEED_DATA_PATH: /etc/sqlpad/seed-data
+      {%if POSTGRESQL_enable %}
       SQLPAD_CONNECTIONS__pgdemo__name: Postgres demo
       SQLPAD_CONNECTIONS__pgdemo__driver: postgres
       SQLPAD_CONNECTIONS__pgdemo__host: postgres
@@ -22175,6 +22176,16 @@ services:
       SQLPAD_CONNECTIONS__pgdemo__password: abc123!
       SQLPAD_CONNECTIONS__pgdemo__multiStatementTransactionEnabled: 'true'
       SQLPAD_CONNECTIONS__pgdemo__idleTimeoutSeconds: 86400
+      {% endif -%}   {#  POSTGRESQL_enable #}
+      {%if TRINO_enable %}
+      SQLPAD_CONNECTIONS__trino__name: Trino
+      SQLPAD_CONNECTIONS__trino__driver: trino
+      SQLPAD_CONNECTIONS__trino__host: trino-1
+      SQLPAD_CONNECTIONS__trino__port: 8088
+      SQLPAD_CONNECTIONS__trino__username: trino
+      SQLPAD_CONNECTIONS__trino__catalog: iceberg_polaris
+      SQLPAD_CONNECTIONS__trino__schema: tpch
+      {% endif -%}   {#  TRINO_enable #}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
