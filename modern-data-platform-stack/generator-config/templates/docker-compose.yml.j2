@@ -5654,6 +5654,7 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie_authentication_type: nessie
       SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie_warehouse: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined and SPARK_sql_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
       SPARK_DEFAULTS_CONF_spark_sql_defaultCatalog: nessie
+    {% endif -%}   {#  SPARK_table_format_type #}      
     {% elif SPARK_table_format_type == 'iceberg' and LAKEFS_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog_type: hive
       SPARK_DEFAULTS_CONF_spark_sql_extensions: org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions
@@ -5822,7 +5823,8 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie_authentication_type: nessie
       SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie_warehouse: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined and SPARK_sql_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
       SPARK_DEFAULTS_CONF_spark_sql_defaultCatalog: nessie
-    {% elif SPARK_table_format_type == 'iceberg' and LAKEFS_enable | default(false) %}
+    {% endif -%}   {#  SPARK_table_format_type #}      
+    {% if SPARK_table_format_type == 'iceberg' and LAKEFS_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog_type: hive
       SPARK_DEFAULTS_CONF_spark_sql_extensions: org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions
@@ -5985,7 +5987,8 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie_authentication_type: nessie
       SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie_warehouse: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined and SPARK_sql_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
       SPARK_DEFAULTS_CONF_spark_sql_defaultCatalog: nessie
-    {% elif SPARK_table_format_type == 'iceberg' and LAKEFS_enable | default(false) %}
+    {% endif -%}   {#  SPARK_table_format_type #}      
+    {% if SPARK_table_format_type == 'iceberg' and LAKEFS_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog_type: hive
       SPARK_DEFAULTS_CONF_spark_sql_extensions: org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions
@@ -5995,6 +5998,16 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakefs_uri: '{{s3Endpoint | default(omit) }}'
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakefs_warehouse: {{'lakefs://' ~ LAKEFS_quickstart_repo_name | default('demo')}}
       SPARK_DEFAULTS_CONF_spark_sql_defaultCatalog: lakefs
+    {% endif -%}   {#  SPARK_table_format_type #}      
+    {% if SPARK_table_format_type == 'iceberg' and POLARIS_enable | default(false) %}
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_polaris_type: rest
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_polaris: org.apache.iceberg.spark.SparkCatalog
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_polaris_uri: '{{polarisEndpoint | default(omit) }}'
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_polaris_token___refresh___enabled: true
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_polaris_credential: {{polarisCredential | default(omit) }}
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_polaris_warehouse:  {{polarisCatalogName | default(omit) }}
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_polaris_scope: 'PRINCIPAL_ROLE:ALL'
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_polaris_header_X___Iceberg___Access___Delegation: vended-credentials
     {%elif SPARK_table_format_type == 'delta' and not UNITY_CATALOG_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.spark.sql.delta.catalog.DeltaCatalog
       SPARK_DEFAULTS_CONF_spark_sql_extensions: io.delta.sql.DeltaSparkSessionExtension
@@ -6110,7 +6123,8 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie_authentication_type: nessie
       SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie_warehouse: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined and SPARK_sql_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
       SPARK_DEFAULTS_CONF_spark_sql_defaultCatalog: nessie
-    {% elif SPARK_table_format_type == 'iceberg' and LAKEFS_enable | default(false) %}
+    {% endif -%}   {#  SPARK_table_format_type #}      
+    {% if SPARK_table_format_type == 'iceberg' and LAKEFS_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog_type: hive
       SPARK_DEFAULTS_CONF_spark_sql_extensions: org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions
@@ -6120,6 +6134,15 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakefs_uri: '{{s3Endpoint | default(omit) }}'
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakefs_warehouse: {{'lakefs://' ~ LAKEFS_quickstart_repo_name | default('demo')}}
       SPARK_DEFAULTS_CONF_spark_sql_defaultCatalog: lakefs
+    {% if SPARK_table_format_type == 'iceberg' and POLARIS_enable | default(false) %}
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_polaris_type: rest
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_polaris: org.apache.iceberg.spark.SparkCatalog
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_polaris_uri: '{{polarisEndpoint | default(omit) }}'
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_polaris_token___refresh___enabled: true
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_polaris_credential: {{polarisCredential | default(omit) }}
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_polaris_warehouse:  {{polarisCatalogName | default(omit) }}
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_polaris_scope: 'PRINCIPAL_ROLE:ALL'
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_polaris_header_X___Iceberg___Access___Delegation: vended-credentials
     {%elif SPARK_table_format_type == 'delta' and not UNITY_CATALOG_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.spark.sql.delta.catalog.DeltaCatalog
       SPARK_DEFAULTS_CONF_spark_sql_extensions: io.delta.sql.DeltaSparkSessionExtension
