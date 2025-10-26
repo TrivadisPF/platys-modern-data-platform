@@ -22954,21 +22954,24 @@ services:
     {%if HIVE_METASTORE_enable | default(false) %}
       - './conf/{{conf_dir}}/catalog/minio.properties:/catalog/minio.properties'
     {% endif %}
-    {%if ICEBERG_REST_CATALOG_enable | default(false) %}
+    {%if SPARK_table_format_type == 'iceberg'
+      {%if HIVE_METASTORE_enable | default(false) %}
+      - './conf/{{conf_dir}}/catalog/iceberg-hive.properties:/catalog/iceberg_hive.properties'
+      {% endif %}  
+      {%if ICEBERG_REST_CATALOG_enable | default(false) %}
       - './conf/{{conf_dir}}/catalog/iceberg-rest.properties:/catalog/iceberg_rest.properties'
-    {% endif %}
-    {%if LAKEKEEPER_enable | default(false) %}
+      {% endif %}
+      {%if LAKEKEEPER_enable | default(false) %}
       - './conf/{{conf_dir}}/catalog/iceberg-lakekeeper.properties:/catalog/iceberg_lakekeeper.properties'
-    {% endif %}
-    {%if POLARIS_enable | default(false) %}
+      {% endif %}
+      {%if POLARIS_enable | default(false) %}
       - './conf/{{conf_dir}}/catalog/iceberg-polaris.properties:/catalog/iceberg_polaris.properties'
-    {% endif %}
-    {%if SPARK_table_format_type == 'iceberg' or ICEBERG_REST_CATALOG_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/iceberg.properties:/catalog/iceberg.properties'
+      {% endif %}
       {%if NESSIE_enable | default(false) %}
       - './conf/{{conf_dir}}/catalog/iceberg-nessie.properties:/catalog/iceberg_nessie.properties'
       {% endif %}
-    {%elif SPARK_table_format_type == 'delta' | default(false) %}
+    {% endif %}
+    {%if SPARK_table_format_type == 'delta' | default(false) %}
       - './conf/{{conf_dir}}/catalog/delta.properties:/catalog/delta.properties'
     {%elif SPARK_table_format_type == 'hudi' | default(false) %}
       - './conf/{{conf_dir}}/catalog/hudi.properties:/catalog/hudi.properties'
