@@ -1425,7 +1425,7 @@ networks:
 {% endif %}   {# POLARIS_enable #}
 
 {% if LAKEKEEPER_enable | default(false) %}
-    {% set lakekeeperEndpoint = 'http://lakekeeper:8181' %}
+    {% set lakekeeperEndpoint = 'http://lakekeeper:8181/catalog' %}
     {% set lakekeeperCatalogName = LAKEKEEPER_CATALOG_NAME if LAKEKEEPER_CATALOG_NAME is defined and LAKEKEEPER_CATALOG_NAME | length else 'lakekeeper_catalog' %}
 {% endif %}   {# LAKEKEEPER_enable #}
 
@@ -5664,7 +5664,17 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakefs_uri: '{{s3Endpoint | default(omit) }}'
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakefs_warehouse: {{'lakefs://' ~ LAKEFS_quickstart_repo_name | default('demo')}}
       SPARK_DEFAULTS_CONF_spark_sql_defaultCatalog: lakefs
-    {% endif -%}   {#  SPARK_table_format_type #}      
+    {% endif -%}   {#  SPARK_table_format_type #}
+    {% if SPARK_table_format_type == 'iceberg' and LAKEKEEPER_enable | default(false) %}
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_lakekeeper_type: rest
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_lakekeeper: org.apache.iceberg.spark.SparkCatalog
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_lakekeeper_uri: '{{lakekeeperEndpoint | default(omit) }}'
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_lakekeeper_token___refresh___enabled: true
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_lakekeeper_credential: {{lakekeeperCredential | default(omit) }}
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_lakekeeper_warehouse:  {{lakekeeperCatalogName | default(omit) }}
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_lakekeeper_scope: 'PRINCIPAL_ROLE:ALL'
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_lakekeeper_header_X___Iceberg___Access___Delegation: vended-credentials
+    {% endif -%}   {#  SPARK_table_format_type #}
     {% if SPARK_table_format_type == 'iceberg' and POLARIS_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_polaris_type: rest
       SPARK_DEFAULTS_CONF_spark_sql_catalog_polaris: org.apache.iceberg.spark.SparkCatalog
@@ -5835,6 +5845,16 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakefs_warehouse: {{'lakefs://' ~ LAKEFS_quickstart_repo_name | default('demo')}}
       SPARK_DEFAULTS_CONF_spark_sql_defaultCatalog: lakefs
     {% endif -%}   {#  SPARK_table_format_type #}      
+    {% if SPARK_table_format_type == 'iceberg' and LAKEKEEPER_enable | default(false) %}
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_lakekeeper_type: rest
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_lakekeeper: org.apache.iceberg.spark.SparkCatalog
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_lakekeeper_uri: '{{lakekeeperEndpoint | default(omit) }}'
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_lakekeeper_token___refresh___enabled: true
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_lakekeeper_credential: {{lakekeeperCredential | default(omit) }}
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_lakekeeper_warehouse:  {{lakekeeperCatalogName | default(omit) }}
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_lakekeeper_scope: 'PRINCIPAL_ROLE:ALL'
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_lakekeeper_header_X___Iceberg___Access___Delegation: vended-credentials
+    {% endif -%}   {#  SPARK_table_format_type #}
     {% if SPARK_table_format_type == 'iceberg' and POLARIS_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_polaris_type: rest
       SPARK_DEFAULTS_CONF_spark_sql_catalog_polaris: org.apache.iceberg.spark.SparkCatalog
@@ -5998,7 +6018,17 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakefs_uri: '{{s3Endpoint | default(omit) }}'
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakefs_warehouse: {{'lakefs://' ~ LAKEFS_quickstart_repo_name | default('demo')}}
       SPARK_DEFAULTS_CONF_spark_sql_defaultCatalog: lakefs
-    {% endif -%}   {#  SPARK_table_format_type #}      
+    {% endif -%}   {#  SPARK_table_format_type #}    
+    {% if SPARK_table_format_type == 'iceberg' and LAKEKEEPER_enable | default(false) %}
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_lakekeeper_type: rest
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_lakekeeper: org.apache.iceberg.spark.SparkCatalog
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_lakekeeper_uri: '{{lakekeeperEndpoint | default(omit) }}'
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_lakekeeper_token___refresh___enabled: true
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_lakekeeper_credential: {{lakekeeperCredential | default(omit) }}
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_lakekeeper_warehouse:  {{lakekeeperCatalogName | default(omit) }}
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_lakekeeper_scope: 'PRINCIPAL_ROLE:ALL'
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_lakekeeper_header_X___Iceberg___Access___Delegation: vended-credentials
+    {% endif -%}   {#  SPARK_table_format_type #}
     {% if SPARK_table_format_type == 'iceberg' and POLARIS_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_polaris_type: rest
       SPARK_DEFAULTS_CONF_spark_sql_catalog_polaris: org.apache.iceberg.spark.SparkCatalog
@@ -6134,6 +6164,15 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakefs_uri: '{{s3Endpoint | default(omit) }}'
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakefs_warehouse: {{'lakefs://' ~ LAKEFS_quickstart_repo_name | default('demo')}}
       SPARK_DEFAULTS_CONF_spark_sql_defaultCatalog: lakefs
+    {% if SPARK_table_format_type == 'iceberg' and LAKEKEEPER_enable | default(false) %}
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_lakekeeper_type: rest
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_lakekeeper: org.apache.iceberg.spark.SparkCatalog
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_lakekeeper_uri: '{{lakekeeperEndpoint | default(omit) }}'
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_lakekeeper_token___refresh___enabled: true
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_lakekeeper_credential: {{lakekeeperCredential | default(omit) }}
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_lakekeeper_warehouse:  {{lakekeeperCatalogName | default(omit) }}
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_lakekeeper_scope: 'PRINCIPAL_ROLE:ALL'
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_lakekeeper_header_X___Iceberg___Access___Delegation: vended-credentials
     {% if SPARK_table_format_type == 'iceberg' and POLARIS_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_polaris_type: rest
       SPARK_DEFAULTS_CONF_spark_sql_catalog_polaris: org.apache.iceberg.spark.SparkCatalog
