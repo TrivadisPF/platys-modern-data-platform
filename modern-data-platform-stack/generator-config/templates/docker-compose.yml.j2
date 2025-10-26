@@ -1435,16 +1435,21 @@ networks:
     {% set s3Endpoint = s3EndpointStorage %}
 {% endif %}   {# LAKEFS_enable #}
 
-{% if POLARIS_enable | default(false) %}
-    {% set polarisEndpoint = 'http://polaris:8181/api/catalog' %}
-    {% set polarisCatalogName = POLARIS_CATALOG_NAME if POLARIS_CATALOG_NAME is defined and POLARIS_CATALOG_NAME | length else 'polaris_catalog' %}
-    {% set polarisCredential = POLARIS_client_id ~ ':' ~ POLARIS_client_secret %}
-{% endif %}   {# POLARIS_enable #}
+{% if UNITY_CATALOG_enable | default(false) %}
+    {% set unitycatalogEndpoint = 'http://unity-catalog:8080/api/2.1/unitycatalog' %}
+    {% set unitycatalogCatalogName = UNITY_CATALOG_catalog_name if UNITY_CATALOG_catalog_name is defined and UNITY_CATALOG_catalog_name | length else 'unitycatalog_catalog' %}
+{% endif %}   {# UNITY_CATALOG_enable #}
 
 {% if LAKEKEEPER_enable | default(false) %}
     {% set lakekeeperEndpoint = 'http://lakekeeper:8181/catalog' %}
-    {% set lakekeeperCatalogName = LAKEKEEPER_CATALOG_NAME if LAKEKEEPER_CATALOG_NAME is defined and LAKEKEEPER_CATALOG_NAME | length else 'lakekeeper_catalog' %}
+    {% set lakekeeperCatalogName = LAKEKEEPER_catalog_name if LAKEKEEPER_catalog_name is defined and LAKEKEEPER_catalog_name | length else 'lakekeeper_catalog' %}
 {% endif %}   {# LAKEKEEPER_enable #}
+
+{% if POLARIS_enable | default(false) %}
+    {% set polarisEndpoint = 'http://polaris:8181/api/catalog' %}
+    {% set polarisCatalogName = POLARIS_catalog_name if POLARIS_catalog_name is defined and POLARIS_catalog_name | length else 'polaris_catalog' %}
+    {% set polarisCredential = POLARIS_client_id ~ ':' ~ POLARIS_client_secret %}
+{% endif %}   {# POLARIS_enable #}
 
 {#  ================================== ADLS Settings ========================================== #}
 
@@ -5633,14 +5638,6 @@ services:
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_defaultFS: file:///tmp
       SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined and SPARK_sql_warehouse_dir | length else 'file:///hive/warehouse'}}
     {% endif -%}   {#  HADOOP_enable #}
-      SPARK_DEFAULTS_CONF_spark_sql_hive_metastore_jars: builtin
-      # SPARK_DEFAULTS_CONF_spark_sql_hive_metastore_version: 3.1.2    
-    {%if (SPARK_catalog | lower) == 'in-memory' | default(false) %}
-      SPARK_DEFAULTS_CONF_spark_sql_catalogImplementation: in-memory
-    {% else %}
-      SPARK_DEFAULTS_CONF_spark_sql_catalogImplementation: hive
-      SPARK_DEFAULTS_CONF_spark_hadoop_hive_metastore_uris: thrift://{{ns.hiveMetastore}}
-    {% endif -%}   {#  SPARK_catalog #}
       SPARK_DEFAULTS_CONF_spark_driver_extraJavaOptions: {{SPARK_driver_extraJavaOptions}}
       SPARK_DEFAULTS_CONF_spark_executor_extraJavaOptions: {{SPARK_executor_extraJavaOptions}}
       SPARK_DEFAULTS_CONF_spark_cores_max: {{SPARK_cores_max if SPARK_cores_max is defined and SPARK_cores_max else omit }}
@@ -5652,11 +5649,19 @@ services:
       SPARK_DEFAULTS_CONF_spark_datahub_rest_server: {{ns.gmsUrl}}
       SPARK_DEFAULTS_CONF_spark_datahub_metadata_dataset_env: {{env}}
     {% endif -%}   {#  DATAHUB_enable or external['DATAHUB_enable'] #}
+      SPARK_DEFAULTS_CONF_spark_sql_hive_metastore_jars: builtin
+      # SPARK_DEFAULTS_CONF_spark_sql_hive_metastore_version: 3.1.2    
+    {%if (SPARK_catalog | lower) == 'in-memory' | default(false) %}
+      SPARK_DEFAULTS_CONF_spark_sql_catalogImplementation: in-memory
+    {% else %}
+      SPARK_DEFAULTS_CONF_spark_sql_catalogImplementation: hive
+      SPARK_DEFAULTS_CONF_spark_hadoop_hive_metastore_uris: thrift://{{ns.hiveMetastore}}
+    {% endif -%}   {#  SPARK_catalog #}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_defaultCatalog: {{SPARK_sql_default_catalog if SPARK_sql_default_catalog is defined and SPARK_sql_default_catalog else omit }}
+      SPARK_DEFAULTS_CONF_spark_sql_extensions: org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions
     {%if SPARK_table_format_type == 'iceberg' and HIVE_METASTORE_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog_type: hive
-      SPARK_DEFAULTS_CONF_spark_sql_extensions: org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hive: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hive_type: hive
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hive_uri: thrift://{{ns.hiveMetastore}}
@@ -5674,12 +5679,19 @@ services:
     {% endif -%}   {#  SPARK_table_format_type #}      
     {% if SPARK_table_format_type == 'iceberg' and LAKEFS_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog_type: hive
-      SPARK_DEFAULTS_CONF_spark_sql_extensions: org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakefs: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakefs_catalog__impl: io.lakefs.iceberg.LakeFSCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakefs_ref: main
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakefs_uri: '{{s3Endpoint | default(omit) }}'
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakefs_warehouse: {{'lakefs://' ~ LAKEFS_quickstart_repo_name | default('demo')}}
+    {% endif -%}   {#  SPARK_table_format_type #}
+    {% if SPARK_table_format_type == 'iceberg' and UNITY_CATALOG_enable | default(false) %}
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_unitycatalog_type: rest
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_unitycatalog: org.apache.iceberg.spark.SparkCatalog
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_unitycatalog_catalog___impl: org.apache.iceberg.rest.RESTCatalog
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_unitycatalog_uri: '{{unitycatalogEndpoint | default(omit) }}/iceberg'
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_unitycatalog_token: not_used
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_unitycatalog_warehouse:  {{lakekeeperCatalogName | default(omit) }}
     {% endif -%}   {#  SPARK_table_format_type #}
     {% if SPARK_table_format_type == 'iceberg' and LAKEKEEPER_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakekeeper_type: rest
