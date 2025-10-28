@@ -227,6 +227,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 8008 | 80 | markdown-viewer, markdown-viewer-dc1 |
 8009 | 80 | markdown-viewer-dc2 |
 8010 | 80 | markdown-viewer-dc3 |
+8020 | 8020 | risingwave-console |
 8024 | 8024 | axon-server |
 8047 | 8047 | drill |
 8048 | 8048 | kafka-eagle |

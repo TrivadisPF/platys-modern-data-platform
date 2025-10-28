@@ -30,6 +30,7 @@ networks:
 {% set __HSTREAMDB_version = HSTREAMDB_version | default('latest') -%}
 {% set __BENTHOS_version = BENTHOS_version | default('latest') -%}
 {% set __RISINGWAVE_version = RISINGWAVE_version | default('latest') -%}
+{% set __RISINGWAVE_CONSOLE_version = RISINGWAVE_CONSOLE_version | default('latest') -%}
 {% set __TIMEPLUS_ENTERPRISE_version = TIMEPLUS_ENTERPRISE_version | default('latest') -%}
 {% set __TIMEPLUS_PROTON_version = TIMEPLUS_PROTON_version | default('latest') -%}
 {% set __ARROYO_version = ARROYO_version | default('latest') -%}
@@ -3063,6 +3064,32 @@ services:
       interval: 1s
       timeout: 5s
   {% endif %}  {#  RISINGWAVE_flavor == 'cluster' #}
+
+  {% if RISINGWAVE_console_enabled | default(false) %}
+  risingwave-console:
+    image: risingwavelabs/risingwave-console:{{__RISINGWAVE_CONSOLE_version}}
+    hostname: risingwave-console
+    container_name: risingwave-console
+    labels:
+      com.platys.name: "risingwave"
+      com.platys.description: "Risingwave Console"
+      com.platys.webui.title: "Risingwave Console UI"
+      com.platys.webui.url: "http://dataplatform:8020"        
+    ports:
+      - "8020:8020"
+    environment:
+      RCONSOLE_ROOT_PASSWORD: 'root'
+      RCONSOLE_INIT: /app/init.yaml
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer    
+    #  - test-risingwave-console-data:/risingwave-console-data
+      - ./init/risingwave/init.yaml:/app/init.yaml
+   #   - test-db-data:/var/lib/postgresql/data  
+    restart: {{container_restart_policy}}   
+  {% endif %}  {#  RISINGWAVE_console_enabled #}
 {% endif %}   {#  RISINGWAVE_enable #}
 
 {% if TIMEPLUS_enable | default(false) %}
