@@ -3088,7 +3088,10 @@ services:
     #  - test-risingwave-console-data:/risingwave-console-data
       - ./init/risingwave/init.yaml:/app/init.yaml
    #   - test-db-data:/var/lib/postgresql/data  
-    restart: {{container_restart_policy}}   
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
   {% endif %}  {#  RISINGWAVE_console_enabled #}
 {% endif %}   {#  RISINGWAVE_enable #}
 
