@@ -18,7 +18,7 @@ fi
 if [ ${DEL_EMPTY_LINES:-0} -eq 1 ]
 then
   # Remove all empty lines
-  #sed -i '/^[[:space:]]*$/d' "/opt/mdps-gen/destination/docker-compose.yml"
+  sed -i '/^[[:space:]]*$/d' "/opt/mdps-gen/destination/docker-compose.yml"
 fi
 
 # Setting Timezone, if needed
