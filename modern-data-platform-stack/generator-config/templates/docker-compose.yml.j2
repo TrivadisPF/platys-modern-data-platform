@@ -2783,11 +2783,11 @@ services:
                       --prometheus-listener-addr 0.0.0.0:1250 \
                       --advertise-addr 0.0.0.0:5688 \
                       --async-stack-trace verbose \
-                      --connector-rpc-endpoint 0.0.0.0:50051 \
                       --parallelism 8 \
-                      --total-memory-bytes 16811696128 \
+                      --total-memory-bytes 21474836480 \
                       --role both \
                       --meta-address http://0.0.0.0:5690\" \
+                      --memory-manager-target-bytes 22333829939 \" \
                     --frontend-opts=\" \
                       --config-path /risingwave.toml \
                       --listen-addr 0.0.0.0:4566 \
@@ -2795,11 +2795,13 @@ services:
                       --prometheus-listener-addr 0.0.0.0:1250 \
                       --health-check-listener-addr 0.0.0.0:6786 \
                       --meta-addr http://0.0.0.0:5690\" \
+                      --frontend-total-memory-bytes=4294967296\" \
                     --compactor-opts=\" \
                       --listen-addr 0.0.0.0:6660 \
                       --prometheus-listener-addr 0.0.0.0:1250 \
                       --advertise-addr 0.0.0.0:6660 \
-                      --meta-address http://0.0.0.0:5690\""
+                      --meta-address http://0.0.0.0:5690 \ 
+                      --compactor-total-memory-bytes=4294967296\""
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
@@ -2815,7 +2817,7 @@ services:
         - CMD-SHELL
         - bash -c 'printf \"GET / HTTP/1.1\n\n\" > /dev/tcp/127.0.0.1/6660; exit $$?;'
         - bash -c 'printf \"GET / HTTP/1.1\n\n\" > /dev/tcp/127.0.0.1/5688; exit $$?;'
-        - bash -c 'printf \"GET / HTTP/1.1\n\n\" > /dev/tcp/127.0.0.1/4566; exit $$?;'
+        - bash -c '> /dev/tcp/127.0.0.1/4566; exit $$?;'
         - bash -c 'printf \"GET / HTTP/1.1\n\n\" > /dev/tcp/127.0.0.1/5690; exit $$?;'
       interval: 1s
       timeout: 5s
