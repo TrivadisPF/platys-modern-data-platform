@@ -1391,6 +1391,20 @@ networks:
   {% set ns.sparkHudiDependencies ="org.apache.hudi:hudi-spark2.4-bundle_2.12:0.13.0" -%}
 {% endif -%}    {# SPARK_base_version #}
 
+{% set ns.sparkSQLExtensions = "" -%}
+{% if (SPARK_table_format_type | lower) == 'iceberg'  %}
+  {% set ns.sparkSQLExtensions = ns.sparkSQLExtensions ~ ",org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions" -%}
+{% endif -%}    {# SPARK_table_format_type == iceberg #}
+{% if (SPARK_table_format_type | lower) == 'delta'  %}
+  {% set ns.sparkSQLExtensions = ns.sparkSQLExtensions ~ ",io.delta.sql.DeltaSparkSessionExtension" -%}
+{% endif -%}    {# SPARK_table_format_type == iceberg #}
+{% if (SPARK_table_format_type | lower) == 'hudi'  %}
+  {% set ns.sparkSQLExtensions = ns.sparkSQLExtensions ~ ",org.apache.hudi.spark3.extensions.HoodieSpark3SessionExtensions" -%}
+{% endif -%}    {# SPARK_table_format_type == hudi #}
+{% if NESSIE_enable | default(false)  %}
+  {% set ns.sparkSQLExtensions = ns.sparkSQLExtensions ~ ",org.projectnessie.spark.extensions.NessieSparkSessionExtensions" -%}
+{% endif -%}    {# NESSIE_enable #}
+
 {% set ns.datahubSparkPluginJar = "/opt/bitnami/spark/jars/datahub-spark-lineage-" ~ __DATAHUB_version | replace("v", "") ~ ".jar" -%}
 {% set ns.datahubSparkPluginDependencies = "io.acryl:datahub-spark-lineage:" ~ __DATAHUB_version | replace("v", "") -%}
 
@@ -5676,8 +5690,6 @@ services:
       SPARK_DEFAULTS_CONF_spark_executor_extraJavaOptions: {{SPARK_executor_extraJavaOptions}}
       SPARK_DEFAULTS_CONF_spark_cores_max: {{SPARK_cores_max if SPARK_cores_max is defined and SPARK_cores_max else omit }}
       SPARK_DEFAULTS_CONF_spark_executor_memory: {{SPARK_executor_memory if SPARK_executor_memory is defined and SPARK_executor_memory else omit }}
-#      SPARK_DEFAULTS_CONF_spark_sql_extensions: {{SPARK_sql_extensions if SPARK_sql_extensions is defined and SPARK_sql_extensions else omit }}
-#      SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: {{SPARK_sql_catalog_spark_catalog if SPARK_sql_catalog_spark_catalog is defined and SPARK_sql_catalog_spark_catalog else omit }}
     {%if (DATAHUB_enable or external['DATAHUB_enable'] and SPARK_datahub_agent_enabled) | default(false) %}
       SPARK_DEFAULTS_CONF_spark_extraListeners: 'datahub.spark.DatahubSparkListener'
       SPARK_DEFAULTS_CONF_spark_datahub_rest_server: {{ns.gmsUrl}}
