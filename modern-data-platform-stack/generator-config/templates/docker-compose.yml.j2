@@ -21458,6 +21458,98 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {# PGADMIN_enable #}
 
+{% if NEON_enable | default(false) %}
+  #  ================================== Neon ========================================== #
+  pageserver:
+    image: ghcr.io/neondatabase/neon:{{__NEON_version}}
+    container_name: pageserver
+    hostname: pageserver
+    labels:
+      com.platys.name: "neon"
+      com.platys.description: "Neon Pageserver"
+    ports:
+      - 9898:9898   # http endpoints
+    environment:
+      - AWS_ACCESS_KEY_ID={{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
+      - AWS_SECRET_ACCESS_KEY={{s3SecretAccessKey}}
+      #- RUST_BACKTRACE=1
+    {% endif -%}   {#  POSTGRESQL_anon_role #}
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./conf/neon/pageserver:/data/.neon/
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+
+  storage-broker:
+    image: ghcr.io/neondatabase/neon:{{__NEON_version}}
+    container_name: storage-broker
+    hostname: storage-broker
+    labels:
+      com.platys.name: "neon"
+      com.platys.description: "Neon Storage Broker"
+    ports:
+      - 50051:50051
+    environment:
+      - AWS_ACCESS_KEY_ID={{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
+      - AWS_SECRET_ACCESS_KEY={{s3SecretAccessKey}}
+      #- RUST_BACKTRACE=1
+    {% endif -%}   {#  POSTGRESQL_anon_role #}
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./conf/neon/pageserver:/data/.neon/
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    command:
+      - "storage_broker"
+      - "--listen-addr=0.0.0.0:50051"        
+    restart: {{container_restart_policy}}
+
+  compute-1:
+    image: ghcr.io/neondatabase/compute-node-v17:{{__NEON_version}}
+    environment:
+      - PG_VERSION=17
+      - TENANT_ID=${TENANT_ID:-}
+      - TIMELINE_ID=${TIMELINE_ID:-}
+      #- RUST_BACKTRACE=1
+    # Mount the test files directly, for faster editing cycle.
+    volumes:
+      - ./compute_wrapper/var/db/postgres/configs/:/var/db/postgres/configs/
+      - ./compute_wrapper/shell/:/shell/
+    ports:
+      - 55433:55433 # pg protocol handler
+      - 3080:3080 # http endpoints
+    entrypoint:
+      - "/shell/compute.sh"
+    # Ad an alias for compute1 for compatibility
+    networks:
+      default:
+        aliases:
+            - compute
+    depends_on:
+      - safekeeper1
+      - safekeeper2
+      - safekeeper3
+      - pageserver
+  
+{% endif %}   {# NEON_enable #}
+
 {% if SUPABASE_enable | default(false) %}
   #  ================================== Supabase ========================================== #
   supabase-studio:
