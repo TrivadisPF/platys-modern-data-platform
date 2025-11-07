@@ -1404,6 +1404,9 @@ networks:
 {% if NESSIE_enable | default(false)  %}
   {% set ns.sparkSQLExtensions = ns.sparkSQLExtensions ~ "org.projectnessie.spark.extensions.NessieSparkSessionExtensions," -%}
 {% endif -%}    {# NESSIE_enable #}
+{% if LAKEFS_enable | default(false)  %}
+  {% set ns.sparkSQLExtensions = ns.sparkSQLExtensions ~ "io.lakefs.iceberg.extension.LakeFSSparkSessionExtensions," -%}
+{% endif -%}    {# LAKEFS_enable #}
 
 {% set ns.datahubSparkPluginJar = "/opt/bitnami/spark/jars/datahub-spark-lineage-" ~ __DATAHUB_version | replace("v", "") ~ ".jar" -%}
 {% set ns.datahubSparkPluginDependencies = "io.acryl:datahub-spark-lineage:" ~ __DATAHUB_version | replace("v", "") -%}
@@ -25417,7 +25420,7 @@ services:
 {% if NESSIE_enable | default(false) %}
   #  ================================== Project Nessie ========================================== #
   nessie:
-    image: ghcr.io/projectnessie/nessie:{{__NESSIE_version}}
+    image: quay.io/projectnessie/nessie:{{__NESSIE_version}}
     container_name: nessie
     hostname: nessie
     labels:
@@ -25554,7 +25557,6 @@ services:
       - 28287:8181
     environment:
       REST_PORT: 8181
-      CATALOG_IO__IMPL: org.apache.iceberg.aws.s3.S3FileIO
       AWS_ACCESS_KEY_ID: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
       AWS_SECRET_ACCESS_KEY: ${PLATYS_AWS_SECRET_ACCESS_KEY:-{{MINIO_secret_key}}}
       AWS_REGION: {{s3DefaultRegion if s3DefaultRegion is defined and s3DefaultRegion else omit}}
