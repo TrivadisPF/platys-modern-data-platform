@@ -626,6 +626,8 @@ networks:
 
 {% set __POLARIS_version = POLARIS_version | default('latest') -%}
 
+{% set __GRAVITINO_version = GRAVITINO_version | default('latest') -%}
+
 {% set __NIMTABLE_version = NIMTABLE_version | default('latest') -%}
 
 {% set __DBT_version = DBT_version | default('latest') -%}
@@ -25901,6 +25903,66 @@ services:
     init: true  
     restart:  no                     
 {% endif %}   {# POLARIS_enable #}
+
+{% if GRAVITINO_enable | default(false) %}
+  #  ================================== Gravitino ========================================== #
+  gravitino:
+    image: apache/gravitino:{{__GRAVITINO_version}}
+    container_name: gravitino
+    hostname: gravitino
+    labels:
+      com.platys.name: "gravitino"
+      com.platys.description: "powerful open data catalog"
+      com.platys.webui.title: "Gravitino Web UI"
+      com.platys.webui.url: "http://dataplatform:28286"
+      com.platys.password.envvars: "PLATYS_POLARIS_DB_PASSWORD,PLATYS_POLARIS_CLIENT_SECRET"
+    ports:
+      - "28286:8090"
+      - "28287:9001"     
+    environment:
+      GRAVITINO_ENTITY_STORE: {{GRAVITINO_entity_store | default('relational') }}
+      GRAVITINO_ENTITY_STORE_RELATIONAL: JDBCBackend
+    {% if GRAVITINO_db_type == 'h2' %}   
+      GRAVITINO_ENTITY_STORE_RELATIONAL_JDBC_URL: jdbc:h2
+      GRAVITINO_ENTITY_STORE_RELATIONAL_JDBC_DRIVER: org.h2.Driver
+    {% elif GRAVITINO_db_type == 'postgresql' %}
+      GRAVITINO_ENTITY_STORE_RELATIONAL_JDBC_URL: jdbc:postgresql://localhost:5432/database1
+      GRAVITINO_ENTITY_STORE_RELATIONAL_JDBC_DRIVER: org.postgresql.Driver
+    {% endif -%}   {#  GRAVITINO_db_type #}
+      GRAVITINO_ENTITY_STORE_RELATIONAL_JDBC_USER: {{GRAVITINO_db_username | default('postgres') }}
+      GRAVITINO_ENTITY_STORE_RELATIONAL_JDBC_PASSWORD: {{GRAVITINO_db_password | default('abc123!') }}
+      GRAVITINO_AUTHORIZATION_ENABLE: false
+      #GRAVITINO_ICEBERG_REST_WAREHOUSE
+    {% if (KAFKA_enable or external['KAFKA_enable']) | default(false) %}
+      GR
+    {% endif -%}   {#  KAFKA_enable #}
+      GRAVITINO_AUDIT_LOG: false
+
+
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./healthcheck:/tmp/healthcheck
+      - ./init/gravitino:/tmp/gravitino
+      - ./data/gravitino/db:/root/gravitino/data      
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    entrypoint: /bin/bash /tmp/gravitino/init.sh
+    restart: {{container_restart_policy}}
+    healthcheck:
+      test: ["CMD", "/tmp/healthcheck/gravitino-healthcheck.sh"]
+      interval: 5s
+      timeout: 60s
+      retries: 5
+      start_period: 20s
+{% endif %}   {# GRAVITINO_enable #}
 
 {% if NIMTABLE_enable | default(false) %}
   #  ================================== Nimtabe ========================================== #

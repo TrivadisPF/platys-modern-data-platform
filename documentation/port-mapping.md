@@ -811,6 +811,9 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28283 | 9000 | openehr-tool |
 28284 | 8081 | polaris |
 28285 | 8082 | polaris |
+28286 | 8090 | gravitino |
+28287 | 9001 | gravitino |
+
 
 ## Ports > 28500
 
