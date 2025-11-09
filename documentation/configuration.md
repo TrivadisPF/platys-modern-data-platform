@@ -1709,6 +1709,7 @@ For each service there might be some other settings, such as controlling the num
 | `GRAVITINO_db_type`                                 	| `h2` 	| 1.19.0 	| The database to use, either `h2` or `postgresql`.                                                                                                                                                   	| 
 | `GRAVITINO_db_username`                                 	| `postres` 	| 1.19.0 	| The database username.                                                                                                                                                   	| 
 | `GRAVITINO_db_password`                                 	| `abc123!` 	| 1.19.0 	| The database user password.                                                                                                                                                 	| 
+| `GRAVITINO_mcp_server_enabled`                                 	| `false` 	| 1.19.0 	| Enable the MCP server?                                                                                                                                               	| 
 | [**_Nimtable_**](./services/nimtable.md)   &nbsp;&nbsp;&nbsp;&nbsp;![x86-64](./images/x86-64.png)                        	|         	|
 | `NIMTABLE_enable`                                 	| `false` 	| 1.19.0 	| Generate Nimtable service                                                                                                                                                              	|    
   
