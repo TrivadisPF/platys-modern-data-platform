@@ -1,0 +1,1 @@
+Contains the data folder of gravition service, if flag GRAPHDB_volume_map_data is set to true.

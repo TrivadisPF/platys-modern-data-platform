@@ -25933,20 +25933,15 @@ services:
       GRAVITINO_ENTITY_STORE_RELATIONAL_JDBC_PASSWORD: {{GRAVITINO_db_password | default('abc123!') }}
       GRAVITINO_AUTHORIZATION_ENABLE: false
       #GRAVITINO_ICEBERG_REST_WAREHOUSE
-    {% if (KAFKA_enable or external['KAFKA_enable']) | default(false) %}
-      GR
-    {% endif -%}   {#  KAFKA_enable #}
       GRAVITINO_AUDIT_LOG: false
-
-
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
-      - ./healthcheck:/tmp/healthcheck
-      - ./init/gravitino:/tmp/gravitino
-      - ./data/gravitino/db:/root/gravitino/data      
+    {% if GRAVITINO_volume_map_data %}      
+      - ./container-volume/gravitino/data:/root/gravitino/data 
+    {% endif -%}   {#  GRAVITINO_volume_map_data #}           
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -25954,14 +25949,36 @@ services:
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
-    entrypoint: /bin/bash /tmp/gravitino/init.sh
+    #entrypoint: /bin/bash /tmp/gravitino/init.sh
     restart: {{container_restart_policy}}
     healthcheck:
-      test: ["CMD", "/tmp/healthcheck/gravitino-healthcheck.sh"]
+      test: ["CMD", "curl -X GET -H "Content-Type: application/json" http://127.0.0.1:8090/api/version || exit 1"]
       interval: 5s
       timeout: 60s
       retries: 5
       start_period: 20s
+
+  {% if GRAVITINO_mcp_server_enabled | default(false) %}
+  gravitino-mcp-server:
+    image: apache/gravitino-mcp-server:latest
+    container_name: gravitino-mcp-server
+    hostname: gravitino-mcp-server
+    labels:
+      com.platys.name: "gravitino"
+      com.platys.description: "Gravitino MCP Server"
+    ports:
+      - "28288:8000"
+    environment:
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+    command: "--metalake test --transport http --mcp-url http://0.0.0.0:8000/mcp --gravitino-uri http://gravition:8090"
+    restart: {{container_restart_policy}}
+  {% endif %}   {# GRAVITINO_mcp_server_enabled #}
+
 {% endif %}   {# GRAVITINO_enable #}
 
 {% if NIMTABLE_enable | default(false) %}
@@ -28866,6 +28883,9 @@ services:
     {% endif -%}   {#  METABASE_enable #}
     {% if NESSIE_enable | default(false) %}
       - ./scripts/grafana/dashboards/nessie:/etc/grafana/provisioning/dashboards/nessie
+    {% endif -%}   {#  NESSIE_enable #}
+    {% if NESSIE_enable | default(false) %}
+      - ./scripts/grafana/dashboards/gravitino:/etc/grafana/provisioning/dashboards/gravitino
     {% endif -%}   {#  NESSIE_enable #}
     {% if PROMETHEUS_enable | default(false) %}
       - ./scripts/grafana/datasources/prometheus-datasource.yml:/etc/grafana/provisioning/datasources/prometheus-datasource.yml
