@@ -25975,6 +25975,12 @@ services:
     volumes:
       - ./data-transfer:/data-transfer
     {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}      
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
     command: "--metalake test --transport http --mcp-url http://0.0.0.0:8000/mcp --gravitino-uri http://gravition:8090"
     restart: {{container_restart_policy}}
   {% endif %}   {# GRAVITINO_mcp_server_enabled #}
