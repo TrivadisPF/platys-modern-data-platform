@@ -401,13 +401,13 @@ networks:
 {% set __MCP_NEO4J_CYPHER_version = MCP_NEO4J_CYPHER_version | default('latest') -%}
 {% set __MCP_NEO4J_MEMORY_version = MCP_NEO4J_MEMORY_version | default('latest') -%}
 
-{% set __PUPPYGRAPH_version = PUPPYGRAPH_version | default('latest') -%}
-
 {% set __GRAPHITI_version = GRAPHITI_version | default('latest') -%}
 
 {% set __NEODASH_version = NEODASH_version | default('latest') -%}
 
 {% set __QUINE_version = QUINE_version | default('latest') -%}
+
+{% set __PUPPYGRAPH_version = PUPPYGRAPH_version | default('latest') -%}
 
 {% set __MEMGRAPH_version = MEMGRAPH_version | default('latest') -%}
 {% set __MEMGRAPH_MAGE_version = MEMGRAPH_MAGE_version | default('latest') -%}
@@ -18842,40 +18842,6 @@ services:
     restart: {{container_restart_policy}}    
 {% endif %}   {#  MCP_NEO4J_enable #}
 
-{% if PUPPYGRAPH_enable | default(false) %}
-  #  ================================== Puppy Graph ========================================== #
-  puppygraph:
-    image: puppygraph/puppygraph:stable:{{__PUPPYGRAPH_version}}
-    platform: linux/amd64    
-    hostname: puppygraph
-    container_name: puppygraph
-    labels:
-      com.platys.name: "puppygraph"
-      com.platys.description: "Relational data as a graph"
-      com.platys.webui.title: "Puppygraph API"
-      com.platys.webui.url: "http://dataplatform:28288"
-    ports:
-      - "28288:8081"
-      - "28289:8182"
-      - "28290:7687"
-    environment:
-      - PUPPYGRAPH_USERNAME=puppygraph
-      - PUPPYGRAPH_PASSWORD=abc123!
-    {%if use_timezone | default(false) %}
-      - TZ={{use_timezone}}
-    {% endif -%}   {#  use_timezone #}
-    volumes:
-      - ./data-transfer:/data-transfer
-    {%if use_timezone | default(false) %}
-      - "./etc/timezone:/etc/timezone:ro"
-      - "./etc/localtime:/etc/localtime:ro"
-    {% endif -%}   {#  use_timezone #}
-    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
-    <<: *logging
-    {% endif -%}   {#  logging_driver is defined ... #}
-    restart: {{container_restart_policy}}
-{% endif %}   {#  PUPPYGRAPH_enable #}
-
 {% if GRAPHITI_enable | default(false) %}
   #  ================================== Graphiti ========================================== #
   {% if GRAPHITI_http_server_enabled | default(false) %}
@@ -19030,6 +18996,40 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  QUINE_enable #}
+
+{% if PUPPYGRAPH_enable | default(false) %}
+  #  ================================== Puppy Graph ========================================== #
+  puppygraph:
+    image: puppygraph/puppygraph:stable:{{__PUPPYGRAPH_version}}
+    platform: linux/amd64    
+    hostname: puppygraph
+    container_name: puppygraph
+    labels:
+      com.platys.name: "puppygraph"
+      com.platys.description: "Relational data as a graph"
+      com.platys.webui.title: "Puppygraph API"
+      com.platys.webui.url: "http://dataplatform:28288"
+    ports:
+      - "28288:8081"
+      - "28289:8182"
+      - "28290:7687"
+    environment:
+      - PUPPYGRAPH_USERNAME=puppygraph
+      - PUPPYGRAPH_PASSWORD=abc123!
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  PUPPYGRAPH_enable #}
 
 {% if MEMGRAPH_enable | default(false) %}
   #  ================================== Memgraph ========================================== #
