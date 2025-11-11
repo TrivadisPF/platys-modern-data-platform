@@ -26128,6 +26128,13 @@ services:
       - 28281:8182
     environment:
       - JAVA_OPTS=-Xmx32g -Xms512m
+    {%if MINIO_enable or external['S3_enable'] | default(false) %}
+      - AWS_ACCESS_KEY_ID={{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
+      - AWS_SECRET_ACCESS_KEY={{s3SecretAccessKey}}
+      - AWS_REGION={{s3DefaultRegion | default(omit) }}
+      - AWS_ENDPOINT_URL_S3={{s3Endpoint | default(omit) }}
+      - AWS_ENDPOINT_URL_STS={{s3Endpoint | default(omit) }}
+    {% endif %}      
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
