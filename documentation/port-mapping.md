@@ -813,9 +813,10 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28285 | 8082 | polaris |
 28286 | 8090 | gravitino |
 28287 | 9001 | gravitino |
-28288 | 8081 | puppygraph |
-28289 | 8182 | puppygraph |
-28290 | 7687 | puppygraph |
+28288 | 8000 | gravitino-mcp-server |
+28289 | 8081 | puppygraph |
+28290 | 8182 | puppygraph |
+28291 | 7687 | puppygraph |
 
 
 ## Ports > 28500
