@@ -45,6 +45,7 @@ Inhere we are documenting cookbooks on how to use the platform:
 
  * **Iceberg Table Format**
    * [Spark with Iceberg](./recipes/iceberg-with-spark/README.md) - `1.16.0`
+   * [Spark with Iceberg and Polaris](./recipes/spark-iceberg-polaris/README.md) - `1.19.0`
 
  * **Hadoop HDFS**
    * [Querying HDFS data using Presto](./recipes/querying-hdfs-with-presto/README.md)
