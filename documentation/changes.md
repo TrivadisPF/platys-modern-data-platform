@@ -115,6 +115,7 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Change all bitnami images to the `bitnamilegacy` docker repository, due to all the bitnami images no longer be available for free
  * Change default values of `MINIO_access_key` and `MINIO_secret_key` to a more memorable value
  * Default value for `LAKEFS_use_as_drop_in_replacement_for_s3` changed to `false`
+ * Change Oracle REST Data Service (ORDS) to use the official oracle docker image
 
 ## What's new in 1.18.1
 

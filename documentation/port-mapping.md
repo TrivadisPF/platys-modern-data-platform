@@ -427,6 +427,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 27019 | 27017 | mongodb-3 |
 27020 | 27017 | mongodb-3 |
 27022 | 27017 | oracle-adb |
+27023 | 27017 | oracle-rest-1 |
 28080 | 8080 | zeppelin |
 28081 | 8080 | presto-1 |
 28082 | 8080 | trino-1 |
@@ -600,7 +601,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28250 | 80 | gitweb |
 28251 | 8888 | oracle-xe |
 28252 | 8888 | oracle-rest-1 |
-28253 | 8888 | oracle-rest-1 |
+28253 | 8443 | oracle-rest-1 |
 28254 | 80 | kafka-magic |
 28255 | 80 | streampipes-ui |
 28256 | 80 | remora |
