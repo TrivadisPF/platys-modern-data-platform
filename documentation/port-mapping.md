@@ -600,7 +600,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28250 | 80 | gitweb |
 28251 | 8888 | oracle-xe |
 28252 | 8888 | oracle-rest-1 |
-28253 | 8888 | kouncil |
+28253 | 8888 | oracle-rest-1 |
 28254 | 80 | kafka-magic |
 28255 | 80 | streampipes-ui |
 28256 | 80 | remora |
@@ -817,6 +817,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28289 | 8081 | puppygraph |
 28290 | 8182 | puppygraph |
 28291 | 7687 | puppygraph |
+28292 | 8888 | kouncil |
 
 
 ## Ports > 28500

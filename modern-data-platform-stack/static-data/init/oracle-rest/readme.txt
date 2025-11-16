@@ -1,0 +1,1 @@
+Add sh scripts which should be executed before the ORDS instance start. The scripts (*.sh) will run alphabetically
