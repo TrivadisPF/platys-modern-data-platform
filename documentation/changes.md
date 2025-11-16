@@ -90,6 +90,8 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Update `flink` to `2.1.0-scala_2.12-java17`
  * Update `postgresql` to `18` 
  * Update `oracle-free` to `23.26.0.0`
+ * Update `oracle-adb` to `25.7.5.2-23ai`
+`
  
 ### Enhancements
 
