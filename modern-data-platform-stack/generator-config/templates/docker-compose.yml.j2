@@ -23229,24 +23229,28 @@ services:
   {%if external['ADLS_enable'] | default(false) %}
       - './conf/{{conf_dir}}/catalog/adls.properties:/catalog/adls.properties'
   {% endif -%}
-  {%if KAFKA_enable or external['KAFKA_enable'] | default(false) %}
-      - './conf/{{conf_dir}}/catalog/kafka-{{'file' if TRINO_kafka_descriptor_supplier | lower == 'file' else 'schema-registry'}}.properties:/catalog/kafka.properties'
+{% if KAFKA_enable or external['KAFKA_enable'] | default(false) %}
+      - './conf/{{conf_dir}}/catalog/kafka-{{ 'file' if TRINO_kafka_descriptor_supplier | lower == 'file' else 'schema-registry' }}.properties:/catalog/kafka.properties'
       - './conf/{{conf_dir}}/kafka/descriptor:{{trino_etc_dir}}/kafka/'
+
   {% if ns.secureKafkaEnabled and ns.securityProtocolBROKER == 'SASL_PLAINTEXT' %}
       - './security/kafka/sasl-scram/client.properties:{{trino_etc_dir}}/kafka-configuration.properties'
   {% else %}
       - './conf/{{conf_dir}}/kafka/client.properties:{{trino_etc_dir}}/kafka-configuration.properties'
-  {% endif -%}
-  {% if ns.secureKafkaEnabled and ns.securityProtocol == 'SSL' %}
-      - ./security/kafka/client-certs:/certs
-  {% endif -%} {#  ns.secureKafkaEnabled #}
-  {% endif -%}  {#  KAFKA_enable #}
-  {%if HADOOP_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/hdfs.properties:/catalog/hdfs.properties'
   {% endif %}
-  {% if TRINO_with_hive_metastore_db_catalog and HIVE_METASTORE_enable | default(false) %}
+
+  {% if ns.secureKafkaEnabled and ns.securityProtocol == 'SSL' %}
+      - './security/kafka/client-certs:/certs'  
+  {% endif %}
+{% endif %}
+
+{% if HADOOP_enable | default(false) %}
+      - './conf/{{conf_dir}}/catalog/hdfs.properties:/catalog/hdfs.properties'
+{% endif %}
+
+{% if TRINO_with_hive_metastore_db_catalog and HIVE_METASTORE_enable | default(false) %}
       - './conf/{{conf_dir}}/catalog/hive_metastore_db.properties:/catalog/hive_metastore_db.properties'
-  {% endif %}  
+{% endif %}
   {% if POSTGRESQL_enable | default(false) %}
       - './conf/{{conf_dir}}/catalog/postgresql.properties:/catalog/postgresql.properties'
   {% endif %}
