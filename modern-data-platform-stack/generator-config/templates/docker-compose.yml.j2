@@ -23192,7 +23192,7 @@ services:
       - ./conf/{{conf_dir}}/{{deployment_type}}/config{{'-dp' if TRINO_starburstdata_enable_data_product is defined and TRINO_starburstdata_enable_data_product else ''}}.properties:{{trino_etc_dir}}/config.properties
       - ./conf/{{conf_dir}}/{{deployment_type}}/node.properties:{{trino_etc_dir}}/node.properties
       - ./conf/{{conf_dir}}/{{deployment_type}}/log-debug.properties:{{trino_etc_dir}}/log.properties
-{%if MINIO_enable or external['S3_enable'] | default(false) %}
+{%- if MINIO_enable or external['S3_enable'] | default(false) %}
   {%if HIVE_METASTORE_enable | default(false) %}
       - './conf/{{conf_dir}}/catalog/minio.properties:/catalog/minio.properties'
   {% endif %}
@@ -23225,21 +23225,21 @@ services:
   {%if UNITY_CATALOG_enable | default(false) %}
       - './conf/{{conf_dir}}/catalog/iceberg-unity.properties:/catalog/iceberg_unity.properties'
   {% endif %}
-{% endif %}  {#  MINIO_enable #}
-{%if external['ADLS_enable'] | default(false) %}
+{%- endif -%}  {#  MINIO_enable #}
+{%- if external['ADLS_enable'] | default(false) %}
       - './conf/{{conf_dir}}/catalog/adls.properties:/catalog/adls.properties'
-{% endif -%}
+{%- endif -%}
 {%- if KAFKA_enable or external['KAFKA_enable'] | default(false) %}
       - './conf/{{conf_dir}}/catalog/kafka-{{ 'file' if TRINO_kafka_descriptor_supplier | lower == 'file' else 'schema-registry' }}.properties:/catalog/kafka.properties'
       - './conf/{{conf_dir}}/kafka/descriptor:{{trino_etc_dir}}/kafka/'
-  {%- if ns.secureKafkaEnabled and ns.securityProtocolBROKER == 'SASL_PLAINTEXT' %}
+  {% if ns.secureKafkaEnabled and ns.securityProtocolBROKER == 'SASL_PLAINTEXT' %}
       - './security/kafka/sasl-scram/client.properties:{{trino_etc_dir}}/kafka-configuration.properties'
   {% else %}
       - './conf/{{conf_dir}}/kafka/client.properties:{{trino_etc_dir}}/kafka-configuration.properties'
-  {% endif %}
+  {%- endif -%}
   {%- if ns.secureKafkaEnabled and ns.securityProtocol == 'SSL' %}
       - './security/kafka/client-certs:/certs'  
-  {%- endif %}
+  {%- endif -%}
 {%- endif -%}
 
   {% if HADOOP_enable | default(false) %}
