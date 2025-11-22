@@ -25328,13 +25328,17 @@ services:
       - 10020:10000
       - 10021:10001
       - 10022:10002
-    {%if use_timezone | default(false) %}
     environment:
+      DUMMY: 1 
+      AZURITE_ACCOUNTS: {{AZURITE_accounts if AZURITE_accounts is defined and AZURITE_accounts and AZURE_accounts | length else omit}})}}
+    {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
-    #  - ./container-volume/azurite:/data
+    {%if AZURITE_volume_map_data | default(false) %}
+      - ./container-volume/azurite/data:/data
+    {% endif -%}   {#  AZURITE_volume_map_data #}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
