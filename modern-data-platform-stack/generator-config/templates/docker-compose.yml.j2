@@ -25334,7 +25334,7 @@ services:
       - 10022:10002
     environment:
       DUMMY: 1 
-      AZURITE_ACCOUNTS: {{AZURITE_accounts if AZURITE_accounts is defined and AZURITE_accounts and AZURE_accounts | length else omit}})}}
+      AZURITE_ACCOUNTS: {{AZURITE_account_name if AZURITE_account_name is defined and AZURITE_account_name and AZURITE_account_name | length > 0 else 'devstoreaccount1'}}:{{AZURITE_account_key if AZURITE_account_key is defined and AZURITE_account_key and AZURITE_account_key | length > 0 else 'Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw=='}}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -25364,7 +25364,7 @@ services:
     labels:
       com.platys.name: "azurite"
     environment:
-      AZURE_STORAGE_CONNECTION_STRING: DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://azurite:10000/devstoreaccount1;
+      AZURE_STORAGE_CONNECTION_STRING: DefaultEndpointsProtocol=http;AccountName={{AZURITE_account_name if AZURITE_account_name is defined and AZURITE_account_name and AZURITE_account_name | length > 0 else 'devstoreaccount1'}};AccountKey={{AZURITE_account_key if AZURITE_account_key is defined and AZURITE_account_key and AZURITE_account_key | length > 0 else 'Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw=='}};BlobEndpoint=http://azurite:10000/{{AZURITE_account_name if AZURITE_account_name is defined and AZURITE_account_name and AZURITE_account_name | length > 0 else 'devstoreaccount1'}};
     volumes:
       - ./data-transfer:/data-transfer
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
