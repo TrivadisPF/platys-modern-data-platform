@@ -25356,6 +25356,32 @@ services:
       test: nc 127.0.0.1 10000 -z
       interval: 1s
       retries: 30
+
+  azurite-init:
+    image: mcr.microsoft.com/azure-cli:{{__AZURECLI_version}}
+    container_name: azurite-init
+    hostname: azurite-init
+    labels:
+      com.platys.name: "azurite"
+    environment:
+      AZURE_STORAGE_CONNECTION_STRING: DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://azurite:10000/devstoreaccount1;
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    command: 
+      - /bin/sh
+      - -c 
+      - |
+        for blob_container in $$(tr ',' '\n' <<< "{{AZURITE_blob_containers}}")
+        do
+          az storage container create --name $$blob_container
+        done      
+        az storage cors add --methods GET --origins '*' --services b
+    init: true
+    restart: no
+          
 {% endif %}   {#  AZURITE_enable #}
 
 {% if AZURECLI_enable | default(false) %}
@@ -25386,11 +25412,6 @@ services:
       - /bin/sh
       - -c 
       - |
-        for blob_container in $$(tr ',' '\n' <<< "{{AZURITE_blob_containers}}")
-        do
-          az storage container create --name $$blob_container
-        done      
-        az storage cors add --methods GET --origins '*' --services b
         tail -f /dev/null
     restart: {{container_restart_policy}}
 {% endif %}   {#  AZURECLI_enable #}
