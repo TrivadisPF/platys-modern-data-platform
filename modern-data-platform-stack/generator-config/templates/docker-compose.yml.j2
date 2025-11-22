@@ -25315,6 +25315,41 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {#  AWSCLI_enable #}
 
+{% if AZURITE_enable | default(false) %}
+  #  ================================== Azurite ========================================== #
+  azurite:
+    image: dmcr.microsoft.com/azure-storage/azurite
+    container_name: azurite
+    hostname: azurite
+    labels:
+      com.platys.name: "azurite"
+      com.platys.description: "Clone of Azure Storage Service"
+    ports:
+      - 10020:10000
+      - 10021:10001
+      - 10022:10002
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    #  - ./container-volume/azurite:/data
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    command: azurite-blob --blobHost 0.0.0.0  
+    restart: {{container_restart_policy}}
+    healthcheck:
+      test: nc 127.0.0.1 10000 -z
+      interval: 1s
+      retries: 30
+{% endif %}   {#  AZURITE_enable #}
+
 {% if AZURECLI_enable | default(false) %}
   #  ================================== Azure CLI ========================================== #
   azurecli:
@@ -25339,6 +25374,9 @@ services:
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
+    command: /bin/sh -c "az storage container create --name contents &&
+      az storage cors add --methods GET --origins '*' --services b &&
+      tail -f /dev/null"
     restart: {{container_restart_policy}}
 {% endif %}   {#  AZURECLI_enable #}
 

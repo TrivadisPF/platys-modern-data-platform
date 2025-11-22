@@ -349,6 +349,9 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 10017 | 10000 | nifi2-3 |
 10009 | 10009 | kyuubi |
 10099 | 10099 | kyuubi |
+10020 | 10000 | azurite (blob service) |
+10021 | 10001 | azurite (queue service) |
+10022 | 10002 | azurite (table service) |
 11211 | 11211 | memcached |
 11212 | 11211 | ignite-1 |
 11235 | 11235 | crawl4ai |
