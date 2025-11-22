@@ -25367,8 +25367,9 @@ services:
     labels:
       com.platys.name: "azurecli"
       com.platys.description: "Azure CLI"
-    {% if use_timezone | default(false) %}
     environment:
+      AZURE_STORAGE_CONNECTION_STRING: DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://azurite:10000/devstoreaccount1;
+    {% if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
@@ -25381,9 +25382,16 @@ services:
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
-    command: /bin/sh -c "az storage container create --name contents &&
-      az storage cors add --methods GET --origins '*' --services b &&
-      tail -f /dev/null"
+    command: 
+      - /bin/sh 
+      - -c 
+      - |
+        for blob_container in $$(tr ',' '\n' <<< "{{AZURITE_blob_containers}}")
+        do
+          az storage container create --name contents &&/$$blob_container
+        done      
+        az storage cors add --methods GET --origins '*' --services b &&
+        tail -f /dev/null
     restart: {{container_restart_policy}}
 {% endif %}   {#  AZURECLI_enable #}
 
