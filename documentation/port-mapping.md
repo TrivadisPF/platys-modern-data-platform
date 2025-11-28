@@ -301,6 +301,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 9083 | 9083 | hive-metastore |
 9021 | 9021 | control-center (dc1) |
 9022 | 9021 | control-center (dc2) |
+9025 | 9021 | control-center-ng (dc1) |
+9026 | 9021 | control-center-ng (dc2) |
 9090 | 9090 | prometheus-1 |
 9091 | 9091 | prometheus-pushgateway |
 9092 | 9092 | kafka-1     |

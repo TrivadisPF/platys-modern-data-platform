@@ -21,6 +21,7 @@ networks:
 {% set __KAFKA_version = KAFKA_version | default('latest') -%}
 {% set __KAFKA_INKLESS_version = KAFKA_INKLESS_version | default('latest') -%}
 {% set __CONFLUENT_CCC_version = CONFLUENT_CCC_version | default('latest') -%}
+{% set __CONFLUENT_CCC_NG_version = CONFLUENT_CCC_NG_version | default('latest') -%}
 {% set __KAFKA_INIT_version = KAFKA_INIT_version | default('latest') -%}
 {% set __KAFKA_MM2_version = KAFKA_MM2_version | default('latest') -%}
 {% set __APICURIO_SCHEMA_REGISTRY_version = APICURIO_SCHEMA_REGISTRY_version | default('latest') -%}
@@ -817,6 +818,8 @@ networks:
 # if we use stack type ARM, then disable some containers which do not support ARM
   {% set ZOOKEEPER_enable = false -%}
   {% set KAFKA_enable = false -%}
+  {% set CONFLUENT_CCC_enable = false -%}
+  {% set CONFLUENT_CCC_NG_enable = false -%}
   {% set APICURIO_SCHEMA_REGISTRY_enable = false -%}
   {% set MATERIALIZE_enable = false -%}
   {% set HSTREAMDB_enable = false -%}
@@ -3684,6 +3687,83 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {# KAFKA_enable and CONFLUENT_CCC_enable #}
 
+
+{% if ((KAFKA_enable or external['KAFKA_enable']) and (KAFKA_edition | lower) == 'enterprise' and CONFLUENT_CCC_NG_enable) | default(false) %}
+  #  ================================== Confluent Control Center v2 (Next Generation) ========================================== #
+  {% set externalPort = 9025 + dataCenterId %}
+  control-center-ng{{dataCenter}}:
+    image: confluentinc/cp-enterprise-control-center-next-gen:{{__CONFLUENT_CCC_NG_version}}
+    hostname: control-center-ng{{dataCenter}}
+    container_name: control-center-ng{{dataCenter}}
+    labels:
+      com.platys.name: "confluent-control-center-ng"
+      com.platys.description: "Confluent Control Center Next Gen."
+      com.platys.webui.title: 'Control Center UI'
+      com.platys.webui.url: "http://dataplatform:{{externalPort}}"
+    ports:
+      - "{{externalPort}}:9021"
+    environment:
+      CONTROL_CENTER_BOOTSTRAP_SERVERS: '{{ns.bootstrapServers}}'
+  {% if ns.secureKafkaEnabled %}
+      CONTROL_CENTER_STREAMS_SECURITY_PROTOCOL: "{{ns.securityProtocolBROKER}}"
+    {% if ns.securityProtocolBROKER == 'SASL_PLAINTEXT' %}
+      CONTROL_CENTER_STREAMS_SASL_MECHANISM: "{{ns.saslMechanismBROKER}}"
+      CONTROL_CENTER_STREAMS_SASL_MECHANISM: "{{ns.loginModuleBROKER}} required username=\"{{ns.kafkaToolsDefaultUsername}}\" password=\"{{ns.kafkaToolsDefaultPassword}}\";"
+    {% elif ns.securityProtocolBROKER == 'SSL' %}
+      CONTROL_CENTER_STREAMS_SSL_TRUSTSTORE_LOCATION: /certs/client.ts.p12
+      CONTROL_CENTER_STREAMS_SSL_TRUSTSTORE_PASSWORD: {{KAFKA_client_truststore_password}}
+      {% if KAFKA_ssl_client_authentication_enabled | default(false) %}
+      CONTROL_CENTER_STREAMS_SSL_KEYSTORE_TYPE: "PKCS12"
+      CONTROL_CENTER_STREAMS_SSL_KEYSTORE_LOCATION: /certs/client.ks.p12
+      CONTROL_CENTER_STREAMS_SSL_KEYSTORE_PASSWORD: {{KAFKA_client_keystore_password}}
+      CONTROL_CENTER_STREAMS_SSL_KEY_PASSWORD: {{KAFKA_client_key_password}}
+      {% endif -%}   {#  KAFKA_ssl_client_authentication_enabled #}
+    {% endif -%}   {#  ns.securityProtocolBROKER #}
+  {% endif -%}   {#  ns.secureKafkaEnabled #}
+  {% if ( KAFKA_CONNECT_enable or KSQLDB_use_embedded_connect) | default(false) %}
+      CONTROL_CENTER_CONNECT_DEMO_CLUSTER: '${DOCKER_HOST_IP}:8083'
+      CONTROL_CENTER_CONNECT_HEALTHCHECK_ENDPOINT: '/connectors'
+  {% endif %}
+  {% if ( KSQLDB_enable ) | default(false) %}
+      CONTROL_CENTER_KSQL_DEMO_URL: "http://ksqldb-server-1:8088"
+      CONTROL_CENTER_KSQL_DEMO_ADVERTISED_URL: "http://dataplatform:8088"
+  {% endif %}
+  {% if (SCHEMA_REGISTRY_enable or external['SCHEMA_REGISTRY_enable']) | default(false) %}
+      CONTROL_CENTER_SCHEMA_REGISTRY_ENABLE: 'true'
+      CONTROL_CENTER_SCHEMA_REGISTRY_URL: '{{ns.schemaRegistryUrl}}'
+  {% endif %}  
+      CONTROL_CENTER_REPLICATION_FACTOR: {{KAFKA_internal_replication_factor | default(1)}}
+      CONTROL_CENTER_INTERNAL_TOPICS_PARTITIONS: {{KAFKA_internal_replication_factor | default(1)}}
+      CONTROL_CENTER_MONITORING_INTERCEPTOR_TOPIC_PARTITIONS: {{KAFKA_internal_replication_factor | default(1)}}
+      CONFLUENT_METRICS_TOPIC_REPLICATION: {{KAFKA_internal_replication_factor | default(1)}}
+  {% if PROMETHEUS_enable | default(false) %}
+      CONTROL_CENTER_PROMETHEUS_ENABLE: true
+      CONTROL_CENTER_PROMETHEUS_URL: http://prometheus:9090
+      CONTROL_CENTER_PROMETHEUS_RULES_FILE: /mnt/config/trigger_rules-generated.yml
+  {% endif %} 
+  {% if PROMETHEUS_ALERTMANAGER_enable | default(false) %}
+      CONTROL_CENTER_ALERTMANAGER_URL: http://alertmanager:9093
+      CONTROL_CENTER_ALERTMANAGER_CONFIG_FILE: /mnt/config/alertmanager-generated.yml      
+  {% endif %} 
+      PORT: 9021
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {% if ns.secureKafkaEnabled and ns.securityProtocol == 'SSL' %}
+      - ./security/kafka/client-certs:/certs
+    {% endif -%} {#  ns.secureKafkaEnabled #}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+{% endif %}   {# KAFKA_enable and CONFLUENT_CCC_NG_enable #}
+
 {% if ((KAFKA_enable or external['KAFKA_enable']) and (KAFKA_edition | lower) == 'enterprise' and KAFKA_REPLICATOR_enable) | default(false) %}
   replicator-1:
     image: confluentinc/cp-enterprise-replicator:{{__CONFLUENT_PLATFORM_version}}
@@ -5389,6 +5469,22 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
+
+  cruise-control-init:
+    image: trivadis/kafka-init:{{__KAFKA_INIT_version}}
+    container_name: cruise-control-init
+    hostname: cruise-control-init
+    depends_on:
+      kafka-1:
+        condition: service_started
+    environment:
+      BOOTSTRAP_SERVERS: '{{ns.bootstrapServers}}'
+      KAFKA_TIMEOUT: 120
+      KAFKA_EXPECTED_BROKERS: {{KAFKA_broker_nodes}}
+      KAFKA_DELETE_TOPIC_ENABLE: false
+      KAFKA_TOPIC_CONFIG: ''
+      KAFKA_CREATE_TOPICS: '____CruiseControlMetrics'
+    init: true        
 {% endif %}   {# KAFKA_enable and CRUISE_CONTROL_enable #}
 
 {% if DEBEZIUM_SERVER_enable | default(false) %}
