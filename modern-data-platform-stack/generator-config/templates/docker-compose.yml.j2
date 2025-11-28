@@ -78,6 +78,8 @@ networks:
 {% set __BURROW_UI_version = BURROW_UI_version | default('latest') -%}
 {% set __BURROW_DASHBOARD_version = BURROW_DASHBOARD_version | default('latest') -%}
 
+{% set __CRUISE_CONTROL_version = CRUISE_CONTROL_version | default('latest') -%}
+
 {% set __DEBEZIUM_SERVER_version = DEBEZIUM_SERVER_version | default('latest') -%}
 {% set __DEBEZIUM_UI_version = DEBEZIUM_UI_version | default('latest') -%}
 
@@ -5357,6 +5359,36 @@ services:
     restart: {{container_restart_policy}}
   {% endif -%}   {#  BURROW_enable and BURROW_DASHBOARD_enable #}
 {% endif %}   {# KAFKA_enable and BURROW_enable #}
+
+{% if ((KAFKA_enable or external['KAFKA_enable']) and CRUISE_CONTROL_enable) | default(false) %}
+  #  ================================== Cruise Control ========================================== #
+  cruise-control:
+    image: docker.io/devopsiaci/cruise-control:{{__CRUISE_CONTROL_version}}
+    container_name: cruise-control
+    hostname: cruise-control
+    labels:
+      com.platys.name: 'cruise-control'
+      com.platys.description: ""
+      com.platys.webui.title: 'Cruise Control'
+      com.platys.webui.url: "http://dataplatform:28293"
+    ports:
+      - 28293:9090
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./conf/cruise-control/cruisecontrol.properties:/cruise-control/config/cruisecontrol.properties
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+{% endif %}   {# KAFKA_enable and CRUISE_CONTROL_enable #}
 
 {% if DEBEZIUM_SERVER_enable | default(false) %}
   #  ================================== Debezium UI ========================================== #
