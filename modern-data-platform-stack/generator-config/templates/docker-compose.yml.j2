@@ -3755,6 +3755,7 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
+      - ./conf/confluent-control-center-ng/config:/mnt/config      
     {% if ns.secureKafkaEnabled and ns.securityProtocol == 'SSL' %}
       - ./security/kafka/client-certs:/certs
     {% endif -%} {#  ns.secureKafkaEnabled #}
@@ -3765,6 +3766,8 @@ services:
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
+    command: "bash -c 'dub template /etc/confluent/docker/control-center.properties.template /etc/confluent-control-center/control-center.properties && \
+                          /etc/confluent/docker/run'"    
     restart: {{container_restart_policy}}
 {% endif %}   {# KAFKA_enable and CONFLUENT_CCC_NG_enable #}
 
