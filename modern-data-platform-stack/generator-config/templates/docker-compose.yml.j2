@@ -20,6 +20,7 @@ networks:
 {% set __CONFLUENT_PLATFORM_version = CONFLUENT_PLATFORM_version | default('latest') -%}
 {% set __KAFKA_version = KAFKA_version | default('latest') -%}
 {% set __KAFKA_INKLESS_version = KAFKA_INKLESS_version | default('latest') -%}
+{% set __CONFLUENT_CCC_version = CONFLUENT_CCC_version | default('latest') -%}
 {% set __KAFKA_INIT_version = KAFKA_INIT_version | default('latest') -%}
 {% set __KAFKA_MM2_version = KAFKA_MM2_version | default('latest') -%}
 {% set __APICURIO_SCHEMA_REGISTRY_version = APICURIO_SCHEMA_REGISTRY_version | default('latest') -%}
@@ -1821,7 +1822,7 @@ services:
       KAFKA_SUPER_USERS: "{% for user in KAFKA_super_users.split(',') -%}User:{{ user }}{% if not loop.last %};{% endif %} {%- endfor %}"
       {% endif -%} {# KAFKA_super_users #}
     {% endif -%} {# KAFKA_authorizer_enabled and ns.secureKafkaEnabled #}
-    {% if KAFKA_CCC_enable and (KAFKA_edition | lower) == 'enterprise' | default(false) %}
+    {% if CONFLUENT_CCC_enable and (KAFKA_edition | lower) == 'enterprise' | default(false) %}
       KAFKA_METRIC_REPORTERS: io.confluent.metrics.reporter.ConfluentMetricsReporter
       KAFKA_CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: '{{ns.bootstrapServers}}'
     {% endif %}
@@ -2337,7 +2338,7 @@ services:
       KSQL_KSQL_STREAMS_REPLICATION_FACTOR: {{KSQLDB_internal_replication_factor | default(1)}}
       KSQL_KSQL_QUERY_PULL_METRICS_ENABLED: "true"
       KSQL_KSQL_HIDDEN_TOPICS: '^_.*,default_ksql_processing_log'
-    {% if (KAFKA_edition | lower) == 'enterprise' and KAFKA_CCC_enable %}
+    {% if (KAFKA_edition | lower) == 'enterprise' and CONFLUENT_CCC_enable %}
       KSQL_PRODUCER_INTERCEPTOR_CLASSES: "io.confluent.monitoring.clients.interceptor.MonitoringProducerInterceptor"
       KSQL_CONSUMER_INTERCEPTOR_CLASSES: "io.confluent.monitoring.clients.interceptor.MonitoringConsumerInterceptor"
     {% endif %}
@@ -3618,11 +3619,11 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {# SCHEMA_REGISTRY_enable and SCHEMA_REGISTRY_UI_enable #}
 
-{% if ((KAFKA_enable or external['KAFKA_enable']) and (KAFKA_edition | lower) == 'enterprise' and KAFKA_CCC_enable) | default(false) %}
+{% if ((KAFKA_enable or external['KAFKA_enable']) and (KAFKA_edition | lower) == 'enterprise' and CONFLUENT_CCC_enable) | default(false) %}
   #  ================================== Confluent Control Center ========================================== #
   {% set externalPort = 9021 + dataCenterId %}
   control-center{{dataCenter}}:
-    image: confluentinc/cp-enterprise-control-center:{{__CONFLUENT_PLATFORM_version}}
+    image: confluentinc/cp-enterprise-control-center:{{__CONFLUENT_CCC_version}}
     hostname: control-center{{dataCenter}}
     container_name: control-center{{dataCenter}}
     labels:
@@ -3681,7 +3682,7 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
-{% endif %}   {# KAFKA_enable and KAFKA_CCC_enable #}
+{% endif %}   {# KAFKA_enable and CONFLUENT_CCC_enable #}
 
 {% if ((KAFKA_enable or external['KAFKA_enable']) and (KAFKA_edition | lower) == 'enterprise' and KAFKA_REPLICATOR_enable) | default(false) %}
   replicator-1:

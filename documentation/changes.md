@@ -118,6 +118,7 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Change default values of `MINIO_access_key` and `MINIO_secret_key` to a more memorable value
  * Default value for `LAKEFS_use_as_drop_in_replacement_for_s3` changed to `false`
  * Change Oracle REST Data Service (ORDS) to use the official oracle docker image
+ * `KAFKA_CCC_enable` renamed to `CONFLUENT_CCC_enable`
 
 ## What's new in 1.18.1
 
