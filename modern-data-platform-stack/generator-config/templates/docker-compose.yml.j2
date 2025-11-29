@@ -1847,7 +1847,11 @@ services:
       KAFKA_CONFLUENT_TELEMETRY_EXPORTER_C3PLUSPLUS_BUFFER_INFLIGHT_SUBMISSIONS_MAX: "10"
       KAFKA_CONFLUENT_TELEMETRY_METRICS_COLLECTOR_INTERVAL_MS: "60000"
       KAFKA_CONFLUENT_TELEMETRY_REMOTECONFIG_CONFLUENT_ENABLED: "false"
-      KAFKA_CONFLUENT_CONSUMER_LAG_EMITTER_ENABLED: "true"          
+      KAFKA_CONFLUENT_CONSUMER_LAG_EMITTER_ENABLED: "true"
+    {% else %}
+      {% if CRUISE_CONTROL_enable | default(false) %}
+      KAFKA_METRIC_REPORTERS: com.linkedin.kafka.cruisecontrol.metricsreporter.CruiseControlMetricsReporter            
+      {% endif %}
     {% endif %}
     {% if (KAFKA_edition | lower) == 'enterprise' | default(false) %}
       KAFKA_CONFLUENT_LICENSE_TOPIC_REPLICATION_FACTOR: {{KAFKA_internal_replication_factor | default(1)}}
