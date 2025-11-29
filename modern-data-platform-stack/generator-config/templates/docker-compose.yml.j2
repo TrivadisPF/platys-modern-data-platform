@@ -1830,9 +1830,13 @@ services:
     {% endif -%} {# KAFKA_authorizer_enabled and ns.secureKafkaEnabled #}
     {% if (CONFLUENT_CCC_enable or CONFLUENT_CCC_NG_enable) and (KAFKA_edition | lower) == 'enterprise' | default(false) %}
       #KAFKA_METRIC_REPORTERS: io.confluent.metrics.reporter.ConfluentMetricsReporter
+      {% if CRUISE_CONTROL_enable | default(false) %}
+      KAFKA_METRIC_REPORTERS: io.confluent.telemetry.reporter.TelemetryReporter, com.linkedin.kafka.cruisecontrol.metricsreporter.CruiseControlMetricsReporter
+      {% else %}
       KAFKA_METRIC_REPORTERS: io.confluent.telemetry.reporter.TelemetryReporter
+      {% endif %}
       CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: '{{ns.bootstrapServers}}'
-      CONFLUENT_METRICS_REPORTER_TOPIC_REPLICAS: 1  
+      CONFLUENT_METRICS_REPORTER_TOPIC_REPLICAS: {{KAFKA_internal_replication_factor | default(1)}}  
       CONFLUENT_METRICS_ENABLE: 'true'
       CONFLUENT_SUPPORT_CUSTOMER_ID: 'anonymous'
       KAFKA_CONFLUENT_TELEMETRY_EXPORTER_C3PLUSPLUS_TYPE: "http"
