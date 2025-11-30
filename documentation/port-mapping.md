@@ -825,6 +825,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28291 | 7687 | puppygraph |
 28292 | 8888 | kouncil |
 28293 | 9090 | cruise-control |
+28394 | 9090 | ccc-prometheus |
+28395 | 9093 | ccc-prometheus-alertmanager |
 
 ## Ports > 28500
 

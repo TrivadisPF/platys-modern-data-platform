@@ -1830,12 +1830,7 @@ services:
     {% endif -%} {# KAFKA_authorizer_enabled and ns.secureKafkaEnabled #}
     {% if (CONFLUENT_CCC_enable or CONFLUENT_CCC_NG_enable) and (KAFKA_edition | lower) == 'enterprise' | default(false) %}
       #KAFKA_METRIC_REPORTERS: io.confluent.metrics.reporter.ConfluentMetricsReporter
-      {% if CRUISE_CONTROL_enable | default(false) %}
-      KAFKA_METRIC_REPORTERS: io.confluent.telemetry.reporter.TelemetryReporter, com.linkedin.kafka.cruisecontrol.metricsreporter.CruiseControlMetricsReporter
-      KAFKA_CRUISE_CONTROL_METRICS_REPORTER_BOOTSTRAP_SERVERS: '{{ns.bootstrapServers}}'
-      {% else %}
       KAFKA_METRIC_REPORTERS: io.confluent.telemetry.reporter.TelemetryReporter
-      {% endif %}
       CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: '{{ns.bootstrapServers}}'
       CONFLUENT_METRICS_REPORTER_TOPIC_REPLICAS: {{KAFKA_internal_replication_factor | default(1)}}  
       CONFLUENT_METRICS_ENABLE: 'true'
@@ -1843,7 +1838,7 @@ services:
       KAFKA_CONFLUENT_TELEMETRY_EXPORTER_C3PLUSPLUS_TYPE: "http"
       KAFKA_CONFLUENT_TELEMETRY_EXPORTER_C3PLUSPLUS_ENABLED: "true"
       KAFKA_CONFLUENT_TELEMETRY_EXPORTER_C3PLUSPLUS_METRICS_INCLUDE: "io.confluent.kafka.server.request.(?!.*delta).*|io.confluent.kafka.server.server.broker.state|io.confluent.kafka.server.replica.manager.leader.count|io.confluent.kafka.server.request.queue.size|io.confluent.kafka.server.broker.topic.failed.produce.requests.rate.1.min|io.confluent.kafka.server.tier.archiver.total.lag|io.confluent.kafka.server.request.total.time.ms.p99|io.confluent.kafka.server.broker.topic.failed.fetch.requests.rate.1.min|io.confluent.kafka.server.broker.topic.total.fetch.requests.rate.1.min|io.confluent.kafka.server.partition.caught.up.replicas.count|io.confluent.kafka.server.partition.observer.replicas.count|io.confluent.kafka.server.tier.tasks.num.partitions.in.error|io.confluent.kafka.server.broker.topic.bytes.out.rate.1.min|io.confluent.kafka.server.request.total.time.ms.p95|io.confluent.kafka.server.controller.active.controller.count|io.confluent.kafka.server.session.expire.listener.zookeeper.disconnects.total|io.confluent.kafka.server.request.total.time.ms.p999|io.confluent.kafka.server.controller.active.broker.count|io.confluent.kafka.server.request.handler.pool.request.handler.avg.idle.percent.rate.1.min|io.confluent.kafka.server.session.expire.listener.zookeeper.disconnects.rate.1.min|io.confluent.kafka.server.controller.unclean.leader.elections.rate.1.min|io.confluent.kafka.server.replica.manager.partition.count|io.confluent.kafka.server.controller.unclean.leader.elections.total|io.confluent.kafka.server.partition.replicas.count|io.confluent.kafka.server.broker.topic.total.produce.requests.rate.1.min|io.confluent.kafka.server.controller.offline.partitions.count|io.confluent.kafka.server.socket.server.network.processor.avg.idle.percent|io.confluent.kafka.server.partition.under.replicated|io.confluent.kafka.server.log.log.start.offset|io.confluent.kafka.server.log.tier.size|io.confluent.kafka.server.log.size|io.confluent.kafka.server.tier.fetcher.bytes.fetched.total|io.confluent.kafka.server.request.total.time.ms.p50|io.confluent.kafka.server.tenant.consumer.lag.offsets|io.confluent.kafka.server.session.expire.listener.zookeeper.expires.rate.1.min|io.confluent.kafka.server.log.log.end.offset|io.confluent.kafka.server.broker.topic.bytes.in.rate.1.min|io.confluent.kafka.server.partition.under.min.isr|io.confluent.kafka.server.partition.in.sync.replicas.count|io.confluent.telemetry.http.exporter.batches.dropped|io.confluent.telemetry.http.exporter.items.total|io.confluent.telemetry.http.exporter.items.succeeded|io.confluent.telemetry.http.exporter.send.time.total.millis|io.confluent.kafka.server.controller.leader.election.rate.(?!.*delta).*|io.confluent.telemetry.http.exporter.batches.failed"
-      KAFKA_CONFLUENT_TELEMETRY_EXPORTER_C3PLUSPLUS_CLIENT_BASE_URL: "http://prometheus-1:9090/api/v1/otlp"
+      KAFKA_CONFLUENT_TELEMETRY_EXPORTER_C3PLUSPLUS_CLIENT_BASE_URL: "http://ccc-prometheus:9090/api/v1/otlp"
       KAFKA_CONFLUENT_TELEMETRY_EXPORTER_C3PLUSPLUS_CLIENT_COMPRESSION: "gzip"
       KAFKA_CONFLUENT_TELEMETRY_EXPORTER_C3PLUSPLUS_API_KEY: "dummy"
       KAFKA_CONFLUENT_TELEMETRY_EXPORTER_C3PLUSPLUS_API_SECRET: "dummy"
@@ -3773,15 +3768,11 @@ services:
       CONTROL_CENTER_INTERNAL_TOPICS_PARTITIONS: 12
       CONTROL_CENTER_MONITORING_INTERCEPTOR_TOPIC_PARTITIONS: 12
       CONFLUENT_METRICS_TOPIC_REPLICATION: {{KAFKA_internal_replication_factor | default(1)}}
-  {% if PROMETHEUS_enable | default(false) %}
       CONTROL_CENTER_PROMETHEUS_ENABLE: true
-      CONTROL_CENTER_PROMETHEUS_URL: http://prometheus-1:9090
+      CONTROL_CENTER_PROMETHEUS_URL: http://ccc-prometheus:9090
       CONTROL_CENTER_PROMETHEUS_RULES_FILE: /mnt/config/trigger_rules-generated.yml
-  {% endif %} 
-  {% if PROMETHEUS_ALERTMANAGER_enable | default(false) %}
-      CONTROL_CENTER_ALERTMANAGER_URL: http://prometheus-alertmanager:9093
+      CONTROL_CENTER_ALERTMANAGER_URL: http://ccc-prometheus-alertmanager:9093
       CONTROL_CENTER_ALERTMANAGER_CONFIG_FILE: /mnt/config/alertmanager-generated.yml      
-  {% endif %} 
       PORT: 9021
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
@@ -3802,6 +3793,63 @@ services:
     command: "bash -c 'dub template /etc/confluent/docker/control-center.properties.template /etc/confluent-control-center/control-center.properties && \
                           /etc/confluent/docker/run'"    
     restart: {{container_restart_policy}}
+
+  cccng-prometheus:
+    image: confluentinc/cp-enterprise-prometheus:2.2.0
+    hostname: cccng-prometheus
+    container_name: cccng-prometheus
+    labels:
+      com.platys.name: "prometheus"
+      com.platys.description: "Monitoring system and time series database"
+      com.platys.webui.title: "Prometheus UI"
+      com.platys.webui.url: "http://dataplatform:28394/graph"
+      com.platys.restapi.title: "Prometheus Rest API"
+      com.platys.restapi.url: "http://dataplatform:28394/api/v1"
+    ports:
+      - "28394:9090"
+    environment:
+      CONFIG_PATH: "/mnt/config"
+      SHOULD_LOG_TO_FILE: false
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./conf/confluent-control-center-ng/config:/mnt/config
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+
+  cccng-prometheus-alertmanager:
+    image: confluentinc/cp-enterprise-alertmanager:2.2.0
+    hostname: cccng-prometheus-alertmanager
+    container_name: cccng-prometheus-alertmanager
+    labels:
+      com.platys.name: "prometheus-alertmanager"
+      com.platys.description: "Monitoring system and time series database"
+      com.platys.webui.title: "Prometheus Alertmanager UI"
+      com.platys.webui.url: "http://dataplatform:28395"    
+    depends_on:
+      - cccng-prometheus
+    ports:
+      - "28395:9093"
+    environment:
+      CONFIG_PATH: "/mnt/config"
+      SHOULD_LOG_TO_FILE: false
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./conf/confluent-control-center-ng/config:/mnt/config
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}
+
 {% endif %}   {# KAFKA_enable and CONFLUENT_CCC_NG_enable #}
 
 {% if ((KAFKA_enable or external['KAFKA_enable']) and (KAFKA_edition | lower) == 'enterprise' and KAFKA_REPLICATOR_enable) | default(false) %}
@@ -5481,7 +5529,7 @@ services:
   {% endif -%}   {#  BURROW_enable and BURROW_DASHBOARD_enable #}
 {% endif %}   {# KAFKA_enable and BURROW_enable #}
 
-{% if ((KAFKA_enable or external['KAFKA_enable']) and CRUISE_CONTROL_enable) | default(false) %}
+{% if ((KAFKA_enable or external['KAFKA_enable']) and CRUISE_CONTROL_enable) and not (KAFKA_edition | lower) == 'enterprise' | default(false) %}
   #  ================================== Cruise Control ========================================== #
   cruise-control:
     image: docker.io/devopsiaci/cruise-control:{{__CRUISE_CONTROL_version}}
@@ -21001,6 +21049,7 @@ services:
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
+    restart: {{container_restart_policy}}    
   {% endif %}   {#  PROMETHEUS_ALERTMANAGER_enable #}
 
 {% endif %}   {#  PROMETHEUS_enable #}
