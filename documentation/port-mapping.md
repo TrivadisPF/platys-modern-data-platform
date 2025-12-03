@@ -146,6 +146,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 5441 | 5432 | supabase-db |
 5442 | 5432 | hive-metastore-db |
 5443 | 5432 | ehrbase-db |
+5444 | 5432 | xtdb |
 5500 | 5500 | oracledb-ee-1 |
 5501 | 5500 | oracledb-ee-1 |
 5502 | 5500 | oracledb-ee-1 |
@@ -827,7 +828,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28293 | 9090 | cruise-control |
 28394 | 9090 | ccc-prometheus |
 28395 | 9093 | ccc-prometheus-alertmanager |
-
+28396 | 8080 | xtdb |
 ## Ports > 28500
 
 Container Port(s) | Internal Port(s)           | Service (alternatives) |

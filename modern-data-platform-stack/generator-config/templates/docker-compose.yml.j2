@@ -511,6 +511,7 @@ networks:
 {% set __SUPABASE_SUPAVISOR_version = SUPABASE_SUPAVISOR_version | default('latest') -%}
 
 {% set __TIMESCALEDB_version = TIMESCALEDB_version | default('latest') -%}
+{% set __XTDB_version = XTDB_version | default('latest') -%}
 {% set __SQLSERVER_version = SQLSERVER_version | default('latest') -%}
 {% set __YUGABYTE_version = YUGABYTE_version | default('latest') -%}
 {% set __SINGLE_STORE_version = SINGLE_STORE_version | default('latest') -%}
@@ -1005,6 +1006,7 @@ networks:
   {% set MYSQL_enable = false -%}
   {% set SQLSERVER_enable = false -%}
   {% set TIMESCALEDB_enable = false -%}
+  {% set XTDB_enable = false -%}
   {% set PGADMIN_enable = false -%}
   {% set ADMINER_enable = false -%}
   {% set CLOUDBEAVER_enable = false -%}
@@ -22552,6 +22554,46 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: always
 {% endif %}   {#  TIMESCALEDB_enable #}
+
+{% if XTDB_enable | default(false) %}
+  #  ================================== XTDB ========================================== #
+  xtdb:
+    image: ghcr.io/xtdb/xtdb-aws:{{__XTDB_version}}
+    container_name: xtdb
+    hostname: xtdb
+    labels:
+      com.platys.name: "xtdb"
+      com.platys.description: "Immutable SQL database for time-travel"
+      com.platys.rest.api.url: "http://dataplatform:28396"
+    ports:
+      - 28396:8080
+      - 5444:5432
+    environment:
+      AWS_REGION: {{s3DefaultRegion | default(omit) }}
+      AWS_S3_FORCE_PATH_STYLE: {{s3PathStyleAccess | default(omit) }}
+      AWS_S3_USE_VIRTUAL_HOSTING: "false"
+      XTDB_NODE_ID: "xt-node-1"
+      KAFKA_BOOTSTRAP_SERVERS: '{{ns.bootstrapServers}}'
+      XTDB_LOG_TOPIC: "xt_log"
+      XTDB_S3_BUCKET: "{{XTDB_bucket_name}}"
+      XTDB_S3_ENDPOINT: '{{s3Endpoint | default(omit) }}'
+      ACCESS_KEY: '{{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}'
+      SECRET_KEY: '{{s3SecretAccessKey}}'
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./dc_config.yaml:/config/dc_config.yaml      
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: always
+{% endif %}   {#  XTDB_enable #}
 
 {% if ADMINER_enable | default(false) %}
   #  ================================== Adminer ========================================== #
