@@ -26399,6 +26399,43 @@ services:
       retries: 5
       start_period: 20s
 
+  # https://gravitino.apache.org/docs/1.0.1/iceberg-rest-service
+  gravitino-iceberg-rest:
+    image: apache/gravitino-iceberg-rest:{{__GRAVITINO_version}}
+    container_name: gravitino-iceberg-rest
+    hostname: gravitino-iceberg-rest
+    labels:
+      com.platys.name: gravitino
+      com.platys.description: powerful open data catalog
+      com.platys.restapi.title: Gravitino Iceberg REST Server
+      com.platys.restapi.url: http://dataplatform:28287
+    ports:
+      - 28287:9001
+    environment:
+      # could be memory, hive or jdbc
+      GRAVITINO_CATALOG_BACKEND: hive
+      GRAVITINO_URI: thrift://hive-metastore:9083
+      GRAVITINO_IO_IMPL: org.apache.iceberg.aws.s3.S3FileIO
+      GRAVITINO_WAREHOUSE: s3a://admin-bucket/iceberg/warehouse
+      GRAVITINO_S3_ACCESS_KEY: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
+      GRAVITINO_S3_SECRET_KEY: {{s3SecretAccessKey}}
+      GRAVITINO_S3_ENDPOINT: {{s3Endpoint | default(omit) }}
+      GRAVITINO_S3_REGION: {{s3DefaultRegion | default(omit) }}
+      GRAVITINO_S3_PATH_STYLE_ACCESS: {{s3PathStyleAccess | default(omit) }}
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}      
+    restart: {{container_restart_policy}}
+
   {% if GRAVITINO_mcp_server_enabled | default(false) %}
   gravitino-mcp-server:
     image: apache/gravitino-mcp-server:{{__GRAVITINO_version}}
