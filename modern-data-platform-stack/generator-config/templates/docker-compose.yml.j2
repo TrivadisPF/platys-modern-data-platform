@@ -26399,6 +26399,34 @@ services:
       retries: 5
       start_period: 20s
 
+  {% if GRAVITINO_mcp_server_enabled | default(false) %}
+  gravitino-mcp-server:
+    image: apache/gravitino-mcp-server:{{__GRAVITINO_version}}
+    container_name: gravitino-mcp-server
+    hostname: gravitino-mcp-server
+    labels:
+      com.platys.name: "gravitino"
+      com.platys.description: "Gravitino MCP Server"
+    ports:
+      - "28288:8000"
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}      
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    command: "--metalake test --transport http --mcp-url http://0.0.0.0:8000/mcp --gravitino-uri http://gravitino:8090"
+    restart: {{container_restart_policy}}
+  {% endif %}   {# GRAVITINO_mcp_server_enabled #}
+
+  {% if GRAVITINO_iceberg_rest_server_enabled | default(false) %}
   # https://gravitino.apache.org/docs/1.0.1/iceberg-rest-service
   gravitino-iceberg-rest:
     image: apache/gravitino-iceberg-rest:{{__GRAVITINO_version}}
@@ -26435,34 +26463,7 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}      
     restart: {{container_restart_policy}}
-
-  {% if GRAVITINO_mcp_server_enabled | default(false) %}
-  gravitino-mcp-server:
-    image: apache/gravitino-mcp-server:{{__GRAVITINO_version}}
-    container_name: gravitino-mcp-server
-    hostname: gravitino-mcp-server
-    labels:
-      com.platys.name: "gravitino"
-      com.platys.description: "Gravitino MCP Server"
-    ports:
-      - "28288:8000"
-    {%if use_timezone | default(false) %}
-    environment:
-      TZ: {{use_timezone}}
-    {% endif -%}   {#  use_timezone #}
-    volumes:
-      - ./data-transfer:/data-transfer
-    {%if use_timezone | default(false) %}
-      - "./etc/timezone:/etc/timezone:ro"
-      - "./etc/localtime:/etc/localtime:ro"
-    {% endif -%}   {#  use_timezone #}      
-    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
-    <<: *logging
-    {% endif -%}   {#  logging_driver is defined ... #}
-    command: "--metalake test --transport http --mcp-url http://0.0.0.0:8000/mcp --gravitino-uri http://gravitino:8090"
-    restart: {{container_restart_policy}}
-  {% endif %}   {# GRAVITINO_mcp_server_enabled #}
-
+  {% endif %}   {# GRAVITINO_iceberg_rest_server_enabled #}
 {% endif %}   {# GRAVITINO_enable #}
 
 {% if NIMTABLE_enable | default(false) %}
