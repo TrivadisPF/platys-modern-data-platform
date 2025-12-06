@@ -26424,8 +26424,9 @@ services:
     command: "--metalake test --transport http --mcp-url http://0.0.0.0:8000/mcp --gravitino-uri http://gravitino:8090"
     restart: {{container_restart_policy}}
   {% endif %}   {# GRAVITINO_mcp_server_enabled #}
+{% endif %}   {# GRAVITINO_enable #}
 
-  {% if GRAVITINO_iceberg_rest_server_enabled | default(false) %}
+{% if GRAVITINO_ICEBERG_REST_SERVER_enabled | default(false) %}
   # https://gravitino.apache.org/docs/1.0.1/iceberg-rest-service
   gravitino-iceberg-rest:
     image: apache/gravitino-iceberg-rest:{{__GRAVITINO_version}}
@@ -26444,6 +26445,7 @@ services:
       GRAVITINO_URI: thrift://hive-metastore:9083
       GRAVITINO_IO_IMPL: org.apache.iceberg.aws.s3.S3FileIO
       GRAVITINO_WAREHOUSE: s3a://admin-bucket/iceberg/warehouse
+      GRAVITINO_CREDENTIAL_PROVIDERS: s3-secret-key      
       GRAVITINO_S3_ACCESS_KEY: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
       GRAVITINO_S3_SECRET_KEY: {{s3SecretAccessKey}}
       GRAVITINO_S3_ENDPOINT: {{s3Endpoint | default(omit) }}
@@ -26462,8 +26464,7 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}      
     restart: {{container_restart_policy}}
-  {% endif %}   {# GRAVITINO_iceberg_rest_server_enabled #}
-{% endif %}   {# GRAVITINO_enable #}
+{% endif %}   {# GRAVITINO_ICEBERG_REST_SERVER_enabled #}
 
 {% if NIMTABLE_enable | default(false) %}
   #  ================================== Nimtabe ========================================== #
