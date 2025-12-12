@@ -18235,6 +18235,8 @@ services:
       com.platys.password.envvars: "PLATYS_MONGO_PASSWORD"      
     ports:
       - {{external_port}}:27017
+    extra_hosts:
+      - "host.docker.internal:host-gateway"      
     environment:
       - MONGO_INITDB_DATABASE={{MONGO_init_database if MONGO_init_database is defined and MONGO_init_database and MONGO_init_database | length else omit }}
     {%if MONGO_root_username is defined and MONGO_root_username and MONGO_root_username | length > 0 %}  
@@ -18264,6 +18266,13 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
+    healthcheck:
+      test: echo "try { rs.status() } catch (err) { rs.initiate({_id:'rs0',members:[{_id:0,host:'host.docker.internal:27017'}]}) }" | mongosh --port 27017 --quiet
+      interval: 5s
+      timeout: 30s
+      start_period: 0s
+      start_interval: 1s
+      retries: 30    
   {% endfor %}
 
   {% if MONGO_EXPRESS_enable | default(false) %}
@@ -29360,10 +29369,13 @@ services:
       - ./scripts/grafana/dashboards/kafka/kafka-consumer.json:/etc/grafana/provisioning/dashboards/kafka/kafka-consumer.json
       - ./scripts/grafana/dashboards/kafka/kafka-producer.json:/etc/grafana/provisioning/dashboards/kafka/kafka-producer.json
       - ./scripts/grafana/dashboards/kafka/kafka-quotas.json:/etc/grafana/provisioning/dashboards/kafka/kafka-quotas.json
-      - ./scripts/grafana/dashboards/kafka/kafka-streams.json:/etc/grafana/provisioning/dashboards/kafka/kafka-streams.json
+      - ./scripts/grafana/dashboards/kafka/kafka-stream.json:/etc/grafana/provisioning/dashboards/kafka/kafka-stream.json
       - ./scripts/grafana/dashboards/kafka/kafka-streams-rocksdb.json:/etc/grafana/provisioning/dashboards/kafka/kafka-streams-rocksdb.json
       - ./scripts/grafana/dashboards/kafka/OTel_kafkametrics.json:/etc/grafana/provisioning/dashboards/kafka/OTel_kafkametrics.json
     {% endif -%}   {#  (KAFKA_enable or external['KAFKA_enable']) #}
+    {% if MONGO_enable | default(false) %}
+      - ./scripts/grafana/dashboards/mongo:/etc/grafana/provisioning/dashboards/mongo
+    {% endif -%}   {#  MONGO_enable #}
     {% if NIFI_enable | default(false) %}
       - ./scripts/grafana/dashboards/nifi:/etc/grafana/provisioning/dashboards/nifi
     {% endif -%}   {#  NIFI_enable #}
