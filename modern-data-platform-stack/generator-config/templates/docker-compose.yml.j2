@@ -21703,7 +21703,7 @@ services:
       timeout: 5s
       retries: 5
 
-  {% if jmx_monitoring_with_prometheus_enable -%}
+  {% if jmx_monitoring_with_prometheus_enable | default(false) %}
   postgresql-exporter:
     image: prometheuscommunity/postgres-exporter
     container_name: postgresql-exporter
@@ -21711,13 +21711,22 @@ services:
     labels:
       com.platys.name: "postgresql-exporter"
       com.platys.description: "PostgreSQL Exporter for Prometheus"
-    environment:
-      DATA_SOURCE_NAME: "postgres://{{POSTGRESQL_user | default('demo') }}:${PLATYS_POSTGRESQL_PASSWORD:-{{POSTGRESQL_password | default('abc123!') }}}@postgresql/{{POSTGRESQL_database | default('demodb') }}?sslmode=disable"
     depends_on:
       prometheus:
         condition: service_started
       postgresql:
         condition: service_healthy
+    environment:
+      DATA_SOURCE_NAME: "postgres://{{POSTGRESQL_user | default('demo') }}:${PLATYS_POSTGRESQL_PASSWORD:-{{POSTGRESQL_password | default('abc123!') }}}@postgresql/{{POSTGRESQL_database | default('demodb') }}?sslmode=disable"
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
     restart: {{container_restart_policy}}
   {% endif -%}   {#  jmx_monitoring_with_prometheus_enable  ... #}  
 
