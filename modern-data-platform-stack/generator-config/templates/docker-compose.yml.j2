@@ -21703,6 +21703,24 @@ services:
       timeout: 5s
       retries: 5
 
+  {% if jmx_monitoring_with_prometheus_enable -%}
+  postgresql-exporter:
+    image: prometheuscommunity/postgres-exporter
+    container_name: postgresql-exporter
+    hostname: postgresql-exporter
+    labels:
+      com.platys.name: "postgresql-exporter"
+      com.platys.description: "PostgreSQL Exporter for Prometheus"
+    environment:
+      DATA_SOURCE_NAME: "postgres://{{POSTGRESQL_user | default('demo') }}:${PLATYS_POSTGRESQL_PASSWORD:-{{POSTGRESQL_password | default('abc123!') }}}@postgresql/{{POSTGRESQL_database | default('demodb') }}?sslmode=disable"
+    depends_on:
+      prometheus:
+        condition: service_started
+      postgresql:
+        condition: service_healthy
+    restart: {{container_restart_policy}}
+  {% endif -%}   {#  jmx_monitoring_with_prometheus_enable  ... #}  
+
   {% if POSTGREST_enable| default(false) %}
   #  ================================== PostgREST ========================================== #
   postgrest:
@@ -29383,6 +29401,9 @@ services:
     {% if NEO4J_enable and (NEO4J_edition | lower) == 'enterprise' | default(false) %}
       - ./scripts/grafana/dashboards/neo4j:/etc/grafana/provisioning/dashboards/neo4j
     {% endif -%}   {#  NEO4J_enable #}
+    {% if POSTGRESQL_enable | default(false) %}
+      - ./scripts/grafana/dashboards/postgresql:/etc/grafana/provisioning/dashboards/postgresql
+    {% endif -%}   {#  POSTGRESQL_enable #}
     {% if NIFI_enable | default(false) %}
       - ./scripts/grafana/dashboards/nifi:/etc/grafana/provisioning/dashboards/nifi
     {% endif -%}   {#  NIFI_enable #}
