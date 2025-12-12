@@ -29340,9 +29340,11 @@ services:
       - ./scripts/grafana/dashboards/docker/docker_containers.json:/etc/grafana/provisioning/dashboards/docker/docker_containers.json
     {% endif -%}   {#  (CADVISOR_enable #}
     {% if (KAFKA_enable or external['KAFKA_enable']) | default(false) %}
-      - ./scripts/grafana/dashboards/kafka/confluent-platform{{'-zkless' if KAFKA_use_kraft_mode}}.json:/etc/grafana/provisioning/dashboards/kafka/confluent-platform{{'-zkless' if KAFKA_use_kraft_mode}}.json
-      - ./scripts/grafana/dashboards/kafka/kafka-cluster.json:/etc/grafana/provisioning/dashboards/kafka/kafka-cluster.json
+      - ./scripts/grafana/dashboards/kafka/confluent-platform{{'-kraft' if KAFKA_use_kraft_mode}}.json:/etc/grafana/provisioning/dashboards/kafka/confluent-platform{{'-zkless' if KAFKA_use_kraft_mode}}.json
+      - ./scripts/grafana/dashboards/kafka/kafka-cluster{{'-kraft' if KAFKA_use_kraft_mode || default(false) }}.json:/etc/grafana/provisioning/dashboards/kafka/kafka-cluster.json
+      {% if KAFKA_use_kraft_mode | default(false) %}
       - ./scripts/grafana/dashboards/kafka/kraft.json:/etc/grafana/provisioning/dashboards/kafka/kraft.json
+      {% endif -%}   {#  (KAFKA_use_kraft_mode #}
       - ./scripts/grafana/dashboards/kafka/cluster-linking.json:/etc/grafana/provisioning/dashboards/kafka/cluster-linking.json
       - ./scripts/grafana/dashboards/kafka-transaction-coordinator.json:/etc/grafana/provisioning/dashboards/kafka/kafka-transaction-coordinator.json
       - ./scripts/grafana/dashboards/kafka/kafka-connect-cluster.json:/etc/grafana/provisioning/dashboards/kafka/kafka-connect-cluster.json
