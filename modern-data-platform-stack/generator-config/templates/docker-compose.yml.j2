@@ -23494,7 +23494,7 @@ services:
 {%- if external['ADLS_enable'] | default(false) %}
       - './conf/{{conf_dir}}/catalog/adls.properties:/catalog/adls.properties'
 {%- endif -%}
-{%- if KAFKA_enable or external['KAFKA_enable'] | default(false) %}
+{%- if KAFKA_enable or external['KAFKA_enable'] and (TRINO_kafka_descriptor_supplier == 'schema-registry' OR TRINO_kafka_descriptor_supplier == 'file' and TRINO_kafka_table_names)  | default(false) %}
       - './conf/{{conf_dir}}/catalog/kafka-{{ 'file' if TRINO_kafka_descriptor_supplier | lower == 'file' else 'schema-registry' }}.properties:/catalog/kafka.properties'
       - './conf/{{conf_dir}}/kafka/descriptor:{{trino_etc_dir}}/kafka/'
   {% if ns.secureKafkaEnabled and ns.securityProtocolBROKER == 'SASL_PLAINTEXT' %}
