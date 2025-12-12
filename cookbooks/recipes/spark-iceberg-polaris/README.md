@@ -117,6 +117,68 @@ WHEN NOT MATCHED
 SELECT * FROM polaris.sparksql.person;
 ```
 
+## Jupyter
+
+```python
+import os
+
+# get the accessKey and secretKey from Environment
+accessKey = os.environ['AWS_ACCESS_KEY_ID']
+secretKey = os.environ['AWS_SECRET_ACCESS_KEY']
+
+import pyspark
+from pyspark.sql import SparkSession
+
+conf = pyspark.SparkConf()
+
+# point to mesos master or zookeeper entry (e.g., zk://10.10.10.10:2181/mesos)
+conf.setMaster("spark://spark-master:7077")
+
+# set other options as desired
+conf.set("spark.executor.memory", "8g")
+conf.set("spark.executor.cores", "1")
+conf.set("spark.core.connection.ack.wait.timeout", "1200")
+conf.set("spark.hadoop.fs.s3a.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem")
+conf.set("spark.hadoop.fs.s3a.endpoint", "http://minio-1:9000")
+conf.set("spark.hadoop.fs.s3a.path.style.access", "true")
+conf.set("spark.hadoop.fs.s3a.access.key", accessKey)
+conf.set("spark.hadoop.fs.s3a.secret.key", secretKey)
+conf.set("spark.hadoop.fs.s3a.aws.credentials.provider", "org.apache.hadoop.fs.s3a.SimpleAWSCredentialsProvider")
+conf.set("spark.sql.catalogImplementation", "hive")
+conf.set("spark.sql.catalog.spark_catalog", "org.apache.iceberg.spark.SparkCatalog")
+conf.set("spark.sql.catalog.hive", "org.apache.iceberg.spark.SparkCatalog")
+conf.set("spark.sql.catalog.spark_catalog.type", "hive")
+conf.set("spark.sql.catalog.spark_catalog.uri", "thrift://hive-metastore:9083")
+conf.set("spark.sql.catalog.spark_catalog.warehouse", "s3a://admin-bucket/iceberg/warehouse")
+conf.set("spark.sql.catalog.polaris", "org.apache.iceberg.spark.SparkCatalog")
+conf.set("spark.sql.catalog.polaris.type", "rest")
+conf.set("spark.sql.catalog.polaris.uri", "http://polaris:8181/api/catalog")
+conf.set("spark.sql.catalog.polaris.warehouse", "polaris_catalog")
+conf.set("spark.sql.catalog.polaris.credential", "admin:abc123!")
+conf.set("spark.sql.catalog.polaris.token-refresh-enabled", "true")
+conf.set("spark.sql.catalog.polaris.scope", "PRINCIPAL_ROLE:ALL")
+conf.set("spark.sql.catalog.polaris.header.X-Iceberg-Access-Delegation", "vended-credentials")
+conf.set("spark.sql.extensions", "org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions")
+conf.set("spark.jars.packages", "org.apache.iceberg:iceberg-spark-runtime-3.5_2.12:1.10.0")
+conf.set("spark.sql.legacy.allowNonEmptyLocationInCTAS","true")
+conf.set("spark.sql.hive.metastore.jars","builtin")
+
+spark = SparkSession.builder.appName('Jupyter').config(conf=conf).getOrCreate()
+spark.sparkContext.setLogLevel("INFO")
+
+sc = spark.sparkContext
+```
+
+```
+spark.table("polaris.sparksql.person").show()
+```
+
+or 
+
+```python
+spark.read.format("iceberg").load("polaris.sparksql.person").show()
+```
+
 ## Pyspark
 
 ```bash
