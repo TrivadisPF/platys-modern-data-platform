@@ -57,7 +57,7 @@ SELECT * FROM iceberg_polaris.tpch.test_polaris;
 ### Rest API
 
 ```
-curl -s http://172.20.10.2:28284/api/catalog/v1/oauth/tokens \
+curl -s http://$PUBLIC_IP:28284/api/catalog/v1/oauth/tokens \
    --user admin:abc123! \
    -d 'grant_type=client_credentials' \
    -d 'scope=PRINCIPAL_ROLE:ALL'
@@ -68,9 +68,30 @@ export POLARIS_TOKEN=<token>
 ```
 
 ```bash
-curl -v http://172.20.10.2:28284/api/management/v1/catalogs/polaris_catalog \
+curl -v http://$PUBLIC_IP:28284/api/management/v1/catalogs/polaris_catalog \
      -H "Authorization: Bearer $POLARIS_TOKEN"
 ```
+
+```bash
+curl -v http://$PUBLIC_IP:28284/api/catalog/v1/config?warehouse=polaris_catalog \
+     -H "Authorization: Bearer $POLARIS_TOKEN"
+```
+
+```bash
+curl -v http://$PUBLIC_IP:28284/api/catalog/v1/polaris_catalog/namespaces \
+     -H "Authorization: Bearer $POLARIS_TOKEN"
+```
+
+```bash
+curl -v http://$PUBLIC_IP:28284/api/catalog/v1/polaris_catalog/namespaces/sparksql/tables \
+     -H "Authorization: Bearer $POLARIS_TOKEN"
+```
+
+```bash
+curl -v http://$PUBLIC_IP:28284/api/catalog/v1/polaris_catalog/namespaces/sparksql/tables/person \
+     -H "Authorization: Bearer $POLARIS_TOKEN" | jq
+```
+
 
 ## Spark SQL
 
@@ -177,6 +198,84 @@ or
 
 ```python
 spark.read.format("iceberg").load("polaris.sparksql.person").show()
+```
+
+### Create a table
+
+```python
+from pyspark.sql.types import StructType, StructField, LongType, StringType, IntegerType
+
+spark.sql("CREATE DATABASE IF NOT EXISTS polaris.jupyter")
+
+# Define the schema for the person table
+schema = StructType([
+    StructField("person_id", LongType(), True),
+    StructField("first_name", StringType(), True),
+    StructField("last_name", StringType(), True),
+    StructField("age", IntegerType(), True),
+    StructField("city", StringType(), True)
+])
+
+# Create an empty DataFrame with that schema
+df = spark.createDataFrame([], schema)
+
+# Create the Iceberg table
+df.writeTo("polaris.jupyter.person").create()
+```
+
+### Write data to the table
+
+```python
+schema = spark.table("polaris.jupyter.person").schema
+data = [
+    (1, "Alice", "Müller", 30, "Berlin"),
+    (2, "Bob", "Smith", 28, "Zurich"),
+    (3, "Charlie", "Dubois", 35, "Paris"),
+    (4, "Diana", "Rossi", 26, "Rome")
+]
+df = spark.createDataFrame(data, schema)
+
+df.writeTo("polaris.jupyter.person").append()
+```
+
+### Read data from table
+
+```python
+df = spark.table("polaris.jupyter.person").show()
+```
+
+or 
+
+```python
+spark.read.format("iceberg").load("polaris.jupyter.person").show()
+```
+
+### Update data in the table
+
+```python
+schema = spark.table("polaris.jupyter.person").schema
+
+upd_data = [
+    (1, "Alice", "Müller", 31, "Berlin"),
+    (2, "Bob", "Smith", 29, "Zurich"),
+    (5, "Scott", "Tiger", 57, "Redwood")
+  ]
+upd_df = spark.createDataFrame(upd_data, schema)
+upd_df.createOrReplaceTempView("upd_person")
+
+spark.sql("""
+	MERGE INTO polaris.jupyter.person AS t
+	USING upd_person AS s
+	ON t.person_id = s.person_id
+	WHEN MATCHED 
+		THEN UPDATE SET *
+	WHEN NOT MATCHED 
+		THEN INSERT *
+""")
+```
+
+```python
+spark.read.format("iceberg").load("polaris.jupyter.person").show()
 ```
 
 ## Pyspark
