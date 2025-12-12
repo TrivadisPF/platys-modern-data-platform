@@ -6901,6 +6901,10 @@ services:
         state.checkpoints.dir: file:///tmp/flink-checkpoints-directory
         state.savepoints.dir: file:///tmp/flink-savepoints-directory
 #        rest.flamegraph.enabled: true
+    {%- if PROMETHEUS_enable | default(false) %}
+        metrics.reporters: prom
+        metrics.reporter.prom.factory.class: org.apache.flink.metrics.prometheus.PrometheusReporterFactory
+    {% endif -%}    {#  MINIOPROMETHEUS_enable #}
     {%if MINIO_enable or external['S3_enable'] | default(false) %}
       - s3.access.key={{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
       - s3.secret.key={{s3SecretAccessKey}}
@@ -6969,6 +6973,10 @@ services:
       - |
         FLINK_PROPERTIES=
         jobmanager.rpc.address: flink-jobmanager
+    {%- if PROMETHEUS_enable | default(false) %}
+        metrics.reporters: prom
+        metrics.reporter.prom.factory.class: org.apache.flink.metrics.prometheus.PrometheusReporterFactory
+    {% endif %}    {#  PROMETHEUS_enable #}    
         taskmanager.numberOfTaskSlots: 10
         taskmanager.memory.process.size: 1728m
         parallelism.default: 2
