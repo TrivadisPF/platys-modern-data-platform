@@ -337,3 +337,26 @@ scrape_configs:
     basic_auth:
       username: puppygraph
       password: abc123!    
+
+  - job_name: "flink"
+    static_configs:
+      - targets:
+          - "flink-jobmanager:9249"
+          - "flink-taskmanager-1:9249"
+          - "flink-taskmanager-2:9249"
+        labels:
+          env: "dev"
+    metric_relabel_configs:
+      - source_labels: [__name__]
+        regex: 'flink_jobmanager_Status_JVM_CPU_Time'
+        target_label: __name__
+        replacement: 'flink_jobmanager_Status_JVM_CPU_Time_total'
+      - source_labels: [__name__]
+        regex: 'flink_taskmanager_Status_JVM_CPU_Time'
+        target_label: __name__
+        replacement: 'flink_taskmanager_Status_JVM_CPU_Time_total'
+    relabel_configs: 
+      - source_labels: [__address__]
+        target_label: instance
+        regex: '([^:]+)(:[0-9]+)?'
+        replacement: '${1}'
