@@ -1,0 +1,32 @@
+server:
+  host: '*'
+  port: 5432
+
+flightSql:
+  host: '*'
+  port: 9832
+
+logClusters:
+  kafkaCluster: !Kafka
+    bootstrapServers: !Env KAFKA_BOOTSTRAP_SERVERS
+
+log: !Kafka
+  cluster: kafkaCluster
+  topic: !Env XTDB_LOG_TOPIC
+
+storage: !Remote
+  objectStore: !S3
+    bucket: !Env XTDB_S3_BUCKET
+    prefix: "xtdb-object-store"
+    endpoint: !Env XTDB_S3_ENDPOINT
+    credentials:
+      accessKey: !Env ACCESS_KEY
+      secretKey: !Env SECRET_KEY
+    pathStyleAccessEnabled: true
+
+diskCache:
+  path: /var/lib/xtdb/buffers
+
+healthz:
+  host: '*'
+  port: 8080

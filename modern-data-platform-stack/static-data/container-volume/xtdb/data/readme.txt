@@ -1,0 +1,1 @@
+Contains the data of xtdb db service, if flag XTDB_volume_map_data is set to true.
