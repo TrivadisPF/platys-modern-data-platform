@@ -6034,6 +6034,9 @@ services:
       - ./scripts/spark/pyspark:/opt/bitnami/spark/bin/pyspark
       - ./container-volume/spark/logs/:/var/log/spark/logs
 #      - ./scripts/docker/maven-download.sh:/usr/src/app/maven-download.sh
+    {%if jmx_monitoring_with_prometheus_enable | default(false) %}
+      - ./conf/spark/metrics.properties:/opt/spark/conf/metrics.properties
+    {% endif -%}   {#  jmx_monitoring_with_prometheus_enable  #}
     {%if AIRFLOW_enable or ZEPPELIN_enable or JUPYTER_enable | default(false) %}
       - spark-{{__SPARK_version | replace('.','-')}}-vol:/opt/bitnami/spark
       - spark-{{__SPARK_version | replace('.','-')}}-java-vol:/opt/bitnami/java
@@ -6207,6 +6210,9 @@ services:
       - ./init/spark:/docker-entrypoint-initdb.d
       - ./scripts/docker/maven-download.sh:/maven-download.sh
       - ./container-volume/spark/logs/:/var/log/spark/logs
+    {%if jmx_monitoring_with_prometheus_enable | default(false) %}
+      - ./conf/spark/metrics.properties:/opt/spark/conf/metrics.properties
+    {% endif -%}   {#  jmx_monitoring_with_prometheus_enable  #}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -29440,6 +29446,9 @@ services:
     {% if AIRFLOW_enable | default(false) %}
       - ./scripts/grafana/dashboards/airflow:/etc/grafana/provisioning/dashboards/airflow
     {% endif -%}   {#  AIRFLOW_enable #}
+    {% if SPARK_enable | default(false) %}
+      - ./scripts/grafana/dashboards/spark:/etc/grafana/provisioning/dashboards/spark
+    {% endif -%}   {#  SPARK_enable #}
     {% if RISINGWAVE_enable | default(false) %}
       - ./scripts/grafana/dashboards/risingwave:/etc/grafana/provisioning/dashboards/risingwave
     {% endif -%}   {#  RISINGWAVE_enable #}
