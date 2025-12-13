@@ -18437,6 +18437,22 @@ services:
     {% endif -%}   {#  ELASTICSEARCH_security_enabled #}  
       retries: 300
       interval: 10s
+
+  {% if jmx_monitoring_with_prometheus_enable | default(false) %}
+  #  ================================== Elasticsearch Exporter ========================================== #
+  elasticsearch-exporter:
+    image: quay.io/prometheuscommunity/elasticsearch-exporter:latest
+    container_name: elasticsearch-exporter
+    hostname: elasticsearch-exporter
+    labels:
+      com.platys.name: "elasticsearch-exporter"
+      com.platys.description: "Elasticsearch Exporter for Prometheus"
+    ports:
+      - "9114:9114"
+    command:
+      - '--es.uri=http://elasticsearch-1:9200'
+    restart: {{container_restart_policy}}
+  {% endif %}   {#  jmx_monitoring_with_prometheus_enable #}
 {% endif %}   {#  ELASTICSEARCH_enable #}
 
 {% if DEJAVU_enable | default(false) %}

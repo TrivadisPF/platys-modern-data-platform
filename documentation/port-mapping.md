@@ -290,6 +290,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 9101 | 9001 | mosquitto-1 |
 9102 | 9002 | mosquitto-2 |
 9103 | 9003 | mosquitto-3 |
+9114 | 9114 | elasticsearch-exporter |
 9121 | 9121 | redis-exporter |
 9200 | 9200 | elasticsearch-1 |
 9201 | 9200 | langwatch-opensearch |

@@ -413,4 +413,31 @@ scrape_configs:
   - job_name: 'spark_executors'
     metrics_path: '/metrics/executors/prometheus'
     static_configs:
-      - targets: ['spark-master:4040', 'spark-master:4041', 'spark-master:4042', 'spark-master:4043', 'spark-master:4044']                     
+      - targets: ['spark-master:4040', 'spark-master:4041', 'spark-master:4042', 'spark-master:4043', 'spark-master:4044']       
+
+  - job_name: es-multi
+    metrics_path: /probe
+    # Default parameters for all scrapes in this job.
+    # Can be overridden by labels on a per-target basis.
+    params:
+      auth_module: [prod_key]
+    static_configs:
+      # This is a target group. All targets here will use the default 'prod_key' auth_module.
+      - targets:
+          - https://elasticsearch-1:9200
+        labels:
+          __param_auth_module: staging_basic
+    relabel_configs:
+      # The following relabeling rules are applied to every target.
+
+      # 1. The special label __address__ (the target address) is saved as the 'target' URL parameter.
+      - source_labels: [__address__]
+        target_label: __param_target
+
+      # 2. The 'target' parameter is used as the 'instance' label for the scraped metrics.
+      - source_labels: [__param_target]
+        target_label: instance
+
+      # 3. The scrape address is rewritten to point to the exporter.
+      - target_label: __address__
+        replacement: elasticsearch-exporter:9114 # host:port of the single exporter                    
