@@ -17802,35 +17802,12 @@ services:
       com.platys.restapi.url: "http://dataplatform:9121/metrics"
     ports:
       - "9121:9121"
-    environment:
-      - REDIS_ADDR=redis-1:6379
-    {% if not REDIS_allow_empty_password and REDIS_password is defined and REDIS_password and REDIS_password | length | default(false) %}
-      - REDIS_PASSWORD={{REDIS_password if REDIS_password is defined and REDIS_password and REDIS_password | length else omit}}
-    {% elif not REDIS_allow_empty_password and REDIS_EXPORTER_password_file is defined and REDIS_EXPORTER_password_file and REDIS_EXPORTER_password_file | length | default(false) %}
-      - REDIS_PASSWORD_FILE=/opt/bitnami/redis/mounted-etc/{{REDIS_EXPORTER_password_file if REDIS_EXPORTER_password_file is defined and REDIS_EXPORTER_password_file and REDIS_EXPORTER_password_file | length else omit }}
-    {% endif -%}   {# not REDIS_allow_empty_password and REDIS_password or REDIS_EXPORTER_password_file #}
-      - REDIS_EXPORTER_CHECK_KEYS='{{REDIS_EXPORTER_check_keys if REDIS_EXPORTER_check_keys is defined else omit}}'
-      - REDIS_EXPORTER_CHECK_SINGLE_KEYS='{{REDIS_EXPORTER_check_single_keys if REDIS_EXPORTER_check_single_keys is defined else omit}}'
-      - REDIS_EXPORTER_COUNT_KEYS='{{REDIS_EXPORTER_count_keys if REDIS_EXPORTER_count_keys is defined else omit}}'
-      - REDIS_EXPORTER_REDIS_ONLY_METRICS={{REDIS_EXPORTER_redis_only_metrics}}
-      - REDIS_EXPORTER_INCL_CONFIG_METRICS={{REDIS_EXPORTER_incl_config_metrics}}
-      - REDIS_EXPORTER_INCL_SYSTEM_METRICS={{REDIS_EXPORTER_incl_system_metrics}}
-      - REDIS_EXPORTER_REDACT_CONFIG_METRICS={{REDIS_EXPORTER_redact_config_metrics}}
-      - REDIS_EXPORTER_PING_ON_CONNECT={{REDIS_EXPORTER_ping_on_connect}}
-      - REDIS_EXPORTER_IS_TILE38=false
-      - REDIS_EXPORTER_IS_CLUSTER=false
-      - REDIS_EXPORTER_EXPORT_CLIENT_LIST={{REDIS_EXPORTER_export_client_list if REDIS_EXPORTER_export_client_list is defined else omit}}
-      - REDIS_EXPORTER_CHECK_KEY_GROUPS={{REDIS_EXPORTER_check_key_groups if REDIS_EXPORTER_check_key_groups is defined else omit}}
-      - REDIS_EXPORTER_MAX_DISTINCT_KEY_GROUPS={{REDIS_EXPORTER_max_distinct_key_groups}}
-      - REDIS_EXPORTER_SKIP_TLS_VERIFICATION=true
     {%if use_timezone | default(false) %}
+    environment:
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
-    {% if REDIS_EXPORTER_password_file is defined and REDIS_EXPORTER_password_file and REDIS_EXPORTER_password_file | length %}
-      - ./security/redis-exporter/{{REDIS_EXPORTER_password_file}}:/opt/bitnami/redis/mounted-etc/{{REDIS_EXPORTER_password_file}}
-    {% endif %}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -17838,6 +17815,7 @@ services:
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
+    command: -redis.addr redis://redis-1:6379
     restart: {{container_restart_policy}}
 {% endif %}   {#  REDIS_EXPORTER_enable #}
 

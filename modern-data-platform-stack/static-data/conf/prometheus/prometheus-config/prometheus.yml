@@ -229,9 +229,26 @@ scrape_configs:
     static_configs:
       - targets: ["minio-1:9000"]
 
-  - job_name: redis_exporter
+  - job_name: 'redis_exporter_targets'
     static_configs:
-    - targets: ['redis-exporter:9121']
+      - targets:
+        - redis://redis-1:6379
+        - redis://redis-2:6379
+        - redis://redis-3:6379
+    metrics_path: /scrape
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: redis-exporter:9121
+
+  ## config for scraping the exporter itself
+  - job_name: 'redis_exporter'
+    static_configs:
+      - targets:
+        - redis-exporter:9121
 
   - job_name: zipkin
     scrape_interval: 5s
