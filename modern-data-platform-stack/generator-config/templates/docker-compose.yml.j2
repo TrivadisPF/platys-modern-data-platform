@@ -22647,7 +22647,12 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
     command: ["-f", "/config/dc_config.yaml"]    
-    restart: always
+    restart: {{container_restart_policy}}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/healthz/alive"]
+      interval: 15s
+      timeout: 20s
+      retries: 3    
 {% endif %}   {#  XTDB_enable #}
 
 {% if ADMINER_enable | default(false) %}
