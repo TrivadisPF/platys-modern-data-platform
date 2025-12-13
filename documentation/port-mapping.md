@@ -326,6 +326,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 9600 | 9600 | zeebe-1 |
 9601 | 9600 | langwatch-opensearch  |
 9851 | 9851 | tile38 |
+9832 | 9832 | xtdb |
 9870 | 9870 | namenode |
 9864 | 9864 | datanode-1 |
 9865 | 9864 | datanode-2 |
