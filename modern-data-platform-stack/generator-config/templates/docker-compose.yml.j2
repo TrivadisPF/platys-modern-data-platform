@@ -6927,10 +6927,13 @@ services:
         execution.checkpointing.interval: 5000
         table.catalog-store.kind: file
         table.catalog-store.file.path: ./conf/catalogs
-        state.backend: filesystem
+        state.backend: {{ FLINK_state_backend | default('hashmap') }}
         state.checkpoints.dir: file:///tmp/flink-checkpoints-directory
         state.savepoints.dir: file:///tmp/flink-savepoints-directory
-#        rest.flamegraph.enabled: true
+        heartbeat.interval: 1000
+        heartbeat.timeout: 5000        
+        rest.flamegraph.enabled: true
+        web.backpressure.refresh-interval: 10000
     {%- if PROMETHEUS_enable | default(false) %}
         metrics.reporters: prom
         metrics.reporter.prom.factory.class: org.apache.flink.metrics.prometheus.PrometheusReporterFactory
@@ -7013,9 +7016,11 @@ services:
         execution.checkpointing.interval: 5000
         table.catalog-store.kind: file
         table.catalog-store.file.path: ./conf/catalogs
-        state.backend: filesystem
+        state.backend: {{ FLINK_state_backend | default('hashmap') }}
         state.checkpoints.dir: file:///tmp/flink-checkpoints-directory
         state.savepoints.dir: file:///tmp/flink-savepoints-directory
+        heartbeat.interval: 1000
+        heartbeat.timeout: 5000        
     {%if MINIO_enable or external['S3_enable'] | default(false) %}
       - s3.access.key={{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
       - s3.secret.key={{s3SecretAccessKey}}
