@@ -4033,6 +4033,7 @@ services:
       - /bin/sh
       - -c
       - |
+        apk add jq;
         while [ 1 -eq 1 ];do sleep 60;done
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
     <<: *logging
@@ -7137,6 +7138,7 @@ services:
     image: {{'trivadis/apache-flink' if FLINK_python_enabled else 'flink'}}:{{__FLINK_version}}{{'-python' ~ FLINK_python_version if FLINK_python_enabled}}
     container_name: flink-sql-cli
     hostname: flink-sql-cli
+    platform: linux/amd64
     labels:
       com.platys.name: 'flink'
       com.platys.description: "Flink SQL CLI"
@@ -7185,7 +7187,7 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
     entrypoint: /docker-entrypoint-override.sh
-    command:  sleep infinity
+    command: bin/sql-client.sh
   {% endif -%}   {#  FLINK_SQL_CLI_enable #}
 {% endif %}   {#  FLINK_enable #}
 
