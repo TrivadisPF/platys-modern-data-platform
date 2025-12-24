@@ -1,6 +1,43 @@
 #!/usr/bin/env bash
 INIT_DIR="/opt/sql-client/init"
 
+function addProperty() {
+  local path=$1
+  local name=$2
+  local value=$3
+
+  local entry="$name    ${value}"
+  local escapedEntry=$(echo $entry | sed 's/\//\\\//g')
+  sed -i "/# >> END/ s/.*/${escapedEntry}\n&/" $path
+}
+
+function addElement() {
+  local path=$1
+  local name=$2
+  local value=$3
+
+  local entry="<property><name>$name</name><value>${value}</value></property>"
+  local escapedEntry=$(echo $entry | sed 's/\//\\\//g')
+  sed -i "/<\/configuration>/ s/.*/${escapedEntry}\n&/" $path
+}
+function configure_hive() {
+    local path=$1
+    local module=$2
+    local envPrefix=$3
+
+    local var
+    local value
+
+    echo "Configuring $module"
+    for c in `printenv | perl -sne 'print "$1 " if m/^${envPrefix}_(.+?)=.*/' -- -envPrefix=$envPrefix`; do
+        name=`echo ${c} | perl -pe 's/___/-/g; s/__/_/g; s/_/./g'`
+        var="${envPrefix}_${c}"
+        value=${!var}
+        echo " - Setting $name=$value"
+        addElement $path $name "$value"
+    done
+}
+
 if [ ${FLINK_INSTALL_MAVEN_DEP} ]
 then
   /platys-scripts/maven-download.sh central ${FLINK_INSTALL_MAVEN_DEP} /opt/flink/lib coursier
@@ -21,6 +58,8 @@ fi
 METASTORE="${METASTORE_HOST}:${METASTORE_PORT}"
 if [ "$METASTORE" != ":" ]; then
 
+  configure_hive /opt/flink/conf/hive-site.xml hive HIVE_SITE_CONF
+
   echo "Waiting for metastore to come up at " $METASTORE
   CONNECTED=false
   while ! $CONNECTED; do
@@ -38,6 +77,11 @@ if [ "$METASTORE" != ":" ]; then
   done;
   echo "Metastore is there!"
   
+  # install hive connector
+  mkdir -p ./lib/hive
+  curl https://repo1.maven.org/maven2/org/apache/flink/flink-sql-connector-hive-3.1.3_2.12/1.20.3/flink-sql-connector-hive-3.1.3_2.12-1.20.3.jar \
+	      -o ./lib/hive/flink-sql-connector-hive-3.1.3_2.12-1.20.3.jar
+
   # install hadoop dependencies - as shown here: https://www.decodable.co/blog/catalogs-in-flink-sql-hands-on#using-the-hive-catalog-with-flink-sql
   mkdir -p ./lib/hive
   curl https://repo1.maven.org/maven2/com/fasterxml/woodstox/woodstox-core/5.3.0/woodstox-core-5.3.0.jar -o ./lib/hive/woodstox-core-5.3.0.jar
