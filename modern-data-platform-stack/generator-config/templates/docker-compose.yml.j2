@@ -7047,6 +7047,16 @@ services:
       - FLINK_PYTHON_PROVIDE_REQUIREMENTS_FILE=true
     {% endif -%}    {#  NIFI_python_provide_requirements_file #}
     {% if HIVE_METASTORE_enable | default(false) %}
+      - HIVE_SITE_CONF_hive_metastore_local=false
+      - HIVE_SITE_CONF_hive_metastore_uris=thrift://{{ns.hiveMetastore}}
+      {%if MINIO_enable or external['S3_enable'] | default(false) %}
+      - HIVE_SITE_CONF_fs_defaultFS:='s3a://{{s3AdminBucketName}}'
+      - HIVE_SITE_CONF_fs_s3a_endpoint='{{s3Endpoint | default(omit) }}'
+      - HIVE_SITE_CONF_fs_s3a_access_key={{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
+      - HIVE_SITE_CONF_fs_s3a_secret_key={{s3SecretAccessKey}}
+      - HIVE_SITE_CONF_fs_s3a_path_style_access='{{s3PathStyleAccess}}'
+      - HIVE_SITE_CONF_fs_s3a_impl=org.apache.hadoop.fs.s3a.S3AFileSystem
+      {% endif -%}    {#  MINIO_enable #}
       - METASTORE_HOST={{ns.hiveMetastoreHost}}
       - METASTORE_PORT={{ns.hiveMetastorePort}}
     {% endif -%}   {#  HIVE_METASTORE_enable #}
@@ -7111,6 +7121,16 @@ services:
       - FLINK_PYTHON_PROVIDE_REQUIREMENTS_FILE=true
     {% endif -%}    {#  NIFI_python_provide_requirements_file #}
     {% if HIVE_METASTORE_enable | default(false) %}
+      - HIVE_SITE_CONF_hive_metastore_local=false
+      - HIVE_SITE_CONF_hive_metastore_uris=thrift://{{ns.hiveMetastore}}
+      {%if MINIO_enable or external['S3_enable'] | default(false) %}
+      - HIVE_SITE_CONF_fs_defaultFS:='s3a://{{s3AdminBucketName}}'
+      - HIVE_SITE_CONF_fs_s3a_endpoint='{{s3Endpoint | default(omit) }}'
+      - HIVE_SITE_CONF_fs_s3a_access_key={{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
+      - HIVE_SITE_CONF_fs_s3a_secret_key={{s3SecretAccessKey}}
+      - HIVE_SITE_CONF_fs_s3a_path_style_access='{{s3PathStyleAccess}}'
+      - HIVE_SITE_CONF_fs_s3a_impl=org.apache.hadoop.fs.s3a.S3AFileSystem
+      {% endif -%}    {#  MINIO_enable #}
       - METASTORE_HOST={{ns.hiveMetastoreHost}}
       - METASTORE_PORT={{ns.hiveMetastorePort}}
     {% endif -%}   {#  HIVE_METASTORE_enable #}
