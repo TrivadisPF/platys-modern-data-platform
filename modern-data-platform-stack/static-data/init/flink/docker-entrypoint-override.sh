@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 INIT_DIR="/opt/sql-client/init"
+HIVE_CONF_DIR="/opt/hive-conf"
+HIVE_DEFAULT_CONF_DIR="/opt/hive-conf.default"
 
 function addProperty() {
   local path=$1
@@ -57,6 +59,9 @@ fi
 # Wait for metastore if we need to
 METASTORE="${METASTORE_HOST}:${METASTORE_PORT}"
 if [ "$METASTORE" != ":" ]; then
+
+  echo "Copying files from $HIVE_DEFAULT_CONF_DIR to $HIVE_CONF_DIR"
+  cp -nr "$HIVE_DEFAULT_CONF_DIR"/. "$HIVE_CONF_DIR"
 
   configure_hive /opt/flink/conf/hive-site.xml hive HIVE_SITE_CONF
 
