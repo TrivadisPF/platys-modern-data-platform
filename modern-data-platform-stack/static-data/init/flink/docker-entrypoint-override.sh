@@ -63,7 +63,7 @@ if [ "$METASTORE" != ":" ]; then
   echo "Copying files from $HIVE_DEFAULT_CONF_DIR to $HIVE_CONF_DIR"
   cp -nr "$HIVE_DEFAULT_CONF_DIR"/. "$HIVE_CONF_DIR"
 
-  configure_hive /opt/flink/conf/hive-site.xml hive HIVE_SITE_CONF
+  configure_hive $HIVE_CONF_DIR/hive-site.xml hive HIVE_SITE_CONF
 
   echo "Waiting for metastore to come up at " $METASTORE
   CONNECTED=false
