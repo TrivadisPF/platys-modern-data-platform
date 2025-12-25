@@ -87,6 +87,10 @@ if [ "$METASTORE" != ":" ]; then
   curl https://repo1.maven.org/maven2/org/apache/flink/flink-sql-connector-hive-3.1.3_2.12/1.20.3/flink-sql-connector-hive-3.1.3_2.12-1.20.3.jar \
 	      -o ./lib/hive/flink-sql-connector-hive-3.1.3_2.12-1.20.3.jar
 
+  mkdir -p ./lib/aws
+  curl https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-aws/3.3.4/hadoop-aws-3.3.4.jar -o ./lib/aws/hadoop-aws-3.3.4.jar && \
+  curl https://repo1.maven.org/maven2/com/amazonaws/aws-java-sdk-bundle/1.12.648/aws-java-sdk-bundle-1.12.648.jar -o ./lib/aws/aws-java-sdk-bundle-1.12.648.jar
+
   # install hadoop dependencies - as shown here: https://www.decodable.co/blog/catalogs-in-flink-sql-hands-on#using-the-hive-catalog-with-flink-sql
   mkdir -p ./lib/hive
   curl https://repo1.maven.org/maven2/com/fasterxml/woodstox/woodstox-core/5.3.0/woodstox-core-5.3.0.jar -o ./lib/hadoop/woodstox-core-5.3.0.jar

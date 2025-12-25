@@ -104,10 +104,10 @@ networks:
 
 {% set __ZEPPELIN_version = ZEPPELIN_version | default('latest') -%}
 
-{% if (FLINK_major_version | lower) == '1'  %}
-  {% set __FLINK_version = FLINK_1_version | default('latest') -%}
-{% elif (FLINK_major_version | lower) == '2'  %}
-  {% set __FLINK_version = FLINK_2_version | default('latest') -%}
+{% if (FLINK_base_version | lower) == '1.20'  %}
+  {% set __FLINK_version = FLINK_1_20_version | default('latest') -%}
+{% elif (FLINK_base_version | lower) == '2.1'  %}
+  {% set __FLINK_version = FLINK_2_2_version | default('latest') -%}
 {% endif -%}
 
 {% set __NUSSKNACKER_version = NUSSKNACKER_version | default('latest') -%}
@@ -1427,6 +1427,13 @@ networks:
 
 {% set ns.datahubSparkPluginJar = "/opt/bitnami/spark/jars/datahub-spark-lineage-" ~ __DATAHUB_version | replace("v", "") ~ ".jar" -%}
 {% set ns.datahubSparkPluginDependencies = "io.acryl:datahub-spark-lineage:" ~ __DATAHUB_version | replace("v", "") -%}
+
+{#  ================================== Flink Settings ========================================== #}
+{% if (FLINK_base_version | lower) == '1.20'  %}
+  {% set ns.flinkIcebergDependencies = "org.apache.iceberg:iceberg-flink-runtime_1.20:1.10.1" -%}
+{% elif (FLINK_base_version | lower) == '2.1'  %}
+  {% set ns.flinkIcebergDependencies = "org.apache.iceberg:iceberg-flink-runtime_2.0:1.10.1" -%}
+{% endif -%}    {# FLINK_base_version #}
 
 {#  ================================== Hive Metastore Settings ========================================== #}
 
@@ -6946,7 +6953,7 @@ services:
       - s3.path.style.access='{{s3PathStyleAccess}}'
     {% endif -%}    {#  MINIO_enable #}
       - ENABLE_BUILT_IN_PLUGINS={{FLINK_enable_build_in_plugins if FLINK_enable_build_in_plugins is defined and FLINK_enable_build_in_plugins and FLINK_enable_build_in_plugins != None and FLINK_enable_build_in_plugins | length else omit}}
-      - FLINK_INSTALL_MAVEN_DEP={{FLINK_install_maven_dep if FLINK_install_maven_dep is defined and FLINK_install_maven_dep and FLINK_install_maven_dep != None and FLINK_install_maven_dep | length else omit}}
+      - FLINK_INSTALL_MAVEN_DEP={{FLINK_install_maven_dep if FLINK_install_maven_dep is defined and FLINK_install_maven_dep and FLINK_install_maven_dep != None and FLINK_install_maven_dep | length else ""}},{{ns.flinkIcebergDependencies}}
       - FLINK_INSTALL_FILE_DEP={{FLINK_install_file_dep if FLINK_install_file_dep is defined and FLINK_install_file_dep and FLINK_install_file_dep != None and FLINK_install_file_dep | length else omit}}
     {%if FLINK_python_enabled and FLINK_python_provide_requirements_file  | default(false) %}
       - FLINK_PYTHON_PROVIDE_REQUIREMENTS_FILE=true
@@ -7041,7 +7048,7 @@ services:
     {% endif -%}    {#  MINIO_enable #}
       - ENABLE_BUILT_IN_PLUGINS={{FLINK_enable_build_in_plugins if FLINK_enable_build_in_plugins is defined and FLINK_enable_build_in_plugins and FLINK_enable_build_in_plugins != None and FLINK_enable_build_in_plugins | length else omit}}
       # the following 2 env variables are supported by the /docker-entrypoint-override.sh script
-      - FLINK_INSTALL_MAVEN_DEP={{FLINK_install_maven_dep if FLINK_install_maven_dep is defined and FLINK_install_maven_dep and FLINK_install_maven_dep != None and FLINK_install_maven_dep | length else omit}}
+      - FLINK_INSTALL_MAVEN_DEP={{FLINK_install_maven_dep if FLINK_install_maven_dep is defined and FLINK_install_maven_dep and FLINK_install_maven_dep != None and FLINK_install_maven_dep | length else ""}},{{ns.flinkIcebergDependencies}}
       - FLINK_INSTALL_FILE_DEP={{FLINK_install_file_dep if FLINK_install_file_dep is defined and FLINK_install_file_dep and FLINK_install_file_dep != None and FLINK_install_file_dep | length else omit}}
     {%if FLINK_python_enabled and FLINK_python_provide_requirements_file  | default(false) %}
       - FLINK_PYTHON_PROVIDE_REQUIREMENTS_FILE=true
@@ -7115,7 +7122,7 @@ services:
         table.catalog-store.file.path: ./conf/catalogs
       - ENABLE_BUILT_IN_PLUGINS={{FLINK_enable_build_in_plugins if FLINK_enable_build_in_plugins is defined and FLINK_enable_build_in_plugins and FLINK_enable_build_in_plugins != None and FLINK_enable_build_in_plugins | length else omit}}
       # the following 2 env variables are supported by the /docker-entrypoint-override.sh script
-      - FLINK_INSTALL_MAVEN_DEP={{FLINK_install_maven_dep if FLINK_install_maven_dep is defined and FLINK_install_maven_dep and FLINK_install_maven_dep != None and FLINK_install_maven_dep | length else omit}}
+      - FLINK_INSTALL_MAVEN_DEP={{FLINK_install_maven_dep if FLINK_install_maven_dep is defined and FLINK_install_maven_dep and FLINK_install_maven_dep != None and FLINK_install_maven_dep | length else ""}},{{ns.flinkIcebergDependencies}}
       - FLINK_INSTALL_FILE_DEP={{FLINK_install_file_dep if FLINK_install_file_dep is defined and FLINK_install_file_dep and FLINK_install_file_dep != None and FLINK_install_file_dep | length else omit}}
     {%if FLINK_python_enabled and FLINK_python_provide_requirements_file  | default(false) %}
       - FLINK_PYTHON_PROVIDE_REQUIREMENTS_FILE=true
@@ -7181,7 +7188,7 @@ services:
         table.catalog-store.file.path: ./conf/catalogs
       - ENABLE_BUILT_IN_PLUGINS={{FLINK_enable_build_in_plugins if FLINK_enable_build_in_plugins is defined and FLINK_enable_build_in_plugins and FLINK_enable_build_in_plugins != None and FLINK_enable_build_in_plugins | length else omit}}
       # the following 2 env variables are supported by the /docker-entrypoint-override.sh script
-      - FLINK_INSTALL_MAVEN_DEP={{FLINK_install_maven_dep if FLINK_install_maven_dep is defined and FLINK_install_maven_dep and FLINK_install_maven_dep != None and FLINK_install_maven_dep | length else omit}}
+      - FLINK_INSTALL_MAVEN_DEP={{FLINK_install_maven_dep if FLINK_install_maven_dep is defined and FLINK_install_maven_dep and FLINK_install_maven_dep != None and FLINK_install_maven_dep | length else ""}},{{ns.flinkIcebergDependencies}}
       - FLINK_INSTALL_FILE_DEP={{FLINK_install_file_dep if FLINK_install_file_dep is defined and FLINK_install_file_dep and FLINK_install_file_dep != None and FLINK_install_file_dep | length else omit}}
     {%if FLINK_python_enabled and FLINK_python_provide_requirements_file  | default(false) %}
       - FLINK_PYTHON_PROVIDE_REQUIREMENTS_FILE=true
