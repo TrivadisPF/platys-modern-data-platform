@@ -85,6 +85,8 @@ networks:
 {% set __DEBEZIUM_SERVER_version = DEBEZIUM_SERVER_version | default('latest') -%}
 {% set __DEBEZIUM_UI_version = DEBEZIUM_UI_version | default('latest') -%}
 
+{% set __SHADOW_TRAFFIC_version = SHADOW_TRAFFIC_version | default('latest') -%}
+
 {% set __HADOOP_image_version = HADOOP_image_version | default('latest') -%}
 {% set __HADOOP_version = HADOOP_version | default('latest') -%}
 {% set __SQOOP_version = SQOOP_version | default('latest') -%}
@@ -5655,6 +5657,39 @@ services:
       test: [CMD, curl, --fail, "http://localhost:8080"]
       timeout: 10s    
 {% endif %}   {# KAFKA_enable and DEBEZIUM_UI_enable #}
+
+{% if SHADOW_TRAFFIC_enable | default(false) %}
+  #  ================================== ShadowTraffic ========================================== #
+  shadowtraffic:
+    image: shadowtraffic/shadowtraffic:{{__SHADOW_TRAFFIC_version}}
+    container_name: shadowtraffic
+    hostname: shadowtraffic
+    labels:
+      com.platys.name: "shadowtraffic"
+      com.platys.description: "Simulate production traffic to your backend."
+    environment:
+      LICENSE_ID={{SHADOW_TRAFFIC_license_id}}
+      LICENSE_EMAIL={{SHADOW_TRAFFIC_license_email}}
+      LICENSE_ORGANIZATION={{SHADOW_TRAFFIC_licence_organization}}
+      LICENSE_EDITION={{SHADOW_TRAFFIC_license_edition}}
+      LICENSE_EXPIRATION={{SHADOW_TRAFFIC_license_expiration}}
+      LICENSE_SIGNATURE={{SHADOW_TRAFFIC_license_signature}}
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./scripts/shadowtraffic:/data      
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    command: --config /data/{{SHADOW_TRAFFIC_config_file}}
+    restart: {{container_restart_policy}}
+{% endif %}   {# SHADOW_TRAFFIC_enable #}
 
 {% if HADOOP_enable | default(false) %}
 
