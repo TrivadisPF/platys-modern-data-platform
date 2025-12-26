@@ -1084,6 +1084,7 @@ networks:
   {% set AZURITE_enable = false -%}
   {% set AZURECLI_enable = false -%}
   {% set AZURE_STORAGE_EXPLORER_enable = false -%}
+  {% set PYICEBERG_enable = false -%}
   {% set KEYCLOAK_enable = false -%}
   {% set POSTMAN_enable = false -%}
   {% set PACT_BROKER_enable = false -%}
@@ -25884,6 +25885,44 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  AZURE_STORAGE_EXPLORER_enable #}
+
+{% if PYICEBERG_enable | default(false) %}
+  #  ================================== PyIceberg ========================================== #
+  pyiceberg:
+    image: spython:3.12-bookworm
+    container_name: pyiceberg
+    hostname: pyiceberg
+    labels:
+      com.platys.name: "pyiceberg"
+      com.platys.description: "PyIceberg CLI"
+    environment:
+      DUMMY: 1
+    {% if HIVE_METASTORE_enable | default(false) %}
+      PYICEBERG_CATALOG__HMS__URI: thrift://{{ns.hiveMetastore}}
+      PYICEBERG_CATALOG__HMS__S3__ACCESS_KEY_ID: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
+      PYICEBERG_CATALOG__HMS__S3__SECRET_ACCESS_KEY: {{s3SecretAccessKey}}
+      PYICEBERG_CATALOG__HMS__S3__PATH_STYLE_ACCESS: {{s3PathStyleAccess}}
+      PYICEBERG_CATALOG__HMS__S3__ENDPOINT: {{s3Endpoint | default(omit) }}
+    {% endif -%}   {#  HIVE_METASTORE_enable #}      
+    {% if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    entrypoint: >
+      /bin/sh -c "
+      pip install pyiceberg["s3fs,hive,pyarrow,duckdb"];
+      sleep infinity
+      "    
+    restart: {{container_restart_policy}}
+{% endif %}   {#  PYICEBERG_enable #}
 
 {% if LAKEFS_enable | default(false) %}
   #  ================================== LakeFS ========================================== #
