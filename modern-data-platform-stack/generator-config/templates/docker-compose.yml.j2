@@ -20398,7 +20398,7 @@ services:
 
 {% if DUCKDB_enable | default(false) %}
   duckdb:
-    image: {{'datacatering/duckdb' if not DUCKDB_ui_enabled else 'ghcr.io/gschmutz/duckdb-ui-remote-docker'}}:{{__DUCKDB_version}}
+    image: {{'duckdb/duckdb' if not DUCKDB_ui_enabled else 'ghcr.io/gschmutz/duckdb-ui-remote-docker'}}:{{__DUCKDB_version}}
     container_name: duckdb
     hostname: duckdb
     labels:
@@ -20427,7 +20427,8 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
     {%if not DUCKDB_ui_enabled | default(false) %}  
-    entrypoint: tail -F anything
+    stdin_open: true   # keeps STDIN open  (-i)
+    tty: true          # allocates a pseudo-TTY (-t)
     {% endif -%}   {#  DUCKDB_ui_enabled #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  DUCKDB_enable #}

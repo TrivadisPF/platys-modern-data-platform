@@ -99,6 +99,7 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Update `oracle-free` to `23.26.0.0`
  * Update `oracle-adb` to `25.7.5.2-23ai`
  * Update `kafka` to `4.1.0`
+ * Update `duckdb` to `v1.4.3`
  
 ### Enhancements
 
