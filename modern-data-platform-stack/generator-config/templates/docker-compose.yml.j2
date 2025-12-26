@@ -20419,6 +20419,9 @@ services:
     {% if DUCKDB_db_folder is defined and DUCKDB_db_folder and DUCKDB_db_folder | length %}
       - {{DUCKDB_db_folder}}:/db
     {% endif %}
+    {% if DUCKDB_init_script is defined and DUCKDB_init_script and DUCKDB_init_script | length %}
+      - ./init/duckdb/{{DUCKDB_init_script}}:/{{DUCKDB_init_script}}
+    {% endif %}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -20426,7 +20429,10 @@ services:
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
-    {%if not DUCKDB_ui_enabled | default(false) %}  
+    {%if not DUCKDB_ui_enabled | default(false) %}
+    {% if DUCKDB_init_script is defined and DUCKDB_init_script and DUCKDB_init_script | length %}
+    command: ["duckdb","-init","/{{DUCKDB_init_script}}"]
+    {% endif %}
     stdin_open: true   # keeps STDIN open  (-i)
     tty: true          # allocates a pseudo-TTY (-t)
     {% endif -%}   {#  DUCKDB_ui_enabled #}
