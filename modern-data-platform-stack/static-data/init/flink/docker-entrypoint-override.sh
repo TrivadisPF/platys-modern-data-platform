@@ -42,7 +42,7 @@ function configure_hive() {
 
 if [ ${FLINK_INSTALL_MAVEN_DEP} ]
 then
-  /platys-scripts/maven-download.sh central ${FLINK_INSTALL_MAVEN_DEP} /opt/flink/lib coursier
+  /platys-scripts/maven-download.sh central ${FLINK_INSTALL_MAVEN_DEP} /opt/flink/lib curl
 fi
 
 if [ ${FLINK_INSTALL_FILE_DEP} ]
