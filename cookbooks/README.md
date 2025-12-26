@@ -93,6 +93,9 @@ Inhere we are documenting cookbooks on how to use the platform:
  * **Apicurio Registry**
    * [Apicurio Registry with SQL Storage (PostgreSQL)](./recipes/apicurio-with-database-storage/README.md) - `1.14.0`
 
+ * **DuckDB**
+ 	* [Using DuckDB](./recipes/using-duckdb/README.md) - `1.19.0` 
+
  * **Oracle RDBMS**
    * [Using private (Trivadis) Oracle EE image](./recipes/using-private-oracle-ee-image/README.md) - `1.13.0`    
    * [Using public Oracle XE image](./recipes/using-public-oracle-xe-image/README.md) - `1.16.0`    
