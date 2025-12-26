@@ -33,6 +33,7 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Cruise Control
  * Confluent Control Center Next Generation
  * XTDB
+ * Shadow Traffic
  
 ### Version upgrades
 
