@@ -35,6 +35,7 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * XTDB
  * Shadow Traffic
  * PyIceberg
+ * Apache Fluss
  
 ### Version upgrades
 
