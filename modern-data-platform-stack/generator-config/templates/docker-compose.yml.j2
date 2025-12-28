@@ -33,6 +33,7 @@ networks:
 {% set __BENTHOS_version = BENTHOS_version | default('latest') -%}
 {% set __RISINGWAVE_version = RISINGWAVE_version | default('latest') -%}
 {% set __RISINGWAVE_CONSOLE_version = RISINGWAVE_CONSOLE_version | default('latest') -%}
+{% set __FLUSS_version = FLUSS_version | default('latest') -%}
 {% set __TIMEPLUS_ENTERPRISE_version = TIMEPLUS_ENTERPRISE_version | default('latest') -%}
 {% set __TIMEPLUS_PROTON_version = TIMEPLUS_PROTON_version | default('latest') -%}
 {% set __ARROYO_version = ARROYO_version | default('latest') -%}
@@ -830,6 +831,7 @@ networks:
   {% set HSTREAMDB_enable = false -%}
   {% set BENTHOS_enable = false -%}
   {% set RISINGWAVE_enable = false -%}
+  {% set FLUSS_enable = false -%}
   {% set TIMEPLUS_enable = false -%}
   {% set ARROYO_enable = false -%}
   {% set SQLFLOW_enable = false -%}
@@ -3240,6 +3242,93 @@ services:
       retries: 3
       start_period: 10s    
 {% endif %}  {#  TIMEPLUS_enable #}
+
+{% if FLUSS_enable | default(false) %}
+  #  ================================== Apache Fluss ========================================== #
+  fluss-coordinator-server:
+    image: apache/fluss:{{__FLUSS_version}}
+    hostname: fluss-coordinator-server
+    container_name: fluss-coordinator-server
+    labels:
+      com.platys.name: "fluss"
+      com.platys.description: "Arroyo Streaming DB"
+    depends_on:
+      - fluss-zookeeper-1    
+    ports:
+      - "9123:9123"
+    environment:
+      - |
+        FLUSS_PROPERTIES=
+        zookeeper.address: fluss-zookeeper:2181
+        bind.listeners: INTERNAL://fluss-coordinator-server:0, CLIENT://fluss-coordinator-server:9123
+        advertised.listeners: CLIENT://${PUBLIC_IP}:9123
+        internal.listener.name: INTERNAL
+        remote.data.dir: /tmp/fluss/remote-data    
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    command: coordinatorServer
+    restart: {{container_restart_policy}}
+
+  {% for num in range(FLUSS_tablet_servers | default(1) ) %}
+    {% set external_port = 9124 + loop.index - 1 %}
+    {% set port = 9123 %}
+  fluss-tablet-server-{{loop.index}}:
+    image: apache/fluss:{{__FLUSS_version}}
+    hostname: fluss-tablet-server
+    container_name: fluss-tablet-server
+    labels:
+      com.platys.name: "fluss"
+      com.platys.description: "Arroyo Streaming DB"
+    depends_on:
+      - fluss-coordinator-server    
+    ports:
+      - "{{external_port}}:{{port}}"
+    environment:
+      - |
+        FLUSS_PROPERTIES=
+        zookeeper.address: fluss-zookeeper:2181
+        bind.listeners: INTERNAL://fluss-tablet-server-{{loop.index}}:0, CLIENT://fluss-tablet-server-{{loop.index}}:{{port}}
+        advertised.listeners: CLIENT://${PUBLIC_IP}:{{external_port}}
+        internal.listener.name: INTERNAL
+        tablet-server.id: {{loop.index}}
+        kv.snapshot.interval: 0s
+        data.dir: /tmp/fluss/data/tablet-server-{{loop.index}}
+        remote.data.dir: /tmp/fluss/remote-data    
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    command: tabletServer
+    restart: {{container_restart_policy}}
+  {% endfor %}
+
+  fluss-zookeeper:
+    image: zookeeper:3.9.2    
+    hostname: fluss-coordinator-server
+    container_name: fluss-coordinator-server
+    labels:
+      com.platys.name: "zookeeper"
+      com.platys.description: "Coordinator Service"
+    restart: {{container_restart_policy}}
+{% endif %}  {#  FLUSS_enable #}
 
 {% if ARROYO_enable | default(false) %}
   #  ================================== Arroyo ========================================== #

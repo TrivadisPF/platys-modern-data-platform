@@ -292,6 +292,10 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 9103 | 9003 | mosquitto-3 |
 9114 | 9114 | elasticsearch-exporter |
 9121 | 9121 | redis-exporter |
+9123 | 9123 | fluss-coordinator-service |
+9124 | 9123 | fluss-tablet-server-1 |
+9125 | 9123 | fluss-tablet-server-2 |
+9126 | 9123 | fluss-tablet-server-3 |
 9200 | 9200 | elasticsearch-1 |
 9201 | 9200 | langwatch-opensearch |
 9300 | 9300 | elasticsearch-1 |
