@@ -7060,15 +7060,24 @@ services:
         jobmanager.memory.process.size: 1600m
         rest.bind-port: 8081
         execution.checkpointing.interval: 5000
+        execution.checkpointing.mode: EXACTLY_ONCE
         table.catalog-store.kind: {{ FLINK_catalog_store_kind | default('generic_in_memory') }}
         table.catalog-store.file.path: ./conf/catalogs
-        state.backend: {{ FLINK_state_backend | default('hashmap') }}
-        state.checkpoints.dir: file:///tmp/flink-checkpoints-directory
-        state.savepoints.dir: file:///tmp/flink-savepoints-directory
+        state.backend.type: {{ FLINK_state_backend_type | default('hashmap') }}
+        state.backend.incremental: true
+        state.checkpoints.dir: {{FLINK_state_checkpoints_dir}}
+        state.savepoints.dir: {{FLINK_state_savepoints_dir}}
         heartbeat.interval: 1000
         heartbeat.timeout: 5000        
         rest.flamegraph.enabled: true
         web.backpressure.refresh-interval: 10000
+    {%if MINIO_enable or external['S3_enable'] | default(false) %}
+        s3.access.key: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
+        s3.secret.key: {{s3SecretAccessKey}}
+        s3.fs.impl: org.apache.hadoop.fs.s3a.S3AFileSystem
+        s3.endpoint: {{s3Endpoint | default(omit) }}
+        s3.path.style.access: {{s3PathStyleAccess}}
+    {% endif -%}    {#  MINIO_enable #}
     {% if PROMETHEUS_enable | default(false) %}
         metrics.reporters: prom
         metrics.reporter.prom.factory.class: org.apache.flink.metrics.prometheus.PrometheusReporterFactory
@@ -7076,6 +7085,7 @@ services:
     {%if MINIO_enable or external['S3_enable'] | default(false) %}
       - s3.access.key={{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
       - s3.secret.key={{s3SecretAccessKey}}
+      - s3.fs.impl=org.apache.hadoop.fs.s3a.S3AFileSystem
       - s3.endpoint={{s3Endpoint | default(omit) }}'
       - s3.path.style.access='{{s3PathStyleAccess}}'
     {% endif -%}    {#  MINIO_enable #}
@@ -7160,16 +7170,26 @@ services:
         taskmanager.memory.process.size: 1728m
         parallelism.default: 2
         execution.checkpointing.interval: 5000
+        execution.checkpointing.mode: EXACTLY_ONCE
         table.catalog-store.kind: {{ FLINK_catalog_store_kind | default('generic_in_memory') }}
         table.catalog-store.file.path: ./conf/catalogs
-        state.backend: {{ FLINK_state_backend | default('hashmap') }}
-        state.checkpoints.dir: file:///tmp/flink-checkpoints-directory
-        state.savepoints.dir: file:///tmp/flink-savepoints-directory
+        state.backend.type: {{ FLINK_state_backend_type | default('hashmap') }}
+        state.backend.incremental: true
+        state.checkpoints.dir: {{FLINK_state_checkpoints_dir}}
+        state.savepoints.dir: {{FLINK_state_savepoints_dir}}
         heartbeat.interval: 1000
         heartbeat.timeout: 5000        
     {%if MINIO_enable or external['S3_enable'] | default(false) %}
+        s3.access.key: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
+        s3.secret.key: {{s3SecretAccessKey}}
+        s3.fs.impl: org.apache.hadoop.fs.s3a.S3AFileSystem
+        s3.endpoint: {{s3Endpoint | default(omit) }}
+        s3.path.style.access: {{s3PathStyleAccess}}
+    {% endif -%}    {#  MINIO_enable #}
+    {%if MINIO_enable or external['S3_enable'] | default(false) %}
       - s3.access.key={{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
       - s3.secret.key={{s3SecretAccessKey}}
+      - s3.fs.impl=org.apache.hadoop.fs.s3a.S3AFileSystem
       - s3.endpoint={{s3Endpoint | default(omit) }}'
       - s3.path.style.access='{{s3PathStyleAccess}}'
     {% endif -%}    {#  MINIO_enable #}
