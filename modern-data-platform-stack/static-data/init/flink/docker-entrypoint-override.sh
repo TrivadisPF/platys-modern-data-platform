@@ -105,6 +105,8 @@ if [ "$METASTORE" != ":" ]; then
   
 fi
 
+chown -R flink:flink /opt/flink/lib
+
 echo "Start initialization"
 if [ -d "$INIT_DIR" ]; then
 	echo "Init folder found at " $INIT_DIR
