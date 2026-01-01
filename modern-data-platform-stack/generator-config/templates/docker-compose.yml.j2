@@ -7117,7 +7117,9 @@ services:
       - ./data-transfer:/data-transfer
       - ./scripts/docker/:/platys-scripts/
       - ./init/flink/docker-entrypoint-override.sh:/docker-entrypoint-override.sh
-#      - flink-vol:/opt/flink
+    {% if FLINK_volume_map_flink_distro | default(false) %}  
+      - flink-vol:/opt/flink
+    {% endif -%}   {#  FLINK_volume_map_flink_distro #}
     {% if FLINK_additional_plugins is defined and FLINK_additional_plugins and FLINK_additional_plugins | length | default(false) %}
     {% for pluginName in (FLINK_additional_plugins.split(',')) %}
       - ./plugins/flink/{{pluginName}}:/opt/flink/lib/{{pluginName}}
@@ -14677,9 +14679,9 @@ services:
   {%if SPARK_enable | default(false) %}
       - spark-{{__SPARK_version | replace('.','-')}}-vol:/opt/bitnami/spark:RO
   {% endif -%}   {#  SPARK_enable #}
-  {%if FLINK_enable | default(false) %}
+  {%if FLINK_enable and FLINK_volume_map_flink_distro | default(false) %}
       - flink-vol:/opt/flink:RO
-  {% endif -%}   {#  FLINK_enable #}
+  {% endif -%}   {#  FLINK_enable and FLINK_volume_map_flink_distro #}
   {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -14768,9 +14770,9 @@ services:
     {%if SPARK_enable | default(false) %}
       - spark-{{__SPARK_version | replace('.','-')}}-vol:/opt/bitnami/spark:RO
     {% endif -%}   {#  SPARK_enable #}
-    {%if FLINK_enable | default(false) %}
+    {%if FLINK_enable and FLINK_volume_map_flink_distro | default(false) %}
       - flink-vol:/opt/flink:RO
-    {% endif -%}   {#  FLINK_enable #}    
+    {% endif -%}   {#  FLINK_enable and FLINK_volume_map_flink_distro #}    
     {% if JUPYTER_requirements_file is defined and JUPYTER_requirements_file and JUPYTER_requirements_file|length  %}
       - {{JUPYTER_requirements_file}}:/tmp/requirements.txt
     {% endif %}
@@ -31268,7 +31270,7 @@ services:
 volumes:
   data-transfer-vol:
     name: data_transfer_vol
-{%if FLINK_enable %}
+{%if FLINK_enable and FLINK_volume_map_flink_distro | default(false) %}
   flink-vol:
 {% endif %}
 {%if MINIO_enable or external['S3_enable'] | default(false) %}
