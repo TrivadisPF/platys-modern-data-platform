@@ -112,10 +112,12 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 4052 | 4052 | zeppelin (spark ui) |
 4053 | 4053 | zeppelin (spark ui) |
 4054 | 4054 | zeppelin (spark ui) |
+4173 | 4173 | data-contract-editor |
 4195 | 4195 | benthos-1 |
 4196 | 4196 | benthos-server |
 4200 | 4200 | cribl-master |
 4222 | 4222 | nats-1 |
+4242 | 4242 | data-contract-api |
 4317 | 4317 | otel-collector |
 4318 | 4318 | otel-collector |
 4319 | 4317 | jaeger |

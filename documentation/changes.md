@@ -36,6 +36,8 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Shadow Traffic
  * PyIceberg
  * Apache Fluss
+ * Data Contract Editor
+ * Data Contract CLI API
  
 ### Version upgrades
 
