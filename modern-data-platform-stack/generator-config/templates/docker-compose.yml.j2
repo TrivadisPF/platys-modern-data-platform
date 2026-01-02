@@ -29167,7 +29167,7 @@ services:
 {% if DATA_CONTRACT_MANAGER_enable | default(false) %}
   #  ================================== Data Contract Manager ================= #
   data-contract-manager:
-    image: datacontractmanager/datacontract-manager-ce:{{__DATA_CONTRACT_MANAGER_version}}
+    image: datentropydata/entropy-data-ce:{{__DATA_CONTRACT_MANAGER_version}}
     container_name: data-contract-manager
     hostname: data-contract-manager
     labels:
@@ -29237,6 +29237,7 @@ services:
     image: datacontract/editor:{{__DATA_CONTRACT_EDITOR_version}}
     container_name: data-contract-editor
     hostname: data-contract-editor
+    platform: linux/amd64        
     labels:
       com.platys.name: "data-contract-editor"
       com.platys.description: "Data Contract Editor"
@@ -29297,6 +29298,7 @@ services:
     image: datacontract/cli:{{__DATA_CONTRACT_CLI_version}}
     container_name: data-contract-api
     hostname: data-contract-api
+    platform: linux/amd64        
     labels:
       com.platys.name: "data-contract-api"
       com.platys.description: "Data Contract CLI API Server"
@@ -29304,8 +29306,9 @@ services:
       com.platys.restapi.url: "http://dataplatform:4242"            
     ports:
       - 4242:4242       
-    {%if use_timezone | default(false) %}
     environment:
+      - DATACONTRACT_CLI_API_KEY=a079ce4c-af90-45ab-abe5-a8d7697f60d6
+    {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
@@ -29319,7 +29322,7 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     command: ["api", "--host", "0.0.0.0"]
     restart: {{container_restart_policy}}
-{% endif %}   {#  DATA_CONTRACT_CLI_enable #}
+{% endif %}   {#  DATA_CONTRACT_CLI_API_enable #}
 
 {% if MICROCKS_enable | default(false) %}
   #  ================================== Microck ================= #
