@@ -60,7 +60,7 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Update `trino` to `479`
  * Update `starburstdata` to `477-e.2`
  * Update `risingwave` to `v2.6.1`
- * Update `confluent-platform` to `8.1.0`
+ * Update `confluent-platform` to `8.1.1`
  * Update `apicurio-registry` to `2.6.11.Final`
  * Update `materialize` to `v0.146.1`
  * Update `arroyo` to `0.14.0`
