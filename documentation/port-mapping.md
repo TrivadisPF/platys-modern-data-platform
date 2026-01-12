@@ -307,6 +307,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 9163 | 9160 | cassandra-4 |
 9164 | 9160 | cassandra-5 |
 9083 | 9083 | hive-metastore |
+9084 | 9084 | hive-metastore (iceberg-rest) |
 9021 | 9021 | control-center (dc1) |
 9022 | 9021 | control-center (dc2) |
 9025 | 9021 | control-center-ng (dc1) |
@@ -837,6 +838,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28394 | 9090 | ccc-prometheus |
 28395 | 9093 | ccc-prometheus-alertmanager |
 28396 | 8080 | xtdb |
+
 ## Ports > 28500
 
 Container Port(s) | Internal Port(s)           | Service (alternatives) |

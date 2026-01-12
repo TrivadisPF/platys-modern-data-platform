@@ -8177,8 +8177,14 @@ services:
         condition: service_healthy      
     ports:
       - "9083:9083"
+      - {{"9084:9084" if __HIVE_METASTORE_version == "4.2.0" | default(false) else omit}}
     environment:
       HIVE_VER: {{__HIVE_METASTORE_version}}
+  {% if __HIVE_METASTORE_version == "4.2.0" | default(false) %}
+      # configure iceberg catalog service (if HMS >= 4.1.0)
+      HIVE_SITE_CONF_metastore_catalog_servlet_port: 9084
+      HIVE_SITE_CONF_metastore_catalog_servlet_auth: none
+  {% endif -%}   {#  __HIVE_METASTORE_version == "4.2.0" #}
   {%if HADOOP_enable | default(false) %}
       CORE_CONF_fs_defaultFS: hdfs://namenode:9000
       HIVE_SITE_CONF_hive_metastore_warehouse_dir: hdfs://namenode:9000/user/hive/warehouse
