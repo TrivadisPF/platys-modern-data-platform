@@ -23618,8 +23618,8 @@ services:
       DATA_PRODUCT_ENABLED: '{{'true' if TRINO_starburstdata_enable_data_product is defined and TRINO_starburstdata_enable_data_product else 'false'}}'
   {% endif %}
   {% if HIVE_METASTORE_enable | default(false) %}
-      ICEBERG_REST_CATALOG_URI: http://hive-metastore:9084/iceberg
-      ICEBERG_REST_CATALOG_WAREHOUSE: {{'s3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
+      HMS_ICEBERG_REST_CATALOG_URI: http://hive-metastore:9084/iceberg
+      HMS_ICEBERG_REST_CATALOG_WAREHOUSE: {{'s3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
   {% endif %}
   {% if TRINO_with_iceberg_rest_catalog | default(false) %}
       ICEBERG_REST_CATALOG_URI: {{TRINO_iceberg_rest_catalog_url if TRINO_iceberg_rest_catalog_url is defined and TRINO_iceberg_rest_catalog_url | length else 'http://iceberg-rest-catalog:8181'}}
@@ -23791,8 +23791,9 @@ services:
   {%if SPARK_table_format_type == 'iceberg' %}
     {%if HIVE_METASTORE_enable | default(false) %}
       - './conf/{{conf_dir}}/catalog/iceberg-hive.properties:/catalog/iceberg_hive.properties'
+      - './conf/{{conf_dir}}/catalog/iceberg-hive-rest.properties:/catalog/iceberg_hive_rest.properties'
     {% endif %}  
-    {%if ICEBERG_REST_CATALOG_enable | default(false) %}
+    {%if TRINO_with_iceberg_rest_catalog | default(false) %}
       - './conf/{{conf_dir}}/catalog/iceberg-rest.properties:/catalog/iceberg_rest.properties'
     {% endif %}
     {%if LAKEKEEPER_enable | default(false) %}
@@ -23994,8 +23995,8 @@ services:
       #CATALOG_STORE: {{TRINO_catalog_store | default('file') }}
       QUERY_MAX_MEMORY_PER_NODE: {{TRINO_max_memory_per_node | default('4GB') }}
   {% if HIVE_METASTORE_enable | default(false) %}
-      ICEBERG_REST_CATALOG_URI: http://hive-metastore:9084/iceberg
-      ICEBERG_REST_CATALOG_WAREHOUSE: {{'s3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
+      HMS_ICEBERG_REST_CATALOG_URI: http://hive-metastore:9084/iceberg
+      HMSICEBERG_REST_CATALOG_WAREHOUSE: {{'s3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
   {% endif %}
   {% if TRINO_with_iceberg_rest_catalog | default(false) %}
       ICEBERG_REST_CATALOG_URI: {{TRINO_iceberg_rest_catalog_url if TRINO_iceberg_rest_catalog_url is defined and TRINO_iceberg_rest_catalog_url | length else 'http://iceberg-rest-catalog:8181'}}
@@ -24158,36 +24159,41 @@ services:
       - ./conf/{{conf_dir}}/{{deployment_type}}/worker.config.properties:{{trino_etc_dir}}/config.properties
       - ./conf/{{conf_dir}}/{{deployment_type}}/node.properties:{{trino_etc_dir}}/node.properties
       - ./conf/{{conf_dir}}/{{deployment_type}}/log-debug.properties:{{trino_etc_dir}}/log.properties
-  {%if MINIO_enable or external['S3_enable'] | default(false) %}
-    {%if HIVE_METASTORE_enable | default(false) %}
+{% if MINIO_enable or external['S3_enable'] | default(false) %}
+  {%if HIVE_METASTORE_enable | default(false) %}
       - './conf/{{conf_dir}}/catalog/minio.properties:/catalog/minio.properties'
-    {% endif %}
-    {%if ICEBERG_REST_CATALOG_enable | default(false) %}
+  {% endif %}
+  {%if SPARK_table_format_type == 'iceberg' %}
+    {%if HIVE_METASTORE_enable | default(false) %}
+      - './conf/{{conf_dir}}/catalog/iceberg-hive.properties:/catalog/iceberg_hive.properties'
+      - './conf/{{conf_dir}}/catalog/iceberg-hive-rest.properties:/catalog/iceberg_hive_rest.properties'
+    {% endif %}  
+    {%if TRINO_with_iceberg_rest_catalog | default(false) %}
       - './conf/{{conf_dir}}/catalog/iceberg-rest.properties:/catalog/iceberg_rest.properties'
     {% endif %}
-    {%if SPARK_table_format_type == 'iceberg' | default(false) %}
-      - './conf/{{conf_dir}}/catalog/iceberg.properties:/catalog/iceberg.properties'
-      {%if LAKEKEEPER_enable | default(false) %}
-        - './conf/{{conf_dir}}/catalog/iceberg-lakekeeper.properties:/catalog/iceberg_lakekeeper.properties'
-      {% endif %}    
-      {%if POLARIS_enable | default(false) %}
-        - './conf/{{conf_dir}}/catalog/iceberg-polaris.properties:/catalog/iceberg_polaris.properties'
-      {% endif %}    
-      {%if GRAVITINO_enable | default(false) %}
-        - './conf/{{conf_dir}}/catalog/iceberg-gravitino.properties:/catalog/iceberg_gravitino.properties'
-      {% endif %}
-      {%if NESSIE_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/iceberg-nessie.properties:/catalog/iceberg_nessie.properties'
-      {% endif %}
-    {%elif SPARK_table_format_type == 'delta' | default(false) %}
-      - './conf/{{conf_dir}}/catalog/delta.properties:/catalog/delta.properties'
-    {%elif SPARK_table_format_type == 'hudi' | default(false) %}
-      - './conf/{{conf_dir}}/catalog/hudi.properties:/catalog/hudi.properties'
+    {%if LAKEKEEPER_enable | default(false) %}
+      - './conf/{{conf_dir}}/catalog/iceberg-lakekeeper.properties:/catalog/iceberg_lakekeeper.properties'
     {% endif %}
-    {%if UNITY_CATALOG_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/iceberg-unity.properties:/catalog/iceberg_unity.properties'
-    {% endif %}    
+    {%if POLARIS_enable | default(false) %}
+      - './conf/{{conf_dir}}/catalog/iceberg-polaris.properties:/catalog/iceberg_polaris.properties'
+    {% endif %}
+    {%if GRAVITINO_enable | default(false) %}
+      - './conf/{{conf_dir}}/catalog/iceberg-gravitino.properties:/catalog/iceberg_gravitino.properties'
+    {% endif %}
+    {%if NESSIE_enable | default(false) %}
+      - './conf/{{conf_dir}}/catalog/iceberg-nessie.properties:/catalog/iceberg_nessie.properties'
+    {% endif %}
+  {% endif %}  {#  SPARK_table_format_type == 'iceberg' #}
+  {%if SPARK_table_format_type == 'delta' | default(false) %}
+      - './conf/{{conf_dir}}/catalog/delta.properties:/catalog/delta.properties'
+  {% endif %} 
+  {%if SPARK_table_format_type == 'hudi' | default(false) %}
+      - './conf/{{conf_dir}}/catalog/hudi.properties:/catalog/hudi.properties'
   {% endif %}
+  {%if UNITY_CATALOG_enable | default(false) %}
+      - './conf/{{conf_dir}}/catalog/iceberg-unity.properties:/catalog/iceberg_unity.properties'
+  {% endif %}
+{%- endif -%}  {#  MINIO_enable #}
   {%if external['ADLS_enable'] | default(false) %}
       - './conf/{{conf_dir}}/catalog/adls.properties:/catalog/adls.properties'
   {% endif %}
