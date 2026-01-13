@@ -23617,6 +23617,14 @@ services:
   {% if (TRINO_edition | lower) == 'starburstdata' %}
       DATA_PRODUCT_ENABLED: '{{'true' if TRINO_starburstdata_enable_data_product is defined and TRINO_starburstdata_enable_data_product else 'false'}}'
   {% endif %}
+  {% if HIVE_METASTORE_enable | default(false) %}
+      ICEBERG_REST_CATALOG_URI: http://hive-metastore:9084/iceberg
+      ICEBERG_REST_CATALOG_WAREHOUSE: {{'s3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
+  {% endif %}
+  {% if TRINO_with_iceberg_rest_catalog | default(false) %}
+      ICEBERG_REST_CATALOG_URI: {{TRINO_iceberg_rest_catalog_url if TRINO_iceberg_rest_catalog_url is defined and TRINO_iceberg_rest_catalog_url | length else 'http://iceberg-rest-catalog:8181'}}
+      ICEBERG_REST_CATALOG_WAREHOUSE: {{TRINO_iceberg_rest_catalog_warehouse if TRINO_iceberg_rest_catalog_warehouse is defined and TRINO_iceberg_rest_catalog_warehouse | length else 's3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
+  {% endif %}
   {%if MINIO_enable or external['S3_enable'] | default(false) %}
       S3_ENDPOINT: {{s3Endpoint | default(omit) }}
       S3_REGION: {{s3DefaultRegion | default(omit) }}
@@ -23630,8 +23638,6 @@ services:
       HIVE_RUN_AS_INVOKER: '{{'true' if TRINO_hive_run_as_invoker else 'false'}}'
       HIVE_LEGACY_TRANSLATION: '{{'true' if TRINO_hive_legacy_translation else 'false'}}'
       NESSIE_CATALOG_WAREHOUSE_DIR: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined and SPARK_sql_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/nessie/warehouse'}}
-      ICEBERG_REST_CATALOG_URI: http://iceberg-rest-catalog:8181
-      ICEBERG_REST_CATALOG_WAREHOUSE: {{ICEBERG_REST_CATALOG_warehouse_dir if ICEBERG_REST_CATALOG_warehouse_dir is defined and ICEBERG_REST_CATALOG_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
     {%if LAKEKEEPER_enable | default(false) %}
       ICEBERG_LAKEKEEPER_CATALOG_URI: {{lakekeeperEndpoint}}
       ICEBERG_LAKEKEEPER_CATALOG_WAREHOUSE: {{lakekeeperCatalogName}}
@@ -23987,6 +23993,14 @@ services:
       CATALOG_CONFIG_DIR: '/catalog'
       #CATALOG_STORE: {{TRINO_catalog_store | default('file') }}
       QUERY_MAX_MEMORY_PER_NODE: {{TRINO_max_memory_per_node | default('4GB') }}
+  {% if HIVE_METASTORE_enable | default(false) %}
+      ICEBERG_REST_CATALOG_URI: http://hive-metastore:9084/iceberg
+      ICEBERG_REST_CATALOG_WAREHOUSE: {{'s3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
+  {% endif %}
+  {% if TRINO_with_iceberg_rest_catalog | default(false) %}
+      ICEBERG_REST_CATALOG_URI: {{TRINO_iceberg_rest_catalog_url if TRINO_iceberg_rest_catalog_url is defined and TRINO_iceberg_rest_catalog_url | length else 'http://iceberg-rest-catalog:8181'}}
+      ICEBERG_REST_CATALOG_WAREHOUSE: {{TRINO_iceberg_rest_catalog_warehouse if TRINO_iceberg_rest_catalog_warehouse is defined and TRINO_iceberg_rest_catalog_warehouse | length else 's3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
+  {% endif %}
   {%if MINIO_enable or external['S3_enable'] | default(false) %}
       S3_ENDPOINT: {{s3Endpoint | default(omit) }}
       S3_REGION: {{s3DefaultRegion | default(omit) }}
@@ -23999,8 +24013,6 @@ services:
       HIVE_RUN_AS_INVOKER: '{{'true' if TRINO_hive_run_as_invoker else 'false'}}'
       HIVE_LEGACY_TRANSLATION: '{{'true' if TRINO_hive_legacy_translation else 'false'}}'
       NESSIE_CATALOG_WAREHOUSE_DIR: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined and SPARK_sql_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/nessie/warehouse'}}
-      ICEBERG_REST_CATALOG_URI: http://iceberg-rest-catalog:8181
-      ICEBERG_REST_CATALOG_WAREHOUSE: {{ICEBERG_REST_CATALOG_warehouse_dir if ICEBERG_REST_CATALOG_warehouse_dir is defined and ICEBERG_REST_CATALOG_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
     {%if LAKEKEEPER_enable | default(false) %}
       ICEBERG_LAKEKEEPER_CATALOG_URI: {{lakekeeperEndpoint}}
       ICEBERG_LAKEKEEPER_CATALOG_WAREHOUSE: {{lakekeeperCatalogName}}
