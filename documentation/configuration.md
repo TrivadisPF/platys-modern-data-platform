@@ -1749,6 +1749,8 @@ For each service there might be some other settings, such as controlling the num
 | `GRAVITINO_ICEBERG_REST_SERVER_enabled`                                 	| `false` 	| 1.19.0 	| Generate Gravitino Iceberg REST server                                                                                                                                                              	|
 | [**_Nimtable_**](./services/nimtable.md)   &nbsp;&nbsp;&nbsp;&nbsp;![x86-64](./images/x86-64.png)                        	|         	|
 | `NIMTABLE_enable`                                 	| `false` 	| 1.19.0 	| Generate Nimtable service                                                                                                                                                              	|    
+| [**_Lakevision_**](./services/lakevision.md)   &nbsp;&nbsp;&nbsp;&nbsp;![x86-64](./images/x86-64.png)                        	|         	|
+| `LAKEVISION_enable`                                 	| `false` 	| 1.19.0 	| Generate Lakevision service                                                                                                                                                              	|    
   
 ### Query Engines
 

@@ -838,6 +838,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28394 | 9090 | ccc-prometheus |
 28395 | 9093 | ccc-prometheus-alertmanager |
 28396 | 8080 | xtdb |
+28397 | 8081 | lakevision |
 
 ## Ports > 28500
 

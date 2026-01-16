@@ -39,6 +39,7 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Data Contract Editor
  * Data Contract CLI API
  * Klag (new kafka lag exporter)
+ * Lakevision
  
 ### Version upgrades
 
