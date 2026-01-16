@@ -104,6 +104,7 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Update `kafka` to `4.1.0`
  * Update `duckdb` to `v1.4.3`
  * Update `hive-metastore` to `4.2.0`
+ * Update `atlas` to `2.4.0
 
 ### New/Updated Cookbook Recipes
 
