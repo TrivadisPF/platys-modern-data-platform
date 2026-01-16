@@ -544,7 +544,6 @@ networks:
 {% set __TRINO_GATEWAY_version = TRINO_GATEWAY_version | default('latest') -%}
 {% set __TRINO_LB_version = TRINO_LB_version | default('latest') -%}
 {% set __PRESTO_version = PRESTO_version | default('latest') -%}
-{% set __AHANA_version = AHANA_version | default('latest') -%}
 {% set __PRESTO_CLI_version = PRESTO_CLI_version | default('latest') -%}
 {% set __DREMIO_version = DREMIO_version | default('latest') -%}
 {% set __DRILL_version = DRILL_version | default('latest') -%}
@@ -24505,10 +24504,7 @@ services:
   #  ================================== Presto ========================================== #
   presto-1:
   {% if (PRESTO_edition | lower) == 'prestodb' %}
-    image: trivadis/prestodb:{{__PRESTO_version}}
-    {% set presto_etc_dir = '/opt/presto/default/etc' %}
-  {% elif (PRESTO_edition | lower) == 'ahana' %}
-    image: ahanaio/prestodb:{{__AHANA_version}}
+    image: prestodb/presto:{{__PRESTO_version}}
     {% set presto_etc_dir = '/opt/presto/default/etc' %}
   {% endif -%}   {#  PRESTO_edition #}
     hostname: presto-1
@@ -24554,10 +24550,7 @@ services:
     {% for numWorkers in range(PRESTO_workers | default(1) ) %}
   presto-worker-{{loop.index}}:
   {% if (PRESTO_edition | lower) == 'prestodb' %}
-    image: trivadis/prestodb:{{__PRESTO_version}}
-    {% set presto_etc_dir = '/opt/presto/default/etc' %}
-  {% elif (PRESTO_edition | lower) == 'ahana' %}
-    image: ahanaio/prestodb:{{__AHANA_version}}
+    image: prestodb/presto:{{__PRESTO_version}}
     {% set presto_etc_dir = '/opt/presto/default/etc' %}
   {% endif -%}   {#  PRESTO_edition #}
     hostname: presto-worker-{{loop.index}}
@@ -24593,10 +24586,7 @@ services:
   {% if PRESTO_CLI_enable | default(false) %}
   presto-cli:
   {% if (PRESTO_edition | lower) == 'prestodb' %}
-    image: ahanaio/prestodb-cli:{{__PRESTO_CLI_version}}
-    {% set presto_etc_dir = '/opt/presto/default/etc' %}
-  {% elif (PRESTO_edition | lower) == 'ahana' %}
-    image: ahanaio/prestodb-cli:{{__PRESTO_CLI_version}}
+    image: prestodb/prestodb-cli:{{__PRESTO_CLI_version}}
     {% set presto_etc_dir = '/opt/presto/default/etc' %}
   {% endif -%}   {#  PRESTO_edition #}
     hostname: presto-cli
