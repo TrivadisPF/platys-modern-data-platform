@@ -72,6 +72,7 @@ networks:
 {% set __KLAW_version = KLAW_version | default('latest') -%}
 {% set __KAFKA_CONNECTOR_BOARD_version = KAFKA_CONNECTOR_BOARD_version | default('latest') -%}
 {% set __STREAMS_EXPLORER_version = STREAMS_EXPLORER_version | default('latest') -%}
+{% set __KLAG_version = KLAG_version | default('latest') -%}
 {% set __KAFKA_LAG_EXPORTER_version = KAFKA_LAG_EXPORTER_version | default('latest') -%}
 {% set __ZILLA_version = ZILLA_version | default('latest') -%}
 
@@ -849,6 +850,7 @@ networks:
   {% set REDPANDA_CONSOLE_enable = false -%}
   {% set KOUNCIL_enable = false -%}
   {% set KAFKA_MAGIC_enable = false -%}
+  {% set KLAG_enable = flase -%}
   {% set KAFKA_LAG_EXPORTER_enable = false -%}
   {% set KAFKA_WEBVIEW_enable = false -%}
   {% set KPOW_enable = false -%}
@@ -5485,6 +5487,59 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {#  KAFKA_enable and STREAMS_EXPLORER_enable #}
 
+{% if ((KAFKA_enable or external['KAFKA_enable']) and KLAG_enable) | default(false) %}
+  #  ================================== KLag ========================================== #
+  klag:
+    image: themoah/klag:{{__KLAG_version}}
+    container_name: klag
+    hostname: klag
+    labels:
+      com.platys.name: "klag"
+      com.platys.description: "Kafka Lag Exporter"
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: {{ns.bootstrapServer}}
+      
+    {% if ns.secureKafkaEnabled %}
+      - KAFKA_SECURITY_PROTOCOL: '{{ns.securityProtocolBROKER}}'
+      {% if ns.securityProtocolBROKER == 'SASL_PLAINTEXT' %}
+      - KAFKA_SASL_MECHANISM: '{{ns.saslMechanismBROKER}}'
+      - KAFKA_SASL_JAAS_CONFIG: '{{ns.loginModuleBROKER}} required username=\"{{ns.kafkaToolsDefaultUsername}}\" password=\"{{ns.kafkaToolsDefaultPassword}}\";'
+      #KAFKA_SASL_JAAS_CONFIG: "org.apache.kafka.common.security.plain.PlainLoginModule required username=${SASL_USERNAME} password=${SASL_PASSWORD};"
+      {% elif ns.securityProtocolBROKER == 'SSL' %}
+      - KAFKA_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: 'https'
+      - KAFKA_SSL_TRUSTSTORE_LOCATION: /certs/client.ts.p12
+      - KAFKA_SSL_TRUSTSTORE_PASSWORD: {{KAFKA_client_truststore_password}}
+        {% if KAFKA_ssl_client_authentication_enabled | default(false) %}
+      - KAFKA_SSL_KEYSTORE_TYPE: "PKCS12"
+      - KAFKA_SSL_KEYSTORE_LOCATION: /certs/client.ks.p12
+      - KAFKA_SSL_KEYSTORE_PASSWORD: {{KAFKA_client_keystore_password}}
+      - KAFKA_SSL_KEY_PASSWORD: {{KAFKA_client_key_password}}
+        {% endif -%}   {#  KAFKA_ssl_client_authentication_enabled #}
+      {% endif -%}   {#  ns.securityProtocol #}
+    {% endif -%}   {#  secureKafkaEnabled #}      
+
+      # metrics reporter
+      METRICS_REPORTER: prometheus-1
+      METRICS_INTERVAL_MS: 30000
+      METRICS_GROUP_FILTER: *
+
+      # jvm metrics
+      METRICS_JVM_ENABLED: true    
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  KAFKA_enable and KLAG_enable #}
+
 {% if ((KAFKA_enable or external['KAFKA_enable']) and KAFKA_LAG_EXPORTER_enable) | default(false) %}
   #  ================================== Kafka Lag Exporter ========================================== #
   kafka-lag-exporter:
@@ -5494,7 +5549,6 @@ services:
     labels:
       com.platys.name: "kafka-lag-exporter"
       com.platys.description: "Kafka Lag Exporter"
-      com.platys.description: "Kafka GUI"
     {%if use_timezone | default(false) %}
     environment:
       TZ: {{use_timezone}}
@@ -29791,6 +29845,9 @@ services:
       - ./scripts/grafana/dashboards/kafka/kafka-streams-rocksdb.json:/etc/grafana/provisioning/dashboards/kafka/kafka-streams-rocksdb.json
       - ./scripts/grafana/dashboards/kafka/OTel_kafkametrics.json:/etc/grafana/provisioning/dashboards/kafka/OTel_kafkametrics.json
     {% endif -%}   {#  (KAFKA_enable or external['KAFKA_enable']) #}
+    {% if KLAG_enable | default(false) %}
+      - ./scripts/grafana/dashboards/klag:/etc/grafana/provisioning/dashboards/klag
+    {% endif -%}   {#  KLAG_enable #}
     {% if REDIS_enable | default(false) %}
       - ./scripts/grafana/dashboards/redis:/etc/grafana/provisioning/dashboards/redis
     {% endif -%}   {#  REDIS_enable #}
