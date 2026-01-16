@@ -147,6 +147,7 @@ networks:
 {% set __HIVE_SERVER_version = HIVE_SERVER_version | default('latest') -%}
 {% set __HIVE_METASTORE_version = HIVE_METASTORE_version | default('latest') -%}
 {% set __HIVE_METASTORE_version_suffix = HIVE_METASTORE_version_suffix | default('postgresql-metastore-s3') -%}
+{% set __HIVE_METASTORE_standalone_version_suffix = HIVE_METASTORE_standalone_version_suffix | default('postgresql-metastore-s3') -%}
 
 {% set __AVRO_TOOLS_version = AVRO_TOOLS_version | default('latest') -%}
 {% set __PARQUET_TOOLS_version = PARQUET_TOOLS_version | default('latest') -%}
@@ -8165,7 +8166,7 @@ services:
 {% if HIVE_METASTORE_enable | default(false) %}
   #  ================================== Apache Hive Metastore ========================================== #
   hive-metastore:
-    image: trivadis/apache-hive:{{__HIVE_METASTORE_version}}-{{__HIVE_METASTORE_version_suffix}}
+    image: trivadis/apache-hive:{{__HIVE_SERVER_version}}-{{__HIVE_METASTORE_standalone_version_suffix if HIVE_METASTORE_use_standalone_edition else __HIVE_METASTORE_version_suffix}}
     container_name: hive-metastore
     hostname: hive-metastore
     labels:
@@ -8232,7 +8233,7 @@ services:
       HIVE_AUX_JARS_PATH: "/opt/atlas/hook/hive"
   {% endif -%}   {#  ATLAS_install_hive_hook #}
       DB_DRIVER: {{HIVE_METASTORE_db_type}}
-      SERVICE_NAME: 'metastore'
+      SERVICE_NAME: {{'standalone-metastore' if HIVE_METASTORE_use_standalone_edition else 'metastore'}}
   {% if (HIVE_METASTORE_db_type  | lower)  == 'postgres' | default(false) %}
       SERVICE_OPTS: '-Xmx1G -Djavax.jdo.option.ConnectionDriverName=org.postgresql.Driver
                      -Djavax.jdo.option.ConnectionURL=jdbc:postgresql://hive-metastore-db/metastore_db
