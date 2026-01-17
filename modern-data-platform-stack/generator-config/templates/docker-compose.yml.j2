@@ -26983,10 +26983,8 @@ services:
       - "28397:8081"
     environment:
       PYICEBERG_CATALOG__DEFAULT__TYPE: rest
-      # For local development:
       PYICEBERG_CATALOG__DEFAULT__URI:  http://hive-metastore:9084/iceberg
       PYICEBERG_CATALOG__DEFAULT__WAREHOUSE: {{'s3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
-
       PYICEBERG_CATALOG__DEFAULT__TOKEN: 
       PYICEBERG_CATALOG__DEFAULT__S3__ENDPOINT: {{s3Endpoint | default(omit) }}
       PYICEBERG_CATALOG__DEFAULT__S3__ACCESS_KEY_ID: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
@@ -27008,7 +27006,7 @@ services:
       PUBLIC_PLATFORM_NAME: Lakehouse
       # URL pointing the DB you want to use
       # Keep in mind this DB is shared among multiple applications so you cannot use in memory DB
-      LAKEVISION_DATABASE_URL: 'sqlite:///./lakevision.db'
+      LAKEVISION_DATABASE_URL: 'sqlite:///data-transfer/lakevision.db'
       PUBLIC_HEALTH_ENABLED: {{LAKEVISION_enable_public_health | default(false)}}    
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
@@ -27022,8 +27020,59 @@ services:
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
-    command: {{"/app/worker.sh" if LAKEVISION_enable_public_health else "/app/start.sh"}}
+    command: /app/start.sh
     restart: {{container_restart_policy}}
+
+  {% if LAKEVISION_enable_worker | default(false) %}
+  lakevision-worker:
+    image: ghcr.io/gschmutz/lakevision:{{__LAKEVISION_version}}
+    hostname: lakevision-worker
+    container_name: lakevision-worker
+    labels:
+      com.platys.name: "lakevision"
+      com.platys.description: "Insights into Lakehouse"
+    environment:
+      PYICEBERG_CATALOG__DEFAULT__TYPE: rest
+      PYICEBERG_CATALOG__DEFAULT__URI:  http://hive-metastore:9084/iceberg
+      PYICEBERG_CATALOG__DEFAULT__WAREHOUSE: {{'s3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
+      PYICEBERG_CATALOG__DEFAULT__TOKEN: 
+      PYICEBERG_CATALOG__DEFAULT__S3__ENDPOINT: {{s3Endpoint | default(omit) }}
+      PYICEBERG_CATALOG__DEFAULT__S3__ACCESS_KEY_ID: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
+      PYICEBERG_CATALOG__DEFAULT__S3__SECRET_ACCESS_KEY: {{s3SecretAccessKey}}
+      PYICEBERG_CATALOG__DEFAULT__PY_IO_IMPL: pyiceberg.io.fsspec.FsspecFileIO
+
+      #when running in single container, leave it to this address.
+      PUBLIC_API_SERVER_SERVER_SIDE: http://localhost:8000  
+
+      PUBLIC_AUTH_ENABLED: false
+
+      #Any extra link we want to put, would go in top right app selector
+      PUBLIC_EXTRA_LINKS: '[{"text":"XXXX","href":"XXXX"}]'
+      #Any extra link we want to put in the header
+      PUBLIC_EXTRA_HEADER_LINKS: '[{"text":"XXXX","href":"XXXX","target":"_self"}]'
+
+      # Name to be shown on top left
+      PUBLIC_COMPANY_NAME: "Apache Iceberg"
+      PUBLIC_PLATFORM_NAME: Lakehouse
+      # URL pointing the DB you want to use
+      # Keep in mind this DB is shared among multiple applications so you cannot use in memory DB
+      LAKEVISION_DATABASE_URL: 'sqlite:///data-transfer/lakevision.db'
+      PUBLIC_HEALTH_ENABLED: {{LAKEVISION_enable_public_health | default(false)}}    
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    command: /app/worker.sh
+    restart: {{container_restart_policy}}    
+  {% endif %}   {#  LAKEVISION_enable_worker  #}
 {% endif %}   {#  LAKEVISION_enable #}
 
 {% if MOSQUITTO_enable | default(false) %}
