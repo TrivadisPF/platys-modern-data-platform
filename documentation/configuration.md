@@ -1751,6 +1751,7 @@ For each service there might be some other settings, such as controlling the num
 | `NIMTABLE_enable`                                 	| `false` 	| 1.19.0 	| Generate Nimtable service                                                                                                                                                              	|    
 | [**_Lakevision_**](./services/lakevision.md)   &nbsp;&nbsp;&nbsp;&nbsp;![x86-64](./images/x86-64.png)                        	|         	|
 | `LAKEVISION_enable`                                 	| `false` 	| 1.19.0 	| Generate Lakevision service                                                                                                                                                              	|    
+| `LAKEVISION_enable_public_health`                                 	| `false` 	| 1.19.0 	| enable the health feature?                                                                                                                                                           	|    
   
 ### Query Engines
 
