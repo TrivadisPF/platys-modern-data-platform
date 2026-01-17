@@ -26982,15 +26982,10 @@ services:
     ports:
       - "28397:8081"
     environment:
-      PYICEBERG_CATALOG__DEFAULT__TYPE: sql
-
-      CATALOG_TYPE: rest
-      CATALOG_URI: https://hive-metastore:9084/iceberg
-      CATALOG_WAREHOUSE: {{'s3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
-
+      PYICEBERG_CATALOG__DEFAULT__TYPE: rest
       # For local development:
-      PYICEBERG_CATALOG__DEFAULT__URI: sqlite:///$(pwd)/warehouse/sql-catalog.db
-      PYICEBERG_CATALOG__DEFAULT__WAREHOUSE: file://$(pwd)/warehouse
+      PYICEBERG_CATALOG__DEFAULT__URI:  https://hive-metastore:9084/iceberg
+      PYICEBERG_CATALOG__DEFAULT__WAREHOUSE: {{'s3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
 
       PYICEBERG_CATALOG__DEFAULT__TOKEN: 
       PYICEBERG_CATALOG__DEFAULT__S3__ENDPOINT: {{s3Endpoint | default(omit) }}
@@ -27000,6 +26995,8 @@ services:
 
       #when running in single container, leave it to this address.
       PUBLIC_API_SERVER_SERVER_SIDE: http://localhost:8000  
+
+      PUBLIC_AUTH_ENABLED: false
 
       #Any extra link we want to put, would go in top right app selector
       PUBLIC_EXTRA_LINKS: '[{"text":"XXXX","href":"XXXX"}]'
@@ -27012,7 +27009,7 @@ services:
       # URL pointing the DB you want to use
       # Keep in mind this DB is shared among multiple applications so you cannot use in memory DB
       LAKEVISION_DATABASE_URL: 'sqlite:///./lakevision.db'
-      PUBLIC_HEALTH_ENABLED: false    
+      PUBLIC_HEALTH_ENABLED: {{LAKEVISION_enable_public_health | default(false)}}    
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -27025,7 +27022,7 @@ services:
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
-    command: "/app/start.sh"
+    command: {{"/app/worker.sh" if LAKEVISION_enable_public_health else "/app/start.sh"}}
     restart: {{container_restart_policy}}
 {% endif %}   {#  LAKEVISION_enable #}
 
