@@ -27005,10 +27005,10 @@ services:
       PUBLIC_COMPANY_NAME: "Apache Iceberg"
       PUBLIC_PLATFORM_NAME: Lakehouse
 
-    {%if LAKEVISION_enable_public_health | default(false) %}  
+    {%if LAKEVISION_public_health_enabled | default(false) %}  
       # DB only necessary, if health enabled
       # Keep in mind this DB is shared among multiple applications so you cannot use in memory DB
-      LAKEVISION_DATABASE_URL: 'sqlite:////data-transfer/lakevision.db'
+      LAKEVISION_DATABASE_URL: {{LAKEVISION_database_url | default('sqlite:////data-transfer/lakevision.db')}}
       PUBLIC_HEALTH_ENABLED: true    
     {% endif -%}   {#  use_timezone #}
     {%if use_timezone | default(false) %}
@@ -27026,7 +27026,7 @@ services:
     command: /app/start.sh
     restart: {{container_restart_policy}}
 
-  {% if LAKEVISION_enable_public_health | default(false) %}
+  {% if LAKEVISION_public_health_enabled | default(false) %}
   lakevision-worker:
     image: ghcr.io/gschmutz/lakevision:{{__LAKEVISION_version}}
     hostname: lakevision-worker
@@ -27059,8 +27059,8 @@ services:
       PUBLIC_PLATFORM_NAME: Lakehouse
       # URL pointing the DB you want to use
       # Keep in mind this DB is shared among multiple applications so you cannot use in memory DB
-      LAKEVISION_DATABASE_URL: 'sqlite:////data-transfer/lakevision.db'
-      PUBLIC_HEALTH_ENABLED: {{LAKEVISION_enable_public_health | default(false)}}    
+      LAKEVISION_DATABASE_URL: {{LAKEVISION_database_url | default('sqlite:////data-transfer/lakevision.db')}}
+      PUBLIC_HEALTH_ENABLED: {{LAKEVISION_public_health_enabled | default(false)}}    
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -27075,7 +27075,7 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     command: /app/worker.sh
     restart: {{container_restart_policy}}    
-  {% endif %}   {#  LAKEVISION_enable_public_health  #}
+  {% endif %}   {#  LAKEVISION_public_health_enabled  #}
 {% endif %}   {#  LAKEVISION_enable #}
 
 {% if MOSQUITTO_enable | default(false) %}
