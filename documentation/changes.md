@@ -54,16 +54,16 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Update `nifi-registry` to `2.7.2`
  * Update `nifi-toolkit` to `2.7.2`
  * Update `ollama` to `0.14.2`
- * Update `local-ai` to `v2.29.0`
+ * Update `local-ai` to `v3.9.0`
  * Update `anaconda` to `2024.10-1`
- * Update `grafana` to `12.0.1`
+ * Update `grafana` to `12.4.0-20977568970-ubuntu`
  * Update `memcached` to `1.6`
- * Update `flowise` to `3.0.1`
+ * Update `flowise` to `3.0.12`
  * Update `trino` to `479`
  * Update `starburstdata` to `477-e.2`
- * Update `risingwave` to `v2.6.1`
+ * Update `risingwave` to `v2.7.1`
  * Update `confluent-platform` to `8.1.1`
- * Update `apicurio-registry` to `2.6.11.Final`
+ * Update `apicurio-registry` to `2.6.13.Final`
  * Update `materialize` to `v0.146.1`
  * Update `arroyo` to `0.14.0`
  * Update `sqlflow` to `0.6.0`
