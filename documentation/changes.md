@@ -45,7 +45,7 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
 
  * Update `milvus` to `v2.5.12` 
  * Update `langflow` to `1.5.0`
- * Update `n8n` to `2.0.2`
+ * Update `n8n` to `2.3.6`
  * Update `minio` to `RELEASE.2025-09-07T16-13-09Z`
  * Update `dgraph` to `v24.1.3`
  * Update `memgraph` to `3.2.1`
