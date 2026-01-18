@@ -1,0 +1,64 @@
+trinoLb:
+  externalAddress: ${TRINO_LB_SCHEME}://${TRINO_LB_EXTERNAL_IP}:${TRINO_LB_PORT}
+  # When you enable authentication trino-clients enforce https encryption
+  tls:
+    enabled: false
+    #certPemFile: /self-signed-certs/cert.pem
+    #keyPemFile: /self-signed-certs/key.pem
+  # Use in-memory persistence which will loose all queued running queries on restart
+  persistence:
+    inMemory: {}
+  #persistence:
+  #  redis:
+  #    endpoint: redis://:redis@redis-1:6379/ 
+
+  refreshQueryCounterInterval: 30s # It is low for testing purpose and to get frequent running queries metrics
+
+  tracing:
+    enabled: ${TRINO_LB_TRACING_ENABLED}
+    # helm install jaeger jaegertracing/jaeger --set 'collector.service.otlp.grpc.name=otlp-grpc,collector.service.otlp.grpc.port=4317,collector.service.otlp.http.name=otlp-http,collector.service.otlp.http.port=4318'
+    #OTEL_EXPORTER_OTLP_ENDPOINT: http://jaeger-collector.default.svc.cluster.local:4317
+    #OTEL_EXPORTER_OTLP_PROTOCOL: Grpc
+    # In case endpoint and protocol are not set here, they will still be read from the env vars
+    # OTEL_EXPORTER_OTLP_ENDPOINT and OTEL_EXPORTER_OTLP_PROTOCOL
+  
+  ports:
+    # Default values
+    http: 8080
+    https: 8443
+    metrics: 9090
+
+trinoClusterGroups:
+  s:
+    maxRunningQueries: ${TRINO_LB_MAX_RUNNING_QUERIES}
+    trinoClusters:
+      - name: trino-s-1
+        endpoint: http://trino-1:8080
+        credentials:
+          username: trino
+          password:         
+  m:
+    maxRunningQueries: ${TRINO_LB_MAX_RUNNING_QUERIES}
+    trinoClusters:
+      - name: trino-m-1
+        endpoint: http://trino-2:8080
+        credentials:
+          username: trino
+          password: 
+
+# Your Trino probably does not have a globally trusted certificate
+trinoClusterGroupsIgnoreCert: true
+
+# Route all queries to the "default" cluster group
+routers:
+  - trinoRoutingGroupHeader:
+      headerName: X-Trino-Routing-Group
+  - pythonScript:
+      script: |
+        # Tested using Python 3.11
+        from typing import Optional
+
+        def targetClusterGroup(query: str, headers: dict[str, str]) -> Optional[str]:
+          return headers.get('x-trino-client-tags') # Will return None in case the header is not set
+
+routingFallback: m

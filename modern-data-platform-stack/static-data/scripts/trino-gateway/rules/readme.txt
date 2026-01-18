@@ -1,0 +1,1 @@
+Place Trino-Gateway routing-rules.yml file here, if rulesType is set to FILE.

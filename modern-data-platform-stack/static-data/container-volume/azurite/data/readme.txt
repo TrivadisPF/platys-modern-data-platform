@@ -1,0 +1,1 @@
+Contains the logs of azurite service, if flag AZURITE_volume_map_data is set to true.

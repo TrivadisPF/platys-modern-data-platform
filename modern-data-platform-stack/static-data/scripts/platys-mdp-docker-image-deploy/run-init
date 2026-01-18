@@ -1,0 +1,50 @@
+#!/bin/sh
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Sources any '.sh' scripts in /docker-entrypoint-init.d. A script is only run once, even if the docker container is restarted / rerun. 
+# The status is stored by marker files held in /var/run/markers.
+
+set -e
+
+# Directory to store marker files
+MARKER_DIR="/var/run/markers"
+mkdir -p "$MARKER_DIR"
+
+cd /docker-entrypoint-init.d/
+
+while read -r f; do
+    case "$f" in
+        *.sh)
+            marker_file="$MARKER_DIR/$(basename "$f").marker"
+            if [ -f "$marker_file" ]; then
+                echo "$0: skipping $f (already run)"
+            else
+                echo "$0: running $f"
+                if . "$f"; then
+                    touch "$marker_file"
+                else
+                    echo "$0: error running $f"
+                fi
+            fi
+            ;;
+        Dockerfile)
+            ;;
+        *)
+            echo "$0: ignoring $f"
+            ;;
+    esac
+    echo
+done < <(find . -mindepth 1 -type f | sort -n)

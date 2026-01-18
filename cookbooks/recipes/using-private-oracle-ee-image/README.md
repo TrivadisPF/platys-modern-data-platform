@@ -13,7 +13,7 @@ This recipe will show how to use the private docker image for Oracle EE provided
 First [initialise a platys-supported data platform](../documentation/getting-started.md) with the following services enabled
 
 ```bash
-platys init --enable-services ORACLE_EE -s trivadis/platys-modern-data-platform -w 1.12.0
+platys init --enable-services ORACLE_EE -s trivadis/platys-modern-data-platform
 ```
 
 If you want to change the password of the `SYS` and `SYSTEM` user, add the following line

@@ -6,7 +6,7 @@
 #
 FROM alpine:latest
 
-COPY airports-data /data/airports-data
+COPY airport-data /data/airport-data
 COPY flight-data /data/flight-data
 COPY graphdb-news /data/graphdb-news
 COPY wordcount /data/wordcount
@@ -16,8 +16,11 @@ COPY movie-lens-small /data/movie-lens-small
 COPY platys-cookbooks /data/platys-cookbooks
 COPY nyc-film-permits /data/nyc-film-permits
 COPY orion-star /data/orion-star
+COPY duckdb /data/duckdb
+COPY dvdrental /data/dvdrental
+COPY ecommerce /data/ecommerce
 
-# copy the generator script and make it executable
+# copy the run script and make it executable
 COPY run.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/run.sh
 

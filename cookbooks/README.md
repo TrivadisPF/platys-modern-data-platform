@@ -1,4 +1,5 @@
-# Modern Data Platform Cookbooks  - v1.18.1
+# Modern Data Platform Cookbooks  - v1.19.0
+
 Inhere we are documenting cookbooks on how to use the platform:
 
  * **Airflow**
@@ -44,6 +45,7 @@ Inhere we are documenting cookbooks on how to use the platform:
 
  * **Iceberg Table Format**
    * [Spark with Iceberg](./recipes/iceberg-with-spark/README.md) - `1.16.0`
+   * [Spark with Iceberg and Polaris](./recipes/spark-iceberg-polaris/README.md) - `1.19.0`
 
  * **Hadoop HDFS**
    * [Querying HDFS data using Presto](./recipes/querying-hdfs-with-presto/README.md)
@@ -74,6 +76,7 @@ Inhere we are documenting cookbooks on how to use the platform:
    * [SASL/SCRAM Authentication with Zookeeper](./recipes/kafka-sasl-scram-authentication-zk/README.md) - `1.17.0`
    * [SASL/SCRAM Authentication with KRaft](./recipes/kafka-sasl-scram-authentication-kraft/README.md) - `1.17.0`
    * [SASL/PLAIN Authentication](./recipes/kafka-sasl-plain-authentication/README.md) - `1.17.0`
+   * [Working with real and synthetic data streams](./recipes/kafka-working-with-real-and-synthetic-streams/README.md) - `1.19.0`
 
  * **Confluent Enterprise Platform**
    * [Using Confluent Enterprise Tiered Storage](./recipes/confluent-tiered-storage/README.md) - `1.13.0`
@@ -89,6 +92,9 @@ Inhere we are documenting cookbooks on how to use the platform:
 
  * **Apicurio Registry**
    * [Apicurio Registry with SQL Storage (PostgreSQL)](./recipes/apicurio-with-database-storage/README.md) - `1.14.0`
+
+ * **DuckDB**
+ 	* [Using DuckDB](./recipes/using-duckdb/README.md) - `1.19.0` 
 
  * **Oracle RDBMS**
    * [Using private (Trivadis) Oracle EE image](./recipes/using-private-oracle-ee-image/README.md) - `1.13.0`    

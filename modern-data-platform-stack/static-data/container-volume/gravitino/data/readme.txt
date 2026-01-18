@@ -1,0 +1,1 @@
+Contains the data folder of gravitino service, if flag GRAVITINO_volume_map_data is set to true.

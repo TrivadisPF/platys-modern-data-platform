@@ -7,7 +7,7 @@ Confluent Control Center is a web-based tool for managing and monitoring Apache 
 ## How to enable?
 
 ```bash
-platys init --enable-services KAFKA_CCC
+platys init --enable-services KAFKA CONFLUENT_CCC
 platys gen
 ```
 
