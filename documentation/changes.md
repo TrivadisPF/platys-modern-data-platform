@@ -178,6 +178,7 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Update `blaze-fhir` to `1.4`
  * Update `fhir-gateway` to `v4.0.10`
  * Update `kyuubi` to `1.10.3-all` 
+ * Update `langfuse` to `3`
  
 ### New/Updated Cookbook Recipes
 

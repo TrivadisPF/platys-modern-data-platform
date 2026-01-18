@@ -3674,12 +3674,12 @@ services:
 {% endif %}   {# KAFKA_enable and SCHEMA_REGISTRY_flavour == confluent #}
 
 {% if (SCHEMA_REGISTRY_enable and SCHEMA_REGISTRY_flavour | lower) == 'apicurio' | default(false) %}
-  #  ================================== Apicurio Schema Registry ========================================== #
+  #  ================================== Apicurio Registry ========================================== #
   {% for num in range(SCHEMA_REGISTRY_nodes | default(1) ) %}
     {% set http_external_port = 8081 + loop.index - 1 %}
     {% set http_port = 8080 + loop.index - 1 %}
   apicurio-registry-{{loop.index}}:
-    image: apicurio/apicurio-registry-{{APICURIO_SCHEMA_REGISTRY_storage}}:{{__APICURIO_SCHEMA_REGISTRY_version}}
+    image: apicurio/apicurio-registry:{{__APICURIO_SCHEMA_REGISTRY_version}}
     hostname: apicurio-registry-{{loop.index}}
     container_name: apicurio-registry-{{loop.index}}
     labels:
@@ -3693,14 +3693,17 @@ services:
       - "{{http_external_port}}:{{http_port}}"
     environment:
       QUARKUS_PROFILE: prod
+      QUARKUS_HTTP_CORS_ORIGINS: '*'
+      APICURIO_STORAGE_KIND: '{{APICURIO_SCHEMA_REGISTRY_storage}}'
     {% if (APICURIO_SCHEMA_REGISTRY_storage | lower) == 'kafkasql'  %}
-      KAFKA_BOOTSTRAP_SERVERS: '{{ns.bootstrapServers}}'
-      REGISTRY_KAFKASQL_TOPIC: 'kafkasql-journal'
-    {% endif -%}   {#  APICURIO_SCHEMA_REGISTRY_storage == sql #}
+      APICURIO_KAFKASQL_BOOTSTRAP_SERVERS: '{{ns.bootstrapServers}}'
+      APICURIO_KAFKASQL_TOPIC: 'kafkasql-journal'
+    {% endif -%}   {#  APICURIO_SCHEMA_REGISTRY_storage == kafkasql #}
     {% if (APICURIO_SCHEMA_REGISTRY_storage | lower) == 'sql'  %}
-      REGISTRY_DATASOURCE_URL: jdbc:postgresql://postgresql/{{APICURIO_SCHEMA_REGISTRY_sql_storage_database}}
-      REGISTRY_DATASOURCE_USERNAME: {{APICURIO_SCHEMA_REGISTRY_sql_storage_user}}
-      REGISTRY_DATASOURCE_PASSWORD: {{APICURIO_SCHEMA_REGISTRY_sql_storage_password}}
+      APICURIO_STORAGE_SQL_KIND: 'postgresql'
+      APICURIO_DATASOURCE_URL: jdbc:postgresql://postgresql/{{APICURIO_SCHEMA_REGISTRY_sql_storage_database}}
+      APICURIO_DATASOURCE_USERNAME: {{APICURIO_SCHEMA_REGISTRY_sql_storage_user}}
+      APICURIO_DATASOURCE_PASSWORD: {{APICURIO_SCHEMA_REGISTRY_sql_storage_password}}§
     {% endif -%}   {#  APICURIO_SCHEMA_REGISTRY_storage == sql #}
     {% if APICURIO_auth_enabled | default(false) %}
       AUTH_ENABLED: '{{APICURIO_auth_enabled}}'
@@ -3720,12 +3723,8 @@ services:
       {% endif -%}   {#  APICURIO_basic_auth_enabled #}
     {% endif -%}   {#  APICURIO_auth_enabled #}
     {% if APICURIO_eventsourcing_enabled | default(false) %}
-      {% if (APICURIO_eventsourcing_transport | lower) == 'kafka'  %}
-      KAFKA_BOOTSTRAP_SERVERS: '{{ns.bootstrapServers}}'
-      REGISTRY_EVENTS_KAFKA_TOPIC: '{{APICURIO_eventsourcing_kafka_topic}}'
-      {% else -%}   {#  APICURIO_eventsourcing_type #}
-      REGISTY_EVENTS_SINK_CONSUMER: '{{APICURIO_eventsourcing_http_endpoint}}'
-      {% endif -%}   {#  APICURIO_eventsourcing_type #}
+      APICURIO_KAFKASQL_BOOTSTRAP_SERVERS: '{{ns.bootstrapServers}}'
+      APICURIO_EVENTS_KAFKA_TOPIC: '{{APICURIO_eventsourcing_kafka_topic}}'
     {% endif -%}   {#  APICURIO_eventsourcing_enabled #}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
@@ -3741,6 +3740,33 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
   {% endfor %}
+
+  #  ================================== Apicurio Registry UI ========================================== #
+  apicurio-registry-ui:
+    image: apicurio/apicurio-registry-ui:{{__SCHEMA_REGISTRY_UI_version}}
+    container_name: apicurio-registry-ui
+    hostname: apicurio-registry-ui
+    labels:
+      com.platys.name: "apicurio-registry"
+      com.platys.description: "Apicurio Registry UI"
+      com.platys.webui.title: 'Apicurio Registry UI'
+      com.platys.webui.url: "http://dataplatform:28398"
+    ports:
+      - "28398:8080"
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
 {% endif %}   {# KAFKA_enable and SCHEMA_REGISTRY_flavour == apicurio #}
 
 {% if (SCHEMA_REGISTRY_enable and SCHEMA_REGISTRY_UI_enable) | default(false) %}
