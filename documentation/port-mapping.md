@@ -199,7 +199,10 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 6749 | 6749 | curity |
 6789 | 6789 | mage-ai |
 6832 | 6832 | jaeger (udp) |
+6874 | 6874 | materialize-1 |
 6875 | 6875 | materialize-1 |
+6876 | 6876 | materialize-1 |
+6877 | 6877 | materialize-1 |
 7000 | 7000 | yb-master |
 7002 | 7002 | opal-server |
 7050 | 7050 | kudu-tserver-1 |

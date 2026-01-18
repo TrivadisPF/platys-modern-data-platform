@@ -204,6 +204,9 @@ networks:
 {% elif (ELASTICSEARCH_major_version | lower) == '8'  %}
   {% set __ELASTICSEARCH_version = ELASTICSEARCH_8_version  -%}
   {% set __KIBANA_version = KIBANA_8_version | default('latest') -%}
+{% elif (ELASTICSEARCH_major_version | lower) == '9'  %}
+  {% set __ELASTICSEARCH_version = ELASTICSEARCH_9_version  -%}
+  {% set __KIBANA_version = KIBANA_9_version | default('latest') -%}
 {% endif -%}
 
 {% set __DEJAVU_version = DEJAVU_version | default('latest') -%}
@@ -2571,8 +2574,15 @@ services:
     labels:
       com.platys.name: "materialize"
       com.platys.description: "Materialize Streaming DB"
+      com.platys.webui.title: "Materialize Console"
+      com.platys.webui.url: "http://dataplatform:6874"
     ports:
-      - "6875:6875"
+      - "6874:6874"  # Console (web UI)
+      - "6875:6875"  # Postgres wire
+      - "6876:6876"  # HTTP API     
+      - "6877:6877"  # Postgres wire as mz_system user
+    environment:
+      MZ_EAT_MY_DATA: 1      # We don't care about date safety, local testing only!  
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -2586,6 +2596,10 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "localhost:6878/api/readyz"]
+      interval: 1s
+      start_period: 60s    
 
   {% if (MATERIALIZE_CLI_enable) | default(false) %}
   mzcli:
@@ -3191,7 +3205,7 @@ services:
   {% if (TIMEPLUS_edition | lower) == 'enterprise'  %}
     image: timeplus/timeplus-enterprise:{{__TIMEPLUS_ENTERPRISE_version}}
   {% elif (TIMEPLUS_edition | lower) == 'oss' %}
-    image: d.timeplus.com/timeplus-io/proton:{{__TIMEPLUS_PROTON_version}}
+    image: ghcr.io/timeplus-io/proton:{{__TIMEPLUS_PROTON_version}}
   {% endif -%}   {#  TIMEPLUS_edition #}    
     hostname: timeplus
     container_name: timeplus
@@ -5744,7 +5758,7 @@ services:
   #  ================================== Debezium UI ========================================== #
   debezium-server:
     image: debezium/server:{{__DEBEZIUM_SERVER_version}}
-    container_name: debezium-servers
+    container_name: debezium-server
     hostname: debezium-server
     labels:
       com.platys.name: "debezium-server"
@@ -27894,7 +27908,7 @@ services:
 {% if CAMUNDA_BPM_PLATFORM_enable | default(false) %}
   #  ================================== Camunda BPM Platform ========================================== #
   bpm-platform:
-    image: registry.camunda.cloud/cambpm-ee/camunda-bpm-platform-ee:{{__CAMUNDA_BPM_PLATFORM_version}}
+    image: camunda/camunda-bpm-platform:{{__CAMUNDA_BPM_PLATFORM_version}}
     container_name: bpm-platform
     hostname: bpm-platform
     labels:
@@ -27922,7 +27936,7 @@ services:
 {% if CAMUNDA_OPTIMIZE_enable | default(false) %}
   #  ================================== Camunda Optimize ========================================== #
   optimize:
-    image: registry.camunda.cloud/optimize-ee/optimize:{{__CAMUNDA_OPTIMIZE_version}}
+    image: rcamunda/optimize:{{__CAMUNDA_OPTIMIZE_version}}
     container_name: optimize
     hostname: optimize
     labels:
@@ -30329,7 +30343,7 @@ services:
 {% if CADVISOR_enable | default(false) %}
   #  ================================== cAdvisor ========================================== #
   cadvisor:
-    image: gcr.io/cadvisor/cadvisor:{{__CADVISOR_version}}
+    image: gcr.io/google/cadvisor:{{__CADVISOR_version}}
     container_name: cadvisor
     hostname: cadvisor
     labels:
