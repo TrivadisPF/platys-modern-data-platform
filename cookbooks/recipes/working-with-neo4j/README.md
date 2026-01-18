@@ -13,7 +13,7 @@ This recipe will show how to use Neo4J.
 First [initialise a platys-supported data platform](../documentation/getting-started.md) with the following services enabled
 
 ```
-platys init --enable-services NEO4J -s trivadis/platys-modern-data-platform -w 1.15.0
+platys init --enable-services NEO4J -s trivadis/platys-modern-data-platform
 ```
 
 Now generate and start the data platform.
