@@ -735,7 +735,7 @@ networks:
   {% set SCHEMA_REGISTRY_enable = true -%}
 {% endif -%}   {# DATAHUB_enable  #}
 
-{% if (KAFKA_enable and not KAFKA_use_kraft_mode) or ATLAS_enable or DRILL_enable or PINOT_enable -%}
+{% if (KAFKA_enable and not KAFKA_use_kraft_mode) or DRILL_enable or PINOT_enable -%}
 # enforce some dependencies
   {% set ZOOKEEPER_enable = true -%}
 {% endif -%}   {# KAFKA_enable or ATLAS_enable or DRILL_enable or PINOT_enable #}
@@ -8885,7 +8885,6 @@ services:
       com.platys.webui.title: "Atlas UI"
       com.platys.webui.url: "http://dataplatform:21000"
     depends_on:
-      - zookeeper{{dataCenter}}-1
       - atlas-kafka-setup
       - cassandra-atlas
     ports:
@@ -8939,8 +8938,8 @@ services:
     {% endif -%}   {#  use_timezone #}
     command: "bash -c 'echo Waiting for Kafka to be ready... && \
                        cub kafka-ready -b {{ns.bootstrapServer}} 1 120 && \
-                       kafka-topics --create --if-not-exists --zookeeper zookeeper-1:2181 --partitions 1 --replication-factor 1 --topic ATLAS_HOOK && \
-                       kafka-topics --create --if-not-exists --zookeeper zookeeper-1:2181 --partitions 1 --replication-factor 1 --topic ATLAS_ENTITIES'"
+                       kafka-topics --create --if-not-exists --bootstrap-server kafka-1:19092 --partitions 1 --replication-factor {{KAFKA_internal_replication_factor | default(1)}}   --topic ATLAS_HOOK && \
+                       kafka-topics --create --if-not-exists --bootstrap-server kafka-1:19092 --partitions 1 --replication-factor {{KAFKA_internal_replication_factor | default(1)}}   --topic ATLAS_ENTITIES'"
     init: true
   {% endif %} {#  KAFKA_enable #}
 
