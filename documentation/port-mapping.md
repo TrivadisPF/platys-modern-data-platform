@@ -420,6 +420,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 19201 | 9200 | amundsen-elasticsearch |
 19202 | 9200 | datahub-elasticsearch |
 19203 | 9200 | openmetadata-elasticsearch |
+19204 | 9300 | openmetadata-elasticsearch |
 19092 | 19092 | kafka-1 (docker-host)   |
 19093 | 19093 | kafka-2 (docker-host    |
 19094 | 19094 | kafka-3 (docker-host)   |

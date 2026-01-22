@@ -9901,21 +9901,24 @@ services:
       # OpenMetadata Server Authentication Configuration
       AUTHORIZER_CLASS_NAME: "org.openmetadata.service.security.DefaultAuthorizer"
       AUTHORIZER_REQUEST_FILTER: "org.openmetadata.service.security.JwtFilter"
-      AUTHORIZER_ADMIN_PRINCIPALS: "admin"
-      AUTHORIZER_ALLOWED_REGISTRATION_DOMAIN: "all"
+      AUTHORIZER_ADMIN_PRINCIPALS: ["admin"]
+      AUTHORIZER_ALLOWED_REGISTRATION_DOMAIN: ["all"]
       AUTHORIZER_INGESTION_PRINCIPALS: ["ingestion-bot"]
       AUTHORIZER_PRINCIPAL_DOMAIN: "openmetadata.org"
+      AUTHORIZER_ALLOWED_DOMAINS: []  
       AUTHORIZER_ENFORCE_PRINCIPAL_DOMAIN: false
       AUTHORIZER_ENABLE_SECURE_SOCKET: false
-      AUTHENTICATION_PROVIDER: "basic"
+      AUTHENTICATION_PROVIDER: basic
       AUTHENTICATION_RESPONSE_TYPE: "id_token"
       CUSTOM_OIDC_AUTHENTICATION_PROVIDER_NAME: ""
       AUTHENTICATION_PUBLIC_KEYS: [http://localhost:8585/api/v1/system/config/jwks]
       AUTHENTICATION_AUTHORITY: "https://accounts.google.com"
       AUTHENTICATION_CLIENT_ID: ""
       AUTHENTICATION_CALLBACK_URL: ""
-      AUTHENTICATION_JWT_PRINCIPAL_CLAIMS: ["\"email\"","\"preferred_username\"","\"sub\""]
+      AUTHENTICATION_JWT_PRINCIPAL_CLAIMS: [email,preferred_username,sub]
+      AUTHENTICATION_JWT_PRINCIPAL_CLAIMS_MAPPING: []
       AUTHENTICATION_ENABLE_SELF_SIGNUP: true
+      AUTHENTICATION_CLIENT_TYPE: public
 
       # JWT Configuration
       RSA_PUBLIC_KEY_FILE_PATH: "./conf/public_key.der"
@@ -9946,7 +9949,7 @@ services:
       DB_USER: openmetadata_user
       DB_USER_PASSWORD: abc123!
       DB_HOST: openmetadata-postgresql
-      DB_PORT: 5432      
+      DB_PORT: 5432
   {% endif %}    
       OM_DATABASE: openmetadata_db
       # ElasticSearch Configurations
@@ -9961,14 +9964,21 @@ services:
       ELASTICSEARCH_CONNECTION_TIMEOUT_SECS: 5
       ELASTICSEARCH_SOCKET_TIMEOUT_SECS: 60
       ELASTICSEARCH_KEEP_ALIVE_TIMEOUT_SECS: 600
-      ELASTICSEARCH_BATCH_SIZE: 10
+      ELASTICSEARCH_BATCH_SIZE: 100
+      ELASTICSEARCH_PAYLOAD_BYTES_SIZE: 10485760
       ELASTICSEARCH_INDEX_MAPPING_LANG: EN
+
+      AWS_DEFAULT_REGION:
+      AWS_ACCESS_KEY_ID:
+      AWS_SECRET_ACCESS_KEY:
+      AWS_SESSION_TOKEN: ""
+      SEARCH_AWS_SERVICE_NAME: "es"
 
       #eventMonitoringConfiguration
       EVENT_MONITOR: prometheus
       EVENT_MONITOR_BATCH_SIZE: 10
       EVENT_MONITOR_PATH_PATTERN: ["/api/v1/tables/*", "/api/v1/health-check"]
-      #EVENT_MONITOR_LATENCY: []
+      EVENT_MONITOR_LATENCY: []
 
       #pipelineServiceClientConfiguration
       PIPELINE_SERVICE_CLIENT_ENABLED: true
@@ -10036,6 +10046,9 @@ services:
       #Permission-Policy
       WEB_CONF_PERMISSION_POLICY_ENABLED: false
       WEB_CONF_PERMISSION_POLICY_OPTION: ""
+      #Cache
+      WEB_CONF_CACHE_CONTROL: ""
+      WEB_CONF_PRAGMA: ""    
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -10086,17 +10099,20 @@ services:
       AUTHORIZER_ALLOWED_REGISTRATION_DOMAIN: ["all"]
       AUTHORIZER_INGESTION_PRINCIPALS: ["ingestion-bot"]
       AUTHORIZER_PRINCIPAL_DOMAIN: "openmetadata.org"
+      AUTHORIZER_ALLOWED_DOMAINS: []  
       AUTHORIZER_ENFORCE_PRINCIPAL_DOMAIN: false
       AUTHORIZER_ENABLE_SECURE_SOCKET: false
-      AUTHENTICATION_PROVIDER: "basic"
+      AUTHENTICATION_PROVIDER: basic
       AUTHENTICATION_RESPONSE_TYPE: "id_token"
       CUSTOM_OIDC_AUTHENTICATION_PROVIDER_NAME: ""
-      AUTHENTICATION_PUBLIC_KEYS: ["http://localhost:8585/api/v1/system/config/jwks"]
-      AUTHENTICATION_AUTHORITY: https://accounts.google.com
+      AUTHENTICATION_PUBLIC_KEYS: [http://localhost:8585/api/v1/system/config/jwks]
+      AUTHENTICATION_AUTHORITY: "https://accounts.google.com"
       AUTHENTICATION_CLIENT_ID: ""
       AUTHENTICATION_CALLBACK_URL: ""
-      AUTHENTICATION_JWT_PRINCIPAL_CLAIMS: ["email","preferred_username","sub"]
+      AUTHENTICATION_JWT_PRINCIPAL_CLAIMS: [email,preferred_username,sub]
+      AUTHENTICATION_JWT_PRINCIPAL_CLAIMS_MAPPING: []
       AUTHENTICATION_ENABLE_SELF_SIGNUP: true
+      AUTHENTICATION_CLIENT_TYPE: public
 
       # JWT Configuration
       RSA_PUBLIC_KEY_FILE_PATH: "./conf/public_key.der"
@@ -10106,7 +10122,7 @@ services:
       # OpenMetadata Server Pipeline Service Client Configuration
       PIPELINE_SERVICE_CLIENT_ENDPOINT: http://openmetadata-ingestion:8080
       PIPELINE_SERVICE_CLIENT_HEALTH_CHECK_INTERVAL: 300
-      SERVER_HOST_API_URL: http://openmetadata-server:8585/api
+      SERVER_HOST_API_URL: "http://openmetadata-server:8585/api"
       PIPELINE_SERVICE_CLIENT_VERIFY_SSL: "no-ssl"
       PIPELINE_SERVICE_CLIENT_SSL_CERT_PATH: ""
   {% if OPENMETADATA_database_type == 'mysql' | default(false) %}      
@@ -10127,7 +10143,7 @@ services:
       DB_USER: openmetadata_user
       DB_USER_PASSWORD: abc123!
       DB_HOST: openmetadata-postgresql
-      DB_PORT: 5432      
+      DB_PORT: 5432
   {% endif %}    
       OM_DATABASE: openmetadata_db
       # ElasticSearch Configurations
@@ -10142,14 +10158,21 @@ services:
       ELASTICSEARCH_CONNECTION_TIMEOUT_SECS: 5
       ELASTICSEARCH_SOCKET_TIMEOUT_SECS: 60
       ELASTICSEARCH_KEEP_ALIVE_TIMEOUT_SECS: 600
-      ELASTICSEARCH_BATCH_SIZE: 10
+      ELASTICSEARCH_BATCH_SIZE: 100
+      ELASTICSEARCH_PAYLOAD_BYTES_SIZE: 10485760
       ELASTICSEARCH_INDEX_MAPPING_LANG: EN
+
+      AWS_DEFAULT_REGION:
+      AWS_ACCESS_KEY_ID:
+      AWS_SECRET_ACCESS_KEY:
+      AWS_SESSION_TOKEN: ""
+      SEARCH_AWS_SERVICE_NAME: "es"
 
       #eventMonitoringConfiguration
       EVENT_MONITOR: prometheus
       EVENT_MONITOR_BATCH_SIZE: 10
       EVENT_MONITOR_PATH_PATTERN: ["/api/v1/tables/*", "/api/v1/health-check"]
-      #EVENT_MONITOR_LATENCY: []
+      EVENT_MONITOR_LATENCY: []
 
       #pipelineServiceClientConfiguration
       PIPELINE_SERVICE_CLIENT_ENABLED: true
@@ -10210,6 +10233,16 @@ services:
       WEB_CONF_XSS_CSP_ENABLED: false
       WEB_CONF_XSS_CSP_POLICY: "default-src 'self'"
       WEB_CONF_XSS_CSP_REPORT_ONLY_POLICY: ""
+
+      #Referrer-Policy
+      WEB_CONF_REFERRER_POLICY_ENABLED: false
+      WEB_CONF_REFERRER_POLICY_OPTION: "SAME_ORIGIN"
+      #Permission-Policy
+      WEB_CONF_PERMISSION_POLICY_ENABLED: false
+      WEB_CONF_PERMISSION_POLICY_OPTION: ""
+      #Cache
+      WEB_CONF_CACHE_CONTROL: ""
+      WEB_CONF_PRAGMA: ""    
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -10305,6 +10338,7 @@ services:
       com.platys.description: "OpenMetadata Data Catalog Eleasticsearch Instance"
     ports:
       - "19203:9200"
+      - "19204:9300"
     environment:
       - discovery.type=single-node
       - ES_JAVA_OPTS=-Xms1024m -Xmx1024m
@@ -10360,8 +10394,8 @@ services:
       DB_HOST: openmetadata-mysql
       DB_PORT: 3306
       AIRFLOW_DB: airflow_db
-      DB_USER: airflow_user
       DB_SCHEME: mysql+pymysql
+      DB_USER: airflow_user
       DB_PASSWORD: abc123!
       # extra connection-string properties for the database
       # EXAMPLE
