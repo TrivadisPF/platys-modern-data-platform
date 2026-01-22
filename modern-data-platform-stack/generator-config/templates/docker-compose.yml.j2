@@ -9888,9 +9888,9 @@ services:
       com.platys.name: "openmetadata"
       com.platys.description: "OpenMetadata Data Catalog"
     depends_on:
-      elasticsearch:
+      openmetadata-elasticsearch:
         condition: service_healthy
-      mysql:
+      openmetadata-mysql:
         condition: service_healthy
     environment:
       OPENMETADATA_CLUSTER_NAME: openmetadata
@@ -9902,26 +9902,26 @@ services:
       MIGRATION_LIMIT_PARAM: 1200
 
       # OpenMetadata Server Authentication Configuration
-      AUTHORIZER_CLASS_NAME: "org.openmetadata.service.security.DefaultAuthorizer"
-      AUTHORIZER_REQUEST_FILTER: "org.openmetadata.service.security.JwtFilter"
-      AUTHORIZER_ADMIN_PRINCIPALS: ["admin"]
-      AUTHORIZER_ALLOWED_REGISTRATION_DOMAIN: ["all"]
-      AUTHORIZER_INGESTION_PRINCIPALS: ["ingestion-bot"]
-      AUTHORIZER_PRINCIPAL_DOMAIN: "openmetadata.org"
-      AUTHORIZER_ALLOWED_DOMAINS: []  
-      AUTHORIZER_ENFORCE_PRINCIPAL_DOMAIN: false
-      AUTHORIZER_ENABLE_SECURE_SOCKET: false
-      AUTHENTICATION_PROVIDER: basic
-      AUTHENTICATION_RESPONSE_TYPE: "id_token"
-      CUSTOM_OIDC_AUTHENTICATION_PROVIDER_NAME: ""
-      AUTHENTICATION_PUBLIC_KEYS: [http://localhost:8585/api/v1/system/config/jwks]
-      AUTHENTICATION_AUTHORITY: "https://accounts.google.com"
-      AUTHENTICATION_CLIENT_ID: ""
-      AUTHENTICATION_CALLBACK_URL: ""
-      AUTHENTICATION_JWT_PRINCIPAL_CLAIMS: [email,preferred_username,sub]
-      AUTHENTICATION_JWT_PRINCIPAL_CLAIMS_MAPPING: []
-      AUTHENTICATION_ENABLE_SELF_SIGNUP: true
-      AUTHENTICATION_CLIENT_TYPE: public
+      AUTHORIZER_CLASS_NAME: ${AUTHORIZER_CLASS_NAME:-org.openmetadata.service.security.DefaultAuthorizer}
+      AUTHORIZER_REQUEST_FILTER: ${AUTHORIZER_REQUEST_FILTER:-org.openmetadata.service.security.JwtFilter}
+      AUTHORIZER_ADMIN_PRINCIPALS: ${AUTHORIZER_ADMIN_PRINCIPALS:-[admin]}
+      AUTHORIZER_ALLOWED_REGISTRATION_DOMAIN: ${AUTHORIZER_ALLOWED_REGISTRATION_DOMAIN:-["all"]}
+      AUTHORIZER_INGESTION_PRINCIPALS: ${AUTHORIZER_INGESTION_PRINCIPALS:-[ingestion-bot]}
+      AUTHORIZER_PRINCIPAL_DOMAIN: ${AUTHORIZER_PRINCIPAL_DOMAIN:-"open-metadata.org"}
+      AUTHORIZER_ALLOWED_DOMAINS: ${AUTHORIZER_ALLOWED_DOMAINS:-[]}
+      AUTHORIZER_ENFORCE_PRINCIPAL_DOMAIN: ${AUTHORIZER_ENFORCE_PRINCIPAL_DOMAIN:-false}
+      AUTHORIZER_ENABLE_SECURE_SOCKET: ${AUTHORIZER_ENABLE_SECURE_SOCKET:-false}
+      AUTHENTICATION_PROVIDER: ${AUTHENTICATION_PROVIDER:-basic}
+      AUTHENTICATION_RESPONSE_TYPE: ${AUTHENTICATION_RESPONSE_TYPE:-id_token}
+      CUSTOM_OIDC_AUTHENTICATION_PROVIDER_NAME: ${CUSTOM_OIDC_AUTHENTICATION_PROVIDER_NAME:-""}
+      AUTHENTICATION_PUBLIC_KEYS: ${AUTHENTICATION_PUBLIC_KEYS:-[http://localhost:8585/api/v1/system/config/jwks]}
+      AUTHENTICATION_AUTHORITY: ${AUTHENTICATION_AUTHORITY:-https://accounts.google.com}
+      AUTHENTICATION_CLIENT_ID: ${AUTHENTICATION_CLIENT_ID:-""}
+      AUTHENTICATION_CALLBACK_URL: ${AUTHENTICATION_CALLBACK_URL:-""}
+      AUTHENTICATION_JWT_PRINCIPAL_CLAIMS: ${AUTHENTICATION_JWT_PRINCIPAL_CLAIMS:-[email,preferred_username,sub]}
+      AUTHENTICATION_JWT_PRINCIPAL_CLAIMS_MAPPING: ${AUTHENTICATION_JWT_PRINCIPAL_CLAIMS_MAPPING:-[]}
+      AUTHENTICATION_ENABLE_SELF_SIGNUP: ${AUTHENTICATION_ENABLE_SELF_SIGNUP:-true}
+      AUTHENTICATION_CLIENT_TYPE: ${AUTHENTICATION_CLIENT_TYPE:-public}
 
       # JWT Configuration
       RSA_PUBLIC_KEY_FILE_PATH: "./conf/public_key.der"
@@ -9940,7 +9940,7 @@ services:
       DB_SCHEME: mysql
       DB_PARAMS: allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
       DB_USER: openmetadata_user
-      DB_USER_PASSWORD: abc123!
+      DB_USER_PASSWORD: openmetadata_password
       DB_HOST: openmetadata-mysql
       DB_PORT: 3306
   {% endif %}    
@@ -9950,7 +9950,7 @@ services:
       DB_SCHEME: postgresql
       DB_PARAMS: allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
       DB_USER: openmetadata_user
-      DB_USER_PASSWORD: abc123!
+      DB_USER_PASSWORD: openmetadata_password
       DB_HOST: openmetadata-postgresql
       DB_PORT: 5432
   {% endif %}    
@@ -9980,8 +9980,8 @@ services:
       #eventMonitoringConfiguration
       EVENT_MONITOR: prometheus
       EVENT_MONITOR_BATCH_SIZE: 10
-      EVENT_MONITOR_PATH_PATTERN: ["/api/v1/tables/*", "/api/v1/health-check"]
-      EVENT_MONITOR_LATENCY: []
+      EVENT_MONITOR_PATH_PATTERN: '["/api/v1/tables/*", "/api/v1/health-check"]'
+      EVENT_MONITOR_LATENCY: '[]'
 
       #pipelineServiceClientConfiguration
       PIPELINE_SERVICE_CLIENT_ENABLED: true
@@ -10017,7 +10017,7 @@ services:
       SMTP_SERVER_STRATEGY: "SMTP_TLS"
 
       # Heap OPTS Configurations
-      OPENMETADATA_HEAP_OPTS: "--Xmx1G -Xms1G"
+      OPENMETADATA_HEAP_OPTS: "-Xmx1G -Xms1G"
       # Mask passwords values in UI
       MASK_PASSWORDS_API: false
 
@@ -10083,9 +10083,9 @@ services:
       - "8585:8585"
       - "8586:8586"
     depends_on:
-      elasticsearch:
+      openmetadata-elasticsearch:
         condition: service_healthy
-      mysql:
+      openmetadata-mysql:
         condition: service_healthy
       openmetadata-migrate-all:
         condition: service_completed_successfully
@@ -10098,17 +10098,17 @@ services:
       # OpenMetadata Server Authentication Configuration
       AUTHORIZER_CLASS_NAME: "org.openmetadata.service.security.DefaultAuthorizer"
       AUTHORIZER_REQUEST_FILTER: "org.openmetadata.service.security.JwtFilter"
-      AUTHORIZER_ADMIN_PRINCIPALS: ["admin"]
-      AUTHORIZER_ALLOWED_REGISTRATION_DOMAIN: ["all"]
-      AUTHORIZER_INGESTION_PRINCIPALS: ["ingestion-bot"]
+      AUTHORIZER_ADMIN_PRINCIPALS: '["admin"]'
+      AUTHORIZER_ALLOWED_REGISTRATION_DOMAIN: "all"
+      AUTHORIZER_INGESTION_PRINCIPALS: '["ingestion-bot"]'
       AUTHORIZER_PRINCIPAL_DOMAIN: "openmetadata.org"
-      AUTHORIZER_ALLOWED_DOMAINS: []  
+      AUTHORIZER_ALLOWED_DOMAINS:
       AUTHORIZER_ENFORCE_PRINCIPAL_DOMAIN: false
       AUTHORIZER_ENABLE_SECURE_SOCKET: false
       AUTHENTICATION_PROVIDER: basic
       AUTHENTICATION_RESPONSE_TYPE: "id_token"
       CUSTOM_OIDC_AUTHENTICATION_PROVIDER_NAME: ""
-      AUTHENTICATION_PUBLIC_KEYS: [http://localhost:8585/api/v1/system/config/jwks]
+      AUTHENTICATION_PUBLIC_KEYS: '[http://localhost:8585/api/v1/system/config/jwks]'
       AUTHENTICATION_AUTHORITY: "https://accounts.google.com"
       AUTHENTICATION_CLIENT_ID: ""
       AUTHENTICATION_CALLBACK_URL: ""
@@ -10134,7 +10134,7 @@ services:
       DB_SCHEME: mysql
       DB_PARAMS: allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
       DB_USER: openmetadata_user
-      DB_USER_PASSWORD: abc123!
+      DB_USER_PASSWORD: openmetadata_password
       DB_HOST: openmetadata-mysql
       DB_PORT: 3306
   {% endif %}    
@@ -10144,7 +10144,7 @@ services:
       DB_SCHEME: postgresql
       DB_PARAMS: allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
       DB_USER: openmetadata_user
-      DB_USER_PASSWORD: abc123!
+      DB_USER_PASSWORD: openmetadata_password
       DB_HOST: openmetadata-postgresql
       DB_PORT: 5432
   {% endif %}    
@@ -10174,8 +10174,8 @@ services:
       #eventMonitoringConfiguration
       EVENT_MONITOR: prometheus
       EVENT_MONITOR_BATCH_SIZE: 10
-      EVENT_MONITOR_PATH_PATTERN: ["/api/v1/tables/*", "/api/v1/health-check"]
-      EVENT_MONITOR_LATENCY: []
+      #EVENT_MONITOR_PATH_PATTERN: '["/api/v1/tables/*", "/api/v1/health-check"]'
+      EVENT_MONITOR_LATENCY: '[]'
 
       #pipelineServiceClientConfiguration
       PIPELINE_SERVICE_CLIENT_ENABLED: true
@@ -10211,7 +10211,7 @@ services:
       SMTP_SERVER_STRATEGY: "SMTP_TLS"
 
       # Heap OPTS Configurations
-      OPENMETADATA_HEAP_OPTS: "--Xmx1G -Xms1G"
+      OPENMETADATA_HEAP_OPTS: "-Xmx1G -Xms1G"
       # Mask passwords values in UI
       MASK_PASSWORDS_API: false
 
@@ -10333,7 +10333,7 @@ services:
   {% endif %}    {#  OPENMETADATA_database_type == 'postgres' #}
 
   openmetadata-elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch::8.11.4
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.4
     hostname: openmetadata-elasticsearch
     container_name: openmetadata-elasticsearch
     labels:
@@ -10373,9 +10373,9 @@ services:
     hostname: openmetadata-ingestion
     container_name: openmetadata-ingestion
     depends_on:
-      elasticsearch:
+      openmetadata-elasticsearch:
         condition: service_started
-      mysql:
+      openmetadata-mysql:
         condition: service_healthy
       openmetadata-server:
         condition: service_started
@@ -10399,7 +10399,7 @@ services:
       AIRFLOW_DB: airflow_db
       DB_SCHEME: mysql+pymysql
       DB_USER: airflow_user
-      DB_PASSWORD: abc123!
+      DB_PASSWORD: airflow_pass
       # extra connection-string properties for the database
       # EXAMPLE
       # require SSL (only for Postgres)
