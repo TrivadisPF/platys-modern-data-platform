@@ -1458,10 +1458,12 @@ networks:
 {% if (external['HIVE_METASTORE_enable']) | default(false) %}
     {% set ns.hiveMetastoreHost = external['HIVE_METASTORE_host'] %}
     {% set ns.hiveMetastorePort = external['HIVE_METASTORE_port'] %}
+    {% set ns.hiveMetastoreRestCatalogPort = external['HIVE_METASTORE_rest_catalog_port'] %}
     {% set ns.hiveMetastore = ns.hiveMetastoreHost ~ ':' ~ ns.hiveMetastorePort %}
 {% else %}
     {% set ns.hiveMetastoreHost = 'hive-metastore' %}
     {% set ns.hiveMetastorePort = 9083 %}
+    {% set ns.hiveMetastoreRestCatalogPort = 9084 %}
     {% set ns.hiveMetastore = 'hive-metastore:9083' %}
 {% endif %}   {# external['HIVE_METASTORE_enable'] #}
 
@@ -6184,6 +6186,14 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hive_uri: thrift://{{ns.hiveMetastore}}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hive_warehouse: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined and SPARK_sql_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
     {% endif -%}   {#  SPARK_table_format_type #}      
+    {%if SPARK_table_format_type == 'iceberg' and HIVE_METASTORE_enable and __HIVE_METASTORE_version == "4.2.0" | default(false) %}
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_type: rest
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest: org.apache.iceberg.spark.SparkCatalog
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_catalog___impl: org.apache.iceberg.rest.RESTCatalog
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_uri: 'http://{{ns.hiveMetastoreHost}}:{{ns.hiveMetastoreRestCatalogPort}}/iceberg'
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_token: not_used
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_warehouse:  {{lakekeeperCatalogName | default(omit) }}
+    {% endif -%}   {#  SPARK_table_format_type #}      
     {% if SPARK_table_format_type == 'iceberg' and NESSIE_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog_type: hive
       SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie: org.apache.iceberg.spark.SparkCatalog
@@ -6375,6 +6385,14 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hive_uri: thrift://{{ns.hiveMetastore}}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hive_warehouse: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined and SPARK_sql_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
     {% endif -%}   {#  SPARK_table_format_type #}      
+    {%if SPARK_table_format_type == 'iceberg' and HIVE_METASTORE_enable and __HIVE_METASTORE_version == "4.2.0" | default(false) %}
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_type: rest
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest: org.apache.iceberg.spark.SparkCatalog
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_catalog___impl: org.apache.iceberg.rest.RESTCatalog
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_uri: 'http://{{ns.hiveMetastoreHost}}:{{ns.hiveMetastoreRestCatalogPort}}/iceberg'
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_token: not_used
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_warehouse:  {{lakekeeperCatalogName | default(omit) }}
+    {% endif -%}   {#  SPARK_table_format_type #}      
     {% if SPARK_table_format_type == 'iceberg' and NESSIE_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie_type: nessie
@@ -6541,6 +6559,14 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hive: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hive_uri: thrift://{{ns.hiveMetastore}}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hive_warehouse: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined and SPARK_sql_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
+    {% endif -%}   {#  SPARK_table_format_type #}      
+    {%if SPARK_table_format_type == 'iceberg' and HIVE_METASTORE_enable and __HIVE_METASTORE_version == "4.2.0" | default(false) %}
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_type: rest
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest: org.apache.iceberg.spark.SparkCatalog
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_catalog___impl: org.apache.iceberg.rest.RESTCatalog
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_uri: 'http://{{ns.hiveMetastoreHost}}:{{ns.hiveMetastoreRestCatalogPort}}/iceberg'
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_token: not_used
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_warehouse: {{lakekeeperCatalogName | default(omit) }}
     {% endif -%}   {#  SPARK_table_format_type #}      
     {% if SPARK_table_format_type == 'iceberg' and NESSIE_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog_type: hive
@@ -6711,6 +6737,14 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hive_type: hive
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hive_uri: thrift://{{ns.hiveMetastore}}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hive_warehouse: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined and SPARK_sql_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
+    {% endif -%}   {#  SPARK_table_format_type #}   
+    {%if SPARK_table_format_type == 'iceberg' and HIVE_METASTORE_enable and __HIVE_METASTORE_version == "4.2.0" | default(false) %}
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_type: rest
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest: org.apache.iceberg.spark.SparkCatalog
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_catalog___impl: org.apache.iceberg.rest.RESTCatalog
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_uri: 'http://{{ns.hiveMetastoreHost}}:{{ns.hiveMetastoreRestCatalogPort}}/iceberg'
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_token: not_used
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_warehouse: {{lakekeeperCatalogName | default(omit) }}
     {% endif -%}   {#  SPARK_table_format_type #}      
     {% if SPARK_table_format_type == 'iceberg' and NESSIE_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie: org.apache.iceberg.spark.SparkCatalog
@@ -6812,7 +6846,6 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {#  SPARK_THRIFTSERVER_enable #}
 
-
 {% if KYUUBI_enable | default(false) %}
   kyuubi:
     image: apache/kyuubi:{{__KYUUBI_version}}
@@ -6888,6 +6921,14 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hive_type: hive
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hive_uri: thrift://{{ns.hiveMetastore}}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hive_warehouse: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined and SPARK_sql_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
+      {% endif -%}   {#  SPARK_table_format_type #}
+      {%if SPARK_table_format_type == 'iceberg' and HIVE_METASTORE_enable and __HIVE_METASTORE_version == "4.2.0" | default(false) %}
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_type: rest
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest: org.apache.iceberg.spark.SparkCatalog
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_catalog___impl: org.apache.iceberg.rest.RESTCatalog
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_uri: 'http://{{ns.hiveMetastoreHost}}:{{ns.hiveMetastoreRestCatalogPort}}/iceberg'
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_token: not_used
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_warehouse:  {{lakekeeperCatalogName | default(omit) }}
       {% endif -%}   {#  SPARK_table_format_type #}      
       {% if SPARK_table_format_type == 'iceberg' and NESSIE_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie: org.apache.iceberg.spark.SparkCatalog
@@ -7063,6 +7104,14 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hive_type: hive
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hive_uri: thrift://{{ns.hiveMetastore}}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hive_warehouse: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined and SPARK_sql_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
+    {% endif -%}   {#  SPARK_table_format_type #}      
+    {%if SPARK_table_format_type == 'iceberg' and HIVE_METASTORE_enable and __HIVE_METASTORE_version == "4.2.0" | default(false) %}
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_type: rest
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest: org.apache.iceberg.spark.SparkCatalog
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_catalog___impl: org.apache.iceberg.rest.RESTCatalog
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_uri: 'http://{{ns.hiveMetastoreHost}}:{{ns.hiveMetastoreRestCatalogPort}}/iceberg'
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_token: not_used
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_warehouse:  {{lakekeeperCatalogName | default(omit) }}
     {% endif -%}   {#  SPARK_table_format_type #}      
     {% if SPARK_table_format_type == 'iceberg' and NESSIE_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie: org.apache.iceberg.spark.SparkCatalog
@@ -23716,7 +23765,7 @@ services:
       DATA_PRODUCT_ENABLED: '{{'true' if TRINO_starburstdata_enable_data_product is defined and TRINO_starburstdata_enable_data_product else 'false'}}'
   {% endif %}
   {% if HIVE_METASTORE_enable | default(false) %}
-      HMS_ICEBERG_REST_CATALOG_URI: http://hive-metastore:9084/iceberg
+      HMS_ICEBERG_REST_CATALOG_URI: http://{{ns.hiveMetastoreHost}}:{{ns.hiveMetastoreRestCatalogPort}}/iceberg
       HMS_ICEBERG_REST_CATALOG_WAREHOUSE: {{'s3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
   {% endif %}
   {% if TRINO_with_iceberg_rest_catalog | default(false) %}
@@ -24095,7 +24144,7 @@ services:
       #CATALOG_STORE: {{TRINO_catalog_store | default('file') }}
       QUERY_MAX_MEMORY_PER_NODE: {{TRINO_max_memory_per_node | default('4GB') }}
   {% if HIVE_METASTORE_enable | default(false) %}
-      HMS_ICEBERG_REST_CATALOG_URI: http://hive-metastore:9084/iceberg
+      HMS_ICEBERG_REST_CATALOG_URI: http://{{ns.hiveMetastoreHost}}:{{ns.hiveMetastoreRestCatalogPort}}/iceberg
       HMSICEBERG_REST_CATALOG_WAREHOUSE: {{'s3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
   {% endif %}
   {% if TRINO_with_iceberg_rest_catalog | default(false) %}
@@ -27025,7 +27074,7 @@ services:
       - "28397:8081"
     environment:
       PYICEBERG_CATALOG__DEFAULT__TYPE: rest
-      PYICEBERG_CATALOG__DEFAULT__URI:  http://hive-metastore:9084/iceberg
+      PYICEBERG_CATALOG__DEFAULT__URI:  http://{{ns.hiveMetastoreHost}}:{{ns.hiveMetastoreRestCatalogPort}}/iceberg
       PYICEBERG_CATALOG__DEFAULT__WAREHOUSE: {{'s3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
       PYICEBERG_CATALOG__DEFAULT__TOKEN: 
       PYICEBERG_CATALOG__DEFAULT__S3__ENDPOINT: {{s3Endpoint | default(omit) }}
@@ -27078,7 +27127,7 @@ services:
       com.platys.description: "Insights into Lakehouse (background worker)"
     environment:
       PYICEBERG_CATALOG__DEFAULT__TYPE: rest
-      PYICEBERG_CATALOG__DEFAULT__URI:  http://hive-metastore:9084/iceberg
+      PYICEBERG_CATALOG__DEFAULT__URI:  http://{{ns.hiveMetastoreHost}}:{{ns.hiveMetastoreRestCatalogPort}}/iceberg
       PYICEBERG_CATALOG__DEFAULT__WAREHOUSE: {{'s3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
       PYICEBERG_CATALOG__DEFAULT__TOKEN: 
       PYICEBERG_CATALOG__DEFAULT__S3__ENDPOINT: {{s3Endpoint | default(omit) }}
