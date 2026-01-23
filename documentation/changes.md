@@ -14,7 +14,8 @@ See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/plat
 
 ### Bug Fixes
 
- * bug fix in datahub
+ * fix bug in DataHub support where gms service had wrong dependency
+ * fix setup of OpenMetadata catalog
 
 ## What's new in 1.19.0
 

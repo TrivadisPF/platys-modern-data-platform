@@ -1,4 +1,4 @@
-# `modern-data-platform` - Port Mappings - 1.19.0
+# `modern-data-platform` - Port Mappings - 1.19.1
 
 This table reserves the external ports for the various services. Not all services have to be used in the platform at a given time. But by reserving, we can assure that there are no conflicts if a service is added at a later time.
 
