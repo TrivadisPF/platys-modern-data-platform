@@ -2,6 +2,21 @@
 
 See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/platys/blob/master/documentation/upgrade-platform-stack.md) for how to upgrade to newer version.
 
+## What's new in 1.19.1
+
+### Version upgrades
+
+ * Update `openmetadata` to `1.11.6` 
+
+### Enhancements
+
+ * support for Hive Metastore Iceberg REST Catalog in Apache Spark (catalog `hiverest`)
+
+### Bug Fixes
+
+ * fix bug in DataHub support where gms service had wrong dependency
+ * fix setup of OpenMetadata catalog
+
 ## What's new in 1.19.0
 
 The Modern Data Platform version 1.18.0 contains the following bug fixes and enhancements:

@@ -17,6 +17,8 @@ networks:
 
 {% set __PROVISIONING_DATA_version = PROVISIONING_DATA_version | default('latest') -%}
 
+{% set __ZOOKEEPER_version = ZOOKEEPER_version | default('latest') -%}
+
 {% set __CONFLUENT_PLATFORM_version = CONFLUENT_PLATFORM_version | default('latest') -%}
 {% set __KAFKA_version = KAFKA_version | default('latest') -%}
 {% set __KAFKA_INKLESS_version = KAFKA_INKLESS_version | default('latest') -%}
@@ -735,7 +737,7 @@ networks:
   {% set SCHEMA_REGISTRY_enable = true -%}
 {% endif -%}   {# DATAHUB_enable  #}
 
-{% if (KAFKA_enable and not KAFKA_use_kraft_mode) or ATLAS_enable or DRILL_enable or PINOT_enable -%}
+{% if (KAFKA_enable and not KAFKA_use_kraft_mode) or DRILL_enable or PINOT_enable -%}
 # enforce some dependencies
   {% set ZOOKEEPER_enable = true -%}
 {% endif -%}   {# KAFKA_enable or ATLAS_enable or DRILL_enable or PINOT_enable #}
@@ -1456,10 +1458,12 @@ networks:
 {% if (external['HIVE_METASTORE_enable']) | default(false) %}
     {% set ns.hiveMetastoreHost = external['HIVE_METASTORE_host'] %}
     {% set ns.hiveMetastorePort = external['HIVE_METASTORE_port'] %}
+    {% set ns.hiveMetastoreRestCatalogPort = external['HIVE_METASTORE_rest_catalog_port'] %}
     {% set ns.hiveMetastore = ns.hiveMetastoreHost ~ ':' ~ ns.hiveMetastorePort %}
 {% else %}
     {% set ns.hiveMetastoreHost = 'hive-metastore' %}
     {% set ns.hiveMetastorePort = 9083 %}
+    {% set ns.hiveMetastoreRestCatalogPort = 9084 %}
     {% set ns.hiveMetastore = 'hive-metastore:9083' %}
 {% endif %}   {# external['HIVE_METASTORE_enable'] #}
 
@@ -1614,7 +1618,7 @@ services:
   {% set port = 2181 + (dataCenterId * ZOOKEEPER_nodes) + loop.index-1 %}
   {% set promPort = 1240 + (dataCenterId * ZOOKEEPER_nodes) + loop.index-1 %}
   zookeeper{{dataCenter}}-{{loop.index}}:
-    image: confluentinc/cp-zookeeper:{{__CONFLUENT_PLATFORM_version}}
+    image: zookeeper:{{__ZOOKEEPER_version}}
     container_name: zookeeper{{dataCenter}}-{{loop.index}}
     hostname: zookeeper{{dataCenter}}-{{loop.index}}
     labels:
@@ -6182,6 +6186,18 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hive_uri: thrift://{{ns.hiveMetastore}}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hive_warehouse: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined and SPARK_sql_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
     {% endif -%}   {#  SPARK_table_format_type #}      
+    {%if SPARK_table_format_type == 'iceberg' and HIVE_METASTORE_enable and __HIVE_METASTORE_version == "4.2.0" | default(false) %}
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_type: rest
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest: org.apache.iceberg.spark.SparkCatalog
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_uri: 'http://{{ns.hiveMetastoreHost}}:{{ns.hiveMetastoreRestCatalogPort}}/iceberg'
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_token: not_used
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_warehouse: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined and SPARK_sql_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_io___impl: org.apache.iceberg.aws.s3.S3FileIO
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_s3_endpoint: '{{s3Endpoint | default(omit) }}'
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_s3_path___style___access: true
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_s3_access___key___id: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_s3_secret___access___key: {{s3SecretAccessKey}}
+    {% endif -%}   {#  SPARK_table_format_type #}      
     {% if SPARK_table_format_type == 'iceberg' and NESSIE_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog_type: hive
       SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie: org.apache.iceberg.spark.SparkCatalog
@@ -6373,6 +6389,18 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hive_uri: thrift://{{ns.hiveMetastore}}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hive_warehouse: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined and SPARK_sql_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
     {% endif -%}   {#  SPARK_table_format_type #}      
+    {%if SPARK_table_format_type == 'iceberg' and HIVE_METASTORE_enable and __HIVE_METASTORE_version == "4.2.0" | default(false) %}
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_type: rest
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest: org.apache.iceberg.spark.SparkCatalog
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_uri: 'http://{{ns.hiveMetastoreHost}}:{{ns.hiveMetastoreRestCatalogPort}}/iceberg'
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_token: not_used
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_warehouse: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined and SPARK_sql_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_io___impl: org.apache.iceberg.aws.s3.S3FileIO
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_s3_endpoint: '{{s3Endpoint | default(omit) }}'
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_s3_path___style___access: true
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_s3_access___key___id: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_s3_secret___access___key: {{s3SecretAccessKey}}
+    {% endif -%}   {#  SPARK_table_format_type #}      
     {% if SPARK_table_format_type == 'iceberg' and NESSIE_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie_type: nessie
@@ -6539,6 +6567,18 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hive: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hive_uri: thrift://{{ns.hiveMetastore}}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hive_warehouse: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined and SPARK_sql_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
+    {% endif -%}   {#  SPARK_table_format_type #}      
+    {%if SPARK_table_format_type == 'iceberg' and HIVE_METASTORE_enable and __HIVE_METASTORE_version == "4.2.0" | default(false) %}
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_type: rest
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest: org.apache.iceberg.spark.SparkCatalog
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_uri: 'http://{{ns.hiveMetastoreHost}}:{{ns.hiveMetastoreRestCatalogPort}}/iceberg'
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_token: not_used
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_warehouse: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined and SPARK_sql_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_io___impl: org.apache.iceberg.aws.s3.S3FileIO
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_s3_endpoint: '{{s3Endpoint | default(omit) }}'
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_s3_path___style___access: true
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_s3_access___key___id: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_s3_secret___access___key: {{s3SecretAccessKey}}
     {% endif -%}   {#  SPARK_table_format_type #}      
     {% if SPARK_table_format_type == 'iceberg' and NESSIE_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog_type: hive
@@ -6709,6 +6749,18 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hive_type: hive
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hive_uri: thrift://{{ns.hiveMetastore}}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hive_warehouse: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined and SPARK_sql_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
+    {% endif -%}   {#  SPARK_table_format_type #}   
+    {%if SPARK_table_format_type == 'iceberg' and HIVE_METASTORE_enable and __HIVE_METASTORE_version == "4.2.0" | default(false) %}
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_type: rest
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest: org.apache.iceberg.spark.SparkCatalog
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_uri: 'http://{{ns.hiveMetastoreHost}}:{{ns.hiveMetastoreRestCatalogPort}}/iceberg'
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_token: not_used
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_warehouse: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined and SPARK_sql_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_io___impl: org.apache.iceberg.aws.s3.S3FileIO
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_s3_endpoint: '{{s3Endpoint | default(omit) }}'
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_s3_path___style___access: true
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_s3_access___key___id: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_s3_secret___access___key: {{s3SecretAccessKey}}
     {% endif -%}   {#  SPARK_table_format_type #}      
     {% if SPARK_table_format_type == 'iceberg' and NESSIE_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie: org.apache.iceberg.spark.SparkCatalog
@@ -6810,7 +6862,6 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {#  SPARK_THRIFTSERVER_enable #}
 
-
 {% if KYUUBI_enable | default(false) %}
   kyuubi:
     image: apache/kyuubi:{{__KYUUBI_version}}
@@ -6886,6 +6937,18 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hive_type: hive
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hive_uri: thrift://{{ns.hiveMetastore}}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hive_warehouse: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined and SPARK_sql_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
+      {% endif -%}   {#  SPARK_table_format_type #}
+      {%if SPARK_table_format_type == 'iceberg' and HIVE_METASTORE_enable and __HIVE_METASTORE_version == "4.2.0" | default(false) %}
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_type: rest
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest: org.apache.iceberg.spark.SparkCatalog
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_uri: 'http://{{ns.hiveMetastoreHost}}:{{ns.hiveMetastoreRestCatalogPort}}/iceberg'
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_token: not_used
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_warehouse: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined and SPARK_sql_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_io___impl: org.apache.iceberg.aws.s3.S3FileIO
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_s3_endpoint: '{{s3Endpoint | default(omit) }}'
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_s3_path___style___access: true
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_s3_access___key___id: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_s3_secret___access___key: {{s3SecretAccessKey}}
       {% endif -%}   {#  SPARK_table_format_type #}      
       {% if SPARK_table_format_type == 'iceberg' and NESSIE_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie: org.apache.iceberg.spark.SparkCatalog
@@ -7061,6 +7124,18 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hive_type: hive
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hive_uri: thrift://{{ns.hiveMetastore}}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hive_warehouse: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined and SPARK_sql_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
+    {% endif -%}   {#  SPARK_table_format_type #}      
+    {%if SPARK_table_format_type == 'iceberg' and HIVE_METASTORE_enable and __HIVE_METASTORE_version == "4.2.0" | default(false) %}
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_type: rest
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest: org.apache.iceberg.spark.SparkCatalog
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_uri: 'http://{{ns.hiveMetastoreHost}}:{{ns.hiveMetastoreRestCatalogPort}}/iceberg'
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_token: not_used
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_warehouse: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined and SPARK_sql_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_io___impl: org.apache.iceberg.aws.s3.S3FileIO
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_s3_endpoint: '{{s3Endpoint | default(omit) }}'
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_s3_path___style___access: true
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_s3_access___key___id: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_s3_secret___access___key: {{s3SecretAccessKey}}
     {% endif -%}   {#  SPARK_table_format_type #}      
     {% if SPARK_table_format_type == 'iceberg' and NESSIE_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie: org.apache.iceberg.spark.SparkCatalog
@@ -8885,7 +8960,6 @@ services:
       com.platys.webui.title: "Atlas UI"
       com.platys.webui.url: "http://dataplatform:21000"
     depends_on:
-      - zookeeper{{dataCenter}}-1
       - atlas-kafka-setup
       - cassandra-atlas
     ports:
@@ -8939,8 +9013,8 @@ services:
     {% endif -%}   {#  use_timezone #}
     command: "bash -c 'echo Waiting for Kafka to be ready... && \
                        cub kafka-ready -b {{ns.bootstrapServer}} 1 120 && \
-                       kafka-topics --create --if-not-exists --zookeeper zookeeper-1:2181 --partitions 1 --replication-factor 1 --topic ATLAS_HOOK && \
-                       kafka-topics --create --if-not-exists --zookeeper zookeeper-1:2181 --partitions 1 --replication-factor 1 --topic ATLAS_ENTITIES'"
+                       kafka-topics --create --if-not-exists --bootstrap-server kafka-1:19092 --partitions 1 --replication-factor {{KAFKA_internal_replication_factor | default(1)}}   --topic ATLAS_HOOK && \
+                       kafka-topics --create --if-not-exists --bootstrap-server kafka-1:19092 --partitions 1 --replication-factor {{KAFKA_internal_replication_factor | default(1)}}   --topic ATLAS_ENTITIES'"
     init: true
   {% endif %} {#  KAFKA_enable #}
 
@@ -9071,14 +9145,14 @@ services:
     image: acryldata/datahub-gms:{{__DATAHUB_version}}
     hostname: datahub-gms
     container_name: datahub-gms
-    depends_on:
-      datahub-gms:
-        condition: service_healthy    
     labels:
       com.platys.name: "datahub"
       com.platys.description: "Datahub Data Catalog GMS Service"
       com.platys.restapi.title: "DataHub GMS REST API / GraphiQL"
       com.platys.restapi.url: "http://dataplatform:28142/openapi/swagger-ui/index.html http://dataplatform:28142/api/graphiql"
+    depends_on:
+      datahub-upgrade:
+        condition: service_completed_successfully
     ports:
       - "28142:8080"
     environment:
@@ -9170,8 +9244,8 @@ services:
     healthcheck:
       test: curl -sS --fail http://datahub-gms:8080/health
       start_period: 90s
-      interval: 1s
-      retries: 3
+      interval: 5s
+      retries: 5
       timeout: 5s
 
   {%if DATAHUB_ACTIONS_enable | default(false) %}
@@ -9422,7 +9496,7 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
     healthcheck:
-      interval: 1s
+      interval: 5s
       retries: 5
       start_period: 20s
       test: mysqladmin ping -h mysql -u $$MYSQL_USER --password=$$MYSQL_PASSWORD
@@ -9463,9 +9537,9 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
     healthcheck:
-      interval: 1s
+      interval: 5s
       retries: 5
-      start_period: 5s
+      start_period: 10s
       test: wget http://datahub-neo4j:7474
       timeout: 5s    
   {% endif -%}   {#  DATAHUB_graph_service_impl #}
@@ -9493,13 +9567,6 @@ services:
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
-    healthcheck:
-      interval: 1s
-      retries: 3
-      start_period: 20s
-      test: curl -sS --fail http://datahub-elasticsearch:9200}/_cluster/health?wait_for_status=yellow&timeout=0s
-      timeout: 5s      
-    mem_limit: 1g
     volumes:
       - ./data-transfer:/data-transfer
     {% if DATAHUB_volume_map_data %}
@@ -9513,6 +9580,13 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
+    healthcheck:
+      interval: 1s
+      retries: 3
+      start_period: 20s
+      test: curl -sS --fail http://datahub-elasticsearch:9200}/_cluster/health?wait_for_status=yellow&timeout=0s
+      timeout: 5s      
+    mem_limit: 1g
   {% endif -%}   {#  DATAHUB_search_service_impl == 'elasticsearch' #}
 
   {%if DATAHUB_use_kibana | default(true) %}
@@ -9612,7 +9686,7 @@ services:
         condition: service_completed_successfully
     {%if (DATAHUB_graph_service_impl | lower) == 'neo4j'  | default(true) %}
       datahub-neo4j:
-        condition: serivice_healthy
+        condition: service_healthy
     {% endif -%}   {#  DATAHUB_graph_service_impl #}
     environment:
       - BACKFILL_BROWSE_PATHS_V2=true
@@ -9814,9 +9888,9 @@ services:
       com.platys.name: "openmetadata"
       com.platys.description: "OpenMetadata Data Catalog"
     depends_on:
-      elasticsearch:
+      openmetadata-elasticsearch:
         condition: service_healthy
-      mysql:
+      openmetadata-mysql:
         condition: service_healthy
     environment:
       OPENMETADATA_CLUSTER_NAME: openmetadata
@@ -9830,21 +9904,24 @@ services:
       # OpenMetadata Server Authentication Configuration
       AUTHORIZER_CLASS_NAME: "org.openmetadata.service.security.DefaultAuthorizer"
       AUTHORIZER_REQUEST_FILTER: "org.openmetadata.service.security.JwtFilter"
-      AUTHORIZER_ADMIN_PRINCIPALS: "admin"
-      AUTHORIZER_ALLOWED_REGISTRATION_DOMAIN: "all"
-      AUTHORIZER_INGESTION_PRINCIPALS: ["ingestion-bot"]
-      AUTHORIZER_PRINCIPAL_DOMAIN: "openmetadata.org"
+      AUTHORIZER_ADMIN_PRINCIPALS: '[admin]'
+      AUTHORIZER_ALLOWED_REGISTRATION_DOMAIN: '["all"]'
+      AUTHORIZER_INGESTION_PRINCIPALS: '[ingestion-bot]'
+      AUTHORIZER_PRINCIPAL_DOMAIN: "open-metadata.org"
+      AUTHORIZER_ALLOWED_DOMAINS:
       AUTHORIZER_ENFORCE_PRINCIPAL_DOMAIN: false
       AUTHORIZER_ENABLE_SECURE_SOCKET: false
-      AUTHENTICATION_PROVIDER: "basic"
+      AUTHENTICATION_PROVIDER: basic
       AUTHENTICATION_RESPONSE_TYPE: "id_token"
       CUSTOM_OIDC_AUTHENTICATION_PROVIDER_NAME: ""
-      AUTHENTICATION_PUBLIC_KEYS: [http://localhost:8585/api/v1/system/config/jwks]
+      AUTHENTICATION_PUBLIC_KEYS: '[http://localhost:8585/api/v1/system/config/jwks]'
       AUTHENTICATION_AUTHORITY: "https://accounts.google.com"
       AUTHENTICATION_CLIENT_ID: ""
       AUTHENTICATION_CALLBACK_URL: ""
-      AUTHENTICATION_JWT_PRINCIPAL_CLAIMS: ["\"email\"","\"preferred_username\"","\"sub\""]
+      AUTHENTICATION_JWT_PRINCIPAL_CLAIMS: '[email,preferred_username,sub]'
+      AUTHENTICATION_JWT_PRINCIPAL_CLAIMS_MAPPING:
       AUTHENTICATION_ENABLE_SELF_SIGNUP: true
+      AUTHENTICATION_CLIENT_TYPE: public
 
       # JWT Configuration
       RSA_PUBLIC_KEY_FILE_PATH: "./conf/public_key.der"
@@ -9863,7 +9940,7 @@ services:
       DB_SCHEME: mysql
       DB_PARAMS: allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
       DB_USER: openmetadata_user
-      DB_USER_PASSWORD: abc123!
+      DB_USER_PASSWORD: openmetadata_password
       DB_HOST: openmetadata-mysql
       DB_PORT: 3306
   {% endif %}    
@@ -9873,9 +9950,9 @@ services:
       DB_SCHEME: postgresql
       DB_PARAMS: allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
       DB_USER: openmetadata_user
-      DB_USER_PASSWORD: abc123!
+      DB_USER_PASSWORD: openmetadata_password
       DB_HOST: openmetadata-postgresql
-      DB_PORT: 5432      
+      DB_PORT: 5432
   {% endif %}    
       OM_DATABASE: openmetadata_db
       # ElasticSearch Configurations
@@ -9890,14 +9967,21 @@ services:
       ELASTICSEARCH_CONNECTION_TIMEOUT_SECS: 5
       ELASTICSEARCH_SOCKET_TIMEOUT_SECS: 60
       ELASTICSEARCH_KEEP_ALIVE_TIMEOUT_SECS: 600
-      ELASTICSEARCH_BATCH_SIZE: 10
+      ELASTICSEARCH_BATCH_SIZE: 100
+      ELASTICSEARCH_PAYLOAD_BYTES_SIZE: 10485760
       ELASTICSEARCH_INDEX_MAPPING_LANG: EN
+
+      AWS_DEFAULT_REGION:
+      AWS_ACCESS_KEY_ID:
+      AWS_SECRET_ACCESS_KEY:
+      AWS_SESSION_TOKEN: ""
+      SEARCH_AWS_SERVICE_NAME: "es"
 
       #eventMonitoringConfiguration
       EVENT_MONITOR: prometheus
       EVENT_MONITOR_BATCH_SIZE: 10
-      EVENT_MONITOR_PATH_PATTERN: ["/api/v1/tables/*", "/api/v1/health-check"]
-      #EVENT_MONITOR_LATENCY: []
+      EVENT_MONITOR_PATH_PATTERN: '["/api/v1/tables/*", "/api/v1/health-check"]'
+      EVENT_MONITOR_LATENCY: '[]'
 
       #pipelineServiceClientConfiguration
       PIPELINE_SERVICE_CLIENT_ENABLED: true
@@ -9933,7 +10017,7 @@ services:
       SMTP_SERVER_STRATEGY: "SMTP_TLS"
 
       # Heap OPTS Configurations
-      OPENMETADATA_HEAP_OPTS: "--Xmx1G -Xms1G"
+      OPENMETADATA_HEAP_OPTS: "-Xmx1G -Xms1G"
       # Mask passwords values in UI
       MASK_PASSWORDS_API: false
 
@@ -9965,6 +10049,9 @@ services:
       #Permission-Policy
       WEB_CONF_PERMISSION_POLICY_ENABLED: false
       WEB_CONF_PERMISSION_POLICY_OPTION: ""
+      #Cache
+      WEB_CONF_CACHE_CONTROL: ""
+      WEB_CONF_PRAGMA: ""    
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -9988,7 +10075,7 @@ services:
       com.platys.name: "openmetadata"
       com.platys.description: "OpenMetadata Data Catalog"
       com.platys.webui.title: "OpenMetadata UI"
-      com.platys.webui.url: "https://dataplatform:8585"
+      com.platys.webui.url: "http://dataplatform:8585"
     expose:
       - 8585
       - 8586
@@ -9996,9 +10083,9 @@ services:
       - "8585:8585"
       - "8586:8586"
     depends_on:
-      elasticsearch:
+      openmetadata-elasticsearch:
         condition: service_healthy
-      mysql:
+      openmetadata-mysql:
         condition: service_healthy
       openmetadata-migrate-all:
         condition: service_completed_successfully
@@ -10011,21 +10098,24 @@ services:
       # OpenMetadata Server Authentication Configuration
       AUTHORIZER_CLASS_NAME: "org.openmetadata.service.security.DefaultAuthorizer"
       AUTHORIZER_REQUEST_FILTER: "org.openmetadata.service.security.JwtFilter"
-      AUTHORIZER_ADMIN_PRINCIPALS: ["admin"]
-      AUTHORIZER_ALLOWED_REGISTRATION_DOMAIN: ["all"]
-      AUTHORIZER_INGESTION_PRINCIPALS: ["ingestion-bot"]
-      AUTHORIZER_PRINCIPAL_DOMAIN: "openmetadata.org"
+      AUTHORIZER_ADMIN_PRINCIPALS: '[admin]'
+      AUTHORIZER_ALLOWED_REGISTRATION_DOMAIN: '["all"]'
+      AUTHORIZER_INGESTION_PRINCIPALS: '[ingestion-bot]'
+      AUTHORIZER_PRINCIPAL_DOMAIN: "open-metadata.org"
+      AUTHORIZER_ALLOWED_DOMAINS:
       AUTHORIZER_ENFORCE_PRINCIPAL_DOMAIN: false
       AUTHORIZER_ENABLE_SECURE_SOCKET: false
-      AUTHENTICATION_PROVIDER: "basic"
+      AUTHENTICATION_PROVIDER: basic
       AUTHENTICATION_RESPONSE_TYPE: "id_token"
       CUSTOM_OIDC_AUTHENTICATION_PROVIDER_NAME: ""
-      AUTHENTICATION_PUBLIC_KEYS: ["http://localhost:8585/api/v1/system/config/jwks"]
-      AUTHENTICATION_AUTHORITY: https://accounts.google.com
+      AUTHENTICATION_PUBLIC_KEYS: '[http://localhost:8585/api/v1/system/config/jwks]'
+      AUTHENTICATION_AUTHORITY: "https://accounts.google.com"
       AUTHENTICATION_CLIENT_ID: ""
       AUTHENTICATION_CALLBACK_URL: ""
-      AUTHENTICATION_JWT_PRINCIPAL_CLAIMS: ["email","preferred_username","sub"]
+      AUTHENTICATION_JWT_PRINCIPAL_CLAIMS: '[email,preferred_username,sub]'
+      AUTHENTICATION_JWT_PRINCIPAL_CLAIMS_MAPPING:
       AUTHENTICATION_ENABLE_SELF_SIGNUP: true
+      AUTHENTICATION_CLIENT_TYPE: public
 
       # JWT Configuration
       RSA_PUBLIC_KEY_FILE_PATH: "./conf/public_key.der"
@@ -10035,7 +10125,7 @@ services:
       # OpenMetadata Server Pipeline Service Client Configuration
       PIPELINE_SERVICE_CLIENT_ENDPOINT: http://openmetadata-ingestion:8080
       PIPELINE_SERVICE_CLIENT_HEALTH_CHECK_INTERVAL: 300
-      SERVER_HOST_API_URL: http://openmetadata-server:8585/api
+      SERVER_HOST_API_URL: "http://openmetadata-server:8585/api"
       PIPELINE_SERVICE_CLIENT_VERIFY_SSL: "no-ssl"
       PIPELINE_SERVICE_CLIENT_SSL_CERT_PATH: ""
   {% if OPENMETADATA_database_type == 'mysql' | default(false) %}      
@@ -10044,7 +10134,7 @@ services:
       DB_SCHEME: mysql
       DB_PARAMS: allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
       DB_USER: openmetadata_user
-      DB_USER_PASSWORD: abc123!
+      DB_USER_PASSWORD: openmetadata_password
       DB_HOST: openmetadata-mysql
       DB_PORT: 3306
   {% endif %}    
@@ -10054,9 +10144,9 @@ services:
       DB_SCHEME: postgresql
       DB_PARAMS: allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
       DB_USER: openmetadata_user
-      DB_USER_PASSWORD: abc123!
+      DB_USER_PASSWORD: openmetadata_password
       DB_HOST: openmetadata-postgresql
-      DB_PORT: 5432      
+      DB_PORT: 5432
   {% endif %}    
       OM_DATABASE: openmetadata_db
       # ElasticSearch Configurations
@@ -10071,14 +10161,21 @@ services:
       ELASTICSEARCH_CONNECTION_TIMEOUT_SECS: 5
       ELASTICSEARCH_SOCKET_TIMEOUT_SECS: 60
       ELASTICSEARCH_KEEP_ALIVE_TIMEOUT_SECS: 600
-      ELASTICSEARCH_BATCH_SIZE: 10
+      ELASTICSEARCH_BATCH_SIZE: 100
+      ELASTICSEARCH_PAYLOAD_BYTES_SIZE: 10485760
       ELASTICSEARCH_INDEX_MAPPING_LANG: EN
+
+      AWS_DEFAULT_REGION:
+      AWS_ACCESS_KEY_ID:
+      AWS_SECRET_ACCESS_KEY:
+      AWS_SESSION_TOKEN: ""
+      SEARCH_AWS_SERVICE_NAME: "es"
 
       #eventMonitoringConfiguration
       EVENT_MONITOR: prometheus
       EVENT_MONITOR_BATCH_SIZE: 10
-      EVENT_MONITOR_PATH_PATTERN: ["/api/v1/tables/*", "/api/v1/health-check"]
-      #EVENT_MONITOR_LATENCY: []
+      #EVENT_MONITOR_PATH_PATTERN: '["/api/v1/tables/*", "/api/v1/health-check"]'
+      EVENT_MONITOR_LATENCY:
 
       #pipelineServiceClientConfiguration
       PIPELINE_SERVICE_CLIENT_ENABLED: true
@@ -10114,7 +10211,7 @@ services:
       SMTP_SERVER_STRATEGY: "SMTP_TLS"
 
       # Heap OPTS Configurations
-      OPENMETADATA_HEAP_OPTS: "--Xmx1G -Xms1G"
+      OPENMETADATA_HEAP_OPTS: "-Xmx1G -Xms1G"
       # Mask passwords values in UI
       MASK_PASSWORDS_API: false
 
@@ -10139,6 +10236,16 @@ services:
       WEB_CONF_XSS_CSP_ENABLED: false
       WEB_CONF_XSS_CSP_POLICY: "default-src 'self'"
       WEB_CONF_XSS_CSP_REPORT_ONLY_POLICY: ""
+
+      #Referrer-Policy
+      WEB_CONF_REFERRER_POLICY_ENABLED: false
+      WEB_CONF_REFERRER_POLICY_OPTION: "SAME_ORIGIN"
+      #Permission-Policy
+      WEB_CONF_PERMISSION_POLICY_ENABLED: false
+      WEB_CONF_PERMISSION_POLICY_OPTION: ""
+      #Cache
+      WEB_CONF_CACHE_CONTROL: ""
+      WEB_CONF_PRAGMA: ""    
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -10226,7 +10333,7 @@ services:
   {% endif %}    {#  OPENMETADATA_database_type == 'postgres' #}
 
   openmetadata-elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch::8.11.4
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.4
     hostname: openmetadata-elasticsearch
     container_name: openmetadata-elasticsearch
     labels:
@@ -10234,6 +10341,7 @@ services:
       com.platys.description: "OpenMetadata Data Catalog Eleasticsearch Instance"
     ports:
       - "19203:9200"
+      - "19204:9300"
     environment:
       - discovery.type=single-node
       - ES_JAVA_OPTS=-Xms1024m -Xmx1024m
@@ -10265,9 +10373,9 @@ services:
     hostname: openmetadata-ingestion
     container_name: openmetadata-ingestion
     depends_on:
-      elasticsearch:
+      openmetadata-elasticsearch:
         condition: service_started
-      mysql:
+      openmetadata-mysql:
         condition: service_healthy
       openmetadata-server:
         condition: service_started
@@ -10275,7 +10383,7 @@ services:
       com.platys.name: "openmetadata"
       com.platys.description: "OpenMetadata Data Catalog Ingestion Service"
       com.platys.webui.title: "OpenMetadata Ingestion UI"
-      com.platys.webui.url: "https://dataplatform:28337"
+      com.platys.webui.url: "http://dataplatform:28337"
     expose:
       - 8080
     ports:
@@ -10289,9 +10397,9 @@ services:
       DB_HOST: openmetadata-mysql
       DB_PORT: 3306
       AIRFLOW_DB: airflow_db
-      DB_USER: airflow_user
       DB_SCHEME: mysql+pymysql
-      DB_PASSWORD: abc123!
+      DB_USER: airflow_user
+      DB_PASSWORD: airflow_pass
       # extra connection-string properties for the database
       # EXAMPLE
       # require SSL (only for Postgres)
@@ -23715,7 +23823,7 @@ services:
       DATA_PRODUCT_ENABLED: '{{'true' if TRINO_starburstdata_enable_data_product is defined and TRINO_starburstdata_enable_data_product else 'false'}}'
   {% endif %}
   {% if HIVE_METASTORE_enable | default(false) %}
-      HMS_ICEBERG_REST_CATALOG_URI: http://hive-metastore:9084/iceberg
+      HMS_ICEBERG_REST_CATALOG_URI: http://{{ns.hiveMetastoreHost}}:{{ns.hiveMetastoreRestCatalogPort}}/iceberg
       HMS_ICEBERG_REST_CATALOG_WAREHOUSE: {{'s3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
   {% endif %}
   {% if TRINO_with_iceberg_rest_catalog | default(false) %}
@@ -24094,7 +24202,7 @@ services:
       #CATALOG_STORE: {{TRINO_catalog_store | default('file') }}
       QUERY_MAX_MEMORY_PER_NODE: {{TRINO_max_memory_per_node | default('4GB') }}
   {% if HIVE_METASTORE_enable | default(false) %}
-      HMS_ICEBERG_REST_CATALOG_URI: http://hive-metastore:9084/iceberg
+      HMS_ICEBERG_REST_CATALOG_URI: http://{{ns.hiveMetastoreHost}}:{{ns.hiveMetastoreRestCatalogPort}}/iceberg
       HMSICEBERG_REST_CATALOG_WAREHOUSE: {{'s3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
   {% endif %}
   {% if TRINO_with_iceberg_rest_catalog | default(false) %}
@@ -27024,7 +27132,7 @@ services:
       - "28397:8081"
     environment:
       PYICEBERG_CATALOG__DEFAULT__TYPE: rest
-      PYICEBERG_CATALOG__DEFAULT__URI:  http://hive-metastore:9084/iceberg
+      PYICEBERG_CATALOG__DEFAULT__URI:  http://{{ns.hiveMetastoreHost}}:{{ns.hiveMetastoreRestCatalogPort}}/iceberg
       PYICEBERG_CATALOG__DEFAULT__WAREHOUSE: {{'s3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
       PYICEBERG_CATALOG__DEFAULT__TOKEN: 
       PYICEBERG_CATALOG__DEFAULT__S3__ENDPOINT: {{s3Endpoint | default(omit) }}
@@ -27077,7 +27185,7 @@ services:
       com.platys.description: "Insights into Lakehouse (background worker)"
     environment:
       PYICEBERG_CATALOG__DEFAULT__TYPE: rest
-      PYICEBERG_CATALOG__DEFAULT__URI:  http://hive-metastore:9084/iceberg
+      PYICEBERG_CATALOG__DEFAULT__URI:  http://{{ns.hiveMetastoreHost}}:{{ns.hiveMetastoreRestCatalogPort}}/iceberg
       PYICEBERG_CATALOG__DEFAULT__WAREHOUSE: {{'s3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
       PYICEBERG_CATALOG__DEFAULT__TOKEN: 
       PYICEBERG_CATALOG__DEFAULT__S3__ENDPOINT: {{s3Endpoint | default(omit) }}
