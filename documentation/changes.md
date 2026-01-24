@@ -56,6 +56,7 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Klag (new kafka lag exporter)
  * Lakevision
  * Graphiti
+ * OpenMetadata
  
 ### Version upgrades
 
