@@ -9121,6 +9121,16 @@ services:
       - DATAHUB_TRACKING_TOPIC=DataHubUsageEvent_v1
       - ELASTIC_CLIENT_HOST={{'datahub-elasticsearch' if DATAHUB_search_service_impl == 'elasticsearch' else 'datahub-opensearch'}}
       - ELASTIC_CLIENT_PORT=9200
+    {% if PROMETHEUS_enable  | default(false) %}  
+      - ENABLE_PROMETHEUS=true
+    {% endif -%}   {#  PROMETHEUS_enable #}
+    {% if JAEGER_enable  | default(false) %}  
+      - ENABLE_OTEL=true
+      - OTEL_TRACES_EXPORTER=jaeger
+      - OTEL_EXPORTER_JAEGER_ENDPOINT=http://jaeger:14250
+      - OTEL_METRICS_EXPORTER=none
+      - OTEL_SERVICE_NAME=datahub-gms      
+    {% endif -%}   {#  OTEL_enable #}
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -9225,6 +9235,16 @@ services:
       - UI_INGESTION_ENABLED={{DATAHUB_ui_ingestion_enabled | lower | default(false)}}
       - UI_INGESTION_DEFAULT_CLI_VERSION={{DATAHUB_ui_ingestion_default_cli_version | default('latest')}}
       - DATAHUB_ANALYTICS_ENABLED={{DATAHUB_analytics_enabled | lower | default(false)}}
+    {% if PROMETHEUS_enable  | default(false) %}  
+      - ENABLE_PROMETHEUS=true
+    {% endif -%}   {#  PROMETHEUS_enable #}
+    {% if JAEGER_enable  | default(false) %}  
+      - ENABLE_OTEL=true
+      - OTEL_TRACES_EXPORTER=jaeger
+      - OTEL_EXPORTER_JAEGER_ENDPOINT=http://jaeger:14250
+      - OTEL_METRICS_EXPORTER=none
+      - OTEL_SERVICE_NAME=datahub-gms      
+    {% endif -%}   {#  OTEL_enable #}      
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -9324,7 +9344,7 @@ services:
       - {{'datahub-elasticsearch' if DATAHUB_search_service_impl == 'elasticsearch' else 'datahub-opensearch'}}
       - datahub-neo4j
     ports:
-        - "28145:9091"
+      - "28145:9091"
     environment:
       - DATAHUB_UPGRADE_HISTORY_KAFKA_CONSUMER_GROUP_ID=generic-duhe-consumer-job-client-mcl
       - DATAHUB_GMS_HOST=datahub-gms
@@ -9364,6 +9384,16 @@ services:
       - METADATA_AUDIT_EVENT_NAME=MetadataAuditEvent_v4
       - DATAHUB_USAGE_EVENT_NAME=DataHubUsageEvent_v1
       - DATAHUB_ANALYTICS_ENABLED={{DATAHUB_analytics_enabled | lower | default(false)}}
+    {% if PROMETHEUS_enable  | default(false) %}  
+      - ENABLE_PROMETHEUS=true
+    {% endif -%}   {#  PROMETHEUS_enable #}
+    {% if JAEGER_enable  | default(false) %}  
+      - ENABLE_OTEL=true
+      - OTEL_TRACES_EXPORTER=jaeger
+      - OTEL_EXPORTER_JAEGER_ENDPOINT=http://jaeger:14250
+      - OTEL_METRICS_EXPORTER=none
+      - OTEL_SERVICE_NAME=datahub-mae-consumer     
+    {% endif -%}   {#  OTEL_enable #}       
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -9396,7 +9426,7 @@ services:
       - kafka-setup
       - datahub-gms
     ports:
-        - "28146:9090"
+      - "28146:9090"
     environment:
       - DATAHUB_TELEMETRY_ENABLED={{DATAHUB_telemetry_enabled | lower | default(false)}}
       - GRAPH_SERVICE_IMPL={{DATAHUB_graph_service_impl}}
@@ -9445,7 +9475,17 @@ services:
 #      - DATAHUB_GMS_PORT=8080
       - MAE_CONSUMER_ENABLED=false
       - PE_CONSUMER_ENABLED=false
-      - UI_INGESTION_ENABLED=false
+      - UI_INGESTION_ENABLED={{DATAHUB_ui_ingestion_enabled | lower | default(false)}}
+    {% if PROMETHEUS_enable  | default(false) %}  
+      - ENABLE_PROMETHEUS=true
+    {% endif -%}   {#  PROMETHEUS_enable #}
+    {% if JAEGER_enable  | default(false) %}  
+      - ENABLE_OTEL=true
+      - OTEL_TRACES_EXPORTER=jaeger
+      - OTEL_EXPORTER_JAEGER_ENDPOINT=http://jaeger:14250
+      - OTEL_METRICS_EXPORTER=none
+      - OTEL_SERVICE_NAME=datahub-mce-consumer     
+    {% endif -%}   {#  OTEL_enable #}       
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -30157,9 +30197,12 @@ services:
     {% if NESSIE_enable | default(false) %}
       - ./scripts/grafana/dashboards/nessie:/etc/grafana/provisioning/dashboards/nessie
     {% endif -%}   {#  NESSIE_enable #}
-    {% if NESSIE_enable | default(false) %}
+    {% if GRAVITINO_enable | default(false) %}
       - ./scripts/grafana/dashboards/gravitino:/etc/grafana/provisioning/dashboards/gravitino
-    {% endif -%}   {#  NESSIE_enable #}
+    {% endif -%}   {#  GRAVITINO_enable #}
+    {% if DATAHUB_enable | default(false) %}
+      - ./scripts/grafana/dashboards/datahub:/etc/grafana/provisioning/dashboards/datahub
+    {% endif -%}   {#  DATAHUB_enable #}
     {% if PROMETHEUS_enable | default(false) %}
       - ./scripts/grafana/datasources/prometheus-datasource.yml:/etc/grafana/provisioning/datasources/prometheus-datasource.yml
     {% endif -%}   {#  PROMETHEUS_enable #}
