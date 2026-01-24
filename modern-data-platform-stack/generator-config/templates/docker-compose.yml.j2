@@ -1989,7 +1989,7 @@ services:
       - ./plugins/kafka/jars/{{jarName}}.jar:/usr/share/java/kafka/{{jarName}}.jar
       {% endfor %}
     {% endif %}
-    {% if KAFKA_volume_map_data %}
+    {% if KAFKA_volume_map_data or DATAHUB_volume_map_data %}
       - "./container-volume/kafka/kafka-{{loop.index}}:/var/lib/kafka/data"
     {% endif %}
     {% if ns.secureKafkaEnabled and ns.securityProtocol == 'SASL_PLAINTEXT' %}
@@ -9223,7 +9223,7 @@ services:
       - AUTH_POLICIES_ENABLED={{DATAHUB_auth_policies_enabled | lower | default(false)}}
       - PE_CONSUMER_ENABLED=true
       - UI_INGESTION_ENABLED={{DATAHUB_ui_ingestion_enabled | lower | default(false)}}
-      - UI_INGESTION_DEFAULT_CLI_VERSION={{__DATAHUB_version}}
+      - UI_INGESTION_DEFAULT_CLI_VERSION={{DATAHUB_ui_ingestion_default_cli_version | default('latest')}}
       - DATAHUB_ANALYTICS_ENABLED={{DATAHUB_analytics_enabled | lower | default(false)}}
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
@@ -9260,8 +9260,8 @@ services:
       datahub-gms:
         condition: service_healthy
     environment:
-#      - ACTIONS_EXTRA_PACKAGES=
-#      - ACTIONS_CONFIG=    
+      - ACTIONS_EXTRA_PACKAGES=''
+      - ACTIONS_CONFIG=''    
       - DATAHUB_GMS_HOST=datahub-gms
       - DATAHUB_GMS_PORT=8080
       - DATAHUB_GMS_PROTOCOL=http
@@ -9609,9 +9609,6 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
-    {% if DATAHUB_volume_map_data %}
-#      - ./container-volume/datahub/elasticsearch:/usr/share/elasticsearch/data
-    {% endif %}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -9777,7 +9774,7 @@ services:
     init: true
 
   datahub-kafka-setup:
-    image: acryldata/datahub-kafka-setup:{{__DATAHUB_version}}
+    image: acryldata/datahub-kafka-setup:head
     hostname: datahub-kafka-setup
     container_name: datahub-kafka-setup
     labels:

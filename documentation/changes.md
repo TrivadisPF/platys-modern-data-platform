@@ -7,6 +7,7 @@ See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/plat
 ### Version upgrades
 
  * Update `openmetadata` to `1.11.6` 
+ * Update `datahub` to `v1.4.0-preview`
 
 ### Enhancements
 
@@ -15,6 +16,7 @@ See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/plat
 ### Bug Fixes
 
  * fix bug in DataHub support where gms service had wrong dependency
+ * fix Datahub CLI version for ingestion
  * fix setup of OpenMetadata catalog
 
 ## What's new in 1.19.0
@@ -56,6 +58,7 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Klag (new kafka lag exporter)
  * Lakevision
  * Graphiti
+ * OpenMetadata
  
 ### Version upgrades
 
