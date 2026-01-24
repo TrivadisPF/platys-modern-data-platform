@@ -149,6 +149,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 5442 | 5432 | hive-metastore-db |
 5443 | 5432 | ehrbase-db |
 5444 | 5432 | xtdb |
+5445 | 5432 | odd-platform-db |
 5500 | 5500 | oracledb-ee-1 |
 5501 | 5500 | oracledb-ee-1 |
 5502 | 5500 | oracledb-ee-1 |
@@ -844,6 +845,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28396 | 8080 | xtdb |
 28397 | 8081 | lakevision |
 28398 | 8080 | lakevision |
+28399 | 8080 | odd-platform |
 
 ## Ports > 28500
 
