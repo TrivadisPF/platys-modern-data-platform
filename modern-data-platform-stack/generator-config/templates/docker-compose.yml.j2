@@ -10585,6 +10585,7 @@ services:
     restart: {{container_restart_policy}}
   {% endif %}   {#  ODD_PLATFORM_provision_sample_data #}
 
+  {% if ODD_PLATFORM_collector_enabled | default(false) %}
   odd-collector:
     image: ghcr.io/opendatadiscovery/odd-collector:{{__ODD_COLLECTOR_version}}
     container_name: odd-collector
@@ -10594,11 +10595,13 @@ services:
       com.platys.description: "Open Data Discovery Platform (ODD)"
     environment:
       - PLATFORM_HOST_URL=http://odd-platform:8080
+      - TOKEN={{ODD_PLATFORM_token | default(omit) }}
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
+      - ./custom-conf/odd-platform/collector-config:/app/
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -10607,6 +10610,7 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
+    {% endif %}    {# ODD_PLATFORM_collector_enabled #}
 {% endif %}   {#  ODD_PLATFORM_enable #}
 
 {% if AMUNDSEN_enable  | default(false) %}
