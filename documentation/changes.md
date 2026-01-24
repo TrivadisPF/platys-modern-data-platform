@@ -12,7 +12,8 @@ See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/plat
 ### Enhancements
 
  * support for Hive Metastore Iceberg REST Catalog in Apache Spark (catalog `hiverest`)
-
+ * add Monitoring support to Datahub
+ 
 ### Bug Fixes
 
  * fix bug in DataHub support where gms service had wrong dependency
