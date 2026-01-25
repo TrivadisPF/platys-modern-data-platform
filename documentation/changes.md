@@ -4,6 +4,10 @@ See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/plat
 
 ## What's new in 1.19.1
 
+### New Services
+
+ * Open Data Discovery Platform (ODD)
+
 ### Version upgrades
 
  * Update `openmetadata` to `1.11.6` 

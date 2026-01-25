@@ -174,6 +174,9 @@ networks:
 
 {% set __OPENMETADATA_version = OPENMETADATA_version | default('latest') -%}
 
+{% set __ODD_PLATFORM_version = ODD_PLATFORM_version | default('latest') -%}
+{% set __ODD_COLLECTOR_version = ODD_COLLECTOR_version | default('latest') -%}
+
 {% set __AMUNDSEN_FRONTEND_version = AMUNDSEN_FRONTEND_version | default('latest') -%}
 {% set __AMUNDSEN_SEARCH_version = AMUNDSEN_SEARCH_version | default('latest') -%}
 {% set __AMUNDSEN_METADATA_version = AMUNDSEN_METADATA_version | default('latest') -%}
@@ -898,6 +901,8 @@ networks:
   {% set OPAL_enable = false -%}
   {% set ATLAS_enable = false -%}
   {% set DATAHUB_enable = false -%}
+  {% set OPENMETADATA_enable = false -%}
+  {% set ODD_PLATFORM_enable = false -%}
   {% set AMUNDSEN_enable = false -%}
   {% set DATA_PRODUCT_PORTAL_enable = false -%}
   {% set MARQUEZ_enable = false -%}
@@ -10476,6 +10481,170 @@ services:
       - "/opt/airflow/ingestion_dependency.sh"
     restart: {{container_restart_policy}}
 {% endif %}   {#  OPENMETADATA_enable #}
+
+{% if ODD_PLATFORM_enable  | default(false) %}
+  #  ================================== Open Data Discovery Platform (ODD) ========================================== #
+  odd-platform:
+    image: ghcr.io/opendatadiscovery/odd-platform:{{__ODD_PLATFORM_version}}
+    container_name: odd-platform
+    hostname: odd-platform
+    platform: linux/amd64 
+    labels:
+      com.platys.name: "odd-platform"
+      com.platys.description: "Open Data Discovery Platform (ODD)"
+      com.platys.webui.title: "Open Data Discovery Platform UI"
+      com.platys.webui.url: "http://dataplatform:28399"
+      com.platys.restapi.title: "Open Data Discovery Platform REST API"
+      com.platys.restapi.url: "http://dataplatform:28399/api/v3/api-docs"
+    depends_on:
+      odd-platform-db:
+        condition: service_healthy            
+    ports:
+      - 28399:8080
+    environment:
+      - ODD_PLATFORM_BASE_URL=http://${PUBLIC_IP}:28399
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://odd-platform-db:5432/odd_platform_db
+      - SPRING_DATASOURCE_USERNAME=odd_platform
+      - SPRING_DATASOURCE_PASSWORD=abc123!
+      - MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE=health,info,metrics,prometheus
+    {% if PROMETHEUS_enable  | default(false) %}  
+      - MANAGEMENT_METRICS_EXPORT_PROMETHEUS_ENABLED=true   
+    {% endif -%}   {#  PROMETHEUS_enable #}
+    {% if JAEGER_enable  | default(false) %}        
+      - METRICS_EXPORT_ENABLED=true
+      - METRICS_EXPORT_OTLP_ENDPOINT=http://jaeger:14250
+    {% endif -%}   {#  JAEGER_enable #}
+    {% if ODD_PLATFORM_notifications_enabled | default(false) %}        
+      - NOTIFICATIONS_ENABLED=true
+      - NOTIFICATIONS_RECEIVERS_WEBHOOK_URL={{ODD_PLATFORM_notifications_receivers_webhook_url}}
+    {% endif -%}   {#  ODD_PLATFORM_notifications_enabled #}
+      - HOUSEKEEPING_ENABLED=true
+      - HOUSEKEEPING_TTL_RESOLVED_ALERTS_DAYS=30
+      - HOUSEKEEPING_TTL_SEARCH_FACETS_DAYS=30
+      - HOUSEKEEPING_TTL_DATA_ENTITY_DELETE_DAYS=30     
+    {% if (ODD_PLATFORM_auth_type | upper) == 'LOGIN_FORM' | default(false) %}        
+      - AUTH_TYPE={{ODD_PLATFORM_auth_type | default(omit) }}
+      - AUTH_LOGIN-FORM-CREDENTIALS={{ODD_PLATFORM_auth_login_form_credentials | default(omit) }}       
+    {% endif -%}   {#  ODD_PLATFORM_notifications_enabled #}
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 60s    
+
+  odd-platform-db:
+    image: postgres:13.2-alpine
+    container_name: odd-platform-db
+    hostname: odd-platform-db
+    labels:
+      com.platys.name: "postgresql"
+      com.platys.description: "Open Data Discovery Platform (ODD) DB"
+    ports:
+      - 5445:5432
+    environment:
+      - POSTGRES_USER=odd_platform
+      - POSTGRES_PASSWORD=abc123!
+      - POSTGRES_DB=odd_platform_db
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer    
+    {% if ODD_PLATFORM_volume_map_data | default(false) %}
+      - ./container-volume/odd-platform/data:/var/lib/postgresql/data/pgdata:Z
+    {% endif %}       
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}  
+    restart: {{container_restart_policy}}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U odd_platform -d odd_platform_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 120    
+
+  {% if ODD_PLATFORM_provision_sample_data | default(false) %}
+  odd-platform-enricher:
+    image: python:3.9.12-alpine3.15
+    container_name: odd-platform-enricher
+    hostname: odd-platform-enricher
+    labels:
+      com.platys.name: "odd-platform"
+      com.platys.description: "Open Data Discovery Platform (ODD)"
+    depends_on:
+      odd-platform:    
+        condition: service_healthy              
+    environment:
+      - PLATFORM_HOST_URL=http://odd-platform:8080
+      - PYTHONUNBUFFERED=1
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./scripts/odd-platform/injector:/injector
+      - ./scripts/odd-platform/data:/samples      
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    command:
+      - sh
+      - ./injector/start.sh    
+    restart: {{container_restart_policy}}
+  {% endif %}   {#  ODD_PLATFORM_provision_sample_data #}
+
+  {% if ODD_PLATFORM_collector_enabled | default(false) %}
+  odd-collector:
+    image: ghcr.io/opendatadiscovery/odd-collector:{{__ODD_COLLECTOR_version}}
+    container_name: odd-collector
+    hostname: odd-collector
+    labels:
+      com.platys.name: "odd-platform"
+      com.platys.description: "Open Data Discovery Platform (ODD)"
+    depends_on:
+      odd-platform:    
+        condition: service_healthy                 
+    environment:
+      - PLATFORM_HOST_URL=http://odd-platform:8080
+      - TOKEN={{ODD_PLATFORM_token | default(omit) }}
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./custom-conf/odd-platform/collector_config.yaml:/app/collector_config.yaml
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+    {% endif %}    {# ODD_PLATFORM_collector_enabled #}
+{% endif %}   {#  ODD_PLATFORM_enable #}
 
 {% if AMUNDSEN_enable  | default(false) %}
   #  ================================== Amundsen ========================================== #
