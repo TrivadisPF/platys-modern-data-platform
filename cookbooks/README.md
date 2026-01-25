@@ -1,4 +1,4 @@
-# Modern Data Platform Cookbooks  - v1.19.0
+# Modern Data Platform Cookbooks  - v1.19.1
 
 Inhere we are documenting cookbooks on how to use the platform:
 
