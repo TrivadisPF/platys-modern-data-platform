@@ -2,6 +2,9 @@
 
 Inhere we are documenting cookbooks on how to use the platform:
 
+ * **Data Catalogs**
+   * [Using Open Data Discovery Platform (ODD)](./recipes/using-odd/README.md) - `1.19.1`
+
  * **Airflow**
    * [Schedule and Run Simple Python Application with Airflow](./recipes/airflow-schedule-python-app/README.md) - `1.16.0`
 
