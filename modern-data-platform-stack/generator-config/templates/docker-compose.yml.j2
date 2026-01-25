@@ -10494,6 +10494,8 @@ services:
       com.platys.description: "Open Data Discovery Platform (ODD)"
       com.platys.webui.title: "Open Data Discovery Platform UI"
       com.platys.webui.url: "http://dataplatform:28399"
+      com.platys.restapi.title: "Open Data Discovery Platform REST API"
+      com.platys.restapi.url: "http://dataplatform:28399/api/v3/api-docs"
     depends_on:
       odd-platform-db:
         condition: service_healthy            
@@ -10502,7 +10504,27 @@ services:
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://odd-platform-db:5432/odd_platform_db
       - SPRING_DATASOURCE_USERNAME=odd_platform
-      - SPRING_DATASOURCE_PASSWORD=abc123!
+      - SPRING_DATASOURCE_PASSWORD=abc123
+      - MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE=health,info,metrics,prometheus
+    {% if PROMETHEUS_enable  | default(false) %}  
+      - MANAGEMENT_METRICS_EXPORT_PROMETHEUS_ENABLED="true"      
+    {% endif -%}   {#  PROMETHEUS_enable #}
+    {% if JAEGER_enable  | default(false) %}        
+      - METRICS_EXPORT_ENABLED=true
+      - METRICS_EXPORT_OTLP_ENDPOINT=http://jaeger:14250
+    {% endif -%}   {#  JAEGER_enable #}
+    {% if ODD_PLATFORM_notifications_enabled | default(false) %}        
+      - NOTIFICATIONS_ENABLED=true
+      - NOTIFICATIONS_RECEIVERS_WEBHOOK_URL={{ODD_PLATFORM_notifications_receivers_webhook_url}}
+    {% endif -%}   {#  ODD_PLATFORM_notifications_enabled #}
+      - HOUSEKEEPING_ENABLED=true
+      - HOUSEKEEPING_TTL_RESOLVED_ALERTS_DAYS=30
+      - HOUSEKEEPING_TTL_SEARCH_FACETS_DAYS=30
+      - HOUSEKEEPING_TTL_DATA_ENTITY_DELETE_DAYS=30     
+      - AUTH_TYPE={{ODD_PLATFORM_auth_type | default(DISABLED) }}
+    {% if (ODD_PLATFORM_auth_type | upper) == 'LOGIN_FORM' | default(false) %}        
+      - AUTH_LOGIN-FORM-CREDENTIALS={{ODD_PLATFORM_auth_login_form_credentials | default(omit) }}       
+    {% endif -%}   {#  ODD_PLATFORM_notifications_enabled #}
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -10516,6 +10538,12 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 60s    
 
   odd-platform-db:
     image: postgres:13.2-alpine
@@ -10561,7 +10589,8 @@ services:
       com.platys.name: "odd-platform"
       com.platys.description: "Open Data Discovery Platform (ODD)"
     depends_on:
-      - odd-platform      
+      odd-platform:    
+        condition: service_healthy              
     environment:
       - PLATFORM_HOST_URL=http://odd-platform:8080
       - PYTHONUNBUFFERED=1
@@ -10590,11 +10619,12 @@ services:
     image: ghcr.io/opendatadiscovery/odd-collector:{{__ODD_COLLECTOR_version}}
     container_name: odd-collector
     hostname: odd-collector
-    depends_on:
-      - odd-platform    
     labels:
       com.platys.name: "odd-platform"
       com.platys.description: "Open Data Discovery Platform (ODD)"
+    depends_on:
+      odd-platform:    
+        condition: service_healthy                 
     environment:
       - PLATFORM_HOST_URL=http://odd-platform:8080
       - TOKEN={{ODD_PLATFORM_token | default(omit) }}
