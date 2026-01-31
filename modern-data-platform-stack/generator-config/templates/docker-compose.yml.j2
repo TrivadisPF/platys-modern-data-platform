@@ -5893,7 +5893,13 @@ services:
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
-    command: --config /data/{{SHADOW_TRAFFIC_config_file}} --metrics-port 9400 {{'--with-studio' if SHADOW_TRAFFIC_with_studio | default(false) else ''}}
+    command: |
+      --config /data/{{SHADOW_TRAFFIC_config_file}}
+      --metrics-port 9400
+      --reload {{SHADOW_TRAFFIC_reload_policy | default(omit) }}
+      {{'--watch' if SHADOW_TRAFFIC_watch_config_file_change or SHADOW_TRAFFIC_with_studio | default(false) else ''}}
+      {{'--sample ' ~ SHADOW_TRAFFIC_sample if SHADOW_TRAFFIC_sample is defined and SHADOW_TRAFFIC_sample and SHADOW_TRAFFIC_sample | length | default(false) else ''}}
+      {{'--with-studio' if SHADOW_TRAFFIC_with_studio | default(false) else ''}}
     restart: {{container_restart_policy}}
 {% endif %}   {# SHADOW_TRAFFIC_enable #}
 
