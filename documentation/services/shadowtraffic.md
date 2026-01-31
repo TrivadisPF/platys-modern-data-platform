@@ -13,4 +13,10 @@ platys gen
 
 ## How to use it?
 
-Place a config into the `./scripts/shadowtraffic` folder.
+Place a config into the `./scripts/shadowtraffic` folder. By default 
+
+You can use the following environment variables in the config file:
+
+* `KAFKA_BOOTSTRAP_SERVERS` - for the Kafka bootstrap server
+* `KAFKA_CONFLUENT_SCHEMA_REGISTRY_URL` - the URL of the schema registry
+
