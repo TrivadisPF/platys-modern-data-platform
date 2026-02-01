@@ -5915,7 +5915,14 @@ services:
       - POSTGRESQL_DATABASE={{ns.postgresqlDatabase}}      
       - POSTGRESQL_USER={{ns.postgresqlUser}}
       - POSTGRESQL_PASSWORD={{ns.postgresqlPassword}}      
-    {% endif %}  
+    {% endif %}  {#  POSTGRESQL_enable #}
+    {%if MINIO_enable or external['S3_enable'] | default(false) %}
+      - S3_ENDPOINT={{s3Endpoint | default(omit) }}
+      - S3_PATH_STYLE_ACCESS='{{s3PathStyleAccess}}'
+      - AWS_REGION={{s3DefaultRegion | default(omit) }}
+      - AWS_ACCESS_KEY_ID={{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
+      - AWS_SECRET_ACCESS_KEY={{s3SecretAccessKey}}
+    {% endif %} {#  MINIO_enable #}
     volumes:
       - ./data-transfer:/data-transfer
       - ./scripts/shadowtraffic:/data      

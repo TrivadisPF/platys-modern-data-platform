@@ -33,6 +33,14 @@ if `POSTGRESQL_enable` is set to `true` (internal or external)
 * `POSTGRESQL_USER` -  the user
 * `POSTGRESQL_PASSWORD` - the password
 
+if `MINIO_enable` or external `S3_enable` is set to `true`
+
+* `S3_ENDPOINT` - the endpoint of the S3 service
+* `S3_PATH_STYLE_ACCESS` - use path style access style
+* `AWS_REGION` - the region, will be automatically used by Shadowtraffic
+* `AWS_ACCESS_KEY_ID` - the access key id, will be automatically used by Shadowtraffic
+* `AWS_SECRET_ACCESS_KEY`- the secret access key id, will be automatically used by Shadowtraffic
+
 you can then use them as shown in be snippet below for the Kafka bootstrap server:
 
 ```json
