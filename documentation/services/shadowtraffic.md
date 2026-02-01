@@ -17,8 +17,21 @@ Place a config into the `./scripts/shadowtraffic` folder. By default
 
 You can use the following environment variables in the config file:
 
+if `KAFKA_enable is` set to `true` (internal or external)
+
 * `KAFKA_BOOTSTRAP_SERVERS` - for the Kafka bootstrap server
+
+if `SCHEMA_REGISTRY_enable` is set to `true` (internal or external)
+
 * `KAFKA_CONFLUENT_SCHEMA_REGISTRY_URL` - the URL of the schema registry
+
+if `POSTGRESQL_enable` is set to `true` (internal or external)
+
+* `POSTGRESQL_HOST` - the host of the postgresql db
+* `POSTGRESQL_PORT` - the port of the postgresql db
+* `POSTGRESQL_DATABASE` - the default database
+* `POSTGRESQL_USER` -  the user
+* `POSTGRESQL_PASSWORD` - the password
 
 you can then use them as shown in be snippet below for the Kafka bootstrap server:
 

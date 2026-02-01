@@ -1529,6 +1529,21 @@ networks:
   {% set adlsAccessKey = '${PLATYS_AZURE_ADLS_ACCESS_KEY:?PLATYS_AZURE_ADLS_ACCESS_KEY must be set either in .env or as an environment variable}' %}
 {% endif %}   {# external['s3Endpoint'] #}
 
+{#  ================================== PostgreSQL Settings ========================================== #}
+{% if not (external['POSTGRESQL_enable']) | default(false) %}
+    {% set ns.postgresqlHost = external['POSTGRESQL_host'] %}
+    {% set ns.postgresqlPort = external['POSTGRESQL_port'] %}
+    {% set ns.postgresqlDatabase = external['POSTGRESQL_database'] %}
+    {% set ns.postgresqlUser = '${PLATYS_AWS_SECRET_ACCESS_KEY:?PLATYS_AWS_SECRET_ACCESS_KEY must be set either in .env or as an environment variable}' %}
+    {% set ns.postgresqlPassword = '${PLATYS_AWS_SECRET_ACCESS_KEY:?PLATYS_AWS_SECRET_ACCESS_KEY must be set either in .env or as an environment variable}' %}
+{% else %}
+    {% set ns.postgresqlHost = 'postgresql' %}
+    {% set ns.postgresqlPort = 5432 %}
+    {% set ns.postgresqlDatabase = '{{POSTGRESQL_database | default('demodb') }}' %}
+    {% set ns.postgresqlUser = '{{POSTGRESQL_user | default('demo') }}' %}
+    {% set ns.postgresqlPassword = '${PLATYS_POSTGRESQL_PASSWORD:-{{POSTGRESQL_password | default('abc123!') }}}' %}
+{% endif %}   {# external['POSTGRESQL_enable'] #}
+
 {#  ================================== Datahub Settings ========================================== #}
 
 {% if (external['DATAHUB_enable']) | default(false) %}
@@ -5889,6 +5904,13 @@ services:
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
+    {% if (POSTGRESQL_enable or external['POSTGRESQL_enable']) | default(false) %}
+      - POSTGRESQL_HOST='{{ns.postgresqlHost}}'
+      - POSTGRESQL_PORT={{ns.postgresqlPort}}
+      - POSTGRESQL_DATABASE={{ns.postgresqlDatabase}}      
+      - POSTGRESQL_USER={{ns.postgresqlUser}}
+      - POSTGRESQL_PASSWORD={{ns.postgresqlPassword}}      
+    {% endif %}  
     volumes:
       - ./data-transfer:/data-transfer
       - ./scripts/shadowtraffic:/data      
