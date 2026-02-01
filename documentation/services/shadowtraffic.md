@@ -20,3 +20,20 @@ You can use the following environment variables in the config file:
 * `KAFKA_BOOTSTRAP_SERVERS` - for the Kafka bootstrap server
 * `KAFKA_CONFLUENT_SCHEMA_REGISTRY_URL` - the URL of the schema registry
 
+you can then use them as shown in be snippet below for the Kafka bootstrap server:
+
+```json
+    "connections": {
+        "kafka": {
+            "kind": "kafka",
+            "producerConfigs": {
+                "bootstrap.servers": {
+                    "_gen": "env",
+                    "var": "KAFKA_BOOTSTRAP_SERVERS"
+                },
+                "key.serializer": "io.shadowtraffic.kafka.serdes.JsonSerializer",
+                "value.serializer": "io.shadowtraffic.kafka.serdes.JsonSerializer"
+            }
+        }
+    }
+```
