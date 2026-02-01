@@ -3725,7 +3725,7 @@ services:
     {% endif -%}   {#  APICURIO_SCHEMA_REGISTRY_storage == kafkasql #}
     {% if (APICURIO_SCHEMA_REGISTRY_storage | lower) == 'sql'  %}
       APICURIO_STORAGE_SQL_KIND: 'postgresql'
-      APICURIO_DATASOURCE_URL: jdbc:postgresql://postgresql/{{APICURIO_SCHEMA_REGISTRY_sql_storage_database}}
+      APICURIO_DATASOURCE_URL: jdbc:postgresql://{{ns.postgresqlHost}}/{{APICURIO_SCHEMA_REGISTRY_sql_storage_database}}
       APICURIO_DATASOURCE_USERNAME: {{APICURIO_SCHEMA_REGISTRY_sql_storage_user}}
       APICURIO_DATASOURCE_PASSWORD: {{APICURIO_SCHEMA_REGISTRY_sql_storage_password}}§
     {% endif -%}   {#  APICURIO_SCHEMA_REGISTRY_storage == sql #}
@@ -25220,11 +25220,11 @@ services:
       SECRET: '6116487b-cda1-52c2-b5b5-c8022c45e263'
 
       DB_CLIENT: 'pg'
-      DB_HOST: 'postgresql'
-      DB_PORT: '5432'
-      DB_DATABASE: 'postgres'
-      DB_USER: 'postgres'
-      DB_PASSWORD: 'abc123!'
+      DB_HOST: '{{ns.postgresqlHost}}'
+      DB_PORT: '{{ns.postgresqlPort}}'
+      DB_DATABASE: '{{ns.postgresqlDatabase}}'
+      DB_USER: '{{ns.postgresqlUser}}'
+      DB_PASSWORD: '{{ns.postgresqlPassword}}'
 
       CACHE_ENABLED: 'true'
       CACHE_STORE: 'redis'
@@ -26726,11 +26726,11 @@ services:
       - QUARKUS_CASSANDRA_KEYSPACE=nessie
     {%elif NESSIE_store_type == 'postgresql' %}
       - NESSIE_VERSION_STORE_TYPE=JDBC
-      - NESSIE_VERSION_STORE_PERSIST_JDBC_DATASOURCE=postgresql
+      - NESSIE_VERSION_STORE_PERSIST_JDBC_DATASOURCE={{ns.postgresqlHost}}
       - QUARKUS_DATASOURCE_POSTGRESQL_DB_KIND=postgresql
-      - QUARKUS_DATASOURCE_POSTGRESQL_USERNAME={{POSTGRESQL_user}}
-      - QUARKUS_DATASOURCE_POSTGRESQL_PASSWORD={{POSTGRESQL_password}}
-      - QUARKUS_DATASOURCE_POSTGRESQL_JDBC_URL=jdbc:postgresql://postgresql:5432/{{POSTGRESQL_database}}
+      - QUARKUS_DATASOURCE_POSTGRESQL_USERNAME={{ns.postgresqlUser}}
+      - QUARKUS_DATASOURCE_POSTGRESQL_PASSWORD={{ns.postgresqlPassword}}
+      - QUARKUS_DATASOURCE_POSTGRESQL_JDBC_URL=jdbc:postgresql://{{ns.postgresqlHost}}:{{ns.postgresqlPort}}/{{ns.postgresqlDatabase}}
     {%elif NESSIE_store_type == 'mysql' %}
       - NESSIE_VERSION_STORE_TYPE=JDBC
       - NESSIE_VERSION_STORE_PERSIST_JDBC_DATASOURCE=mariadb
