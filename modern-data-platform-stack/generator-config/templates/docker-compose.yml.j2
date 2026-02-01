@@ -1530,6 +1530,8 @@ networks:
 {% endif %}   {# external['s3Endpoint'] #}
 
 {#  ================================== PostgreSQL Settings ========================================== #}
+
+{% set ns1 = namespace(postgresqlPassword='') %}
 {% if (external['POSTGRESQL_enable']) | default(false) %}
     {% set ns.postgresqlHost = external['POSTGRESQL_host'] %}
     {% set ns.postgresqlPort = external['POSTGRESQL_port'] %}
@@ -1541,9 +1543,8 @@ networks:
     {% set ns.postgresqlPort = 5432 %}
     {% set ns.postgresqlDatabase = POSTGRESQL_database | default('demodb') %}
     {% set ns.postgresqlUser = POSTGRESQL_user | default('demo') %}
-  {%if '${PLATYS_POSTGRESQL_PASSWORD}' is defined and '${PLATYS_POSTGRESQL_PASSWORD}' | length %}
     {% set ns.postgresqlPassword = '${PLATYS_POSTGRESQL_PASSWORD}' %}
-  {%else %}
+  {%if not (ns.postgresqlPassword is defined and ns.postgresqlPassword | length) %}
     {% set ns.postgresqlPassword = POSTGRESQL_password | default('abc123!') %}
   {%endif %}
 {% endif %}   {# external['POSTGRESQL_enable'] #}
