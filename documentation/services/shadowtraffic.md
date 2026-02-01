@@ -55,6 +55,35 @@ you can then use them as shown in be snippet below for the Kafka bootstrap serve
                 "key.serializer": "io.shadowtraffic.kafka.serdes.JsonSerializer",
                 "value.serializer": "io.shadowtraffic.kafka.serdes.JsonSerializer"
             }
+        },
+        "postgres": {
+            "kind": "postgres",
+            "tablePolicy": "dropAndCreate",
+            "connectionConfigs": {
+                "host": {
+                    "_gen": "env",
+                    "var": "POSTGRESQL_HOST"
+                },
+                "port": {
+                    "_gen": "env",
+                    "var": "POSTGRESQL_PORT",
+                    "as": "integer"
+                },
+                "db":{
+                    "_gen": "env",
+                    "var": "POSTGRESQL_DATABASE"
+                },
+                "username": {
+                    "_gen": "env",
+                    "var": "POSTGRESQL_USER"
+                },
+                "password": {
+                    "_gen": "env",
+                    "var": "POSTGRESQL_PASSWORD"
+                }
+            }
         }
+        
+        
     }
 ```
