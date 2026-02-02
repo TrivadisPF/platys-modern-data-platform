@@ -1545,6 +1545,22 @@ networks:
   {% set ns.postgresqlPassword = POSTGRESQL_password %}
 {% endif %}   {# external['POSTGRESQL_enable'] #}
 
+{#  ================================== MySQL Settings ========================================== #}
+
+{% if (external['MYSQL_enable']) | default(false) %}
+  {% set ns.mysqlHost = external['MYSQL_host'] %}
+  {% set ns.mysqlPort = external['MYSQL_port'] %}
+  {% set ns.mysqlDatabase = external['MYSQL_database'] %}
+  {% set ns.mysqlUser = '${PLATYS_AWS_SECRET_ACCESS_KEY:?PLATYS_AWS_SECRET_ACCESS_KEY must be set either in .env or as an environment variable}' %}
+  {% set ns.mysqlPassword = '${PLATYS_AWS_SECRET_ACCESS_KEY:?PLATYS_AWS_SECRET_ACCESS_KEY must be set either in .env or as an environment variable}' %}
+{% else %}
+  {% set ns.mysqlHost = 'mysql' %}
+  {% set ns.mysqlPort = 3306 %}
+  {% set ns.mysqlDatabase = MYSQL_database %}
+  {% set ns.mysqlUser = MYSQL_user %}
+  {% set ns.mysqlPassword = MYSQL_password %}
+{% endif %}   {# external['MYSQL_enable'] #}
+
 {#  ================================== Datahub Settings ========================================== #}
 
 {% if (external['DATAHUB_enable']) | default(false) %}
@@ -5912,6 +5928,13 @@ services:
       - POSTGRESQL_USER={{ns.postgresqlUser}}
       - POSTGRESQL_PASSWORD={{ns.postgresqlPassword}}      
     {% endif -%}  {#  POSTGRESQL_enable #}
+    {% if (MYSQL_enable or external['MYSQL_enable']) | default(false) %}
+      - MYSQL_HOST={{ns.mysqlHost}}
+      - MYSQL_PORT={{ns.mysqlPort}}
+      - MYSQL_DATABASE={{ns.mysqlDatabase}}      
+      - MYSQL_USER={{ns.mysqlUser}}
+      - MYSQL_PASSWORD={{ns.mysqlPassword}}      
+    {% endif -%}  {#  MYSQL_enable #}
     {%if MINIO_enable or external['S3_enable'] | default(false) %}
       - S3_ENDPOINT={{s3Endpoint | default(omit) }}
       - S3_PATH_STYLE_ACCESS='{{s3PathStyleAccess}}'
