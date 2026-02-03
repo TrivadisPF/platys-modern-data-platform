@@ -23,7 +23,7 @@ if `KAFKA_enable is` set to `true` (internal or external)
 
 if `SCHEMA_REGISTRY_enable` is set to `true` (internal or external)
 
-* `KAFKA_CONFLUENT_SCHEMA_REGISTRY_URL` - the URL of the schema registry
+* `KAFKA_SCHEMA_REGISTRY_URL` - the URL of the schema registry
 
 if `POSTGRESQL_enable` is set to `true` (internal or external)
 
