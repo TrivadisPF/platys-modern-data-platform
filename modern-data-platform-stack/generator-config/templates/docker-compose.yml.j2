@@ -25150,9 +25150,7 @@ services:
       - ./conf/presto/single/config.properties:{{presto_etc_dir}}/config.properties
   {% endif %}
       - ./conf/presto/cluster/node.properties:{{presto_etc_dir}}/node.properties
-  {%if MINIO_enable or external['S3_enable'] | default(false) %}
-      - './conf/presto/catalog/minio.properties:{{presto_etc_dir}}/catalog/minio.properties'
-  {% endif %}
+
 {% if MINIO_enable or external['S3_enable'] | default(false) %}
   {%if HIVE_METASTORE_enable | default(false) %}
       - './conf/presto/catalog/minio.properties:{{presto_etc_dir}}/catalog/minio.properties'
@@ -25190,6 +25188,18 @@ services:
       - './conf/presto/catalog/iceberg-unity.properties:{{presto_etc_dir}}/catalog/iceberg_unity.properties'
   {% endif %}
 {%- endif -%}  {#  MINIO_enable #}
+{%- if (KAFKA_enable or external['KAFKA_enable']) and (PRESTO_kafka_descriptor_supplier == 'schema-registry' or (PRESTO_kafka_descriptor_supplier == 'file' and PRESTO_kafka_table_names))  | default(false) %}
+      - './conf/{{conf_dir}}/catalog/kafka-{{ 'file' if PRESTO_kafka_descriptor_supplier | lower == 'file' else 'schema-registry' }}.properties:/catalog/kafka.properties'
+      - './conf/{{conf_dir}}/kafka/descriptor:{{presto_etc_dir}}/kafka/'
+  {% if ns.secureKafkaEnabled and ns.securityProtocolBROKER == 'SASL_PLAINTEXT' %}
+      - './security/kafka/sasl-scram/client.properties:{{presto_etc_dir}}/kafka-configuration.properties'
+  {% else %}
+      - './conf/{{conf_dir}}/kafka/client.properties:{{presto_etc_dir}}/kafka-configuration.properties'
+  {%- endif -%}
+  {%- if ns.secureKafkaEnabled and ns.securityProtocol == 'SSL' %}
+      - './security/kafka/client-certs:/certs'  
+  {%- endif -%}
+{%- endif -%}
 
   {%if HADOOP_enable | default(false) %}
       - './conf/presto/catalog/hdfs.properties:{{presto_etc_dir}}/catalog/hdfs.properties'
@@ -25401,9 +25411,57 @@ services:
       - ./data-transfer:/data-transfer
       - ./conf/presto/cluster/worker.config.properties:{{presto_etc_dir}}/config.properties
       - ./conf/presto/cluster/node.properties:{{presto_etc_dir}}/node.properties
-  {%if MINIO_enable or external['S3_enable'] | default(false) %}
+
+{% if MINIO_enable or external['S3_enable'] | default(false) %}
+  {%if HIVE_METASTORE_enable | default(false) %}
       - './conf/presto/catalog/minio.properties:{{presto_etc_dir}}/catalog/minio.properties'
   {% endif %}
+  {%if SPARK_table_format_type == 'iceberg' %}
+    {%if HIVE_METASTORE_enable | default(false) %}
+      - './conf/presto/catalog/iceberg-hive.properties:{{presto_etc_dir}}/catalog/iceberg_hive.properties'
+    {% if __HIVE_METASTORE_version == "4.2.0" | default(false) %}
+      - './conf/presto/catalog/iceberg-hive-rest.properties:{{presto_etc_dir}}/catalog/iceberg_hive_rest.properties'
+    {% endif %}  
+    {% endif %}  
+    {%if TRINO_with_iceberg_rest_catalog | default(false) %}
+      - './conf/presto/catalog/iceberg-rest.properties:{{presto_etc_dir}}/catalog/iceberg_rest.properties'
+    {% endif %}
+    {%if LAKEKEEPER_enable | default(false) %}
+      - './conf/presto/catalog/iceberg-lakekeeper.properties:{{presto_etc_dir}}/catalog/iceberg_lakekeeper.properties'
+    {% endif %}
+    {%if POLARIS_enable | default(false) %}
+      - './conf/presto/catalog/iceberg-polaris.properties:{{presto_etc_dir}}/catalog/iceberg_polaris.properties'
+    {% endif %}
+    {%if GRAVITINO_enable | default(false) %}
+      - './conf/presto/catalog/iceberg-gravitino.properties:{{presto_etc_dir}}/catalog/iceberg_gravitino.properties'
+    {% endif %}
+    {%if NESSIE_enable | default(false) %}
+      - './conf/presto/catalog/iceberg-nessie.properties:{{presto_etc_dir}}/catalog/iceberg_nessie.properties'
+    {% endif %}
+  {% endif -%}  {#  SPARK_table_format_type == 'iceberg' #}
+  {%if SPARK_table_format_type == 'delta' | default(false) %}
+      - './conf/presto/catalog/delta.properties:{{presto_etc_dir}}/catalog/delta.properties'
+  {% endif -%} 
+  {%if SPARK_table_format_type == 'hudi' | default(false) %}
+      - './conf/presto/catalog/hudi.properties:{{presto_etc_dir}}/catalog/hudi.properties'
+  {% endif %}
+  {%if UNITY_CATALOG_enable | default(false) %}
+      - './conf/presto/catalog/iceberg-unity.properties:{{presto_etc_dir}}/catalog/iceberg_unity.properties'
+  {% endif %}
+{%- endif -%}  {#  MINIO_enable #}
+{%- if (KAFKA_enable or external['KAFKA_enable']) and (PRESTO_kafka_descriptor_supplier == 'schema-registry' or (PRESTO_kafka_descriptor_supplier == 'file' and PRESTO_kafka_table_names))  | default(false) %}
+      - './conf/{{conf_dir}}/catalog/kafka-{{ 'file' if PRESTO_kafka_descriptor_supplier | lower == 'file' else 'schema-registry' }}.properties:/catalog/kafka.properties'
+      - './conf/{{conf_dir}}/kafka/descriptor:{{presto_etc_dir}}/kafka/'
+  {% if ns.secureKafkaEnabled and ns.securityProtocolBROKER == 'SASL_PLAINTEXT' %}
+      - './security/kafka/sasl-scram/client.properties:{{presto_etc_dir}}/kafka-configuration.properties'
+  {% else %}
+      - './conf/{{conf_dir}}/kafka/client.properties:{{presto_etc_dir}}/kafka-configuration.properties'
+  {%- endif -%}
+  {%- if ns.secureKafkaEnabled and ns.securityProtocol == 'SSL' %}
+      - './security/kafka/client-certs:/certs'  
+  {%- endif -%}
+{%- endif -%}  
+
   {%if HADOOP_enable | default(false) %}
       - './conf/{{conf_dir}}/catalog/hdfs.properties:/catalog/hdfs.properties'
   {% endif %}
