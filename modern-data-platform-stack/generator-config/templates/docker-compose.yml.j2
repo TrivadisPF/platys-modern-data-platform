@@ -24997,12 +24997,10 @@ services:
 {% endif %}   {#  TRINO_LB_enable #}
 
 {% if PRESTO_enable | default(false) %}
+  {% set presto_etc_dir = '/opt/presto/default/etc' %}
   #  ================================== Presto ========================================== #
   presto-1:
-  {% if (PRESTO_edition | lower) == 'prestodb' %}
     image: prestodb/presto:{{__PRESTO_version}}
-    {% set presto_etc_dir = '/opt/presto/default/etc' %}
-  {% endif -%}   {#  PRESTO_edition #}
     hostname: presto-1
     container_name: presto-1
     labels:
@@ -25044,11 +25042,9 @@ services:
 
   {% if (PRESTO_install | lower) == 'cluster'  %}
     {% for numWorkers in range(PRESTO_workers | default(1) ) %}
-  presto-worker-{{loop.index}}:
-  {% if (PRESTO_edition | lower) == 'prestodb' %}
-    image: prestodb/presto:{{__PRESTO_version}}
     {% set presto_etc_dir = '/opt/presto/default/etc' %}
-  {% endif -%}   {#  PRESTO_edition #}
+  presto-worker-{{loop.index}}:
+    image: prestodb/presto:{{__PRESTO_version}}
     hostname: presto-worker-{{loop.index}}
     container_name: presto-worker-{{loop.index}}
     {%if use_timezone | default(false) %}
