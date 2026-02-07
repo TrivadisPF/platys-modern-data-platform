@@ -25002,6 +25002,11 @@ services:
 
 {% if PRESTO_enable | default(false) %}
   {% set presto_etc_dir = '/opt/presto-server/etc' %}
+  {% if (PRESTO_install | lower) == 'cluster'  %}
+    {% set deployment_type = 'cluster' %}
+  {% else %}
+    {% set deployment_type = 'single' %}
+  {% endif %}
   #  ================================== Presto ========================================== #
   presto-1:
     image: prestodb/presto:{{__PRESTO_version}}
@@ -25144,13 +25149,8 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
-  {% if (PRESTO_install | lower) == 'cluster'  %}
-      - ./conf/presto/cluster/coordinator.config.properties:{{presto_etc_dir}}/config.properties
-  {% else %}
-      - ./conf/presto/single/config.properties:{{presto_etc_dir}}/config.properties
-  {% endif %}
-      - ./conf/presto/cluster/node.properties:{{presto_etc_dir}}/node.properties
-
+      - ./conf/presto/{{deployment_type}}/config.properties:{{presto_etc_dir}}/config.properties
+      - ./conf/presto/{{deployment_type}}/node.properties:{{presto_etc_dir}}/node.properties
 {% if MINIO_enable or external['S3_enable'] | default(false) %}
   {%if HIVE_METASTORE_enable | default(false) %}
       - './conf/presto/catalog/minio.properties:{{presto_etc_dir}}/catalog/minio.properties'
@@ -25409,8 +25409,8 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
-      - ./conf/presto/cluster/worker.config.properties:{{presto_etc_dir}}/config.properties
-      - ./conf/presto/cluster/node.properties:{{presto_etc_dir}}/node.properties
+      - ./conf/presto/{{deployment_type}}/worker.config.properties:{{presto_etc_dir}}/config.properties
+      - ./conf/presto/{{deployment_type}}/node.properties:{{presto_etc_dir}}/node.properties
 
 {% if MINIO_enable or external['S3_enable'] | default(false) %}
   {%if HIVE_METASTORE_enable | default(false) %}
