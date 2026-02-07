@@ -24177,6 +24177,10 @@ services:
       KAFKA_TABLE_DESCRIPTOR_DIR: '{{trino_etc_dir}}/kafka/'
   {% endif %}
   {% if TRINO_with_hive_metastore_db_catalog and HIVE_METASTORE_enable | default(false) %}
+      HIVE_METASTORE_DB_TYPE: postgresql
+      HIVE_METASTORE_DB_HOST: hive-metastore-db
+      HIVE_METASTORE_DB_PORT: 5432
+      HIVE_METASTORE_DB_NAME: metastore_db
       HIVE_METASTORE_DB_USER: {{HIVE_METASTORE_db_user | default('hive') }}
       HIVE_METASTORE_DB_PASSWORD: ${PLATYS_HMS_POSTGRESQL_PASSWORD:-{{HIVE_METASTORE_db_password | default('abc123!') }}}
   {% endif %}
@@ -25010,8 +25014,132 @@ services:
       com.platys.webui.url: "http://dataplatform:28081"
     ports:
       - '28081:8080'
+    environment:      
+  {% if HIVE_METASTORE_enable | default(false) %}
+      HMS_ICEBERG_REST_CATALOG_URI: http://{{ns.hiveMetastoreHost}}:{{ns.hiveMetastoreRestCatalogPort}}/iceberg
+      HMS_ICEBERG_REST_CATALOG_WAREHOUSE: {{'s3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
+  {% endif %}
+  {% if PRESTO_with_iceberg_rest_catalog | default(false) %}
+      ICEBERG_REST_CATALOG_URI: {{PRESTO_iceberg_rest_catalog_url if PRESTO_iceberg_rest_catalog_url is defined and PRESTO_iceberg_rest_catalog_url | length else 'http://iceberg-rest-catalog:8181'}}
+      ICEBERG_REST_CATALOG_WAREHOUSE: {{PRESTO_iceberg_rest_catalog_warehouse if PRESTO_iceberg_rest_catalog_warehouse is defined and PRESTO_iceberg_rest_catalog_warehouse | length else 's3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
+  {% endif %}
+  {%if MINIO_enable or external['S3_enable'] | default(false) %}
+      S3_ENDPOINT: {{s3Endpoint | default(omit) }}
+      S3_REGION: {{s3DefaultRegion | default(omit) }}
+      S3_AWS_ACCESS_KEY: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
+      S3_AWS_SECRET_KEY: {{s3SecretAccessKey}}
+      S3_PATH_STYLE_ACCESS: '{{s3PathStyleAccess}}'
+      HIVE_METASTORE_URI: thrift://{{ns.hiveMetastore}}
+      HIVE_STORAGE_FORMAT: '{{PRESTO_hive_storage_format if PRESTO_hive_storage_format is defined and PRESTO_hive_storage_format | length else omit}}'
+      HIVE_COMPRESSION_CODEC: '{{PRESTO_hive_compression_codec if PRESTO_hive_compression_codec is defined and PRESTO_hive_compression_codec | length else omit}}'
+      NESSIE_CATALOG_WAREHOUSE_DIR: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined and SPARK_sql_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/nessie/warehouse'}}
+    {%if LAKEKEEPER_enable | default(false) %}
+      ICEBERG_LAKEKEEPER_CATALOG_URI: {{lakekeeperEndpoint}}
+      ICEBERG_LAKEKEEPER_CATALOG_WAREHOUSE: {{lakekeeperCatalogName}}
+    {% endif %}
+    {%if POLARIS_enable | default(false) %}
+      ICEBERG_POLARIS_CATALOG_URI: {{polarisEndpoint}}
+      ICEBERG_POLARIS_CATALOG_WAREHOUSE: {{polarisCatalogName}}
+      CLIENT_ID: {{POLARIS_client_id | default('admin')}}
+      CLIENT_SECRET: ${PLATYS_POLARIS_CLIENT_SECRET:-{{POLARIS_client_secret | default('abc123!')}}} 
+    {% endif %}
+    {%if GRAVITINO_enable | default(false) %}
+      ICEBERG_GRAVITINO_CATALOG_URI: {{gravitinoEndpoint}}
+      ICEBERG_GRAVITINO_CATALOG_WAREHOUSE:  {{gravitinoCatalogName}}
+    {% endif %}
+  {% endif %}
+  {%if external['ADLS_enable'] | default(false) %}
+      ADLS_STORAGE_ACCOUNT: {{adlsStorageAccount | default(omit) }}
+      ADLS_ACCESS_KEY: {{adlsAccessKey}}
+  {% endif -%}   {#  external['ADLS_enable'] #}
+  {% if (KAFKA_enable or external['KAFKA_enable']) | default(false)  %}
+      KAFKA_NODES: {{ns.bootstrapServers}}
+      KAFKA_SCHEMA_REGISTRY_URL: {{ns.schemaRegistryUrl if ns.schemaRegistryUrl is defined and ns.schemaRegistryUrl | length else omit}}
+      KAFKA_CONFIG_RESOURCES: '{{trino_etc_dir}}/kafka-configuration.properties'
+    {% if ns.secureKafkaEnabled %}
+      KAFKA_SECURITY_PROTOCOL: '{{ns.securityProtocolBROKER}}'
+      {% if ns.securityProtocolBROKER == 'SSL' %}
+      KAFKA_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: "https"
+      KAFKA_SSL_TRUSTSTORE_LOCATION: /certs/client.ts.p12
+      KAFKA_SSL_TRUSTSTORE_PASSWORD: {{KAFKA_client_truststore_password}}
+        {% if KAFKA_ssl_client_authentication_enabled | default(false) %}
+      KAFKA_SSL_KEYSTORE_TYPE: "PKCS12"
+      KAFKA_SSL_KEYSTORE_LOCATION: /certs/client.ks.p12
+      KAFKA_SSL_KEYSTORE_PASSWORD: {{KAFKA_client_keystore_password}}
+      KAFKA_SSL_KEY_PASSWORD: {{KAFKA_client_key_password}}
+        {% endif -%}   {#  KAFKA_ssl_client_authentication_enabled #}
+      {% endif -%}   {#  ns.securityProtocol #}
+    {% else -%}   {#  secureKafkaEnabled #}
+      KAFKA_SECURITY_PROTOCOL: '{{ns.securityProtocolBROKER}}'
+    {% endif -%}   {#  secureKafkaEnabled #}
+      KAFKA_TABLE_NAMES: {{TRINO_kafka_table_names}}
+      KAFKA_DEFAULT_SCHEMA: {{TRINO_kafka_default_schema}}
+      KAFKA_TABLE_DESCRIPTOR_DIR: '{{trino_etc_dir}}/kafka/'
+  {% endif %}
+  {% if PRESTO_with_hive_metastore_db_catalog and HIVE_METASTORE_enable | default(false) %}
+      HIVE_METASTORE_DB_TYPE: postgresql
+      HIVE_METASTORE_DB_HOST: hive-metastore-db
+      HIVE_METASTORE_DB_PORT: 5432
+      HIVE_METASTORE_DB_NAME: metastore_db
+      HIVE_METASTORE_DB_USER: {{HIVE_METASTORE_db_user | default('hive') }}
+      HIVE_METASTORE_DB_PASSWORD: ${PLATYS_HMS_POSTGRESQL_PASSWORD:-{{HIVE_METASTORE_db_password | default('abc123!') }}}
+  {% endif %}
+  {% if POSTGRESQL_enable | default(false) %}
+      POSTGRESQL_DATABASE: {{TRINO_postgresql_database if TRINO_postgresql_database is defined and TRINO_postgresql_database and TRINO_postgresql_database | length else POSTGRESQL_database}}
+      POSTGRESQL_USER: {{TRINO_postgresql_user if TRINO_postgresql_user is defined and TRINO_postgresql_user and TRINO_postgresql_user | length else POSTGRESQL_user}}
+      POSTGRESQL_PASSWORD: {{TRINO_postgresql_password if TRINO_postgresql_password is defined and TRINO_postgresql_password and TRINO_postgresql_password | length else POSTGRESQL_password}}
+  {% endif %}
+  {% if MYSQL_enable | default(false) %}
+      MYSQL_DATABASE: {{MYSQL_database if MYSQL_database is defined and MYSQL_database and MYSQL_database | length else MYSQL_database }}
+      MYSQL_USER: {{MYSQL_user if MYSQL_user is defined and MYSQL_user and MYSQL_user | lenght else MYSQL_user }}
+      MYSQL_PASSWORD: {{MYSQL_password if MYSQL_password is defined and MYSQL_password and MYSQL_password | length else MYSQL_password }}
+  {% endif %}
+  {% if MARIADB_enable | default(false) %}
+      MARIADB_DATABASE: {{MARIADB_database | default('demodb') }}
+      MARIADB_version_USER: {{MARIADB_user | default('demo') }}
+      MARIADB_PASSWORD: {{MARIADB_password | default('abc123!') }}
+  {% endif %}
+  {% if SQLSERVER_enable | default(false) %}
+      SQLSERVER_DATABASE: {{TRINO_sqlserver_database | default('demodb') }}
+      SQLSERVER_USER: {{TRINO_sqlserver_user | default('demo') }}
+      SQLSERVER_PASSWORD: {{TRINO_sqlserver_password | default('abc123!') }}
+  {% endif %}
+  {% if ORACLE_EE_enable or ORACLE_XE_enable | default(false) %}
+      ORACLE_USER: {{TRINO_oracle_user | default('demo') }}
+      ORACLE_PASSWORD: {{TRINO_oracle_password | default('abc123!') }}
+  {% endif %}
+  {% if CLICKHOUSE_enable | default(false) %}
+      CLICKHOUSE_USER: {{CLICKHOUSE_username}}
+      CLICKHOUSE_PASSWORD: ${PLATYS_CLICKHOUSE_PASSWORD:-{{CLICKHOUSE_password}}}
+  {% endif %}
+  {% if external['SNOWFLAKE_enable'] | default(false) %}
+      SNOWFLAKE_ACCOUNT: {{external['SNOWFLAKE_account'] | default(omit) }}
+      SNOWFLAKE_USER: {{external['SNOWFLAKE_user'] | default(omit) }}
+      SNOWFLAKE_PASSWORD: ${PLATYS_SNOWFLAKE_PASSWORD:-{{external['SNOWFLAKE_password']}}}
+      SNOWFLAKE_DATABASE: {{external['SNOWFLAKE_database'] | default(omit) }}
+      SNOWFLAKE_ROLE: {{external['SNOWFLAKE_role'] | default(omit) }}
+      SNOWFLAKE_WAREHOUSE: {{external['SNOWFLAKE_warehouse'] | default(omit) }}
+  {% endif %}
+  {% if SINGLE_STORE_enable | default(false) %}
+      SINGLE_STORE_USER: root
+      SINGLE_STORE_PASSWORD: ${PLATYS_SINGLE_STORE_PASSWORD:-{{SINGLE_STORE_password}}}
+  {% endif %}  
+  {% if REDIS_enable | default(false) %}
+      REDIS_TABLE_NAMES: '{{TRINO_redis_table_names if TRINO_redis_table_names is defined and TRINO_redis_table_names and TRINO_redis_table_names | length else '' }}'
+      REDIS_NODES: redis-1:6379
+  {% endif %}
+  {% if REDIS_STACK_enable | default(false) %}
+      REDIS_TABLE_NAMES: '{{TRINO_redis_stack_table_names if TRINO_redis_stack_table_names is defined and TRINO_redis_stack_table_names and TRINO_redis_stack_table_names | length else '' }}'
+      REDIS_NODES: redis-stack-1:6379
+
+      REDISEARCH_URI: redis://redis-stack-1:6379
+      REDISEARCH_USERNAME:
+      REDISEARCH_PASSWORD:
+      REDISEARCH_CASE_INSENSITIVE_NAMES: false
+      REDISEARCH_CURSOR_COUNT: 1000
+      REDISEARCH_DEFAULT_LIMIT: 10000
+  {% endif %}      
     {%if use_timezone | default(false) %}
-    environment:
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
@@ -25025,12 +25153,106 @@ services:
   {%if MINIO_enable or external['S3_enable'] | default(false) %}
       - './conf/presto/catalog/minio.properties:{{presto_etc_dir}}/catalog/minio.properties'
   {% endif %}
+{% if MINIO_enable or external['S3_enable'] | default(false) %}
+  {%if HIVE_METASTORE_enable | default(false) %}
+      - './conf/presto/catalog/minio.properties:{{presto_etc_dir}}/catalog/minio.properties'
+  {% endif %}
+  {%if SPARK_table_format_type == 'iceberg' %}
+    {%if HIVE_METASTORE_enable | default(false) %}
+      - './conf/presto/catalog/iceberg-hive.properties:{{presto_etc_dir}}/catalog/iceberg_hive.properties'
+    {% if __HIVE_METASTORE_version == "4.2.0" | default(false) %}
+      - './conf/presto/catalog/iceberg-hive-rest.properties:{{presto_etc_dir}}/catalog/iceberg_hive_rest.properties'
+    {% endif %}  
+    {% endif %}  
+    {%if TRINO_with_iceberg_rest_catalog | default(false) %}
+      - './conf/presto/catalog/iceberg-rest.properties:{{presto_etc_dir}}/catalog/iceberg_rest.properties'
+    {% endif %}
+    {%if LAKEKEEPER_enable | default(false) %}
+      - './conf/presto/catalog/iceberg-lakekeeper.properties:{{presto_etc_dir}}/catalog/iceberg_lakekeeper.properties'
+    {% endif %}
+    {%if POLARIS_enable | default(false) %}
+      - './conf/presto/catalog/iceberg-polaris.properties:{{presto_etc_dir}}/catalog/iceberg_polaris.properties'
+    {% endif %}
+    {%if GRAVITINO_enable | default(false) %}
+      - './conf/presto/catalog/iceberg-gravitino.properties:{{presto_etc_dir}}/catalog/iceberg_gravitino.properties'
+    {% endif %}
+    {%if NESSIE_enable | default(false) %}
+      - './conf/presto/catalog/iceberg-nessie.properties:{{presto_etc_dir}}/catalog/iceberg_nessie.properties'
+    {% endif %}
+  {% endif -%}  {#  SPARK_table_format_type == 'iceberg' #}
+  {%if SPARK_table_format_type == 'delta' | default(false) %}
+      - './conf/presto/catalog/delta.properties:{{presto_etc_dir}}/catalog/delta.properties'
+  {% endif -%} 
+  {%if SPARK_table_format_type == 'hudi' | default(false) %}
+      - './conf/presto/catalog/hudi.properties:{{presto_etc_dir}}/catalog/hudi.properties'
+  {% endif %}
+  {%if UNITY_CATALOG_enable | default(false) %}
+      - './conf/presto/catalog/iceberg-unity.properties:{{presto_etc_dir}}/catalog/iceberg_unity.properties'
+  {% endif %}
+{%- endif -%}  {#  MINIO_enable #}
+
   {%if HADOOP_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/hdfs.properties:/catalog/hdfs.properties'
+      - './conf/presto/catalog/hdfs.properties:{{presto_etc_dir}}/catalog/hdfs.properties'
+  {% endif %}
+  {% if PRESTO_with_hive_metastore_db_catalog and HIVE_METASTORE_enable | default(false) %}
+      - './conf/presto/catalog/hive_metastore_db.properties:{{presto_etc_dir}}/catalog/hive_metastore_db.properties'
   {% endif %}
   {% if POSTGRESQL_enable | default(false) %}
-      - './conf/presto/catalog/postgresql.properties:/usr/lib/presto/etc/catalog/postgresql.properties'
+      - './conf/presto/catalog/postgresql.properties:{{presto_etc_dir}}/catalog/postgresql.properties'
   {% endif %}
+  {% if MYSQL_enable | default(false) %}
+      - './conf/presto/catalog/mysql.properties:{{presto_etc_dir}}/catalog/mysql.properties'
+  {% endif %}
+  {% if MARIADB_enable | default(false) %}
+      - './conf/presto/catalog/mariadb.properties:{{presto_etc_dir}}/catalog/mariadb.properties'
+  {% endif %}
+  {% if SQLSERVER_enable | default(false) %}
+      - './conf/presto/catalog/sqlserver.properties:{{presto_etc_dir}}/catalog/sqlserver.properties'
+  {% endif %}
+  {% if ORACLE_EE_enable or ORACLE_XE_enable | default(false) %}
+      - './conf/presto/catalog/oracle.properties:{{presto_etc_dir}}/catalog/oracle.properties'
+  {% endif %}
+  {% if IGNITE_enable | default(false) %}
+      - './conf/presto/catalog/ignite.properties:{{presto_etc_dir}}/catalog/ignite.properties'
+  {% endif %}
+  {% if REDIS_enable | default(false) %}
+      - './conf/presto/catalog/redis.properties:{{presto_etc_dir}}/catalog/redis.properties'
+  {% endif %}
+  {% if REDIS_STACK_enable | default(false) %}
+      - './conf/presto/catalog/redis-stack.properties:{{presto_etc_dir}}/catalog/redis-stack.properties'
+      - './conf/presto/catalog/redis-search.properties:{{presto_etc_dir}}/catalog/redis-search.properties'
+  {% endif %}
+  {% if SINGLE_STORE_enable | default(false) %}
+      - './conf/presto/catalog/singlestore.properties:{{presto_etc_dir}}/catalog/singlestore.properties'
+  {% endif %}
+  {% if MONGO_enable | default(false) %}
+      - './conf/presto/catalog/mongo.properties:{{presto_etc_dir}}/catalog/mongo.properties'
+  {% endif %}
+  {% if ELASTICSEARCH_enable | default(false) %}
+      - './conf/presto/catalog/elasticsearch.properties:{{presto_etc_dir}}/catalog/elasticsearch.properties'
+  {% endif %}
+  {% if OPENSEARCH_enable | default(false) %}
+      - './conf/presto/catalog/opensearch.properties:{{presto_etc_dir}}/catalog/opensearch.properties'
+  {% endif %}
+  {% if PINOT_enable | default(false) %}
+      - './conf/presto/catalog/pinot.properties:{{presto_etc_dir}}/catalog/pinot.properties'
+  {% endif %}
+  {% if DRUID_enable | default(false) %}
+      - './conf/presto/catalog/druid.properties:{{presto_etc_dir}}/catalog/druid.properties'
+  {% endif %}
+  {% if CLICKHOUSE_enable | default(false) %}
+      - './conf/presto/catalog/clickhouse.properties:{{presto_etc_dir}}/catalog/clickhouse.properties'
+  {% endif %}
+  {% if external['SNOWFLAKE_enable'] | default(false) %}
+      - './conf/presto/catalog/snowflake.properties:{{presto_etc_dir}}/catalog/snowflake.properties'
+  {% endif %}    
+  {% if PROMETHEUS_enable | default(false) %}
+      - './conf/presto/catalog/prometheus.properties:{{presto_etc_dir}}/catalog/prometheus.properties'
+  {% endif %}
+  {% if LOKI_enable | default(false) %}
+      - './conf/presto/catalog/loki.properties:{{presto_etc_dir}}/catalog/loki.properties'
+  {% endif %}  
+
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -25047,8 +25269,132 @@ services:
     image: prestodb/presto:{{__PRESTO_version}}
     hostname: presto-worker-{{loop.index}}
     container_name: presto-worker-{{loop.index}}
-    {%if use_timezone | default(false) %}
     environment:
+  {% if HIVE_METASTORE_enable | default(false) %}
+      HMS_ICEBERG_REST_CATALOG_URI: http://{{ns.hiveMetastoreHost}}:{{ns.hiveMetastoreRestCatalogPort}}/iceberg
+      HMS_ICEBERG_REST_CATALOG_WAREHOUSE: {{'s3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
+  {% endif %}
+  {% if PRESTO_with_iceberg_rest_catalog | default(false) %}
+      ICEBERG_REST_CATALOG_URI: {{PRESTO_iceberg_rest_catalog_url if PRESTO_iceberg_rest_catalog_url is defined and PRESTO_iceberg_rest_catalog_url | length else 'http://iceberg-rest-catalog:8181'}}
+      ICEBERG_REST_CATALOG_WAREHOUSE: {{PRESTO_iceberg_rest_catalog_warehouse if PRESTO_iceberg_rest_catalog_warehouse is defined and PRESTO_iceberg_rest_catalog_warehouse | length else 's3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
+  {% endif %}
+  {%if MINIO_enable or external['S3_enable'] | default(false) %}
+      S3_ENDPOINT: {{s3Endpoint | default(omit) }}
+      S3_REGION: {{s3DefaultRegion | default(omit) }}
+      S3_AWS_ACCESS_KEY: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
+      S3_AWS_SECRET_KEY: {{s3SecretAccessKey}}
+      S3_PATH_STYLE_ACCESS: '{{s3PathStyleAccess}}'
+      HIVE_METASTORE_URI: thrift://{{ns.hiveMetastore}}
+      HIVE_STORAGE_FORMAT: '{{PRESTO_hive_storage_format if PRESTO_hive_storage_format is defined and PRESTO_hive_storage_format | length else omit}}'
+      HIVE_COMPRESSION_CODEC: '{{PRESTO_hive_compression_codec if PRESTO_hive_compression_codec is defined and PRESTO_hive_compression_codec | length else omit}}'
+      NESSIE_CATALOG_WAREHOUSE_DIR: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined and SPARK_sql_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/nessie/warehouse'}}
+    {%if LAKEKEEPER_enable | default(false) %}
+      ICEBERG_LAKEKEEPER_CATALOG_URI: {{lakekeeperEndpoint}}
+      ICEBERG_LAKEKEEPER_CATALOG_WAREHOUSE: {{lakekeeperCatalogName}}
+    {% endif %}
+    {%if POLARIS_enable | default(false) %}
+      ICEBERG_POLARIS_CATALOG_URI: {{polarisEndpoint}}
+      ICEBERG_POLARIS_CATALOG_WAREHOUSE: {{polarisCatalogName}}
+      CLIENT_ID: {{POLARIS_client_id | default('admin')}}
+      CLIENT_SECRET: ${PLATYS_POLARIS_CLIENT_SECRET:-{{POLARIS_client_secret | default('abc123!')}}} 
+    {% endif %}
+    {%if GRAVITINO_enable | default(false) %}
+      ICEBERG_GRAVITINO_CATALOG_URI: {{gravitinoEndpoint}}
+      ICEBERG_GRAVITINO_CATALOG_WAREHOUSE:  {{gravitinoCatalogName}}
+    {% endif %}
+  {% endif %}
+  {%if external['ADLS_enable'] | default(false) %}
+      ADLS_STORAGE_ACCOUNT: {{adlsStorageAccount | default(omit) }}
+      ADLS_ACCESS_KEY: {{adlsAccessKey}}
+  {% endif -%}   {#  external['ADLS_enable'] #}
+  {% if (KAFKA_enable or external['KAFKA_enable']) | default(false)  %}
+      KAFKA_NODES: {{ns.bootstrapServers}}
+      KAFKA_SCHEMA_REGISTRY_URL: {{ns.schemaRegistryUrl if ns.schemaRegistryUrl is defined and ns.schemaRegistryUrl | length else omit}}
+      KAFKA_CONFIG_RESOURCES: '{{trino_etc_dir}}/kafka-configuration.properties'
+    {% if ns.secureKafkaEnabled %}
+      KAFKA_SECURITY_PROTOCOL: '{{ns.securityProtocolBROKER}}'
+      {% if ns.securityProtocolBROKER == 'SSL' %}
+      KAFKA_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: "https"
+      KAFKA_SSL_TRUSTSTORE_LOCATION: /certs/client.ts.p12
+      KAFKA_SSL_TRUSTSTORE_PASSWORD: {{KAFKA_client_truststore_password}}
+        {% if KAFKA_ssl_client_authentication_enabled | default(false) %}
+      KAFKA_SSL_KEYSTORE_TYPE: "PKCS12"
+      KAFKA_SSL_KEYSTORE_LOCATION: /certs/client.ks.p12
+      KAFKA_SSL_KEYSTORE_PASSWORD: {{KAFKA_client_keystore_password}}
+      KAFKA_SSL_KEY_PASSWORD: {{KAFKA_client_key_password}}
+        {% endif -%}   {#  KAFKA_ssl_client_authentication_enabled #}
+      {% endif -%}   {#  ns.securityProtocol #}
+    {% else -%}   {#  secureKafkaEnabled #}
+      KAFKA_SECURITY_PROTOCOL: '{{ns.securityProtocolBROKER}}'
+    {% endif -%}   {#  secureKafkaEnabled #}
+      KAFKA_TABLE_NAMES: {{TRINO_kafka_table_names}}
+      KAFKA_DEFAULT_SCHEMA: {{TRINO_kafka_default_schema}}
+      KAFKA_TABLE_DESCRIPTOR_DIR: '{{trino_etc_dir}}/kafka/'
+  {% endif %}
+  {% if PRESTO_with_hive_metastore_db_catalog and HIVE_METASTORE_enable | default(false) %}
+      HIVE_METASTORE_DB_TYPE: postgresql
+      HIVE_METASTORE_DB_HOST: hive-metastore-db
+      HIVE_METASTORE_DB_PORT: 5432
+      HIVE_METASTORE_DB_NAME: metastore_db
+      HIVE_METASTORE_DB_USER: {{HIVE_METASTORE_db_user | default('hive') }}
+      HIVE_METASTORE_DB_PASSWORD: ${PLATYS_HMS_POSTGRESQL_PASSWORD:-{{HIVE_METASTORE_db_password | default('abc123!') }}}
+  {% endif %}
+  {% if POSTGRESQL_enable | default(false) %}
+      POSTGRESQL_DATABASE: {{TRINO_postgresql_database if TRINO_postgresql_database is defined and TRINO_postgresql_database and TRINO_postgresql_database | length else POSTGRESQL_database}}
+      POSTGRESQL_USER: {{TRINO_postgresql_user if TRINO_postgresql_user is defined and TRINO_postgresql_user and TRINO_postgresql_user | length else POSTGRESQL_user}}
+      POSTGRESQL_PASSWORD: {{TRINO_postgresql_password if TRINO_postgresql_password is defined and TRINO_postgresql_password and TRINO_postgresql_password | length else POSTGRESQL_password}}
+  {% endif %}
+  {% if MYSQL_enable | default(false) %}
+      MYSQL_DATABASE: {{MYSQL_database if MYSQL_database is defined and MYSQL_database and MYSQL_database | length else MYSQL_database }}
+      MYSQL_USER: {{MYSQL_user if MYSQL_user is defined and MYSQL_user and MYSQL_user | lenght else MYSQL_user }}
+      MYSQL_PASSWORD: {{MYSQL_password if MYSQL_password is defined and MYSQL_password and MYSQL_password | length else MYSQL_password }}
+  {% endif %}
+  {% if MARIADB_enable | default(false) %}
+      MARIADB_DATABASE: {{MARIADB_database | default('demodb') }}
+      MARIADB_version_USER: {{MARIADB_user | default('demo') }}
+      MARIADB_PASSWORD: {{MARIADB_password | default('abc123!') }}
+  {% endif %}
+  {% if SQLSERVER_enable | default(false) %}
+      SQLSERVER_DATABASE: {{TRINO_sqlserver_database | default('demodb') }}
+      SQLSERVER_USER: {{TRINO_sqlserver_user | default('demo') }}
+      SQLSERVER_PASSWORD: {{TRINO_sqlserver_password | default('abc123!') }}
+  {% endif %}
+  {% if ORACLE_EE_enable or ORACLE_XE_enable | default(false) %}
+      ORACLE_USER: {{TRINO_oracle_user | default('demo') }}
+      ORACLE_PASSWORD: {{TRINO_oracle_password | default('abc123!') }}
+  {% endif %}
+  {% if CLICKHOUSE_enable | default(false) %}
+      CLICKHOUSE_USER: {{CLICKHOUSE_username}}
+      CLICKHOUSE_PASSWORD: ${PLATYS_CLICKHOUSE_PASSWORD:-{{CLICKHOUSE_password}}}
+  {% endif %}
+  {% if external['SNOWFLAKE_enable'] | default(false) %}
+      SNOWFLAKE_ACCOUNT: {{external['SNOWFLAKE_account'] | default(omit) }}
+      SNOWFLAKE_USER: {{external['SNOWFLAKE_user'] | default(omit) }}
+      SNOWFLAKE_PASSWORD: ${PLATYS_SNOWFLAKE_PASSWORD:-{{external['SNOWFLAKE_password']}}}
+      SNOWFLAKE_DATABASE: {{external['SNOWFLAKE_database'] | default(omit) }}
+      SNOWFLAKE_ROLE: {{external['SNOWFLAKE_role'] | default(omit) }}
+      SNOWFLAKE_WAREHOUSE: {{external['SNOWFLAKE_warehouse'] | default(omit) }}
+  {% endif %}
+  {% if SINGLE_STORE_enable | default(false) %}
+      SINGLE_STORE_USER: root
+      SINGLE_STORE_PASSWORD: ${PLATYS_SINGLE_STORE_PASSWORD:-{{SINGLE_STORE_password}}}
+  {% endif %}  
+  {% if REDIS_enable | default(false) %}
+      REDIS_TABLE_NAMES: '{{TRINO_redis_table_names if TRINO_redis_table_names is defined and TRINO_redis_table_names and TRINO_redis_table_names | length else '' }}'
+      REDIS_NODES: redis-1:6379
+  {% endif %}
+  {% if REDIS_STACK_enable | default(false) %}
+      REDIS_TABLE_NAMES: '{{TRINO_redis_stack_table_names if TRINO_redis_stack_table_names is defined and TRINO_redis_stack_table_names and TRINO_redis_stack_table_names | length else '' }}'
+      REDIS_NODES: redis-stack-1:6379
+
+      REDISEARCH_URI: redis://redis-stack-1:6379
+      REDISEARCH_USERNAME:
+      REDISEARCH_PASSWORD:
+      REDISEARCH_CASE_INSENSITIVE_NAMES: false
+      REDISEARCH_CURSOR_COUNT: 1000
+      REDISEARCH_DEFAULT_LIMIT: 10000
+  {% endif %}          
+    {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
@@ -25061,9 +25407,64 @@ services:
   {%if HADOOP_enable | default(false) %}
       - './conf/{{conf_dir}}/catalog/hdfs.properties:/catalog/hdfs.properties'
   {% endif %}
-  {% if POSTGRESQL_enable | default(false) %}
-      - './conf/presto/catalog/postgresql.properties:/usr/lib/presto/etc/catalog/postgresql.properties'
+  {% if PRESTO_with_hive_metastore_db_catalog and HIVE_METASTORE_enable | default(false) %}
+      - './conf/presto/catalog/hive_metastore_db.properties:{{presto_etc_dir}}/catalog/hive_metastore_db.properties'
   {% endif %}
+  {% if POSTGRESQL_enable | default(false) %}
+      - './conf/presto/catalog/postgresql.properties:{{presto_etc_dir}}/catalog/postgresql.properties'
+  {% endif %}
+  {% if MYSQL_enable | default(false) %}
+      - './conf/presto/catalog/mysql.properties:{{presto_etc_dir}}/catalog/mysql.properties'
+  {% endif %}
+  {% if MARIADB_enable | default(false) %}
+      - './conf/presto/catalog/mariadb.properties:{{presto_etc_dir}}/catalog/mariadb.properties'
+  {% endif %}
+  {% if SQLSERVER_enable | default(false) %}
+      - './conf/presto/catalog/sqlserver.properties:{{presto_etc_dir}}/catalog/sqlserver.properties'
+  {% endif %}
+  {% if ORACLE_EE_enable or ORACLE_XE_enable | default(false) %}
+      - './conf/presto/catalog/oracle.properties:{{presto_etc_dir}}/catalog/oracle.properties'
+  {% endif %}
+  {% if IGNITE_enable | default(false) %}
+      - './conf/presto/catalog/ignite.properties:{{presto_etc_dir}}/catalog/ignite.properties'
+  {% endif %}
+  {% if REDIS_enable | default(false) %}
+      - './conf/presto/catalog/redis.properties:{{presto_etc_dir}}/catalog/redis.properties'
+  {% endif %}
+  {% if REDIS_STACK_enable | default(false) %}
+      - './conf/presto/catalog/redis-stack.properties:{{presto_etc_dir}}/catalog/redis-stack.properties'
+      - './conf/presto/catalog/redis-search.properties:{{presto_etc_dir}}/catalog/redis-search.properties'
+  {% endif %}
+  {% if SINGLE_STORE_enable | default(false) %}
+      - './conf/presto/catalog/singlestore.properties:{{presto_etc_dir}}/catalog/singlestore.properties'
+  {% endif %}
+  {% if MONGO_enable | default(false) %}
+      - './conf/presto/catalog/mongo.properties:{{presto_etc_dir}}/catalog/mongo.properties'
+  {% endif %}
+  {% if ELASTICSEARCH_enable | default(false) %}
+      - './conf/presto/catalog/elasticsearch.properties:{{presto_etc_dir}}/catalog/elasticsearch.properties'
+  {% endif %}
+  {% if OPENSEARCH_enable | default(false) %}
+      - './conf/presto/catalog/opensearch.properties:{{presto_etc_dir}}/catalog/opensearch.properties'
+  {% endif %}
+  {% if PINOT_enable | default(false) %}
+      - './conf/presto/catalog/pinot.properties:{{presto_etc_dir}}/catalog/pinot.properties'
+  {% endif %}
+  {% if DRUID_enable | default(false) %}
+      - './conf/presto/catalog/druid.properties:{{presto_etc_dir}}/catalog/druid.properties'
+  {% endif %}
+  {% if CLICKHOUSE_enable | default(false) %}
+      - './conf/presto/catalog/clickhouse.properties:{{presto_etc_dir}}/catalog/clickhouse.properties'
+  {% endif %}
+  {% if external['SNOWFLAKE_enable'] | default(false) %}
+      - './conf/presto/catalog/snowflake.properties:{{presto_etc_dir}}/catalog/snowflake.properties'
+  {% endif %}    
+  {% if PROMETHEUS_enable | default(false) %}
+      - './conf/presto/catalog/prometheus.properties:{{presto_etc_dir}}/catalog/prometheus.properties'
+  {% endif %}
+  {% if LOKI_enable | default(false) %}
+      - './conf/presto/catalog/loki.properties:{{presto_etc_dir}}/catalog/loki.properties'
+  {% endif %}  
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
