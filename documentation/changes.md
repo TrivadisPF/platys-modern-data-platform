@@ -12,6 +12,8 @@ See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/plat
 
  * Update `openmetadata` to `1.11.6` 
  * Update `datahub` to `v1.4.0-preview`
+ * Update `langflow` to `1.7.3`
+ * Update `n8n` to `2.7.5`
 
 ### Enhancements
 
