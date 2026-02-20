@@ -2,6 +2,23 @@
 
 See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/platys/blob/master/documentation/upgrade-platform-stack.md) for how to upgrade to newer version.
 
+## What's new in 1.19.2
+
+### New Services
+ 
+
+### Version upgrades
+
+ * Update `langflow` to `1.7.3`
+ * Update `n8n` to `2.7.5`
+
+### Enhancements
+
+ * add default values for environment variables `PUBLIC_IP=127.0.0.1` and `DOCKER_HOST_IP=localhost`
+ 
+### Bug Fixes
+
+
 ## What's new in 1.19.1
 
 ### New Services

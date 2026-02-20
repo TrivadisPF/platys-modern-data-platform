@@ -1316,9 +1316,9 @@ networks:
 {% if not (external['SCHEMA_REGISTRY_enable']) | default(false) %}
     {% if SCHEMA_REGISTRY_flavour is defined %}
         {%if SCHEMA_REGISTRY_UI_use_public_ip | default(true) %}
-          {% set ns.schemaRegistryUrlExternal = 'http://${PUBLIC_IP}:8081' %}
+          {% set ns.schemaRegistryUrlExternal = 'http://${PUBLIC_IP:-127.0.0.1}:8081' %}
         {% else %}
-          {% set ns.schemaRegistryUrlExternal = 'http://${DOCKER_HOST_IP}:8081' %}
+          {% set ns.schemaRegistryUrlExternal = 'http://${DOCKER_HOST_IP:-localhost}:8081' %}
         {% endif -%}   {#  SCHEMA_REGISTRY_use_public_ip #}
     {% endif %}
 
@@ -1356,14 +1356,14 @@ networks:
   {% for num in range(connectNodes | default(1) ) %}
     {% set port = 8083 + loop.index-1 %}
     {% if loop.first %}
-      {% set ns1.connectServersUrl = 'http://${PUBLIC_IP}:' ~ port %}
+      {% set ns1.connectServersUrl = 'http://${PUBLIC_IP:-127.0.0.1}:' ~ port %}
       {%if KSQLDB_use_embedded_connect | default(true) %}
         {% set ns1.connectServersInternalUrl = 'http://ksqldb-server-' ~ loop.index ~ ':' ~ port %}
       {% else %}
         {% set ns1.connectServersInternalUrl = 'http://kafka-connect-' ~ loop.index ~ ':' ~ port %}
       {% endif -%}   {#  KSQLDB_use_embedded_connect #}
     {% else %}
-      {% set ns1.connectServersUrl = ns1.connectServersUrl ~ ',http://${PUBLIC_IP}:' ~ port %}
+      {% set ns1.connectServersUrl = ns1.connectServersUrl ~ ',http://${PUBLIC_IP:-127.0.0.1}:' ~ port %}
       {%if KSQLDB_use_embedded_connect | default(true) %}
         {% set ns1.connectServersInternalUrl = ns1.connectServersInternalUrl ~ ',http://ksqldb-server-' ~ loop.index ~ ':' ~ port %}
       {% else %}
@@ -3336,7 +3336,7 @@ services:
         FLUSS_PROPERTIES=
         zookeeper.address: fluss-zookeeper-1:2181
         bind.listeners: INTERNAL://fluss-coordinator-server:0, CLIENT://fluss-coordinator-server:9123
-        advertised.listeners: CLIENT://${PUBLIC_IP}:9123
+        advertised.listeners: CLIENT://${PUBLIC_IP:-127.0.0.1}:9123
         internal.listener.name: INTERNAL
         remote.data.dir: /tmp/fluss/remote-data    
     {%if use_timezone | default(false) %}
@@ -3373,7 +3373,7 @@ services:
         FLUSS_PROPERTIES=
         zookeeper.address: fluss-zookeeper-1:2181
         bind.listeners: INTERNAL://fluss-tablet-server-{{loop.index}}:0, CLIENT://fluss-tablet-server-{{loop.index}}:{{port}}
-        advertised.listeners: CLIENT://${PUBLIC_IP}:{{external_port}}
+        advertised.listeners: CLIENT://${PUBLIC_IP:-127.0.0.1}:{{external_port}}
         internal.listener.name: INTERNAL
         tablet-server.id: {{loop.index}}
         kv.snapshot.interval: 0s
@@ -3760,7 +3760,7 @@ services:
     {% endif -%}   {#  APICURIO_SCHEMA_REGISTRY_storage == sql #}
     {% if APICURIO_auth_enabled | default(false) %}
       AUTH_ENABLED: '{{APICURIO_auth_enabled}}'
-      KEYCLOAK_URL: 'http://${PUBLIC_IP}:28204/auth'
+      KEYCLOAK_URL: 'http://${PUBLIC_IP:-127.0.0.1}:28204/auth'
       KEYCLOAK_REALM: 'registry'
       KEYCLOAK_API_CLIENT_ID: 'registry-api'
       KEYCLOAK_UI_CLIENT_ID: 'apicurio-registry'
@@ -3807,7 +3807,7 @@ services:
     ports:
       - "28398:8080"
     environment:
-      REGISTRY_API_URL: http://${PUBLIC_IP}:8081/apis/registry/v3
+      REGISTRY_API_URL: http://${PUBLIC_IP:-127.0.0.1}:8081/apis/registry/v3
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -3892,7 +3892,7 @@ services:
     {% endif -%}   {#  ns.securityProtocolBROKER #}
   {% endif -%}   {#  ns.secureKafkaEnabled #}
   {% if ( KAFKA_CONNECT_enable or KSQLDB_use_embedded_connect) | default(false) %}
-      CONTROL_CENTER_CONNECT_DEMO_CLUSTER: '${DOCKER_HOST_IP}:8083'
+      CONTROL_CENTER_CONNECT_DEMO_CLUSTER: '${DOCKER_HOST_IP:-localhost}:8083'
   {% endif %}
   {% if ( KSQLDB_enable ) | default(false) %}
       CONTROL_CENTER_KSQL_DEMO_URL: "http://ksqldb-server-1:8088"
@@ -3959,7 +3959,7 @@ services:
     {% endif -%}   {#  ns.securityProtocolBROKER #}
   {% endif -%}   {#  ns.secureKafkaEnabled #}
   {% if ( KAFKA_CONNECT_enable or KSQLDB_use_embedded_connect) | default(false) %}
-      CONTROL_CENTER_CONNECT_DEMO_CLUSTER: '${DOCKER_HOST_IP}:8083'
+      CONTROL_CENTER_CONNECT_DEMO_CLUSTER: '${DOCKER_HOST_IP:-localhost}:8083'
       CONTROL_CENTER_CONNECT_HEALTHCHECK_ENDPOINT: '/connectors'
   {% endif %}
   {% if ( KSQLDB_enable ) | default(false) %}
@@ -4190,7 +4190,7 @@ services:
       - 28369:3030
       - 9192:9192
     environment:
-      ADV_HOST: "${PUBLIC_IP}"
+      ADV_HOST: "${PUBLIC_IP:-127.0.0.1}"
       BROKER_PORT: 9192
       EULA: "{{LENSES_BOX_license}}"
       SAMPLEDATA: 1
@@ -5881,7 +5881,7 @@ services:
     ports:
       - "28227:8080"
     environment:
-      KAFKA_CONNECT_URI: "http://dataplatform:8083/,http://${PUBLIC_IP}:8084/"
+      KAFKA_CONNECT_URI: "http://dataplatform:8083/,http://${PUBLIC_IP:-127.0.0.1}:8084/"
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -6083,8 +6083,8 @@ services:
       CORE_CONF_fs_defaultFS: hdfs://namenode:9000
       YARN_CONF_yarn_resourcemanager_webapp_address: 'resourcemanager:8088'
       YARN_CONF_yarn_nodemanager_webapp_address: 'nodemanager:8042'
-      YARN_CONF_yarn_timeline___service_webapp_address: '${PUBLIC_IP}:18188'
-      YARN_CONF_yarn_log_server_url: '${PUBLIC_IP}:18188'
+      YARN_CONF_yarn_timeline___service_webapp_address: '${PUBLIC_IP:-127.0.0.1}:18188'
+      YARN_CONF_yarn_log_server_url: '${PUBLIC_IP:-127.0.0.1}:18188'
       MAPRED_CONF_yarn_app_mapreduce_am_env: HADOOP_MAPRED_HOME=/opt/hadoop-{{__HADOOP_version}}/
       MAPRED_CONF_mapreduce_map_env: HADOOP_MAPRED_HOME=/opt/hadoop-{{__HADOOP_version}}/
       MAPRED_CONF_mapreduce_reduce_env: HADOOP_MAPRED_HOME=/opt/hadoop-{{__HADOOP_version}}/
@@ -6122,8 +6122,8 @@ services:
       CORE_CONF_fs_defaultFS: hdfs://namenode:9000
       YARN_CONF_yarn_resourcemanager_webapp_address: 'resourcemanager:8088'
       YARN_CONF_yarn_nodemanager_webapp_address: 'nodemanager:8042'
-      YARN_CONF_yarn_timeline___service_webapp_address: '${PUBLIC_IP}:18188'
-      YARN_CONF_yarn_log_server_url: '${PUBLIC_IP}:18188'
+      YARN_CONF_yarn_timeline___service_webapp_address: '${PUBLIC_IP:-127.0.0.1}:18188'
+      YARN_CONF_yarn_log_server_url: '${PUBLIC_IP:-127.0.0.1}:18188'
       MAPRED_CONF_yarn_app_mapreduce_am_env: HADOOP_MAPRED_HOME=/opt/hadoop-{{__HADOOP_version}}/
       MAPRED_CONF_mapreduce_map_env: HADOOP_MAPRED_HOME=/opt/hadoop-{{__HADOOP_version}}/
       MAPRED_CONF_mapreduce_reduce_env: HADOOP_MAPRED_HOME=/opt/hadoop-{{__HADOOP_version}}/
@@ -6240,7 +6240,7 @@ services:
       # spark standard env vars
       SPARK_MASTER_WEBUI_PORT: 28304
       SPARK_MASTER_OPTS: '{{SPARK_master_opts if SPARK_master_opts is defined and SPARK_master_opts else omit }}'
-      SPARK_PUBLIC_DNS: ${PUBLIC_IP}
+      SPARK_PUBLIC_DNS: ${PUBLIC_IP:-127.0.0.1}
       # env vars for config files
 #     INIT_DAEMON_STEP: setup_spark
     {%if MINIO_enable or external['S3_enable'] | default(false) %}
@@ -6442,7 +6442,7 @@ services:
       SPARK_WORKER_CORES: '{{SPARK_worker_cores if SPARK_worker_cores is defined and SPARK_worker_cores else omit }}'
       SPARK_WORKER_MEMORY: '{{SPARK_worker_memory if SPARK_worker_memory is defined and SPARK_worker_memory else omit }}'
       SPARK_WORKER_OPTS: '{{SPARK_worker_opts if SPARK_worker_opts is defined and SPARK_worker_opts else omit }}'
-      SPARK_PUBLIC_DNS: ${PUBLIC_IP}
+      SPARK_PUBLIC_DNS: ${PUBLIC_IP:-127.0.0.1}
       # env vars for config files
     {%if MINIO_enable or external['S3_enable'] | default(false) %}
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
@@ -8745,7 +8745,7 @@ services:
       - LDAP_IGNORE_CERT_ERRORS=true
       - NO_HTTPS=TRUE
       - PASSWORD_HASH=SSHA
-      - SERVER_HOSTNAME=${PUBLIC_IP}:28297
+      - SERVER_HOSTNAME=${PUBLIC_IP:-127.0.0.1}:28297
      {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -9291,7 +9291,7 @@ services:
       - GRAPH_SERVICE_DIFF_MODE_ENABLED={{DATAHUB_graph_service_diff_mode_enabled | default(false)}}
     {%if (DATAHUB_graph_service_impl | lower) == 'neo4j'  | default(true) %}
       - NEO4J_HOST=http://datahub-neo4j:7474
-      - NEO4J_URI=bolt://${PUBLIC_IP}:17688
+      - NEO4J_URI=bolt://${PUBLIC_IP:-127.0.0.1}:17688
       - NEO4J_USERNAME=neo4j
       - NEO4J_PASSWORD=abc123!
     {% endif -%}   {#  DATAHUB_graph_service_impl #}
@@ -9480,7 +9480,7 @@ services:
       - GRAPH_SERVICE_IMPL={{DATAHUB_graph_service_impl}}
     {%if (DATAHUB_graph_service_impl | lower) == 'neo4j'  | default(true) %}
       - NEO4J_HOST=datahub-neo4j:7474
-      - NEO4J_URI=bolt://${PUBLIC_IP}:17688
+      - NEO4J_URI=bolt://${PUBLIC_IP:-127.0.0.1}:17688
       - NEO4J_USERNAME=neo4j
       - NEO4J_PASSWORD=abc123!
     {% endif -%}   {#  DATAHUB_graph_service_impl #}
@@ -9537,7 +9537,7 @@ services:
       - GRAPH_SERVICE_DIFF_MODE_ENABLED={{DATAHUB_graph_service_diff_mode_enabled | lower | default(false)}}
     {%if (DATAHUB_graph_service_impl | lower) == 'neo4j'  | default(true) %}
       - NEO4J_HOST=datahub-neo4j:7474
-      - NEO4J_URI=bolt://${PUBLIC_IP}:17688
+      - NEO4J_URI=bolt://${PUBLIC_IP:-127.0.0.1}:17688
       - NEO4J_USERNAME=neo4j
       - NEO4J_PASSWORD=abc123!
     {% endif -%}   {#  DATAHUB_graph_service_impl #}
@@ -9784,7 +9784,7 @@ services:
       - "bootstrap.memory_lock=true" # along with the memlock settings below, disables swapping
       - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m -Dlog4j2.formatMsgNoLookups=true" # minimum and maximum Java heap size, recommend setting both to 50% of system RAM
       - "http.cors.enabled=true"
-      - http.cors.allow-origin="http://${DOCKER_HOST_IP}:28275,http://${PUBLIC_IP}:28275,http://dejavu:1358,http://dataplatform:28125,http://dataplatform:28125,http://${PUBLIC_IP}:28125,http://${DOCKER_HOST_IP}:28125,http://127.0.0.1:1358"
+      - http.cors.allow-origin="http://${DOCKER_HOST_IP:-localhost}:28275,http://${PUBLIC_IP:-127.0.0.1}:28275,http://dejavu:1358,http://dataplatform:28125,http://dataplatform:28125,http://${PUBLIC_IP:-127.0.0.1}:28125,http://${DOCKER_HOST_IP:-localhost}:28125,http://127.0.0.1:1358"
       - http.cors.allow-headers="X-Requested-With,X-Auth-Token,Content-Type,Content-Length,Authorization"
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
@@ -9849,7 +9849,7 @@ services:
       - KAFKA_SCHEMAREGISTRY_URL={{ns.schemaRegistryUrl}}
     {%if (DATAHUB_graph_service_impl | lower) == 'neo4j'  | default(true) %}
       - NEO4J_HOST=datahub-neo4j:7474
-      - NEO4J_URI=bolt://${PUBLIC_IP}:17688
+      - NEO4J_URI=bolt://${PUBLIC_IP:-127.0.0.1}:17688
       - NEO4J_USERNAME=neo4j
       - NEO4J_PASSWORD=abc123!
     {% endif -%}   {#  DATAHUB_graph_service_impl #}
@@ -10988,7 +10988,7 @@ services:
       data-product-portal-postgresql:
         condition: service_healthy
     environment:
-      - PUBLIC_IP=${PUBLIC_IP}
+      - PUBLIC_IP=${PUBLIC_IP:-127.0.0.1}
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -11283,7 +11283,7 @@ services:
     environment:
       - CKAN_SITE_ID=default
       - CKAN_PORT=5000
-      - CKAN_SITE_URL=http://${PUBLIC_IP}:28294
+      - CKAN_SITE_URL=http://${PUBLIC_IP:-127.0.0.1}:28294
 #      - CKAN_SITE_URL=http://ckan:5000
       - CKAN_SYSADMIN_NAME=ckan_admin
       - CKAN_SYSADMIN_PASSWORD={{CKAN_sysadmin_password}}
@@ -11490,7 +11490,7 @@ services:
       - "8686:8686" # JMX
     environment:
       #- DATAVERSE_FQDN=localhost
-      - DATAVERSE_SITEURL=http://${PUBLIC_IP}:28394
+      - DATAVERSE_SITEURL=http://${PUBLIC_IP:-127.0.0.1}:28394
       - DATAVERSE_DB_HOST=dataverse-postgresql
       - DATAVERSE_DB_USER=dataverse
       - DATAVERSE_DB_PASSWORD=abc123!
@@ -11539,7 +11539,7 @@ services:
       - DATAVERSE_AUTH_OIDC_ENABLED=1
       - DATAVERSE_AUTH_OIDC_CLIENT_ID=test
       - DATAVERSE_AUTH_OIDC_CLIENT_SECRET=94XHrfNRwXsjqTqApRrwWmhDLDHpIYV8
-      - DATAVERSE_AUTH_OIDC_AUTH_SERVER_URL=http://${PUBLIC_IP}:28204/realms/dataverse
+      - DATAVERSE_AUTH_OIDC_AUTH_SERVER_URL=http://${PUBLIC_IP:-127.0.0.1}:28204/realms/dataverse
     {% endif -%}   {#  KEYCLOAK_enable #}
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
@@ -11563,7 +11563,7 @@ services:
     hostname: dataverse-bootstrap
     image: gdcc/configbaker:{{DATAVERSE_version}}
     environment:
-      - DATAVERSE_URL=http://${PUBLIC_IP}:28394
+      - DATAVERSE_URL=http://${PUBLIC_IP:-127.0.0.1}:28394
       - TIMEOUT=10m
     volumes:
       - ./data-transfer:/data-transfer
@@ -11603,7 +11603,7 @@ services:
       - load
     environment:
       - API_TOKEN=${API_TOKEN}
-      - DATAVERSE_URL=http://${PUBLIC_IP}:28394
+      - DATAVERSE_URL=http://${PUBLIC_IP:-127.0.0.1}:28394
     volumes:
       - ./data-transfer:/data-transfer
       - ./scripts/python/run_pip_and_python.sh:/app/run_pip_and_python.sh:ro
@@ -11674,7 +11674,7 @@ services:
       - "28395:8080"
     environment:
       - NGINX_HTTP_PORT=8080
-      - PREVIEWERS_PROVIDER_URL=http://${PUBLIC_IP}:28395
+      - PREVIEWERS_PROVIDER_URL=http://${PUBLIC_IP:-127.0.0.1}:28395
       - VERSIONS="v1.4,betatest"
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
@@ -11992,7 +11992,7 @@ services:
     {%if NIFI_run_secure  | default(false) %}
       NIFI_WEB_HTTPS_PORT: '{{externalPort}}'
       NIFI_WEB_HTTPS_HOST: 0.0.0.0
-      NIFI_WEB_PROXY_HOST: '${PUBLIC_IP}:{{externalPort}},${DOCKER_HOST_IP}:{{externalPort}}'
+      NIFI_WEB_PROXY_HOST: '${PUBLIC_IP:-127.0.0.1}:{{externalPort}},${DOCKER_HOST_IP:-localhost}:{{externalPort}}'
       {% if NIFI_use_custom_certs is defined and NIFI_use_custom_certs | default(false) %}
       KEYSTORE_PATH: /opt/certs/keystore.jks
       KEYSTORE_TYPE: JKS
@@ -12132,7 +12132,7 @@ services:
     {%if NIFI2_run_secure  | default(false) %}
       NIFI_WEB_HTTPS_PORT: '{{externalPort}}'
       NIFI_WEB_HTTPS_HOST: 0.0.0.0
-      NIFI_WEB_PROXY_HOST: '${PUBLIC_IP}:{{externalPort}},${DOCKER_HOST_IP}:{{externalPort}}'
+      NIFI_WEB_PROXY_HOST: '${PUBLIC_IP:-127.0.0.1}:{{externalPort}},${DOCKER_HOST_IP:-localhost}:{{externalPort}}'
       {% if NIFI2_use_custom_certs is defined and NIFI2_use_custom_certs | default(false) %}
       KEYSTORE_PATH: /opt/certs/keystore.jks
       KEYSTORE_TYPE: JKS
@@ -12298,7 +12298,7 @@ services:
     {%if NIFI_REGISTRY_run_secure  | default(false) %}
       NIFI_REGISTRY_WEB_HTTPS_PORT: 19090
       NIFI_REGISTRY_WEB_HTTPS_HOST: 0.0.0.0
-      NIFI_REGISTRY_WEB_PROXY_HOST: '${PUBLIC_IP}:19090,${DOCKER_HOST_IP}:19090'
+      NIFI_REGISTRY_WEB_PROXY_HOST: '${PUBLIC_IP:-127.0.0.1}:19090,${DOCKER_HOST_IP:-localhost}:19090'
       AUTH: tls
       KEYSTORE_PATH: /opt/certs/keystore.jks
       KEYSTORE_TYPE: JKS
@@ -12680,7 +12680,7 @@ services:
     depends_on:
       - streampipes-couchdb
     environment:
-      SP_HOST: ${PUBLIC_IP}
+      SP_HOST: ${PUBLIC_IP:-127.0.0.1}
       SP_BACKEND_HOST: streampipes-backend
       SP_PRIORITIZED_PROTOCOL: kafka
       SP_KAFKA_HOST: kafka-1
@@ -12873,7 +12873,7 @@ services:
       - 8000-8020     # use to expose ports for push sources
     environment:
       CRIBL_DIST_MODE: worker
-      CRIBL_DIST_MASTER_URL: tcp://2fQ9GRc3n7jhWBmpOfgCi6664yGZHuFB@${DOCKER_HOST_IP}:4200?group=default
+      CRIBL_DIST_MASTER_URL: tcp://2fQ9GRc3n7jhWBmpOfgCi6664yGZHuFB@${DOCKER_HOST_IP:-localhost}:4200?group=default
       CRIBL_MAX_WORKERS: 2
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
@@ -12911,7 +12911,7 @@ services:
     environment:
     {%if CRIBL_EDGE_managed | default(false) %}
       CRIBL_DIST_MODE: managed-edge
-      CRIBL_DIST_MASTER_URL: tcp://2fQ9GRc3n7jhWBmpOfgCi6664yGZHuFB@${DOCKER_HOST_IP}:4200?group={{CRIBL_EDGE_fleet | default(default_fleet)}}
+      CRIBL_DIST_MASTER_URL: tcp://2fQ9GRc3n7jhWBmpOfgCi6664yGZHuFB@${DOCKER_HOST_IP:-localhost}:4200?group={{CRIBL_EDGE_fleet | default(default_fleet)}}
     {% endif -%}   {#  CRIBL_EDGE_managed #}
       CRIBL_EDGE: 1
     {%if use_timezone | default(false) %}
@@ -13498,7 +13498,7 @@ services:
       - SYNC_JOB_MAX_TIMEOUT_DAYS=3
       - TEMPORAL_HOST=airbyte-temporal:7233
       - TRACKING_STRATEGY=segment
-      - WEBAPP_URL=http://${PUBLIC_IP}:28271/
+      - WEBAPP_URL=http://${PUBLIC_IP:-127.0.0.1}:28271/
       - WORKER_ENVIRONMENT=docker
       - WORKSPACE_DOCKER_MOUNT=airbyte_workspace
       - WORKSPACE_ROOT=/tmp/workspace
@@ -13568,7 +13568,7 @@ services:
       - TRACKING_STRATEGY=segment
       - JOB_ERROR_REPORTING_STRATEGY=logging
       - JOB_ERROR_REPORTING_SENTRY_DSN=
-      - WEBAPP_URL=http://${PUBLIC_IP}:28271/
+      - WEBAPP_URL=http://${PUBLIC_IP:-127.0.0.1}:28271/
       - WORKER_ENVIRONMENT=
       - WORKSPACE_ROOT=/tmp/workspace
       - GITHUB_STORE_BRANCH=
@@ -15059,7 +15059,7 @@ services:
             enabled: {{KESTRA_provision_tutorial_flows | default(false)}}    
           variables:
             envVarsPrefix: KESTRA_            
-          url: http://${PUBLIC_IP}:28245/
+          url: http://${PUBLIC_IP:-127.0.0.1}:28245/
     {% if KESTRA_env_variables is defined and KESTRA_env_variables and KESTRA_env_variables | length | default(false) %}
       {% for envvar in KESTRA_env_variables.split(",") %}
       {{"KESTRA_"}}{{envvar.split('=')[0]}}: "{{envvar.split('=')[1]}}"
@@ -15918,7 +15918,7 @@ services:
       VECTOR_DB: {{OPEN_WEBUI_vector_db if OPEN_WEBUI_vector_db is defined and OPEN_WEBUI_vector_db and OPEN_WEBUI_vector_db | length else omit}}
       AUDIO_STT_ENGINE: {{OPEN_WEBUI_audio_stt_engine if OPEN_WEBUI_audio_stt_engine is defined and OPEN_WEBUI_audio_stt_engine and OPEN_WEBUI_audio_stt_engine | length else omit}}  
       AUDIO_STT_MODEL: whisper-1
-      AUDIO_STT_OPENAI_API_BASE_URL: 'http://${PUBLIC_IP}:'
+      AUDIO_STT_OPENAI_API_BASE_URL: 'http://${PUBLIC_IP:-127.0.0.1}:'
       AUDIO_STT_OPENAI_API_KEY: ''
       USE_CUDA_DOCKER: {{OPEN_WEBUI_gpu_enabled | default(false)}}      
     {% if (OPEN_WEBUI_database_type | lower) == 'postgres' %}
@@ -16130,8 +16130,8 @@ services:
     depends_on:
       - perplexica-backend
     environment: 
-      NEXT_PUBLIC_API_URL: http://${PUBLIC_IP}:3001/api
-      NEXT_PUBLIC_WS_URL: ws://${PUBLIC_IP}:3001
+      NEXT_PUBLIC_API_URL: http://${PUBLIC_IP:-127.0.0.1}:3001/api
+      NEXT_PUBLIC_WS_URL: ws://${PUBLIC_IP:-127.0.0.1}:3001
     {%if use_timezone | default(false) %}    
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -16531,7 +16531,7 @@ services:
     {% endif -%}   {#  LANGFUSE_database_type #}
       NEXTAUTH_SECRET: abc123!
       SALT: abc123!
-      NEXTAUTH_URL: http://${PUBLIC_IP}:28366
+      NEXTAUTH_URL: http://${PUBLIC_IP:-127.0.0.1}:28366
       TELEMETRY_ENABLED: {{LANGFUSE_enable_telemetry}}
       LANGFUSE_ENABLE_EXPERIMENTAL_FEATURES: {{LANGFUSE_enable_experimental_features}}
       AUTH_DISABLE_USERNAME_PASSWORD: false
@@ -17314,7 +17314,7 @@ services:
       - "host.docker.internal:host-gateway"    
     environment:
   {% if NEO4J_enable | default(false) %}    
-      - NEO4J_URI=neo4j://${PUBLIC_IP}:7687
+      - NEO4J_URI=neo4j://${PUBLIC_IP:-127.0.0.1}:7687
       - NEO4J_PASSWORD=${PLATYS_NEO4J_PASSWORD:-{{NEO4J_password}}}
       - NEO4J_USERNAME=neo4j
       - NEO4J_DATABASE=neo4j
@@ -17371,7 +17371,7 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"    
     environment:
-      - VITE_BACKEND_API_URL="http://${PUBLIC_IP}:8000"
+      - VITE_BACKEND_API_URL="http://${PUBLIC_IP:-127.0.0.1}:8000"
       - VITE_BLOOM_URL="https://workspace-preview.neo4j.io/workspace/explore?connectURL={CONNECT_URL}&search=Show+me+a+graph&featureGenAISuggestions=true&featureGenAISuggestionsInternal=true"
       - VITE_REACT_APP_SOURCES="local,youtube,wiki,s3,web"
       - VITE_LLM_MODELS="diffbot,openai_gpt_3.5,openai_gpt_4o"
@@ -17383,7 +17383,7 @@ services:
       - VITE_CHAT_MODES=""
       - VITE_BATCH_SIZE=2
       - VITE_LLM_MODELS_PROD="openai_gpt_4o,openai_gpt_4o_mini,diffbot,gemini_1.5_flash"
-      - VITE_FRONTEND_HOSTNAME="${PUBLIC_IP}:8080"
+      - VITE_FRONTEND_HOSTNAME="${PUBLIC_IP:-127.0.0.1}:8080"
       - VITE_SEGMENT_API_URL=""
    {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
@@ -18323,7 +18323,7 @@ services:
       - "28299:80"
       - "28300:443"
     environment:
-      BASEROW_PUBLIC_URL: 'http://${PUBLIC_IP}:28299'
+      BASEROW_PUBLIC_URL: 'http://${PUBLIC_IP:-127.0.0.1}:28299'
     {% if not BASEROW_volume_map_data %}
       DISABLE_VOLUME_CHECK: true
     {% endif -%}   {#  BASEROW_volume_map_data #}
@@ -19162,7 +19162,7 @@ services:
       xpack.security.transport.ssl.enabled: false
     {% endif -%}   {#  ELASTICSEARCH_run_secure #}
       http.cors.enabled: "true"
-      http.cors.allow-origin: "http://${DOCKER_HOST_IP}:28275,http://${PUBLIC_IP}:28275,http://dejavu:1358,http://dataplatform:28125,http://dataplatform:28125,http://${PUBLIC_IP}:28125,http://${DOCKER_HOST_IP}:28125,http://127.0.0.1:1358"
+      http.cors.allow-origin: "http://${DOCKER_HOST_IP:-localhost}:28275,http://${PUBLIC_IP:-127.0.0.1}:28275,http://dejavu:1358,http://dataplatform:28125,http://dataplatform:28125,http://${PUBLIC_IP:-127.0.0.1}:28125,http://${DOCKER_HOST_IP:-localhost}:28125,http://127.0.0.1:1358"
       http.cors.allow-headers: "X-Requested-With,X-Auth-Token,Content-Type,Content-Length,Authorization"
       http.cors.allow-credentials: "true"
       cluster.routing.allocation.disk.threshold_enabled: 'true'
@@ -19451,7 +19451,7 @@ services:
       - "bootstrap.memory_lock=true" # along with the memlock settings below, disables swapping
       - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m" # minimum and maximum Java heap size, recommend setting both to 50% of system RAM
       - "http.cors.enabled=true"
-      - http.cors.allow-origin="http://${DOCKER_HOST_IP}:28275,http://${PUBLIC_IP}:28275,http://dejavu:1358,http://dataplatform:28125,http://dataplatform:28125,http://${PUBLIC_IP}:28125,http://${DOCKER_HOST_IP}:28125,http://127.0.0.1:1358"
+      - http.cors.allow-origin="http://${DOCKER_HOST_IP:-localhost}:28275,http://${PUBLIC_IP:-127.0.0.1}:28275,http://dejavu:1358,http://dataplatform:28125,http://dataplatform:28125,http://${PUBLIC_IP:-127.0.0.1}:28125,http://${DOCKER_HOST_IP:-localhost}:28125,http://127.0.0.1:1358"
       - http.cors.allow-headers="X-Requested-With,X-Auth-Token,Content-Type,Content-Length,Authorization"
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
@@ -21606,7 +21606,7 @@ services:
     ports:
       - "5521:5521"       
     environment:
-      - VITE_CLICKHOUSE_URL=http://${PUBLIC_IP}:28243
+      - VITE_CLICKHOUSE_URL=http://${PUBLIC_IP:-127.0.0.1}:28243
       - VITE_CLICKHOUSE_USER={{CLICKHOUSE_username}}
       - VITE_CLICKHOUSE_PASS=${PLATYS_CLICKHOUSE_PASSWORD:-{{CLICKHOUSE_password}}}
     {%if use_timezone | default(false) %}
@@ -22685,7 +22685,7 @@ services:
     {% endif -%}   {#  OPENAI_enable #}      
 
       SUPABASE_URL: http://supabase-kong:8000
-      SUPABASE_PUBLIC_URL: http://${PUBLIC_IP}:8000
+      SUPABASE_PUBLIC_URL: http://${PUBLIC_IP:-127.0.0.1}:8000
       SUPABASE_ANON_KEY: {{SUPABASE_anon_key}}
       SUPABASE_SERVICE_KEY: {{SUPABASE_service_role_key}}
       AUTH_JWT_SECRET: {{SUPABASE_jwt_secret}}
@@ -22773,12 +22773,12 @@ services:
     environment:
       GOTRUE_API_HOST: 0.0.0.0
       GOTRUE_API_PORT: 9999
-      API_EXTERNAL_URL: http://${PUBLIC_IP}:8000
+      API_EXTERNAL_URL: http://${PUBLIC_IP:-127.0.0.1}:8000
 
       GOTRUE_DB_DRIVER: postgres
       GOTRUE_DB_DATABASE_URL: postgres://supabase_auth_admin:${PLATYS_SUPABASE_DB_PASSWORD:-{{SUPABASE_db_password}}}@supabase-db:5432/postgres
 
-      GOTRUE_SITE_URL: http://${PUBLIC_IP}:3000
+      GOTRUE_SITE_URL: http://${PUBLIC_IP:-127.0.0.1}:3000
       GOTRUE_URI_ALLOW_LIST: 
       GOTRUE_DISABLE_SIGNUP: false
 
@@ -23881,7 +23881,7 @@ services:
       - "28160:3000"
     environment:
       BACKEND_INTERNAL_URL: http://quick-backend:8081
-      BACKEND_PUBLIC_URL: http://${PUBLIC_IP}:28159
+      BACKEND_PUBLIC_URL: http://${PUBLIC_IP:-127.0.0.1}:28159
       DB_NAME: quix
       DB_USER: root
       DB_HOST: quix-db
@@ -23941,7 +23941,7 @@ services:
       - "{{external_port}}:{{port}}"
     environment:
       - LOGGING_LEVEL=INFO
-      - HZ_NETWORK_PUBLICADDRESS=${PUBLIC_IP}:{{external_port}}
+      - HZ_NETWORK_PUBLICADDRESS=${PUBLIC_IP:-127.0.0.1}:{{external_port}}
       - HZ_NETWORK_JOIN_AUTODETECTION_ENABLED=false
       - HZ_NETWORK_JOIN_MULTICAST_ENABLED=true
       - HZ_NETWORK_JOIN_AWS_ENABLED=false
@@ -24982,7 +24982,7 @@ services:
       - "28269:9090"
     environment:
       - TRINO_LB_TRACING_ENABLED=false
-      - TRINO_LB_EXTERNAL_IP=${PUBLIC_IP}
+      - TRINO_LB_EXTERNAL_IP=${PUBLIC_IP:-127.0.0.1}
       - TRINO_LB_PORT=28267
       - TRINO_LB_SCHEME=http
       - TRINO_LB_MAX_RUNNING_QUERIES={{TRINO_LB_max_running_queries | default(1) }}
@@ -26012,8 +26012,8 @@ services:
       - KONG_PROXY_LISTEN=0.0.0.0:8000
       - KONG_ADMIN_LISTEN=0.0.0.0:8001
       - KONG_ADMIN_GUI_LISTEN=0.0.0.0:8002
-      - KONG_ADMIN_GUI_URL=http://${PUBLIC_IP}:8002
-      - KONG_ADMIN_API_URI=http://${PUBLIC_IP}:8001
+      - KONG_ADMIN_GUI_URL=http://${PUBLIC_IP:-127.0.0.1}:8002
+      - KONG_ADMIN_API_URI=http://${PUBLIC_IP:-127.0.0.1}:8001
     {% endif -%}  {# loop.index == 1 #}
     {% if KONG_volume_map_working %}
       - KONG_PREFIX=/var/run/kong
@@ -26253,7 +26253,7 @@ services:
       - "8100:8100"
     environment:
       KONGMAP_CLUSTERS_JSON: '{  "my enterprise cluster": {    "kong_admin_api_url": "http://kong-gateway-1:8001",    "kong_edit_config": "true",   "kong_ent": "true",    "kong_ent_token": "admin",    "kong_ent_token_name": "kong-admin-token",    "kong_ent_manager_url": "http://kong-gateway-1:8002"  }}'
-      KONGMAP_URL: http://${PUBLIC_IP}:8100
+      KONGMAP_URL: http://${PUBLIC_IP:-127.0.0.1}:8100
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -26366,7 +26366,7 @@ services:
       #MINIO_REGION_NAME: {{s3DefaultRegion if s3DefaultRegion is defined and s3DefaultRegion else omit}}
       #MINIO_REGION: {{s3DefaultRegion if s3DefaultRegion is defined and s3DefaultRegion else omit}}
       MINIO_DOMAIN: minio
-      MINIO_SERVER_URL: "http://${PUBLIC_IP}:9000"
+      MINIO_SERVER_URL: "http://${PUBLIC_IP:-127.0.0.1}:9000"
       MINIO_COMPRESSION_ENABLE: "off"
       MINIO_PROMETHEUS_AUTH_TYPE: public
       MINIO_PROMETHEUS_URL: "http://prometheus-1:9090"
@@ -26565,9 +26565,9 @@ services:
     ports:
       - "28190:80"
     environment:
-      API_BASE_URL: "http://${PUBLIC_IP}:28191"
+      API_BASE_URL: "http://${PUBLIC_IP:-127.0.0.1}:28191"
       ADMINIO_MULTI_BACKEND: "false"
-      ADMINIO_BACKENDS: '[{"name":"myminio","url":"http://${PUBLIC_IP}:28191"}]'
+      ADMINIO_BACKENDS: '[{"name":"myminio","url":"http://${PUBLIC_IP:-127.0.0.1}:28191"}]'
       NGX_ROOT_PATH: "/"
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
@@ -27103,7 +27103,7 @@ services:
     {% endif -%}   {#  use_timezone #}
       LAKECTL_CREDENTIALS_ACCESS_KEY_ID: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
       LAKECTL_CREDENTIALS_SECRET_ACCESS_KEY: ${PLATYS_AWS_SECRET_ACCESS_KEY:-{{MINIO_secret_key}}}
-      LAKECTL_SERVER_ENDPOINT_URL: http://${PUBLIC_IP}:28220
+      LAKECTL_SERVER_ENDPOINT_URL: http://${PUBLIC_IP:-127.0.0.1}:28220
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -27142,7 +27142,7 @@ services:
     environment:
       LAKECTL_CREDENTIALS_ACCESS_KEY_ID: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
       LAKECTL_CREDENTIALS_SECRET_ACCESS_KEY: ${PLATYS_AWS_SECRET_ACCESS_KEY:-{{MINIO_secret_key}}}
-      LAKECTL_SERVER_ENDPOINT_URL: http://${PUBLIC_IP}:28220
+      LAKECTL_SERVER_ENDPOINT_URL: http://${PUBLIC_IP:-127.0.0.1}:28220
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -28243,7 +28243,7 @@ services:
       CEDALO_STREAMSHEETS_ID: streamsheets
       CEDALO_STREAMSHEETS_NAME: Streamsheets
       CEDALO_STREAMSHEETS_DESCRIPTION: Local Streamsheets
-      CEDALO_STREAMSHEETS_URL: http://${PUBLIC_IP}:28175
+      CEDALO_STREAMSHEETS_URL: http://${PUBLIC_IP:-127.0.0.1}:28175
     {% endif -%}   {#  STREAMSHEETS_enable #}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
@@ -28481,7 +28481,7 @@ services:
       - 59092:59092
     environment:
       PROXY_LISTENERS: PLAINTEXT://solace-kafka-proxy:59092
-      PROXY_ADVERTISED_LISTENERS: PLAINTEXT://${PUBLIC_IP}:59092
+      PROXY_ADVERTISED_LISTENERS: PLAINTEXT://${PUBLIC_IP:-127.0.0.1}:59092
       SOLACE_HOST: tpc://solace-pubsub:55555
       SOLACE_VPN_NAME: {{SOLACE_KAFKA_PROXY_vpn_name}}
       SOLACE_SEPARATORS: {{SOLACE_KAFKA_PROXY_separators}}
@@ -29044,7 +29044,7 @@ services:
     ports:
       - 28327:3000
     environment:
-      COCKPit_API_URL: 'http://${PUBLIC_IP}:8761/api'
+      COCKPit_API_URL: 'http://${PUBLIC_IP:-127.0.0.1}:8761/api'
       COCKPit_UI_REGISTRATION: "true#####"
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
@@ -29209,8 +29209,8 @@ services:
     ports:
       - 28323:80
     environment:
-      TAIGA_URL: "http://${PUBLIC_IP}:28324"
-      TAIGA_WEBSOCKETS_URL: "ws://${PUBLIC_IP}:28324"
+      TAIGA_URL: "http://${PUBLIC_IP:-127.0.0.1}:28324"
+      TAIGA_WEBSOCKETS_URL: "ws://${PUBLIC_IP:-127.0.0.1}:28324"
       TAIGA_SUBPATH: ""
       PUBLIC_REGISTER_ENABLED: false      
     {%if use_timezone | default(false) %}
@@ -29239,7 +29239,7 @@ services:
       TAIGA_LANG: "en_us"
       TAIGA_SECRET_KEY: "{{TAIGA_secret_key}}"
       TAIGA_SITES_SCHEME: "http"
-      TAIGA_SITES_DOMAIN: "${PUBLIC_IP}:28324"
+      TAIGA_SITES_DOMAIN: "${PUBLIC_IP:-127.0.0.1}:28324"
       TAIGA_SUBPATH: ""
       # Email settings.
       EMAIL_BACKEND: {{TAIGA_email_backend}}
@@ -29290,7 +29290,7 @@ services:
       TAIGA_LANG: "en_us"
       TAIGA_SECRET_KEY: "{{TAIGA_secret_key}}"
       TAIGA_SITES_SCHEME: "http"
-      TAIGA_SITES_DOMAIN: "${PUBLIC_IP}:28324"
+      TAIGA_SITES_DOMAIN: "${PUBLIC_IP:-127.0.0.1}:28324"
       TAIGA_SUBPATH: ""
       # Email settings.
       EMAIL_BACKEND: {{TAIGA_email_backend}}
@@ -29731,7 +29731,7 @@ services:
     volumes:
       - ./scripts/drawio/fonts:/usr/share/fonts/drawio
     environment:
-      DRAWIO_BASE_URL: ${PUBLIC_IP}      
+      DRAWIO_BASE_URL: ${PUBLIC_IP:-127.0.0.1}      
 {% endif %}   {# DRAWIO_enable #}
 
 {% if FIREFOX_enable | default(false) %}
@@ -30172,7 +30172,7 @@ services:
     ports:
       - 28381:8080
     environment:
-      - APPLICATION_HOST_WEB=http://${PUBLIC_IP}:28381
+      - APPLICATION_HOST_WEB=http://${PUBLIC_IP:-127.0.0.1}:28381
       - SPRING_DATASOURCE_URL=jdbc:postgresql://data-mesh-manager-postgresql:5432/data_mesh_mgr_db
       - SPRING_DATASOURCE_USERNAME={{DATA_MESH_MANAGER_postgres_username}}
       - SPRING_DATASOURCE_PASSWORD=${PLATYS_DATA_MESH_MANAGER_POSTGRESQL_PASSWORD:-{{DATA_MESH_MANAGER_postgres_password}}}
@@ -30275,7 +30275,7 @@ services:
     ports:
       - 28382:8080
     environment:
-      - APPLICATION_HOST_WEB=http://${PUBLIC_IP}:28382
+      - APPLICATION_HOST_WEB=http://${PUBLIC_IP:-127.0.0.1}:28382
       - SPRING_DATASOURCE_URL=jdbc:postgresql://data-contract-manager-postgresql:5432/data_contract_mgr_db
       - SPRING_DATASOURCE_USERNAME={{DATA_CONTRACT_MANAGER_postgres_username}}
       - SPRING_DATASOURCE_PASSWORD=${PLATYS_DATA_CONTRACT_MANAGER_POSTGRESQL_PASSWORD:-{{DATA_CONTRACT_MANAGER_postgres_password}}}
@@ -31032,7 +31032,7 @@ services:
       - HTTP_PORT=8081
       - ETCD=etcd-1:2379
       - EDITABLE={{1 if ETCD_BROWSER_allow_edit else omit}}
-      - CORS=http://localhost:28310,http://localhost:8081,http://localhost:8080,http://${PUBLIC_IP}:28310,http://${DOCKER_HOST_IP}:28310
+      - CORS=http://localhost:28310,http://localhost:8081,http://localhost:8080,http://${PUBLIC_IP:-127.0.0.1}:28310,http://${DOCKER_HOST_IP:-localhost}:28310
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -31363,7 +31363,7 @@ services:
     environment:
       REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY: /var/lib/registry
       REGISTRY_HTTP_ADDR: 0.0.0.0:5020
-      REGISTRY_HTTP_HEADERS_Access-Control-Allow-Origin: '["http://${PUBLIC_IP}:28307"]'
+      REGISTRY_HTTP_HEADERS_Access-Control-Allow-Origin: '["http://${PUBLIC_IP:-127.0.0.1}:28307"]'
       REGISTRY_HTTP_HEADERS_Access-Control-Allow-Methods: '[HEAD,GET,OPTIONS,DELETE]'
       REGISTRY_HTTP_HEADERS_Access-Control-Allow-Credentials: '[true]'
       REGISTRY_HTTP_HEADERS_Access-Control-Allow-Headers: '[Authorization,Accept,Cache-Control]'
@@ -31405,7 +31405,7 @@ services:
     environment:
       SINGLE_REGISTRY: true
       REGISTRY_TITLE: "Private Docker Registry"
-      REGISTRY_URL: http://${PUBLIC_IP}:5020
+      REGISTRY_URL: http://${PUBLIC_IP:-127.0.0.1}:5020
       DELETE_IMAGES: true
       SHOW_CONTENT_DIGEST: true
       REGISTRY_SECURED: false
@@ -31517,7 +31517,7 @@ services:
       com.platys.webui.title: "Allure UI"
       com.platys.webui.url: "http://dataplatform:28279"       
     environment:
-      ALLURE_DOCKER_PUBLIC_API_URL: "http://${PUBLIC_IP}:28278"
+      ALLURE_DOCKER_PUBLIC_API_URL: "http://${PUBLIC_IP:-127.0.0.1}:28278"
       ALLURE_DOCKER_PUBLIC_API_URL_PREFIX: ""
     ports:
       - "28279:5252"
@@ -31632,7 +31632,7 @@ services:
     ports:
       - "{{externalPort}}:3000"
     environment:
-      - SSHHOST=${DOCKER_HOST_IP}
+      - SSHHOST=${DOCKER_HOST_IP:-localhost}
       - SSHPORT=22
       - SSHUSER=
       - SSHAUTH=password
@@ -31809,8 +31809,8 @@ services:
       com.platys.description: "Platys Platform homepage rendering"
     environment:
       USE_PUBLIC_IP: "{{MARKDOWN_VIEWER_use_public_ip | default(true) }}"
-      PUBLIC_IP: '${PUBLIC_IP}'
-      DOCKER_HOST_IP: '${DOCKER_HOST_IP}'
+      PUBLIC_IP: '${PUBLIC_IP:-127.0.0.1}'
+      DOCKER_HOST_IP: '${DOCKER_HOST_IP:-localhost}'
       DATAPLATFORM_HOME: '${DATAPLATFORM_HOME}'
       PLATYS_PLATFORM_NAME: {{platys['platform-name']}}
       PLATYS_PLATFORM_STACK: {{platys['platform-stack']}}
@@ -31819,7 +31819,7 @@ services:
       PLATYS_DATACENTER: {{dataCenter.replace('-','') | default('') }}
       SERVICE_LIST_VERSION: {{MARKDOWN_VIEWER_services_list_version}}
   {% if MARKDOWN_MADNESS_enable | default(false) %}
-      PLATYS_ADDL_DOCUMENTATION: 'http://${PUBLIC_IP}:28312'
+      PLATYS_ADDL_DOCUMENTATION: 'http://${PUBLIC_IP:-127.0.0.1}:28312'
   {% endif -%}   {# MARKDOWN_MADNESS_enable #}
     volumes:
       - ./artefacts/templates:/templates
@@ -32396,7 +32396,7 @@ services:
       com.platys.name: "platys-mdp-docker-image-deploy"
       com.platys.description: "Platys MDP Docker Image Deploy Service"    
     environment:
-      DOCKER_REGISTRY: ${PUBLIC_IP}:5020    # runs on docker on the docker host and therefore the docker compose network is not visible
+      DOCKER_REGISTRY: ${PUBLIC_IP:-127.0.0.1}:5020    # runs on docker on the docker host and therefore the docker compose network is not visible
     {% if PLATYS_MDP_DOCKER_DEPLOY_env_variables is defined and PLATYS_MDP_DOCKER_DEPLOY_env_variables and PLATYS_MDP_DOCKER_DEPLOY_env_variables | length | default(false) %}
       {% for envvar in PLATYS_MDP_DOCKER_DEPLOY_env_variables.split(",") %}
       {{envvar.split('=')[0]}}: "{{envvar.split('=')[1]}}"
