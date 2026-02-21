@@ -847,6 +847,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28398 | 8080 | lakevision |
 28399 | 8080 | odd-platform |
 28400 | 8080 | shadowtraffic |
+28401 | 8080 | openclaw |
 
 ## Ports > 28500
 
