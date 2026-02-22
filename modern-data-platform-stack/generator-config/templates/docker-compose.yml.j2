@@ -16540,12 +16540,18 @@ services:
     {% if (external['ANTHROPIC_enable'] | default(false)) %}
       ANTHROPIC_API_KEY: {{external['ANTHROPIC_api_key']}}
     {% endif -%}   {#  ANTHROPIC_enable #}
+      OLLAMA_BASE_URL: {{ns.ollamaUrl}}
       OPENCLAW_GATEWAY_TOKEN: {{OPENCLAW_gateway_token if OPENCLAW_gateway_token is defined and OPENCLAW_gateway_token and OPENCLAW_gateway_token | length else omit }}
       OPENCLAW_PRIMARY_MODEL: {{OPENCLAW_primary_model if OPENCLAW_primary_model is defined and OPENCLAW_primary_model and OPENCLAW_primary_model | length else omit }}
       OPENCLAW_GATEWAY_BIND: {{OPENCLAW_gateway_bind if OPENCLAW_gateway_bind is defined and OPENCLAW_gateway_bind and OPENCLAW_gateway_bind | length else omit }}
       BROWSER_CDP_URL: http://browser:9223
       BROWSER_DEFAULT_PROFILE: openclaw
       BROWSER_EVALUATE_ENABLED: true
+      HOOKS_ENABLED: {{OPENCLAW_hooks_enabled | default(false)}} 
+      HOOKS_TOKEN: {{OPENCLAW_hooks_token if OPENCLAW_hooks_token is defined and OPENCLAW_hooks_token and OPENCLAW_hooks_token | length else omit }}  
+      HOOKS_PATH: /hooks
+      OPENCLAW_DOCKER_APT_PACKAGES: {{OPENCLAW_docker_apt_packages if OPENCLAW_docker_apt_packages is defined and OPENCLAW_docker_apt_packages and OPENCLAW_docker_apt_packages | length else omit }}
+      OPENCLAW_DOCKER_INIT_SCRIPT: {{'/init/' ~ OPENCLAW_docker_init_script if OPENCLAW_docker_init_script is defined and OPENCLAW_docker_init_script and OPENCLAW_docker_init_script | length else omit }}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -16554,6 +16560,9 @@ services:
     {% if OPENCLAW_volume_map_data %}
       - ./container-volume/openclaw/data:/data
     {% endif -%}   {#  OPENCLAW_volume_map_data #}
+    {% if OPENCLAW_docker_init_script is defined and OPENCLAW_docker_init_script and OPENCLAW_docker_init_script | length %}
+      - ./init/openclaw/:/init
+    {% endif -%}   {#  OPENCLAW_docker_init_script #}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
