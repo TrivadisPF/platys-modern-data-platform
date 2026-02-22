@@ -16529,7 +16529,8 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
     environment:
-    {% if (OPENCLAW_with_auth | lower) == 'sqlite' %}
+      PORT: 28401
+    {% if (OPENCLAW_with_auth | default(false)) %}
       AUTH_USERNAME: {{OPENCLAW_username | default('admin')}}
       AUTH_PASSWORD: ${PLATYS_OPENCLAW_ADMIN_PASSWORD:-{{OPENCLAW_password | default('abc123!') }}}
     {% endif -%}   {#  OPENCLAW_with_auth #}
@@ -16541,6 +16542,7 @@ services:
     {% endif -%}   {#  ANTHROPIC_enable #}
       OPENCLAW_GATEWAY_TOKEN: {{OPENCLAW_gateway_token if OPENCLAW_gateway_token is defined and OPENCLAW_gateway_token and OPENCLAW_gateway_token | length else omit }}
       OPENCLAW_PRIMARY_MODEL: {{OPENCLAW_primary_model if OPENCLAW_primary_model is defined and OPENCLAW_primary_model and OPENCLAW_primary_model | length else omit }}
+      OPENCLAW_GATEWAY_BIND: lan
       BROWSER_CDP_URL: http://openclaw-browser:9223
       BROWSER_DEFAULT_PROFILE: openclaw
       BROWSER_EVALUATE_ENABLED: true

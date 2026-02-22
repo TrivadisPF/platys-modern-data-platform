@@ -5,7 +5,8 @@ See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/plat
 ## What's new in 1.19.2
 
 ### New Services
- 
+
+ * OpenClaw
 
 ### Version upgrades
 
