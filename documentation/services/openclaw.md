@@ -13,4 +13,20 @@ platys gen
 
 ## How to use it?
 
-Navitage to <http://dataplatform:28401>
+
+
+Navitage to <http://dataplatform:28401?token=<token> and login with username and password specified in the configuration. 
+
+Pass the token using `?token=<token>`.
+
+
+```
+docker exec -it openclaw openclaw devices list
+
+docker exec -it openclaw openclaw devices approve <request-id>
+```
+
+
+
+
+
