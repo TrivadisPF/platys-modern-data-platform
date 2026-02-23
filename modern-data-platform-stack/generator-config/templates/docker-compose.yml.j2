@@ -30,6 +30,7 @@ networks:
 {% set __ZOONAVIGATOR_version = ZOONAVIGATOR_version | default('latest') -%}
 {% set __ZOONAVIGATOR_API_version = ZOONAVIGATOR_API_version | default('latest') -%}
 {% set __KSQLDB_version = KSQLDB_version | default('latest') -%}
+{% set __AUTOMQ_version = AUTOMQ_version | default('latest') -%}
 {% set __MATERIALIZE_version = MATERIALIZE_version | default('latest') -%}
 {% set __HSTREAMDB_version = HSTREAMDB_version | default('latest') -%}
 {% set __BENTHOS_version = BENTHOS_version | default('latest') -%}
@@ -852,6 +853,7 @@ networks:
   {% set CONFLUENT_CCC_enable = false -%}
   {% set CONFLUENT_CCC_NG_enable = false -%}
   {% set APICURIO_SCHEMA_REGISTRY_enable = false -%}
+  {% set AUTOMQ_enable = false -%}
   {% set MATERIALIZE_enable = false -%}
   {% set HSTREAMDB_enable = false -%}
   {% set BENTHOS_enable = false -%}
@@ -2619,6 +2621,57 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
 {% endif %}   {# KAFKA_broker_enable and KSQLDB_enable #}
+
+{% if AUTOMQ_enable | default(false) %}
+  #  ================================== AutoMQ ========================================== #
+  automq-1:
+    image: automqinc/automq:{{__AUTOMQ_version}}
+    hostname: automq-1
+    container_name: automq-1
+    labels:
+      com.platys.name: "automq"
+      com.platys.description: "AutoMQ"
+      com.platys.webui.title: "AutoMQ Console"
+      com.platys.webui.url: "http://dataplatform:6874"
+    ports:
+      - "6874:6874"  # Console (web UI)
+      - "6875:6875"  # Postgres wire
+      - "6876:6876"  # HTTP API     
+      - "6877:6877"  # Postgres wire as mz_system user
+    environment:
+      KAFKA_S3_ACCESS_KEY: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
+      KAFKA_S3_SECRET_KEY: {{s3SecretAccessKey}}
+      KAFKA_HEAP_OPTS: -Xms1g -Xmx4g -XX:MetaspaceSize=96m -XX:MaxDirectMemorySize=1G
+      # Replace CLUSTER_ID with a unique base64 UUID using "bin/kafka-storage.sh random-uuid"
+      CLUSTER_ID: 3D4fXN-yS1-vsQ8aJ_q4Mg
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    command:
+      - bash
+      - -c
+      - |
+        /opt/automq/kafka/bin/kafka-server-start.sh \
+        /opt/automq/kafka/config/kraft/server.properties \
+        --override cluster.id=$$CLUSTER_ID \
+        --override node.id=0 \
+        --override controller.quorum.voters=0@automq-1:9093 \
+        --override controller.quorum.bootstrap.servers=automq-1:9093 \
+        --override advertised.listeners=PLAINTEXT://automq-1:9092 \
+        --override s3.data.buckets='0@s3://automq-data?region=us-east-1&endpoint=http://minio-1:9000&pathStyle=true' \
+        --override s3.ops.buckets='1@s3://automq-ops?region=us-east-1&endpoint=http://minio-1:9000&pathStyle=true' \
+        --override s3.wal.path='0@s3://automq-data?region=us-east-1&endpoint=http://minio-1:9000&pathStyle=true'    
+    restart: {{container_restart_policy}} 
+{% endif %}   {# AUTOMQ_enable #}
 
 {% if (MATERIALIZE_enable) | default(false) %}
   #  ================================== Materialize ========================================== #

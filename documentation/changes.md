@@ -12,6 +12,7 @@ See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/plat
 
  * Update `langflow` to `1.7.3`
  * Update `n8n` to `2.7.5`
+ * Update `ollama` to `0.16.3`
 
 ### Enhancements
 
