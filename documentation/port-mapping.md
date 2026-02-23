@@ -335,6 +335,9 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 9412 | 9412 | jaeger |
 9413 | 9413 | pitchfork |
 9443 | 9443 | lfh-fhir |
+9492 | 9492 | automq-1     |
+9493 | 9493 | automq-2     |
+9494 | 9494 | automq-3     |
 9600 | 9600 | zeebe-1 |
 9601 | 9600 | langwatch-opensearch  |
 9851 | 9851 | tile38 |

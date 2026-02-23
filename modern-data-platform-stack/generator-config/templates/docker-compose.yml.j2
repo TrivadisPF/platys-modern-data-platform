@@ -2631,13 +2631,8 @@ services:
     labels:
       com.platys.name: "automq"
       com.platys.description: "AutoMQ"
-      com.platys.webui.title: "AutoMQ Console"
-      com.platys.webui.url: "http://dataplatform:6874"
     ports:
-      - "6874:6874"  # Console (web UI)
-      - "6875:6875"  # Postgres wire
-      - "6876:6876"  # HTTP API     
-      - "6877:6877"  # Postgres wire as mz_system user
+      - "9492:9492"
     environment:
       KAFKA_S3_ACCESS_KEY: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
       KAFKA_S3_SECRET_KEY: {{s3SecretAccessKey}}
@@ -2664,13 +2659,24 @@ services:
         /opt/automq/kafka/config/kraft/server.properties \
         --override cluster.id=$$CLUSTER_ID \
         --override node.id=0 \
-        --override controller.quorum.voters=0@automq-1:9093 \
-        --override controller.quorum.bootstrap.servers=automq-1:9093 \
-        --override advertised.listeners=PLAINTEXT://automq-1:9092 \
+        --override controller.quorum.voters=0@automq-1:9493 \
+        --override controller.quorum.bootstrap.servers=automq-1:9493 \
+        --override advertised.listeners=PLAINTEXT://automq-1:9492 \
         --override s3.data.buckets='0@s3://automq-data?region=us-east-1&endpoint=http://minio-1:9000&pathStyle=true' \
         --override s3.ops.buckets='1@s3://automq-ops?region=us-east-1&endpoint=http://minio-1:9000&pathStyle=true' \
-        --override s3.wal.path='0@s3://automq-data?region=us-east-1&endpoint=http://minio-1:9000&pathStyle=true'    
+        --override s3.wal.path='0@s3://automq-data?region=us-east-1&endpoint=http://minio-1:9000&pathStyle=true' \
+        --override automq.table.topic.catalog.type=rest \
+        --override automq.table.topic.catalog.uri=http://rest:8181 \
+        --override automq.table.topic.catalog.warehouse=s3://warehouse/wh/ \
+        --override automq.table.topic.namespace=default \
+        --override automq.table.topic.schema.registry.url=http://schema-registry-1:8081           
     restart: {{container_restart_policy}} 
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/automq/kafka/bin/kafka-broker-api-versions.sh --bootstrap-server localhost:9492 | grep -q 'automq'"]
+      interval: 20s
+      timeout: 20s
+      retries: 5
+      start_period: 20s    
 {% endif %}   {# AUTOMQ_enable #}
 
 {% if (MATERIALIZE_enable) | default(false) %}
