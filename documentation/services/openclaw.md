@@ -26,6 +26,11 @@ docker exec -it openclaw openclaw devices list
 docker exec -it openclaw openclaw devices approve <request-id>
 ```
 
+to access a remote gateway, create an SSH tunnel from your local machine
+
+```bash
+ssh -N -L 28401:127.0.0.1:28401 root@187.124.0.29
+```
 
 
 
