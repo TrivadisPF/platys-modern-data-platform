@@ -172,6 +172,7 @@ networks:
 {% set __RANGER_postgresql_version = RANGER_postgresql_version | default('latest') -%}
 
 {% set __OPA_version = OPA_version | default('latest') -%}
+{% set __MOAT_version = MOAT_version | default('latest') -%}
 {% set __STYRA_EOPA_version = STYRA_EOPA_version | default('latest') -%}
 {% set __CEDAR_version = CEDAR_version | default('latest') -%}
 {% set __OPAL_version = OPAL_version | default('latest') -%}
@@ -8902,11 +8903,14 @@ services:
     command:
       - "run"
       - "--server"
-      - "--addr=0.0.0.0:8181"
-      - "--log-format={{OPA_log_format | lower}}"
-      - "--set=decision_logs.console=true"
-      - "--log-level={{OPA_log_level | lower}}"
       - "--watch"
+      - "--format=pretty"      
+      - "--log-level={{OPA_log_level | lower}}"
+      - "--log-format={{OPA_log_format | lower}}"
+      - "--addr=0.0.0.0:8181"
+      - "--set=decision_logs.console=true"
+      - "--config-file"
+      - "/data/policies/config.yaml"      
       - "/data/policies"
     {%if use_timezone | default(false) %}
     environment:
@@ -8924,6 +8928,38 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  OPA_enable #}
+
+{% if MOAT_enable  | default(false) %}
+  #  ================================== Moat ========================================== #
+  moat:
+    image: ghcr.io/moat-io/moat:{{__MOAT_version}}
+    container_name: moat
+    hostname: moat
+    labels:
+      com.platys.name: "moat"
+      com.platys.description: "OPA bundle provider for Trino"
+      com.platys.webui.title: "Moat UI"
+      com.platys.webui.url: "http://dataplatform:28402"
+    ports:
+      - "28402:8000"
+    environment:
+      CONFIG_FILE_PATH: config/config.docker.yaml
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./conf/moat/:/app/moat/config      
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    command: ["start-demo-server"]
+    restart: {{container_restart_policy}}
+{% endif %}   {#  CEDAR_enable #}
 
 {% if STYRA_EOPA_enable  | default(false) %}
   #  ================================== Styra Enterprise Open Policy Agent (opa) ========================================== #
