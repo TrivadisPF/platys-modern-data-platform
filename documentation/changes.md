@@ -7,16 +7,20 @@ See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/plat
 ### New Services
 
  * OpenClaw
+ * AutoMQ
 
 ### Version upgrades
 
  * Update `langflow` to `1.7.3`
  * Update `n8n` to `2.7.5`
  * Update `ollama` to `0.16.3`
+ * Update `opa` to `1.14.0` 
+ * Update `opal` to `0.9.3`
 
 ### Enhancements
 
  * add default values for environment variables `PUBLIC_IP=127.0.0.1` and `DOCKER_HOST_IP=localhost`
+ * change docker image for the iceberg rest service from `tabulario/iceberg-rest` to `apache/iceberg-rest-fixture`
  
 ### Bug Fixes
 
