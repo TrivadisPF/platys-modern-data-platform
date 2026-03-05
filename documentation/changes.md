@@ -17,6 +17,7 @@ See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/plat
  * Update `ollama` to `0.16.3`
  * Update `opa` to `1.14.0` 
  * Update `opal` to `0.9.3`
+ * Update `starburstdata` to `479-e`
 
 ### Enhancements
 
