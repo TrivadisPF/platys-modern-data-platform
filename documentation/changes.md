@@ -18,6 +18,7 @@ See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/plat
  * Update `opa` to `1.14.0` 
  * Update `opal` to `0.9.3`
  * Update `starburstdata` to `479-e`
+ * Update `n8n` to `2.11.4`
 
 ### Enhancements
 
