@@ -283,11 +283,13 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 9001 | 9000 | minio-2 |
 9002 | 9000 | minio-3 |
 9003 | 9000 | minio-4 |
+9005 | 9000 | rustfs-1 |
 9009 | 9009 | questdb |
 9010 | 9010 | minio-1 ui |
 9011 | 9011 | minio-2 ui |
 9012 | 9012 | minio-3 ui |
 9013 | 9013 | minio-4 ui |
+9014 | 9001 | rustfs-1 ui |
 9042 | 9042 | dse-1 |
 9043 | 9042 | dse-2 |
 9044 | 9042 | dse-3 |
