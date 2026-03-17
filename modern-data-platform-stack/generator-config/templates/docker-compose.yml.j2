@@ -639,6 +639,8 @@ networks:
 {% set __MINIO_WEB_version = MINIO_WEB_version | default('latest') -%}
 {% set __MINIO_KES_version = MINIO_KES_version | default('latest') -%}
 
+{% set __RUSTFS_version = RUSTFS_version | default('latest') -%}
+
 {% set __GARAGE_version = GARAGE_version | default('latest') -%}
 {% set __GARAGE_WEBUI_version = GARAGE_WEBUI_version | default('latest') -%}
 
@@ -1103,6 +1105,7 @@ networks:
   {% set MINIO_MC_enable = false -%}
   {% set MINIO_CONSOLE_enable = false -%}
   {% set MINIO_WEB_enable = false -%}
+  {% set RUSTFS_enable = false -%}  
   {% set GARAGE_enable = false -%}
   {% set GARAGE_WEBUI_enable = false -%}
   {% set LAKEFS_enable = false -%}
@@ -26888,6 +26891,75 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  MINIO_KES_enable #}
+
+{% if RUSTFS_enable | default(false) %}
+  #  ================================== RustFS (S3 Storage) ========================================== #
+  rustfs:
+    image: rustfs/rustfs:{{__RUSTFS_version}}
+    container_name: rustfs
+    hostname: rustfs
+    security_opt:
+      - "no-new-privileges:true"    
+    labels:
+      com.platys.name: "rustfs"
+      com.platys.description: "Software-defined Object Storage"
+      com.platys.webui.title: "RustFS Console"
+      com.platys.webui.url: "http://dataplatform:9001"
+      com.platys.password.envvars: "PLATYS_AWS_SECRET_ACCESS_KEY"
+    {% if OTEL_COLLECTOR_enable | default(false) -%}
+    depends_on:
+      otel-collector:
+        condition: service_started
+        required: false         
+    {% endif -%}
+    ports:
+      - "9000:9000" # S3 API port
+      - "9001:9001" # Console port    
+    environment:
+      - RUSTFS_VOLUMES=/data/rustfs{0..3} # Define 4 storage volumes
+      - RUSTFS_ADDRESS=0.0.0.0:9000
+      - RUSTFS_CONSOLE_ADDRESS=0.0.0.0:9001
+      - RUSTFS_CONSOLE_ENABLE=true
+      - RUSTFS_CORS_ALLOWED_ORIGINS=*
+      - RUSTFS_CONSOLE_CORS_ALLOWED_ORIGINS=*
+      - RUSTFS_ACCESS_KEY={{s3AccessKey}}
+      - RUSTFS_SECRET_KEY={{s3SecretAccessKey}}
+      - RUSTFS_OBS_LOGGER_LEVEL=info
+#      - RUSTFS_TLS_PATH=/opt/tls
+    {% if OTEL_COLLECTOR_enable | default(false) -%}
+      - RUSTFS_OBS_ENDPOINT=http://otel-collector:4318
+    {% endif -%}
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if RUSTFS_volume_map_data | default(false) %}  
+      - ./container-volume/rustfs/data:/data
+    {% endif -%}   {#  RUSTFS_volume_map_data #}
+    {%if RUSTFS_volume_map_logs | default(false) %}  
+      - ./container-volume/rustfs/logs:/app/logs
+    {% endif -%}   {#  RUSTFS_volume_map_logs #}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "sh", "-c",
+          "curl -f http://127.0.0.1:9000/health && curl -f http://127.0.0.1:9001/rustfs/console/health"
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s 
+{% endif %}   {#  GARAGE_enable #}
 
 {% if GARAGE_enable | default(false) %}
   #  ================================== Garage (S3 Storage) ========================================== #
