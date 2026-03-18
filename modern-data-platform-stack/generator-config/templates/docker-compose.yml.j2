@@ -1505,12 +1505,21 @@ networks:
     {% set s3DefaultRegion = external['S3_default_region'] %}
     {% set s3AdminBucketName = external['S3_admin_bucket_name'] %}
 {% else %}
+  {% if s3_service_to_use == 'minio' %}
     {% set s3EndpointStorage = 'http://minio-1:9000' %}
     {% set s3PathStyleAccess = 'true' %}
     {% set s3AccessKey = '${PLATYS_AWS_ACCESS_KEY:-' ~ MINIO_access_key ~'}' %}
     {% set s3SecretAccessKey = '${PLATYS_AWS_SECRET_ACCESS_KEY:-' ~ MINIO_secret_key ~'}' %}
     {% set s3DefaultRegion = 'us-east-1' %}
     {% set s3AdminBucketName = 'admin-bucket' %}
+  {% elif s3_service_to_use == 'rustfs' %}
+    {% set s3EndpointStorage = 'http://rustfs-1:9000' %}
+    {% set s3PathStyleAccess = 'true' %}
+    {% set s3AccessKey = '${PLATYS_AWS_ACCESS_KEY:-' ~ RUSTFS_access_key ~'}' %}
+    {% set s3SecretAccessKey = '${PLATYS_AWS_SECRET_ACCESS_KEY:-' ~ RUSTFS_secret_key ~'}' %}
+    {% set s3DefaultRegion = 'us-east-1' %}
+    {% set s3AdminBucketName = 'admin-bucket' %}
+  {% endif %}
 {% endif %}   {# external['s3Endpoint'] #}
 
 {% if LAKEFS_enable and LAKEFS_use_as_drop_in_replacement_for_s3 | default(false) %}
