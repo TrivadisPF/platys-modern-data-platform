@@ -26716,8 +26716,6 @@ services:
     volumes:
       - ./data-transfer:/data-transfer
       - ./scripts/docker/wait-for-it.sh:/usr/src/app/wait-for-it.sh
-      - ./security/aws/credentials:/tmp/credentials.templ
-      - aws-credentials-vol:/tmp/.aws:RO
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -26727,12 +26725,9 @@ services:
       - -c
       - |
         /usr/src/app/wait-for-it.sh -t 180 minio-1:9000
-        mkdir -p /tmp/.aws
-        eval "echo \"$$(cat /tmp/credentials.templ)\"" >> /tmp/.aws/credentials
         mc mb --ignore-existing minio-1/{{s3AdminBucketName}}
     {% if MINIO_upload_data_transfer_to_bucket_enabled | default(false) %}
         mc mb --ignore-existing minio-1/{{MINIO_upload_data_transfer_bucket_name | default("data-transfer-bucket")}};
-
       {% if MINIO_upload_data_transfer_subfolders is defined and MINIO_upload_data_transfer_subfolders and MINIO_upload_data_transfer_subfolders | length | default(false) %}
         for subfolder in $$(echo '{{MINIO_upload_data_transfer_subfolders}}' | tr ',' '\n'); do
           mc cp --recursive /data-transfer/$$subfolder minio-1/{{MINIO_upload_data_transfer_bucket_name | default("data-transfer-bucket")}}/; 
@@ -26982,8 +26977,6 @@ services:
     volumes:
       - ./data-transfer:/data-transfer
       - ./scripts/docker/wait-for-it.sh:/usr/src/app/wait-for-it.sh
-      - ./security/aws/credentials:/tmp/credentials.templ
-      - aws-credentials-vol:/tmp/.aws:RO
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -26993,8 +26986,6 @@ services:
       - -c
       - |
         /usr/src/app/wait-for-it.sh -t 180 rustfs-1:9000
-        mkdir -p /tmp/.aws
-        eval "echo \"$$(cat /tmp/credentials.templ)\"" >> /tmp/.aws/credentials
         mc mb --ignore-existing rustfs-1/{{s3AdminBucketName}}
     {% if RUSTFS_upload_data_transfer_to_bucket_enabled | default(false) %}
         mc mb --ignore-existing rustfs-1/{{RUSTFS_upload_data_transfer_bucket_name | default("data-transfer-bucket")}};
@@ -32658,12 +32649,25 @@ services:
     env_file: {{PLATYS_MDP_INIT_env_filename if PLATYS_MDP_INIT_env_filename is defined and PLATYS_MDP_INIT_env_filename and PLATYS_MDP_INIT_env_filename | length else ".env"}}
     {% endif -%}   {#  NIFI2_enable #}   
     environment:
+    {% if MINIO_enable or RUSTFS_enable or external['S3_enable'] | default(false) %}    
+      AWS_ACCESS_KEY: {{s3AccessKey | mandatory('s3AccessKey must be defined') }}
+      AWS_SECRET_ACCESS_KEY: {{s3SecretAccessKey}}
+      S3_ENDPOINT: '{{s3Endpoint | default(omit) }}'
+      S3_REGION: '{{s3Region | default(omit) }}'
+      S3_PATH_STYLE_ACCESS: '{{s3PathStyleAccess | default(omit) }}'  
+    {% endif -%}   
     {% if MINIO_enable | default(false) %}    
       MC_HOST_minio-1: http://{{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}:{{s3SecretAccessKey}}@minio-1:9000    
-      MINIO_ACCESS_KEY_ID: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
-      MINIO_SECRET_ACCESS_KEY: {{s3SecretAccessKey}}
-      MINIO_URL: {{s3Endpoint}}
-    {% endif -%}   {#  NIFI2_enable #}   
+      MINIO_ACCESS_KEY_ID: ${PLATYS_AWS_ACCESS_KEY:-{{MINIO_access_key | default('admin') }}}
+      MINIO_SECRET_ACCESS_KEY: ${PLATYS_AWS_SECRET_ACCESS_KEY:-{{MINIO_secret_key | default('abc123abc123!') }}}
+      MINIO_URL: http://minio-1:9000
+    {% endif -%}   {#  MINIO_enable #}   
+    {% if RUSTFS_enable | default(false) %}    
+      MC_HOST_rustfs-1: http://{{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}:{{s3SecretAccessKey}}@rustfs-1:9000    
+      RUSTFS_ACCESS_KEY_ID: ${PLATYS_AWS_ACCESS_KEY:-{{RUSTFS_access_key | default('admin') }}}
+      RUSTFS_SECRET_ACCESS_KEY: ${PLATYS_AWS_SECRET_ACCESS_KEY:-{{RUSTFS_secret_key | default('abc123abc123!') }}}
+      RUSTFS_URL: http://rustfs-1:9000
+    {% endif -%}   {#  RUSTFS_enable #}   
     {% if LAKEFS_enable | default(false) %}
       LAKEFS_URL: http://lakefs:8000
       LAKEFS_USER: {{LAKEFS_user_name | default(lakefs) }}
@@ -32697,6 +32701,8 @@ services:
     volumes:
       - ./data-transfer:/data-transfer
       - ./init/platys-mdp-init:/docker-entrypoint-init.d/
+      - ./security/aws/credentials:/tmp/credentials.templ
+      - aws-credentials-vol:/tmp/.aws:RO
     {%if NIFI2_enable | default(false) %}
       - nifi-config-vol:/opt/nifi/conf/
     {% endif -%}      
@@ -32708,7 +32714,13 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
     init: true
-    command: sleep 30
+    command:
+      - /bin/sh
+      - -c
+      - |
+        mkdir -p /tmp/.aws
+        eval "echo \"$$(cat /tmp/credentials.templ)\"" >> /tmp/.aws/credentials
+        sleep 30
     restart: "no"
 {% endif %}   {#  PLATYS_MDP_INIT_enable  #}
 
@@ -32766,7 +32778,7 @@ volumes:
 {%if FLINK_enable and FLINK_volume_map_flink_distro | default(false) %}
   flink-vol:
 {% endif %}
-{%if MINIO_enable or RUSTFS_enable or external['S3_enable'] | default(false) %}
+{%if PLATYS_MDP_INIT_enable and (MINIO_enable or RUSTFS_enable or external['S3_enable']) | default(false) %}
   aws-credentials-vol:
 {% endif %}
 {%if NIFI2_enable | default(false) %}
