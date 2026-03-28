@@ -6425,8 +6425,10 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalog_gravitino: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_gravitino_uri: '{{gravitinoEndpoint | default(omit) }}'
       SPARK_DEFAULTS_CONF_spark_sql_catalog_gravitino_warehouse:  {{gravitinoCatalogName | default(omit) }}
-    {%elif SPARK_table_format_type == 'delta' and not UNITY_CATALOG_enable | default(false) %}
+    {%elif SPARK_table_format_type == 'delta' and HIVE_METASTORE_enable and not UNITY_CATALOG_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_delta: org.apache.spark.sql.delta.catalog.DeltaCatalog
+      SPARK_DEFAULTS_CONF_spark_sql_hive_metastore_uris: thrift://hive-metastore:9083
+      SPARK_DEFAULTS_CONF_spark_sql_hive_metastore_warehouse_dir: s3a://admin-bucket/warehouse      
     {%elif SPARK_table_format_type == 'delta' and UNITY_CATALOG_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_delta: io.unitycatalog.spark.UCSingleCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_delta_uri: 'http://unity-catalog:8080'     
@@ -6539,15 +6541,6 @@ services:
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_defaultFS: file:///tmp
       SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined and SPARK_sql_warehouse_dir | length else 'file:///hive/warehouse'}}
     {% endif -%}   {#  HADOOP_enable #}
-      SPARK_DEFAULTS_CONF_spark_sql_hive_metastore_jars: builtin
-      # SPARK_DEFAULTS_CONF_spark_sql_hive_metastore_version: 3.1.2    
-    {%if (SPARK_catalog | lower) == 'in-memory' | default(false) %}
-      SPARK_DEFAULTS_CONF_spark_sql_catalogImplementation: in-memory
-    {% else %}
-      SPARK_DEFAULTS_CONF_spark_sql_catalogImplementation: hive
-      SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog_type: hive
-      SPARK_DEFAULTS_CONF_spark_hadoop_hive_metastore_uris: thrift://{{ns.hiveMetastore}}
-    {% endif -%}   {#  SPARK_catalog #}
       SPARK_DEFAULTS_CONF_spark_driver_extraJavaOptions: {{SPARK_driver_extraJavaOptions}}
       SPARK_DEFAULTS_CONF_spark_executor_extraJavaOptions: {{SPARK_executor_extraJavaOptions}}
       SPARK_DEFAULTS_CONF_spark_cores_max: {{SPARK_cores_max if SPARK_cores_max is defined and SPARK_cores_max else omit }}
@@ -6557,12 +6550,20 @@ services:
       SPARK_DEFAULTS_CONF_spark_datahub_rest_server: {{ns.gmsUrl}}
       SPARK_DEFAULTS_CONF_spark_datahub_metadata_dataset_env: {{env}}
     {% endif -%}   {#  DATAHUB_enable or external['DATAHUB_enable'] #}
+      SPARK_DEFAULTS_CONF_spark_sql_hive_metastore_jars: builtin
+      # SPARK_DEFAULTS_CONF_spark_sql_hive_metastore_version: 3.1.2    
+    {%if (SPARK_catalog | lower) == 'in-memory' | default(false) %}
+      SPARK_DEFAULTS_CONF_spark_sql_catalogImplementation: in-memory
+    {% else %}
+      SPARK_DEFAULTS_CONF_spark_sql_catalogImplementation: hive
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog_type: hive
+      SPARK_DEFAULTS_CONF_spark_hadoop_hive_metastore_uris: thrift://{{ns.hiveMetastore}}
+    {% endif -%}   {#  SPARK_catalog #}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_defaultCatalog: {{SPARK_sql_default_catalog if SPARK_sql_default_catalog is defined and SPARK_sql_default_catalog else omit }} 
       SPARK_DEFAULTS_CONF_spark_sql_extensions: {{ns.sparkSQLExtensions if ns.sparkSQLExtensions is defined and ns.sparkSQLExtensions | length else omit}}
     {%if SPARK_table_format_type == 'iceberg' and HIVE_METASTORE_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hive: org.apache.iceberg.spark.SparkCatalog
-      SPARK_DEFAULTS_CONF_spark_sql_catalog_hive_type: hive
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hive_uri: thrift://{{ns.hiveMetastore}}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hive_warehouse: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined and SPARK_sql_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
     {% endif -%}   {#  SPARK_table_format_type #}      
@@ -6579,19 +6580,28 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_s3_secret___access___key: {{s3SecretAccessKey}}
     {% endif -%}   {#  SPARK_table_format_type #}      
     {% if SPARK_table_format_type == 'iceberg' and NESSIE_enable | default(false) %}
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog_type: hive
       SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie_type: nessie
       SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie_ref: main
       SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie_uri: http://nessie:19120/api/v1
       SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie_authentication_type: NONE
       SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie_warehouse: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined and SPARK_sql_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
-    {% endif -%}   {#  SPARK_table_format_type #}      
+    {% endif -%}   {#  SPARK_table_format_type #}    
     {% if SPARK_table_format_type == 'iceberg' and LAKEFS_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakefs: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakefs_catalog__impl: io.lakefs.iceberg.LakeFSCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakefs_ref: main
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakefs_uri: '{{s3Endpoint | default(omit) }}'
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakefs_warehouse: {{'lakefs://' ~ LAKEFS_quickstart_repo_name | default('demo')}}
+    {% endif -%}   {#  SPARK_table_format_type #}      
+    {% if SPARK_table_format_type == 'iceberg' and UNITY_CATALOG_enable | default(false) %}
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_unitycatalog_type: rest
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_unitycatalog: org.apache.iceberg.spark.SparkCatalog
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_unitycatalog_catalog___impl: org.apache.iceberg.rest.RESTCatalog
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_unitycatalog_uri: '{{unitycatalogEndpoint | default(omit) }}/iceberg'
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_unitycatalog_token: not_used
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_unitycatalog_warehouse:  {{lakekeeperCatalogName | default(omit) }}
     {% endif -%}   {#  SPARK_table_format_type #}      
     {% if SPARK_table_format_type == 'iceberg' and LAKEKEEPER_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakekeeper_type: rest
