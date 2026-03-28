@@ -1391,7 +1391,16 @@ networks:
 {% endif -%} 
 
 {% if (SPARK_base_version | lower) == '3.3'  %}
-  {% set ns.sparkTableFormatJar = ("/opt/bitnami/spark/jars/delta-core_2.12-2.3.0.jar,/opt/bitnami/spark/jars/delta-storage-2.3.0.jar" if SPARK_table_format_type == 'delta' else "/opt/bitnami/spark/jars/iceberg-spark-runtime-3.3_2.12-1.2.1.jar" if SPARK_table_format_type == 'iceberg' else "/opt/bitnami/spark/jars/hudi-spark3.3-bundle_2.12-0.13.0.jar" if SPARK_table_format_type == 'hudi') -%}
+  {% set ns.sparkTableFormatJar = '' -%}
+  {% if 'iceberg' in (table_formats_to_use | default('') | lower) -%}
+    {% set ns.sparkTableFormatJar = ns.sparkTableFormatJar ~ (',' if ns.sparkTableFormatJar else '') ~ "/opt/bitnami/spark/jars/iceberg-spark-runtime-3.3_2.12-1.2.1.jar" -%}
+  {% endif -%}
+  {% if 'delta' in (table_formats_to_use | default('') | lower) -%}
+    {% set ns.sparkTableFormatJar = ns.sparkTableFormatJar ~ (',' if ns.sparkTableFormatJar else '') ~ "/opt/bitnami/spark/jars/delta-core_2.12-2.3.0.jar,/opt/bitnami/spark/jars/delta-storage-2.3.0.jar" -%}
+  {% endif -%}
+  {% if 'hudi' in (table_formats_to_use | default('') | lower) -%}
+    {% set ns.sparkTableFormatJar = ns.sparkTableFormatJar ~ (',' if ns.sparkTableFormatJar else '') ~ "/opt/bitnami/spark/jars/hudi-spark3.3-bundle_2.12-0.13.0.jar" -%}
+  {% endif -%}
   {% set ns.sparkDeltaDependencies = "io.delta:delta-core_2.12:2.3.0,io.delta:delta-storage:2.3.0" -%}
  {% if NESSIE_enable | default(false) %}
   {% set ns.sparkIcebergDependencies = "org.apache.iceberg:iceberg-spark-runtime-3.3_2.12:1.7.0,org.projectnessie.nessie-integrations:nessie-spark-extensions-3.3_2.12:0.100.0" -%}  
@@ -1402,7 +1411,16 @@ networks:
  {% endif %}
   {% set ns.sparkHudiDependencies ="org.apache.hudi:hudi-spark3.3-bundle_2.12:0.13.0" -%}
 {% elif (SPARK_base_version | lower) == '3.4'  %}
-  {% set ns.sparkTableFormatJar = ("/opt/bitnami/spark/jars/delta-core_2.12-2.4.0.jar,/opt/bitnami/spark/jars/delta-storage-2.4.0.jar" if SPARK_table_format_type == 'delta' else "/opt/bitnami/spark/jars/iceberg-spark-runtime-3.4_2.12-1.2.1.jar" if SPARK_table_format_type == 'iceberg' else "/opt/bitnami/spark/jars/hudi-spark3.3-bundle_2.12-0.13.0.jar" if SPARK_table_format_type == 'hudi') -%}
+  {% set ns.sparkTableFormatJar = '' -%}
+  {% if 'iceberg' in (table_formats_to_use | default('') | lower) -%}
+    {% set ns.sparkTableFormatJar = ns.sparkTableFormatJar ~ (',' if ns.sparkTableFormatJar else '') ~ "/opt/bitnami/spark/jars/iceberg-spark-runtime-3.4_2.12-1.2.1.jar" -%}
+  {% endif -%}
+  {% if 'delta' in (table_formats_to_use | default('') | lower) -%}
+    {% set ns.sparkTableFormatJar = ns.sparkTableFormatJar ~ (',' if ns.sparkTableFormatJar else '') ~ "/opt/bitnami/spark/jars/delta-core_2.12-2.4.0.jar,/opt/bitnami/spark/jars/delta-storage-2.4.0.jar" -%}
+  {% endif -%}
+  {% if 'hudi' in (table_formats_to_use | default('') | lower) -%}
+    {% set ns.sparkTableFormatJar = ns.sparkTableFormatJar ~ (',' if ns.sparkTableFormatJar else '') ~ "/opt/bitnami/spark/jars/hudi-spark3.3-bundle_2.12-0.13.0.jar" -%}
+  {% endif -%}
   {% set ns.sparkDeltaDependencies = "io.delta:delta-core_2.12:2.4.0,io.delta:delta-storage:2.4.0" -%}
  {% if NESSIE_enable | default(false) %}
   {% set ns.sparkIcebergDependencies = "org.apache.iceberg:iceberg-spark-runtime-3.4_2.12:1.10.1,org.projectnessie.nessie-integrations:nessie-spark-extensions-3.4_2.12:0.100.0" -%}
@@ -1413,9 +1431,18 @@ networks:
  {% endif %}
   {% set ns.sparkHudiDependencies ="org.apache.hudi:hudi-spark3.4-bundle_2.12:0.13.0" -%}
 {% elif (SPARK_base_version | lower) == '3.5'  %}
-  {% set ns.sparkTableFormatJar = ("/opt/bitnami/spark/jars/delta-spark_2.12-3.3.2.jar,/opt/bitnami/spark/jars/delta-storage-3.3.2.jar" if SPARK_table_format_type == 'delta' else "/opt/bitnami/spark/jars/iceberg-spark-runtime-3.5_2.12-1.10.1.jar" if SPARK_table_format_type == 'iceberg' else "/opt/bitnami/spark/jars/hudi-spark3.3-bundle_2.12-0.15.0.jar" if SPARK_table_format_type == 'hudi') -%}
+  {% set ns.sparkTableFormatJar = '' -%}
+  {% if 'iceberg' in (table_formats_to_use | default('') | lower) -%}
+    {% set ns.sparkTableFormatJar = ns.sparkTableFormatJar ~ (',' if ns.sparkTableFormatJar else '') ~ "/opt/bitnami/spark/jars/iceberg-spark-runtime-3.5_2.12-1.10.1.jar" -%}
+  {% endif -%}
+  {% if 'delta' in (table_formats_to_use | default('') | lower) -%}
+    {% set ns.sparkTableFormatJar = ns.sparkTableFormatJar ~ (',' if ns.sparkTableFormatJar else '') ~ "/opt/bitnami/spark/jars/delta-spark_2.12-3.3.2.jar,/opt/bitnami/spark/jars/delta-storage-3.3.2.jar" -%}
+  {% endif -%}
+  {% if 'hudi' in (table_formats_to_use | default('') | lower) -%}
+    {% set ns.sparkTableFormatJar = ns.sparkTableFormatJar ~ (',' if ns.sparkTableFormatJar else '') ~ "/opt/bitnami/spark/jars/hudi-spark3.3-bundle_2.12-0.15.0.jar" -%}
+  {% endif -%}
   {% set ns.sparkDeltaDependencies = "io.delta:delta-spark_2.12:3.3.2,io.delta:delta-storage:3.3.2" -%}
- {% if UNITY_CATALOG_enable and SPARK_table_format_type == 'delta' | default(false) %}
+ {% if UNITY_CATALOG_enable and 'delta' in (table_formats_to_use | default('') | lower) | default(false) %}
   {% set ns.sparkTableFormatJar = ns.sparkTableFormatJar ~ ",/opt/bitnami/spark/jars/unitycatalog-spark_2.12-0.2.1.jar,/opt/bitnami/spark/jars/unitycatalog-client-0.2.1.jar" -%}
   {% set ns.sparkDeltaDependencies = ns.sparkDeltaDependencies ~ ",io.unitycatalog:unitycatalog-spark_2.12:0.2.1,io.unitycatalog:unitycatalog-client:0.2.1" -%}
  {% endif %}
@@ -1430,9 +1457,18 @@ networks:
  {% endif %}
   {% set ns.sparkHudiDependencies ="org.apache.hudi:hudi-spark3.4-bundle_2.12:0.15.0" -%}
 {% elif (SPARK_base_version | lower) == '4.0'  %}
-  {% set ns.sparkTableFormatJar = ("/opt/bitnami/spark/jars/delta-spark_2.12-4.0.0.jar,/opt/bitnami/spark/jars/delta-storage-4.0.0.jar" if SPARK_table_format_type == 'delta' else "/opt/bitnami/spark/jars/iceberg-spark-runtime-4.0_2.13-1.10.1.jar" if SPARK_table_format_type == 'iceberg' else "/opt/bitnami/spark/jars/hudi-spark4.0-bundle_2.12-0.15.0.jar" if SPARK_table_format_type == 'hudi') -%}
+  {% set ns.sparkTableFormatJar = '' -%}
+  {% if 'iceberg' in (table_formats_to_use | default('') | lower) -%}
+    {% set ns.sparkTableFormatJar = ns.sparkTableFormatJar ~ (',' if ns.sparkTableFormatJar else '') ~ "/opt/bitnami/spark/jars/iceberg-spark-runtime-4.0_2.13-1.10.1.jar" -%}
+  {% endif -%}
+  {% if 'delta' in (table_formats_to_use | default('') | lower) -%}
+    {% set ns.sparkTableFormatJar = ns.sparkTableFormatJar ~ (',' if ns.sparkTableFormatJar else '') ~ "/opt/bitnami/spark/jars/delta-spark_2.12-4.0.0.jar,/opt/bitnami/spark/jars/delta-storage-4.0.0.jar" -%}
+  {% endif -%}
+  {% if 'hudi' in (table_formats_to_use | default('') | lower) -%}
+    {% set ns.sparkTableFormatJar = ns.sparkTableFormatJar ~ (',' if ns.sparkTableFormatJar else '') ~ "/opt/bitnami/spark/jars/hudi-spark4.0-bundle_2.12-0.15.0.jar" -%}
+  {% endif -%}
   {% set ns.sparkDeltaDependencies = "io.delta:delta-spark_2.12:4.0.0,io.delta:delta-storage:4.0.0" -%}
- {% if UNITY_CATALOG_enable and SPARK_table_format_type == 'delta' | default(false) %}
+ {% if UNITY_CATALOG_enable and 'delta' in (table_formats_to_use | default('') | lower) | default(false) %}
   {% set ns.sparkTableFormatJar = ns.sparkTableFormatJar ~ ",/opt/bitnami/spark/jars/unitycatalog-spark_2.12-0.2.1.jar,/opt/bitnami/spark/jars/unitycatalog-client-0.2.1.jar" -%}
   {% set ns.sparkDeltaDependencies = ns.sparkDeltaDependencies ~ ",io.unitycatalog:unitycatalog-spark_2.12:0.2.1,io.unitycatalog:unitycatalog-client:0.2.1" -%}
  {% endif %}
@@ -1447,22 +1483,31 @@ networks:
  {% endif %}
   {% set ns.sparkHudiDependencies ="org.apache.hudi:hudi-spark3.4-bundle_2.12:0.15.0" -%}
 {% else -%}
-  {% set ns.sparkTableFormatJar = ("/opt/bitnami/spark/jars/delta-core_2.12-0.6.1.jar,/opt/bitnami/spark/jars/delta-storage-0.6.1.jar" if SPARK_table_format_type == 'delta' else "/opt/bitnami/spark/jars/iceberg-spark-2-0.13.2.jar" if SPARK_table_format_type == 'iceberg' else "/opt/bitnami/spark/jars/hudi-spark2.4-bundle_2.12-0.13.0" if SPARK_table_format_type == 'hudi') -%}
+  {% set ns.sparkTableFormatJar = '' -%}
+  {% if 'iceberg' in (table_formats_to_use | default('') | lower) -%}
+    {% set ns.sparkTableFormatJar = ns.sparkTableFormatJar ~ (',' if ns.sparkTableFormatJar else '') ~ "/opt/bitnami/spark/jars/iceberg-spark-2-0.13.2.jar" -%}
+  {% endif -%}
+  {% if 'delta' in (table_formats_to_use | default('') | lower) -%}
+    {% set ns.sparkTableFormatJar = ns.sparkTableFormatJar ~ (',' if ns.sparkTableFormatJar else '') ~ "/opt/bitnami/spark/jars/delta-core_2.12-0.6.1.jar,/opt/bitnami/spark/jars/delta-storage-0.6.1.jar" -%}
+  {% endif -%}
+  {% if 'hudi' in (table_formats_to_use | default('') | lower) -%}
+    {% set ns.sparkTableFormatJar = ns.sparkTableFormatJar ~ (',' if ns.sparkTableFormatJar else '') ~ "/opt/bitnami/spark/jars/hudi-spark2.4-bundle_2.12-0.13.0" -%}
+  {% endif -%}
   {% set ns.sparkDeltaDependencies = "io.delta:delta-core_2.12:0.6.1" -%}
   {% set ns.sparkIcebergDependencies = "org.apache.iceberg:iceberg-spark-2:0.13.2" -%}
   {% set ns.sparkHudiDependencies ="org.apache.hudi:hudi-spark2.4-bundle_2.12:0.13.0" -%}
 {% endif -%}    {# SPARK_base_version #}
 
 {% set ns.sparkSQLExtensions = "" -%}
-{% if (SPARK_table_format_type | lower) == 'iceberg'  %}
+{% if 'iceberg' in (table_formats_to_use | default('') | lower)  %}
   {% set ns.sparkSQLExtensions = ns.sparkSQLExtensions ~ "org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions," -%}
-{% endif -%}    {# SPARK_table_format_type == iceberg #}
-{% if (SPARK_table_format_type | lower) == 'delta'  %}
+{% endif -%}    {# table_formats_to_use includes iceberg #}
+{% if 'delta' in (table_formats_to_use | default('') | lower)  %}
   {% set ns.sparkSQLExtensions = ns.sparkSQLExtensions ~ "io.delta.sql.DeltaSparkSessionExtension," -%}
-{% endif -%}    {# SPARK_table_format_type == iceberg #}
-{% if (SPARK_table_format_type | lower) == 'hudi'  %}
+{% endif -%}    {# table_formats_to_use includes iceberg #}
+{% if 'hudi' in (table_formats_to_use | default('') | lower)  %}
   {% set ns.sparkSQLExtensions = ns.sparkSQLExtensions ~ "org.apache.hudi.spark3.extensions.HoodieSpark3SessionExtensions," -%}
-{% endif -%}    {# SPARK_table_format_type == hudi #}
+{% endif -%}    {# table_formats_to_use includes hudi #}
 {% if NESSIE_enable | default(false)  %}
   {% set ns.sparkSQLExtensions = ns.sparkSQLExtensions ~ "org.projectnessie.spark.extensions.NessieSparkSessionExtensions," -%}
 {% endif -%}    {# NESSIE_enable #}
@@ -6361,12 +6406,12 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_defaultCatalog: {{SPARK_sql_default_catalog if SPARK_sql_default_catalog is defined and SPARK_sql_default_catalog else omit }}
       SPARK_DEFAULTS_CONF_spark_sql_extensions: {{ns.sparkSQLExtensions if ns.sparkSQLExtensions is defined and ns.sparkSQLExtensions | length else omit}}
-    {%if SPARK_table_format_type == 'iceberg' and HIVE_METASTORE_enable | default(false) %}
+    {%if 'iceberg' in (table_formats_to_use | default('') | lower) and HIVE_METASTORE_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hive: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hive_uri: thrift://{{ns.hiveMetastore}}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hive_warehouse: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined and SPARK_sql_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
-    {% endif -%}   {#  SPARK_table_format_type #}      
-    {%if SPARK_table_format_type == 'iceberg' and HIVE_METASTORE_enable and __HIVE_METASTORE_version == "4.2.0" | default(false) %}
+    {% endif -%}   {#  table_formats_to_use #}      
+    {%if 'iceberg' in (table_formats_to_use | default('') | lower) and HIVE_METASTORE_enable and __HIVE_METASTORE_version == "4.2.0" | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_type: rest
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_uri: 'http://{{ns.hiveMetastoreHost}}:{{ns.hiveMetastoreRestCatalogPort}}/iceberg'
@@ -6377,8 +6422,8 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_s3_path___style___access: true
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_s3_access___key___id: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_s3_secret___access___key: {{s3SecretAccessKey}}
-    {% endif -%}   {#  SPARK_table_format_type #}      
-    {% if SPARK_table_format_type == 'iceberg' and NESSIE_enable | default(false) %}
+    {% endif -%}   {#  table_formats_to_use #}      
+    {% if 'iceberg' in (table_formats_to_use | default('') | lower) and NESSIE_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog_type: hive
       SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie_type: nessie
@@ -6386,23 +6431,23 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie_uri: http://nessie:19120/api/v1
       SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie_authentication_type: NONE
       SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie_warehouse: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined and SPARK_sql_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
-    {% endif -%}   {#  SPARK_table_format_type #}      
-    {% if SPARK_table_format_type == 'iceberg' and LAKEFS_enable | default(false) %}
+    {% endif -%}   {#  table_formats_to_use #}      
+    {% if 'iceberg' in (table_formats_to_use | default('') | lower) and LAKEFS_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakefs: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakefs_catalog__impl: io.lakefs.iceberg.LakeFSCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakefs_ref: main
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakefs_uri: '{{s3Endpoint | default(omit) }}'
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakefs_warehouse: {{'lakefs://' ~ LAKEFS_quickstart_repo_name | default('demo')}}
-    {% endif -%}   {#  SPARK_table_format_type #}
-    {% if SPARK_table_format_type == 'iceberg' and UNITY_CATALOG_enable | default(false) %}
+    {% endif -%}   {#  table_formats_to_use #}
+    {% if 'iceberg' in (table_formats_to_use | default('') | lower) and UNITY_CATALOG_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_unitycatalog_type: rest
       SPARK_DEFAULTS_CONF_spark_sql_catalog_unitycatalog: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_unitycatalog_catalog___impl: org.apache.iceberg.rest.RESTCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_unitycatalog_uri: '{{unitycatalogEndpoint | default(omit) }}/iceberg'
       SPARK_DEFAULTS_CONF_spark_sql_catalog_unitycatalog_token: not_used
       SPARK_DEFAULTS_CONF_spark_sql_catalog_unitycatalog_warehouse:  {{lakekeeperCatalogName | default(omit) }}
-    {% endif -%}   {#  SPARK_table_format_type #}
-    {% if SPARK_table_format_type == 'iceberg' and LAKEKEEPER_enable | default(false) %}
+    {% endif -%}   {#  table_formats_to_use #}
+    {% if 'iceberg' in (table_formats_to_use | default('') | lower) and LAKEKEEPER_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakekeeper_type: rest
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakekeeper: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakekeeper_uri: '{{lakekeeperEndpoint | default(omit) }}'
@@ -6411,8 +6456,8 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakekeeper_warehouse:  {{lakekeeperCatalogName | default(omit) }}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakekeeper_scope: 'PRINCIPAL_ROLE:ALL'
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakekeeper_header_X___Iceberg___Access___Delegation: vended-credentials
-    {% endif -%}   {#  SPARK_table_format_type #}
-    {% if SPARK_table_format_type == 'iceberg' and POLARIS_enable | default(false) %}
+    {% endif -%}   {#  table_formats_to_use #}
+    {% if 'iceberg' in (table_formats_to_use | default('') | lower) and POLARIS_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_polaris_type: rest
       SPARK_DEFAULTS_CONF_spark_sql_catalog_polaris: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_polaris_uri: '{{polarisEndpoint | default(omit) }}'
@@ -6421,24 +6466,26 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalog_polaris_warehouse:  {{polarisCatalogName | default(omit) }}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_polaris_scope: 'PRINCIPAL_ROLE:ALL'
       SPARK_DEFAULTS_CONF_spark_sql_catalog_polaris_header_X___Iceberg___Access___Delegation: vended-credentials
-    {% endif -%}   {#  SPARK_table_format_type #}
-    {% if SPARK_table_format_type == 'iceberg' and GRAVITINO_enable | default(false) %}
+    {% endif -%}   {#  table_formats_to_use #}
+    {% if 'iceberg' in (table_formats_to_use | default('') | lower) and GRAVITINO_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_gravitino_type: rest
       SPARK_DEFAULTS_CONF_spark_sql_catalog_gravitino: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_gravitino_uri: '{{gravitinoEndpoint | default(omit) }}'
       SPARK_DEFAULTS_CONF_spark_sql_catalog_gravitino_warehouse:  {{gravitinoCatalogName | default(omit) }}
-    {%elif SPARK_table_format_type == 'delta' and HIVE_METASTORE_enable and not UNITY_CATALOG_enable | default(false) %}
+    {% endif -%}   {#  table_formats_to_use iceberg #}
+    {% if 'delta' in (table_formats_to_use | default('') | lower) and HIVE_METASTORE_enable and not UNITY_CATALOG_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_delta: org.apache.spark.sql.delta.catalog.DeltaCatalog
       SPARK_DEFAULTS_CONF_spark_sql_hive_metastore_uris: thrift://hive-metastore:9083
       SPARK_DEFAULTS_CONF_spark_sql_hive_metastore_warehouse_dir: s3a://admin-bucket/warehouse      
-    {%elif SPARK_table_format_type == 'delta' and UNITY_CATALOG_enable | default(false) %}
+    {%elif 'delta' in (table_formats_to_use | default('') | lower) and UNITY_CATALOG_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_delta: io.unitycatalog.spark.UCSingleCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_delta_uri: 'http://unity-catalog:8080'     
       SPARK_DEFAULTS_CONF_spark_sql_catalog_delta_token: ''     
-    {%elif SPARK_table_format_type == 'hudi' | default(false) %}
+    {% endif -%}   {#  table_formats_to_use delta #}
+    {% if 'hudi' in (table_formats_to_use | default('') | lower) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.spark.sql.hudi.catalog.HoodieCatalog
       SPARK_DEFAULTS_CONF_spark_serializer: org.apache.spark.serializer.KryoSerializer
-    {% endif -%}   {#  SPARK_table_format_type #}
+    {% endif -%}   {#  table_formats_to_use hudi #}
       SPARK_DEFAULTS_CONF_spark_sql_legacy_allowNonEmptyLocationInCTAS: 'true'
       SPARK_DEFAULTS_CONF_spark_jars_repositories: {{SPARK_jars_repositories | default(omit)}}
       SPARK_DEFAULTS_CONF_spark_jars_packages: "{{SPARK_jars_packages}}"
@@ -6563,12 +6610,12 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_defaultCatalog: {{SPARK_sql_default_catalog if SPARK_sql_default_catalog is defined and SPARK_sql_default_catalog else omit }} 
       SPARK_DEFAULTS_CONF_spark_sql_extensions: {{ns.sparkSQLExtensions if ns.sparkSQLExtensions is defined and ns.sparkSQLExtensions | length else omit}}
-    {%if SPARK_table_format_type == 'iceberg' and HIVE_METASTORE_enable | default(false) %}
+    {%if 'iceberg' in (table_formats_to_use | default('') | lower) and HIVE_METASTORE_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hive: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hive_uri: thrift://{{ns.hiveMetastore}}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hive_warehouse: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined and SPARK_sql_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
-    {% endif -%}   {#  SPARK_table_format_type #}      
-    {%if SPARK_table_format_type == 'iceberg' and HIVE_METASTORE_enable and __HIVE_METASTORE_version == "4.2.0" | default(false) %}
+    {% endif -%}   {#  table_formats_to_use #}      
+    {%if 'iceberg' in (table_formats_to_use | default('') | lower) and HIVE_METASTORE_enable and __HIVE_METASTORE_version == "4.2.0" | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_type: rest
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_uri: 'http://{{ns.hiveMetastoreHost}}:{{ns.hiveMetastoreRestCatalogPort}}/iceberg'
@@ -6579,8 +6626,8 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_s3_path___style___access: true
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_s3_access___key___id: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_s3_secret___access___key: {{s3SecretAccessKey}}
-    {% endif -%}   {#  SPARK_table_format_type #}      
-    {% if SPARK_table_format_type == 'iceberg' and NESSIE_enable | default(false) %}
+    {% endif -%}   {#  table_formats_to_use #}      
+    {% if 'iceberg' in (table_formats_to_use | default('') | lower) and NESSIE_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog_type: hive
       SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie_type: nessie
@@ -6588,23 +6635,23 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie_uri: http://nessie:19120/api/v1
       SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie_authentication_type: NONE
       SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie_warehouse: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined and SPARK_sql_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
-    {% endif -%}   {#  SPARK_table_format_type #}    
-    {% if SPARK_table_format_type == 'iceberg' and LAKEFS_enable | default(false) %}
+    {% endif -%}   {#  table_formats_to_use #}    
+    {% if 'iceberg' in (table_formats_to_use | default('') | lower) and LAKEFS_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakefs: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakefs_catalog__impl: io.lakefs.iceberg.LakeFSCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakefs_ref: main
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakefs_uri: '{{s3Endpoint | default(omit) }}'
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakefs_warehouse: {{'lakefs://' ~ LAKEFS_quickstart_repo_name | default('demo')}}
-    {% endif -%}   {#  SPARK_table_format_type #}      
-    {% if SPARK_table_format_type == 'iceberg' and UNITY_CATALOG_enable | default(false) %}
+    {% endif -%}   {#  table_formats_to_use #}      
+    {% if 'iceberg' in (table_formats_to_use | default('') | lower) and UNITY_CATALOG_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_unitycatalog_type: rest
       SPARK_DEFAULTS_CONF_spark_sql_catalog_unitycatalog: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_unitycatalog_catalog___impl: org.apache.iceberg.rest.RESTCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_unitycatalog_uri: '{{unitycatalogEndpoint | default(omit) }}/iceberg'
       SPARK_DEFAULTS_CONF_spark_sql_catalog_unitycatalog_token: not_used
       SPARK_DEFAULTS_CONF_spark_sql_catalog_unitycatalog_warehouse:  {{lakekeeperCatalogName | default(omit) }}
-    {% endif -%}   {#  SPARK_table_format_type #}      
-    {% if SPARK_table_format_type == 'iceberg' and LAKEKEEPER_enable | default(false) %}
+    {% endif -%}   {#  table_formats_to_use #}      
+    {% if 'iceberg' in (table_formats_to_use | default('') | lower) and LAKEKEEPER_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakekeeper_type: rest
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakekeeper: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakekeeper_uri: '{{lakekeeperEndpoint | default(omit) }}'
@@ -6613,8 +6660,8 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakekeeper_warehouse:  {{lakekeeperCatalogName | default(omit) }}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakekeeper_scope: 'PRINCIPAL_ROLE:ALL'
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakekeeper_header_X___Iceberg___Access___Delegation: vended-credentials
-    {% endif -%}   {#  SPARK_table_format_type #}
-    {% if SPARK_table_format_type == 'iceberg' and POLARIS_enable | default(false) %}
+    {% endif -%}   {#  table_formats_to_use #}
+    {% if 'iceberg' in (table_formats_to_use | default('') | lower) and POLARIS_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_polaris_type: rest
       SPARK_DEFAULTS_CONF_spark_sql_catalog_polaris: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_polaris_uri: '{{polarisEndpoint | default(omit) }}'
@@ -6623,26 +6670,28 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalog_polaris_warehouse:  {{polarisCatalogName | default(omit) }}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_polaris_scope: 'PRINCIPAL_ROLE:ALL'
       SPARK_DEFAULTS_CONF_spark_sql_catalog_polaris_header_X___Iceberg___Access___Delegation: vended-credentials
-    {% endif -%}   {#  SPARK_table_format_type #}
-    {% if SPARK_table_format_type == 'iceberg' and GRAVITINO_enable | default(false) %}
+    {% endif -%}   {#  table_formats_to_use #}
+    {% if 'iceberg' in (table_formats_to_use | default('') | lower) and GRAVITINO_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_gravitino_type: rest
       SPARK_DEFAULTS_CONF_spark_sql_catalog_gravitino: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_gravitino_uri: '{{gravitinoEndpoint | default(omit) }}'
       SPARK_DEFAULTS_CONF_spark_sql_catalog_gravitino_warehouse:  {{gravitinoCatalogName | default(omit) }}
-    {%elif SPARK_table_format_type == 'delta' and HIVE_METASTORE_enable and not UNITY_CATALOG_enable | default(false) %}
+    {% endif -%}   {#  table_formats_to_use iceberg #}
+    {% if 'delta' in (table_formats_to_use | default('') | lower) and HIVE_METASTORE_enable and not UNITY_CATALOG_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.spark.sql.delta.catalog.DeltaCatalog
       SPARK_DEFAULTS_CONF_spark_sql_hive_metastore_uris: thrift://hive-metastore:9083
       SPARK_DEFAULTS_CONF_spark_sql_hive_metastore_warehouse_dir: s3a://admin-bucket/warehouse
-    {%elif SPARK_table_format_type == 'delta' and UNITY_CATALOG_enable | default(false) %}
+    {%elif 'delta' in (table_formats_to_use | default('') | lower) and UNITY_CATALOG_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: io.unitycatalog.spark.UCSingleCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_delta: io.unitycatalog.spark.UCSingleCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_delta_uri: 'http://unity-catalog:8080'     
       SPARK_DEFAULTS_CONF_spark_sql_catalog_delta_token: ''     
 #      SPARK_DEFAULTS_CONF_spark_sql_defaultCatalog: my_catalog      
-    {%elif SPARK_table_format_type == 'hudi' | default(false) %}
+    {% endif -%}   {#  table_formats_to_use delta #}
+    {% if 'hudi' in (table_formats_to_use | default('') | lower) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.spark.sql.hudi.catalog.HoodieCatalog
       SPARK_DEFAULTS_CONF_spark_serializer: org.apache.spark.serializer.KryoSerializer
-    {% endif -%}   {#  SPARK_table_format_type #}
+    {% endif -%}   {#  table_formats_to_use hudi #}
       SPARK_DEFAULTS_CONF_spark_sql_legacy_allowNonEmptyLocationInCTAS: 'true'
       SPARK_DEFAULTS_CONF_spark_jars_repositories: {{SPARK_jars_repositories | default(omit)}}
       SPARK_DEFAULTS_CONF_spark_jars_packages: "{{SPARK_jars_packages}}{{',' if SPARK_jars_packages | length}}{{SPARK_datahub_package | default('')}}"
@@ -6750,12 +6799,12 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_defaultCatalog: {{SPARK_sql_default_catalog if SPARK_sql_default_catalog is defined and SPARK_sql_default_catalog else omit }}
       SPARK_DEFAULTS_CONF_spark_sql_extensions: {{ns.sparkSQLExtensions if ns.sparkSQLExtensions is defined and ns.sparkSQLExtensions | length else omit }}
-    {%if SPARK_table_format_type == 'iceberg' and HIVE_METASTORE_enable | default(false) %}
+    {%if 'iceberg' in (table_formats_to_use | default('') | lower) and HIVE_METASTORE_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hive: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hive_uri: thrift://{{ns.hiveMetastore}}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hive_warehouse: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined and SPARK_sql_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
-    {% endif -%}   {#  SPARK_table_format_type #}      
-    {%if SPARK_table_format_type == 'iceberg' and HIVE_METASTORE_enable and __HIVE_METASTORE_version == "4.2.0" | default(false) %}
+    {% endif -%}   {#  table_formats_to_use #}      
+    {%if 'iceberg' in (table_formats_to_use | default('') | lower) and HIVE_METASTORE_enable and __HIVE_METASTORE_version == "4.2.0" | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_type: rest
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_uri: 'http://{{ns.hiveMetastoreHost}}:{{ns.hiveMetastoreRestCatalogPort}}/iceberg'
@@ -6766,8 +6815,8 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_s3_path___style___access: true
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_s3_access___key___id: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_s3_secret___access___key: {{s3SecretAccessKey}}
-    {% endif -%}   {#  SPARK_table_format_type #}      
-    {% if SPARK_table_format_type == 'iceberg' and NESSIE_enable | default(false) %}
+    {% endif -%}   {#  table_formats_to_use #}      
+    {% if 'iceberg' in (table_formats_to_use | default('') | lower) and NESSIE_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog_type: hive
       SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie_type: nessie
@@ -6775,23 +6824,23 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie_uri: http://nessie:19120/api/v1
       SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie_authentication_type: NONE
       SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie_warehouse: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined and SPARK_sql_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
-    {% endif -%}   {#  SPARK_table_format_type #}      
-    {% if SPARK_table_format_type == 'iceberg' and LAKEFS_enable | default(false) %}
+    {% endif -%}   {#  table_formats_to_use #}      
+    {% if 'iceberg' in (table_formats_to_use | default('') | lower) and LAKEFS_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakefs: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakefs_catalog__impl: io.lakefs.iceberg.LakeFSCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakefs_ref: main
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakefs_uri: '{{s3Endpoint | default(omit) }}'
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakefs_warehouse: {{'lakefs://' ~ LAKEFS_quickstart_repo_name | default('demo')}}
-    {% endif -%}   {#  SPARK_table_format_type #}
-    {% if SPARK_table_format_type == 'iceberg' and UNITY_CATALOG_enable | default(false) %}
+    {% endif -%}   {#  table_formats_to_use #}
+    {% if 'iceberg' in (table_formats_to_use | default('') | lower) and UNITY_CATALOG_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_unitycatalog_type: rest
       SPARK_DEFAULTS_CONF_spark_sql_catalog_unitycatalog: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_unitycatalog_catalog___impl: org.apache.iceberg.rest.RESTCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_unitycatalog_uri: '{{unitycatalogEndpoint | default(omit) }}/iceberg'
       SPARK_DEFAULTS_CONF_spark_sql_catalog_unitycatalog_token: not_used
       SPARK_DEFAULTS_CONF_spark_sql_catalog_unitycatalog_warehouse:  {{lakekeeperCatalogName | default(omit) }}
-    {% endif -%}   {#  SPARK_table_format_type #}
-    {% if SPARK_table_format_type == 'iceberg' and LAKEKEEPER_enable | default(false) %}
+    {% endif -%}   {#  table_formats_to_use #}
+    {% if 'iceberg' in (table_formats_to_use | default('') | lower) and LAKEKEEPER_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakekeeper_type: rest
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakekeeper: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakekeeper_uri: '{{lakekeeperEndpoint | default(omit) }}'
@@ -6800,8 +6849,8 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakekeeper_warehouse:  {{lakekeeperCatalogName | default(omit) }}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakekeeper_scope: 'PRINCIPAL_ROLE:ALL'
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakekeeper_header_X___Iceberg___Access___Delegation: vended-credentials
-    {% endif -%}   {#  SPARK_table_format_type #}
-    {% if SPARK_table_format_type == 'iceberg' and POLARIS_enable | default(false) %}
+    {% endif -%}   {#  table_formats_to_use #}
+    {% if 'iceberg' in (table_formats_to_use | default('') | lower) and POLARIS_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_polaris_type: rest
       SPARK_DEFAULTS_CONF_spark_sql_catalog_polaris: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_polaris_uri: '{{polarisEndpoint | default(omit) }}'
@@ -6810,26 +6859,28 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalog_polaris_warehouse:  {{polarisCatalogName | default(omit) }}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_polaris_scope: 'PRINCIPAL_ROLE:ALL'
       SPARK_DEFAULTS_CONF_spark_sql_catalog_polaris_header_X___Iceberg___Access___Delegation: vended-credentials
-    {% endif -%}   {#  SPARK_table_format_type #}
-    {% if SPARK_table_format_type == 'iceberg' and GRAVITINO_enable | default(false) %}
+    {% endif -%}   {#  table_formats_to_use #}
+    {% if 'iceberg' in (table_formats_to_use | default('') | lower) and GRAVITINO_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_gravitino_type: rest
       SPARK_DEFAULTS_CONF_spark_sql_catalog_gravitino: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_gravitino_uri: '{{gravitinoEndpoint | default(omit) }}'
       SPARK_DEFAULTS_CONF_spark_sql_catalog_gravitino_warehouse:  {{gravitinoCatalogName | default(omit) }}
-    {%elif SPARK_table_format_type == 'delta' and HIVE_METASTORE_enable and not UNITY_CATALOG_enable | default(false) %}
+    {% endif -%}   {#  table_formats_to_use iceberg #}
+    {% if 'delta' in (table_formats_to_use | default('') | lower) and HIVE_METASTORE_enable and not UNITY_CATALOG_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.spark.sql.delta.catalog.DeltaCatalog
       SPARK_DEFAULTS_CONF_spark_sql_hive_metastore_uris: thrift://hive-metastore:9083
       SPARK_DEFAULTS_CONF_spark_sql_hive_metastore_warehouse_dir: s3a://admin-bucket/warehouse      
-    {%elif SPARK_table_format_type == 'delta' and UNITY_CATALOG_enable | default(false) %}
+    {%elif 'delta' in (table_formats_to_use | default('') | lower) and UNITY_CATALOG_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: io.unitycatalog.spark.UCSingleCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_my__catalog: io.unitycatalog.spark.UCSingleCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_my__catalog_uri: 'http://unity-catalog:8080'     
       SPARK_DEFAULTS_CONF_spark_sql_catalog_my__catalog_token: ''     
       #SPARK_DEFAULTS_CONF_spark_sql_defaultCatalog: my_catalog      
-    {%elif SPARK_table_format_type == 'hudi' | default(false) %}
+    {% endif -%}   {#  table_formats_to_use delta #}
+    {% if 'hudi' in (table_formats_to_use | default('') | lower) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.spark.sql.hudi.catalog.HoodieCatalog
       SPARK_DEFAULTS_CONF_spark_serializer: org.apache.spark.serializer.KryoSerializer
-    {% endif -%}   {#  SPARK_table_format_type #}
+    {% endif -%}   {#  table_formats_to_use hudi #}
       SPARK_DEFAULTS_CONF_spark_sql_legacy_allowNonEmptyLocationInCTAS: 'true'
       SPARK_DEFAULTS_CONF_spark_jars_repositories: {{SPARK_jars_repositories | default(omit)}}
       SPARK_DEFAULTS_CONF_spark_jars_packages: "{{SPARK_jars_packages}}"
@@ -6936,12 +6987,12 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_defaultCatalog: {{SPARK_sql_default_catalog if SPARK_sql_default_catalog is defined and SPARK_sql_default_catalog else omit }}
       SPARK_DEFAULTS_CONF_spark_sql_extensions: {{ns.sparkSQLExtensions if ns.sparkSQLExtensions is defined and ns.sparkSQLExtensions | length else omit}}
-    {%if SPARK_table_format_type == 'iceberg' and HIVE_METASTORE_enable | default(false) %}
+    {%if 'iceberg' in (table_formats_to_use | default('') | lower) and HIVE_METASTORE_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hive: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hive_uri: thrift://{{ns.hiveMetastore}}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hive_warehouse: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined and SPARK_sql_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
-    {% endif -%}   {#  SPARK_table_format_type #}   
-    {%if SPARK_table_format_type == 'iceberg' and HIVE_METASTORE_enable and __HIVE_METASTORE_version == "4.2.0" | default(false) %}
+    {% endif -%}   {#  table_formats_to_use #}   
+    {%if 'iceberg' in (table_formats_to_use | default('') | lower) and HIVE_METASTORE_enable and __HIVE_METASTORE_version == "4.2.0" | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_type: rest
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_uri: 'http://{{ns.hiveMetastoreHost}}:{{ns.hiveMetastoreRestCatalogPort}}/iceberg'
@@ -6952,8 +7003,8 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_s3_path___style___access: true
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_s3_access___key___id: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_s3_secret___access___key: {{s3SecretAccessKey}}
-    {% endif -%}   {#  SPARK_table_format_type #}      
-    {% if SPARK_table_format_type == 'iceberg' and NESSIE_enable | default(false) %}
+    {% endif -%}   {#  table_formats_to_use #}      
+    {% if 'iceberg' in (table_formats_to_use | default('') | lower) and NESSIE_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog_type: hive    
       SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie_type: nessie
@@ -6961,23 +7012,23 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie_uri: http://nessie:19120/api/v1
       SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie_authentication_type: NONE
       SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie_warehouse: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined and SPARK_sql_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
-    {% endif -%}   {#  SPARK_table_format_type #}      
-    {% if SPARK_table_format_type == 'iceberg' and LAKEFS_enable | default(false) %}
+    {% endif -%}   {#  table_formats_to_use #}      
+    {% if 'iceberg' in (table_formats_to_use | default('') | lower) and LAKEFS_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakefs: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakefs_catalog__impl: io.lakefs.iceberg.LakeFSCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakefs_ref: main
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakefs_uri: '{{s3Endpoint | default(omit) }}'
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakefs_warehouse: {{'lakefs://' ~ LAKEFS_quickstart_repo_name | default('demo')}}
-    {% endif -%}   {#  SPARK_table_format_type #} 
-    {% if SPARK_table_format_type == 'iceberg' and UNITY_CATALOG_enable | default(false) %}
+    {% endif -%}   {#  table_formats_to_use #} 
+    {% if 'iceberg' in (table_formats_to_use | default('') | lower) and UNITY_CATALOG_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_unitycatalog_type: rest
       SPARK_DEFAULTS_CONF_spark_sql_catalog_unitycatalog: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_unitycatalog_catalog___impl: org.apache.iceberg.rest.RESTCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_unitycatalog_uri: '{{unitycatalogEndpoint | default(omit) }}/iceberg'
       SPARK_DEFAULTS_CONF_spark_sql_catalog_unitycatalog_token: not_used
       SPARK_DEFAULTS_CONF_spark_sql_catalog_unitycatalog_warehouse:  {{lakekeeperCatalogName | default(omit) }}
-    {% endif -%}   {#  SPARK_table_format_type #}           
-    {% if SPARK_table_format_type == 'iceberg' and LAKEKEEPER_enable | default(false) %}
+    {% endif -%}   {#  table_formats_to_use #}           
+    {% if 'iceberg' in (table_formats_to_use | default('') | lower) and LAKEKEEPER_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakekeeper_type: rest
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakekeeper: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakekeeper_uri: '{{lakekeeperEndpoint | default(omit) }}'
@@ -6986,8 +7037,8 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakekeeper_warehouse:  {{lakekeeperCatalogName | default(omit) }}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakekeeper_scope: 'PRINCIPAL_ROLE:ALL'
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakekeeper_header_X___Iceberg___Access___Delegation: vended-credentials
-    {% endif -%}   {#  SPARK_table_format_type #}
-    {% if SPARK_table_format_type == 'iceberg' and POLARIS_enable | default(false) %}
+    {% endif -%}   {#  table_formats_to_use #}
+    {% if 'iceberg' in (table_formats_to_use | default('') | lower) and POLARIS_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_polaris_type: rest
       SPARK_DEFAULTS_CONF_spark_sql_catalog_polaris: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_polaris_uri: '{{polarisEndpoint | default(omit) }}'
@@ -6996,26 +7047,26 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalog_polaris_warehouse:  {{polarisCatalogName | default(omit) }}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_polaris_scope: 'PRINCIPAL_ROLE:ALL'
       SPARK_DEFAULTS_CONF_spark_sql_catalog_polaris_header_X___Iceberg___Access___Delegation: vended-credentials
-    {% endif -%}   {#  SPARK_table_format_type #}
-    {% if SPARK_table_format_type == 'iceberg' and GRAVITINO_enable | default(false) %}
+    {% endif -%}   {#  table_formats_to_use #}
+    {% if 'iceberg' in (table_formats_to_use | default('') | lower) and GRAVITINO_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_gravitino_type: rest
       SPARK_DEFAULTS_CONF_spark_sql_catalog_gravitino: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_gravitino_uri: '{{gravitinoEndpoint | default(omit) }}'
       SPARK_DEFAULTS_CONF_spark_sql_catalog_gravitino_warehouse:  {{gravitinoCatalogName | default(omit) }}
-    {%elif SPARK_table_format_type == 'delta' and HIVE_METASTORE_enable and not UNITY_CATALOG_enable | default(false) %}
+    {%elif 'delta' in (table_formats_to_use | default('') | lower) and HIVE_METASTORE_enable and not UNITY_CATALOG_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.spark.sql.delta.catalog.DeltaCatalog
       SPARK_DEFAULTS_CONF_spark_sql_hive_metastore_uris: thrift://hive-metastore:9083
       SPARK_DEFAULTS_CONF_spark_sql_hive_metastore_warehouse_dir: s3a://admin-bucket/warehouse
-    {%elif SPARK_table_format_type == 'delta' and UNITY_CATALOG_enable | default(false) %}
+    {%elif 'delta' in (table_formats_to_use | default('') | lower) and UNITY_CATALOG_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: io.unitycatalog.spark.UCSingleCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_my__catalog: io.unitycatalog.spark.UCSingleCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_my__catalog_uri: 'http://unity-catalog:8080'     
       SPARK_DEFAULTS_CONF_spark_sql_catalog_my__catalog_token: ''     
       #SPARK_DEFAULTS_CONF_spark_sql_defaultCatalog: my_catalog      
-    {%elif SPARK_table_format_type == 'hudi' | default(false) %}
+    {%elif 'hudi' in (table_formats_to_use | default('') | lower) | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.spark.sql.hudi.catalog.HoodieCatalog
       SPARK_DEFAULTS_CONF_spark_serializer: org.apache.spark.serializer.KryoSerializer
-    {% endif -%}   {#  SPARK_table_format_type #}
+    {% endif -%}   {#  table_formats_to_use #}
       SPARK_DEFAULTS_CONF_spark_sql_legacy_allowNonEmptyLocationInCTAS: 'true'
       SPARK_DEFAULTS_CONF_spark_jars_repositories: {{SPARK_jars_repositories | default(omit)}}
       SPARK_DEFAULTS_CONF_spark_jars_packages: "{{SPARK_jars_packages}}{{',' if SPARK_jars_packages | length}}{{SPARK_datahub_package | default('')}}"
@@ -7130,13 +7181,13 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_defaultCatalog: {{SPARK_sql_default_catalog if SPARK_sql_default_catalog is defined and SPARK_sql_default_catalog else omit }}
       SPARK_DEFAULTS_CONF_spark_sql_extensions: {{ns.sparkSQLExtensions if ns.sparkSQLExtensions is defined and ns.sparkSQLExtensions | length else omit}}
-      {%if SPARK_table_format_type == 'iceberg' and HIVE_METASTORE_enable | default(false) %}
+      {%if 'iceberg' in (table_formats_to_use | default('') | lower) and HIVE_METASTORE_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hive: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hive_type: hive
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hive_uri: thrift://{{ns.hiveMetastore}}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hive_warehouse: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined and SPARK_sql_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
-      {% endif -%}   {#  SPARK_table_format_type #}
-      {%if SPARK_table_format_type == 'iceberg' and HIVE_METASTORE_enable and __HIVE_METASTORE_version == "4.2.0" | default(false) %}
+      {% endif -%}   {#  table_formats_to_use #}
+      {%if 'iceberg' in (table_formats_to_use | default('') | lower) and HIVE_METASTORE_enable and __HIVE_METASTORE_version == "4.2.0" | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_type: rest
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_uri: 'http://{{ns.hiveMetastoreHost}}:{{ns.hiveMetastoreRestCatalogPort}}/iceberg'
@@ -7147,23 +7198,23 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_s3_path___style___access: true
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_s3_access___key___id: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_s3_secret___access___key: {{s3SecretAccessKey}}
-      {% endif -%}   {#  SPARK_table_format_type #}      
-      {% if SPARK_table_format_type == 'iceberg' and NESSIE_enable | default(false) %}
+      {% endif -%}   {#  table_formats_to_use #}      
+      {% if 'iceberg' in (table_formats_to_use | default('') | lower) and NESSIE_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie_type: nessie
       SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie_ref: main
       SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie_uri: http://nessie:19120/api/v1
       SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie_authentication_type: NONE
       SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie_warehouse: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined and SPARK_sql_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
-      {% endif -%}   {#  SPARK_table_format_type #}      
-      {% if SPARK_table_format_type == 'iceberg' and LAKEFS_enable | default(false) %}
+      {% endif -%}   {#  table_formats_to_use #}      
+      {% if 'iceberg' in (table_formats_to_use | default('') | lower) and LAKEFS_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakefs: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakefs_catalog__impl: io.lakefs.iceberg.LakeFSCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakefs_ref: main
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakefs_uri: '{{s3Endpoint | default(omit) }}'
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakefs_warehouse: {{'lakefs://' ~ LAKEFS_quickstart_repo_name | default('demo')}}
-      {% endif -%}   {#  SPARK_table_format_type #}
-      {% if SPARK_table_format_type == 'iceberg' and LAKEKEEPER_enable | default(false) %}
+      {% endif -%}   {#  table_formats_to_use #}
+      {% if 'iceberg' in (table_formats_to_use | default('') | lower) and LAKEKEEPER_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakekeeper_type: rest
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakekeeper: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakekeeper_uri: '{{lakekeeperEndpoint | default(omit) }}'
@@ -7172,8 +7223,8 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakekeeper_warehouse:  {{lakekeeperCatalogName | default(omit) }}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakekeeper_scope: 'PRINCIPAL_ROLE:ALL'
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakekeeper_header_X___Iceberg___Access___Delegation: vended-credentials
-      {% endif -%}   {#  SPARK_table_format_type #}
-      {% if SPARK_table_format_type == 'iceberg' and POLARIS_enable | default(false) %}
+      {% endif -%}   {#  table_formats_to_use #}
+      {% if 'iceberg' in (table_formats_to_use | default('') | lower) and POLARIS_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_polaris_type: rest
       SPARK_DEFAULTS_CONF_spark_sql_catalog_polaris: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_polaris_uri: '{{polarisEndpoint | default(omit) }}'
@@ -7182,24 +7233,24 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalog_polaris_warehouse:  {{polarisCatalogName | default(omit) }}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_polaris_scope: 'PRINCIPAL_ROLE:ALL'
       SPARK_DEFAULTS_CONF_spark_sql_catalog_polaris_header_X___Iceberg___Access___Delegation: vended-credentials
-      {% endif -%}   {#  SPARK_table_format_type #}
-      {% if SPARK_table_format_type == 'iceberg' and GRAVITINO_enable | default(false) %}
+      {% endif -%}   {#  table_formats_to_use #}
+      {% if 'iceberg' in (table_formats_to_use | default('') | lower) and GRAVITINO_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_gravitino_type: rest
       SPARK_DEFAULTS_CONF_spark_sql_catalog_gravitino: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_gravitino_uri: '{{gravitinoEndpoint | default(omit) }}'
       SPARK_DEFAULTS_CONF_spark_sql_catalog_gravitino_warehouse:  {{gravitinoCatalogName | default(omit) }}
-      {%elif SPARK_table_format_type == 'delta' and not UNITY_CATALOG_enable | default(false) %}
+      {%elif 'delta' in (table_formats_to_use | default('') | lower) and not UNITY_CATALOG_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.spark.sql.delta.catalog.DeltaCatalog
-      {%elif SPARK_table_format_type == 'delta' and UNITY_CATALOG_enable | default(false) %}
+      {%elif 'delta' in (table_formats_to_use | default('') | lower) and UNITY_CATALOG_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: io.unitycatalog.spark.UCSingleCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_my__catalog: io.unitycatalog.spark.UCSingleCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_my__catalog_uri: 'http://unity-catalog:8080'     
       SPARK_DEFAULTS_CONF_spark_sql_catalog_my__catalog_token: ''     
       SPARK_DEFAULTS_CONF_spark_sql_defaultCatalog: my_catalog
-      {%elif SPARK_table_format_type == 'hudi' | default(false) %}
+      {%elif 'hudi' in (table_formats_to_use | default('') | lower) | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.spark.sql.hudi.catalog.HoodieCatalog
       SPARK_DEFAULTS_CONF_spark_serializer: org.apache.spark.serializer.KryoSerializer
-      {% endif -%}   {#  SPARK_table_format_type #}
+      {% endif -%}   {#  table_formats_to_use #}
       SPARK_DEFAULTS_CONF_spark_sql_legacy_allowNonEmptyLocationInCTAS: 'true'
       SPARK_DEFAULTS_CONF_spark_jars_repositories: {{KYUUBI_local_spark_jars_repositories | default(omit)}}
       SPARK_DEFAULTS_CONF_spark_jars_packages: "{{KYUUBI_local_spark_jars_packages}}"
@@ -7317,13 +7368,13 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_defaultCatalog: iceberg
       SPARK_DEFAULTS_CONF_spark_sql_extensions: {{ns.sparkSQLExtensions if ns.sparkSQLExtensions is defined and ns.sparkSQLExtensions | length else omit}}
-    {%if SPARK_table_format_type == 'iceberg' and HIVE_METASTORE_enable | default(false) %}
+    {%if 'iceberg' in (table_formats_to_use | default('') | lower) and HIVE_METASTORE_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hive: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hive_type: hive
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hive_uri: thrift://{{ns.hiveMetastore}}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hive_warehouse: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined and SPARK_sql_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
-    {% endif -%}   {#  SPARK_table_format_type #}      
-    {%if SPARK_table_format_type == 'iceberg' and HIVE_METASTORE_enable and __HIVE_METASTORE_version == "4.2.0" | default(false) %}
+    {% endif -%}   {#  table_formats_to_use #}      
+    {%if 'iceberg' in (table_formats_to_use | default('') | lower) and HIVE_METASTORE_enable and __HIVE_METASTORE_version == "4.2.0" | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_type: rest
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_uri: 'http://{{ns.hiveMetastoreHost}}:{{ns.hiveMetastoreRestCatalogPort}}/iceberg'
@@ -7334,23 +7385,23 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_s3_path___style___access: true
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_s3_access___key___id: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_s3_secret___access___key: {{s3SecretAccessKey}}
-    {% endif -%}   {#  SPARK_table_format_type #}      
-    {% if SPARK_table_format_type == 'iceberg' and NESSIE_enable | default(false) %}
+    {% endif -%}   {#  table_formats_to_use #}      
+    {% if 'iceberg' in (table_formats_to_use | default('') | lower) and NESSIE_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie_type: nessie
       SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie_ref: main
       SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie_uri: http://nessie:19120/api/v1
       SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie_authentication_type: NONE
       SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie_warehouse: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined and SPARK_sql_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
-    {% endif -%}   {#  SPARK_table_format_type #}      
-    {% if SPARK_table_format_type == 'iceberg' and LAKEFS_enable | default(false) %}
+    {% endif -%}   {#  table_formats_to_use #}      
+    {% if 'iceberg' in (table_formats_to_use | default('') | lower) and LAKEFS_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakefs: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakefs_catalog__impl: io.lakefs.iceberg.LakeFSCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakefs_ref: main
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakefs_uri: '{{s3Endpoint | default(omit) }}'
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakefs_warehouse: {{'lakefs://' ~ LAKEFS_quickstart_repo_name | default('demo')}}
-    {% endif -%}   {#  SPARK_table_format_type #}
-    {% if SPARK_table_format_type == 'iceberg' and LAKEKEEPER_enable | default(false) %}
+    {% endif -%}   {#  table_formats_to_use #}
+    {% if 'iceberg' in (table_formats_to_use | default('') | lower) and LAKEKEEPER_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakekeeper_type: rest
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakekeeper: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakekeeper_uri: '{{lakekeeperEndpoint | default(omit) }}'
@@ -7359,8 +7410,8 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakekeeper_warehouse:  {{lakekeeperCatalogName | default(omit) }}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakekeeper_scope: 'PRINCIPAL_ROLE:ALL'
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakekeeper_header_X___Iceberg___Access___Delegation: vended-credentials
-    {% endif -%}   {#  SPARK_table_format_type #}
-    {% if SPARK_table_format_type == 'iceberg' and POLARIS_enable | default(false) %}
+    {% endif -%}   {#  table_formats_to_use #}
+    {% if 'iceberg' in (table_formats_to_use | default('') | lower) and POLARIS_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_polaris_type: rest
       SPARK_DEFAULTS_CONF_spark_sql_catalog_polaris: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_polaris_uri: '{{polarisEndpoint | default(omit) }}'
@@ -7369,18 +7420,18 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalog_polaris_warehouse:  {{polarisCatalogName | default(omit) }}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_polaris_scope: 'PRINCIPAL_ROLE:ALL'
       SPARK_DEFAULTS_CONF_spark_sql_catalog_polaris_header_X___Iceberg___Access___Delegation: vended-credentials
-    {% endif -%}   {#  SPARK_table_format_type #}
-    {% if SPARK_table_format_type == 'iceberg' and GRAVITINO_enable | default(false) %}
+    {% endif -%}   {#  table_formats_to_use #}
+    {% if 'iceberg' in (table_formats_to_use | default('') | lower) and GRAVITINO_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_gravitino_type: rest
       SPARK_DEFAULTS_CONF_spark_sql_catalog_gravitino: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_gravitino_uri: '{{gravitinoEndpoint | default(omit) }}'
       SPARK_DEFAULTS_CONF_spark_sql_catalog_gravitino_warehouse:  {{gravitinoCatalogName | default(omit) }}
-  {%elif SPARK_table_format_type == 'delta' | default(false) %}
+  {%elif 'delta' in (table_formats_to_use | default('') | lower) | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.spark.sql.delta.catalog.DeltaCatalog
-  {%elif SPARK_table_format_type == 'hudi' | default(false) %}
+  {%elif 'hudi' in (table_formats_to_use | default('') | lower) | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.spark.sql.hudi.catalog.HoodieCatalog
       SPARK_DEFAULTS_CONF_spark_serializer: org.apache.spark.serializer.KryoSerializer
-  {% endif -%}   {#  SPARK_table_format_type #}
+  {% endif -%}   {#  table_formats_to_use #}
       SPARK_DEFAULTS_CONF_spark_sql_legacy_allowNonEmptyLocationInCTAS: 'true'
       SPARK_DEFAULTS_CONF_spark_jars_repositories: {{SPARK_jars_repositories | default(omit)}}
       SPARK_DEFAULTS_CONF_spark_jars_packages: "{{SPARK_jars_packages}}{{',' if SPARK_jars_packages | length}}{{SPARK_datahub_package | default('')}}"
@@ -24574,7 +24625,7 @@ services:
   {%if HIVE_METASTORE_enable | default(false) %}
       - './conf/{{conf_dir}}/catalog/minio.properties:/catalog/minio.properties'
   {% endif %}
-  {%if SPARK_table_format_type == 'iceberg' %}
+  {%if 'iceberg' in (table_formats_to_use | default('') | lower) %}
     {%if HIVE_METASTORE_enable | default(false) %}
       - './conf/{{conf_dir}}/catalog/iceberg-hive.properties:/catalog/iceberg_hive.properties'
     {% if __HIVE_METASTORE_version == "4.2.0" | default(false) %}
@@ -24596,11 +24647,11 @@ services:
     {%if NESSIE_enable | default(false) %}
       - './conf/{{conf_dir}}/catalog/iceberg-nessie.properties:/catalog/iceberg_nessie.properties'
     {% endif %}
-  {% endif -%}  {#  SPARK_table_format_type == 'iceberg' #}
-  {%if SPARK_table_format_type == 'delta' | default(false) %}
+  {% endif -%}  {#  'iceberg' in (table_formats_to_use | default('') | lower) #}
+  {%if 'delta' in (table_formats_to_use | default('') | lower) | default(false) %}
       - './conf/{{conf_dir}}/catalog/delta.properties:/catalog/delta.properties'
   {% endif -%} 
-  {%if SPARK_table_format_type == 'hudi' | default(false) %}
+  {%if 'hudi' in (table_formats_to_use | default('') | lower) | default(false) %}
       - './conf/{{conf_dir}}/catalog/hudi.properties:/catalog/hudi.properties'
   {% endif %}
   {%if UNITY_CATALOG_enable | default(false) %}
@@ -24951,7 +25002,7 @@ services:
   {%if HIVE_METASTORE_enable | default(false) %}
       - './conf/{{conf_dir}}/catalog/minio.properties:/catalog/minio.properties'
   {% endif %}
-  {%if SPARK_table_format_type == 'iceberg' %}
+  {%if 'iceberg' in (table_formats_to_use | default('') | lower) %}
     {%if HIVE_METASTORE_enable | default(false) %}
       - './conf/{{conf_dir}}/catalog/iceberg-hive.properties:/catalog/iceberg_hive.properties'
     {% if __HIVE_METASTORE_version == "4.2.0" | default(false) %}
@@ -24973,11 +25024,11 @@ services:
     {%if NESSIE_enable | default(false) %}
       - './conf/{{conf_dir}}/catalog/iceberg-nessie.properties:/catalog/iceberg_nessie.properties'
     {% endif %}
-  {% endif %}  {#  SPARK_table_format_type == 'iceberg' #}
-  {%if SPARK_table_format_type == 'delta' | default(false) %}
+  {% endif %}  {#  'iceberg' in (table_formats_to_use | default('') | lower) #}
+  {%if 'delta' in (table_formats_to_use | default('') | lower) | default(false) %}
       - './conf/{{conf_dir}}/catalog/delta.properties:/catalog/delta.properties'
   {% endif %} 
-  {%if SPARK_table_format_type == 'hudi' | default(false) %}
+  {%if 'hudi' in (table_formats_to_use | default('') | lower) | default(false) %}
       - './conf/{{conf_dir}}/catalog/hudi.properties:/catalog/hudi.properties'
   {% endif %}
   {%if UNITY_CATALOG_enable | default(false) %}
@@ -25443,7 +25494,7 @@ services:
   {%if HIVE_METASTORE_enable | default(false) %}
       - './conf/presto/catalog/minio.properties:{{presto_etc_dir}}/catalog/minio.properties'
   {% endif %}
-  {%if SPARK_table_format_type == 'iceberg' %}
+  {%if 'iceberg' in (table_formats_to_use | default('') | lower) %}
     {%if HIVE_METASTORE_enable | default(false) %}
       - './conf/presto/catalog/iceberg-hive.properties:{{presto_etc_dir}}/catalog/iceberg_hive.properties'
     {% if __HIVE_METASTORE_version == "4.2.0" | default(false) %}
@@ -25465,11 +25516,11 @@ services:
     {%if NESSIE_enable | default(false) %}
       - './conf/presto/catalog/iceberg-nessie.properties:{{presto_etc_dir}}/catalog/iceberg_nessie.properties'
     {% endif %}
-  {% endif -%}  {#  SPARK_table_format_type == 'iceberg' #}
-  {%if SPARK_table_format_type == 'delta' | default(false) %}
+  {% endif -%}  {#  'iceberg' in (table_formats_to_use | default('') | lower) #}
+  {%if 'delta' in (table_formats_to_use | default('') | lower) | default(false) %}
       - './conf/presto/catalog/delta.properties:{{presto_etc_dir}}/catalog/delta.properties'
   {% endif -%} 
-  {%if SPARK_table_format_type == 'hudi' | default(false) %}
+  {%if 'hudi' in (table_formats_to_use | default('') | lower) | default(false) %}
       - './conf/presto/catalog/hudi.properties:{{presto_etc_dir}}/catalog/hudi.properties'
   {% endif %}
   {%if UNITY_CATALOG_enable | default(false) %}
@@ -25704,7 +25755,7 @@ services:
   {%if HIVE_METASTORE_enable | default(false) %}
       - './conf/presto/catalog/minio.properties:{{presto_etc_dir}}/catalog/minio.properties'
   {% endif %}
-  {%if SPARK_table_format_type == 'iceberg' %}
+  {%if 'iceberg' in (table_formats_to_use | default('') | lower) %}
     {%if HIVE_METASTORE_enable | default(false) %}
       - './conf/presto/catalog/iceberg-hive.properties:{{presto_etc_dir}}/catalog/iceberg_hive.properties'
     {% if __HIVE_METASTORE_version == "4.2.0" | default(false) %}
@@ -25726,11 +25777,11 @@ services:
     {%if NESSIE_enable | default(false) %}
       - './conf/presto/catalog/iceberg-nessie.properties:{{presto_etc_dir}}/catalog/iceberg_nessie.properties'
     {% endif %}
-  {% endif -%}  {#  SPARK_table_format_type == 'iceberg' #}
-  {%if SPARK_table_format_type == 'delta' | default(false) %}
+  {% endif -%}  {#  'iceberg' in (table_formats_to_use | default('') | lower) #}
+  {%if 'delta' in (table_formats_to_use | default('') | lower) | default(false) %}
       - './conf/presto/catalog/delta.properties:{{presto_etc_dir}}/catalog/delta.properties'
   {% endif -%} 
-  {%if SPARK_table_format_type == 'hudi' | default(false) %}
+  {%if 'hudi' in (table_formats_to_use | default('') | lower) | default(false) %}
       - './conf/presto/catalog/hudi.properties:{{presto_etc_dir}}/catalog/hudi.properties'
   {% endif %}
   {%if UNITY_CATALOG_enable | default(false) %}
