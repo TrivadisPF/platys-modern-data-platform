@@ -1192,6 +1192,16 @@ For each service there might be some other settings, such as controlling the num
 | `METABASE_volume_map_data`                               	| `false` 	| 1.14.0 	| Volume Map Metabase data folder?                                                                                                                                                           	|             	|                                	|
 | `METABASE_query_caching_enabled`                               	| `false` 	| 1.17.0 	| Enabling caching will save the results of queries that take a long time to run.                                                                                                                                                           	|             	|                                	|
 | `METABASE_prometheus_enabled`                               	| `false` 	| 1.19.0 	| Enabling Prometheus export metrics.                                                                                                                                                           	|             	|                                	|
+| [**_Lightdash_**](./services/lightdash.md) &nbsp;&nbsp;&nbsp;&nbsp;![x86-64](./images/x86-64.png)                                	|         	|       	|                                                                                                                                                                                     	|             	|                                	|
+| `LIGHTDASH_enable` | `false` | 1.19.2 | Enable the Lightdash service | |
+| `LIGHTDASH_volume_map_data` | `false` | 1.19.2 | Map a local directory for the dbt project (`./container-volume/lightdash/data`) |
+| `LIGHTDASH_secret` | `abc123!` | 1.19.2 | Encryption secret for data at rest — must not change after first run |
+| `LIGHTDASH_postgres_dbname` | `lightdash` | 1.19.2 | PostgreSQL database name |
+| `LIGHTDASH_postgres_user` | `lightdash` | 1.19.2 | PostgreSQL user |
+| `LIGHTDASH_postgres_password` | `abc123!` | 1.19.2 | PostgreSQL password |
+| `LIGHTDASH_s3_endpoint` | `` | 1.19.2 | Optional S3/MinIO endpoint for file storage |
+| `LIGHTDASH_s3_bucket` | `` | 1.19.2 | Optional S3 bucket name |
+| `LIGHTDASH_s3_region` | `us-east-1` | 1.19.2 | S3 region |
 | [**_Superset_**](./services/superset.md) &nbsp;&nbsp;&nbsp;&nbsp;![x86-64](./images/x86-64.png)                                	|         	|       	|                                                                                                                                                                                     	|             	|                                	|
 | `SUPERSET_enable`                               	| `false` 	| 1.4.0 	| Generate Superset service                                                                                                                                                            	|             	|                                	|
 | `SUPERSET_provision_example`                               	| `false` 	| 1.11.0 	| Provision Superset examples?                                                                                                                                                           	|             	|                                	|

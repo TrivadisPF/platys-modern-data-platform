@@ -392,6 +392,7 @@ networks:
 {% set __GRAFANA_version = GRAFANA_version | default('latest') -%}
 
 {% set __METABASE_version = METABASE_version | default('latest') -%}
+{% set __LIGHTDASH_version = LIGHTDASH_version | default('latest') -%}
 {% set __SUPERSET_version = SUPERSET_version | default('latest') -%}
 {% set __REDASH_version = REDASH_version | default('latest') -%}
 {% set __SMASHING_version = SMASHING_version | default('latest') -%}
@@ -978,6 +979,7 @@ networks:
   {% set DATAIKU_DSS_enable = false -%}
   {% set KIE_SERVER_enable = false -%}
   {% set METABASE_enable = false -%}
+  {% set LIGHTDASH_enable = false -%}
   {% set SUPERSET_enable = false -%}
   {% set REDASH_enable = false -%}
   {% set SMASHING_enable = false -%}
@@ -17737,6 +17739,55 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  METABASE_enable #}
+
+{% if LIGHTDASH_enable | default(false) %}
+  #  ================================== Lightdash ========================================== #
+  lightdash:
+    image: lightdash/lightdash:{{__LIGHTDASH_version}}
+    hostname: lightdash
+    container_name: lightdash
+    labels:
+      com.platys.name: "lightdash"
+      com.platys.description: "Open-source BI tool for dbt and SQL"
+      com.platys.webui.title: "Lightdash UI"
+      com.platys.webui.url: "http://dataplatform:28422"
+    depends_on:
+      - postgresql
+    ports:
+      - "28422:8080"
+    environment:
+      PGHOST: postgresql
+      PGPORT: 5432
+      PGUSER: {{LIGHTDASH_postgres_user}}
+      PGPASSWORD: {{LIGHTDASH_postgres_password}}
+      PGDATABASE: {{LIGHTDASH_postgres_dbname}}
+      LIGHTDASH_SECRET: {{LIGHTDASH_secret}}
+      PORT: 8080
+      SECURE_COOKIES: "false"
+      TRUST_PROXY: "false"
+    {% if LIGHTDASH_s3_endpoint | default('') != '' %}
+      S3_ENDPOINT: {{LIGHTDASH_s3_endpoint}}
+      S3_BUCKET: {{LIGHTDASH_s3_bucket}}
+      S3_REGION: {{LIGHTDASH_s3_region}}
+    {% endif -%}   {#  LIGHTDASH_s3_endpoint #}
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {% if LIGHTDASH_volume_map_data %}
+      - ./container-volume/lightdash/data:/usr/app/dbt
+    {% endif -%}   {#  LIGHTDASH_volume_map_data #}
+      - ./scripts/docker/:/platys-scripts/
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  LIGHTDASH_enable #}
 
 {% if SUPERSET_enable | default(false) %}
   #  ================================== Superset ========================================== #
