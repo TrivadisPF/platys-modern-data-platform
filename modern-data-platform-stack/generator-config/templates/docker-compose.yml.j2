@@ -683,7 +683,7 @@ networks:
 {% set __EXCALIDRAW_version = EXCALIDRAW_version | default('latest') -%}
 {% set __DRAWIO_version = DRAWIO_version | default('latest') -%}
 {% set __FIREFOX_version = FIREFOX_version | default('latest') -%}
-{% set __BROWSERLESS_CHROMIUM_version = BROWSERLESS_CHROMIUM_version | default('latest') -%}
+{% set __BROWSERLESS_version = BROWSERLESS_version | default('latest') -%}
 {% set __FILE_BROWSER_version = FILE_BROWSER_version | default('latest') -%}
 {% set __VAULT_version = VAULT_version | default('latest') -%}
 {% set __KEYCLOAK_version = KEYCLOAK_version | default('latest') -%}
@@ -1146,7 +1146,7 @@ networks:
   {% set EXCALIDRAW_enable = false -%}
   {% set DRAWIO_enable = false -%}
   {% set FIREFOX_enable = false -%}
-  {% set BROWSERLESS_CHROMIUM_enable = false -%}
+  {% set BROWSERLESS_enable = false -%}
   {% set FILE_BROWSER_enable = false -%}
   {% set ETCD_E3W_enable = false -%}
   {% set DOCKER_EXEC_WEBCONSOLE_enable = false -%}
@@ -30222,23 +30222,21 @@ services:
     restart: unless-stopped
 {% endif %}   {# CODE_SERVER_enable #}
 
-{% if BROWSERLESS_CHROMIUM_enable | default(false) %}
-  #  ================================== Browserless Chromium ========================================== #
-  browserless-chromium:
-    image: ghcr.io/browserless/chromium:{{__BROWSERLESS_CHROMIUM_version}}
-    container_name: browserless-chromium
-    hostname: browserless-chromium
+{% if BROWSERLESS_enable | default(false) %}
+  #  ================================== Browserless ========================================== #
+  browserless:
+    image: ghcr.io/browserless/{{BROWSERLESS_browser_type | default('chromium') }}:{{__BROWSERLESS_version}}
+    container_name: browserless
+    hostname: browserless
     labels:
-      com.platys.name: "browserless-chromium"
-      com.platys.description: "Headless Chromium browser as a service"
-      com.platys.webui.title: "Browserless Chromium UI"
+      com.platys.name: "browserless"
+      com.platys.description: "Headless browser as a service"
+      com.platys.webui.title: "Browserless UI"
       com.platys.webui.url: "http://dataplatform:28423"
     ports:
       - "28423:3000"
     environment:
-    {% if BROWSERLESS_CHROMIUM_token | default('') != '' %}
-      TOKEN: {{BROWSERLESS_CHROMIUM_token}}
-    {% endif -%}   {#  BROWSERLESS_CHROMIUM_token #}
+      TOKEN: {{BROWSERLESS_token if BROWSERLESS_token is defined and BROWSERLESS_token and BROWSERLESS_token | length else omit}}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -30252,7 +30250,7 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
-{% endif %}   {# BROWSERLESS_CHROMIUM_enable #}
+{% endif %}   {# BROWSERLESS_enable #}
 
 {% if FILE_BROWSER_enable | default(false) %}
   #  ================================== File Browser ================= #
