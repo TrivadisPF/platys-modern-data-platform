@@ -795,6 +795,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28420 | 8080 | sftpgo (webui) |
 28421 | 8000 | timeplus (enterprise) |
 28422 | 8080 | lightdash |
+28423 | 3000 | browserless-chromium |
 28242 | 3000 | openlit |
 28243 | 8123 | clickhouse |
 28244 | 9000 | clickhouse |
