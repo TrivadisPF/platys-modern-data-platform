@@ -17821,6 +17821,7 @@ services:
       PORT: 8080
       SECURE_COOKIES: "false"
       TRUST_PROXY: "false"
+      LIGHTDASH_LOG_LEVEL: INFO
     {% if (LIGHTDASH_db_type | lower) == 'external' %}
       PGHOST: postgresql
       PGPORT: 5432
@@ -17841,14 +17842,18 @@ services:
       RESULTS_S3_ACCESS_KEY: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
       RESULTS_S3_SECRET_KEY: {{s3SecretAccessKey}}§
     {% endif -%}   {#  MINIO_enable #}
+    {% if PROMETHEUS_enable | default(false) %}
+      LIGHTDASH_PROMETHEUS_ENABLED: true
+      LIGHTDASH_PROMETHEUS_PORT: 9090
+    {% endif -%}   {#  PROMETHEUS_enable #}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
-    {% if LIGHTDASH_volume_map_data %}
-      - ./container-volume/lightdash/data:/usr/app/dbt
-    {% endif -%}   {#  LIGHTDASH_volume_map_data #}
+    {% if LIGHTDASH_volume_map_dbt_project %}
+      - {{LIGHTDASH_dbt_project_path}}:/usr/app/dbt
+    {% endif -%}   {#  LIGHTDASH_volume_map_dbt_project #}
       - ./scripts/docker/:/platys-scripts/
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
