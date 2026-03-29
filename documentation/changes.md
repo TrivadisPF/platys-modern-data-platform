@@ -10,6 +10,7 @@ See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/plat
  * AutoMQ
  * Moat
  * RustFS
+ * Lightdash
 
 ### Version upgrades
 
