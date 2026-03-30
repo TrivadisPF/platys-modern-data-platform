@@ -29,6 +29,10 @@ See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/plat
  * add default values for environment variables `PUBLIC_IP=127.0.0.1` and `DOCKER_HOST_IP=localhost`
  * change docker image for the iceberg rest service from `tabulario/iceberg-rest` to `apache/iceberg-rest-fixture`
  
+### Breaking Changes
+ 
+ * rename `SPARK_install_jars_packages` to `SPARK_install_java_packages`
+
 ### Bug Fixes
 
 
