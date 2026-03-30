@@ -57,10 +57,3 @@ When a token is set, append it as a query parameter:
 ```
 ws://dataplatform:28423?token=my-secret-token
 ```
-
-## Configuration options
-
-| Property | Default | Description |
-|----------|---------|-------------|
-| `BROWSERLESS_enable` | `false` | Enable the Browserless service |
-| `BROWSERLESS_token` | `` | Optional access token; if set, all requests must include `?token=<value>` |

@@ -19,3 +19,16 @@ Navigate to <http://dataplatform:28422>
 
 On first access, create your admin account and connect a dbt project or warehouse directly.
 
+### Setup using CLI
+
+Login (generate the personal access token first in the GUI and replace `ldpat_XXXX` by it).
+
+```bash
+lightdash login http://localhost:28422 --token ldpat_XXXX
+```
+
+Create project
+
+```
+lightdash deploy --create
+```
