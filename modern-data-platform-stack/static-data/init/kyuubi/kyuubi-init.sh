@@ -110,11 +110,11 @@ do
     wait_for_it ${i}
 done
 
-if [ ${SPARK_INSTALL_JARS_PACKAGES} ]
+if [ ${SPARK_INSTALL_JAVA_PACKAGES} ]
 then
   # navigate into the spark folder
   cd ${KYUUBI_HOME}/externals/spark*
-  /maven-download.sh central ${SPARK_INSTALL_JARS_PACKAGES} ./jars
+  /maven-download.sh central ${SPARK_INSTALL_JAVA_PACKAGES} ./jars
   cd
 fi  
 

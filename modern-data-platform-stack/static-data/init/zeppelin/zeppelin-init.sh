@@ -102,9 +102,9 @@ replace_env_config shiro.ini '$ZEPPELIN_ADMIN_USERNAME,$ZEPPELIN_ADMIN_PASSWORD,
 
 perl -pe 's/\$\{(\w+)\}/$ENV{$1}/g' < /root/.s3cfg.template > /root/.s3cfg
 
-if [ ${SPARK_INSTALL_JARS_PACKAGES} ]
+if [ ${SPARK_INSTALL_JAVA_PACKAGES} ]
 then
-  /maven-download.sh central ${SPARK_INSTALL_JARS_PACKAGES} /spark/jars
+  /maven-download.sh central ${SPARK_INSTALL_JAVA_PACKAGES} /spark/jars
 fi
 
 source /opt/conda/etc/profile.d/conda.sh
