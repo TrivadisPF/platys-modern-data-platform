@@ -169,6 +169,11 @@ if [ ${SPARK_INSTALL_JARS_PACKAGES} ]
 then
   # using python for the download, as spark bitnami docker images don't come with curl installed
   /maven-download.sh central ${SPARK_INSTALL_JARS_PACKAGES} /opt/bitnami/spark/jars python
-fi  
+fi
+
+if [ ${SPARK_INSTALL_PYTHON_PACKAGES} ]
+then
+  echo "Installing Python packages: ${SPARK_INSTALL_PYTHON_PACKAGES}"
+fi
 
 exec $@
