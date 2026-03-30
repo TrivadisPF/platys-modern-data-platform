@@ -1404,6 +1404,7 @@ networks:
     {% set ns.sparkTableFormatJar = ns.sparkTableFormatJar ~ (',' if ns.sparkTableFormatJar else '') ~ "/opt/bitnami/spark/jars/hudi-spark3.3-bundle_2.12-0.13.0.jar" -%}
   {% endif -%}
   {% set ns.sparkDeltaJavaPackages = "io.delta:delta-core_2.12:2.3.0,io.delta:delta-storage:2.3.0" -%}
+  {% set ns.sparkDeltaPythonPackages = "delta-spark==2.3.0" -%}
  {% if NESSIE_enable | default(false) %}
   {% set ns.sparkIcebergJavaPackages = "org.apache.iceberg:iceberg-spark-runtime-3.3_2.12:1.7.0,org.projectnessie.nessie-integrations:nessie-spark-extensions-3.3_2.12:0.100.0" -%}  
  {% elif LAKEFS_enable | default(false) %}
@@ -1424,6 +1425,7 @@ networks:
     {% set ns.sparkTableFormatJar = ns.sparkTableFormatJar ~ (',' if ns.sparkTableFormatJar else '') ~ "/opt/bitnami/spark/jars/hudi-spark3.3-bundle_2.12-0.13.0.jar" -%}
   {% endif -%}
   {% set ns.sparkDeltaJavaPackages = "io.delta:delta-core_2.12:2.4.0,io.delta:delta-storage:2.4.0" -%}
+  {% set ns.sparkDeltaPythonPackages = "delta-spark==2.4.0" -%}
  {% if NESSIE_enable | default(false) %}
   {% set ns.sparkIcebergJavaPackages = "org.apache.iceberg:iceberg-spark-runtime-3.4_2.12:1.10.1,org.projectnessie.nessie-integrations:nessie-spark-extensions-3.4_2.12:0.100.0" -%}
  {% elif LAKEFS_enable | default(false) %}
@@ -1444,10 +1446,12 @@ networks:
     {% set ns.sparkTableFormatJar = ns.sparkTableFormatJar ~ (',' if ns.sparkTableFormatJar else '') ~ "/opt/bitnami/spark/jars/hudi-spark3.3-bundle_2.12-0.15.0.jar" -%}
   {% endif -%}
   {% set ns.sparkDeltaJavaPackages = "io.delta:delta-spark_2.12:3.3.2,io.delta:delta-storage:3.3.2" -%}
+  {% set ns.sparkDeltaPythonPackages = "delta-spark==3.3.2" -%}
  {% if UNITY_CATALOG_enable and 'delta' in (table_formats_to_use | default('') | lower) | default(false) %}
   {% set ns.sparkTableFormatJar = ns.sparkTableFormatJar ~ ",/opt/bitnami/spark/jars/unitycatalog-spark_2.12-0.2.1.jar,/opt/bitnami/spark/jars/unitycatalog-client-0.2.1.jar" -%}
   {% set ns.sparkDeltaJavaPackages = ns.sparkDeltaJavaPackages ~ ",io.unitycatalog:unitycatalog-spark_2.12:0.2.1,io.unitycatalog:unitycatalog-client:0.2.1" -%}
- {% endif %}
+  {% set ns.sparkDeltaPythonPackages = "delta-spark==0.2.1" -%}
+{% endif %}
  {% if NESSIE_enable | default(false) %}
   {% set ns.sparkIcebergJavaPackages = "org.apache.iceberg:iceberg-spark-runtime-3.5_2.12:1.10.1,org.apache.iceberg:iceberg-aws-bundle:1.10.1,org.projectnessie.nessie-integrations:nessie-spark-extensions-3.5_2.12:0.100.0" -%}
  {% elif LAKEFS_enable | default(false) %}
@@ -1470,6 +1474,7 @@ networks:
     {% set ns.sparkTableFormatJar = ns.sparkTableFormatJar ~ (',' if ns.sparkTableFormatJar else '') ~ "/opt/bitnami/spark/jars/hudi-spark4.0-bundle_2.12-0.15.0.jar" -%}
   {% endif -%}
   {% set ns.sparkDeltaJavaPackages = "io.delta:delta-spark_2.12:4.0.0,io.delta:delta-storage:4.0.0" -%}
+  {% set ns.sparkDeltaPythonPackages = "delta-spark==4.0.0" -%}
  {% if UNITY_CATALOG_enable and 'delta' in (table_formats_to_use | default('') | lower) | default(false) %}
   {% set ns.sparkTableFormatJar = ns.sparkTableFormatJar ~ ",/opt/bitnami/spark/jars/unitycatalog-spark_2.12-0.2.1.jar,/opt/bitnami/spark/jars/unitycatalog-client-0.2.1.jar" -%}
   {% set ns.sparkDeltaJavaPackages = ns.sparkDeltaJavaPackages ~ ",io.unitycatalog:unitycatalog-spark_2.12:0.2.1,io.unitycatalog:unitycatalog-client:0.2.1" -%}
@@ -1495,7 +1500,8 @@ networks:
   {% if 'hudi' in (table_formats_to_use | default('') | lower) -%}
     {% set ns.sparkTableFormatJar = ns.sparkTableFormatJar ~ (',' if ns.sparkTableFormatJar else '') ~ "/opt/bitnami/spark/jars/hudi-spark2.4-bundle_2.12-0.13.0" -%}
   {% endif -%}
-  {% set ns.sparkDeltaJavaPackages = "io.delta:delta-core_2.12:0.6.1" -%}
+  {% set ns.sparkDeltaJavaPackages = "io.delta:delta-core_2.12:0.6.1" -%}0.6.1
+  {% set ns.sparkDeltaPythonPackages = "delta-spark==0.6.1" -%}
   {% set ns.sparkIcebergJavaPackages = "org.apache.iceberg:iceberg-spark-2:0.13.2" -%}
   {% set ns.sparkHudiJavaPackages ="org.apache.hudi:hudi-spark2.4-bundle_2.12:0.13.0" -%}
 {% endif -%}    {# SPARK_base_version #}
@@ -6500,7 +6506,7 @@ services:
     {% else %}
       # specifies the JARs to be downloaded to the jars folder by maven-download-sh script
       SPARK_INSTALL_JAVA_PACKAGES: '{{SPARK_install_java_packages}},{{ns.sparkDeltaJavaPackages}},{{ns.sparkIcebergJavaPackages}},{{ns.sparkHudiJavaPackages}}'
-      SPARK_INSTALL_PYTHON_PACKAGES: '{{SPARK_install_python_packages}}'
+      SPARK_INSTALL_PYTHON_PACKAGES: '{{SPARK_install_python_packages}} {{ns.sparkDeltaPythonPackages}}'
       SPARK_DEFAULTS_CONF_spark_jars: {{SPARK_jars}}{{',' if SPARK_jars | length}}{{ns.sparkTableFormatJar | default('')}}
     {% endif -%}   {#  DATAHUB_enable or external['DATAHUB_enable'] #}
       SPARK_DEFAULTS_CONF_spark_jars_ivySettings: {{SPARK_jars_ivySettings}}
@@ -6708,7 +6714,7 @@ services:
     {% else %}
       # specifies the JARs to be downloaded to the jars folder by maven-download-sh script
       SPARK_INSTALL_JAVA_PACKAGES: '{{SPARK_install_java_packages}},{{ns.sparkDeltaJavaPackages}},{{ns.sparkIcebergJavaPackages}},{{ns.sparkHudiJavaPackages}}'
-      SPARK_INSTALL_PYTHON_PACKAGES: '{{SPARK_install_python_packages}}'
+      SPARK_INSTALL_PYTHON_PACKAGES: '{{SPARK_install_python_packages}} {{ns.sparkDeltaPythonPackages}}'
       SPARK_DEFAULTS_CONF_spark_jars: {{SPARK_jars}}{{',' if SPARK_jars | length}}{{ns.sparkTableFormatJar | default('')}}
     {% endif -%}   {#  DATAHUB_enable or external['DATAHUB_enable'] #}
       SPARK_DEFAULTS_CONF_spark_jars_ivySettings: {{SPARK_jars_ivySettings}}
@@ -6899,7 +6905,7 @@ services:
     {% else %}
       # specifies the JARs to be downloaded to the jars folder by maven-download-sh script
       SPARK_INSTALL_JAVA_PACKAGES: '{{SPARK_install_java_packages}},{{ns.sparkDeltaJavaPackages}},{{ns.sparkIcebergJavaPackages}},{{ns.sparkHudiJavaPackages}}'
-      SPARK_INSTALL_PYTHON_PACKAGES: '{{SPARK_install_python_packages}}'
+      SPARK_INSTALL_PYTHON_PACKAGES: '{{SPARK_install_python_packages}} {{ns.sparkDeltaPythonPackages}}'
       SPARK_DEFAULTS_CONF_spark_jars: {{SPARK_jars}}{{',' if SPARK_jars | length}}{{ns.sparkTableFormatJar | default('')}}
     {% endif -%}   {#  DATAHUB_enable or external['DATAHUB_enable'] #}
       SPARK_DEFAULTS_CONF_spark_jars_ivySettings: {{SPARK_jars_ivySettings}}
@@ -7082,12 +7088,12 @@ services:
     {%if (DATAHUB_enable or external['DATAHUB_enable'] and SPARK_datahub_agent_enabled) | default(false) %}
       # specifies the JARs to be downloaded to the jars folder by maven-download-sh script
       SPARK_INSTALL_JAVA_PACKAGES: '{{SPARK_install_java_packages}},{{ns.sparkDeltaJavaPackages}},{{ns.sparkIcebergJavaPackages}},{{ns.sparkHudiJavaPackages}},{{ns.datahubSparkPluginDependencies}}'
-      SPARK_INSTALL_PYTHON_PACKAGES: '{{SPARK_install_python_packages}}'
+      SPARK_INSTALL_PYTHON_PACKAGES: '{{SPARK_install_python_packages}} {{ns.sparkDeltaPythonPackages}}'
       SPARK_DEFAULTS_CONF_spark_jars: {{SPARK_jars}}{{',' if SPARK_jars | length}}{{ns.sparkTableFormatJar | default('')}}{{',' if ns.sparkTableFormatJar | length}}{{ns.datahubSparkPluginJar | default('')}}
     {% else %}
       # specifies the JARs to be downloaded to the jars folder by maven-download-sh script
       SPARK_INSTALL_JAVA_PACKAGES: '{{SPARK_install_java_packages}},{{ns.sparkDeltaJavaPackages}},{{ns.sparkIcebergJavaPackages}},{{ns.sparkHudiJavaPackages}}'
-      SPARK_INSTALL_PYTHON_PACKAGES: '{{SPARK_install_python_packages}}'
+      SPARK_INSTALL_PYTHON_PACKAGES: '{{SPARK_install_python_packages}} {{ns.sparkDeltaPythonPackages}}'
       SPARK_DEFAULTS_CONF_spark_jars: {{SPARK_jars}}{{',' if SPARK_jars | length}}{{ns.sparkTableFormatJar | default('')}}
     {% endif -%}   {#  DATAHUB_enable or external['DATAHUB_enable'] #}
       SPARK_DEFAULTS_CONF_spark_jars_ivySettings: {{SPARK_jars_ivySettings}}
@@ -7449,12 +7455,12 @@ services:
     {%if (DATAHUB_enable or external['DATAHUB_enable'] and SPARK_datahub_agent_enabled) | default(false) %}
       # specifies the JARs to be downloaded by maven-download-sh script
       SPARK_INSTALL_JAVA_PACKAGES: '{{SPARK_install_java_packages}},{{ns.sparkDeltaJavaPackages}},{{ns.sparkIcebergJavaPackages}},{{ns.sparkHudiJavaPackages}},{{ns.datahubSparkPluginDependencies}}'
-      SPARK_INSTALL_PYTHON_PACKAGES: '{{SPARK_install_python_packages}}'
+      SPARK_INSTALL_PYTHON_PACKAGES: '{{SPARK_install_python_packages}} {{ns.sparkDeltaPythonPackages}}'
       SPARK_DEFAULTS_CONF_spark_jars: {{SPARK_jars}}{{',' if SPARK_jars | length}}{{ns.sparkTableFormatJar | default('')}}{{',' if ns.sparkTableFormatJar | length}}{{ns.datahubSparkPluginJar | default('')}}
     {% else %}
       # specifies the JARs to be downloaded by maven-download-sh script
       SPARK_INSTALL_JAVA_PACKAGES: '{{SPARK_install_java_packages}},{{ns.sparkDeltaJavaPackages}},{{ns.sparkIcebergJavaPackages}},{{ns.sparkHudiJavaPackages}}'
-      SPARK_INSTALL_PYTHON_PACKAGES: '{{SPARK_install_python_packages}}'
+      SPARK_INSTALL_PYTHON_PACKAGES: '{{SPARK_install_python_packages}} {{ns.sparkDeltaPythonPackages}}'
       SPARK_DEFAULTS_CONF_spark_jars: {{SPARK_jars}}{{',' if SPARK_jars | length}}{{ns.sparkTableFormatJar | default('')}}
     {% endif -%}   {#  DATAHUB_enable or external['DATAHUB_enable'] #}
       SPARK_DEFAULTS_CONF_spark_jars_ivySettings: {{SPARK_jars_ivySettings}}
