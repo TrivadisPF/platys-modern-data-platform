@@ -6623,8 +6623,14 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog_type: hive
       SPARK_DEFAULTS_CONF_spark_hadoop_hive_metastore_uris: thrift://{{ns.hiveMetastore}}
     {% endif -%}   {#  SPARK_catalog #}
-      #SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.iceberg.spark.SparkCatalog
-      SPARK_DEFAULTS_CONF_spark_sql_defaultCatalog: {{SPARK_sql_default_catalog if SPARK_sql_default_catalog is defined and SPARK_sql_default_catalog else omit }} 
+    {% if 'delta' in (table_formats_to_use | default('') | lower) and HIVE_METASTORE_enable and not UNITY_CATALOG_enable | default(false) %}
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.spark.sql.delta.catalog.DeltaCatalog
+    {%elif 'delta' in (table_formats_to_use | default('') | lower) and UNITY_CATALOG_enable | default(false) %}    
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: io.unitycatalog.spark.UCSingleCatalog
+    {% elif 'iceberg' in (table_formats_to_use | default('') | lower) %}
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.iceberg.spark.SparkCatalog
+    {% endif -%}   {#  SPARK_catalog #}
+      SPARK_DEFAULTS_CONF_spark_sql_defaultCatalog: {{SPARK_sql_default_catalog if SPARK_sql_default_catalog is defined and SPARK_sql_default_catalog else omit }}
       SPARK_DEFAULTS_CONF_spark_sql_extensions: {{ns.sparkSQLExtensions if ns.sparkSQLExtensions is defined and ns.sparkSQLExtensions | length else omit}}
     {%if 'iceberg' in (table_formats_to_use | default('') | lower) and HIVE_METASTORE_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hive: org.apache.iceberg.spark.SparkCatalog
@@ -6651,14 +6657,14 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie_uri: http://nessie:19120/api/v1
       SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie_authentication_type: NONE
       SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie_warehouse: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined and SPARK_sql_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
-    {% endif -%}   {#  table_formats_to_use #}    
+    {% endif -%}   {#  table_formats_to_use #}      
     {% if 'iceberg' in (table_formats_to_use | default('') | lower) and LAKEFS_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakefs: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakefs_catalog__impl: io.lakefs.iceberg.LakeFSCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakefs_ref: main
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakefs_uri: '{{s3Endpoint | default(omit) }}'
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakefs_warehouse: {{'lakefs://' ~ LAKEFS_quickstart_repo_name | default('demo')}}
-    {% endif -%}   {#  table_formats_to_use #}      
+    {% endif -%}   {#  table_formats_to_use #}
     {% if 'iceberg' in (table_formats_to_use | default('') | lower) and UNITY_CATALOG_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_unitycatalog_type: rest
       SPARK_DEFAULTS_CONF_spark_sql_catalog_unitycatalog: org.apache.iceberg.spark.SparkCatalog
@@ -6666,7 +6672,7 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalog_unitycatalog_uri: '{{unitycatalogEndpoint | default(omit) }}/iceberg'
       SPARK_DEFAULTS_CONF_spark_sql_catalog_unitycatalog_token: not_used
       SPARK_DEFAULTS_CONF_spark_sql_catalog_unitycatalog_warehouse:  {{lakekeeperCatalogName | default(omit) }}
-    {% endif -%}   {#  table_formats_to_use #}      
+    {% endif -%}   {#  table_formats_to_use #}
     {% if 'iceberg' in (table_formats_to_use | default('') | lower) and LAKEKEEPER_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakekeeper_type: rest
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakekeeper: org.apache.iceberg.spark.SparkCatalog
@@ -6694,26 +6700,24 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalog_gravitino_warehouse:  {{gravitinoCatalogName | default(omit) }}
     {% endif -%}   {#  table_formats_to_use iceberg #}
     {% if 'delta' in (table_formats_to_use | default('') | lower) and HIVE_METASTORE_enable and not UNITY_CATALOG_enable | default(false) %}
-      SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.spark.sql.delta.catalog.DeltaCatalog
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_delta: org.apache.spark.sql.delta.catalog.DeltaCatalog
       SPARK_DEFAULTS_CONF_spark_sql_hive_metastore_uris: thrift://{{ns.hiveMetastore}}
-      SPARK_DEFAULTS_CONF_spark_sql_hive_metastore_warehouse_dir: s3a://admin-bucket/warehouse
+      SPARK_DEFAULTS_CONF_spark_sql_hive_metastore_warehouse_dir: s3a://admin-bucket/warehouse      
     {%elif 'delta' in (table_formats_to_use | default('') | lower) and UNITY_CATALOG_enable | default(false) %}
-      SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: io.unitycatalog.spark.UCSingleCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_delta: io.unitycatalog.spark.UCSingleCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_delta_uri: 'http://unity-catalog:8080'     
       SPARK_DEFAULTS_CONF_spark_sql_catalog_delta_token: ''     
-#      SPARK_DEFAULTS_CONF_spark_sql_defaultCatalog: my_catalog      
     {% endif -%}   {#  table_formats_to_use delta #}
     {% if 'hudi' in (table_formats_to_use | default('') | lower) %}
-      SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.spark.sql.hudi.catalog.HoodieCatalog
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_hudi: org.apache.spark.sql.hudi.catalog.HoodieCatalog
       SPARK_DEFAULTS_CONF_spark_serializer: org.apache.spark.serializer.KryoSerializer
     {% endif -%}   {#  table_formats_to_use hudi #}
       SPARK_DEFAULTS_CONF_spark_sql_legacy_allowNonEmptyLocationInCTAS: 'true'
       SPARK_DEFAULTS_CONF_spark_jars_repositories: {{SPARK_jars_repositories | default(omit)}}
-      SPARK_DEFAULTS_CONF_spark_jars_packages: "{{SPARK_jars_packages}}{{',' if SPARK_jars_packages | length}}{{SPARK_datahub_package | default('')}}"
+      SPARK_DEFAULTS_CONF_spark_jars_packages: "{{SPARK_jars_packages}},{{ns.sparkDeltaJavaPackages}}"
       SPARK_DEFAULTS_CONF_spark_jars_excludes: {{SPARK_jars_excludes}}
     {%if (DATAHUB_enable or external['DATAHUB_enable'] and SPARK_datahub_agent_enabled) | default(false) %}
-      # specifies the JARs to be downloaded to the jars folder by maven-download-sh script
+      # specifies the JARs to be downloaded to the jars folder by maven-download-sh script (triggered in the init script)
       SPARK_INSTALL_JAVA_PACKAGES: '{{SPARK_install_java_packages}},{{ns.sparkDeltaJavaPackages}},{{ns.sparkIcebergJavaPackages}},{{ns.sparkHudiJavaPackages}},{{ns.datahubSparkPluginDependencies}}'
       SPARK_INSTALL_PYTHON_PACKAGES: '{{SPARK_install_python_packages}}'
       SPARK_DEFAULTS_CONF_spark_jars: {{SPARK_jars}}{{',' if SPARK_jars | length}}{{ns.sparkTableFormatJar | default('')}}{{',' if ns.sparkTableFormatJar | length}}{{ns.datahubSparkPluginJar | default('')}}
@@ -6814,9 +6818,15 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog_type: hive
       SPARK_DEFAULTS_CONF_spark_hadoop_hive_metastore_uris: thrift://{{ns.hiveMetastore}}
     {% endif -%}   {#  SPARK_catalog #}
-      #SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.iceberg.spark.SparkCatalog
+    {% if 'delta' in (table_formats_to_use | default('') | lower) and HIVE_METASTORE_enable and not UNITY_CATALOG_enable | default(false) %}
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.spark.sql.delta.catalog.DeltaCatalog
+    {%elif 'delta' in (table_formats_to_use | default('') | lower) and UNITY_CATALOG_enable | default(false) %}    
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: io.unitycatalog.spark.UCSingleCatalog
+    {% elif 'iceberg' in (table_formats_to_use | default('') | lower) %}
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.iceberg.spark.SparkCatalog
+    {% endif -%}   {#  SPARK_catalog #}
       SPARK_DEFAULTS_CONF_spark_sql_defaultCatalog: {{SPARK_sql_default_catalog if SPARK_sql_default_catalog is defined and SPARK_sql_default_catalog else omit }}
-      SPARK_DEFAULTS_CONF_spark_sql_extensions: {{ns.sparkSQLExtensions if ns.sparkSQLExtensions is defined and ns.sparkSQLExtensions | length else omit }}
+      SPARK_DEFAULTS_CONF_spark_sql_extensions: {{ns.sparkSQLExtensions if ns.sparkSQLExtensions is defined and ns.sparkSQLExtensions | length else omit}}
     {%if 'iceberg' in (table_formats_to_use | default('') | lower) and HIVE_METASTORE_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hive: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hive_uri: thrift://{{ns.hiveMetastore}}
@@ -6885,23 +6895,21 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalog_gravitino_warehouse:  {{gravitinoCatalogName | default(omit) }}
     {% endif -%}   {#  table_formats_to_use iceberg #}
     {% if 'delta' in (table_formats_to_use | default('') | lower) and HIVE_METASTORE_enable and not UNITY_CATALOG_enable | default(false) %}
-      SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.spark.sql.delta.catalog.DeltaCatalog
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_delta: org.apache.spark.sql.delta.catalog.DeltaCatalog
       SPARK_DEFAULTS_CONF_spark_sql_hive_metastore_uris: thrift://{{ns.hiveMetastore}}
       SPARK_DEFAULTS_CONF_spark_sql_hive_metastore_warehouse_dir: s3a://admin-bucket/warehouse      
     {%elif 'delta' in (table_formats_to_use | default('') | lower) and UNITY_CATALOG_enable | default(false) %}
-      SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: io.unitycatalog.spark.UCSingleCatalog
-      SPARK_DEFAULTS_CONF_spark_sql_catalog_my__catalog: io.unitycatalog.spark.UCSingleCatalog
-      SPARK_DEFAULTS_CONF_spark_sql_catalog_my__catalog_uri: 'http://unity-catalog:8080'     
-      SPARK_DEFAULTS_CONF_spark_sql_catalog_my__catalog_token: ''     
-      #SPARK_DEFAULTS_CONF_spark_sql_defaultCatalog: my_catalog      
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_delta: io.unitycatalog.spark.UCSingleCatalog
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_delta_uri: 'http://unity-catalog:8080'     
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_delta_token: ''     
     {% endif -%}   {#  table_formats_to_use delta #}
     {% if 'hudi' in (table_formats_to_use | default('') | lower) %}
-      SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.spark.sql.hudi.catalog.HoodieCatalog
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_hudi: org.apache.spark.sql.hudi.catalog.HoodieCatalog
       SPARK_DEFAULTS_CONF_spark_serializer: org.apache.spark.serializer.KryoSerializer
     {% endif -%}   {#  table_formats_to_use hudi #}
       SPARK_DEFAULTS_CONF_spark_sql_legacy_allowNonEmptyLocationInCTAS: 'true'
       SPARK_DEFAULTS_CONF_spark_jars_repositories: {{SPARK_jars_repositories | default(omit)}}
-      SPARK_DEFAULTS_CONF_spark_jars_packages: "{{SPARK_jars_packages}}"
+      SPARK_DEFAULTS_CONF_spark_jars_packages: "{{SPARK_jars_packages}},{{ns.sparkDeltaJavaPackages}}"
       SPARK_DEFAULTS_CONF_spark_jars_excludes: {{SPARK_jars_excludes}}
     {%if (DATAHUB_enable or external['DATAHUB_enable'] and SPARK_datahub_agent_enabled) | default(false) %}
       # specifies the JARs to be downloaded to the jars folder by maven-download-sh script (triggered in the init script)
@@ -6992,8 +7000,8 @@ services:
       SPARK_DEFAULTS_CONF_spark_executor_memory: {{SPARK_executor_memory if SPARK_executor_memory is defined and SPARK_executor_memory else omit }}
     {%if (DATAHUB_enable or external['DATAHUB_enable'] and SPARK_datahub_agent_enabled) | default(false) %}
       SPARK_DEFAULTS_CONF_spark_extraListeners: 'datahub.spark.DatahubSparkListener'
-      SPARK_DEFAULTS_CONF_spark_datahub_metadata_dataset_env: {{env}}
       SPARK_DEFAULTS_CONF_spark_datahub_rest_server: {{ns.gmsUrl}}
+      SPARK_DEFAULTS_CONF_spark_datahub_metadata_dataset_env: {{env}}
     {% endif -%}   {#  DATAHUB_enable or external['DATAHUB_enable'] #}
       SPARK_DEFAULTS_CONF_spark_sql_hive_metastore_jars: builtin
       # SPARK_DEFAULTS_CONF_spark_sql_hive_metastore_version: 3.1.2    
@@ -7004,14 +7012,20 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog_type: hive
       SPARK_DEFAULTS_CONF_spark_hadoop_hive_metastore_uris: thrift://{{ns.hiveMetastore}}
     {% endif -%}   {#  SPARK_catalog #}
-      #SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.iceberg.spark.SparkCatalog
+    {% if 'delta' in (table_formats_to_use | default('') | lower) and HIVE_METASTORE_enable and not UNITY_CATALOG_enable | default(false) %}
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.spark.sql.delta.catalog.DeltaCatalog
+    {%elif 'delta' in (table_formats_to_use | default('') | lower) and UNITY_CATALOG_enable | default(false) %}    
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: io.unitycatalog.spark.UCSingleCatalog
+    {% elif 'iceberg' in (table_formats_to_use | default('') | lower) %}
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.iceberg.spark.SparkCatalog
+    {% endif -%}   {#  SPARK_catalog #}
       SPARK_DEFAULTS_CONF_spark_sql_defaultCatalog: {{SPARK_sql_default_catalog if SPARK_sql_default_catalog is defined and SPARK_sql_default_catalog else omit }}
       SPARK_DEFAULTS_CONF_spark_sql_extensions: {{ns.sparkSQLExtensions if ns.sparkSQLExtensions is defined and ns.sparkSQLExtensions | length else omit}}
     {%if 'iceberg' in (table_formats_to_use | default('') | lower) and HIVE_METASTORE_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hive: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hive_uri: thrift://{{ns.hiveMetastore}}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hive_warehouse: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined and SPARK_sql_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
-    {% endif -%}   {#  table_formats_to_use #}   
+    {% endif -%}   {#  table_formats_to_use #}      
     {%if 'iceberg' in (table_formats_to_use | default('') | lower) and HIVE_METASTORE_enable and __HIVE_METASTORE_version == "4.2.0" | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_type: rest
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest: org.apache.iceberg.spark.SparkCatalog
@@ -7025,7 +7039,7 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_s3_secret___access___key: {{s3SecretAccessKey}}
     {% endif -%}   {#  table_formats_to_use #}      
     {% if 'iceberg' in (table_formats_to_use | default('') | lower) and NESSIE_enable | default(false) %}
-      SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog_type: hive    
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog_type: hive
       SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie_type: nessie
       SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie_ref: main
@@ -7039,7 +7053,7 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakefs_ref: main
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakefs_uri: '{{s3Endpoint | default(omit) }}'
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakefs_warehouse: {{'lakefs://' ~ LAKEFS_quickstart_repo_name | default('demo')}}
-    {% endif -%}   {#  table_formats_to_use #} 
+    {% endif -%}   {#  table_formats_to_use #}
     {% if 'iceberg' in (table_formats_to_use | default('') | lower) and UNITY_CATALOG_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_unitycatalog_type: rest
       SPARK_DEFAULTS_CONF_spark_sql_catalog_unitycatalog: org.apache.iceberg.spark.SparkCatalog
@@ -7047,7 +7061,7 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalog_unitycatalog_uri: '{{unitycatalogEndpoint | default(omit) }}/iceberg'
       SPARK_DEFAULTS_CONF_spark_sql_catalog_unitycatalog_token: not_used
       SPARK_DEFAULTS_CONF_spark_sql_catalog_unitycatalog_warehouse:  {{lakekeeperCatalogName | default(omit) }}
-    {% endif -%}   {#  table_formats_to_use #}           
+    {% endif -%}   {#  table_formats_to_use #}
     {% if 'iceberg' in (table_formats_to_use | default('') | lower) and LAKEKEEPER_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakekeeper_type: rest
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakekeeper: org.apache.iceberg.spark.SparkCatalog
@@ -7073,28 +7087,28 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalog_gravitino: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_gravitino_uri: '{{gravitinoEndpoint | default(omit) }}'
       SPARK_DEFAULTS_CONF_spark_sql_catalog_gravitino_warehouse:  {{gravitinoCatalogName | default(omit) }}
-    {%elif 'delta' in (table_formats_to_use | default('') | lower) and HIVE_METASTORE_enable and not UNITY_CATALOG_enable | default(false) %}
-      SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.spark.sql.delta.catalog.DeltaCatalog
+    {% endif -%}   {#  table_formats_to_use iceberg #}
+    {% if 'delta' in (table_formats_to_use | default('') | lower) and HIVE_METASTORE_enable and not UNITY_CATALOG_enable | default(false) %}
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_delta: org.apache.spark.sql.delta.catalog.DeltaCatalog
       SPARK_DEFAULTS_CONF_spark_sql_hive_metastore_uris: thrift://{{ns.hiveMetastore}}
-      SPARK_DEFAULTS_CONF_spark_sql_hive_metastore_warehouse_dir: s3a://admin-bucket/warehouse
+      SPARK_DEFAULTS_CONF_spark_sql_hive_metastore_warehouse_dir: s3a://admin-bucket/warehouse      
     {%elif 'delta' in (table_formats_to_use | default('') | lower) and UNITY_CATALOG_enable | default(false) %}
-      SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: io.unitycatalog.spark.UCSingleCatalog
-      SPARK_DEFAULTS_CONF_spark_sql_catalog_my__catalog: io.unitycatalog.spark.UCSingleCatalog
-      SPARK_DEFAULTS_CONF_spark_sql_catalog_my__catalog_uri: 'http://unity-catalog:8080'     
-      SPARK_DEFAULTS_CONF_spark_sql_catalog_my__catalog_token: ''     
-      #SPARK_DEFAULTS_CONF_spark_sql_defaultCatalog: my_catalog      
-    {%elif 'hudi' in (table_formats_to_use | default('') | lower) | default(false) %}
-      SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.spark.sql.hudi.catalog.HoodieCatalog
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_delta: io.unitycatalog.spark.UCSingleCatalog
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_delta_uri: 'http://unity-catalog:8080'     
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_delta_token: ''     
+    {% endif -%}   {#  table_formats_to_use delta #}
+    {% if 'hudi' in (table_formats_to_use | default('') | lower) %}
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_hudi: org.apache.spark.sql.hudi.catalog.HoodieCatalog
       SPARK_DEFAULTS_CONF_spark_serializer: org.apache.spark.serializer.KryoSerializer
-    {% endif -%}   {#  table_formats_to_use #}
+    {% endif -%}   {#  table_formats_to_use hudi #}
       SPARK_DEFAULTS_CONF_spark_sql_legacy_allowNonEmptyLocationInCTAS: 'true'
       SPARK_DEFAULTS_CONF_spark_jars_repositories: {{SPARK_jars_repositories | default(omit)}}
-      SPARK_DEFAULTS_CONF_spark_jars_packages: "{{SPARK_jars_packages}}{{',' if SPARK_jars_packages | length}}{{SPARK_datahub_package | default('')}}"
+      SPARK_DEFAULTS_CONF_spark_jars_packages: "{{SPARK_jars_packages}},{{ns.sparkDeltaJavaPackages}}"
       SPARK_DEFAULTS_CONF_spark_jars_excludes: {{SPARK_jars_excludes}}
     {%if (DATAHUB_enable or external['DATAHUB_enable'] and SPARK_datahub_agent_enabled) | default(false) %}
-      # specifies the JARs to be downloaded to the jars folder by maven-download-sh script
+      # specifies the JARs to be downloaded to the jars folder by maven-download-sh script (triggered in the init script)
       SPARK_INSTALL_JAVA_PACKAGES: '{{SPARK_install_java_packages}},{{ns.sparkDeltaJavaPackages}},{{ns.sparkIcebergJavaPackages}},{{ns.sparkHudiJavaPackages}},{{ns.datahubSparkPluginDependencies}}'
-      SPARK_INSTALL_PYTHON_PACKAGES: '{{SPARK_install_python_packages}} {{ns.sparkDeltaPythonPackages}}'
+      SPARK_INSTALL_PYTHON_PACKAGES: '{{SPARK_install_python_packages}}'
       SPARK_DEFAULTS_CONF_spark_jars: {{SPARK_jars}}{{',' if SPARK_jars | length}}{{ns.sparkTableFormatJar | default('')}}{{',' if ns.sparkTableFormatJar | length}}{{ns.datahubSparkPluginJar | default('')}}
     {% else %}
       # specifies the JARs to be downloaded to the jars folder by maven-download-sh script
@@ -7169,47 +7183,59 @@ services:
       {% else %}
       SPARK_MASTER_URL: '{{ns.sparkMasterUrl}}'
       {% endif -%}   {#  KYUUBI_use_local_spark  #}    
-      {%if MINIO_enable or RUSTFS_enable or external['S3_enable'] | default(false) %}
+    {%if MINIO_enable or RUSTFS_enable or external['S3_enable'] | default(false) %}
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_endpoint: '{{s3Endpoint | default(omit) }}'
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_access_key: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_secret_key: {{s3SecretAccessKey}}
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_path_style_access: '{{s3PathStyleAccess}}'
-      {% endif %} 
-      {%if HADOOP_enable | default(false) %}
+      AWS_REGION: {{s3Region | default('us-east-1')}}
+      AWS_ACCESS_KEY_ID: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
+      AWS_SECRET_ACCESS_KEY: {{s3SecretAccessKey}}
+    {% endif %}
+    {%if HADOOP_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_defaultFS: hdfs://namenode:9000
-      SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: {{KYUUBI_local_spark_sql_warehouse_dir if KYUUBI_local_spark_sql_warehouse_dir is defined and KYUUBI_local_spark_sql_warehouse_dir | length else 'hdfs://namenode:9000/user/hive/warehouse'}}
-      {%elif MINIO_enable or RUSTFS_enable or external['S3_enable'] | default(false) %}
+      SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined and SPARK_sql_warehouse_dir | length else 'hdfs://namenode:9000/user/hive/warehouse'}}
+    {%elif MINIO_enable or RUSTFS_enable or external['S3_enable'] | default(false) %}
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_defaultFS: s3a://{{s3AdminBucketName}}
-      SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: {{KYUUBI_local_spark_sql_warehouse_dir if KYUUBI_local_spark_sql_warehouse_dir is defined and KYUUBI_local_spark_sql_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/hive/warehouse'}}
-      {% else %}
+      SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined and SPARK_sql_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/hive/warehouse'}}
+    {% else %}
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_defaultFS: file:///tmp
-      SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: {{KYUUBI_local_spark_sql_warehouse_dir if KYUUBI_local_spark_sql_warehouse_dir is defined and KYUUBI_local_spark_sql_warehouse_dir | length else 'file:///hive/warehouse'}}
-      {% endif -%}   {#  HADOOP_enable #}
-      SPARK_DEFAULTS_CONF_spark_sql_hive_metastore_jars: builtin
-      # SPARK_DEFAULTS_CONF_spark_sql_hive_metastore_version: 3.1.2    
-      {%if (KYUUBI_local_spark_catalog | lower) == 'in-memory' | default(false) %}
-      SPARK_DEFAULTS_CONF_spark_sql_catalogImplementation: in-memory
-      {% else %}
-      SPARK_DEFAULTS_CONF_spark_sql_catalogImplementation: hive
-      SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog_type: hive      
-      SPARK_DEFAULTS_CONF_spark_hadoop_hive_metastore_uris: thrift://{{ns.hiveMetastore}}
-      {% endif -%}   {#  KYUUBI_local_spark_catalog #}
-      {%if (DATAHUB_enable or external['DATAHUB_enable'] and SPARK_datahub_agent_enabled) | default(false) %}
+      SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined and SPARK_sql_warehouse_dir | length else 'file:///hive/warehouse'}}
+    {% endif -%}   {#  HADOOP_enable #}
+      SPARK_DEFAULTS_CONF_spark_driver_extraJavaOptions: {{SPARK_driver_extraJavaOptions}}
+      SPARK_DEFAULTS_CONF_spark_executor_extraJavaOptions: {{SPARK_executor_extraJavaOptions}}
+      SPARK_DEFAULTS_CONF_spark_cores_max: {{SPARK_cores_max if SPARK_cores_max is defined and SPARK_cores_max else omit }}
+      SPARK_DEFAULTS_CONF_spark_executor_memory: {{SPARK_executor_memory if SPARK_executor_memory is defined and SPARK_executor_memory else omit }}
+    {%if (DATAHUB_enable or external['DATAHUB_enable'] and SPARK_datahub_agent_enabled) | default(false) %}
       SPARK_DEFAULTS_CONF_spark_extraListeners: 'datahub.spark.DatahubSparkListener'
       SPARK_DEFAULTS_CONF_spark_datahub_rest_server: {{ns.gmsUrl}}
       SPARK_DEFAULTS_CONF_spark_datahub_metadata_dataset_env: {{env}}
-      {% endif -%}   {#  DATAHUB_enable or external['DATAHUB_enable'] #}
+    {% endif -%}   {#  DATAHUB_enable or external['DATAHUB_enable'] #}
+      SPARK_DEFAULTS_CONF_spark_sql_hive_metastore_jars: builtin
+      # SPARK_DEFAULTS_CONF_spark_sql_hive_metastore_version: 3.1.2    
+    {%if (SPARK_catalog | lower) == 'in-memory' | default(false) %}
+      SPARK_DEFAULTS_CONF_spark_sql_catalogImplementation: in-memory
+    {% else %}
+      SPARK_DEFAULTS_CONF_spark_sql_catalogImplementation: hive
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog_type: hive
+      SPARK_DEFAULTS_CONF_spark_hadoop_hive_metastore_uris: thrift://{{ns.hiveMetastore}}
+    {% endif -%}   {#  SPARK_catalog #}
+    {% if 'delta' in (table_formats_to_use | default('') | lower) and HIVE_METASTORE_enable and not UNITY_CATALOG_enable | default(false) %}
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.spark.sql.delta.catalog.DeltaCatalog
+    {%elif 'delta' in (table_formats_to_use | default('') | lower) and UNITY_CATALOG_enable | default(false) %}    
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: io.unitycatalog.spark.UCSingleCatalog
+    {% elif 'iceberg' in (table_formats_to_use | default('') | lower) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.iceberg.spark.SparkCatalog
+    {% endif -%}   {#  SPARK_catalog #}
       SPARK_DEFAULTS_CONF_spark_sql_defaultCatalog: {{SPARK_sql_default_catalog if SPARK_sql_default_catalog is defined and SPARK_sql_default_catalog else omit }}
       SPARK_DEFAULTS_CONF_spark_sql_extensions: {{ns.sparkSQLExtensions if ns.sparkSQLExtensions is defined and ns.sparkSQLExtensions | length else omit}}
-      {%if 'iceberg' in (table_formats_to_use | default('') | lower) and HIVE_METASTORE_enable | default(false) %}
+    {%if 'iceberg' in (table_formats_to_use | default('') | lower) and HIVE_METASTORE_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hive: org.apache.iceberg.spark.SparkCatalog
-      SPARK_DEFAULTS_CONF_spark_sql_catalog_hive_type: hive
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hive_uri: thrift://{{ns.hiveMetastore}}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hive_warehouse: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined and SPARK_sql_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
-      {% endif -%}   {#  table_formats_to_use #}
-      {%if 'iceberg' in (table_formats_to_use | default('') | lower) and HIVE_METASTORE_enable and __HIVE_METASTORE_version == "4.2.0" | default(false) %}
+    {% endif -%}   {#  table_formats_to_use #}      
+    {%if 'iceberg' in (table_formats_to_use | default('') | lower) and HIVE_METASTORE_enable and __HIVE_METASTORE_version == "4.2.0" | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_type: rest
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_uri: 'http://{{ns.hiveMetastoreHost}}:{{ns.hiveMetastoreRestCatalogPort}}/iceberg'
@@ -7220,23 +7246,32 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_s3_path___style___access: true
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_s3_access___key___id: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_s3_secret___access___key: {{s3SecretAccessKey}}
-      {% endif -%}   {#  table_formats_to_use #}      
-      {% if 'iceberg' in (table_formats_to_use | default('') | lower) and NESSIE_enable | default(false) %}
+    {% endif -%}   {#  table_formats_to_use #}      
+    {% if 'iceberg' in (table_formats_to_use | default('') | lower) and NESSIE_enable | default(false) %}
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog_type: hive
       SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie_type: nessie
       SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie_ref: main
       SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie_uri: http://nessie:19120/api/v1
       SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie_authentication_type: NONE
       SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie_warehouse: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined and SPARK_sql_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
-      {% endif -%}   {#  table_formats_to_use #}      
-      {% if 'iceberg' in (table_formats_to_use | default('') | lower) and LAKEFS_enable | default(false) %}
+    {% endif -%}   {#  table_formats_to_use #}      
+    {% if 'iceberg' in (table_formats_to_use | default('') | lower) and LAKEFS_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakefs: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakefs_catalog__impl: io.lakefs.iceberg.LakeFSCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakefs_ref: main
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakefs_uri: '{{s3Endpoint | default(omit) }}'
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakefs_warehouse: {{'lakefs://' ~ LAKEFS_quickstart_repo_name | default('demo')}}
-      {% endif -%}   {#  table_formats_to_use #}
-      {% if 'iceberg' in (table_formats_to_use | default('') | lower) and LAKEKEEPER_enable | default(false) %}
+    {% endif -%}   {#  table_formats_to_use #}
+    {% if 'iceberg' in (table_formats_to_use | default('') | lower) and UNITY_CATALOG_enable | default(false) %}
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_unitycatalog_type: rest
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_unitycatalog: org.apache.iceberg.spark.SparkCatalog
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_unitycatalog_catalog___impl: org.apache.iceberg.rest.RESTCatalog
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_unitycatalog_uri: '{{unitycatalogEndpoint | default(omit) }}/iceberg'
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_unitycatalog_token: not_used
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_unitycatalog_warehouse:  {{lakekeeperCatalogName | default(omit) }}
+    {% endif -%}   {#  table_formats_to_use #}
+    {% if 'iceberg' in (table_formats_to_use | default('') | lower) and LAKEKEEPER_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakekeeper_type: rest
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakekeeper: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakekeeper_uri: '{{lakekeeperEndpoint | default(omit) }}'
@@ -7245,8 +7280,8 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakekeeper_warehouse:  {{lakekeeperCatalogName | default(omit) }}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakekeeper_scope: 'PRINCIPAL_ROLE:ALL'
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakekeeper_header_X___Iceberg___Access___Delegation: vended-credentials
-      {% endif -%}   {#  table_formats_to_use #}
-      {% if 'iceberg' in (table_formats_to_use | default('') | lower) and POLARIS_enable | default(false) %}
+    {% endif -%}   {#  table_formats_to_use #}
+    {% if 'iceberg' in (table_formats_to_use | default('') | lower) and POLARIS_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_polaris_type: rest
       SPARK_DEFAULTS_CONF_spark_sql_catalog_polaris: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_polaris_uri: '{{polarisEndpoint | default(omit) }}'
@@ -7255,38 +7290,42 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalog_polaris_warehouse:  {{polarisCatalogName | default(omit) }}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_polaris_scope: 'PRINCIPAL_ROLE:ALL'
       SPARK_DEFAULTS_CONF_spark_sql_catalog_polaris_header_X___Iceberg___Access___Delegation: vended-credentials
-      {% endif -%}   {#  table_formats_to_use #}
-      {% if 'iceberg' in (table_formats_to_use | default('') | lower) and GRAVITINO_enable | default(false) %}
+    {% endif -%}   {#  table_formats_to_use #}
+    {% if 'iceberg' in (table_formats_to_use | default('') | lower) and GRAVITINO_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_gravitino_type: rest
       SPARK_DEFAULTS_CONF_spark_sql_catalog_gravitino: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_gravitino_uri: '{{gravitinoEndpoint | default(omit) }}'
       SPARK_DEFAULTS_CONF_spark_sql_catalog_gravitino_warehouse:  {{gravitinoCatalogName | default(omit) }}
-      {%elif 'delta' in (table_formats_to_use | default('') | lower) and not UNITY_CATALOG_enable | default(false) %}
-      SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.spark.sql.delta.catalog.DeltaCatalog
-      {%elif 'delta' in (table_formats_to_use | default('') | lower) and UNITY_CATALOG_enable | default(false) %}
-      SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: io.unitycatalog.spark.UCSingleCatalog
-      SPARK_DEFAULTS_CONF_spark_sql_catalog_my__catalog: io.unitycatalog.spark.UCSingleCatalog
-      SPARK_DEFAULTS_CONF_spark_sql_catalog_my__catalog_uri: 'http://unity-catalog:8080'     
-      SPARK_DEFAULTS_CONF_spark_sql_catalog_my__catalog_token: ''     
-      SPARK_DEFAULTS_CONF_spark_sql_defaultCatalog: my_catalog
-      {%elif 'hudi' in (table_formats_to_use | default('') | lower) | default(false) %}
-      SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.spark.sql.hudi.catalog.HoodieCatalog
+    {% endif -%}   {#  table_formats_to_use iceberg #}
+    {% if 'delta' in (table_formats_to_use | default('') | lower) and HIVE_METASTORE_enable and not UNITY_CATALOG_enable | default(false) %}
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_delta: org.apache.spark.sql.delta.catalog.DeltaCatalog
+      SPARK_DEFAULTS_CONF_spark_sql_hive_metastore_uris: thrift://{{ns.hiveMetastore}}
+      SPARK_DEFAULTS_CONF_spark_sql_hive_metastore_warehouse_dir: s3a://admin-bucket/warehouse      
+    {%elif 'delta' in (table_formats_to_use | default('') | lower) and UNITY_CATALOG_enable | default(false) %}
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_delta: io.unitycatalog.spark.UCSingleCatalog
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_delta_uri: 'http://unity-catalog:8080'     
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_delta_token: ''     
+    {% endif -%}   {#  table_formats_to_use delta #}
+    {% if 'hudi' in (table_formats_to_use | default('') | lower) %}
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_hudi: org.apache.spark.sql.hudi.catalog.HoodieCatalog
       SPARK_DEFAULTS_CONF_spark_serializer: org.apache.spark.serializer.KryoSerializer
-      {% endif -%}   {#  table_formats_to_use #}
+    {% endif -%}   {#  table_formats_to_use hudi #}
       SPARK_DEFAULTS_CONF_spark_sql_legacy_allowNonEmptyLocationInCTAS: 'true'
-      SPARK_DEFAULTS_CONF_spark_jars_repositories: {{KYUUBI_local_spark_jars_repositories | default(omit)}}
-      SPARK_DEFAULTS_CONF_spark_jars_packages: "{{KYUUBI_local_spark_jars_packages}}"
-      SPARK_DEFAULTS_CONF_spark_jars_excludes: {{KYUUBI_local_spark_jars_excludes}}
-      {%if (DATAHUB_enable or external['DATAHUB_enable'] and SPARK_datahub_agent_enabled) | default(false) %}
+      SPARK_DEFAULTS_CONF_spark_jars_repositories: {{SPARK_jars_repositories | default(omit)}}
+      SPARK_DEFAULTS_CONF_spark_jars_packages: "{{SPARK_jars_packages}},{{ns.sparkDeltaJavaPackages}}"
+      SPARK_DEFAULTS_CONF_spark_jars_excludes: {{SPARK_jars_excludes}}
+    {%if (DATAHUB_enable or external['DATAHUB_enable'] and SPARK_datahub_agent_enabled) | default(false) %}
       # specifies the JARs to be downloaded to the jars folder by maven-download-sh script (triggered in the init script)
-      SPARK_INSTALL_JAVA_PACKAGES: '{{KYUUBI_local_spark_install_jars_packages}},{{ns.sparkDeltaJavaPackages}},{{ns.sparkIcebergJavaPackages}},{{ns.sparkHudiJavaPackages}},{{ns.datahubSparkPluginDependencies}}'
-      SPARK_DEFAULTS_CONF_spark_jars: {{KYUUBI_local_spark_jars}}{{',' if KYUUBI_local_spark_jars | length}}{{ns.sparkTableFormatJar | default('')}}{{',' if ns.sparkTableFormatJar | length}}{{ns.datahubSparkPluginJar | default('')}}
-      {% else %}
+      SPARK_INSTALL_JAVA_PACKAGES: '{{SPARK_install_java_packages}},{{ns.sparkDeltaJavaPackages}},{{ns.sparkIcebergJavaPackages}},{{ns.sparkHudiJavaPackages}},{{ns.datahubSparkPluginDependencies}}'
+      SPARK_INSTALL_PYTHON_PACKAGES: '{{SPARK_install_python_packages}}'
+      SPARK_DEFAULTS_CONF_spark_jars: {{SPARK_jars}}{{',' if SPARK_jars | length}}{{ns.sparkTableFormatJar | default('')}}{{',' if ns.sparkTableFormatJar | length}}{{ns.datahubSparkPluginJar | default('')}}
+    {% else %}
       # specifies the JARs to be downloaded to the jars folder by maven-download-sh script
-      SPARK_INSTALL_JAVA_PACKAGES: '{{KYUUBI_local_spark_install_jars_packages}},{{ns.sparkDeltaJavaPackages}},{{ns.sparkIcebergJavaPackages}},{{ns.sparkHudiJavaPackages}}'
-      SPARK_DEFAULTS_CONF_spark_jars: {{KYUUBI_local_spark_jars}}{{',' if KYUUBI_local_spark_jars | length}}{{ns.sparkTableFormatJar | default('')}}
-      {% endif -%}   {#  DATAHUB_enable or external['DATAHUB_enable'] #}
-      SPARK_DEFAULTS_CONF_spark_jars_ivySettings: {{KYUUBI_local_spark_jars_ivySettings}}    
+      SPARK_INSTALL_JAVA_PACKAGES: '{{SPARK_install_java_packages}},{{ns.sparkDeltaJavaPackages}},{{ns.sparkIcebergJavaPackages}},{{ns.sparkHudiJavaPackages}}'
+      SPARK_INSTALL_PYTHON_PACKAGES: '{{SPARK_install_python_packages}} {{ns.sparkDeltaPythonPackages}}'
+      SPARK_DEFAULTS_CONF_spark_jars: {{SPARK_jars}}{{',' if SPARK_jars | length}}{{ns.sparkTableFormatJar | default('')}}
+    {% endif -%}   {#  DATAHUB_enable or external['DATAHUB_enable'] #}
+      SPARK_DEFAULTS_CONF_spark_jars_ivySettings: {{SPARK_jars_ivySettings}}
     {%if jmx_monitoring_with_prometheus_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_metrics_conf: /opt/bitnami/spark/conf/metrics.properties
     {% endif -%}   {#  jmx_monitoring_with_prometheus_enable  #}
@@ -7342,23 +7381,15 @@ services:
       SPARK_MASTER: spark://spark-master:7077
       DEPLOY_MODE: client
     {%if MINIO_enable or RUSTFS_enable or external['S3_enable'] | default(false) %}
-      HIVE_SITE_CONF_fs_defaultFS: 's3a://{{s3AdminBucketName}}'
-      HIVE_SITE_CONF_fs_s3a_endpoint: '{{s3Endpoint | default(omit) }}'
-      HIVE_SITE_CONF_fs_s3a_access_key: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
-      HIVE_SITE_CONF_fs_s3a_secret_key: {{s3SecretAccessKey}}
-      HIVE_SITE_CONF_fs_s3a_path_style_access: '{{s3PathStyleAccess}}'
-      HIVE_SITE_CONF_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_endpoint: '{{s3Endpoint | default(omit) }}'
+      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_access_key: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
+      SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_secret_key: {{s3SecretAccessKey}}
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_path_style_access: '{{s3PathStyleAccess}}'
+      AWS_REGION: {{s3Region | default('us-east-1')}}
+      AWS_ACCESS_KEY_ID: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
+      AWS_SECRET_ACCESS_KEY: {{s3SecretAccessKey}}
     {% endif %}
-      HIVE_SITE_CONF_hive_metastore_uris: thrift://{{ns.hiveMetastore}}
-      HIVE_SITE_CONF_javax_jdo_option_ConnectionURL: jdbc:postgresql://hive-metastore-db/metastore
-      HIVE_SITE_CONF_javax_jdo_option_ConnectionDriverName: org.postgresql.Driver
-      HIVE_SITE_CONF_javax_jdo_option_ConnectionUserName: hive
-      HIVE_SITE_CONF_javax_jdo_option_ConnectionPassword: hive
-      HIVE_SITE_CONF_datanucleus_autoCreateSchema: false
-      HIVE_SITE_CONF_hive_metastore_event_db_notification_api_auth: false      
     {%if HADOOP_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_defaultFS: hdfs://namenode:9000
       SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined and SPARK_sql_warehouse_dir | length else 'hdfs://namenode:9000/user/hive/warehouse'}}
@@ -7369,30 +7400,35 @@ services:
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_defaultFS: file:///tmp
       SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined and SPARK_sql_warehouse_dir | length else 'file:///hive/warehouse'}}
     {% endif -%}   {#  HADOOP_enable #}
+      SPARK_DEFAULTS_CONF_spark_driver_extraJavaOptions: {{SPARK_driver_extraJavaOptions}}
+      SPARK_DEFAULTS_CONF_spark_executor_extraJavaOptions: {{SPARK_executor_extraJavaOptions}}
+      SPARK_DEFAULTS_CONF_spark_cores_max: {{SPARK_cores_max if SPARK_cores_max is defined and SPARK_cores_max else omit }}
+      SPARK_DEFAULTS_CONF_spark_executor_memory: {{SPARK_executor_memory if SPARK_executor_memory is defined and SPARK_executor_memory else omit }}
+    {%if (DATAHUB_enable or external['DATAHUB_enable'] and SPARK_datahub_agent_enabled) | default(false) %}
+      SPARK_DEFAULTS_CONF_spark_extraListeners: 'datahub.spark.DatahubSparkListener'
+      SPARK_DEFAULTS_CONF_spark_datahub_rest_server: {{ns.gmsUrl}}
+      SPARK_DEFAULTS_CONF_spark_datahub_metadata_dataset_env: {{env}}
+    {% endif -%}   {#  DATAHUB_enable or external['DATAHUB_enable'] #}
       SPARK_DEFAULTS_CONF_spark_sql_hive_metastore_jars: builtin
       # SPARK_DEFAULTS_CONF_spark_sql_hive_metastore_version: 3.1.2    
     {%if (SPARK_catalog | lower) == 'in-memory' | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalogImplementation: in-memory
     {% else %}
       SPARK_DEFAULTS_CONF_spark_sql_catalogImplementation: hive
-      SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog_type: hive      
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog_type: hive
+      SPARK_DEFAULTS_CONF_spark_hadoop_hive_metastore_uris: thrift://{{ns.hiveMetastore}}
     {% endif -%}   {#  SPARK_catalog #}
-      SPARK_DEFAULTS_CONF_spark_yarn_dist_files: '/spark/conf/hive-site.xml'
-      SPARK_DEFAULTS_CONF_spark_driver_extraJavaOptions: {{SPARK_driver_extraJavaOptions}}
-      SPARK_DEFAULTS_CONF_spark_executor_extraJavaOptions: {{SPARK_executor_extraJavaOptions}}
-      SPARK_DEFAULTS_CONF_spark_cores_max: {{SPARK_cores_max if SPARK_cores_max is defined and SPARK_cores_max else omit }}
-      SPARK_DEFAULTS_CONF_spark_executor_memory: {{SPARK_executor_memory if SPARK_executor_memory is defined and SPARK_executor_memory else omit }}
-  {%if (DATAHUB_enable or external['DATAHUB_enable'] and SPARK_datahub_agent_enabled) | default(false) %}
-      SPARK_DEFAULTS_CONF_spark_extraListeners: 'datahub.spark.DatahubSparkListener'
-      SPARK_DEFAULTS_CONF_spark_datahub_rest_server: {{ns.gmsUrl}}
-      SPARK_DEFAULTS_CONF_spark_datahub_metadata_dataset_env: {{env}}
-  {% endif -%}   {#  DATAHUB_enable or external['DATAHUB_enable'] #}
+    {% if 'delta' in (table_formats_to_use | default('') | lower) and HIVE_METASTORE_enable and not UNITY_CATALOG_enable | default(false) %}
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.spark.sql.delta.catalog.DeltaCatalog
+    {%elif 'delta' in (table_formats_to_use | default('') | lower) and UNITY_CATALOG_enable | default(false) %}    
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: io.unitycatalog.spark.UCSingleCatalog
+    {% elif 'iceberg' in (table_formats_to_use | default('') | lower) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.iceberg.spark.SparkCatalog
-      SPARK_DEFAULTS_CONF_spark_sql_defaultCatalog: iceberg
+    {% endif -%}   {#  SPARK_catalog #}
+      SPARK_DEFAULTS_CONF_spark_sql_defaultCatalog: {{SPARK_sql_default_catalog if SPARK_sql_default_catalog is defined and SPARK_sql_default_catalog else omit }}
       SPARK_DEFAULTS_CONF_spark_sql_extensions: {{ns.sparkSQLExtensions if ns.sparkSQLExtensions is defined and ns.sparkSQLExtensions | length else omit}}
     {%if 'iceberg' in (table_formats_to_use | default('') | lower) and HIVE_METASTORE_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hive: org.apache.iceberg.spark.SparkCatalog
-      SPARK_DEFAULTS_CONF_spark_sql_catalog_hive_type: hive
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hive_uri: thrift://{{ns.hiveMetastore}}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hive_warehouse: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined and SPARK_sql_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
     {% endif -%}   {#  table_formats_to_use #}      
@@ -7409,6 +7445,7 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalog_hiverest_s3_secret___access___key: {{s3SecretAccessKey}}
     {% endif -%}   {#  table_formats_to_use #}      
     {% if 'iceberg' in (table_formats_to_use | default('') | lower) and NESSIE_enable | default(false) %}
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog_type: hive
       SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie_type: nessie
       SPARK_DEFAULTS_CONF_spark_sql_catalog_nessie_ref: main
@@ -7422,6 +7459,14 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakefs_ref: main
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakefs_uri: '{{s3Endpoint | default(omit) }}'
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakefs_warehouse: {{'lakefs://' ~ LAKEFS_quickstart_repo_name | default('demo')}}
+    {% endif -%}   {#  table_formats_to_use #}
+    {% if 'iceberg' in (table_formats_to_use | default('') | lower) and UNITY_CATALOG_enable | default(false) %}
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_unitycatalog_type: rest
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_unitycatalog: org.apache.iceberg.spark.SparkCatalog
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_unitycatalog_catalog___impl: org.apache.iceberg.rest.RESTCatalog
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_unitycatalog_uri: '{{unitycatalogEndpoint | default(omit) }}/iceberg'
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_unitycatalog_token: not_used
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_unitycatalog_warehouse:  {{lakekeeperCatalogName | default(omit) }}
     {% endif -%}   {#  table_formats_to_use #}
     {% if 'iceberg' in (table_formats_to_use | default('') | lower) and LAKEKEEPER_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_lakekeeper_type: rest
@@ -7448,28 +7493,39 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalog_gravitino: org.apache.iceberg.spark.SparkCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_gravitino_uri: '{{gravitinoEndpoint | default(omit) }}'
       SPARK_DEFAULTS_CONF_spark_sql_catalog_gravitino_warehouse:  {{gravitinoCatalogName | default(omit) }}
-  {%elif 'delta' in (table_formats_to_use | default('') | lower) | default(false) %}
-      SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.spark.sql.delta.catalog.DeltaCatalog
-  {%elif 'hudi' in (table_formats_to_use | default('') | lower) | default(false) %}
-      SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.spark.sql.hudi.catalog.HoodieCatalog
+    {% endif -%}   {#  table_formats_to_use iceberg #}
+    {% if 'delta' in (table_formats_to_use | default('') | lower) and HIVE_METASTORE_enable and not UNITY_CATALOG_enable | default(false) %}
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_delta: org.apache.spark.sql.delta.catalog.DeltaCatalog
+      SPARK_DEFAULTS_CONF_spark_sql_hive_metastore_uris: thrift://{{ns.hiveMetastore}}
+      SPARK_DEFAULTS_CONF_spark_sql_hive_metastore_warehouse_dir: s3a://admin-bucket/warehouse      
+    {%elif 'delta' in (table_formats_to_use | default('') | lower) and UNITY_CATALOG_enable | default(false) %}
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_delta: io.unitycatalog.spark.UCSingleCatalog
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_delta_uri: 'http://unity-catalog:8080'     
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_delta_token: ''     
+    {% endif -%}   {#  table_formats_to_use delta #}
+    {% if 'hudi' in (table_formats_to_use | default('') | lower) %}
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_hudi: org.apache.spark.sql.hudi.catalog.HoodieCatalog
       SPARK_DEFAULTS_CONF_spark_serializer: org.apache.spark.serializer.KryoSerializer
-  {% endif -%}   {#  table_formats_to_use #}
+    {% endif -%}   {#  table_formats_to_use hudi #}
       SPARK_DEFAULTS_CONF_spark_sql_legacy_allowNonEmptyLocationInCTAS: 'true'
       SPARK_DEFAULTS_CONF_spark_jars_repositories: {{SPARK_jars_repositories | default(omit)}}
-      SPARK_DEFAULTS_CONF_spark_jars_packages: "{{SPARK_jars_packages}}{{',' if SPARK_jars_packages | length}}{{SPARK_datahub_package | default('')}}"
+      SPARK_DEFAULTS_CONF_spark_jars_packages: "{{SPARK_jars_packages}},{{ns.sparkDeltaJavaPackages}}"
       SPARK_DEFAULTS_CONF_spark_jars_excludes: {{SPARK_jars_excludes}}
     {%if (DATAHUB_enable or external['DATAHUB_enable'] and SPARK_datahub_agent_enabled) | default(false) %}
-      # specifies the JARs to be downloaded by maven-download-sh script
+      # specifies the JARs to be downloaded to the jars folder by maven-download-sh script (triggered in the init script)
       SPARK_INSTALL_JAVA_PACKAGES: '{{SPARK_install_java_packages}},{{ns.sparkDeltaJavaPackages}},{{ns.sparkIcebergJavaPackages}},{{ns.sparkHudiJavaPackages}},{{ns.datahubSparkPluginDependencies}}'
-      SPARK_INSTALL_PYTHON_PACKAGES: '{{SPARK_install_python_packages}} {{ns.sparkDeltaPythonPackages}}'
+      SPARK_INSTALL_PYTHON_PACKAGES: '{{SPARK_install_python_packages}}'
       SPARK_DEFAULTS_CONF_spark_jars: {{SPARK_jars}}{{',' if SPARK_jars | length}}{{ns.sparkTableFormatJar | default('')}}{{',' if ns.sparkTableFormatJar | length}}{{ns.datahubSparkPluginJar | default('')}}
     {% else %}
-      # specifies the JARs to be downloaded by maven-download-sh script
+      # specifies the JARs to be downloaded to the jars folder by maven-download-sh script
       SPARK_INSTALL_JAVA_PACKAGES: '{{SPARK_install_java_packages}},{{ns.sparkDeltaJavaPackages}},{{ns.sparkIcebergJavaPackages}},{{ns.sparkHudiJavaPackages}}'
       SPARK_INSTALL_PYTHON_PACKAGES: '{{SPARK_install_python_packages}} {{ns.sparkDeltaPythonPackages}}'
       SPARK_DEFAULTS_CONF_spark_jars: {{SPARK_jars}}{{',' if SPARK_jars | length}}{{ns.sparkTableFormatJar | default('')}}
     {% endif -%}   {#  DATAHUB_enable or external['DATAHUB_enable'] #}
       SPARK_DEFAULTS_CONF_spark_jars_ivySettings: {{SPARK_jars_ivySettings}}
+    {%if jmx_monitoring_with_prometheus_enable | default(false) %}
+      SPARK_DEFAULTS_CONF_spark_metrics_conf: /opt/bitnami/spark/conf/metrics.properties
+    {% endif -%}   {#  jmx_monitoring_with_prometheus_enable  #}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
