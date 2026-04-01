@@ -6411,7 +6411,13 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog_type: hive
       SPARK_DEFAULTS_CONF_spark_hadoop_hive_metastore_uris: thrift://{{ns.hiveMetastore}}
     {% endif -%}   {#  SPARK_catalog #}
-      #SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.iceberg.spark.SparkCatalog
+    {% if 'delta' in (table_formats_to_use | default('') | lower) and HIVE_METASTORE_enable and not UNITY_CATALOG_enable | default(false) %}
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.spark.sql.delta.catalog.DeltaCatalog
+    {%elif 'delta' in (table_formats_to_use | default('') | lower) and UNITY_CATALOG_enable | default(false) %}    
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: io.unitycatalog.spark.UCSingleCatalog
+    {% elif 'iceberg' in (table_formats_to_use | default('') | lower) %}
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.iceberg.spark.SparkCatalog
+    {% endif -%}   {#  SPARK_catalog #}
       SPARK_DEFAULTS_CONF_spark_sql_defaultCatalog: {{SPARK_sql_default_catalog if SPARK_sql_default_catalog is defined and SPARK_sql_default_catalog else omit }}
       SPARK_DEFAULTS_CONF_spark_sql_extensions: {{ns.sparkSQLExtensions if ns.sparkSQLExtensions is defined and ns.sparkSQLExtensions | length else omit}}
     {%if 'iceberg' in (table_formats_to_use | default('') | lower) and HIVE_METASTORE_enable | default(false) %}
@@ -6482,7 +6488,6 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalog_gravitino_warehouse:  {{gravitinoCatalogName | default(omit) }}
     {% endif -%}   {#  table_formats_to_use iceberg #}
     {% if 'delta' in (table_formats_to_use | default('') | lower) and HIVE_METASTORE_enable and not UNITY_CATALOG_enable | default(false) %}
-      SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.spark.sql.delta.catalog.DeltaCatalog
       SPARK_DEFAULTS_CONF_spark_sql_catalog_delta: org.apache.spark.sql.delta.catalog.DeltaCatalog
       SPARK_DEFAULTS_CONF_spark_sql_hive_metastore_uris: thrift://{{ns.hiveMetastore}}
       SPARK_DEFAULTS_CONF_spark_sql_hive_metastore_warehouse_dir: s3a://admin-bucket/warehouse      
@@ -6492,7 +6497,7 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalog_delta_token: ''     
     {% endif -%}   {#  table_formats_to_use delta #}
     {% if 'hudi' in (table_formats_to_use | default('') | lower) %}
-      SPARK_DEFAULTS_CONF_spark_sql_catalog_spark__catalog: org.apache.spark.sql.hudi.catalog.HoodieCatalog
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_hudi: org.apache.spark.sql.hudi.catalog.HoodieCatalog
       SPARK_DEFAULTS_CONF_spark_serializer: org.apache.spark.serializer.KryoSerializer
     {% endif -%}   {#  table_formats_to_use hudi #}
       SPARK_DEFAULTS_CONF_spark_sql_legacy_allowNonEmptyLocationInCTAS: 'true'
