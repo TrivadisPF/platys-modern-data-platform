@@ -23,6 +23,7 @@ See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/plat
  * Update `n8n` to `2.11.4`
  * Update `starburst` to `479-e.3`
  * Update `fluss` to `0.9.0-incubating`
+ * Update `zeppelin` to `0.12.0`
 
 ### Enhancements
 
