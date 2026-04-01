@@ -11,6 +11,7 @@ See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/plat
  * Moat
  * RustFS
  * Lightdash
+ * Minio Aistor
 
 ### Version upgrades
 
@@ -29,6 +30,7 @@ See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/plat
 
  * add default values for environment variables `PUBLIC_IP=127.0.0.1` and `DOCKER_HOST_IP=localhost`
  * change docker image for the iceberg rest service from `tabulario/iceberg-rest` to `apache/iceberg-rest-fixture`
+ * add aistor as an editon of Minio
  
 ### Breaking Changes
  

@@ -634,6 +634,7 @@ networks:
 {% set __PENTHAO_version = PENTHAO_version | default('latest') -%}
 
 {% set __MINIO_version = MINIO_version | default('latest') -%}
+{% set __AISTOR_version = AISTOR_version | default('latest') -%}
 {% set __MINIO_MC_version = MINIO_MC_version | default('latest') -%}
 {% set __ADMINIO_UI_version = ADMINIO_UI_version | default('latest') -%}
 {% set __ADMINIO_API_version = ADMINIO_API_version | default('latest') -%}
@@ -26777,7 +26778,7 @@ services:
     {% set uiport = 9010 + loop.index - 1 %}
     {% set serviceName = "minio-" ~ loop.index %}
   {{serviceName}}:
-    image: minio/minio:{{__MINIO_version}}
+    image: {{'quay.io/minio/aistor/minio' if (MINIO_edition | lower) == 'aistor' else 'minio/minio'}}:{{__AISTOR_version if (MINIO_edition | lower) == 'aistor' else __MINIO_VERSION}}
     container_name: {{serviceName}}
     hostname: {{serviceName}}
     labels:
@@ -26896,6 +26897,9 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
+    {% if (MINIO_edition | lower) == 'aistor' %}
+      - "./licenses/minio:/"
+    {% endif %}
     {% if MINIO_volume_map_data %}
       - "./container-volume/minio:/data/"
     {% endif %}
@@ -26912,7 +26916,7 @@ services:
     {% if MINIO_volume_map_data %}
     user: "{{uid | default(1000)}}"
     {% endif -%}   {#  MINIO_volume_map_data #}
-    command: server /data --console-address ":{{uiport}}"
+    command: server /data --console-address ":{{uiport}}" {{'--license ./minio.license' if (MINIO_edition | lower) == 'aistor'}}
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
