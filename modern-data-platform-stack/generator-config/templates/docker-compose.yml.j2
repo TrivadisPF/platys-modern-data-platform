@@ -26892,6 +26892,8 @@ services:
     {%if not MINIO_browser_enabled | default(false) %}
       MINIO_BROWSER: "off"
     {% endif -%}   {#  MINIO_browser_enabled #}
+      MINIO_LICENSE_CONTENT: "abc"
+
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -26916,7 +26918,13 @@ services:
     {% if MINIO_volume_map_data %}
     user: "{{uid | default(1000)}}"
     {% endif -%}   {#  MINIO_volume_map_data #}
-    command: server /data --console-address ":{{uiport}}" {{'--license ./minio.license' if (MINIO_edition | lower) == 'aistor'}}
+    command: >
+        /bin/sh -c '
+    {% if (MINIO_edition | lower) == 'aistor' %}
+        echo "$MINIO_LICENSE_CONTENT" > /minio.license
+    {% endif %}
+        server /data --console-address ":{{uiport}}" {{'--license ./minio.license' if (MINIO_edition | lower) == 'aistor'}}
+        '
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
