@@ -26786,7 +26786,7 @@ services:
       com.platys.description: "Software-defined Object Storage"
       com.platys.webui.title: "MinIO UI"
       com.platys.webui.url: "http://dataplatform:{{uiport}}"
-      com.platys.password.envvars: "PLATYS_AWS_SECRET_ACCESS_KEY"
+      com.platys.password.envvars: "PLATYS_AWS_SECRET_ACCESS_KEY" ~ {{'PLATYS_MINIO_LICENSE' if (MINIO_edition | lower) == 'aistor'}}     
     ports:
       # S3 API Port
       - '{{port}}:9000'
@@ -26892,16 +26892,15 @@ services:
     {%if not MINIO_browser_enabled | default(false) %}
       MINIO_BROWSER: "off"
     {% endif -%}   {#  MINIO_browser_enabled #}
-      MINIO_LICENSE_CONTENT: "abc"
+    {% if (MINIO_edition | lower) == 'aistor' %}
+      MINIO_LICENSE: '${PLATYS_MINIO_LICENSE:-{{MINIO_license}}}'
+    {% endif %}
 
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
-    {% if (MINIO_edition | lower) == 'aistor' %}
-      - "./licenses/minio:/"
-    {% endif %}
     {% if MINIO_volume_map_data %}
       - "./container-volume/minio:/data/"
     {% endif %}
@@ -26918,13 +26917,12 @@ services:
     {% if MINIO_volume_map_data %}
     user: "{{uid | default(1000)}}"
     {% endif -%}   {#  MINIO_volume_map_data #}
-    command: >
-        /bin/sh -c '
-    {% if (MINIO_edition | lower) == 'aistor' %}
-        echo "$MINIO_LICENSE_CONTENT" > /minio.license
-    {% endif %}
-        server /data --console-address ":{{uiport}}" {{'--license ./minio.license' if (MINIO_edition | lower) == 'aistor'}}
-        '
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        mkdir -p /root/.minio && echo "$$MINIO_LICENSE" > /root/.minio/minio.license && exec /usr/bin/docker-entrypoint.sh "$$@"
+    command: minio server /data --console-address ":{{uiport}}" {{'--license ./minio.license' if (MINIO_edition | lower) == 'aistor'}}
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
