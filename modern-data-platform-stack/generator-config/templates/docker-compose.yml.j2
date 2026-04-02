@@ -26893,7 +26893,7 @@ services:
       MINIO_BROWSER: "off"
     {% endif -%}   {#  MINIO_browser_enabled #}
     {% if (MINIO_edition | lower) == 'aistor' %}
-      MINIO_LICENSE: '${PLATYS_MINIO_LICENSE:-{{MINIO_license}}}'
+      MINIO_LICENSE: '${PLATYS_MINIO_LICENSE:-{{MINIO_aistor_license}}}'
     {% endif %}
 
     {%if use_timezone | default(false) %}
@@ -26922,7 +26922,7 @@ services:
       - -c
       - |
         mkdir -p /root/.minio && echo "$$MINIO_LICENSE" > /root/.minio/minio.license && exec /usr/bin/docker-entrypoint.sh "$$@"
-    command: minio server /data --console-address ":{{uiport}}" {{'--license ./minio.license' if (MINIO_edition | lower) == 'aistor'}}
+    command: minio server /data --console-address ":{{uiport}}" {{'--license /root/.minio/minio.license' if (MINIO_edition | lower) == 'aistor'}}
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
