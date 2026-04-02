@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **platys-modern-data-platform** is a [Platys](https://github.com/TrivadisPF/platys) platform stack that generates Docker Compose configurations for modern data platforms. Users enable desired services in a `config.yml` file, then run `platys gen` to produce a fully-configured `docker-compose.yml`.
 
-Current version: **1.19.1** (develop branch tracking 1.19.2)
+Current version: **1.19.1** (develop branch tracking 1.20.0)
 
 ## How the Generator Works
 

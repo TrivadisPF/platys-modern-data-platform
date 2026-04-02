@@ -2,7 +2,7 @@
 
 See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/platys/blob/master/documentation/upgrade-platform-stack.md) for how to upgrade to newer version.
 
-## What's new in 1.19.2
+## What's new in 1.20.0
 
 ### New Services
 
