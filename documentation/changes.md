@@ -25,7 +25,8 @@ See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/plat
  * Update `starburst` to `479-e.3`
  * Update `fluss` to `0.9.0-incubating`
  * Update `zeppelin` to `0.12.0`
- * Update `lakefs` to `1.80
+ * Update `lakefs` to `1.80`
+ * Update `trino` to `480`
 
 ### Enhancements
 
