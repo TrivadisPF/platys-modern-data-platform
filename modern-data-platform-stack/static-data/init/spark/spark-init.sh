@@ -171,7 +171,7 @@ then
   /maven-download.sh central ${SPARK_INSTALL_JAVA_PACKAGES} /opt/bitnami/spark/jars python
 fi
 
-if [ ${SPARK_INSTALL_PYTHON_PACKAGES} ]
+if [ "${SPARK_INSTALL_PYTHON_PACKAGES}" ]
 then
   echo "Installing Python packages: ${SPARK_INSTALL_PYTHON_PACKAGES}"
   pip install ${SPARK_INSTALL_PYTHON_PACKAGES}
