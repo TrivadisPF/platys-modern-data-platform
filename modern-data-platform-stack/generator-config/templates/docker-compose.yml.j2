@@ -24507,6 +24507,7 @@ services:
 {% endif %}   {#  enable #}
 
 {% if TRINO_enable | default(false) %}
+  #  ================================== Trino ========================================== #
   {% for numCluster in range(TRINO_clusters | default(1) ) %}  
     {% set external_http_port = 28082 + loop.index - 1 %}
     {% set external_https_port = 28087 + loop.index - 1 %}
@@ -24520,7 +24521,7 @@ services:
         {% endif %}
       {% endfor %}
     {% endif %}
-  #  ================================== Trino ========================================== #
+
   trino-{{loop.index}}:
   {% if (TRINO_edition | lower) == 'starburstdata'  %}
     image: {{TRINO_custom_image_name if TRINO_custom_image_name is defined and TRINO_custom_image_name | length else ' starburstdata/starburst-enterprise'}}:{{__STARBURSTDATA_version}}
@@ -24729,7 +24730,8 @@ services:
       - ./conf/{{conf_dir}}/{{deployment_type}}/log-debug.properties:{{trino_etc_dir}}/log.properties
 {% if MINIO_enable or RUSTFS_enable or external['S3_enable'] | default(false) %}
   {%if HIVE_METASTORE_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/minio.properties:/catalog/minio.properties'
+      - './conf/{{conf_dir}}/catalog/hive.properties:/catalog/minio.properties'
+      - './conf/{{conf_dir}}/catalog/hive.properties:/catalog/hive.properties'
   {% endif %}
   {%if 'iceberg' in (table_formats_to_use | default('') | lower) %}
     {%if HIVE_METASTORE_enable | default(false) %}
@@ -25106,7 +25108,8 @@ services:
       - ./conf/{{conf_dir}}/{{deployment_type}}/log-debug.properties:{{trino_etc_dir}}/log.properties
 {% if MINIO_enable or RUSTFS_enable or external['S3_enable'] | default(false) %}
   {%if HIVE_METASTORE_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/minio.properties:/catalog/minio.properties'
+      - './conf/{{conf_dir}}/catalog/hive.properties:/catalog/minio.properties'
+      - './conf/{{conf_dir}}/catalog/hive.properties:/catalog/hive.properties'
   {% endif %}
   {%if 'iceberg' in (table_formats_to_use | default('') | lower) %}
     {%if HIVE_METASTORE_enable | default(false) %}
@@ -25599,7 +25602,8 @@ services:
       - ./conf/presto/{{deployment_type}}/node.properties:{{presto_etc_dir}}/node.properties
 {% if MINIO_enable or RUSTFS_enable or external['S3_enable'] | default(false) %}
   {%if HIVE_METASTORE_enable | default(false) %}
-      - './conf/presto/catalog/minio.properties:{{presto_etc_dir}}/catalog/minio.properties'
+      - './conf/presto/catalog/hive.properties:{{presto_etc_dir}}/catalog/minio.properties'
+      - './conf/presto/catalog/hive.properties:{{presto_etc_dir}}/catalog/hive.properties'
   {% endif %}
   {%if 'iceberg' in (table_formats_to_use | default('') | lower) %}
     {%if HIVE_METASTORE_enable | default(false) %}
@@ -25860,7 +25864,8 @@ services:
 
 {% if MINIO_enable or RUSTFS_enable or external['S3_enable'] | default(false) %}
   {%if HIVE_METASTORE_enable | default(false) %}
-      - './conf/presto/catalog/minio.properties:{{presto_etc_dir}}/catalog/minio.properties'
+      - './conf/presto/catalog/hive.properties:{{presto_etc_dir}}/catalog/minio.properties'
+      - './conf/presto/catalog/hive.properties:{{presto_etc_dir}}/catalog/hive.properties'
   {% endif %}
   {%if 'iceberg' in (table_formats_to_use | default('') | lower) %}
     {%if HIVE_METASTORE_enable | default(false) %}

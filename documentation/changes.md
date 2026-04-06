@@ -37,6 +37,7 @@ See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/plat
 ### Breaking Changes
  
  * rename `SPARK_install_jars_packages` to `SPARK_install_java_packages`
+ * new Trino/Starburst and Presto configuation for Hive S3 named to `hive.properties` - `minio.properties` is deprecated and will be removed in `1.21.0`
 
 ### Bug Fixes
 
