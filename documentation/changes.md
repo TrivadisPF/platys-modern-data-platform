@@ -28,6 +28,8 @@ See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/plat
  * Update `lakefs` to `1.80`
  * Update `trino` to `480`
  * Update `telegraf` to `1.38`
+ * Update `redis` to `8.2`
+ * Update `valkey` to `8.1.3`
 
 ### Enhancements
 
