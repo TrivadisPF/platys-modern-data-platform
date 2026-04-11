@@ -20688,6 +20688,9 @@ services:
         -Xmx2g -Xms2g
         -Dgraphdb.home=/opt/graphdb
         -Dgraphdb.workbench.importDirectory={{GRAPHDB_workbench_import_dir}}
+        -Dgraphdb.jsonld.whitelist=https://w3c.github.io/json-ld-api/tests/*
+        -Dgraphdb.stats.default=disabled
+        -Dgraphdb.foreground=        
         -Dgraphdb.workbench.cors.enable=true
         -Denable-context-index=true
         -Dentity-pool-implementation=transactional
@@ -20715,6 +20718,11 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f -H 'Accept: text/html' ${GRAPHDB_URL}/index.html"]
+      interval: 10s
+      timeout: 5s
+      retries: 5    
 {% endif %}   {#  GRAPHDB_enable #}
 
 {% if JENA_FUSEKI_enable | default(false) %}
