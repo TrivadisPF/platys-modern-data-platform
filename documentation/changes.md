@@ -16,7 +16,6 @@ See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/plat
 ### Version upgrades
 
  * Update `langflow` to `1.7.3`
- * Update `n8n` to `2.7.5`
  * Update `ollama` to `0.16.3`
  * Update `opa` to `1.14.0` 
  * Update `opal` to `0.9.3`
@@ -30,6 +29,7 @@ See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/plat
  * Update `telegraf` to `1.38`
  * Update `redis` to `8.2`
  * Update `valkey` to `8.1.3`
+ * Update `neo4j` to `2026-community`
 
 ### Enhancements
 
