@@ -21049,7 +21049,7 @@ services:
 {% if INFLUXDB3_EXPLORER_enable | default(false) %}
   #  ================================== InfluxDB 3 Explorer ========================================== #
   influxdb3-explorer:
-    image: quay.io/influxdb/influxdb3-explorer:{{__INFLUXDB3_EXPLORER_version}}
+    image: influxdata/influxdb3-ui:{{__INFLUXDB3_EXPLORER_version}}
     hostname: influxdb3-explorer
     container_name: influxdb3-explorer
     labels:
@@ -21057,20 +21057,28 @@ services:
       com.platys.description: "Timeseries Database UI"
       com.platys.webui.title: "InfluxDB 3.0 Explorer"
       com.platys.webui.url: "http://dataplatform:28264"
+      com.platys.password.envvars: "PLATYS_INFLUXDB3_EXPLORER_SECRET_KEY"    
     ports:
-      - 28264:8888
-    {%if use_timezone | default(false) %}
+      - 28264:80
     environment:
+      SESSION_SECRET_KEY: ${PLATYS_INFLUXDB3_EXPLORER_SECRET_KEY:-{{INFLUXDB3_EXPLORER_session_secret_key}}}
+      DATABASE_URL: "/db/sqlite.db"
+    {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
+      - ./conf/influxdb3-explorer:/app-root/config:ro   
+    {% if INFLUXDB3_EXPLORER_volume_map_data | default(false) %}     
+      - ./container-volume/influxdb3-explorer:/db:rw
+    {%endif %}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
     <<: *logging
+    command: ["--mode={{INFLUXDB3_EXPLORER_mode | default('query') }}"]
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
 {% endif %}   {# INFLUXDB3_EXPLORER_enable #}
