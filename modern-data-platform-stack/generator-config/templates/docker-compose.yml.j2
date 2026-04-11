@@ -21008,7 +21008,10 @@ services:
     volumes:
       - ./data-transfer:/data-transfer
     {% if INFLUXDB3_volume_map_data %}
-      - "./container-volume/influxdb3:/var/lib/influxdb3"
+      - "./container-volume/influxdb3:/var/lib/influxdb3/data"
+    {% endif %}
+    {% if INFLUXDB3_volume_map_plugins %}
+      - "./plugins/influxdb3:/var/lib/influxdb3/plugins"
     {% endif %}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
@@ -21021,9 +21024,26 @@ services:
     command:
       - influxdb3
       - serve
-      - --node-id=node0
-      - --object-store=file
-      - --data-dir=/var/lib/influxdb3    
+      - --node-id=node0  
+      - --object-store={{INFLUXDB3_object_store_type | default('file')}}
+      {% if INFLUXDB3_object_store_type == 'file' %}
+      {% endif %}
+      - --data-dir=/var/lib/influxdb3/data   
+      {% if INFLUXDB3_object_store_type == 's3' %}
+      - --bucket={{INFLUXDB3_s3_bucket_name}}
+      - --aws-default-region={{s3Region | default(omit) }}
+      - --aws-access-key-id={{s3AccessKey | mandatory('s3AccessKey must be defined') }}
+      - --aws-secret-access-key={{s3SecretAccessKey}}
+      - --aws-endpoint={{s3Endpoint | default(omit) }}
+      - --aws-allow-http
+      {% endif %}
+      - --plugin-dir=/var/lib/influxdb3/plugins   # Optional: only needed for processing engine plugins      
+    healthcheck:
+      test: ["CMD", "curl", "-f", "-H", "Authorization: Bearer apiv3_test", "http://localhost:8181/ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
 {% endif %}   {# INFLUXDB3_enable #}
 
 {% if INFLUXDB3_EXPLORER_enable | default(false) %}
