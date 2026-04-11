@@ -30,6 +30,7 @@ See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/plat
  * Update `redis` to `8.2`
  * Update `valkey` to `8.1.3`
  * Update `neo4j` to `2026-community`
+ * Update `graphdb` to `11.3.2`
 
 ### Enhancements
 

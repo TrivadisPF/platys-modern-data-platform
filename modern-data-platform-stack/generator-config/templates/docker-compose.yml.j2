@@ -457,7 +457,6 @@ networks:
 {% set __STARDOG_version = STARDOG_version | default('latest') -%}
 {% set __STARDOG_STUDIO_version = STARDOG_STUDIO_version | default('latest') -%}
 
-{% set __GRAPHDB_FREE_version = GRAPHDB_FREE_version | default('latest') -%}
 {% set __GRAPHDB_version = GRAPHDB_version | default('latest') -%}
 
 {% set __JENA_FUSEKI_version = JENA_FUSEKI_version | default('latest') -%}
@@ -20671,9 +20670,7 @@ services:
 {% if GRAPHDB_enable | default(false) %}
   #  ================================== GraphDB ========================================== #
   graphdb-1:
-  {% if (GRAPHDB_edition | lower) == 'free'  %}
-    image: khaller/graphdb-free:{{__GRAPHDB_FREE_version}}
-  {% elif (GRAPHDB_edition | lower) == 'se' or 'ee' %}
+  {% if (GRAPHDB_edition | lower) == 'free' or 'enterprise' %}
     image: ontotext/graphdb:{{__GRAPHDB_version}}
   {% endif -%}   {#  GRAPHDB_enable #}
     hostname: graphdb-1
@@ -20702,10 +20699,7 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
-    {% if (GRAPHDB_edition | lower) == 'free'  %}
-      - ./init/graphdb:/repository.init/
-    {% endif %}
-    {% if (GRAPHDB_edition | lower) == 'se' or (GRAPHDB_edition | lower) == 'ee' %}
+    {% if (GRAPHDB_edition | lower) == 'free' or (GRAPHDB_edition | lower) == 'enterprise' %}
       - ./licences/graphdb:/opt/graphdb/home
     {% endif %}
     {% if GRAPHDB_volume_map_data %}
