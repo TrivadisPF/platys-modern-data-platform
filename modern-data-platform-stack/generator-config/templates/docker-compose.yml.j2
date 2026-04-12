@@ -20909,8 +20909,13 @@ services:
     environment:
       HOSTNAME: telegraf
       INFLUXDB_TOKEN: ${PLATYS_INFLUXDB_TOKEN:-{{INFLUXDB_TELEGRAF_influx_token}}}
+    {% if INFLUXDB2_enable | default(false) %}  
       INFLUXDB_ORGANIZATION: {{INFLUXDB2_org}}
       INFLUXDB_BUCKET: {{INFLUXDB2_bucket}}
+    {% endif %}
+    {% if INFLUXDB3_enable | default(false) %}  
+      INFLUXDB_DATABASE: {{INFLUXDB3_database}}
+    {% endif %}
     {% if INFLUXDB_TELEGRAF_monitor_docker_host_enabled | default(false) %}
       HOST_ETC: /hostfs/etc
       HOST_PROC: /hostfs/proc
@@ -20927,7 +20932,15 @@ services:
     {% if INFLUXDB_TELEGRAF_custom_conf_file is defined and INFLUXDB_TELEGRAF_custom_conf_file and INFLUXDB_TELEGRAF_custom_conf_file | length | default(false) %}
       - ./custom-conf/telegraf/{{INFLUXDB_TELEGRAF_custom_conf_file}}:/etc/telegraf/telegraf.conf
     {% else %}
-      - ./conf/telegraf/telegraf.conf:/etc/telegraf/telegraf.conf
+      {% if INFLUXDB_enable | default(false) %}  
+      - ./conf/telegraf/telegraf-influxdb.conf:/etc/telegraf/telegraf.conf
+      {% endif %}
+      {% if INFLUXDB2_enable | default(false) %}  
+      - ./conf/telegraf/telegraf-influxdb2.conf:/etc/telegraf/telegraf.conf
+      {% endif %}
+      {% if INFLUXDB3_enable | default(false) %}  
+      - ./conf/telegraf/telegraf-influxdb3.conf:/etc/telegraf/telegraf.conf
+      {% endif %}
     {% endif -%}   {#  INFLUXDB_TELEGRAF_custom_conf_file #}
       # Mount for Docker API access
       - /var/run/docker.sock:/var/run/docker.sock
