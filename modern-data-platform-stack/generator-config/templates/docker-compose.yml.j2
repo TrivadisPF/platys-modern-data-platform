@@ -15552,42 +15552,43 @@ services:
       #PYSPARK_PYTHON: /opt/bitnami/python/bin/python3.12
       #PYSPARK_DRIVER_PYTHON: /usr/bin/python3.12   
   {% endif -%}     {#  JUPYTER_edition  #}
-    {%if use_timezone | default(false) %}
+  {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
-    {% endif -%}   {#  use_timezone #}
+  {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
-    {% if JUPYTER_upload_data_transfer_to_workspace_enabled %}
+  {% if JUPYTER_upload_data_transfer_to_workspace_enabled %}
       - ./data-transfer:/home/jovyan/work/data-transfer
-    {% endif -%}   {#  JUPYTER_upload_data_transfer_to_workspace_enabled #}
+  {% endif -%}   {#  JUPYTER_upload_data_transfer_to_workspace_enabled #}
       - ./init/jupyter/on-startup-jupyter/:/usr/local/bin/start-notebook.d/
       - ./init/jupyter/on-startup-jupyter-finished/:/usr/local/bin/before-notebook.d/
       - ./init/jupyter/on-startup-notebook-kernel:/home/jovyan/.ipython/profile_default/startup/
       - ./scripts/docker/maven-download.sh:/maven-download.sh
-    {% if JUPYTER_volume_map_docker_daemon %}
+  {% if JUPYTER_volume_map_docker_daemon %}
       - /var/run/docker.sock:/var/run/docker.sock
-    {% endif -%}   {#  JUPYTER_volume_map_docker_daemon #}
-    {% if JUPYTER_volume_map_data %}
+  {% endif -%}   {#  JUPYTER_volume_map_docker_daemon #}
+  {% if JUPYTER_volume_map_data %}
       - "{{JUPYTER_data_folder_on_docker_host}}:/home/jovyan/work"
-    {% endif %}
-    {%if SPARK_enable | default(false) %}
+  {% endif %}
+  {%if SPARK_enable | default(false) %}
 #      - spark-{{__SPARK_version | replace('.','-')}}-vol:/opt/bitnami/spark:RO
-    {% endif -%}   {#  SPARK_enable #}
-    {%if FLINK_enable and FLINK_volume_map_flink_distro | default(false) %}
+  {% endif -%}   {#  SPARK_enable #}
+  {%if FLINK_enable and FLINK_volume_map_flink_distro | default(false) %}
       - flink-vol:/opt/flink:RO
-    {% endif -%}   {#  FLINK_enable and FLINK_volume_map_flink_distro #}    
-    {% if JUPYTER_requirements_file is defined and JUPYTER_requirements_file and JUPYTER_requirements_file|length  %}
+  {% endif -%}   {#  FLINK_enable and FLINK_volume_map_flink_distro #}    
+  {% if JUPYTER_requirements_file is defined and JUPYTER_requirements_file and JUPYTER_requirements_file|length  %}
       - {{JUPYTER_requirements_file}}:/tmp/requirements.txt
-    {% endif %}
-    {%if use_timezone | default(false) %}
+  {% endif %}
+  {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
-    {% endif -%}   {#  use_timezone #}
+  {% endif -%}   {#  use_timezone #}
     command:
       # In the command section, $ are replaced with $$ to avoid the error 'Invalid interpolation format for "command" option'
       - bash
       - -c
       - |
+  {%if JUPYTER_edition == 'all-spark' or JUPYTER_edition == 'pyspark' | default(false) %}
         conda create -y --name py312 python=3.12.8
         source /opt/conda/etc/profile.d/conda.sh
         conda activate py312
@@ -15599,6 +15600,7 @@ services:
     {% if JUPYTER_requirements_file is defined and JUPYTER_requirements_file and JUPYTER_requirements_file|length  %}
         pip install -r /tmp/requirements.txt
     {% endif -%}   {#  JUPYTER_python_packages #}
+  {%endif%}  
     {% if JUPYTER_tokenless %}
         start-notebook.sh --LabApp.token=''
     {% else %}
@@ -20834,15 +20836,19 @@ services:
       com.platys.description: "Timeseries Visualization for InfluxDB 1.x"
       com.platys.webui.title: "Chronograf UI"
       com.platys.webui.url: "http://dataplatform:28129"
-    depends_on:
-      - influxdb
     ports:
       - "28129:8888"
     environment:
       RESOURCES_PATH: "/usr/share/chronograf/resources"
       PORT: 8888
       HOST: chronograf
+    {% if INFLUXDB_enable | default(false) %}  
       INFLUXDB_URL: "http://influxdb:8086"
+    {% elif INFLUXDB2_enable | default(false) %}  
+      INFLUXDB_URL: "http://influxdb2:8181"
+    {% elif INFLUXDB3_enable | default(false) %}  
+      INFLUXDB_URL: "http://influxdb3:8181"
+    {% endif %}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
