@@ -181,6 +181,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 6222 | 6222 | nats-1 |
 6333 | 6333 | qdrant |
 6334 | 6334 | qdrant |
+6274 | 6274 | mcp-inspector |
+6277 | 6277 | mcp-inspector |
 6379 | 6379 | redis-1 |
 6380 | 6379 | redis-replica-1 |
 6381 | 6379 | redis-replica-2 |
@@ -829,8 +831,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28273 | 3000 | presidio-analyzer |
 28274 | 8000 | presidio-anonymizer |
 28275 | 8181 | lakekeeper |
-28276 | 8080 | mcp-inspector |
-28277 | 8081 | mcp-inspector |
+28276 | | |
+28277 | | |
 28278 | 5050 | allure |
 28279 | 5252 | allure-ui |
 28280 | 3000 | nimtable-web |
