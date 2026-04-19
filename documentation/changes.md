@@ -12,6 +12,7 @@ See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/plat
  * RustFS
  * Lightdash
  * Minio Aistor
+ * Redis MCP
 
 ### Version upgrades
 
