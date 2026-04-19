@@ -14,6 +14,7 @@ See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/plat
  * Minio Aistor
  * Redis MCP
  * Mongo MCP
+ * Neo4J MCP
 
 ### Version upgrades
 
