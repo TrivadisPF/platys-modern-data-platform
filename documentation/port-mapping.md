@@ -858,6 +858,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28400 | 8080 | shadowtraffic |
 28401 | 8080 | openclaw |
 28402 | 8000 | moat |
+28403 | 8000 | mongo-mcp |
 
 ## Ports > 28500
 

@@ -19489,6 +19489,44 @@ services:
       retries: 30    
   {% endfor %}
 
+  {% if MONGO_MCP_enable | default(false) %}
+  #  ================================== MongoDB MCP Server ========================================== #
+  {% set _mongo_mcp_conn = 'mongodb://' + MONGO_root_username + ':${PLATYS_MONGO_PASSWORD:-' + MONGO_root_password + '}@mongo-1:27017' if (MONGO_root_username is defined and MONGO_root_username and MONGO_root_username | length > 0) else 'mongodb://mongo-1:27017' %}
+  mongo-mcp:
+    image: supercorp/supergateway:npx
+    container_name: mongo-mcp
+    hostname: mongo-mcp
+    labels:
+      com.platys.name: "mongo-mcp"
+      com.platys.restapi.title: "MongoDB MCP Server"
+      com.platys.restapi.url: "http://dataplatform:28403/sse"
+    depends_on:
+      mongo-1:
+        condition: service_healthy
+    ports:
+      - "28403:8000"
+    environment:
+      MDB_MCP_CONNECTION_STRING: {{_mongo_mcp_conn}}
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    command: >
+      --stdio "npx -y @mongodb-js/mongodb-mcp-server@{{__MONGO_MCP_version}}"
+      --port 8000
+      --outputTransport {{MONGO_MCP_output_transport | default('sse')}}
+      --cors
+    restart: {{container_restart_policy}}
+  {% endif %}   {# MONGO_MCP_enable #}
+
   {% if MONGO_EXPRESS_enable | default(false) %}
   mongo-express:
     image: mongo-express:{{__MONGO_EXPRESS_version}}
