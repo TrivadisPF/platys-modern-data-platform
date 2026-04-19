@@ -139,7 +139,7 @@ networks:
 
 {% set __CENTRALMIND_GATEWAY_version = CENTRALMIND_GATEWAY_version | default('latest') -%}
 
-{% set __MCP_TRINO_version = MCP_TRINO_version | default('latest') -%}
+{% set __TRINO_MCP_version = TRINO_MCP_version | default('latest') -%}
 
 {% set __PRESIDIO_ANALYZER_version = PRESIDIO_ANALYZER_version | default('latest') -%}
 {% set __PRESIDIO_ANONYMIZER_version = PRESIDIO_ANONYMIZER_version | default('latest') -%}
@@ -907,7 +907,7 @@ networks:
   {% set MCP_INSPECTOR_enable = false -%}
   {% set MCP_TOOLBOX_enable = false -%}
   {% set CENTRALMIND_GATEWAY_enable = false -%}
-  {% set MCP_TRINO_enable = false -%}
+  {% set TRINO_MCP_enable = false -%}
   {% set PRESIDIO_ANALYZER_enable = false -%}
   {% set PRESIDIO_ANONYMIZER_enable = false -%}
   {% set WHISPER_enable = false -%}
@@ -8411,10 +8411,10 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {#  CENTRALMIND_GATEWAY_enable #}
 
-{% if MCP_TRINO_enable | default(false) %}
+{% if TRINO_MCP_enable | default(false) %}
   #  ================================== MCP Trino ========================================== #
   mcp-trino:
-    image: ghcr.io/tuannvm/mcp-trino:{{__MCP_TRINO_version}}
+    image: ghcr.io/tuannvm/mcp-trino:{{__TRINO_MCP_version}}
     container_name: mcp-trino
     hostname: mcp-trino
     labels:
@@ -8431,10 +8431,10 @@ services:
       - TRINO_HOST=trino-1
       - TRINO_PORT=8080
       - TRINO_USER=trino
-      - TRINO_CATALOG={{MCP_TRINO_default_catalog if MCP_TRINO_default_catalog is defined and MCP_TRINO_default_catalog and MCP_TRINO_default_catalog | length else omit}}
+      - TRINO_CATALOG={{TRINO_MCP_default_catalog if TRINO_MCP_default_catalog is defined and TRINO_MCP_default_catalog and TRINO_MCP_default_catalog | length else omit}}
       - TRINO_SCHEMA=default
-      - TRINO_SCHEME={{MCP_TRINO_scheme if MCP_TRINO_scheme is defined and MCP_TRINO_scheme and MCP_TRINO_scheme | length else 'http'}}
-      - TRINO_ALLOW_WRITE_QUERIES={{MCP_TRINO_allow_write_queries if MCP_TRINO_allow_write_queries is defined and MCP_TRINO_allow_write_queries and MCP_TRINO_allow_write_queries | length else omit}}
+      - TRINO_SCHEME={{TRINO_MCP_scheme if TRINO_MCP_scheme is defined and TRINO_MCP_scheme and TRINO_MCP_scheme | length else 'http'}}
+      - TRINO_ALLOW_WRITE_QUERIES={{TRINO_MCP_allow_write_queries if TRINO_MCP_allow_write_queries is defined and TRINO_MCP_allow_write_queries and TRINO_MCP_allow_write_queries | length else omit}}
       - MCP_TRANSPORT=http
       - MCP_PORT=9097    
     {%if use_timezone | default(false) %}
@@ -8450,7 +8450,7 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
-{% endif %}   {#  MCP_TRINO_enable #}
+{% endif %}   {#  TRINO_MCP_enable #}
 
 {% if PRESIDIO_ANALYZER_enable | default(false) %}
   #  ================================== Presidio Analyzer ========================================== #
