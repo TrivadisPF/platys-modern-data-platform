@@ -409,6 +409,7 @@ networks:
 {% set __REDIS_version = REDIS_version | default('latest') -%}
 {% set __REDIS_STACK_version = REDIS_STACK_version | default('latest') -%}
 {% set __REDIS_EXPORTER_version = REDIS_EXPORTER_version | default('latest') -%}
+{% set __REDIS_MCP_version = REDIS_MCP_version | default('latest') -%}
 {% set __REDIS_INSIGHT_version = REDIS_INSIGHT_version | default('latest') -%}
 {% set __REDIS_COMMANDER_version = REDIS_COMMANDER_version | default('latest') -%}
 
@@ -19008,6 +19009,42 @@ services:
     command: -redis.addr redis://redis-1:6379
     restart: {{container_restart_policy}}
 {% endif %}   {#  REDIS_EXPORTER_enable #}
+
+{% if REDIS_MCP_enable | default(false) %}
+  #  ================================== Redis MCP Server ========================================== #
+  redis-mcp:
+    image: supercorp/supergateway:uvx
+    container_name: redis-mcp
+    hostname: redis-mcp
+    labels:
+      com.platys.name: "redis-mcp"
+      com.platys.restapi.title: "Redis MCP Server"
+      com.platys.restapi.url: "http://dataplatform:28225/sse"
+    ports:
+      - "28225:8000"
+    environment:
+      REDIS_HOST: redis-1
+      REDIS_PORT: 6379
+      # REDIS_PWD: yourpassword      
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    command: >
+      --stdio "uvx --from redis-mcp-server=={{__REDIS_MCP_version}} redis-mcp-server --url redis://redis-1:6379/0"
+      --port 8000
+      --outputTransport {{REDIS_MCP_output_transport | default('sse')}}
+      --cors
+    restart: {{container_restart_policy}}
+{% endif %}   {#  REDIS_MCP_enable #}
 
 {% if REDIS_INSIGHT_enable | default(false) %}
   #  ================================== Redis Insight ========================================== #

@@ -602,7 +602,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28222 | 9000 | whisper |
 28223 | 80 | audio-transcriber |
 28224 | 8082 | centralmind-gateway  |
-28225 | |  |
+28225 | 8000 | redis-mcp  |
 28226 | 9000 | questdb |
 28227 | 8080 | debezium-ui |
 28228 | 9998 | tikka-server |
