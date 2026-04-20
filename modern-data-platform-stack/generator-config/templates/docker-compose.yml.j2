@@ -530,6 +530,7 @@ networks:
 {% set __POSTGRESQL_PGDUCKDB_version = POSTGRESQL_PGDUCKDB_version | default('latest') -%}
 
 {% set __POSTGREST_version = POSTGREST_version | default('latest') -%}
+{% set __POSTGRESQL_MCP_version = POSTGRESQL_MCP_version | default('latest') -%}
 
 {% set __SUPABASE_STUDIO_version = SUPABASE_STUDIO_version | default('latest') -%}
 {% set __SUPABASE_AUTH_version = SUPABASE_AUTH_version | default('latest') -%}
@@ -23103,7 +23104,42 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
   {% endif %}   {#  POSTGREST_enable #}
+
 {% endif %}   {#  POSTGRESQL_enable #}
+
+{% if POSTGRESQL_MCP_enable | default(false) %}
+  #  ================================== PostgreSQL MCP Server ========================================== #
+  postgresql-mcp:
+    image: crystaldba/postgres-mcp:{{__POSTGRESQL_MCP_version}}
+    container_name: postgresql-mcp
+    hostname: postgresql-mcp
+    labels:
+      com.platys.name: "postgresql-mcp"
+      com.platys.restapi.title: "PostgreSQL MCP Server"
+      com.platys.restapi.url: "http://dataplatform:28404/sse"
+    depends_on:
+      - postgresql
+    ports:
+      - "28404:8000"
+    environment:
+      DATABASE_URI: postgresql://{{POSTGRESQL_user}}:${PLATYS_POSTGRESQL_PASSWORD:-{{POSTGRESQL_password}}}@postgresql:5432/{{POSTGRESQL_database}}
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    command: >
+      --access-mode={{POSTGRESQL_MCP_access_mode | default('unrestricted')}}
+      --transport={{POSTGRESQL_MCP_output_transport | default('sse')}}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  POSTGRESQL_MCP_enable #}
 
 {% if POSTGRESQL_enable and PGADMIN_enable| default(false) %}
   #  ================================== pgAdmin ========================================== #

@@ -859,6 +859,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28401 | 8080 | openclaw |
 28402 | 8000 | moat |
 28403 | 8000 | mongo-mcp |
+28404 | 8000 | postgresql-mcp |
 
 ## Ports > 28500
 

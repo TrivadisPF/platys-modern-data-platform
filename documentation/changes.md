@@ -15,6 +15,7 @@ See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/plat
  * Redis MCP
  * Mongo MCP
  * Neo4J MCP
+ * Postgresql MCP
 
 ### Version upgrades
 
