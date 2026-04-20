@@ -860,6 +860,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28402 | 8000 | moat |
 28403 | 8000 | mongo-mcp |
 28404 | 8000 | postgresql-mcp |
+28405 | 3000 | better-chatbot |
 
 ## Ports > 28500
 

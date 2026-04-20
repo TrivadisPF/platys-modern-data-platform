@@ -348,6 +348,8 @@ networks:
 
 {% set __OPEN_WEBUI_version = OPEN_WEBUI_version | default('latest') -%}
 
+{% set __BETTER_CHATBOT_version = BETTER_CHATBOT_version | default('latest') -%}
+
 {% set __ALPACA_WEBUI_version = ALPACA_WEBUI_version | default('latest') -%}
 
 {% set __ANYTHING_LLM_version = ANYTHING_LLM_version | default('latest') -%}
@@ -961,6 +963,7 @@ networks:
   {% set OLLAMA_enable = false -%}
   {% set NVIDIA_NIM_enable = false -%}
   {% set OPEN_WEBUI_enable = false -%}
+  {% set BETTER_CHATBOT_enable = false -%}
   {% set ALPACA_WEBUI_enable = false -%}
   {% set ANYTHING_LLM_enable = false -%}
   {% set PERPLEXICA_enable = false -%}
@@ -16269,6 +16272,56 @@ services:
   {% endif -%}   {#  OPEN_WEBUI_audio_transcriber_enabled and WHISPER_enable ... #}
 
 {% endif %}   {# OPEN_WEBUI_enable  #}
+
+{%if BETTER_CHATBOT_enable | default(false) %}
+  #  ================================== Better Chatbot ========================================== #
+  better-chatbot:
+    image: ghcr.io/cgoinglove/better-chatbot:{{__BETTER_CHATBOT_version}}
+    container_name: better-chatbot
+    hostname: better-chatbot
+    labels:
+      com.platys.name: "better-chatbot"
+      com.platys.description: "Modern AI chatbot with multi-LLM support"
+      com.platys.webui.title: "Better Chatbot"
+      com.platys.webui.url: "http://dataplatform:28405"
+    {% if POSTGRESQL_enable | default(false) %}
+    depends_on:
+      - postgresql
+    {% endif -%}   {#  POSTGRESQL_enable #}
+    ports:
+      - "28405:3000"
+    environment:
+      NO_HTTPS: 1
+      DISABLE_SIGN_UP: 1
+      FILE_BASED_MCP_CONFIG: False
+      BETTER_AUTH_URL: http://${PUBLIC_IP:-127.0.0.1}:28405
+      BETTER_AUTH_SECRET: {{BETTER_CHATBOT_auth_secret if BETTER_CHATBOT_auth_secret is defined and BETTER_CHATBOT_auth_secret and BETTER_CHATBOT_auth_secret | length else omit}}
+    {% if BETTER_CHATBOT_postgres_url is defined and BETTER_CHATBOT_postgres_url and BETTER_CHATBOT_postgres_url | length %}
+      POSTGRES_URL: {{BETTER_CHATBOT_postgres_url}}
+    {%elif POSTGRESQL_enable | default(false) %}
+      POSTGRES_URL: postgresql://{{POSTGRESQL_user}}:${PLATYS_POSTGRESQL_PASSWORD:-{{POSTGRESQL_password}}}@postgresql:5432/{{POSTGRESQL_database}}
+    {% endif -%}   {#  BETTER_
+    CHATBOT_postgres_url #}
+    {% if OLLAMA_enable | default(false) %}
+      OLLAMA_BASE_URL: {{ns.ollamaUrl}}
+    {% endif -%}   {#  OLLAMA_enable #}
+      OPENAI_API_KEY: {{BETTER_CHATBOT_openai_api_key if BETTER_CHATBOT_openai_api_key is defined and BETTER_CHATBOT_openai_api_key and BETTER_CHATBOT_openai_api_key | length else omit}}
+      ANTHROPIC_API_KEY: {{BETTER_CHATBOT_anthropic_api_key if BETTER_CHATBOT_anthropic_api_key is defined and BETTER_CHATBOT_anthropic_api_key and BETTER_CHATBOT_anthropic_api_key | length else omit}}
+      GOOGLE_GENERATIVE_AI_API_KEY: {{BETTER_CHATBOT_google_generative_ai_api_key if BETTER_CHATBOT_google_generative_ai_api_key is defined and BETTER_CHATBOT_google_generative_ai_api_key and BETTER_CHATBOT_google_generative_ai_api_key | length else omit}}
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+{% endif %}   {# BETTER_CHATBOT_enable #}
 
 {%if ALPACA_WEBUI_enable | default(false) %}
   #  ================================== Alpaca WebUI  ========================================== #
