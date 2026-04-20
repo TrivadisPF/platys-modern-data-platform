@@ -1684,7 +1684,20 @@ networks:
     {% set ns.openaiBaseUrl = external['OPENAI_base_url'] %}
     {% set ns.openaiModelName = external['OPENAI_model_name'] %}
     {% set ns.openaiSmallModelName = external['OPENAI_small_model_name'] %}
-{% endif %}   {# external['LMSTUDIO_enable'] #}
+{% endif %}   {# external['OPENAI_enable'] #}
+
+{#  ================================== Anthropic Settings ========================================== #}
+
+{% if (external['ANTHROPIC_enable']) | default(false) %}
+    {% set ns.anthropicApiKey = external['ANTHROPIC_api_key'] %}
+{% endif %}   {# external['ANTHROPIC_enable'] #}
+
+{#  ================================== GROQ Settings ========================================== #}
+
+{% if (external['GROQ_enable']) | default(false) %}
+    {% set ns.groqApiKey = external['GROQ_api_key'] %}
+    {% set ns.groqBaseUrl = external['GROQ_base_url'] %}
+{% endif %}   {# external['GROQ_enable'] #}
 
 {#  ================================== SearXNG Settings ========================================== #}
 
@@ -16293,6 +16306,8 @@ services:
     environment:
       NO_HTTPS: 1
       DISABLE_SIGN_UP: 1
+      DISABLE_EMAIL_SIGN_UP: 1
+      DISABLE_EMAIL_SIGN_IN: 1
       FILE_BASED_MCP_CONFIG: False
       BETTER_AUTH_URL: http://${PUBLIC_IP:-127.0.0.1}:28405
       BETTER_AUTH_SECRET: {{BETTER_CHATBOT_auth_secret if BETTER_CHATBOT_auth_secret is defined and BETTER_CHATBOT_auth_secret and BETTER_CHATBOT_auth_secret | length else omit}}
@@ -16300,14 +16315,12 @@ services:
       POSTGRES_URL: {{BETTER_CHATBOT_postgres_url}}
     {%elif POSTGRESQL_enable | default(false) %}
       POSTGRES_URL: postgresql://{{POSTGRESQL_user}}:${PLATYS_POSTGRESQL_PASSWORD:-{{POSTGRESQL_password}}}@postgresql:5432/{{POSTGRESQL_database}}
-    {% endif -%}   {#  BETTER_
-    CHATBOT_postgres_url #}
-    {% if OLLAMA_enable | default(false) %}
-      OLLAMA_BASE_URL: {{ns.ollamaUrl}}
-    {% endif -%}   {#  OLLAMA_enable #}
-      OPENAI_API_KEY: {{BETTER_CHATBOT_openai_api_key if BETTER_CHATBOT_openai_api_key is defined and BETTER_CHATBOT_openai_api_key and BETTER_CHATBOT_openai_api_key | length else omit}}
-      ANTHROPIC_API_KEY: {{BETTER_CHATBOT_anthropic_api_key if BETTER_CHATBOT_anthropic_api_key is defined and BETTER_CHATBOT_anthropic_api_key and BETTER_CHATBOT_anthropic_api_key | length else omit}}
-      GOOGLE_GENERATIVE_AI_API_KEY: {{BETTER_CHATBOT_google_generative_ai_api_key if BETTER_CHATBOT_google_generative_ai_api_key is defined and BETTER_CHATBOT_google_generative_ai_api_key and BETTER_CHATBOT_google_generative_ai_api_key | length else omit}}
+    {% endif -%}   {#  BETTER_CHATBOT_postgres_url #}
+      OLLAMA_BASE_URL: {{ns.ollamaUrl if ns.ollamaUrl is defined and ns.ollamaUrl and ns.ollamaUrl | length else omit}}
+      GROQ_API_KEY: {{ns.groqApiKey if ns.groqApiKey is defined and ns.groqApiKey and ns.groqApiKey | length else omit}}
+      GROQ_BASE_URL: {{ns.groqBaseUrl if ns.groqBaseUrl is defined and ns.groqBaseUrl and ns.groqBaseUrl | length else omit}}
+      OPENAI_API_KEY: {{ns.openaiApiKey if ns.openaiApiKey is defined and ns.openaiApiKey and ns.openaiApiKey | length else omit}}
+      ANTHROPIC_API_KEY: {{ns.anthropicApiKey if ns.anthropicApiKey is defined and ns.anthropicApiKey and ns.anthropicApiKey | length else omit}}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
