@@ -23112,7 +23112,7 @@ services:
 {% if POSTGRESQL_MCP_enable | default(false) %}
   #  ================================== PostgreSQL MCP Server ========================================== #
   postgresql-mcp:
-    image: crystaldba/postgres-mcp:{{__POSTGRESQL_MCP_version}}
+    image: supercorp/supergateway:uvx
     container_name: postgresql-mcp
     hostname: postgresql-mcp
     labels:
@@ -23138,16 +23138,11 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
     command: >
-      --access-mode={{POSTGRESQL_MCP_access_mode | default('unrestricted')}}
-      --transport={{POSTGRESQL_MCP_output_transport | default('sse')}}
-    {%if POSTGRESQL_MCP_output_transport == 'sse' | default(false) %}
-      --sse-host=0.0.0.0
-      --sse-port=8000
-    {% endif -%}   {#  POSTGRESQL_MCP_output_transport ... #}
-    {%if POSTGRESQL_MCP_output_transport == 'streamable-http' | default(false) %}
-      --streamable-http-host=0.0.0.0
-      --streamable-http-port=8000
-    {% endif -%}   {#  POSTGRESQL_MCP_output_transport ... #}
+      --stdio "uvx postgres-mcp --access-mode={{POSTGRESQL_MCP_access_mode | default('unrestricted')}} "
+      --baseUrl http://${PUBLIC_IP}:8000
+      --port 8000
+      --outputTransport {{POSTGRESQL_MCP_output_transport | default('sse')}}
+      --cors
     restart: {{container_restart_policy}}
 {% endif %}   {#  POSTGRESQL_MCP_enable #}
 
