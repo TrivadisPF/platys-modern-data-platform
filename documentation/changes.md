@@ -50,6 +50,7 @@ See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/plat
  * rename `SPARK_install_jars_packages` to `SPARK_install_java_packages`
  * new Trino/Starburst and Presto configuation for Hive S3 named to `hive.properties` - `minio.properties` is deprecated and will be removed in `1.21.0`
  * rename `mcp-trino` to `trino-mcp`
+ * change from `neo4j-cypher-mcp` to `neo4j-mcp` (official one)
 
 ### Bug Fixes
 
