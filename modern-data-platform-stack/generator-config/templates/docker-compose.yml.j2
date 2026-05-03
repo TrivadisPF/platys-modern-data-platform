@@ -22591,15 +22591,31 @@ services:
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
-    command: start-single-node --insecure  --accept-sql-without-tls
+    command: >
+      start-single-node 
+      --insecure  
+      --accept-sql-without-tls 
+      --http-addr=cockroachdb-1:8080
+      --store=/cockroach/cockroach-data
     restart: {{container_restart_policy}}
     healthcheck:
       test: ["CMD", "cockroach", "node", "status", "--insecure", "--host=cockroachdb-1:26257"]
       interval: 10s
       timeout: 5s
       retries: 5
-      start_period: 30s    
-{% endif %}   {#  COCKROACHDB_enable #}
+      start_period: 30s
+
+  cockroach-init:
+    image: cockroachdb/cockroach:{{__COCKROACHDB_version}}
+    depends_on:
+      cockroachdb-1:
+        condition: service_healthy
+    command: >
+      sql --insecure --host=cockroachdb-1:26257
+      -e "ALTER USER root WITH PASSWORD 'abc123!';"
+    restart: "no"
+    init: true
+  {% endif %}   {#  COCKROACHDB_enable #}
 
 {% if SINGLE_STORE_enable | default(false) %}
   #  ================================== SingleStore ========================================== #
