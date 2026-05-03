@@ -550,6 +550,7 @@ networks:
 {% set __XTDB_version = XTDB_version | default('latest') -%}
 {% set __SQLSERVER_version = SQLSERVER_version | default('latest') -%}
 {% set __YUGABYTE_version = YUGABYTE_version | default('latest') -%}
+{% set __COCKROACHDB_version = COCKROACHDB_version | default('latest') -%}
 {% set __SINGLE_STORE_version = SINGLE_STORE_version | default('latest') -%}
 
 {% set __PGADMIN_version = PGADMIN_version | default('latest') -%}
@@ -22558,6 +22559,38 @@ services:
     restart: {{container_restart_policy}}
 
 {% endif %}   {#  YUGABYTE_enable #}
+
+{% if COCKROACHDB_enable | default(false) %}
+  #  ================================== CockroachDB ========================================== #
+  cockroachdb-1:
+    image: cockroachdb/cockroach:{{__COCKROACHDB_version}}
+    container_name: cockroachdb-1
+    hostname: cockroachdb-1
+    labels:
+      com.platys.name: "cockroachdb"
+      com.platys.description: "Cloud-native distributed SQL database"
+      com.platys.webui.title: "CockroachDB Admin UI"
+      com.platys.webui.url: "http://${PUBLIC_IP}:28406"
+    command: start-single-node --insecure
+    ports:
+      - "26257:26257"
+      - "28406:8080"
+    environment:
+      COCKROACH_DATABASE: defaultdb
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  COCKROACHDB_enable #}
 
 {% if SINGLE_STORE_enable | default(false) %}
   #  ================================== SingleStore ========================================== #

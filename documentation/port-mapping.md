@@ -448,6 +448,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 23820 | 23820 | infinity (http) |
 24224 | 24224 | fluentd |
 24225 | 24224 | fluent-bit |
+26257 | 26257 | cockroach-1 |
 26500 | 26500 | zeebe-1 |
 27017 | 27017 | mongodb-1 |
 27018 | 27017 | mongodb-2 |
@@ -861,6 +862,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28403 | 8000 | mongo-mcp |
 28404 | 8000 | postgresql-mcp |
 28405 | 3000 | better-chatbot |
+28406 | 8080 | better-chatbot |
 
 ## Ports > 28500
 
