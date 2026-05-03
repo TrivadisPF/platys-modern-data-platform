@@ -22593,6 +22593,12 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     command: start-single-node --insecure  --accept-sql-without-tls
     restart: {{container_restart_policy}}
+    healthcheck:
+      test: ["CMD", "cockroach", "node", "status", "--insecure", "--host=cockroachdb-1:26257"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s    
 {% endif %}   {#  COCKROACHDB_enable #}
 
 {% if SINGLE_STORE_enable | default(false) %}
