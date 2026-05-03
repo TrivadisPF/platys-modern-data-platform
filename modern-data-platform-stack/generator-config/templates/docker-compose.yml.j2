@@ -22564,7 +22564,7 @@ services:
   {% set ns = namespace(cockroachJoinList='') %}
   {% for i in range(COCKROACHDB_nodes | default(1)) %}
     {% if loop.first %}
-      {% set ns.cockroachJoinList = 'cockroachdb-' ~ loop.index ~ ':26257' %}
+      {% set ns.cockroachJoinList = 'cockroachdb-' ~ loop.index ~ ':26357' %}
     {% else %}
       {% set ns.cockroachJoinList = ns.cockroachJoinList ~ ',cockroachdb-' ~ loop.index ~ ':26257' %}
     {% endif %}
@@ -22607,15 +22607,15 @@ services:
     command: >    
       {{'start-single-node' if COCKROACHDB_nodes == 1 else 'start'}}
       --insecure  
-      --accept-sql-without-tls 
+      --advertise-addr=cockroachdb-{{loop.index}}:26357
       --http-addr=cockroachdb-{{loop.index}}:8080
-      --listen-addr=cockroachdb-{{loop.index}}:26257
+      --listen-addr=cockroachdb-{{loop.index}}:26357
       --sql-addr=cockroachdb-{{loop.index}}:26257
       --join={{ns.cockroachJoinList}}
       --store=/cockroach/cockroach-data
     restart: {{container_restart_policy}}
     healthcheck:
-      test: ["CMD", "cockroach", "node", "status", "--insecure", "--host=cockroachdb-1:26257"]
+      test: ["CMD", "cockroach", "node", "status", "--insecure", "--host=cockroachdb-{{loop.index}}:26257"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -22630,7 +22630,7 @@ services:
       cockroachdb-1:
         condition: service_healthy
     command: >
-      init --insecure --host=cockroachdb-1:26257
+      init --insecure --host=cockroachdb-1:26357
     restart: "no"
     init: true
   {% endif %}   {#  COCKROACHDB_enable #}
