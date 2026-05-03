@@ -22621,19 +22621,17 @@ services:
       retries: 5
       start_period: 30s
   {% endfor %}
-
+  {%if COCKROACHDB_nodes | default(1) > 1 %}
   cockroachdb-init:
     image: cockroachdb/cockroach:{{__COCKROACHDB_version}}
     container_name: cockroachdb-init
     hostname: cockroachdb-init  
-    depends_on:
-      cockroachdb-1:
-        condition: service_healthy
     command: >
       init --insecure --host=cockroachdb-1:26357
     restart: "no"
     init: true
-  {% endif %}   {#  COCKROACHDB_enable #}
+  {% endif %}   {#  COCKROACHDB_nodes > 1 #}
+{% endif %}   {#  COCKROACHDB_enable #}
 
 {% if SINGLE_STORE_enable | default(false) %}
   #  ================================== SingleStore ========================================== #
