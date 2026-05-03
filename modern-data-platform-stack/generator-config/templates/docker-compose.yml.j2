@@ -22561,19 +22561,31 @@ services:
 {% endif %}   {#  YUGABYTE_enable #}
 
 {% if COCKROACHDB_enable | default(false) %}
-  #  ================================== CockroachDB ========================================== #
-  cockroachdb-1:
+  {% set ns = namespace(cockroachJoinList='') %}
+  {% for i in range(COCKROACHDB_nodes | default(1)) %}
+    {% if loop.first %}
+      {% set ns.cockroachJoinList = 'cockroachdb-' ~ loop.index ~ ':26257' %}
+    {% else %}
+      {% set ns.cockroachJoinList = ns.cockroachJoinList ~ ',cockroachdb-' ~ loop.index ~ ':26257' %}
+    {% endif %}
+  {% endfor %}
+  #  ================================== CockroachDB ========================================== #  
+  {% for num in range(COCKROACHDB_nodes | default(1) ) %}
+    {% set port = 26257 + loop.index - 1 %}
+    {% set web_port = 28406 + loop.index - 1 %}
+
+  cockroachdb-{{loop.index}}:
     image: cockroachdb/cockroach:{{__COCKROACHDB_version}}
-    container_name: cockroachdb-1
-    hostname: cockroachdb-1
+    container_name: cockroachdb-{{loop.index}}
+    hostname: cockroachdb-{{loop.index}}
     labels:
       com.platys.name: "cockroachdb"
       com.platys.description: "Cloud-native distributed SQL database"
       com.platys.webui.title: "CockroachDB Admin UI"
-      com.platys.webui.url: "http://${PUBLIC_IP}:28406"
+      com.platys.webui.url: "http://${PUBLIC_IP}:{{web_port}}"
     ports:
-      - "26257:26257"
-      - "28406:8080"
+      - "{{port}}:26257"
+      - "{{web_port}}:8080"
     environment:
       COCKROACH_DATABASE: defaultdb
     {%if use_timezone | default(false) %}
@@ -22581,8 +22593,9 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
+      - ./init/cockroachdb-{{loop.index}}:/docker-entrypoint-initdb.d/      
     {% if COCKROACHDB_volume_map_data %}
-      - ./container-volume/cockroachdb-1/data:/cockroach/cockroach-data
+      - ./container-volume/cockroachdb-{{loop.index}}/data:/cockroach/cockroach-data
     {% endif -%}   {#  COCKROACHDB_volume_map_data #
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
@@ -22591,11 +22604,14 @@ services:
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
-    command: >
-      start-single-node 
+    command: >    
+      {{'start-single-node' if COCKROACHDB_nodes == 1 else 'start'}}
       --insecure  
       --accept-sql-without-tls 
-      --http-addr=cockroachdb-1:8080
+      --http-addr=cockroachdb-{{loop.index}}:8080
+      --listen-addr=cockroachdb-{{loop.index}}:26257
+      --sql-addr=cockroachdb-{{loop.index}}:26257
+      --join={{ns.cockroachJoinList}}
       --store=/cockroach/cockroach-data
     restart: {{container_restart_policy}}
     healthcheck:
@@ -22604,15 +22620,17 @@ services:
       timeout: 5s
       retries: 5
       start_period: 30s
+  {% endfor %}
 
-  cockroach-init:
+  cockroachdb-init:
     image: cockroachdb/cockroach:{{__COCKROACHDB_version}}
+    container_name: cockroachdb-init
+    hostname: cockroachdb-init  
     depends_on:
       cockroachdb-1:
         condition: service_healthy
     command: >
-      sql --insecure --host=cockroachdb-1:26257
-      -e "ALTER USER root WITH PASSWORD 'abc123!';"
+      init --insecure --host=cockroachdb-1:26257
     restart: "no"
     init: true
   {% endif %}   {#  COCKROACHDB_enable #}
