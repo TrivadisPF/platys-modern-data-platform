@@ -39,6 +39,7 @@ See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/plat
  * Update `graphdb` to `11.3.2`
  * Update `qdrant` to `1.17`
  * Update `oracle-adb` to `26.2.4.2-26ai`
+ * Update `risingwave` to `v2.8.2`
 
 ### Enhancements
 
