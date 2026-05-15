@@ -27455,6 +27455,9 @@ services:
       - RUSTFS_ACCESS_KEY=${PLATYS_AWS_ACCESS_KEY:-{{RUSTFS_access_key | default('admin') }}}
       - RUSTFS_SECRET_KEY=${PLATYS_AWS_SECRET_ACCESS_KEY:-{{RUSTFS_secret_key | default('abc123abc123!') }}}
       - RUSTFS_OBS_LOGGER_LEVEL=info
+      # Keep strict disk topology checks enabled by default.
+      # For local testing only, set `RUSTFS_UNSAFE_BYPASS_DISK_CHECK=true` explicitly.      
+      - RUSTFS_UNSAFE_BYPASS_DISK_CHECK={{ true if not RUSTFS_volume_map_data else false }}
 #      - RUSTFS_TLS_PATH=/opt/tls
     {% if OTEL_COLLECTOR_enable | default(false) -%}
       - RUSTFS_OBS_ENDPOINT=http://otel-collector:4318
@@ -27465,7 +27468,10 @@ services:
     volumes:
       - ./data-transfer:/data-transfer
     {%if RUSTFS_volume_map_data | default(false) %}  
-      - ./container-volume/rustfs/data:/data
+      - ./container-volume/rustfs/data/rustfs0:/data/rustfs0
+      - ./container-volume/rustfs/data/rustfs1:/data/rustfs1
+      - ./container-volume/rustfs/data/rustfs2:/data/rustfs2
+      - ./container-volume/rustfs/data/rustfs3:/data/rustfs3
     {% endif -%}   {#  RUSTFS_volume_map_data #}
     {%if RUSTFS_volume_map_logs | default(false) %}  
       - ./container-volume/rustfs/logs:/app/logs
