@@ -30840,7 +30840,7 @@ services:
       - start-dev
     {%if KEYCLOAK_import_realm_enabled | default(false) %}
       - --import-realm
-      - --http-port=28204   # change port to 8090, so within the network and external the same port is used
+      - --http-port=28204   # change port to 28204, so within the network and external the same port is used
     {% endif -%}   {#  KEYCLOAK_import_realm_enabled #}
     restart: {{container_restart_policy}}
     healthcheck:
@@ -31326,8 +31326,11 @@ services:
       - POSTMAN_RUNNER_URL=http://postman:3000
       - TEST_CALLBACK_URL=http://microcks:8080
       - SERVICES_UPDATE_INTERVAL=0 0 0/2 * * *
-      - KEYCLOAK_URL=http://keycloak:8080/auth
-      - KEYCLOAK_PUBLIC_URL=http://localhost:18080/auth
+      - KEYCLOAK_URL=http://keycloak:28204/auth
+      - KEYCLOAK_PUBLIC_URL=http://${PUBLIC_IP}:28204/auth
+      - JAVA_OPTIONS=-Dspring.security.oauth2.resourceserver.jwt.issuer-uri=http://${PUBLIC_IP}:28204/realms/microcks -Dspring.security.oauth2.resourceserver.jwt.jwk-set-uri=http://keycloak:28204/realms/microcks/protocol/openid-connect/certs
+      #- LOGGING_LEVEL_IO_GITHUB_MICROCKS=DEBUG
+      #- MAX_UPLOAD_FILE_SIZE=3MB      
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -31341,6 +31344,12 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/health"]
+      start_period: 35s
+      interval: 10s
+      timeout: 3s
+      retries: 3    
 {% endif %}   {#  MICROCKS_enable #}
 
 {% if OTEL_COLLECTOR_enable | default(false) %}
