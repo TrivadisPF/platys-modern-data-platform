@@ -3504,6 +3504,11 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     command: coordinatorServer
     restart: {{container_restart_policy}}
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9123/health || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 5    
 
   {% for num in range(FLUSS_tablet_servers | default(1) ) %}
     {% set external_port = 9124 + loop.index - 1 %}
@@ -3529,14 +3534,15 @@ services:
         tablet-server.id: {{loop.index}}
         kv.snapshot.interval: 0s
         data.dir: /tmp/fluss/data/tablet-server-{{loop.index}}
-        remote.data.dir: /tmp/fluss/remote-data    
+        remote.data.dir: /tmp/fluss/remote-data
+        datalake.format: {{FLUSS_datalake_format if FLUSS_datalake_enabled else omit}}    
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
     {%if use_timezone | default(false) %}
-      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/timezoane:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
@@ -3544,6 +3550,11 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     command: tabletServer
     restart: {{container_restart_policy}}
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:{{port}}/health || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
   {% endfor %}
 
   fluss-zookeeper-1:
@@ -3553,7 +3564,15 @@ services:
     labels:
       com.platys.name: "zookeeper"
       com.platys.description: "Coordinator Service"
+    environment:
+      ZOO_MY_ID: 1
+      ZOO_SERVERS: server.1=fluss-zookeeper-1:2888:3888;2181
     restart: {{container_restart_policy}}
+    healthcheck:
+      test: ["CMD-SHELL", "echo ruok | nc localhost 2181 | grep imok"]
+      interval: 10s
+      timeout: 5s
+      retries: 5    
 {% endif %}  {#  FLUSS_enable #}
 
 {% if ARROYO_enable | default(false) %}
