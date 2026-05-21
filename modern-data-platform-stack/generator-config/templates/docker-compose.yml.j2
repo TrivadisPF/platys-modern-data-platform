@@ -7587,6 +7587,7 @@ services:
     ports:
       - "28237:8081"
     environment:
+    {%if FLINK_base_version < '1.20' %}        
       - |
         FLINK_PROPERTIES=
         jobmanager.rpc.address: flink-jobmanager
@@ -7599,7 +7600,7 @@ services:
         execution.restart-strategy.fixed-delay.delay: 10 s        
         table.catalog-store.kind: {{ FLINK_catalog_store_kind | default('generic_in_memory') }}
         table.catalog-store.file.path: ./conf/catalogs
-        state.backend.type: {{ FLINK_state_backend_type | default('hashmap') }}
+        state.backend: {{ FLINK_state_backend_type | default('hashmap') }}
         state.backend.incremental: true
         state.checkpoints.dir: {{FLINK_state_checkpoints_dir}}
         state.savepoints.dir: {{FLINK_state_savepoints_dir}}
@@ -7607,18 +7608,49 @@ services:
         heartbeat.timeout: 5000        
         rest.flamegraph.enabled: true
         web.backpressure.refresh-interval: 10000
-    {%if MINIO_enable or RUSTFS_enable or external['S3_enable'] | default(false) %}
+      {%if MINIO_enable or RUSTFS_enable or external['S3_enable'] | default(false) %}
         s3.access.key: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
         s3.secret.key: {{s3SecretAccessKey}}
         s3.fs.impl: org.apache.hadoop.fs.s3a.S3AFileSystem
         s3.endpoint: {{s3Endpoint | default(omit) }}
         s3.path.style.access: {{s3PathStyleAccess}}
-    {% endif -%}    {#  MINIO_enable #}
-    {% if PROMETHEUS_enable | default(false) %}
+      {% endif -%}    {#  MINIO_enable #}
+      {% if PROMETHEUS_enable | default(false) %}
         metrics.reporters: prom
         metrics.reporter.prom.factory.class: org.apache.flink.metrics.prometheus.PrometheusReporterFactory
         metrics.reporter.prom.port: 9249
-    {% endif -%}    {#  MINIOPROMETHEUS_enable #}
+      {% endif -%}    {#  MINIOPROMETHEUS_enable #}
+    {% elif FLINK_base_version == '1.20' or FLINK_base_version == '2.1' %}        
+      - FLINK_JOBMANAGER_RPC_ADDRESS=flink-jobmanager
+      - FLINK_TASKMANAGER_NUMBEROFTASKSLOTS="10"
+      - FLINK_TASKMANAGER_MEMORY_PROCESS_SIZE=1728m
+      - FLINK_PARALLELISM_DEFAULT="2"
+      - FLINK_EXECUTION_CHECKPOINTING_INTERVAL="5000"
+      - FLINK_EXECUTION_CHECKPOINTING_MODE=EXACTLY_ONCE 
+      - FLINK_EXECUTION_RESTART_STRATEGY=fixed-delay
+      - FLINK_EXECUTION_RESTART_STRATEGY_FIXED_DELAY_ATTEMPTS="3"
+      - FLINK_EXECUTION_RESTART_STRATEGY_FIXED_DELAY_DELAY="10 s"
+      - FLINK_TABLE_CATALOG_STORE_KIND=generic_in_memory
+      - FLINK_TABLE_CATALOG_STORE_FILE_PATH=./conf/catalogs
+      - FLINK_STATE_BACKEND_TYPE=hashmap
+      - FLINK_STATE_BACKEND_INCREMENTAL="true"
+      - FLINK_STATE_CHECKPOINTS_DIR=file:///tmp/flink-checkpoints
+      - FLINK_STATE_SAVEPOINTS_DIR=file:///tmp/flink-savepoints
+      - FLINK_HEARTBEAT_INTERVAL="1000"
+      - FLINK_HEARTBEAT_TIMEOUT="5000"
+      {%if MINIO_enable or RUSTFS_enable or external['S3_enable'] | default(false) %}
+      - FLINK_S3_ACCESS_KEY=${PLATYS_AWS_ACCESS_KEY:-admin}
+      - FLINK_S3_SECRET_KEY=${PLATYS_AWS_SECRET_ACCESS_KEY:-abc123abc123!}
+      - FLINK_S3_FS_IMPL=org.apache.hadoop.fs.s3a.S3AFileSystem
+      - FLINK_S3_ENDPOINT=http://rustfs-1:9000
+      - FLINK_S3_PATH_STYLE_ACCESS="true"
+      {% endif -%}    {#  MINIO_enable #}
+      {% if PROMETHEUS_enable | default(false) %}
+      - FLINK_METRICS_REPORTERS=prom
+      - FLINK_METRICS_REPORTER_PROM_FACTORY_CLASS=org.apache.flink.metrics.prometheus.PrometheusReporterFactory
+      - FLINK_METRICS_REPORTER_PROM_PORT=9249
+      {% endif -%}    {#  MINIOPROMETHEUS_enable #}      
+    {% endif -%}  {#  FLINK_base_version #}
     {%if MINIO_enable or RUSTFS_enable or external['S3_enable'] | default(false) %}
       - s3.access.key={{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
       - s3.secret.key={{s3SecretAccessKey}}
