@@ -3028,8 +3028,7 @@ services:
       com.platys.webui.url: "http://dataplatform:5691"
       com.platys.password.envvars: "PLATYS_RISINGWAVE_DATABASE_PASSWORD"
     depends_on:
-      - markdown-renderer
-      - {{s3ServiceName if MINIO_enable or RUSTFS_enable | default(false) else omit }}
+      - {{s3ServiceName}}
     expose:
       - "6660"
       - "4566"
@@ -17654,7 +17653,7 @@ services:
         condition: service_healthy
       elasticsearch-1:
         condition: service_healthy      
-      minio-1:
+      {{s3ServiceName}}:
         condition: service_healthy      
     ports:
       - 9380:9380
@@ -21494,7 +21493,7 @@ services:
       - seccomp:unconfined
     depends_on:
       - etcd-1
-      - minio-1  
+      - {{s3ServiceName if MINIO_enable or RUSTFS_enable | default(false) else omit }}
     ports:
       # grpc
       - "28341:19530"
