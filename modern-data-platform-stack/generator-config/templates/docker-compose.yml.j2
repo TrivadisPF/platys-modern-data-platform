@@ -1571,6 +1571,7 @@ networks:
     {% set s3AdminBucketName = external['S3_admin_bucket_name'] %}
 {% else %}
   {% if s3_service_to_use == 'minio' %}
+    {% set s3ServiceName = 'minio-1' %}    
     {% set s3EndpointStorage = 'http://minio-1:9000' %}
     {% set s3PathStyleAccess = 'true' %}
     {% set s3AccessKey = '${PLATYS_AWS_ACCESS_KEY:-' ~ MINIO_access_key ~'}' %}
@@ -1578,6 +1579,7 @@ networks:
     {% set s3DefaultRegion = 'us-east-1' %}
     {% set s3AdminBucketName = MINIO_admin_bucket_name %}
   {% elif s3_service_to_use == 'rustfs' %}
+    {% set s3ServiceName = 'rustfs-1' %}
     {% set s3EndpointStorage = 'http://rustfs-1:9000' %}
     {% set s3PathStyleAccess = 'true' %}
     {% set s3AccessKey = '${PLATYS_AWS_ACCESS_KEY:-' ~ RUSTFS_access_key ~'}' %}
@@ -3026,7 +3028,7 @@ services:
       com.platys.webui.url: "http://dataplatform:5691"
       com.platys.password.envvars: "PLATYS_RISINGWAVE_DATABASE_PASSWORD"
     depends_on:
-      - minio-1
+      - {{s3ServiceName}}  {#  if RISINGWAVE_state_store_type is s3 #}
     expose:
       - "6660"
       - "4566"
