@@ -2392,4 +2392,4 @@ For each service there might be some other settings, such as controlling the num
 | `FHIR_GATEWAY_postgresql_enabled`                             	| `false` 	| 1.17.0 	| Persists any received FHIR resource in a PostgreSQL database?                                                                                                                                              	|             	|                                	|
 | `FHIR_GATEWAY_kafka_enabled`                             	| `false` 	| 1.17.0 	| Enable reading FHIR resources from, and writing them back to a Kafka clusters.                                                                                                                                              	|             	|                                	|
 | `FHIR_GATEWAY_pseudonymizer_enabled`                             	| `false` 	| 1.17.0 	| Whether pseudonymization should be enabled.                                                                                                                                              	|             	|                                	|
-f
+f 
