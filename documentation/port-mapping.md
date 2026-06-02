@@ -81,6 +81,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 3010 | 3000 | postman |
 3006 | 3000 | retool-api |
 3007 | 3000 | gpt-researcher-nextjs |
+3008 | 3000 | cubejs |
 3030 | 3030 | jena-fuseki |
 3100 | 3100 | loki |
 3200 | 3200 | tempo |
@@ -101,6 +102,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 4000 | 4000 | graphql-mesh |
 4001 | 4000 | supabase-analytics |
 4002 | 4000 | litellm |
+4003 | 4000 | cubejs |
 4004 | 4004 | log4brains |
 4040 | 4040 | spark-master (ui) |
 4041 | 4041 | spark-master (ui) |

@@ -407,6 +407,7 @@ networks:
 {% set __TOOLJET_version = TOOLJET_version | default('latest') -%}
 {% set __STREAMLIT_python_version = STREAMLIT_python_version | default('latest') -%}
 {% set __BASEROW_version = BASEROW_version | default('latest') -%}
+{% set __CUBEJS_version = CUBEJS_version | default('latest') -%}
 
 {% set __MEMCACHED_version = MEMCACHED_version | default('latest') -%}
 
@@ -18850,6 +18851,39 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  BASEROW_enable #}
+
+{% if CUBEJS_enable | default(false) %}
+  #  ================================== Cube.js ========================================== #
+  cubejs:
+    image: cubejs/cube:{{__CUBEJS_version}}
+    hostname: cubejs
+    container_name: cubejs
+    labels:
+      com.platys.name: "cubejs"
+      com.platys.description: "Headless Business Intelligence platform"
+      com.platys.webui.title: "Cube.js Playground"
+      com.platys.webui.url: "http://dataplatform:4003"
+      com.platys.restapi.title: "Cube.js API"
+      com.platys.restapi.url: "http://dataplatform:4003/cubejs-api/v1"      
+    ports:
+      - "4003:4000"
+      - "3008:3000"
+    environment:
+      CUBEJS_DEV_MODE: '{{CUBEJS_dev_mode | default(true) | lower}}'
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  CUBEJS_enable #}
 
 {% if MEMCACHED_enable | default(false) %}
   #  ================================== Memcached ========================================== #

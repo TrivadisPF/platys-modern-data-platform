@@ -18,6 +18,7 @@ See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/plat
  * Postgresql MCP
  * Better Chatbot
  * CockroachDB
+ * Cube.js
 
 ### Version upgrades
 
