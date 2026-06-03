@@ -23,17 +23,15 @@ See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/plat
 
 ### Version upgrades
 
- * Update `langflow` to `1.7.3`
  * Update `ollama` to `0.16.3`
- * Update `opa` to `1.14.0` 
- * Update `opal` to `0.9.3`
- * Update `starburstdata` to `479-e`
- * Update `n8n` to `2.11.4`
- * Update `starburst` to `479-e.3`
- * Update `fluss` to `0.9.0-incubating`
+ * Update `opa` to `1.17.0` 
+ * Update `opal` to `0.9.6`
+ * Update `starburstdata` to `480-e.1`
+ * Update `n8n` to `2.25.2`
+ * Update `fluss` to `0.9.1-incubating`
  * Update `zeppelin` to `0.12.0`
- * Update `lakefs` to `1.80`
- * Update `trino` to `480`
+ * Update `lakefs` to `1.81`
+ * Update `trino` to `481`
  * Update `telegraf` to `1.38`
  * Update `redis` to `8.2`
  * Update `valkey` to `8.1.3`
@@ -41,9 +39,31 @@ See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/plat
  * Update `graphdb` to `11.3.2`
  * Update `qdrant` to `1.17`
  * Update `oracle-adb` to `26.2.4.2-26ai`
- * Update `risingwave` to `v2.8.2`
+ * Update `risingwave` to `v2.8.4`
  * Update `nifi` to `2.9.0`
  * Update `singlestore` to `0.2.80`
+ * Update `risingwave-console` to `v0.7.4-pgbundle`
+ * Update `langflow` to `1.9.6`
+ * Update `flowise` to `3.1.2`
+ * Update `dataiku-dss` to `14.5.1`
+ * Update `confluent-platform` to `8.1.3`
+ * Update `kafka` to `4.3.0`
+ * Update `confluent-ccc-ng` to `2.5.0`
+ * Update `arroyo` to `master`
+ * Update `presto` to `0.297` 
+ * Update `drill` to `1.22.0`
+ * Update `kong-gateway` to `3.11`
+ * Update `nessie`to `0.107.6`
+ * Update `gravitino` to `1.1.1`
+ * Update `vault` to `2.0`
+ * Update `garage` to `v2.3.0`
+ * Update `nats` to `2.14`
+ * Update `emqx` to `5.10.4`
+ * Update `emqx-ee` to `4.4.36`
+ * Update `mosquitto` to `2.1-alpine`
+ * Update `hivemq-3` to `4.52.0`
+ * Update `hivemq-4` to `4.52.0`
+ * Update `trino-lb` to `0.6.0`
 
 ### Enhancements
 
