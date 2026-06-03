@@ -64,6 +64,8 @@ See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/plat
  * Update `hivemq-3` to `4.52.0`
  * Update `hivemq-4` to `4.52.0`
  * Update `trino-lb` to `0.6.0`
+ * Update `markdown-viewer` to `1.2.5`
+ * Update `markdown-madness` to `1.2.5`
 
 ### Enhancements
 
