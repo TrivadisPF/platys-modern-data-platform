@@ -1,4 +1,4 @@
-# `modern-data-platform` - Port Mappings - 1.19.1
+# `modern-data-platform` - Port Mappings - 1.20.0
 
 This table reserves the external ports for the various services. Not all services have to be used in the platform at a given time. But by reserving, we can assure that there are no conflicts if a service is added at a later time.
 
@@ -101,6 +101,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 4000 | 4000 | graphql-mesh |
 4001 | 4000 | supabase-analytics |
 4002 | 4000 | litellm |
+4003 | 4000 | cubejs |
 4004 | 4004 | log4brains |
 4040 | 4040 | spark-master (ui) |
 4041 | 4041 | spark-master (ui) |
@@ -181,6 +182,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 6222 | 6222 | nats-1 |
 6333 | 6333 | qdrant |
 6334 | 6334 | qdrant |
+6274 | 6274 | mcp-inspector |
+6277 | 6277 | mcp-inspector |
 6379 | 6379 | redis-1 |
 6380 | 6379 | redis-replica-1 |
 6381 | 6379 | redis-replica-2 |
@@ -283,11 +286,13 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 9001 | 9000 | minio-2 |
 9002 | 9000 | minio-3 |
 9003 | 9000 | minio-4 |
+9005 | 9000 | rustfs-1 |
 9009 | 9009 | questdb |
 9010 | 9010 | minio-1 ui |
 9011 | 9011 | minio-2 ui |
 9012 | 9012 | minio-3 ui |
 9013 | 9013 | minio-4 ui |
+9014 | 9001 | rustfs-1 ui |
 9042 | 9042 | dse-1 |
 9043 | 9042 | dse-2 |
 9044 | 9042 | dse-3 |
@@ -335,6 +340,9 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 9412 | 9412 | jaeger |
 9413 | 9413 | pitchfork |
 9443 | 9443 | lfh-fhir |
+9492 | 9492 | automq-1     |
+9493 | 9493 | automq-2     |
+9494 | 9494 | automq-3     |
 9600 | 9600 | zeebe-1 |
 9601 | 9600 | langwatch-opensearch  |
 9851 | 9851 | tile38 |
@@ -441,6 +449,9 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 23820 | 23820 | infinity (http) |
 24224 | 24224 | fluentd |
 24225 | 24224 | fluent-bit |
+26257 | 26257 | cockroachdb-1 |
+26258 | 26257 | cockroachdb-2 |
+26259 | 26257 | cockroachdb-3 |
 26500 | 26500 | zeebe-1 |
 27017 | 27017 | mongodb-1 |
 27018 | 27017 | mongodb-2 |
@@ -595,7 +606,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28222 | 9000 | whisper |
 28223 | 80 | audio-transcriber |
 28224 | 8082 | centralmind-gateway  |
-28225 | |  |
+28225 | 8000 | redis-mcp  |
 28226 | 9000 | questdb |
 28227 | 8080 | debezium-ui |
 28228 | 9998 | tikka-server |
@@ -789,6 +800,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28419 | 8080 | data-product-portal-nginx |
 28420 | 8080 | sftpgo (webui) |
 28421 | 8000 | timeplus (enterprise) |
+28422 | 8080 | lightdash |
+28423 | 3000 | browserless |
 28242 | 3000 | openlit |
 28243 | 8123 | clickhouse |
 28244 | 9000 | clickhouse |
@@ -817,13 +830,13 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28268 | 8443 | trino-lb (https) |
 28269 | 9090 | trino-lb (prometheus) |
 28270 | 8080 | trino-gateway |
-28271 | 8000 | mcp-neo4j-cypher |
-28272 | 8000 | mcp-neo4j-memory |
+28271 | 8000 | neo4j-mcp |
+28272 | |  |
 28273 | 3000 | presidio-analyzer |
 28274 | 8000 | presidio-anonymizer |
 28275 | 8181 | lakekeeper |
-28276 | 8080 | mcp-inspector |
-28277 | 8081 | mcp-inspector |
+28276 | | |
+28277 | | |
 28278 | 5050 | allure |
 28279 | 5252 | allure-ui |
 28280 | 3000 | nimtable-web |
@@ -846,6 +859,16 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28397 | 8081 | lakevision |
 28398 | 8080 | lakevision |
 28399 | 8080 | odd-platform |
+28400 | 8080 | shadowtraffic |
+28401 | 8080 | openclaw |
+28402 | 8000 | moat |
+28403 | 8000 | mongo-mcp |
+28404 | 8000 | postgresql-mcp |
+28405 | 3000 | better-chatbot |
+28406 | 8080 | cockroachdb-1 |
+28407 | 8080 | cockroachdb-2 |
+28408 | 8080 | cockroachdb-3 |
+28409 | 8000 | risingwave-mcp |
 
 ## Ports > 28500
 

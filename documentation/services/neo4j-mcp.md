@@ -1,4 +1,4 @@
-# MCP Neo4J
+# Neo4J MCP
 
 Model Context Protocol with Neo4j. 
 
@@ -7,7 +7,7 @@ Model Context Protocol with Neo4j.
 ## How to enable?
 
 ```
-platys init --enable-services NEO4J,MCP_NEO4J
+platys init --enable-services NEO4J,NEO4J_MCP
 platys gen
 ```
 

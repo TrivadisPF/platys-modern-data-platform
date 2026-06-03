@@ -63,6 +63,7 @@ maven_dep() {
 
     for mvn_coord in $MVN_COORDS;
     do
+      [ -z "$mvn_coord" ] && continue
       local MVN_COORD=$mvn_coord
 
       local GROUP_TMP=$(echo $MVN_COORD | cut -d: -f1)

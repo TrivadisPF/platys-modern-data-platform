@@ -1,6 +1,6 @@
 # MinIO
 
-High Performance, Kubernetes Native Object Storage
+High Performance, Kubernetes Native Object Storage.
 
 **[Website](https://min.io/)** | **[Documentation](https://docs.min.io/minio/baremetal/)** | **[GitHub](https://github.com/minio/minio)**
 
@@ -10,6 +10,8 @@ High Performance, Kubernetes Native Object Storage
 platys init --enable-services MINIO
 platys gen
 ```
+
+There are two editions to choose from, the legacy `community` edition, which is no longer maintained and the new `aistor`, with a free version available for standalone use (testing, development). Use the `MINIO_edition` config to specify the edition.  
 
 ## How to use it?
 

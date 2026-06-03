@@ -4,7 +4,7 @@
       platys:
         platform-name: 'platys-platform'
         platform-stack: 'trivadis/platys-modern-data-platform'
-        platform-stack-version: '1.19.1'
+        platform-stack-version: 'develop'
         structure: 'flat'
 
       # ========================================================================
@@ -19,7 +19,7 @@
 
       # Docker Logging Driver to use, either 'json-file', 'fluentd' or 'loki' or 'splunk' or 'syslog'
       logging_driver: 'json-file'
-      loggin_fluentd_address: 'fluentd:24224'
+      logging_fluentd_address: 'fluentd:24224'
       logging_syslog_address: 'udp://syslog:1111'
       logging_splunk_url: 'http://splunk:8000'
       logging_splunk_token: ''
@@ -35,6 +35,11 @@
 
       data_centers: 'dc1,dc2,dc3'
       data_center_to_use: 0
+
+      # either 'minio' or 'rustfs'
+      s3_service_to_use: minio
+      # a list of table formats to use, separated by comma, for example 'delta,iceberg,hudi'
+      table_formats_to_use: ''
 
       # enable jmx monitoring with prometheus
       jmx_monitoring_with_prometheus_enable: false
@@ -197,6 +202,12 @@
       KSQLDB_kafka_username: 'ksqldb'
       KSQLDB_kafka_password: 'ksqldb-secret'
 
+
+      #
+      # ===== AutoMQ ========
+      #
+      AUTOMQ_enable: false
+
       #
       # ===== Materialize ========
       #
@@ -218,7 +229,7 @@
       # ===== RisingWave ========
       #
       RISINGWAVE_enable: false
-      # either 'playground', 'standalone' (does not yet work) or 'cluster'
+      # either 'playground', 'standalone' or 'cluster'
       RISINGWAVE_flavor: 'cluster'
       # either 'sqlite' or 'postgresql' or `mysql`
       RISINGWAVE_meta_store_type: 'sqlite'
@@ -236,11 +247,18 @@
 
       RISINGWAVE_console_enabled: false
 
+      RISINGWAVE_MCP_enable: false
+      # either 'stdio' or 'sse' or 'streamable-http'
+      RISINGWAVE_MCP_output_transport: 'streamable-http'           
+
       #
       # ===== Apache Fluss ========
       #
       FLUSS_enable: false
       FLUSS_tablet_servers: 1
+      FLUSS_datalake_enabled: false
+      # either 'paimon' or 'iceberg' or 'lance'
+      FLUSS_datalake_format: 'iceberg'
 
       #
       # ===== Timeplus ========
@@ -597,14 +615,23 @@
       # ===== ShadowTraffic ========
       #      
       SHADOW_TRAFFIC_enable: false
-      SHADOW_TRAFFIC_license_id: b96c45d8-7af3-4ba7-b00b-623da5a9b356
-      SHADOW_TRAFFIC_license_email: michael+examples@shadowtraffic.io
-      SHADOW_TRAFFIC_licence_organization: ShadowTraffic
-      SHADOW_TRAFFIC_license_edition: ShadowTraffic Free Trial
-      SHADOW_TRAFFIC_license_expiration: '2026-01-22'
-      SHADOW_TRAFFIC_license_signature: oltgzNX6tlpTWSx1lsntkFTBxGra4hDX8jZIDOUHsasAQJat6DzNVj4k3jRZjAKpPdwL4PGFdoS6zy4AYqH2o0oQufp8/eNAxanVZ49X9DJfwBOXlJ3RmBya7uSkw6zSFn4/5bodX8znxYlCkS5z59iyWqhzcMlYTDYouDHI66UmiBi7y7ceD522+W/qzEaIj5VppGwVQDkZOmbefTion+cOzK+Oova+g6wEmqstxOZbmPpmgr4zw2EATBooTalfyfuDYJf7skTWuEPCn+lK00uqTBABiPiBR0XZhY+iwDQ/KSmNDXOBozi6BdImwCYiJtJcVdQvj8rlufNZcgvkQw==
-      SHADOW_TRAFFIC_config_file: kafka.json
-      #
+      SHADOW_TRAFFIC_compose_profile:
+      SHADOW_TRAFFIC_config_file: config.json
+      SHADOW_TRAFFIC_watch_config_file_change: false
+      # either 'completion' or 'immediate'
+      SHADOW_TRAFFIC_reload_policy: completion
+      SHADOW_TRAFFIC_sample_size:
+      SHADOW_TRAFFIC_seed_value:
+      SHADOW_TRAFFIC_to_stdout: false
+      SHADOW_TRAFFIC_with_studio: false
+      SHADOW_TRAFFIC_report_benchmark: false
+      # to not having to copy the license information into the config file, you can also provide the information as environment variables, using the format PLATYS_SHADOW_TRAFFIC_LICENSE_ID
+      SHADOW_TRAFFIC_license_id:
+      SHADOW_TRAFFIC_license_email:
+      SHADOW_TRAFFIC_licence_organization:
+      SHADOW_TRAFFIC_license_edition:
+      SHADOW_TRAFFIC_license_expiration:
+      SHADOW_TRAFFIC_license_signature:
       # ===== Apache Hadoop ========
       #
       HADOOP_enable: false
@@ -635,7 +662,10 @@
       SPARK_jars_excludes: ''
       SPARK_jars: ''
       SPARK_jars_ivySettings: ''
-      SPARK_install_jars_packages: ''
+      # a comma separated list of jars packages
+      SPARK_install_java_packages: ''
+      # a space separated list of python packages
+      SPARK_install_python_packages: ''
       SPARK_driver_extraJavaOptions: ''
       SPARK_executor_extraJavaOptions: ''
       SPARK_sql_warehouse_dir: ''
@@ -655,6 +685,7 @@
       SPARK_THRIFTSERVER_use_local_spark: false
       SPARK_THRIFTSERVER_cores_max:
       SPARK_THRIFTSERVER_executor_memory:
+      SPARK_THRIFTSERVER_default_catalog:
 
       #
       # ===== Apache Kyuubi ========
@@ -682,7 +713,7 @@
       # ===== Apache Flink ========
       #
       FLINK_enable: false
-      # either 1.20 or 2.1
+      # either 1.20 or 2.1 or 2.2
       FLINK_base_version: '1.20'
       # either 11, 17 or 21 (if FLINK_base_version is 2.1)    
       FLINK_java_version: '17'  
@@ -765,7 +796,7 @@
       #
       # ===== MCP Toolbox for Databases ========
       #
-      MCP_TOOLBOX_enable: false
+      MCP_TOOLBOX_enable: false    
 
       #
       # ===== Presidio Analyzer & Anonymizer ========
@@ -800,6 +831,7 @@
       # ===== Apache Hive Metastore ========
       #
       HIVE_METASTORE_enable: false
+      HIVE_METASTORE_major_version: 4
       HIVE_METASTORE_use_standalone_edition: true
       HIVE_METASTORE_transactional_event_listener_enabled: false
       # an implementatio of the TransactionalMetaStoreEventListener, for example 'org.apache.hive.hcatalog.listener.DbNotificationListener'
@@ -855,6 +887,11 @@
       OPA_enable: false
       OPA_log_level: 'INFO'
       OPA_log_format: 'json-pretty'
+
+      #
+      # ===== Moat ========
+      #
+      MOAT_enable: false
 
       #
       # ===== Styra Enterprise Open Policy Agent (OPA) ========
@@ -1375,6 +1412,8 @@
       ZEPPELIN_notebook_cron_enabled: true
       ZEPPELIN_spark_submit_options: ""
       ZEPPELIN_use_local_spark: false
+      ZEPPELIN_python_packages: ''
+      ZEPPELIN_pyspark_driver_python_path: "/opt/conda/envs/py312/bin/python3"
 
       #
       # ===== Jupyter ========
@@ -1382,6 +1421,7 @@
       JUPYTER_enable: false
       # one of 'minimal', 'r', 'scipy', 'julia', 'tensorflow', 'pytorch', 'datascience', 'pyspark', all-spark'
       JUPYTER_edition: 'minimal'
+      JUPYTER_spark_base_version: '4.1'
       # a space separated list of python packages
       JUPYTER_python_packages: ''
       # the token to use, if empty a random token is generated
@@ -1398,6 +1438,7 @@
       # one of 'lab', 'notebook', 'nbclassic', 'server'
       JUPYTER_startup_cmd: 'lab'
       JUPYTER_download_jars: 'com.amazonaws:aws-java-sdk-bundle:1.12.262,org.apache.hadoop:hadoop-aws:3.3.4,com.google.guava:guava:27.1-jre,software.amazon.awssdk:bundle:2.27.1'
+      #JUPYTER_download_jars: 'software.amazon.awssdk:bundle:2.29.52,org.apache.hadoop:hadoop-aws:3.4.2,com.google.guava:guava:33.4.8-jre'    # spark 4.1.1
       JUPYTER_volume_map_docker_daemon: false
       #
       # ===== JupyterHub ========
@@ -1513,8 +1554,16 @@
       OPEN_WEBUI_audio_transcriber_enabled: false
 
       #
+      # ===== Better Chatbot ========
+      #
+      BETTER_CHATBOT_enable: false
+      BETTER_CHATBOT_auth_secret: sijaUrJQ1yq96vy+mzWxXajRRAJ17RY3lUTNbBkv/b6sBfm8pAuQeXRl1yA=
+      # leave empty to auto-build from POSTGRESQL_* settings when POSTGRESQL_enable is true
+      BETTER_CHATBOT_postgres_url: ''
+
+      #
       # ===== Alpaca WebUI ========
-      #      
+      #
       ALPACA_WEBUI_enable: false
 
       #
@@ -1606,7 +1655,22 @@
       LANGFLOW_log_level: info
       LANGFLOW_store_enabled: true
 
-
+      #
+      # ===== OpenClaw ========
+      #
+      OPENCLAW_enable: false
+      OPENCLAW_volume_map_data: false
+      # either 'loopback' or 'lan' or 'tailnet' or 'auto' or 'custom'
+      OPENCLAW_gateway_bind:
+      OPENCLAW_with_auth: false
+      OPENCLAW_username:
+      OPENCLAW_password:
+      OPENCLAW_gateway_token: 9c3b8b31072b56586fdd3a330145a8fd
+      OPENCLAW_primary_model:
+      OPENCLAW_hooks_enabled: false
+      OPENCLAW_hooks_token: c5bbd4b3d31fd7b53f863d1dbfe56556
+      OPENCLAW_docker_apt_packages:
+      OPENCLAW_docker_init_script:
       #
       # ===== Langfuse ========
       #
@@ -1803,6 +1867,22 @@
       METABASE_prometheus_enabled: false
 
       #
+      # ===== Lightdash ========
+      #
+      LIGHTDASH_enable: false
+      LIGHTDASH_volume_map_dbt_project: false
+      LIGHTDASH_dbt_project_path:
+      LIGHTDASH_secret: 'changeme-use-a-long-random-secret-here'
+      LIGHTDASH_license_key: ''
+      # postgres connection (requires POSTGRESQL_enable: true)
+      LIGHTDASH_postgres_dbname: 'postgres'
+      LIGHTDASH_postgres_user: 'postgres'
+      LIGHTDASH_postgres_password: 'abc123!'
+      # optional: S3/MinIO for file storage
+      LIGHTDASH_s3_bucket: ''
+      LIGHTDASH_s3_results_bucket: ''
+
+      #
       # ===== Superset ========
       #
       SUPERSET_enable: false
@@ -1874,6 +1954,12 @@
       BASEROW_volume_map_data: false
 
       #
+      # ===== Cube.js ========
+      #
+      CUBEJS_enable: false
+      CUBEJS_dev_mode: true
+
+      #
       # ===== Memcached ========
       #
       MEMCACHED_enable: false
@@ -1923,6 +2009,13 @@
       REDIS_EXPORTER_export_client_list: false
       REDIS_EXPORTER_check_key_groups: ''
       REDIS_EXPORTER_max_distinct_key_groups: 0
+
+      #
+      # ===== MCP Redis ========
+      #
+      REDIS_MCP_enable: false
+      # either 'stdio' or 'sse' or 'ws' or 'streamableHttp'
+      REDIS_MCP_output_transport: 'sse'
 
       #
       # ===== Redis Insight ========
@@ -1992,6 +2085,13 @@
       # ===== Mongo Admin ========
       #
       MONGO_ADMIN_enable: false
+
+      #
+      # ===== Mongo MCP Server ========
+      #
+      MONGO_MCP_enable: false
+      # either 'stdio' or 'sse' or 'ws' or 'streamableHttp'
+      MONGO_MCP_output_transport: 'sse'
 
       #
       # ===== Mongo Express ========
@@ -2069,8 +2169,8 @@
       # ===== Neo4J ========
       #
       NEO4J_enable: false
-      # either 4 or 5 or 25
-      NEO4J_major_version: 25
+      # either 4 or 5 or 25 or 26
+      NEO4J_major_version: 26
       # either "community" or "enterprise"
       NEO4J_edition: community
       NEO4J_nodes: 1
@@ -2123,8 +2223,12 @@
       #
       # ===== MCP Neo4j ========
       #
-      MCP_NEO4J_enable: false
-
+      NEO4J_MCP_enable: false
+      # either 'stdio' or 'http'
+      NEO4J_MCP_output_transport: 'http'     
+      NEO4J_MCP_http_allow_origin: '*'
+      NEO4J_MCP_schema_sample_size: 100
+      NEO4J_MCP_read_only: false
       #
       # ===== Puppy Graph ========
       #
@@ -2166,7 +2270,7 @@
       # ===== Ontotext GraphDB ========
       #
       GRAPHDB_enable: false
-      # one of 'free', 'se', 'ee'
+      # one of 'free' or 'enterprise'
       GRAPHDB_edition: 'free'
       GRAPHDB_heap_size: 2G
       GRAPHDB_volume_map_data: false
@@ -2214,12 +2318,21 @@
       # ===== Influx DB 3.x ========
       #
       INFLUXDB3_enable: false
+      # one of 'file' or 's3' or 'memory'
+      INFLUXDB3_object_store_type: file
+      INFLUXDB3_s3_bucket_name: influxdb3-bucket
+      INFLUXDB3_database: demo-db
       INFLUXDB3_volume_map_data: false
+      INFLUXDB3_volume_map_plugins: false
 
       #
       # ===== Influx DB 3 Explorer (UI) ========
       #
       INFLUXDB3_EXPLORER_enable: false
+      INFLUXDB3_EXPLORER_mode: 'admin'   # either 'admin' or 'query'
+      # use openssl rand -hex 32 to generate a random secret key
+      INFLUXDB3_EXPLORER_session_secret_key: 3fd4e9d0a3f7307fb5e3285414781fc2cfff1486d9306d0ea10dd5f39d6b0ea5
+      INFLUXDB3_EXPLORER_volume_map_data: false
 
       #
       # ===== Influx Telegraf ========
@@ -2365,6 +2478,15 @@
       YUGABYTE_enable: false
 
       #
+      # ===== CockroachDB ========
+      #
+      COCKROACHDB_enable: false
+      # specify number of nodes for cockroachdb cluster (default: 1, max: 3)
+      COCKROACHDB_nodes: 1
+      COCKROACHDB_volume_map_data: false
+      #COCKROACHDB_password: abc123!
+
+      #
       # ===== SingleStore ========
       #
       SINGLE_STORE_enable: false
@@ -2499,6 +2621,16 @@
       POSTGRESQL_wal_level: 
       #POSTGRESQL_anon_role: appuser
       
+      #
+      # ===== PostgreSQL MCP Server ========
+      #
+      POSTGRESQL_MCP_enable: false
+      # either 'stdio' or 'sse' or 'streamable-http'
+      POSTGRESQL_MCP_output_transport: 'sse'
+      # either 'unrestricted' or 'restricted'
+      POSTGRESQL_MCP_access_mode: unrestricted
+      POSTGRESQL_MCP_database: postgres
+
       #
       # ===== Posgrest ========
       #
@@ -2707,10 +2839,10 @@
       #
       # ===== MCP Trino ========
       #
-      MCP_TRINO_enable: false
-      MCP_TRINO_scheme: http
-      MCP_TRINO_default_catalog: memory
-      MCP_TRINO_allow_write_queries: false
+      TRINO_MCP_enable: false
+      TRINO_MCP_scheme: http
+      TRINO_MCP_default_catalog: memory
+      TRINO_MCP_allow_write_queries: false
 
       #
       # ===== Trino Gateway ========
@@ -2730,6 +2862,7 @@
       # the router module to use, currently one of 'query-count-based-router'
       TRINO_GATEWAY_modules_enabled: ''
       TRINO_GATEWAY_db_migrations_enabled: true
+      TRINO_GATEWAY_query_history_enabled: true
       #
       # ===== Trino-LB (Loadbalancer) ========
       #
@@ -2746,6 +2879,17 @@
       PRESTO_install: single
       PRESTO_workers: 3
 
+      PRESTO_hive_storage_format: ORC
+      PRESTO_hive_compression_codec: GZIP
+      # either 'file' or 'schema-registry'
+      PRESTO_kafka_descriptor_supplier: file
+      PRESTO_kafka_table_names: ''
+      PRESTO_kafka_default_schema: 'default'
+      PRESTO_with_iceberg_rest_catalog: false
+      PRESTO_iceberg_rest_catalog_url: http://iceberg-rest-catalog:8181
+      PRESTO_iceberg_rest_catalog_warehouse: 
+      PRESTO_with_hive_metastore_db_catalog: false
+      
       # Presto-CLI is enabled by default
       PRESTO_CLI_enable: true
 
@@ -2928,6 +3072,10 @@
       #=====  MinIO Object Storage ========
       #
       MINIO_enable: false
+      # either "community" or "aistor"
+      MINIO_edition: 'community'
+      # the Minio AIStor license if not specified in PLATYS_MINIO_AISTOR_LICENSE env variable
+      MINIO_aistor_license: 
       MINIO_volume_map_data: false
       MINIO_datacenters: 1
       # "single" or "cluster"
@@ -2935,6 +3083,7 @@
       MINIO_nodes: 1
       MINIO_access_key: admin
       MINIO_secret_key: abc123abc123!
+      MINIO_admin_bucket_name: admin-bucket
       # add additional buckets, comma separated, admin-bucket will be created by default
       MINIO_buckets: ''
       MINIO_browser_enabled: true
@@ -2981,6 +3130,22 @@
       #
       ADMINIO_UI_enable: false      
       S3MANAGER_enable: false
+
+      #
+      #=====  RustFS ========
+      #
+      RUSTFS_enable: false
+      RUSTFS_volume_map_data: false
+      RUSTFS_volume_map_logs: false
+      RUSTFS_access_key: admin
+      RUSTFS_secret_key: abc123abc123!
+      RUSTFS_admin_bucket_name: admin-bucket
+      # add additional buckets, comma separated, admin-bucket will be created by default
+      RUSTFS_buckets: ''
+      RUSTFS_console_enabled: true
+      RUSTFS_upload_data_transfer_to_bucket_enabled: false
+      RUSTFS_upload_data_transfer_bucket_name: 'data-transfer-bucket'
+      RUSTFS_upload_data_transfer_subfolders: ''
 
       #
       #=====  Garage ========
@@ -3344,13 +3509,20 @@
       FIREFOX_use_port_80: false
 
       #
+      # ===== Browserless ========
+      #
+      BROWSERLESS_enable: false
+      BROWSERLESS_browser_type: 'chromium'
+      BROWSERLESS_token: ''
+
+      #
       # ===== File Browser ========
       #
       FILE_BROWSER_enable: false
       FILE_BROWSER_volume_map_data: false
       FILE_BROWSER_user: admin
       # must be bcrypt encrypted: 'docker run -ti hurlenko/filebrowser hash <password>' to encrypt, replace all $ by $$
-      FILE_BROWSER_password:      
+      FILE_BROWSER_password: $2a$10$7KnADVChwzf33IThd7cYhOb.w6yxW2/V1pg1XBqQBY8b2tJfiz9ri
 
       #
       # ===== Vault ========
@@ -3706,6 +3878,20 @@
         S3_path_style_access: false
         S3_admin_bucket_name: 'admin-bucket'
 
+        POSTGRESQL_enable: false
+        POSTGRESQL_host:
+        POSTGRESQL_port: 5432
+        POSTGRESQL_database:
+        POSTGRESQL_user:
+        POSTGRESQL_password:
+
+        MYSQL_enable: false
+        MYSQL_host:
+        MYSQL_port: 5432
+        MYSQL_database:
+        MYSQL_user:
+        MYSQL_password:
+
         ADLS_enable: false
         ADLS_storage_account:
 
@@ -3726,14 +3912,18 @@
         LMSTUDIO_enable: false
         LMSTUDIO_url: http://${PUBLIC_IP}:1234/v1
 
+        ANTHROPIC_enable: false
+        ANTHROPIC_api_key: ${ANTHROPIC_API_KEY}
+
         OPENAI_enable: false
-        OPENAI_api_key:
+        OPENAI_api_key: ${OPENAI_API_KEY}
         OPENAI_base_url:
         OPENAI_model_name:
         OPENAI_small_model_name:
 
         GROQ_enable: false
-        GROQ_api_key:
+        GROQ_api_key: ${GROQ_API_KEY}
+        GROQ_base_url: https://api.groq.com/openai/v1
 
         OPENROUTER_enable: false
         OPENROUTER_api_key:

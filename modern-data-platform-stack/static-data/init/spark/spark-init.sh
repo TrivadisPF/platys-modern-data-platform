@@ -165,10 +165,16 @@ do
     wait_for_it ${i}
 done
 
-if [ ${SPARK_INSTALL_JARS_PACKAGES} ]
+if [ ${SPARK_INSTALL_JAVA_PACKAGES} ]
 then
   # using python for the download, as spark bitnami docker images don't come with curl installed
-  /maven-download.sh central ${SPARK_INSTALL_JARS_PACKAGES} /opt/bitnami/spark/jars python
-fi  
+  /maven-download.sh central ${SPARK_INSTALL_JAVA_PACKAGES} /opt/bitnami/spark/jars python
+fi
+
+if [ "${SPARK_INSTALL_PYTHON_PACKAGES}" ]
+then
+  echo "Installing Python packages: ${SPARK_INSTALL_PYTHON_PACKAGES}"
+  pip install ${SPARK_INSTALL_PYTHON_PACKAGES}
+fi
 
 exec $@

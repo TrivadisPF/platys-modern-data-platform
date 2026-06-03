@@ -1,4 +1,4 @@
-# MCP Trino
+# Trino MCP
 
 A high-performance Model Context Protocol (MCP) server for Trino implemented in Go.
 
@@ -7,7 +7,7 @@ A high-performance Model Context Protocol (MCP) server for Trino implemented in 
 ## How to enable?
 
 ```bash
-platys init --enable-services TRINO MCP_TRINO
+platys init --enable-services TRINO TRINO_MCP
 platys gen
 ```
 
