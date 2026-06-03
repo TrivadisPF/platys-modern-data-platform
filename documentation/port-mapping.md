@@ -868,6 +868,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28406 | 8080 | cockroachdb-1 |
 28407 | 8080 | cockroachdb-2 |
 28408 | 8080 | cockroachdb-3 |
+28409 | 8000 | risingwave-mcp |
 
 ## Ports > 28500
 

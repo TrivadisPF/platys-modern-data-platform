@@ -36,6 +36,7 @@ networks:
 {% set __BENTHOS_version = BENTHOS_version | default('latest') -%}
 {% set __RISINGWAVE_version = RISINGWAVE_version | default('latest') -%}
 {% set __RISINGWAVE_CONSOLE_version = RISINGWAVE_CONSOLE_version | default('latest') -%}
+{% set __RISINGWAVE_MCP_version = RISINGWAVE_MCP_version | default('latest') -%}
 {% set __FLUSS_version = FLUSS_version | default('latest') -%}
 {% set __TIMEPLUS_ENTERPRISE_version = TIMEPLUS_ENTERPRISE_version | default('latest') -%}
 {% set __TIMEPLUS_PROTON_version = TIMEPLUS_PROTON_version | default('latest') -%}
@@ -914,6 +915,7 @@ networks:
   {% set MCP_TOOLBOX_enable = false -%}
   {% set CENTRALMIND_GATEWAY_enable = false -%}
   {% set TRINO_MCP_enable = false -%}
+  {% set RISINGWAVE_MCP_enable = false -%}
   {% set PRESIDIO_ANALYZER_enable = false -%}
   {% set PRESIDIO_ANONYMIZER_enable = false -%}
   {% set WHISPER_enable = false -%}
@@ -3402,6 +3404,41 @@ services:
     restart: {{container_restart_policy}}
   {% endif %}  {#  RISINGWAVE_console_enabled #}
 {% endif %}   {#  RISINGWAVE_enable #}
+
+{% if RISINGWAVE_MCP_enable | default(false) %}
+  #  ================================== RisingWave MCP Server ========================================== #
+  risingwave-mcp:
+    image: risingwavelabs/risingwave-mcp-server:{{__RISINGWAVE_MCP_version}}
+    container_name: risingwave-mcp
+    hostname: risingwave-mcp
+    labels:
+      com.platys.name: 'risingwave-mcp'
+      com.platys.description: "RisingWave MCP Server"
+      com.platys.restapi.title: "RisingWave MCP Server"
+      com.platys.restapi.url: "http://dataplatform:28409/mcp"
+      com.platys.mcp.title: "RisingWave MCP Server"
+      com.platys.mcp.url: "http://dataplatform:28409/mcp"
+    ports:
+      - "28409:8000"
+    environment:
+      MCP_TRANSPORT: {{RISINGWAVE_MCP_output_transport | default('streamable-http')}}
+      MCP_HOST: 0.0.0.0
+      MCP_PORT: 8000
+      RISINGWAVE_CONNECTION_STR: 'postgresql://root:root@host.docker.internal:4566/dev'
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  RISINGWAVE_MCP_enable #}
 
 {% if TIMEPLUS_enable | default(false) %}
   #  ================================== Timeplus OSS (Proton) or Enterprise ========================================== #
