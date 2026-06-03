@@ -78,9 +78,6 @@ See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/plat
  * rename `mcp-trino` to `trino-mcp`
  * change from `neo4j-cypher-mcp` to `neo4j-mcp` (official one)
 
-### Bug Fixes
-
-
 ## What's new in 1.19.1
 
 ### New Services
