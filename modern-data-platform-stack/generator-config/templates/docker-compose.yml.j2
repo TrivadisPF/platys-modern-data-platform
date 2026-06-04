@@ -63,6 +63,7 @@ networks:
 {% set __KADMIN_version = KADMIN_version | default('latest') -%}
 {% set __AKHQ_version = AKHQ_version | default('latest') -%}
 {% set __KAFKA_UI_version = KAFKA_UI_version | default('latest') -%}
+{% set __KAFBAT_UI_version = KAFBAT_UI_version | default('latest') -%}
 {% set __EFAK_version = EFAK_version | default('latest') -%}
 {% set __KOWL_version = KOWL_version | default('latest') -%}
 {% set __REDPANDA_CONSOLE_version = REDPANDA_CONSOLE_version | default('latest') -%}
@@ -886,6 +887,7 @@ networks:
   {% set JIKKOU_enable = false -%}
   {% set JIKKOU_SERVER_enable = false -%}  
   {% set KAFKA_UI_enable = false -%}
+  {% set KAFBAT_UI_enable = false -%}
   {% set EFAK_enable = false -%}
   {% set KOWL_enable = false -%}
   {% set REDPANDA_CONSOLE_enable = false -%}
@@ -5034,7 +5036,7 @@ services:
       KAFKA_CLUSTERS_0_NAME: external
     {% else %}
       KAFKA_CLUSTERS_0_NAME: local
-      KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper-1:2181
+      KAFKA_CLUSTERS_0_ZOOKEEPER: {{'zookeeper-1:2181' if ZOOKEEPER_enable | default(false) else omit}}
       KAFKA_CLUSTERS_0_JMXPORT: '9992'
     {% endif -%}   {#  external['KAFKA_enable'] #}
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: '{{ns.bootstrapServers}}'
@@ -5056,7 +5058,7 @@ services:
       {% endif -%}   {#  ns.securityProtocol #}
     {% endif -%}   {#  ns.secureKafkaEnabled #}
     {% if (SCHEMA_REGISTRY_enable or external['SCHEMA_REGISTRY_enable']) | default(false) %}
-      KAFKA_CLUSTERS_0_SCHEMAREGISTRY: '{{ns.schemaRegistryUrlExternal}}'
+      KAFKA_CLUSTERS_0_SCHEMAREGISTRY: '{{ns.schemaRegistryUrl}}'
       {% if ns.schemaRegistryUsername is defined and ns.schemaRegistryUsername|length %}
       KAFKA_CLUSTERS_0_SCHEMAREGISTRYAUTH_USERNAME: "{{ns.schemaRegistryUsername}}"
       KAFKA_CLUSTERS_0_SCHEMAREGISTRYAUTH_PASSWORD: "{{ns.schemaRegistryPassword}}"
@@ -5091,6 +5093,84 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  KAFKA_enable and KAFKA_UI_enable #}
+
+{% if ((KAFKA_enable or external['KAFKA_enable']) and KAFBAT_UI_enable) | default(false) %}
+  #  ================================== Kafbat UI ========================================== #
+  kafbat-ui:
+    image: ghcr.io/kafbat/kafka-ui:{{__KAFBAT_UI_version}}
+    container_name: kafbat-ui
+    hostname: kafbat-ui
+    labels:
+      com.platys.name: "kafbat-ui"
+      com.platys.description: "Kafbat UI - Kafka GUI"
+      com.platys.webui.title: 'Kafbat UI'
+      com.platys.webui.url: "http://dataplatform:28183"
+    ports:
+      - 28183:8080
+    environment:
+    {% if external['KAFKA_enable'] | default(false) %}
+      KAFKA_CLUSTERS_0_NAME: external
+    {% else %}
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_ZOOKEEPER: {{'zookeeper-1:2181' if ZOOKEEPER_enable | default(false) else omit}}
+      KAFKA_CLUSTERS_0_JMXPORT: '9992'
+    {% endif -%}   {#  external['KAFKA_enable'] #}
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: '{{ns.bootstrapServers}}'
+    {% if ns.secureKafkaEnabled %}
+      KAFKA_CLUSTERS_0_PROPERTIES_SECURITY_PROTOCOL: "{{ns.securityProtocolBROKER}}"
+      {% if ns.securityProtocolBROKER == 'SASL_PLAINTEXT' %}
+      KAFKA_CLUSTERS_0_PROPERTIES_SASL_MECHANISM: "{{ns.saslMechanismBROKER}}"
+      KAFKA_CLUSTERS_0_PROPERTIES_SASL_JAAS_CONFIG: "{{ns.loginModuleBROKER}} required username=\"{{ns.kafkaToolsDefaultUsername}}\" password=\"{{ns.kafkaToolsDefaultPassword}}\";"
+      {% elif ns.securityProtocolBROKER == 'SSL' %}
+      KAFKA_CLUSTERS_0_PROPERTIES_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: 'https'
+      KAFKA_CLUSTERS_0_SSL_TRUSTSTORE_LOCATION: /certs/client.ts.p12
+      KAFKA_CLUSTERS_0_SSL_TRUSTSTORE_PASSWORD: {{KAFKA_client_truststore_password}}
+        {% if KAFKA_ssl_client_authentication_enabled | default(false) %}
+      KAFKA_CLUSTERS_0_SSL_KEYSTORE_TYPE: "PKCS12"
+      KAFKA_CLUSTERS_0_SSL_KEYSTORE_LOCATION: /certs/client.ks.p12
+      KAFKA_CLUSTERS_0_SSL_KEYSTORE_PASSWORD: {{KAFKA_client_keystore_password}}
+      KAFKA_CLUSTERS_0_SSL_KEY_PASSWORD: {{KAFKA_client_key_password}}
+        {% endif -%}   {#  KAFKA_ssl_client_authentication_enabled #}
+      {% endif -%}   {#  ns.securityProtocol #}
+    {% endif -%}   {#  ns.secureKafkaEnabled #}
+    {% if (SCHEMA_REGISTRY_enable or external['SCHEMA_REGISTRY_enable']) | default(false) %}
+      KAFKA_CLUSTERS_0_SCHEMAREGISTRY: '{{ns.schemaRegistryUrl}}'
+      KAFKA_CLUSTERS_0_SCHEMAREGISTRYSHOWNULLVALUES: 'true'
+      KAFKA_CLUSTERS_0_SCHEMAREGISTRYUSEFULLYQUALIFIEDNAMES: 'true'
+      {% if ns.schemaRegistryUsername is defined and ns.schemaRegistryUsername|length %}
+      KAFKA_CLUSTERS_0_SCHEMAREGISTRYAUTH_USERNAME: "{{ns.schemaRegistryUsername}}"
+      KAFKA_CLUSTERS_0_SCHEMAREGISTRYAUTH_PASSWORD: "{{ns.schemaRegistryPassword}}"
+      {% endif %}
+    {% endif -%}   {#  SCHEMA_REGISTRY_enable #}
+    {% if KSQLDB_enable | default(false) %}
+      KAFKA_CLUSTERS_0_KSQLDBSERVER: 'http://ksqldb-server-1:8088'
+    {% endif -%}   {#  KSQLDB_enable #}
+    {% if ( KAFKA_CONNECT_enable or KSQLDB_use_embedded_connect ) | default(false) %}
+      KAFKA_CLUSTERS_0_KAFKACONNECT_0_NAME: '{{ns1.connectClusterName}}'
+      KAFKA_CLUSTERS_0_KAFKACONNECT_0_ADDRESS: {{ns1.connectServersInternalUrl.split(',')[0]}}
+    {% endif -%}   {#  KAFKA_CONNECT_enable #}
+      KAFKA_CLUSTERS_0_PROPERTIES_CLIENT_DNS_LOOKUP: use_all_dns_ips
+      KAFKA_CLUSTERS_0_DISABLELOGDIRSCOLLECTION: 'true'
+      KAFKA_CLUSTERS_0_READONLY: 'false'
+      DYNAMIC_CONFIG_ENABLED: 'true'
+      LOGGING_LEVEL_ROOT: 'info'
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {% if ns.secureKafkaEnabled and ns.securityProtocol == 'SSL' %}
+      - ./security/kafka/client-certs:/certs
+    {% endif -%} {#  ns.secureKafkaEnabled #}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  KAFKA_enable and KAFBAT_UI_enable #}
 
 {% if ((KAFKA_enable or external['KAFKA_enable']) and EFAK_enable) | default(false) %}
   #  ================================== Kafka EFAK (previously Kafka Eagle) ========================================== #
