@@ -1,4 +1,4 @@
-# Modern Data Platform Cookbooks  - v1.20.0
+# Modern Data Platform Cookbooks  - v1.21.0
 
 Inhere we are documenting cookbooks on how to use the platform:
 
