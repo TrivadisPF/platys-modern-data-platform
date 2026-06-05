@@ -7,6 +7,7 @@ See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/plat
 ### New Services
 
  * Kafbat UI
+ * RisingWave Events API
 
 ### Version upgrades
  

@@ -37,6 +37,7 @@ networks:
 {% set __RISINGWAVE_version = RISINGWAVE_version | default('latest') -%}
 {% set __RISINGWAVE_CONSOLE_version = RISINGWAVE_CONSOLE_version | default('latest') -%}
 {% set __RISINGWAVE_MCP_version = RISINGWAVE_MCP_version | default('latest') -%}
+{% set __RISINGWAVE_EVENTS_API_version = RISINGWAVE_EVENTS_API_version | default('latest') -%}
 {% set __FLUSS_version = FLUSS_version | default('latest') -%}
 {% set __TIMEPLUS_ENTERPRISE_version = TIMEPLUS_ENTERPRISE_version | default('latest') -%}
 {% set __TIMEPLUS_PROTON_version = TIMEPLUS_PROTON_version | default('latest') -%}
@@ -918,6 +919,7 @@ networks:
   {% set CENTRALMIND_GATEWAY_enable = false -%}
   {% set TRINO_MCP_enable = false -%}
   {% set RISINGWAVE_MCP_enable = false -%}
+  {% set RISINGWAVE_EVENTS_API_enable = false -%}
   {% set PRESIDIO_ANALYZER_enable = false -%}
   {% set PRESIDIO_ANONYMIZER_enable = false -%}
   {% set WHISPER_enable = false -%}
@@ -3441,6 +3443,36 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  RISINGWAVE_MCP_enable #}
+
+{% if RISINGWAVE_EVENTS_API_enable | default(false) %}
+  #  ================================== RisingWave Events API ========================================== #
+  risingwave-events-api:
+    image: risingwavelabs/events-api:{{__RISINGWAVE_EVENTS_API_version}}
+    container_name: risingwave-events-api
+    hostname: risingwave-events-api
+    labels:
+      com.platys.name: 'risingwave-events-api'
+      com.platys.description: "RisingWave Events API"
+      com.platys.restapi.title: "RisingWave Events API"
+      com.platys.restapi.url: "http://dataplatform:28424/v1/healthz"
+    ports:
+      - "28424:8000"
+    environment:
+      EVENTS_API_RW_DSN: 'postgres://root:@risingwave-1:4566/dev'
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  RISINGWAVE_EVENTS_API_enable #}
 
 {% if TIMEPLUS_enable | default(false) %}
   #  ================================== Timeplus OSS (Proton) or Enterprise ========================================== #
