@@ -3455,6 +3455,12 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
+    healthcheck:
+      test: ["CMD-SHELL", "python3 -c \"import socket; s=socket.socket(); s.connect(('localhost',8000)); s.close()\" 2>/dev/null || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
 {% endif %}   {#  RISINGWAVE_MCP_enable #}
 
 {% if RISINGWAVE_EVENTS_API_enable | default(false) %}
@@ -3488,6 +3494,12 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8000/v1/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
 {% endif %}   {#  RISINGWAVE_EVENTS_API_enable #}
 
 {% if TIMEPLUS_enable | default(false) %}
