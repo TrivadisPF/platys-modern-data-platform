@@ -2429,9 +2429,11 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
     healthcheck:
+      test: [CMD, curl, -f, http://localhost:8083/connectors]
       interval: 30s
-      retries: 25
-      test: curl --user connectAdmin:connectAdmin --fail --silent --insecure https://kafka-connect-{{loop.index}}:{{port}}/ --output /dev/null || exit 1
+      timeout: 10s
+      retries: 10
+      start_period: 60s
   {% endfor %}
 {% endif %}   {# KAFKA_enable and KAFKA_CONNECT_enable  #}
 
