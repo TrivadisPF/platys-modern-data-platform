@@ -3494,12 +3494,6 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
-    healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:8000/v1/healthz"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 15s
 {% endif %}   {#  RISINGWAVE_EVENTS_API_enable #}
 
 {% if TIMEPLUS_enable | default(false) %}
@@ -5083,7 +5077,7 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:8080/health"]
+      test: [CMD, curl, -f, http://localhost:28320/health]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -5164,6 +5158,12 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:28179/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s    
 {% endif %}   {#  KAFKA_enable and KAFKA_UI_enable #}
 
 {% if ((KAFKA_enable or external['KAFKA_enable']) and KAFBAT_UI_enable) | default(false) %}
@@ -24434,7 +24434,7 @@ services:
     command: php -S 0.0.0.0:8080 -t /var/www/html
     restart: {{container_restart_policy}}
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:8080/"]
+      test: ["CMD", "wget", "-qO-", "http://adminer:8080/"]
       interval: 10s
       timeout: 5s
       retries: 5
