@@ -5077,7 +5077,7 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
     healthcheck:
-      test: [CMD, curl, -f, http://localhost:28320/health]
+      test: [CMD, curl, -f, http://akhq:28081/health]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -29137,6 +29137,12 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
+    healthcheck:
+      test: [CMD, mosquitto_sub, -t, '$$SYS/#', -C, '1', -i, healthcheck, -W, '3']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s    
     {% endfor %}
 {% endif %}   {#  MOSQUITTO_enable #}
 
