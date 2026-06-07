@@ -5197,7 +5197,6 @@ services:
     {% else %}
       KAFKA_CLUSTERS_0_NAME: local
       KAFKA_CLUSTERS_0_ZOOKEEPER: {{'zookeeper-1:2181' if ZOOKEEPER_enable | default(false) else omit}}
-      KAFKA_CLUSTERS_0_JMXPORT: '9992'
     {% endif -%}   {#  external['KAFKA_enable'] #}
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: '{{ns.bootstrapServers}}'
     {% if ns.secureKafkaEnabled %}
@@ -5235,12 +5234,22 @@ services:
     {% endif -%}   {#  KAFKA_CONNECT_enable #}
       KAFKA_CLUSTERS_0_PROPERTIES_CLIENT_DNS_LOOKUP: use_all_dns_ips
       KAFKA_CLUSTERS_0_DISABLELOGDIRSCOLLECTION: 'true'
-      KAFKA_CLUSTERS_0_READONLY: 'false'
+      KAFKA_CLUSTERS_0_METRICS_PORT: 9992
+      KAFKA_CLUSTERS_0_METRICS_TYPE: 'jmx'      
+      KAFKA_CLUSTERS_0_READONLY: '{{KAFBAT_UI_read_only_mode | default("false")}}'
+    {% if KAFBAT_UI_audit_log_enabled | default(false) %}
+      KAFKA_CLUSTERS_0_AUDIT_TOPICAUDITENABLED: {{KAFBAT_UI_audit_log_to_topic_enabled | default("false")}}
+      KAFKA_CLUSTERS_0_AUDIT_CONSOLEAUDITENABLED: {{KAFBAT_UI_audit_log_to_console_enabled | default("false")}}
+      KAFKA_CLUSTERS_0_AUDIT_TOPIC: {{KAFBAT_UI_audit_log_topic | default("__kafbat-ui-audit-log")}}
+      KAFKA_CLUSTERS_0_AUDIT_AUDITTOPICPROPERTIES_RETENTION_MS: 43200000
+      KAFKA_CLUSTERS_0_AUDIT_AUDITTOPICSPARTITIONS: 1
+      KAFKA_CLUSTERS_0_AUDIT_LEVEL: all
+    {% endif %}        
       DYNAMIC_CONFIG_ENABLED: 'true'
       LOGGING_LEVEL_ROOT: 'info'
       LOGGING_LEVEL_IO_KAFBAT_UI: 'info'
-      SWAGGER_UI_ENABLED: 'true'
-      MCP_ENABLED: 'true'
+      SWAGGER_UI_ENABLED: '{{KAFBAT_UI_swagger_enabled | default("false")}}'
+      MCP_ENABLED: '{{KAFBAT_UI_mcp_enabled | default("false")}}'
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
