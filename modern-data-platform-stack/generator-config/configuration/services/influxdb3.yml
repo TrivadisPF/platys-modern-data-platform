@@ -1,0 +1,98 @@
+name: InfluxDB v3 Core
+id: influxdb3
+type: engine
+arch: [x86-64]
+
+links:
+  website: https://www.influxdata.com/
+  documentation: https://docs.influxdata.com/influxdb3/core/
+  github: https://github.com/influxdata/influxdb
+
+description: >
+  InfluxDB v3 Core is a database built to collect, process, transform, and store
+  event and time series data. It is designed for real-time ingest and fast query
+  response times, ideal for monitoring, automation, and user-facing analytics.
+
+enable:
+  platys_init: INFLUXDB3
+  example: |
+    platys init --enable-services INFLUXDB3
+    platys gen
+
+usage:
+  - title: Create an admin token
+    content: |
+      ```bash
+      docker exec -it influxdb3 influxdb3 create token --admin
+      ```
+
+parameters:
+  - name: INFLUXDB3_enable
+    default: "false"
+    since: "1.18.0"
+    description: >
+      Enable InfluxDB v3 Core service.
+
+  - name: INFLUXDB3_database
+    default: ""
+    since: "1.20.0"
+    description: >
+      Default database name. Passed as INFLUXDB_DATABASE to Telegraf when
+      InfluxDB 3 is enabled.
+
+  - name: INFLUXDB3_object_store_type
+    default: "file"
+    since: "1.20.0"
+    allowed_values: [file, s3, memory]
+    description: >
+      Object store backend used by InfluxDB v3 Core for persisting data.
+
+  - name: INFLUXDB3_s3_bucket_name
+    default: "influxdb3-bucket"
+    since: "1.20.0"
+    applicable_when: "INFLUXDB3_object_store_type == s3"
+    description: >
+      S3 bucket name used when INFLUXDB3_object_store_type is set to s3.
+
+  - name: INFLUXDB3_volume_map_data
+    default: "false"
+    since: "1.18.0"
+    description: >
+      Volume map the data folder into the InfluxDB v3 Core container.
+
+  - name: INFLUXDB3_volume_map_plugins
+    default: "false"
+    since: "1.20.0"
+    description: >
+      Volume map the plugins folder into the InfluxDB v3 Core container.
+
+  - name: INFLUXDB3_EXPLORER_enable
+    default: "false"
+    since: "1.18.0"
+    description: >
+      Enable the InfluxDB 3 Explorer web UI alongside InfluxDB v3 Core.
+
+  - name: INFLUXDB3_EXPLORER_mode
+    default: "admin"
+    since: "1.20.0"
+    applicable_when: "INFLUXDB3_EXPLORER_enable == true"
+    allowed_values: [admin, query]
+    description: >
+      Run mode for InfluxDB 3 Explorer. admin enables full management;
+      query provides a read-only query interface.
+
+  - name: INFLUXDB3_EXPLORER_session_secret_key
+    default: ""
+    since: "1.20.0"
+    sensitive: true
+    applicable_when: "INFLUXDB3_EXPLORER_enable == true"
+    description: >
+      Secret key used to sign Explorer session tokens.
+      Generate with: openssl rand -hex 32
+
+  - name: INFLUXDB3_EXPLORER_volume_map_data
+    default: "false"
+    since: "1.20.0"
+    applicable_when: "INFLUXDB3_EXPLORER_enable == true"
+    description: >
+      Volume map the data folder into the InfluxDB 3 Explorer container.

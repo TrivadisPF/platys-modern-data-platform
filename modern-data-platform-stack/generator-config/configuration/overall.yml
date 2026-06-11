@@ -1,0 +1,96 @@
+name: Overall Settings
+description: >
+  Settings that control behaviour across all or a group of services.
+
+properties:
+  - name: use_timezone
+    default: ""
+    since: "1.5.0"
+    description: >
+      Unix timezone string for the whole stack (e.g. Europe/Zurich, America/New_York).
+      Empty by default — the Docker engine timezone (Etc/UTC) is used unchanged.
+
+  - name: logging_driver
+    default: "json-file"
+    since: "1.17.0"
+    allowed_values: [json-file, fluentd, loki, syslog, splunk]
+    description: "Docker logging driver to use for all services."
+
+  - name: logging_fluentd_address
+    default: "fluentd:24224"
+    since: "1.17.0"
+    applicable_when: "logging_driver == fluentd"
+    description: "Socket address of the Fluentd daemon."
+
+  - name: logging_syslog_address
+    default: "udp://syslog:1111"
+    since: "1.17.0"
+    applicable_when: "logging_driver == syslog"
+    description: "Address of the syslog server."
+
+  - name: logging_splunk_url
+    default: "http://splunk:8000"
+    since: "1.17.0"
+    applicable_when: "logging_driver == splunk"
+    description: "URL of the Splunk Enterprise or Splunk Cloud instance."
+
+  - name: logging_splunk_token
+    default: ""
+    since: "1.17.0"
+    sensitive: true
+    applicable_when: "logging_driver == splunk"
+    description: "Splunk HTTP Event Collector token."
+
+  - name: private_docker_repository_name
+    default: "trivadis"
+    since: "1.5.0"
+    description: >
+      Docker registry for images not available on public Docker Hub.
+      Login required before using a private image.
+
+  - name: uid
+    default: "1000"
+    since: "1.9.0"
+    description: "UID used in the 'user' property to override the in-container user."
+
+  - name: env
+    default: "${PLATYS_ENV}"
+    since: "1.16.0"
+    allowed_values: [dev, test, qa, uat, ei, pre, non_prod, prod, corp]
+    description: "Environment identifier for this platys instance."
+
+  - name: data_centers
+    default: "dc1,dc2,dc3"
+    since: "1.14.0"
+    description: "Comma-separated list of data-center names."
+
+  - name: data_center_to_use
+    default: "0"
+    since: "1.14.0"
+    description: >
+      Which data-center to activate. 0 means single DC. Values 1-3 select from data_centers.
+      Also used to run multiple environments on one host.
+
+  - name: s3_service_to_use
+    default: "minio"
+    since: "1.20.0"
+    allowed_values: [minio, rustfs]
+    description: "Which internal S3 service to auto-configure across the stack."
+
+  - name: table_formats_to_use
+    default: ""
+    since: "1.20.0"
+    allowed_values: [iceberg, delta, hudi]
+    description: "Comma-separated list of table formats to activate across the stack (e.g. 'delta,iceberg'). Supported values: iceberg, delta, hudi."
+
+  - name: jmx_monitoring_with_prometheus_enable
+    default: "false"
+    since: "1.17.0"
+    description: >
+      Enable JMX monitoring via Prometheus for Kafka and related services.
+      Auto-enables prometheus and grafana.
+
+  - name: copy_cookbook_data_folder
+    default: "true"
+    since: "1.14.0"
+    description: "Copy cookbook recipe data folders into data-transfer/cookbook-data."

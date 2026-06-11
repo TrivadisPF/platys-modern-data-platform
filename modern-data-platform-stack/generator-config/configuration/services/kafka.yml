@@ -1,0 +1,404 @@
+name: Apache Kafka
+id: kafka
+type: engine
+arch: [x86-64]
+
+links:
+  website: https://kafka.apache.org
+  documentation: https://kafka.apache.org/documentation
+  github: https://github.com/apache/kafka
+
+description: >
+  Apache Kafka is an open-source distributed event streaming platform used by
+  thousands of companies for high-performance data pipelines, streaming analytics,
+  data integration, and mission-critical applications.
+
+enable:
+  platys_init: KAFKA
+  example: |
+    platys init --enable-services KAFKA
+    platys gen
+
+usage:
+  - title: Connect to a broker
+    content: |
+      ```bash
+      docker exec -ti kafka-1 bash
+      ```
+
+  - title: List all topics
+    content: |
+      ```bash
+      docker exec -ti kafka-1 kafka-topics --bootstrap-server kafka-1:29092 --list
+      ```
+
+  - title: List topics on a secured cluster
+    content: |
+      ```bash
+      docker exec -ti kafka-1 kafka-topics --bootstrap-server kafka-1:29092 --list \
+        --command-config /tmp/client.properties
+      ```
+
+  - title: Show KRaft cluster metadata
+    content: |
+      ```bash
+      docker exec -ti kafka-1 kafka-dump-log --cluster-metadata-decoder \
+        --files /var/lib/kafka/data/__cluster_metadata-0/00000000000000000000.log
+      ```
+
+parameters:
+  - name: KAFKA_enable
+    default: "false"
+    since: "1.0.0"
+    description: >
+      Enable Apache Kafka.
+
+  - name: KAFKA_edition
+    default: "community"
+    since: "1.19.0"
+    allowed_values: [oss, inkless, community, enterprise]
+    description: >
+      Kafka edition to use. oss = open source Apache Kafka, inkless = Aiven's
+      diskless Kafka (KIP-1150 preview), community = Confluent Community,
+      enterprise = Confluent Enterprise.
+
+  - name: KAFKA_use_kraft_mode
+    default: "true"
+    since: "1.13.0"
+    description: >
+      Enable Zookeeper-less KRaft mode. Must be true when using Kafka 4.x.
+
+  - name: KAFKA_unstable_api_enabled
+    default: "false"
+    since: "1.18.0"
+    description: >
+      Enable unstable APIs. Currently enables group.coordinator.rebalance.protocols.
+
+  - name: KAFKA_nodes
+    default: "3"
+    since: "1.0.0"
+    description: >
+      Number of Kafka broker nodes to start.
+
+  - name: KAFKA_cluster_id
+    default: "y4vRIwfDT0SkZ65tD7Ey2A"
+    since: "1.17.0"
+    description: >
+      Unique base64 UUID identifier for the Kafka cluster. Replace the default
+      with a fresh UUID: docker run confluentinc/cp-kafka kafka-storage random-uuid.
+
+  - name: KAFKA_internal_replication_factor
+    default: "3"
+    since: "1.6.0"
+    description: >
+      Replication factor for Kafka internal topics.
+
+  - name: KAFKA_volume_map_data
+    default: "false"
+    since: "1.0.0"
+    description: >
+      Volume map the data folder into the Kafka broker container.
+
+  - name: KAFKA_use_standard_port_for_external_interface
+    default: "true"
+    since: "1.14.0"
+    description: >
+      Use standard ports 9092–9095 for the external interface. Set to false to
+      use them for the private (docker host) interface instead.
+
+  - name: KAFKA_delete_topic_enable
+    default: "true"
+    since: "1.0.0"
+    description: >
+      Allow deletion of Kafka topics.
+
+  - name: KAFKA_auto_create_topics_enable
+    default: "false"
+    since: "1.0.0"
+    description: >
+      Allow automatic creation of topics when a producer or consumer references
+      a non-existent topic.
+
+  - name: KAFKA_message_timestamp_type
+    default: "CreateTime"
+    since: "1.8.0"
+    allowed_values: [CreateTime, LogAppendTime]
+    description: >
+      Whether the message timestamp reflects the producer create time or the
+      broker log append time.
+
+  - name: KAFKA_log_dirs
+    default: ""
+    since: "1.17.0"
+    description: >
+      Comma-separated list of directories where log data is stored.
+
+  - name: KAFKA_log_segment_bytes
+    default: "1073741824"
+    since: "1.8.0"
+    description: >
+      Maximum size of a single log segment file (default 1 GB).
+
+  - name: KAFKA_log_retention_ms
+    default: ""
+    since: "1.8.0"
+    description: >
+      Milliseconds to retain log files. If not set, log.retention.hours is used.
+      Set to -1 to disable time-based retention.
+
+  - name: KAFKA_log_retention_hours
+    default: "168"
+    since: "1.8.0"
+    description: >
+      Hours to retain log files (default 7 days). Tertiary to log.retention.ms.
+
+  - name: KAFKA_log_retention_bytes
+    default: "-1"
+    since: "1.8.0"
+    description: >
+      Maximum total size of the log before deletion. -1 means no size limit.
+
+  - name: KAFKA_compression_type
+    default: "producer"
+    since: "1.8.0"
+    allowed_values: [producer, uncompressed, gzip, snappy, lz4, zstd]
+    description: >
+      Final compression type for topic data. producer retains the compression
+      set by the producer.
+
+  - name: KAFKA_min_insync_replicas
+    default: "1"
+    since: "1.8.0"
+    description: >
+      Minimum number of in-sync replicas required when a producer uses acks=all.
+      Writes are rejected if this minimum cannot be met.
+
+  - name: KAFKA_replica_selector_class
+    default: ""
+    since: "1.8.0"
+    description: >
+      Fully qualified class name implementing ReplicaSelector, used to choose
+      the preferred read replica.
+
+  - name: KAFKA_log4j_root_level
+    default: "INFO"
+    since: "1.14.0"
+    allowed_values: [TRACE, DEBUG, INFO, WARN, ERROR]
+    description: >
+      Default log4j logging level for the Kafka broker.
+
+  - name: KAFKA_log4j_loggers
+    default: ""
+    since: "1.14.0"
+    description: >
+      Fine-grained log level overrides, e.g.
+      kafka.controller=TRACE,kafka.request.logger=WARN.
+
+  - name: KAFKA_tools_log4j_level
+    default: "INFO"
+    since: "1.14.0"
+    allowed_values: [TRACE, DEBUG, INFO, WARN, ERROR]
+    description: >
+      Default log4j logging level for Kafka CLI tools.
+
+  - name: KAFKA_additional_jars
+    default: ""
+    since: "1.17.0"
+    description: >
+      Comma-separated list of custom JAR names (without .jar extension) to copy
+      to the broker on startup.
+
+  - name: KAFKA_security_protocol
+    default: "PLAINTEXT"
+    since: "1.17.0"
+    allowed_values: [PLAINTEXT, SASL_PLAINTEXT]
+    description: >
+      Default security protocol for broker communication. Use
+      KAFKA_<listener>_security_protocol to override per listener.
+
+  - name: KAFKA_sasl_mechanism
+    default: "PLAIN"
+    since: "1.17.0"
+    allowed_values: [PLAIN, SCRAM-SHA-256, SCRAM-SHA-512]
+    description: >
+      Default SASL mechanism for client connections. Use
+      KAFKA_<listener>_sasl_mechanism to override per listener.
+
+  - name: KAFKA_admin_user
+    default: "admin"
+    since: "1.17.0"
+    description: >
+      Username of the Kafka admin user.
+
+  - name: KAFKA_admin_password
+    default: "admin-secret"
+    since: "1.17.0"
+    sensitive: true
+    description: >
+      Password of the Kafka admin user.
+
+  # Inkless edition parameters
+  - name: KAFKA_inkless_bucket_name
+    default: "inkless-bucket"
+    since: "1.19.0"
+    applicable_when: "KAFKA_edition == inkless"
+    description: >
+      S3 bucket name used by the inkless (diskless) Kafka edition.
+
+  - name: KAFKA_inkless_control_plane_type
+    default: "in-memory"
+    since: "1.19.0"
+    applicable_when: "KAFKA_edition == inkless"
+    allowed_values: [in-memory, postgres]
+    description: >
+      Control plane backend for inkless Kafka. Use postgres for persistence
+      (requires POSTGRESQL_enable: true).
+
+  - name: KAFKA_inkless_control_db_dbname
+    default: "postgres"
+    since: "1.19.0"
+    applicable_when: "KAFKA_inkless_control_plane_type == postgres"
+    description: >
+      PostgreSQL database name for the inkless control plane.
+
+  - name: KAFKA_inkless_control_db_username
+    default: "postgres"
+    since: "1.19.0"
+    applicable_when: "KAFKA_inkless_control_plane_type == postgres"
+    description: >
+      PostgreSQL username for the inkless control plane.
+
+  - name: KAFKA_inkless_control_db_password
+    default: "abc123!"
+    since: "1.19.0"
+    sensitive: true
+    applicable_when: "KAFKA_inkless_control_plane_type == postgres"
+    description: >
+      PostgreSQL password for the inkless control plane.
+
+  # Confluent enterprise / tiered storage parameters
+  - name: KAFKA_confluent_log_placement_constraints
+    default: "{}"
+    since: "1.8.0"
+    applicable_when: "KAFKA_edition == enterprise"
+    description: >
+      JSON object controlling which brokers (replicas) may join the ISR and
+      which are observers. Enterprise edition only.
+
+  - name: KAFKA_confluent_cluster_link_enabled
+    default: "false"
+    since: "1.17.0"
+    applicable_when: "KAFKA_edition == enterprise"
+    description: >
+      Enable Confluent Cluster Linking.
+
+  - name: KAFKA_confluent_tier_feature
+    default: "false"
+    since: "1.8.0"
+    applicable_when: "KAFKA_edition == enterprise"
+    description: >
+      Enable Tiered Storage at the broker level.
+
+  - name: KAFKA_confluent_tier_enabled
+    default: "false"
+    since: "1.8.0"
+    applicable_when: "KAFKA_confluent_tier_feature == true"
+    description: >
+      Allow tiering for topics. All non-compacted topics will use tiered storage.
+
+  - name: KAFKA_confluent_tier_backend
+    default: "S3"
+    since: "1.8.0"
+    applicable_when: "KAFKA_confluent_tier_feature == true"
+    allowed_values: [S3, GCS]
+    description: >
+      Cloud storage backend for tiered storage.
+
+  - name: KAFKA_confluent_tier_s3_bucket
+    default: "kafka-logs"
+    since: "1.8.0"
+    applicable_when: "KAFKA_confluent_tier_backend == S3"
+    description: >
+      S3 bucket name for tiered storage data.
+
+  - name: KAFKA_confluent_tier_s3_prefix
+    default: ""
+    since: "1.8.0"
+    applicable_when: "KAFKA_confluent_tier_backend == S3"
+    description: >
+      Prefix added to all objects written to S3 tiered storage.
+
+  - name: KAFKA_confluent_tier_s3_region
+    default: "us-east-1"
+    since: "1.8.0"
+    applicable_when: "KAFKA_confluent_tier_backend == S3"
+    description: >
+      AWS region for tiered storage S3 bucket.
+
+  - name: KAFKA_confluent_tier_s3_aws_endpoint_override
+    default: ""
+    since: "1.8.0"
+    applicable_when: "KAFKA_confluent_tier_backend == S3"
+    description: >
+      Override the S3 endpoint, e.g. when using MinIO as on-premises storage.
+
+  - name: KAFKA_confluent_tier_s3_force_path_style_access
+    default: "false"
+    since: "1.13.0"
+    applicable_when: "KAFKA_confluent_tier_backend == S3"
+    description: >
+      Force path-style access for all S3 requests. Required for MinIO and other
+      S3-compatible stores that do not support virtual hosted-style access.
+
+  - name: KAFKA_confluent_tier_local_hotset_bytes
+    default: "-1"
+    since: "1.8.0"
+    applicable_when: "KAFKA_confluent_tier_feature == true"
+    description: >
+      Maximum partition size kept on broker-local storage (hotset) in bytes.
+      -1 means no size limit (only time-based via hotset_ms applies).
+
+  - name: KAFKA_confluent_tier_local_hotset_ms
+    default: "86400000"
+    since: "1.8.0"
+    applicable_when: "KAFKA_confluent_tier_feature == true"
+    description: >
+      Maximum time (ms) a log segment is kept on broker-local storage before
+      being offloaded to tiered storage (default 1 day). -1 disables the limit.
+
+  - name: KAFKA_confluent_tier_archiver_num_threads
+    default: "2"
+    since: "1.8.0"
+    applicable_when: "KAFKA_confluent_tier_feature == true"
+    description: >
+      Thread pool size for archiving data to tiered storage and garbage collection.
+
+  - name: KAFKA_confluent_tier_fetcher_num_threads
+    default: "4"
+    since: "1.8.0"
+    applicable_when: "KAFKA_confluent_tier_feature == true"
+    description: >
+      Thread pool size for fetching data from tiered storage.
+
+  - name: KAFKA_confluent_tier_topic_delete_check_interval_ms
+    default: "10800000"
+    since: "1.8.0"
+    applicable_when: "KAFKA_confluent_tier_feature == true"
+    description: >
+      Interval (ms) at which tiered storage cleanup runs for deleted topics
+      (default 3 hours).
+
+  - name: KAFKA_confluent_tier_metadata_replication_factor
+    default: "1"
+    since: "1.8.0"
+    applicable_when: "KAFKA_confluent_tier_feature == true"
+    description: >
+      Replication factor for the internal tier metadata topic. Increase for
+      higher availability.
+
+  # Kafka Init container
+  - name: KAFKA_INIT_enable
+    default: "false"
+    since: "1.17.0"
+    description: >
+      Enable the Kafka Init container to automatically create topics on startup.

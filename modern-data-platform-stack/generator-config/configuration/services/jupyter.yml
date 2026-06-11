@@ -1,0 +1,136 @@
+name: Jupyter
+id: jupyter
+type: engine
+arch: [x86-64, arm]
+
+links:
+  website: https://jupyter.org/
+  documentation: https://jupyter.org/documentation
+  github: https://github.com/jupyter/notebook
+
+description: >
+  Open-source software, open standards, and services for interactive computing
+  across dozens of programming languages.
+
+enable:
+  platys_init: JUPYTER
+  example: |
+    platys init --enable-services JUPYTER
+    platys gen
+
+usage:
+  - title: Open the Jupyter UI
+    content: |
+      Navigate to <http://dataplatform:28888>.
+
+      The login token is either set via `JUPYTER_token` in `config.yml`, or — if
+      left empty — a random token is generated and printed to the container log:
+      ```bash
+      docker logs -f jupyter
+      ```
+
+  - title: Spark UI (all-spark edition)
+    content: |
+      If `JUPYTER_edition` is set to `all_spark`, the Spark UI is available at
+      <http://dataplatform:28376> (up to port 28380 for additional executors).
+
+parameters:
+  - name: JUPYTER_enable
+    default: "false"
+    since: "1.1.0"
+    description: >
+      Global Jupyter flag. If set to false it overrides all JUPYTER_xxxx_enable flags.
+
+  - name: JUPYTER_edition
+    default: "minimal"
+    since: "1.2.0"
+    allowed_values: [minimal, r, julia, scipy, tensorflow, datascience, pytorch, pyspark, all_spark]
+    description: >
+      Which Jupyter edition (image) to use.
+
+  - name: JUPYTER_spark_base_version
+    default: "4.1"
+    since: "1.20.0"
+    applicable_when: "JUPYTER_edition in [pyspark, all_spark]"
+    description: >
+      Spark base version to use inside Jupyter.
+
+  - name: JUPYTER_startup_cmd
+    default: "lab"
+    since: "1.16.0"
+    allowed_values: [lab, jupyter, nbclassic, server]
+    description: >
+      Command used when starting the container. Use 'server' for backend-only (no UI).
+
+  - name: JUPYTER_tokenless
+    default: "false"
+    since: "1.16.0"
+    description: >
+      Disable token authentication entirely.
+
+  - name: JUPYTER_token
+    default: ""
+    since: "1.16.0"
+    sensitive: true
+    description: >
+      Token for first-time authentication. If empty, a random token is generated
+      and printed to the container log.
+
+  - name: JUPYTER_volume_map_data
+    default: "false"
+    since: "1.1.0"
+    description: >
+      Volume map the data folder into the Jupyter service.
+
+  - name: JUPYTER_data_folder_on_docker_host
+    default: "./container-volume/jupyter/work"
+    since: "1.18.0"
+    applicable_when: "JUPYTER_volume_map_data == true"
+    description: >
+      Host path mapped as the data volume. Can be set to a Git project folder
+      or any other directory on the Docker host.
+
+  - name: JUPYTER_upload_data_transfer_to_workspace_enabled
+    default: "false"
+    since: "1.18.0"
+    description: >
+      Copy the contents of /data-transfer into the Jupyter 'work' folder on startup.
+
+  - name: JUPYTER_python_packages
+    default: ""
+    since: "1.13.0"
+    description: >
+      Space-separated list of Python packages to install on startup.
+
+  - name: JUPYTER_requirements_file
+    default: ""
+    since: "1.18.0"
+    description: >
+      Path to a pip requirements file, either relative to the platys stack
+      (e.g. ./requirements.txt) or an absolute path on the Docker host. Ignored if empty.
+
+  - name: JUPYTER_spark_jars_packages
+    default: ""
+    since: "1.16.0"
+    applicable_when: "JUPYTER_edition in [pyspark, all_spark]"
+    description: >
+      Comma-separated Maven coordinates of JARs to add to driver and executor
+      classpaths (spark.jars.packages).
+
+  - name: JUPYTER_download_jars
+    default: "com.amazonaws:aws-java-sdk-bundle:1.11.375 ..."
+    since: "1.17.0"
+    description: >
+      Additional JARs to download when the container starts.
+
+  - name: JUPYTER_notebook_args
+    default: ""
+    since: "1.16.0"
+    description: >
+      Custom options appended to the jupyter startup command.
+
+  - name: JUPYTER_volume_map_docker_daemon
+    default: "false"
+    since: "1.17.0"
+    description: >
+      Volume map the Docker daemon socket into the Jupyter container.

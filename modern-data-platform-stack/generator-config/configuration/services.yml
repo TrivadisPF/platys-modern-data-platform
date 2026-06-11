@@ -1,0 +1,1009 @@
+services:
+
+  - name: AKHQ
+    id: akhq
+    type: ui
+    arch: [x86-64, arm]
+    links:
+      website: https://akhq.io/
+      documentation: https://akhq.io/docs/
+      github: https://github.com/tchiotludo/akhq
+    description: >
+      Kafka GUI for Apache Kafka to manage topics, topic data, consumer groups,
+      schema registry, Kafka Connect, and more.
+    enable:
+      platys_init: AKHQ
+      example: |
+        platys init --enable-services AKHQ
+        platys gen
+    usage:
+      - title: Open the AKHQ UI
+        content: |
+          Navigate to <http://dataplatform:28107>.
+          If authentication is enabled, log in with the configured username and password.
+      - title: REST API
+        content: |
+          The REST API is available at <http://dataplatform:28107/api>.
+          See <https://akhq.io/docs/api.html> for the full API reference.
+      - title: Monitoring endpoints
+        content: |
+          ```
+          http://dataplatform:28320/info
+          http://dataplatform:28320/health
+          http://dataplatform:28320/loggers
+          http://dataplatform:28320/metrics
+          http://dataplatform:28320/prometheus
+          ```
+    parameters:
+      - name: AKHQ_enable
+        default: "false"
+        since: "1.3.0"
+        description: >
+          Enable AKHQ (formerly KafkaHQ) service.
+      - name: AKHQ_topic_page_size
+        default: "25"
+        since: "1.16.0"
+        description: >
+          Number of topics shown per page in the topic list.
+      - name: AKHQ_topic_data_size
+        default: "50"
+        since: "1.16.0"
+        description: >
+          Maximum number of records shown per page when browsing topic data.
+      - name: AKHQ_topic_data_poll_timeout
+        default: "1000"
+        since: "1.16.0"
+        description: >
+          Time in milliseconds to wait in poll when no data is available in the buffer.
+      - name: AKHQ_topic_data_kafka_max_message_length
+        default: "1000000"
+        since: "1.16.0"
+        description: >
+          Maximum message length (in bytes) sent to the UI when retrieving topic records.
+      - name: AKHQ_default_view
+        default: "HIDE_INTERNAL"
+        since: "1.16.0"
+        allowed_values: [ALL, HIDE_INTERNAL, HIDE_INTERNAL_STREAM, HIDE_STREAM]
+        description: >
+          Default topic list view filter.
+      - name: AKHQ_sort
+        default: "OLDEST"
+        since: "1.16.0"
+        allowed_values: [OLDEST, NEWEST]
+        description: >
+          Default sort order when browsing topic data.
+      - name: AKHQ_show_consumer_groups
+        default: "true"
+        since: "1.16.0"
+        description: >
+          Show the consumer groups column in the topic list.
+      - name: AKHQ_show_all_consumer_groups
+        default: "true"
+        since: "1.16.0"
+        description: >
+          Expand the full consumer group list rather than showing only one group per topic.
+      - name: AKHQ_show_last_record
+        default: "true"
+        since: "1.16.0"
+        description: >
+          Show the timestamp of the last record sent to each topic.
+      - name: AKHQ_read_only_mode
+        default: "false"
+        since: "1.16.0"
+        description: >
+          Run AKHQ in read-only mode, preventing any write operations from the UI.
+      - name: AKHQ_auth_enabled
+        default: "false"
+        since: "1.17.0"
+        description: >
+          Enable authentication for the AKHQ UI.
+      - name: AKHQ_auth_type
+        default: "basic"
+        since: "1.17.0"
+        allowed_values: [basic]
+        applicable_when: "AKHQ_auth_enabled == true"
+        description: >
+          Authentication type. Currently only basic authentication is supported.
+      - name: AKHQ_username
+        default: "admin"
+        since: "1.17.0"
+        applicable_when: "AKHQ_auth_enabled == true"
+        description: >
+          Username for basic authentication.
+      - name: AKHQ_password
+        default: "admin"
+        since: "1.17.0"
+        sensitive: true
+        applicable_when: "AKHQ_auth_enabled == true"
+        description: >
+          Password for basic authentication.
+
+  - name: Apache Hive Metastore
+    id: hive-metastore
+    type: engine
+    arch: [x86-64]
+    links:
+      website: https://hive.apache.org/
+      documentation: https://cwiki.apache.org/confluence/display/Hive/GettingStarted
+      github: https://github.com/apache/hive
+    description: >
+      The Hive Metastore (HMS) stores metadata for Apache Hive and other services
+      (Spark, Impala, Trino, Flink) in a backend RDBMS such as PostgreSQL. It acts
+      as the central catalog for table schemas, partitions, and storage locations.
+    enable:
+      platys_init: HIVE_METASTORE
+      example: |
+        platys init --enable-services HIVE_METASTORE
+        platys gen
+    usage:
+      - title: Connect to the Hive Metastore CLI
+        content: |
+          ```bash
+          docker exec -ti hive-metastore hive
+          ```
+    parameters:
+      - name: HIVE_METASTORE_enable
+        default: "false"
+        since: "1.0.0"
+        description: >
+          Enable the Apache Hive Metastore service.
+      - name: HIVE_METASTORE_major_version
+        default: "4"
+        since: "1.20.0"
+        allowed_values: ["3", "4"]
+        description: >
+          Major version of the Hive Metastore to deploy.
+      - name: HIVE_METASTORE_use_standalone_edition
+        default: "true"
+        since: "1.19.0"
+        applicable_when: "HIVE_METASTORE_major_version == 4"
+        description: >
+          Use the standalone Hive Metastore edition. Only available with version 4.1 or later.
+      - name: HIVE_METASTORE_volume_map_data
+        default: "false"
+        since: "1.18.0"
+        description: >
+          Volume map the data folder into the container.
+      - name: HIVE_METASTORE_db_type
+        default: "postgres"
+        since: "1.18.0"
+        allowed_values: [derby, postgres]
+        description: >
+          Backend database for storing Hive Metastore metadata. Use derby for an embedded
+          instance (development only) or postgres for a standalone PostgreSQL instance.
+      - name: HIVE_METASTORE_db_user
+        default: "hive"
+        since: "1.18.0"
+        applicable_when: "HIVE_METASTORE_db_type == postgres"
+        description: >
+          PostgreSQL username for the Hive Metastore schema.
+      - name: HIVE_METASTORE_db_password
+        default: "abc123!"
+        since: "1.18.0"
+        sensitive: true
+        applicable_when: "HIVE_METASTORE_db_type == postgres"
+        description: >
+          PostgreSQL password for the Hive Metastore database user.
+      - name: HIVE_METASTORE_db_postgresql_wal_level
+        default: "replica"
+        since: "1.18.0"
+        applicable_when: "HIVE_METASTORE_db_type == postgres"
+        allowed_values: [minimal, replica, logical]
+        description: >
+          PostgreSQL wal_level setting. Set to logical to enable logical replication
+          to another PostgreSQL instance.
+      - name: HIVE_METASTORE_transactional_event_listener_enabled
+        default: "false"
+        since: "1.18.0"
+        description: >
+          Enable transactional event listeners on the metastore.
+      - name: HIVE_METASTORE_transactional_event_listeners
+        default: ""
+        since: "1.18.0"
+        applicable_when: "HIVE_METASTORE_transactional_event_listener_enabled == true"
+        description: >
+          Comma-separated list of Java classes implementing MetaStoreEventListener.
+          If DbNotificationListener is included, place it last in the list.
+      - name: HIVE_METASTORE_transactional_event_listener_configs
+        default: ""
+        since: "1.19.0"
+        applicable_when: "HIVE_METASTORE_transactional_event_listener_enabled == true"
+        description: >
+          Comma-separated list of propertykey=value pairs added as hive-site.xml
+          configuration entries for the transactional event listeners.
+      - name: HIVE_METASTORE_plugin_jars
+        default: ""
+        since: "1.19.0"
+        description: >
+          Additional JARs to place on the Hive Metastore classpath. Place the JAR files
+          in the ./plugins/hive-metastore folder of the stack.
+
+  - name: InfluxDB
+    id: influxdb
+    type: engine
+    arch: [x86-64, arm]
+    links:
+      website: https://www.influxdata.com/
+      documentation: https://docs.influxdata.com/influxdb/v1.8/
+      github: https://github.com/influxdata/influxdb
+    description: >
+      InfluxDB v1 is a time series database designed for high write and query loads.
+      It is the core component of the TICK stack and is suited for DevOps monitoring,
+      application metrics, IoT sensor data, and real-time analytics.
+    enable:
+      platys_init: INFLUXDB
+      example: |
+        platys init --enable-services INFLUXDB
+        platys gen
+    usage:
+      - title: Open the InfluxDB UI
+        content: |
+          Navigate to <http://dataplatform:8086>.
+    parameters:
+      - name: INFLUXDB_enable
+        default: "false"
+        since: "1.1.0"
+        description: >
+          Enable InfluxDB v1 service.
+      - name: INFLUXDB_volume_map_data
+        default: "false"
+        since: "1.1.0"
+        description: >
+          Volume map the data folder into the InfluxDB container.
+      - name: INFLUXDB_TELEGRAF_enable
+        default: "false"
+        since: "1.2.0"
+        description: >
+          Enable the Telegraf metrics collection agent alongside InfluxDB.
+      - name: INFLUXDB_TELEGRAF_custom_conf_file
+        default: "false"
+        since: "1.18.0"
+        applicable_when: "INFLUXDB_TELEGRAF_enable == true"
+        description: >
+          Overwrite the default telegraf.conf with a custom file placed in the
+          custom-conf/telegraf folder of the stack.
+      - name: INFLUXDB_TELEGRAF_influx_token
+        default: ""
+        since: "1.18.0"
+        sensitive: true
+        applicable_when: "INFLUXDB_TELEGRAF_enable == true"
+        description: >
+          Authentication token for Telegraf to connect to InfluxDB. Used only if the
+          PLATYS_INFLUXDB_TOKEN environment variable is not set.
+      - name: INFLUXDB_TELEGRAF_monitor_docker_host_enabled
+        default: "false"
+        since: "1.18.0"
+        applicable_when: "INFLUXDB_TELEGRAF_enable == true"
+        description: >
+          Enable Docker host monitoring from within the Telegraf container. Mounts host
+          filesystems and sets environment variables to locate them.
+      - name: INFLUXDB_CHRONOGRAF_enable
+        default: "false"
+        since: "1.2.0"
+        description: >
+          Enable the Chronograf time series data visualisation UI.
+      - name: INFLUXDB_CHRONOGRAF_volume_map_data
+        default: "false"
+        since: "1.1.0"
+        applicable_when: "INFLUXDB_CHRONOGRAF_enable == true"
+        description: >
+          Volume map the data folder into the Chronograf container.
+      - name: INFLUXDB_KAPACITOR_enable
+        default: "false"
+        since: "1.1.0"
+        description: >
+          Enable the Kapacitor real-time streaming data processing engine.
+      - name: INFLUXDB_KAPACITOR_volume_map_data
+        default: "false"
+        since: "1.2.0"
+        applicable_when: "INFLUXDB_KAPACITOR_enable == true"
+        description: >
+          Volume map the data folder into the Kapacitor container.
+
+  - name: InfluxDB v2
+    id: influxdb2
+    type: engine
+    arch: [x86-64, arm]
+    links:
+      website: https://www.influxdata.com/
+      documentation: https://docs.influxdata.com/influxdb/latest/
+      github: https://github.com/influxdata/influxdb
+    description: >
+      InfluxDB v2 is an open source time series platform combining a multi-tenanted
+      time series database, built-in UI and dashboarding tools, background processing,
+      and a monitoring agent — all in a single binary.
+    enable:
+      platys_init: INFLUXDB2
+      example: |
+        platys init --enable-services INFLUXDB2
+        platys gen
+    usage:
+      - title: Open the InfluxDB v2 UI
+        content: |
+          Navigate to <http://dataplatform:19999> and log in with the configured
+          `INFLUXDB2_username` and `INFLUXDB2_password`.
+      - title: InfluxDB CLI
+        content: |
+          ```bash
+          docker exec -ti influxdb2 influx -h
+          ```
+      - title: InfluxQL interactive shell
+        content: |
+          ```bash
+          docker exec -ti influxdb2 influx v1 shell
+          ```
+    parameters:
+      - name: INFLUXDB2_enable
+        default: "false"
+        since: "1.1.0"
+        description: >
+          Enable InfluxDB v2 service.
+      - name: INFLUXDB2_volume_map_data
+        default: "false"
+        since: "1.1.0"
+        description: >
+          Volume map the data folder into the InfluxDB v2 container.
+      - name: INFLUXDB2_volume_map_config
+        default: "false"
+        since: "1.14.0"
+        description: >
+          Volume map the config folder into the InfluxDB v2 container.
+      - name: INFLUXDB2_username
+        default: "influx"
+        since: "1.14.0"
+        description: >
+          Username of the initial super-user created on first startup.
+      - name: INFLUXDB2_password
+        default: "abc123abc123!"
+        since: "1.14.0"
+        sensitive: true
+        description: >
+          Password of the initial super-user.
+      - name: INFLUXDB2_org
+        default: "platys"
+        since: "1.14.0"
+        description: >
+          Name of the initial organisation created on first startup.
+      - name: INFLUXDB2_bucket
+        default: "demo-bucket"
+        since: "1.14.0"
+        description: >
+          Name of the initial bucket created on first startup.
+      - name: INFLUXDB2_admin_token
+        default: ""
+        since: "1.14.0"
+        sensitive: true
+        description: >
+          Authentication token associated with the initial super-user. If empty,
+          a token is auto-generated by InfluxDB on first startup.
+
+  - name: InfluxDB v3 Core
+    id: influxdb3
+    type: engine
+    arch: [x86-64]
+    links:
+      website: https://www.influxdata.com/
+      documentation: https://docs.influxdata.com/influxdb3/core/
+      github: https://github.com/influxdata/influxdb
+    description: >
+      InfluxDB v3 Core is a database built to collect, process, transform, and store
+      event and time series data. It is designed for real-time ingest and fast query
+      response times, ideal for monitoring, automation, and user-facing analytics.
+    enable:
+      platys_init: INFLUXDB3
+      example: |
+        platys init --enable-services INFLUXDB3
+        platys gen
+    usage:
+      - title: Create an admin token
+        content: |
+          ```bash
+          docker exec -it influxdb3 influxdb3 create token --admin
+          ```
+    parameters:
+      - name: INFLUXDB3_enable
+        default: "false"
+        since: "1.18.0"
+        description: >
+          Enable InfluxDB v3 Core service.
+      - name: INFLUXDB3_database
+        default: ""
+        since: "1.20.0"
+        description: >
+          Default database name. Passed as INFLUXDB_DATABASE to Telegraf when
+          InfluxDB 3 is enabled.
+      - name: INFLUXDB3_object_store_type
+        default: "file"
+        since: "1.20.0"
+        allowed_values: [file, s3, memory]
+        description: >
+          Object store backend used by InfluxDB v3 Core for persisting data.
+      - name: INFLUXDB3_s3_bucket_name
+        default: "influxdb3-bucket"
+        since: "1.20.0"
+        applicable_when: "INFLUXDB3_object_store_type == s3"
+        description: >
+          S3 bucket name used when INFLUXDB3_object_store_type is set to s3.
+      - name: INFLUXDB3_volume_map_data
+        default: "false"
+        since: "1.18.0"
+        description: >
+          Volume map the data folder into the InfluxDB v3 Core container.
+      - name: INFLUXDB3_volume_map_plugins
+        default: "false"
+        since: "1.20.0"
+        description: >
+          Volume map the plugins folder into the InfluxDB v3 Core container.
+      - name: INFLUXDB3_EXPLORER_enable
+        default: "false"
+        since: "1.18.0"
+        description: >
+          Enable the InfluxDB 3 Explorer web UI alongside InfluxDB v3 Core.
+      - name: INFLUXDB3_EXPLORER_mode
+        default: "admin"
+        since: "1.20.0"
+        applicable_when: "INFLUXDB3_EXPLORER_enable == true"
+        allowed_values: [admin, query]
+        description: >
+          Run mode for InfluxDB 3 Explorer. admin enables full management;
+          query provides a read-only query interface.
+      - name: INFLUXDB3_EXPLORER_session_secret_key
+        default: ""
+        since: "1.20.0"
+        sensitive: true
+        applicable_when: "INFLUXDB3_EXPLORER_enable == true"
+        description: >
+          Secret key used to sign Explorer session tokens.
+          Generate with: openssl rand -hex 32
+      - name: INFLUXDB3_EXPLORER_volume_map_data
+        default: "false"
+        since: "1.20.0"
+        applicable_when: "INFLUXDB3_EXPLORER_enable == true"
+        description: >
+          Volume map the data folder into the InfluxDB 3 Explorer container.
+
+  - name: Jupyter
+    id: jupyter
+    type: engine
+    arch: [x86-64, arm]
+    links:
+      website: https://jupyter.org/
+      documentation: https://jupyter.org/documentation
+      github: https://github.com/jupyter/notebook
+    description: >
+      Open-source software, open standards, and services for interactive computing
+      across dozens of programming languages.
+    enable:
+      platys_init: JUPYTER
+      example: |
+        platys init --enable-services JUPYTER
+        platys gen
+    usage:
+      - title: Open the Jupyter UI
+        content: |
+          Navigate to <http://dataplatform:28888>.
+
+          The login token is either set via `JUPYTER_token` in `config.yml`, or — if
+          left empty — a random token is generated and printed to the container log:
+          ```bash
+          docker logs -f jupyter
+          ```
+      - title: Spark UI (all-spark edition)
+        content: |
+          If `JUPYTER_edition` is set to `all_spark`, the Spark UI is available at
+          <http://dataplatform:28376> (up to port 28380 for additional executors).
+    parameters:
+      - name: JUPYTER_enable
+        default: "false"
+        since: "1.1.0"
+        description: >
+          Global Jupyter flag. If set to false it overrides all JUPYTER_xxxx_enable flags.
+      - name: JUPYTER_edition
+        default: "minimal"
+        since: "1.2.0"
+        allowed_values: [minimal, r, julia, scipy, tensorflow, datascience, pytorch, pyspark, all_spark]
+        description: >
+          Which Jupyter edition (image) to use.
+      - name: JUPYTER_spark_base_version
+        default: "4.1"
+        since: "1.20.0"
+        applicable_when: "JUPYTER_edition in [pyspark, all_spark]"
+        description: >
+          Spark base version to use inside Jupyter.
+      - name: JUPYTER_startup_cmd
+        default: "lab"
+        since: "1.16.0"
+        allowed_values: [lab, jupyter, nbclassic, server]
+        description: >
+          Command used when starting the container. Use 'server' for backend-only (no UI).
+      - name: JUPYTER_tokenless
+        default: "false"
+        since: "1.16.0"
+        description: >
+          Disable token authentication entirely.
+      - name: JUPYTER_token
+        default: ""
+        since: "1.16.0"
+        sensitive: true
+        description: >
+          Token for first-time authentication. If empty, a random token is generated
+          and printed to the container log.
+      - name: JUPYTER_volume_map_data
+        default: "false"
+        since: "1.1.0"
+        description: >
+          Volume map the data folder into the Jupyter service.
+      - name: JUPYTER_data_folder_on_docker_host
+        default: "./container-volume/jupyter/work"
+        since: "1.18.0"
+        applicable_when: "JUPYTER_volume_map_data == true"
+        description: >
+          Host path mapped as the data volume. Can be set to a Git project folder
+          or any other directory on the Docker host.
+      - name: JUPYTER_upload_data_transfer_to_workspace_enabled
+        default: "false"
+        since: "1.18.0"
+        description: >
+          Copy the contents of /data-transfer into the Jupyter 'work' folder on startup.
+      - name: JUPYTER_python_packages
+        default: ""
+        since: "1.13.0"
+        description: >
+          Space-separated list of Python packages to install on startup.
+      - name: JUPYTER_requirements_file
+        default: ""
+        since: "1.18.0"
+        description: >
+          Path to a pip requirements file, either relative to the platys stack
+          (e.g. ./requirements.txt) or an absolute path on the Docker host. Ignored if empty.
+      - name: JUPYTER_spark_jars_packages
+        default: ""
+        since: "1.16.0"
+        applicable_when: "JUPYTER_edition in [pyspark, all_spark]"
+        description: >
+          Comma-separated Maven coordinates of JARs to add to driver and executor
+          classpaths (spark.jars.packages).
+      - name: JUPYTER_download_jars
+        default: "com.amazonaws:aws-java-sdk-bundle:1.11.375 ..."
+        since: "1.17.0"
+        description: >
+          Additional JARs to download when the container starts.
+      - name: JUPYTER_notebook_args
+        default: ""
+        since: "1.16.0"
+        description: >
+          Custom options appended to the jupyter startup command.
+      - name: JUPYTER_volume_map_docker_daemon
+        default: "false"
+        since: "1.17.0"
+        description: >
+          Volume map the Docker daemon socket into the Jupyter container.
+
+  - name: Apache Kafka
+    id: kafka
+    type: engine
+    arch: [x86-64]
+    links:
+      website: https://kafka.apache.org
+      documentation: https://kafka.apache.org/documentation
+      github: https://github.com/apache/kafka
+    description: >
+      Apache Kafka is an open-source distributed event streaming platform used by
+      thousands of companies for high-performance data pipelines, streaming analytics,
+      data integration, and mission-critical applications.
+    enable:
+      platys_init: KAFKA
+      example: |
+        platys init --enable-services KAFKA
+        platys gen
+    usage:
+      - title: Connect to a broker
+        content: |
+          ```bash
+          docker exec -ti kafka-1 bash
+          ```
+      - title: List all topics
+        content: |
+          ```bash
+          docker exec -ti kafka-1 kafka-topics --bootstrap-server kafka-1:29092 --list
+          ```
+      - title: List topics on a secured cluster
+        content: |
+          ```bash
+          docker exec -ti kafka-1 kafka-topics --bootstrap-server kafka-1:29092 --list \
+            --command-config /tmp/client.properties
+          ```
+      - title: Show KRaft cluster metadata
+        content: |
+          ```bash
+          docker exec -ti kafka-1 kafka-dump-log --cluster-metadata-decoder \
+            --files /var/lib/kafka/data/__cluster_metadata-0/00000000000000000000.log
+          ```
+    parameters:
+      - name: KAFKA_enable
+        default: "false"
+        since: "1.0.0"
+        description: >
+          Enable Apache Kafka.
+      - name: KAFKA_edition
+        default: "community"
+        since: "1.19.0"
+        allowed_values: [oss, inkless, community, enterprise]
+        description: >
+          Kafka edition to use. oss = open source Apache Kafka, inkless = Aiven's
+          diskless Kafka (KIP-1150 preview), community = Confluent Community,
+          enterprise = Confluent Enterprise.
+      - name: KAFKA_use_kraft_mode
+        default: "true"
+        since: "1.13.0"
+        description: >
+          Enable Zookeeper-less KRaft mode. Must be true when using Kafka 4.x.
+      - name: KAFKA_unstable_api_enabled
+        default: "false"
+        since: "1.18.0"
+        description: >
+          Enable unstable APIs. Currently enables group.coordinator.rebalance.protocols.
+      - name: KAFKA_nodes
+        default: "3"
+        since: "1.0.0"
+        description: >
+          Number of Kafka broker nodes to start.
+      - name: KAFKA_cluster_id
+        default: "y4vRIwfDT0SkZ65tD7Ey2A"
+        since: "1.17.0"
+        description: >
+          Unique base64 UUID identifier for the Kafka cluster. Replace the default
+          with a fresh UUID: docker run confluentinc/cp-kafka kafka-storage random-uuid.
+      - name: KAFKA_internal_replication_factor
+        default: "3"
+        since: "1.6.0"
+        description: >
+          Replication factor for Kafka internal topics.
+      - name: KAFKA_volume_map_data
+        default: "false"
+        since: "1.0.0"
+        description: >
+          Volume map the data folder into the Kafka broker container.
+      - name: KAFKA_use_standard_port_for_external_interface
+        default: "true"
+        since: "1.14.0"
+        description: >
+          Use standard ports 9092–9095 for the external interface. Set to false to
+          use them for the private (docker host) interface instead.
+      - name: KAFKA_delete_topic_enable
+        default: "true"
+        since: "1.0.0"
+        description: >
+          Allow deletion of Kafka topics.
+      - name: KAFKA_auto_create_topics_enable
+        default: "false"
+        since: "1.0.0"
+        description: >
+          Allow automatic creation of topics when a producer or consumer references
+          a non-existent topic.
+      - name: KAFKA_message_timestamp_type
+        default: "CreateTime"
+        since: "1.8.0"
+        allowed_values: [CreateTime, LogAppendTime]
+        description: >
+          Whether the message timestamp reflects the producer create time or the
+          broker log append time.
+      - name: KAFKA_log_dirs
+        default: ""
+        since: "1.17.0"
+        description: >
+          Comma-separated list of directories where log data is stored.
+      - name: KAFKA_log_segment_bytes
+        default: "1073741824"
+        since: "1.8.0"
+        description: >
+          Maximum size of a single log segment file (default 1 GB).
+      - name: KAFKA_log_retention_ms
+        default: ""
+        since: "1.8.0"
+        description: >
+          Milliseconds to retain log files. If not set, log.retention.hours is used.
+          Set to -1 to disable time-based retention.
+      - name: KAFKA_log_retention_hours
+        default: "168"
+        since: "1.8.0"
+        description: >
+          Hours to retain log files (default 7 days). Tertiary to log.retention.ms.
+      - name: KAFKA_log_retention_bytes
+        default: "-1"
+        since: "1.8.0"
+        description: >
+          Maximum total size of the log before deletion. -1 means no size limit.
+      - name: KAFKA_compression_type
+        default: "producer"
+        since: "1.8.0"
+        allowed_values: [producer, uncompressed, gzip, snappy, lz4, zstd]
+        description: >
+          Final compression type for topic data. producer retains the compression
+          set by the producer.
+      - name: KAFKA_min_insync_replicas
+        default: "1"
+        since: "1.8.0"
+        description: >
+          Minimum number of in-sync replicas required when a producer uses acks=all.
+          Writes are rejected if this minimum cannot be met.
+      - name: KAFKA_replica_selector_class
+        default: ""
+        since: "1.8.0"
+        description: >
+          Fully qualified class name implementing ReplicaSelector, used to choose
+          the preferred read replica.
+      - name: KAFKA_log4j_root_level
+        default: "INFO"
+        since: "1.14.0"
+        allowed_values: [TRACE, DEBUG, INFO, WARN, ERROR]
+        description: >
+          Default log4j logging level for the Kafka broker.
+      - name: KAFKA_log4j_loggers
+        default: ""
+        since: "1.14.0"
+        description: >
+          Fine-grained log level overrides, e.g.
+          kafka.controller=TRACE,kafka.request.logger=WARN.
+      - name: KAFKA_tools_log4j_level
+        default: "INFO"
+        since: "1.14.0"
+        allowed_values: [TRACE, DEBUG, INFO, WARN, ERROR]
+        description: >
+          Default log4j logging level for Kafka CLI tools.
+      - name: KAFKA_additional_jars
+        default: ""
+        since: "1.17.0"
+        description: >
+          Comma-separated list of custom JAR names (without .jar extension) to copy
+          to the broker on startup.
+      - name: KAFKA_security_protocol
+        default: "PLAINTEXT"
+        since: "1.17.0"
+        allowed_values: [PLAINTEXT, SASL_PLAINTEXT]
+        description: >
+          Default security protocol for broker communication. Use
+          KAFKA_<listener>_security_protocol to override per listener.
+      - name: KAFKA_sasl_mechanism
+        default: "PLAIN"
+        since: "1.17.0"
+        allowed_values: [PLAIN, SCRAM-SHA-256, SCRAM-SHA-512]
+        description: >
+          Default SASL mechanism for client connections. Use
+          KAFKA_<listener>_sasl_mechanism to override per listener.
+      - name: KAFKA_admin_user
+        default: "admin"
+        since: "1.17.0"
+        description: >
+          Username of the Kafka admin user.
+      - name: KAFKA_admin_password
+        default: "admin-secret"
+        since: "1.17.0"
+        sensitive: true
+        description: >
+          Password of the Kafka admin user.
+      - name: KAFKA_inkless_bucket_name
+        default: "inkless-bucket"
+        since: "1.19.0"
+        applicable_when: "KAFKA_edition == inkless"
+        description: >
+          S3 bucket name used by the inkless (diskless) Kafka edition.
+      - name: KAFKA_inkless_control_plane_type
+        default: "in-memory"
+        since: "1.19.0"
+        applicable_when: "KAFKA_edition == inkless"
+        allowed_values: [in-memory, postgres]
+        description: >
+          Control plane backend for inkless Kafka. Use postgres for persistence
+          (requires POSTGRESQL_enable: true).
+      - name: KAFKA_inkless_control_db_dbname
+        default: "postgres"
+        since: "1.19.0"
+        applicable_when: "KAFKA_inkless_control_plane_type == postgres"
+        description: >
+          PostgreSQL database name for the inkless control plane.
+      - name: KAFKA_inkless_control_db_username
+        default: "postgres"
+        since: "1.19.0"
+        applicable_when: "KAFKA_inkless_control_plane_type == postgres"
+        description: >
+          PostgreSQL username for the inkless control plane.
+      - name: KAFKA_inkless_control_db_password
+        default: "abc123!"
+        since: "1.19.0"
+        sensitive: true
+        applicable_when: "KAFKA_inkless_control_plane_type == postgres"
+        description: >
+          PostgreSQL password for the inkless control plane.
+      - name: KAFKA_confluent_log_placement_constraints
+        default: "{}"
+        since: "1.8.0"
+        applicable_when: "KAFKA_edition == enterprise"
+        description: >
+          JSON object controlling which brokers (replicas) may join the ISR and
+          which are observers. Enterprise edition only.
+      - name: KAFKA_confluent_cluster_link_enabled
+        default: "false"
+        since: "1.17.0"
+        applicable_when: "KAFKA_edition == enterprise"
+        description: >
+          Enable Confluent Cluster Linking.
+      - name: KAFKA_confluent_tier_feature
+        default: "false"
+        since: "1.8.0"
+        applicable_when: "KAFKA_edition == enterprise"
+        description: >
+          Enable Tiered Storage at the broker level.
+      - name: KAFKA_confluent_tier_enabled
+        default: "false"
+        since: "1.8.0"
+        applicable_when: "KAFKA_confluent_tier_feature == true"
+        description: >
+          Allow tiering for topics. All non-compacted topics will use tiered storage.
+      - name: KAFKA_confluent_tier_backend
+        default: "S3"
+        since: "1.8.0"
+        applicable_when: "KAFKA_confluent_tier_feature == true"
+        allowed_values: [S3, GCS]
+        description: >
+          Cloud storage backend for tiered storage.
+      - name: KAFKA_confluent_tier_s3_bucket
+        default: "kafka-logs"
+        since: "1.8.0"
+        applicable_when: "KAFKA_confluent_tier_backend == S3"
+        description: >
+          S3 bucket name for tiered storage data.
+      - name: KAFKA_confluent_tier_s3_prefix
+        default: ""
+        since: "1.8.0"
+        applicable_when: "KAFKA_confluent_tier_backend == S3"
+        description: >
+          Prefix added to all objects written to S3 tiered storage.
+      - name: KAFKA_confluent_tier_s3_region
+        default: "us-east-1"
+        since: "1.8.0"
+        applicable_when: "KAFKA_confluent_tier_backend == S3"
+        description: >
+          AWS region for tiered storage S3 bucket.
+      - name: KAFKA_confluent_tier_s3_aws_endpoint_override
+        default: ""
+        since: "1.8.0"
+        applicable_when: "KAFKA_confluent_tier_backend == S3"
+        description: >
+          Override the S3 endpoint, e.g. when using MinIO as on-premises storage.
+      - name: KAFKA_confluent_tier_s3_force_path_style_access
+        default: "false"
+        since: "1.13.0"
+        applicable_when: "KAFKA_confluent_tier_backend == S3"
+        description: >
+          Force path-style access for all S3 requests. Required for MinIO and other
+          S3-compatible stores that do not support virtual hosted-style access.
+      - name: KAFKA_confluent_tier_local_hotset_bytes
+        default: "-1"
+        since: "1.8.0"
+        applicable_when: "KAFKA_confluent_tier_feature == true"
+        description: >
+          Maximum partition size kept on broker-local storage (hotset) in bytes.
+          -1 means no size limit (only time-based via hotset_ms applies).
+      - name: KAFKA_confluent_tier_local_hotset_ms
+        default: "86400000"
+        since: "1.8.0"
+        applicable_when: "KAFKA_confluent_tier_feature == true"
+        description: >
+          Maximum time (ms) a log segment is kept on broker-local storage before
+          being offloaded to tiered storage (default 1 day). -1 disables the limit.
+      - name: KAFKA_confluent_tier_archiver_num_threads
+        default: "2"
+        since: "1.8.0"
+        applicable_when: "KAFKA_confluent_tier_feature == true"
+        description: >
+          Thread pool size for archiving data to tiered storage and garbage collection.
+      - name: KAFKA_confluent_tier_fetcher_num_threads
+        default: "4"
+        since: "1.8.0"
+        applicable_when: "KAFKA_confluent_tier_feature == true"
+        description: >
+          Thread pool size for fetching data from tiered storage.
+      - name: KAFKA_confluent_tier_topic_delete_check_interval_ms
+        default: "10800000"
+        since: "1.8.0"
+        applicable_when: "KAFKA_confluent_tier_feature == true"
+        description: >
+          Interval (ms) at which tiered storage cleanup runs for deleted topics
+          (default 3 hours).
+      - name: KAFKA_confluent_tier_metadata_replication_factor
+        default: "1"
+        since: "1.8.0"
+        applicable_when: "KAFKA_confluent_tier_feature == true"
+        description: >
+          Replication factor for the internal tier metadata topic. Increase for
+          higher availability.
+      - name: KAFKA_INIT_enable
+        default: "false"
+        since: "1.17.0"
+        description: >
+          Enable the Kafka Init container to automatically create topics on startup.
+
+  - name: RustFS
+    id: rustfs
+    type: engine
+    arch: [x86-64]
+    links:
+      website: https://rustfs.com
+      documentation: https://docs.rustfs.com
+      github: https://github.com/rustfs/rustfs
+    description: >
+      RustFS is an open-source, S3-compatible high-performance object storage system
+      written in Rust, supporting migration and coexistence with other S3-compatible
+      platforms such as MinIO and Ceph.
+    enable:
+      platys_init: RUSTFS
+      example: |
+        platys init --enable-services RUSTFS
+        platys gen
+    usage:
+      - title: Open the RustFS console
+        content: |
+          Navigate to <http://dataplatform:9014>.
+          Log in with the configured `RUSTFS_access_key` and `RUSTFS_secret_key`.
+    parameters:
+      - name: RUSTFS_enable
+        default: "false"
+        since: "1.20.0"
+        description: >
+          Enable RustFS object storage service.
+      - name: RUSTFS_volume_map_data
+        default: "false"
+        since: "1.20.0"
+        description: >
+          Volume map the data folder into the container.
+      - name: RUSTFS_volume_map_logs
+        default: "false"
+        since: "1.20.0"
+        description: >
+          Volume map the logs folder into the container.
+      - name: RUSTFS_access_key
+        default: "admin"
+        since: "1.20.0"
+        description: >
+          S3 access key used to authenticate with RustFS.
+      - name: RUSTFS_secret_key
+        default: "abc123abc123!"
+        since: "1.20.0"
+        sensitive: true
+        description: >
+          S3 secret key used to authenticate with RustFS.
+      - name: RUSTFS_admin_bucket_name
+        default: "admin-bucket"
+        since: "1.20.0"
+        description: >
+          Name of the admin bucket created and used on startup.
+      - name: RUSTFS_buckets
+        default: ""
+        since: "1.20.0"
+        description: >
+          Comma-separated list of additional buckets to create on startup.
+      - name: RUSTFS_console_enabled
+        default: "true"
+        since: "1.20.0"
+        description: >
+          Enable the RustFS web console UI.
+      - name: RUSTFS_upload_data_transfer_to_bucket_enabled
+        default: "false"
+        since: "1.20.0"
+        description: >
+          Upload the contents of the /data-transfer folder into RustFS on container startup.
+          The target bucket is specified in RUSTFS_upload_data_transfer_bucket_name.
+      - name: RUSTFS_upload_data_transfer_bucket_name
+        default: "data-transfer-bucket"
+        since: "1.20.0"
+        applicable_when: "RUSTFS_upload_data_transfer_to_bucket_enabled == true"
+        description: >
+          Name of the bucket to upload /data-transfer contents into.
+      - name: RUSTFS_upload_data_transfer_subfolders
+        default: ""
+        since: "1.20.0"
+        applicable_when: "RUSTFS_upload_data_transfer_to_bucket_enabled == true"
+        description: >
+          Comma-separated list of subfolders within /data-transfer to upload selectively.
+          If empty, everything is uploaded recursively.

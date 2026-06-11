@@ -1,0 +1,115 @@
+name: Apache Hive Metastore
+id: hive-metastore
+type: engine
+arch: [x86-64]
+
+links:
+  website: https://hive.apache.org/
+  documentation: https://cwiki.apache.org/confluence/display/Hive/GettingStarted
+  github: https://github.com/apache/hive
+
+description: >
+  The Hive Metastore (HMS) stores metadata for Apache Hive and other services
+  (Spark, Impala, Trino, Flink) in a backend RDBMS such as PostgreSQL. It acts
+  as the central catalog for table schemas, partitions, and storage locations.
+
+enable:
+  platys_init: HIVE_METASTORE
+  example: |
+    platys init --enable-services HIVE_METASTORE
+    platys gen
+
+usage:
+  - title: Connect to the Hive Metastore CLI
+    content: |
+      ```bash
+      docker exec -ti hive-metastore hive
+      ```
+
+parameters:
+  - name: HIVE_METASTORE_enable
+    default: "false"
+    since: "1.0.0"
+    description: >
+      Enable the Apache Hive Metastore service.
+
+  - name: HIVE_METASTORE_major_version
+    default: "4"
+    since: "1.20.0"
+    allowed_values: ["3", "4"]
+    description: >
+      Major version of the Hive Metastore to deploy.
+
+  - name: HIVE_METASTORE_use_standalone_edition
+    default: "true"
+    since: "1.19.0"
+    applicable_when: "HIVE_METASTORE_major_version == 4"
+    description: >
+      Use the standalone Hive Metastore edition. Only available with version 4.1 or later.
+
+  - name: HIVE_METASTORE_volume_map_data
+    default: "false"
+    since: "1.18.0"
+    description: >
+      Volume map the data folder into the container.
+
+  - name: HIVE_METASTORE_db_type
+    default: "postgres"
+    since: "1.18.0"
+    allowed_values: [derby, postgres]
+    description: >
+      Backend database for storing Hive Metastore metadata. Use derby for an embedded
+      instance (development only) or postgres for a standalone PostgreSQL instance.
+
+  - name: HIVE_METASTORE_db_user
+    default: "hive"
+    since: "1.18.0"
+    applicable_when: "HIVE_METASTORE_db_type == postgres"
+    description: >
+      PostgreSQL username for the Hive Metastore schema.
+
+  - name: HIVE_METASTORE_db_password
+    default: "abc123!"
+    since: "1.18.0"
+    sensitive: true
+    applicable_when: "HIVE_METASTORE_db_type == postgres"
+    description: >
+      PostgreSQL password for the Hive Metastore database user.
+
+  - name: HIVE_METASTORE_db_postgresql_wal_level
+    default: "replica"
+    since: "1.18.0"
+    applicable_when: "HIVE_METASTORE_db_type == postgres"
+    allowed_values: [minimal, replica, logical]
+    description: >
+      PostgreSQL wal_level setting. Set to logical to enable logical replication
+      to another PostgreSQL instance.
+
+  - name: HIVE_METASTORE_transactional_event_listener_enabled
+    default: "false"
+    since: "1.18.0"
+    description: >
+      Enable transactional event listeners on the metastore.
+
+  - name: HIVE_METASTORE_transactional_event_listeners
+    default: ""
+    since: "1.18.0"
+    applicable_when: "HIVE_METASTORE_transactional_event_listener_enabled == true"
+    description: >
+      Comma-separated list of Java classes implementing MetaStoreEventListener.
+      If DbNotificationListener is included, place it last in the list.
+
+  - name: HIVE_METASTORE_transactional_event_listener_configs
+    default: ""
+    since: "1.19.0"
+    applicable_when: "HIVE_METASTORE_transactional_event_listener_enabled == true"
+    description: >
+      Comma-separated list of propertykey=value pairs added as hive-site.xml
+      configuration entries for the transactional event listeners.
+
+  - name: HIVE_METASTORE_plugin_jars
+    default: ""
+    since: "1.19.0"
+    description: >
+      Additional JARs to place on the Hive Metastore classpath. Place the JAR files
+      in the ./plugins/hive-metastore folder of the stack.
