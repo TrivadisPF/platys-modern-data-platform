@@ -5358,7 +5358,7 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {#  KAFKA_enable and KOWL_enable #}
 
-{% if ((KAFKA_enable or external['KAFKA_enable']) and  REDPANDA_CONSOLE_enable) | default(false) %}
+{% if ((KAFKA_enable or external['KAFKA_enable']) and REDPANDA_CONSOLE_enable) | default(false) %}
   #  ================================== Redpanda Console ========================================== #
   redpanda-console:
     image: docker.redpanda.com/redpandadata/console:{{__REDPANDA_CONSOLE_version}}
@@ -8948,7 +8948,7 @@ services:
       HIVE_SITE_CONF_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
       HIVE_SITE_CONF_hive_metastore_uris: thrift://{{ns.hiveMetastore}}
       HIVE_SITE_CONF_hive_metastore_warehouse_dir: s3a://{{s3AdminBucketName}}/warehouse
-      HIVE_SITE_CONF_hive_metastore_warehouse_external_dir: s3a://{{s3AdminBucketName}}/warehouse
+      HIVE_SITE_CONF_hive_metastore_warehouse_external_dir: s3a://{{s3AdminBucketName}}/warehouse/external
   {%elif external['ADLS_enable'] | default(false) %}
       HIVE_SITE_CONF_fs_defaultFS: 'file:///tmp'
       HIVE_SITE_CONF_fs_azure_account_auth_type_gusstorage_dfs_core_windows_net: 'SharedKey'
@@ -8956,6 +8956,7 @@ services:
   {% else %}
       HIVE_SITE_CONF_fs_defaultFS: 'file:///tmp'
       HIVE_SITE_CONF_hive_metastore_warehouse_dir: file:///tmp/hive/warehouse
+      HIVE_SITE_CONF_hive_metastore_warehouse_external_dir: file:///tmp/hive/warehouse/external
   {% endif -%}   {#  HADOOP_enable or MINIO_enable #}
   {% if (HIVE_METASTORE_db_type  | lower)  == 'postgres' | default(false) %}
       HIVE_SITE_CONF_javax_jdo_option_ConnectionURL: jdbc:postgresql://hive-metastore-db/metastore_db
@@ -20881,7 +20882,7 @@ services:
     image: memgraph/memgraph-platform:{{__MEMGRAPH_PLATFORM_version}}
   {% elif (MEMGRAPH_edition | lower) == 'db' and not MEMGRAPH_with_mage | default(false) %}
     image: memgraph/memgraph:{{__MEMGRAPH_version}}
-  {% elif (MEMGRAPH_edition | lower) == 'db' and  MEMGRAPH_with_mage | default(false) %}
+  {% elif (MEMGRAPH_edition | lower) == 'db' and MEMGRAPH_with_mage | default(false) %}
     image: memgraph/memgraph-mage:{{__MEMGRAPH_MAGE_version}}-memgraph{{__MEMGRAPH_version}}
   {% endif %}
     hostname: memgraph
@@ -20921,7 +20922,7 @@ services:
     {% endif -%}   {#  use_timezone #}
   {% if (MEMGRAPH_edition | lower) == 'platform'  %}
     entrypoint: ["/usr/bin/supervisord"]
-  {% elif (MEMGRAPH_edition | lower) == 'db' and  MEMGRAPH_with_mage | default(false) %}
+  {% elif (MEMGRAPH_edition | lower) == 'db' and MEMGRAPH_with_mage | default(false) %}
     entrypoint: ["/usr/lib/memgraph/memgraph", "--log-level=TRACE"]
   {% elif (MEMGRAPH_edition | lower) == 'db' and not MEMGRAPH_with_mage | default(false) %}
     entrypoint: ["/usr/lib/memgraph/memgraph", "--log-level=TRACE"]
@@ -24349,12 +24350,13 @@ services:
     labels:
       com.platys.name: "timescaledb"
       com.platys.description: "Timeseries Database on PostgreSQL"
+      com.platys.password.envvars: "PLATYS_TIMESCALEDB_PASSWORD"
     ports:
       - "5433:5432"
     environment:
-      POSTGRES_PASSWORD: "6AXL3g7}+2G2Kc;"
-      POSTGRES_USER: "timescaledb"
-      POSTGRES_DB: "timescaledb"
+      POSTGRES_PASSWORD: ${PLATYS_TIMESCALEDB_PASSWORD:-{{TIMESCALEDB_password}}}
+      POSTGRES_USER: {{TIMESCALEDB_user | default('timescaledb')}}
+      POSTGRES_DB: {{TIMESCALEDB_db | default('abc123!')}}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -32010,6 +32012,11 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD={{admin_password}}
       - GF_USERS_ALLOW_SIGN_UP=false
       - GF_FEATURE_TOGGLES_ENABLE={{GRAFANA_feature_toggles if GRAFANA_feature_toggles is defined and GRAFANA_feature_toggles and GRAFANA_feature_toggles | length else omit}}
+    {% if TIMESCALEDB_enable | default(false) %}
+      - TIMESCALEDB_USER=${PLATYS_TIMESCALEDB_PASSWORD:-{{TIMESCALEDB_password}}}
+      - TIMESCALEDB_PASSWORD={{TIMESCALEDB_user | default('timescaledb')}}
+      - TIMESCALEDB_DB={{TIMESCALEDB_db | default('abc123!')}}
+    {% endif -%}   {#  TIMESCALEDB_enable #}
     {% if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -32021,7 +32028,7 @@ services:
       - ./scripts/grafana/dashboards/docker/docker_host.json:/etc/grafana/provisioning/dashboards/docker/docker_host.json
       - ./scripts/grafana/dashboards/docker/docker_containers.json:/etc/grafana/provisioning/dashboards/docker/docker_containers.json
     {% endif -%}   {#  (CADVISOR_enable #}
-    {% if (KAFKA_enable or external['KAFKA_enable']) | default(false) %}
+    {% if jmx_monitoring_with_prometheus_enable and (KAFKA_enable or external['KAFKA_enable']) | default(false) %}
       - ./scripts/grafana/dashboards/kafka/confluent-platform{{'-kraft' if KAFKA_use_kraft_mode}}.json:/etc/grafana/provisioning/dashboards/kafka/confluent-platform{{'-kraft' if KAFKA_use_kraft_mode}}.json
       - ./scripts/grafana/dashboards/kafka/kafka-cluster{{'-kraft' if KAFKA_use_kraft_mode}}.json:/etc/grafana/provisioning/dashboards/kafka/kafka-cluster{{'-kraft' if KAFKA_use_kraft_mode}}.json
       - ./scripts/grafana/dashboards/kafka/kafka-topics{{'-kraft' if KAFKA_use_kraft_mode}}.json:/etc/grafana/provisioning/dashboards/kafka/kafka-topics{{'-kraft' if KAFKA_use_kraft_mode}}.json
@@ -32046,72 +32053,76 @@ services:
       - ./scripts/grafana/dashboards/kafka/kafka-streams-rocksdb.json:/etc/grafana/provisioning/dashboards/kafka/kafka-streams-rocksdb.json
       - ./scripts/grafana/dashboards/kafka/OTel_kafkametrics.json:/etc/grafana/provisioning/dashboards/kafka/OTel_kafkametrics.json
     {% endif -%}   {#  (KAFKA_enable or external['KAFKA_enable']) #}
-    {% if KLAG_enable | default(false) %}
+    {% if jmx_monitoring_with_prometheus_enable and KLAG_enable | default(false) %}
       - ./scripts/grafana/dashboards/klag:/etc/grafana/provisioning/dashboards/klag
     {% endif -%}   {#  KLAG_enable #}
-    {% if REDIS_enable | default(false) %}
+    {% if jmx_monitoring_with_prometheus_enable and REDIS_enable | default(false) %}
       - ./scripts/grafana/dashboards/redis:/etc/grafana/provisioning/dashboards/redis
     {% endif -%}   {#  REDIS_enable #}
-    {% if MONGO_enable | default(false) %}
+    {% if jmx_monitoring_with_prometheus_enable and MONGO_enable | default(false) %}
       - ./scripts/grafana/dashboards/mongo:/etc/grafana/provisioning/dashboards/mongo
     {% endif -%}   {#  MONGO_enable #}
-    {% if ELASTICSEARCH_enable | default(false) %}
+    {% if jmx_monitoring_with_prometheus_enable and ELASTICSEARCH_enable | default(false) %}
       - ./scripts/grafana/dashboards/elasticsearch:/etc/grafana/provisioning/dashboards/elasticsearch
     {% endif -%}   {#  ELASTICSEARCH_enable #}
-    {% if NEO4J_enable and (NEO4J_edition | lower) == 'enterprise' | default(false) %}
+    {% if jmx_monitoring_with_prometheus_enable and NEO4J_enable and (NEO4J_edition | lower) == 'enterprise' | default(false) %}
       - ./scripts/grafana/dashboards/neo4j:/etc/grafana/provisioning/dashboards/neo4j
     {% endif -%}   {#  NEO4J_enable #}
-    {% if POSTGRESQL_enable | default(false) %}
+    {% if jmx_monitoring_with_prometheus_enable and POSTGRESQL_enable | default(false) %}
       - ./scripts/grafana/dashboards/postgresql:/etc/grafana/provisioning/dashboards/postgresql
     {% endif -%}   {#  POSTGRESQL_enable #}
-    {% if XTDB_enable | default(false) %}
+    {% if jmx_monitoring_with_prometheus_enable and XTDB_enable | default(false) %}
       - ./scripts/grafana/dashboards/xtdb:/etc/grafana/provisioning/dashboards/xtdb
     {% endif -%}   {#  XTDB_enable #}
     {% if N8N_enable | default(false) %}
       - ./scripts/grafana/dashboards/n8n:/etc/grafana/provisioning/dashboards/n8n
     {% endif -%}   {#  N8N_enable #}
-    {% if NIFI_enable | default(false) %}
+    {% if jmx_monitoring_with_prometheus_enable and NIFI_enable | default(false) %}
       - ./scripts/grafana/dashboards/nifi:/etc/grafana/provisioning/dashboards/nifi
     {% endif -%}   {#  NIFI_enable #}
-    {% if MINIO_enable | default(false) %}
+    {% if jmx_monitoring_with_prometheus_enable and MINIO_enable | default(false) %}
       - ./scripts/grafana/dashboards/minio:/etc/grafana/provisioning/dashboards/minio
     {% endif -%}   {#  MINIO_enable #}
-    {% if AIRFLOW_enable | default(false) %}
+    {% if jmx_monitoring_with_prometheus_enable and AIRFLOW_enable | default(false) %}
       - ./scripts/grafana/dashboards/airflow:/etc/grafana/provisioning/dashboards/airflow
     {% endif -%}   {#  AIRFLOW_enable #}
-    {% if SPARK_enable | default(false) %}
+    {% if jmx_monitoring_with_prometheus_enable and SPARK_enable | default(false) %}
       - ./scripts/grafana/dashboards/spark:/etc/grafana/provisioning/dashboards/spark
     {% endif -%}   {#  SPARK_enable #}
-    {% if RISINGWAVE_enable | default(false) %}
+    {% if jmx_monitoring_with_prometheus_enable and RISINGWAVE_enable | default(false) %}
       - ./scripts/grafana/dashboards/risingwave:/etc/grafana/provisioning/dashboards/risingwave
     {% endif -%}   {#  RISINGWAVE_enable #}
-    {% if FLINK_enable | default(false) %}
+    {% if jmx_monitoring_with_prometheus_enable and FLINK_enable | default(false) %}
       - ./scripts/grafana/dashboards/flink:/etc/grafana/provisioning/dashboards/flink
     {% endif -%}   {#  FLINK_enable #}
-    {% if TRINO_enable | default(false) %}
+    {% if jmx_monitoring_with_prometheus_enable and TRINO_enable | default(false) %}
       - ./scripts/grafana/dashboards/trino:/etc/grafana/provisioning/dashboards/trino
     {% endif -%}   {#  TRINO_enable #}
-    {% if TRINO_LB_enable | default(false) %}
+    {% if jmx_monitoring_with_prometheus_enable and TRINO_LB_enable | default(false) %}
       - ./scripts/grafana/dashboards/trino-lb:/etc/grafana/provisioning/dashboards/trino-lb
     {% endif -%}   {#  TRINO_LB_enable #}
-    {% if METABASE_enable | default(false) %}
+    {% if jmx_monitoring_with_prometheus_enable and METABASE_enable | default(false) %}
       - ./scripts/grafana/dashboards/metabase:/etc/grafana/provisioning/dashboards/metabase
     {% endif -%}   {#  METABASE_enable #}
-    {% if NESSIE_enable | default(false) %}
+    {% if jmx_monitoring_with_prometheus_enable and NESSIE_enable | default(false) %}
       - ./scripts/grafana/dashboards/nessie:/etc/grafana/provisioning/dashboards/nessie
     {% endif -%}   {#  NESSIE_enable #}
-    {% if GRAVITINO_enable | default(false) %}
+    {% if jmx_monitoring_with_prometheus_enable and GRAVITINO_enable | default(false) %}
       - ./scripts/grafana/dashboards/gravitino:/etc/grafana/provisioning/dashboards/gravitino
     {% endif -%}   {#  GRAVITINO_enable #}
-    {% if DATAHUB_enable | default(false) %}
+    {% if jmx_monitoring_with_prometheus_enable and DATAHUB_enable | default(false) %}
       - ./scripts/grafana/dashboards/datahub:/etc/grafana/provisioning/dashboards/datahub
     {% endif -%}   {#  DATAHUB_enable #}
+   
     {% if PROMETHEUS_enable | default(false) %}
       - ./scripts/grafana/datasources/prometheus-datasource.yml:/etc/grafana/provisioning/datasources/prometheus-datasource.yml
     {% endif -%}   {#  PROMETHEUS_enable #}
     {% if INFLUXDB_enable or INFLUXDB2_enable | default(false) %}
       - ./scripts/grafana/datasources/influx-datasource.yml:/etc/grafana/provisioning/datasources/influx-datasource.yml
     {% endif -%}   {#  INFLUXDB_enable or INFLUXDB2_enable #}
+    {% if TIMESCALEDB_enable | default(false) %}
+      - ./scripts/grafana/datasources/timescaledb.yml:/etc/grafana/provisioning/datasources/timescaledb.yml
+    {% endif -%}   {#  TIMESCALEDB_enable #}
     {% if TEMPO_enable | default(false) %}
       - ./scripts/grafana/datasources/tempo-datasource.yml:/etc/grafana/provisioning/datasources/tempo-datasource.yml
     {% endif -%}   {#  TEMPO_enable #}
