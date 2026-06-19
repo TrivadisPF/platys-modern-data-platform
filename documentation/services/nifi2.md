@@ -2,7 +2,7 @@
 
 Apache NiFi supports powerful and scalable directed graphs of data routing, transformation, and system mediation logic.
 
-**[Website](https://nifi.apache.org/)** | **[Documentation](https://nifi.apache.org/documentation/v1/)** | **[GitHub](https://github.com/apache/nifi)**
+**[Website](https://nifi.apache.org/)** | **[Documentation](https://nifi.apache.org/components/)** | **[GitHub](https://github.com/apache/nifi)**
 
 ## How to enable?
 
@@ -36,6 +36,13 @@ as it returns JSON, we can pipe into `jq`
 
 ```bash
 curl -k -H "Authorization: Bearer $TOKEN" 'https://localhost:18080/nifi-api/flow/current-user' | jq
+```
+
+### Export Metrics to Prometheus
+
+```bash
+printf '%s' "$(curl -sk -X POST https://localhost:18083/nifi-api/access/token \
+  -d 'username=nifi&password=<yourpassword>')" > ./security/nifi2/nifi_token
 ```
 
 ### Installing JDBC Driver
