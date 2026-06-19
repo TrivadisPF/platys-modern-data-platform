@@ -12735,15 +12735,16 @@ services:
       - bash
       - -c
       - |
-    {% if NIFI2_volume_map_custom_config %}
-        # this indiretion is needed, to avoid a priviledge error when starting the container
-        cat /tmp/nifi.properties.custom > /opt/nifi/nifi-current/conf/nifi.properties
-    {% endif -%}
-    {%if NIFI2_python_provide_requirements_file  | default(false) %}
-        pip install -r /opt/nifi/nifi-current/requirements.txt
-    {% endif -%}   {#  NIFI2_python_provide_requirements_file #}
-        /tmp/pre-start.sh        
-        ../scripts/start.sh
+          {% if NIFI2_volume_map_custom_config %}
+          # this indiretion is needed, to avoid a priviledge error when starting the container
+          cat /tmp/nifi.properties.custom > /opt/nifi/nifi-current/conf/nifi.properties
+          {% endif %}
+          sed -i 's/nifi.security.user.login.identity.provider.expiration=.*/nifi.security.user.login.identity.provider.expiration=30 days/' /opt/nifi/nifi-current/conf/nifi.properties
+          {%if NIFI2_python_provide_requirements_file  | default(false) %}
+          pip install -r /opt/nifi/nifi-current/requirements.txt
+          {% endif %}   {#  NIFI2_python_provide_requirements_file #}
+          /tmp/pre-start.sh        
+          ../scripts/start.sh
     restart: {{container_restart_policy}}
   {% endfor %}
 {% endif %}   {#  NIFI2_enable  #}
