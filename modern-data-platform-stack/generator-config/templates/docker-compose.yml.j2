@@ -22619,12 +22619,10 @@ services:
       com.platys.webui.url: "http://dataplatform:9090/graph"
       com.platys.restapi.title: "Prometheus Rest API"
       com.platys.restapi.url: "http://dataplatform:9090/api/v1"
-      com.platys.password.envvars: "PLATYS_NIFI2_TOKEN"
     ports:
       - "9090:9090"
-    environment:
-      NIFI_TOKEN: ${PLATYS_NIFI2_TOKEN:-{{PROMETHEUS_nifi2_token | default('')}}}
     {%if use_timezone | default(false) %}
+    environment:
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
@@ -22632,11 +22630,14 @@ services:
     {% if not PROMETHEUS_volume_map_custom_config %}
       - ./conf/prometheus/prometheus-config/prometheus.yml:/etc/prometheus/prometheus.yml
     {% else %}
-      - ./custom-conf/prometheus/prometheus-config/prometheus.yml:/etc/prometheus/prometheus.yml.template
+      - ./custom-conf/prometheus/prometheus-config/prometheus.yml:/etc/prometheus/prometheus.yml
     {% endif -%}
     {% if PROMETHEUS_volume_map_data %}
       - "./container-volume/prometheus:/prometheus"
     {% endif %}
+    {% if NIFI2_enable | default(false) %}
+      - ./security/nifi2/nifi_token:/etc/prometheus/nifi_token:ro
+    {% endif -%}   {#  NIFI2_enable #}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -22644,13 +22645,6 @@ services:
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
-    entrypoint:
-      - /bin/sh
-      - -c
-      - |
-        envsubst < /etc/prometheus/prometheus.yml.template \
-                 > /etc/prometheus/prometheus.yml &&
-        exec /bin/prometheus $$@    
     command:
       - "--config.file=/etc/prometheus/prometheus.yml"
       - "--storage.tsdb.path=/prometheus"
