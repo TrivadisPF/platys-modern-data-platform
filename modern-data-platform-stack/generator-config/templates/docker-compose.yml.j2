@@ -12932,6 +12932,37 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {#  NIFI_TOOLKIT_enable  #}
 
+{%if MINIFI_enable | default(false) %}
+  #  ================================== Apache MiNiFi C++ ========================================== #
+  minifi:
+    image: apache/nifi-minifi-cpp:{{MINIFI_version}}
+    container_name: minifi
+    hostname: minifi
+    labels:
+      com.platys.name: 'minifi'
+      com.platys.description: "Apache MiNiFi C++ Agent"
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if MINIFI_volume_map_config | default(false) %}
+      - ./conf/minifi/config.yml:/opt/minifi/minifi-current/conf/config.yml
+    {% endif -%}   {#  MINIFI_volume_map_config #}
+    {%if MINIFI_volume_map_minifi_properties | default(false) %}
+      - ./conf/minifi/minifi.properties:/opt/minifi/minifi-current/conf/minifi.properties
+    {% endif -%}   {#  MINIFI_volume_map_minifi_properties #}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  MINIFI_enable  #}
+
 {%if N8N_enable | default(false) %}
   #  ================================== n8n ========================================== #
   n8n:

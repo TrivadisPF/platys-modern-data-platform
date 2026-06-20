@@ -28,6 +28,7 @@ See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/plat
  * Moat
  * RustFS
  * Lightdash
+ * Apache MiNiFi C++
  * Minio Aistor
  * Redis MCP
  * Mongo MCP
