@@ -262,6 +262,8 @@ networks:
 {% endif -%}
 {% set __MONITOFI_version = MONITOFI_version | default('latest') -%}
 
+{% set __MINIFI_version = MINIFI_version -%}
+
 {% set __N8N_version = N8N_version | default('latest') -%}
 
 {% set __STREAMPIPES_version = STREAMPIPES_version | default('latest') -%}
@@ -12935,7 +12937,7 @@ services:
 {%if MINIFI_enable | default(false) %}
   #  ================================== Apache MiNiFi C++ ========================================== #
   minifi:
-    image: apache/nifi-minifi-cpp:{{MINIFI_version}}
+    image: apache/nifi-minifi-cpp:{{__MINIFI_version}}
     container_name: minifi
     hostname: minifi
     labels:
@@ -12947,12 +12949,12 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
-    {%if MINIFI_volume_map_config | default(false) %}
-      - ./conf/minifi/config.yml:/opt/minifi/minifi-current/conf/config.yml
-    {% endif -%}   {#  MINIFI_volume_map_config #}
-    {%if MINIFI_volume_map_minifi_properties | default(false) %}
-      - ./conf/minifi/minifi.properties:/opt/minifi/minifi-current/conf/minifi.properties
-    {% endif -%}   {#  MINIFI_volume_map_minifi_properties #}
+    {%if MINIFI_volume_map_custom_config | default(false) %}
+      - ./custom-conf/minifi/config.yml:/opt/minifi/minifi-current/conf/config.yml
+    {% endif -%}   {#  MINIFI_volume_map_custom_config #}
+    {%if MINIFI_volume_map_custom_minifi_properties | default(false) %}
+      - ./custom-conf/minifi/minifi.properties:/opt/minifi/minifi-current/conf/minifi.properties
+    {% endif -%}   {#  MINIFI_volume_map_custom_minifi_properties #}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
