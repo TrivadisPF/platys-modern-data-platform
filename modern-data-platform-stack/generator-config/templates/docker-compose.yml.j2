@@ -7909,7 +7909,13 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
-
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+      
   {% for num in range(FLINK_taskmanagers | default(1) ) %}
 
   flink-taskmanager-{{loop.index}}:
