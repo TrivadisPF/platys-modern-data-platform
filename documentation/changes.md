@@ -13,6 +13,7 @@ See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/plat
 ### Version upgrades
  
  * Update `nifi-toolkit v2` to `2.10.0`
+ * Update `n8n` to `2.28.4`
 
 ### Enhancements
 
