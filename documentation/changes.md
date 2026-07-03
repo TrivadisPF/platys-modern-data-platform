@@ -14,6 +14,7 @@ See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/plat
  
  * Update `nifi-toolkit v2` to `2.10.0`
  * Update `n8n` to `2.28.4`
+ * Update `kestra` to `v1.3`
 
 ### Enhancements
 
@@ -39,6 +40,7 @@ See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/plat
  * CockroachDB
  * Cube.js
  * RisingWave MCP
+ * OpenObserve
 
 ### Version upgrades
 

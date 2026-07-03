@@ -135,6 +135,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 5020 | 5020 | docker-registry |
 5050 | 5050 | zeppelin |
 5051 | 5050 | data-product-portal-nginx |
+5080 | 5080 | openobserve |
 5115 | 5115 | arroyo |
 5173 | 5173 | opik-frontend |
 5432 | 5432 | postgresql |

@@ -400,6 +400,8 @@ networks:
 
 {% set __GRAFANA_version = GRAFANA_version | default('latest') -%}
 
+{% set __OPENOBSERVE_version = OPENOBSERVE_version | default('latest') -%}
+
 {% set __METABASE_version = METABASE_version | default('latest') -%}
 {% set __LIGHTDASH_version = LIGHTDASH_version | default('latest') -%}
 {% set __SUPERSET_version = SUPERSET_version | default('latest') -%}
@@ -32239,6 +32241,50 @@ services:
       timeout: 5s
       retries: 5
 {% endif %}   {#  GRAFANA_enable #}
+
+{% if OPENOBSERVE_enable | default(false) %}
+  #  ================================== OpenObserve ========================================== #
+  openobserve:
+    image: public.ecr.aws/zinclabs/openobserve:{{__OPENOBSERVE_version}}
+    hostname: openobserve
+    container_name: openobserve
+    labels:
+      com.platys.name: "openobserve"
+      com.platys.description: "Cloud-native observability platform for logs, metrics, traces, and analytics"
+      com.platys.webui.title: "OpenObserve UI"
+      com.platys.webui.url: "http://dataplatform:5080"
+    expose:
+      - 5080
+    ports:
+      - "5080:5080"
+    environment:
+      - ZO_ROOT_USER_EMAIL={{OPENOBSERVE_root_user_email | default('root@example.com')}}
+      - ZO_ROOT_USER_PASSWORD={{OPENOBSERVE_root_user_password | default('abc123!')}}
+      - ZO_DATA_DIR=/data
+    {% if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {% if OPENOBSERVE_volume_map_data | default(false) %}  
+      - ./container-volumes/openobserve/data:/data
+    {%endif -%}   {#  OPENOBSERVE_volume_map_data #}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - bash -c 'printf "GET / HTTP/1.1\n\n" > /dev/tcp/127.0.0.1/5080; exit $$?;'
+      interval: 5s
+      timeout: 10s
+      retries: 5
+{% endif %}   {#  OPENOBSERVE_enable #}
 
 {% if ETCD_enable | default(false) %}
   #  ================================== etcd ========================================== #
