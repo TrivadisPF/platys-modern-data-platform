@@ -695,6 +695,11 @@ networks:
 {% set __TAIGA_version = TAIGA_version | default('latest') -%}
 {% set __TASKCAFE_version = TASKCAFE_version | default('latest') -%}
 {% set __FOCALBOARD_version = FOCALBOARD_version | default('latest') -%}
+{% set __ZAMMAD_version = ZAMMAD_version | default('latest') -%}
+{% set __ZAMMAD_elasticsearch_version = ZAMMAD_elasticsearch_version | default('latest') -%}
+{% set __ZAMMAD_memcached_version = ZAMMAD_memcached_version | default('latest') -%}
+{% set __ZAMMAD_postgresql_version = ZAMMAD_postgresql_version | default('latest') -%}
+{% set __ZAMMAD_redis_version = ZAMMAD_redis_version | default('latest') -%}
 
 {% set __CODE_SERVER_version = CODE_SERVER_version | default('latest') -%}
 {% set __EXCALIDRAW_version = EXCALIDRAW_version | default('latest') -%}
@@ -30827,6 +30832,268 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {# FOCALBOARD_enable #}
 
+{% if ZAMMAD_enable | default(false) %}
+  #  ================================== Zammad ========================================== #
+  zammad-railsserver:
+    image: ghcr.io/zammad/zammad:{{__ZAMMAD_version}}
+    container_name: zammad-railsserver
+    hostname: zammad-railsserver
+    labels:
+      com.platys.name: "zammad"
+      com.platys.webui.title: "Zammad UI"
+      com.platys.webui.url: "http://dataplatform:28425"
+    depends_on:
+      zammad-memcached:
+        condition: service_healthy
+      zammad-postgresql:
+        condition: service_healthy
+      zammad-redis:
+        condition: service_healthy
+    environment:
+      - MEMCACHE_SERVERS=zammad-memcached:11211
+      - POSTGRESQL_DB={{ZAMMAD_db_name | default('zammad_production')}}
+      - POSTGRESQL_HOST=zammad-postgresql
+      - POSTGRESQL_USER={{ZAMMAD_db_user | default('zammad')}}
+      - POSTGRESQL_PASS={{ZAMMAD_db_password | default('zammad')}}
+      - POSTGRESQL_PORT=5432
+      - POSTGRESQL_OPTIONS=?pool=50
+      - REDIS_URL=redis://zammad-redis:6379
+      - BACKUP_DIR=/var/tmp/zammad
+      - BACKUP_TIME=03:00
+      - BACKUP_ON_START=true
+      - HOLD_DAYS=10
+    {% if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - zammad-backup:/var/tmp/zammad:ro
+      - zammad-storage:/opt/zammad/storage
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    command: ["zammad-railsserver"]
+    restart: {{container_restart_policy}}
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://127.0.0.1:3000"]
+      interval: 30s
+      timeout: 5s
+      start_period: 120s
+      retries: 3
+
+  zammad-backup:
+    image: ghcr.io/zammad/zammad:{{__ZAMMAD_version}}
+    container_name: zammad-backup
+    hostname: zammad-backup
+    labels:
+      com.platys.name: "zammad"
+    user: 0:0
+    depends_on:
+      zammad-memcached:
+        condition: service_healthy
+      zammad-postgresql:
+        condition: service_healthy
+      zammad-redis:
+        condition: service_healthy
+    environment:
+      - MEMCACHE_SERVERS=zammad-memcached:11211
+      - POSTGRESQL_DB={{ZAMMAD_db_name | default('zammad_production')}}
+      - POSTGRESQL_HOST=zammad-postgresql
+      - POSTGRESQL_USER={{ZAMMAD_db_user | default('zammad')}}
+      - POSTGRESQL_PASS={{ZAMMAD_db_password | default('zammad')}}
+      - POSTGRESQL_PORT=5432
+      - POSTGRESQL_OPTIONS=?pool=50
+      - REDIS_URL=redis://zammad-redis:6379
+      - BACKUP_DIR=/var/tmp/zammad
+      - BACKUP_TIME=03:00
+      - BACKUP_ON_START=true
+      - HOLD_DAYS=10
+    {% if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - zammad-backup:/var/tmp/zammad
+      - zammad-storage:/opt/zammad/storage
+    command: ["zammad-backup"]      
+    restart: {{container_restart_policy}}
+
+  zammad-scheduler:
+    image: ghcr.io/zammad/zammad:{{__ZAMMAD_version}}
+    container_name: zammad-scheduler
+    labels:
+      com.platys.name: "zammad"
+    command: ["zammad-scheduler"]
+    depends_on:
+      zammad-memcached:
+        condition: service_healthy
+      zammad-postgresql:
+        condition: service_healthy
+      zammad-redis:
+        condition: service_healthy
+    environment:
+      - MEMCACHE_SERVERS=zammad-memcached:11211
+      - POSTGRESQL_DB={{ZAMMAD_db_name | default('zammad_production')}}
+      - POSTGRESQL_HOST=zammad-postgresql
+      - POSTGRESQL_USER={{ZAMMAD_db_user | default('zammad')}}
+      - POSTGRESQL_PASS={{ZAMMAD_db_password | default('zammad')}}
+      - POSTGRESQL_PORT=5432
+      - POSTGRESQL_OPTIONS=?pool=50
+      - REDIS_URL=redis://zammad-redis:6379
+      - BACKUP_DIR=/var/tmp/zammad
+      - BACKUP_TIME=03:00
+      - BACKUP_ON_START=true
+      - HOLD_DAYS=10
+    {% if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - zammad-backup:/var/tmp/zammad:ro
+      - zammad-storage:/opt/zammad/storage
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    hostname: zammad-scheduler    
+    restart: {{container_restart_policy}}
+
+  zammad-websocket:
+    image: ghcr.io/zammad/zammad:{{__ZAMMAD_version}}
+    container_name: zammad-websocket
+    hostname: zammad-websocket
+    labels:
+      com.platys.name: "zammad"
+    depends_on:
+      zammad-memcached:
+        condition: service_healthy
+      zammad-postgresql:
+        condition: service_healthy
+      zammad-redis:
+        condition: service_healthy
+    environment:
+      - MEMCACHE_SERVERS=zammad-memcached:11211
+      - POSTGRESQL_DB={{ZAMMAD_db_name | default('zammad_production')}}
+      - POSTGRESQL_HOST=zammad-postgresql
+      - POSTGRESQL_USER={{ZAMMAD_db_user | default('zammad')}}
+      - POSTGRESQL_PASS={{ZAMMAD_db_password | default('zammad')}}
+      - POSTGRESQL_PORT=5432
+      - POSTGRESQL_OPTIONS=?pool=50
+      - REDIS_URL=redis://zammad-redis:6379
+      - BACKUP_DIR=/var/tmp/zammad
+      - BACKUP_TIME=03:00
+      - BACKUP_ON_START=true
+      - HOLD_DAYS=10
+    {% if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - zammad-backup:/var/tmp/zammad:ro
+      - zammad-storage:/opt/zammad/storage
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    command: ["zammad-websocket"]    
+    restart: {{container_restart_policy}}
+
+  zammad-elasticsearch:
+    image: elasticsearch:{{__ZAMMAD_elasticsearch_version}}
+    container_name: zammad-elasticsearch
+    hostname: zammad-elasticsearch
+    labels:
+      com.platys.name: "zammad"
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - ES_JAVA_OPTS=-Xms1g -Xmx1g
+    volumes:
+      - zammad-elasticsearch-data:/usr/share/elasticsearch/data
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+
+  zammad-memcached:
+    image: memcached:{{__ZAMMAD_memcached_version}}
+    container_name: zammad-memcached
+    hostname: zammad-memcached
+    labels:
+      com.platys.name: "zammad"
+    command: memcached -m 256M
+    restart: {{container_restart_policy}}
+    healthcheck:
+      test: ["CMD", "nc", "-z", "127.0.0.1", "11211"]
+      interval: 10s
+      timeout: 5s
+      start_period: 10s
+      retries: 5
+
+  zammad-postgresql:
+    image: postgres:{{__ZAMMAD_postgresql_version}}
+    container_name: zammad-postgresql
+    hostname: zammad-postgresql
+    labels:
+      com.platys.name: "zammad"
+    environment:
+      - POSTGRES_DB={{ZAMMAD_db_name | default('zammad_production')}}
+      - POSTGRES_USER={{ZAMMAD_db_user | default('zammad')}}
+      - POSTGRES_PASSWORD={{ZAMMAD_db_password | default('zammad')}}
+    volumes:
+      - zammad-postgresql-data:/var/lib/postgresql/data
+    restart: {{container_restart_policy}}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U {{ZAMMAD_db_user | default('zammad')}} -d {{ZAMMAD_db_name | default('zammad_production')}}"]
+      interval: 10s
+      timeout: 5s
+      start_period: 60s
+      retries: 5
+
+  zammad-redis:
+    image: redis:{{__ZAMMAD_redis_version}}
+    container_name: zammad-redis
+    hostname: zammad-redis
+    labels:
+      com.platys.name: "zammad"
+    volumes:
+      - zammad-redis-data:/data
+    restart: {{container_restart_policy}}
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      start_period: 10s
+      retries: 5
+
+  zammad-init:
+    image: ghcr.io/zammad/zammad:{{__ZAMMAD_version}}
+    container_name: zammad-init
+    hostname: zammad-init
+    labels:
+      com.platys.name: "zammad"
+    user: 0:0
+    depends_on:
+      zammad-postgresql:
+        condition: service_healthy
+    environment:
+      - MEMCACHE_SERVERS=zammad-memcached:11211
+      - POSTGRESQL_DB={{ZAMMAD_db_name | default('zammad_production')}}
+      - POSTGRESQL_HOST=zammad-postgresql
+      - POSTGRESQL_USER={{ZAMMAD_db_user | default('zammad')}}
+      - POSTGRESQL_PASS={{ZAMMAD_db_password | default('zammad')}}
+      - POSTGRESQL_PORT=5432
+      - POSTGRESQL_OPTIONS=?pool=50
+      - REDIS_URL=redis://zammad-redis:6379
+      - BACKUP_DIR=/var/tmp/zammad
+      - BACKUP_TIME=03:00
+      - BACKUP_ON_START=true
+      - HOLD_DAYS=10
+    {% if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - container-volume/:/var/tmp/zammad:ro
+      - zammad-storage:/opt/zammad/storage
+    command: ["zammad-init"]
+    restart: {{container_restart_policy}}  
+    init: true    
+{% endif %}   {#  ZAMMAD_enable #}
+
 {% if MOCK_SERVER_enable | default(false) %}
   #  ================================== MockServer ========================================== #
   mockserver:
@@ -32267,7 +32534,7 @@ services:
     volumes:
       - ./data-transfer:/data-transfer
     {% if OPENOBSERVE_volume_map_data | default(false) %}  
-      - ./container-volumes/openobserve/data:/data
+      - ./container-volume/openobserve/data:/data
     {%endif -%}   {#  OPENOBSERVE_volume_map_data #}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"

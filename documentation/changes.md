@@ -41,6 +41,7 @@ See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/plat
  * Cube.js
  * RisingWave MCP
  * OpenObserve
+ * Zammad
 
 ### Version upgrades
 

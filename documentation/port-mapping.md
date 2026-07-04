@@ -805,6 +805,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28422 | 8080 | lightdash |
 28423 | 3000 | browserless |
 28424 | 8000 | risingwave-events-api |
+28425 | 8080 | zammad-nginx |
 28242 | 3000 | openlit |
 28243 | 8123 | clickhouse |
 28244 | 9000 | clickhouse |
