@@ -30866,6 +30866,7 @@ services:
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
+      - ./data-transfer:/data-transfer
       - ./container-volume/zammad/backup:/var/tmp/zammad:ro
       - ./container-volume/zammad/storage:/opt/zammad/storage
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
@@ -30911,6 +30912,7 @@ services:
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
+      - ./data-transfer:/data-transfer
       - ./container-volume/zammad/backup:/var/tmp/zammad
       - ./container-volume/zammad/storage:/opt/zammad/storage
     command: ["zammad-backup"]      
@@ -30946,6 +30948,7 @@ services:
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
+      - ./data-transfer:/data-transfer
       - ./container-volume/zammad/backup:/var/tmp/zammad:ro
       - ./container-volume/zammad/storage:/opt/zammad/storage
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
@@ -30984,6 +30987,7 @@ services:
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
+      - ./data-transfer:/data-transfer
       - ./container-volume/zammad/backup:/var/tmp/zammad:ro
       - ./container-volume/zammad/storage:/opt/zammad/storage
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
@@ -31003,7 +31007,8 @@ services:
       - xpack.security.enabled=false
       - ES_JAVA_OPTS=-Xms1g -Xmx1g
     volumes:
-      - zammad-elasticsearch-data:/usr/share/elasticsearch/data
+      - ./data-transfer:/data-transfer
+      - ./container-volume/zammad/elasticsearch:/usr/share/elasticsearch/data
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
@@ -31035,7 +31040,8 @@ services:
       - POSTGRES_USER={{ZAMMAD_db_user | default('zammad')}}
       - POSTGRES_PASSWORD={{ZAMMAD_db_password | default('zammad')}}
     volumes:
-      - zammad-postgresql-data:/var/lib/postgresql/data
+      - ./data-transfer:/data-transfer
+      - ./container-volume/zammad/postgresql:/var/lib/postgresql/data
     restart: {{container_restart_policy}}
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U {{ZAMMAD_db_user | default('zammad')}} -d {{ZAMMAD_db_name | default('zammad_production')}}"]
@@ -31051,7 +31057,8 @@ services:
     labels:
       com.platys.name: "zammad"
     volumes:
-      - zammad-redis-data:/data
+      - ./data-transfer:/data-transfer
+      - ./container-volume/zammad/redis:/data
     restart: {{container_restart_policy}}
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
@@ -31087,8 +31094,9 @@ services:
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
-      - container-volume/:/var/tmp/zammad:ro
-      - zammad-storage:/opt/zammad/storage
+      - ./data-transfer:/data-transfer
+      - ./container-volume/zammad/backup:/var/tmp/zammad:ro
+      - ./container-volume/zammad/storage:/opt/zammad/storage
     command: ["zammad-init"]
     restart: {{container_restart_policy}}  
     init: true    
