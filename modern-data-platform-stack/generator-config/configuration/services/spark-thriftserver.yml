@@ -1,0 +1,81 @@
+name: Spark Thriftserver
+id: spark-thriftserver
+category:
+  id: 05_engine
+  name: engine
+  color: blue
+arch: [x86-64]
+
+links:
+  website: https://spark.apache.org/
+  documentation: https://spark.apache.org/docs/latest/sql-distributed-sql-engine.html#running-the-thrift-jdbcodbc-server
+  github: https://github.com/apache/spark/tree/master/sql/hive-thriftserver
+
+description: >
+  Thrift JDBC/ODBC Server (aka Spark Thrift Server or STS) is Spark SQL’s port
+  of Apache Hive’s HiveServer2 that allows JDBC/ODBC clients to execute SQL
+  queries over JDBC and ODBC protocols on Apache Spark.
+
+enable:
+  platys_init: SPARK,SPARK_THRIFTSERVER
+  example: |
+    platys init --enable-services SPARK,SPARK_THRIFTSERVER
+    platys gen
+
+usage:
+  - title: Usage
+    content: |
+      Navigate to <http://dataplatform:28298> to view the Thriftserver UI.
+  - title: Connect with Beeline
+    content: |
+      Start beeline
+      
+      ```bash
+      docker exec -ti spark-thriftserver /spark/bin/beeline
+      ```
+      
+      and connect to Spark Thrift Server (enter blank for username and password)
+      
+      ```bash
+      !connect jdbc:hive2://spark-thriftserver:10000
+      ```
+  - title: Connect with JDBC
+    content: |
+      Download Hive JDBC Driver 3.1.2 (standalone) from [here](https://repo.maven.apache.org/maven2/org/apache/hive/hive-jdbc/3.1.2/hive-jdbc-3.1.2-standalone.jar).
+      
+      Use `jdbc:hive2://dataplatform:28118` (external) or `jdbc:hive2://spark-thriftserver:10000` (internal) for the JDBC URL and use `org.apache.hive.jdbc.HiveDriver` for the class name.
+
+parameters:
+  - name: SPARK_THRIFTSERVER_enable
+    default: "false"
+    since: "1.0.0"
+    description: >
+      Generate Spark Thrift Server
+
+  - name: SPARK_THRIFTSERVER_use_local_spark
+    default: "false"
+    since: "1.18.0"
+    description: >
+      Enable local spark environment within the Spark Thrift Server.
+
+  - name: SPARK_THRIFTSERVER_cores_max
+    default: ""
+    since: "1.16.0"
+    description: >
+      the maximum amount of CPU cores to request for the application from across
+      the cluster (not from each machine). If not set, the default will be
+      `spark.deploy.defaultCores` to be set through `SPARK_MASTER_OPTS`.
+
+  - name: SPARK_THRIFTSERVER_executor_memory
+    default: ""
+    since: "1.16.0"
+    description: >
+      Amount of memory to use per executor process, in the same format as JVM
+      memory strings with a size unit suffix ('k', 'm', 'g' or 't') (e.g. 512m,
+      2g). If not set, the default will be `1g`.
+
+  - name: SPARK_THRIFTSERVER_default_catalog
+    default: ""
+    since: "1.20.0"
+    description: >
+      The catalog to use.

@@ -1,0 +1,155 @@
+name: Redis
+id: redis
+category:
+  id: 09_storage
+  name: storage
+  color: purple
+arch: [x86-64, arm]
+
+links:
+  website: https://redis.io/
+  documentation: https://redis.io/documentation
+  github: https://github.com/redis/redis
+
+description: >
+  Redis is an in-memory database that persists on disk. The data model is
+  key-value, but many different kind of values are supported: Strings, Lists,
+  Sets, Sorted Sets, Hashes, Streams, HyperLogLogs, Bitmaps.
+
+enable:
+  platys_init: REDIS
+  example: |
+    platys init --enable-services REDIS
+    platys gen
+
+usage:
+  - title: Usage
+    content: |
+      To connect to Redis over the Redis-CLI, use
+      
+      ```
+      docker exec -ti redis-1 redis-cli
+      ```
+
+parameters:
+  - name: REDIS_enable
+    default: "false"
+    since: "1.0.0"
+    description: >
+      Generate Redis service
+
+  - name: REDIS_edition
+    default: "redis"
+    since: "1.18.0"
+    description: >
+      Specify the Redis edition, either `redis` (for the original Redis service)
+      or `valkey` (for Valkey, an fork of Redis with an open source license).
+      Using this option allow to use Valkey as a drop-in replacement for Redis.
+      An alternative is to use `VALKEY_enable` to have the option to run both
+      Redis and Valkey side-by-side.
+
+  - name: REDIS_replicasets
+    default: "0"
+    since: "1.9.0"
+    description: >
+      The number of replica instances to generate.
+
+  - name: REDIS_volume_map_data
+    default: "false"
+    since: "1.9.0"
+    description: >
+      Volume map data folder into the Redis service
+
+  - name: REDIS_allow_empty_password
+    default: "true"
+    since: "1.9.0"
+    sensitive: true
+    description: >
+      Allow access the database without a password?.
+
+  - name: REDIS_password
+    default: ""
+    since: "1.9.0"
+    sensitive: true
+    description: >
+      Set the Redis server password, only used if `REDIS_allow_empty_password` is
+      set to `false`. Alternative to setting it via `REDIS_password_file`.
+
+  - name: REDIS_password_file
+    default: ""
+    since: "1.17.0"
+    sensitive: true
+    description: >
+      The name of a password file in `./security/redis/` which holds the Redis
+      server password. Only used if `REDIS_allow_empty_password` is set to
+      `false`. Alternative to setting it via `REDIS_password`.
+
+  - name: REDIS_aclfile
+    default: ""
+    since: "1.17.0"
+    description: >
+      The name of an ACL file available in `./security/redis/` where the Redis
+      access control lists, to control which commands can be executed and what
+      keys can be accessed.
+
+  - name: REDIS_disable_commands
+    default: ""
+    since: "1.9.0"
+    description: >
+      Comma-separated list of Redis commands to disable. Defaults to empty.
+
+  - name: REDIS_aof_enabled
+    default: "true"
+    since: "1.17.0"
+    description: >
+      Use the Append Only File persistence. If set to `false` will disable it.
+
+  - name: REDIS_rdb_enabled
+    default: "false"
+    since: "1.17.0"
+    description: >
+      Use the RDB persistence? If set to `false`, it is disabled, and
+      `REDIS_rdb_save_policy` will have no effect.
+
+  - name: REDIS_rdb_save_policy
+    default: ""
+    since: "1.17.0"
+    description: >
+      The data synchronization strategy, a space delimited list of key-value
+      pairs in the form of `nof-seconds#nof-changes`. So for example `60#1000
+      30#2000` will dump the data to disk every 60 seconds if at least 1000 keys
+      have changed and ever 30 seconds if at least 2000 keys have changed.
+
+  - name: REDIS_io_threads
+    default: ""
+    since: "1.17.0"
+    description: >
+      The number of I/O threads to use in Redis, to divert from the normally
+      single-threaded operation mode of Redis. Available since Redis 6.0. By
+      default multi-threading is disabled, set this parameter to anything > 1 to
+      enable it.
+
+  - name: REDIS_io_threads_do_reads_enabled
+    default: "false"
+    since: "1.17.0"
+    description: >
+      Usually threading reads does not help much. Set this to `true` to enable
+      threading reads.
+
+  - name: REDIS_overrides_config_file
+    default: ""
+    since: "1.17.0"
+    description: >
+      The name of an overrides file available in `./custom-conf/redis/`
+      containing only the settings you wish to override. Can be combined with the
+      other specific settings available above but be careful to not override a
+      value set through the specific configs.
+
+  - name: REDIS_log_level
+    default: "notice"
+    since: "1.17.0"
+    description: >
+      Specify the server verbosity level, one of `nothing` (no logging),
+      `warning` (only very important, critical messages are logged), `notice`
+      (moderately verbose, what you want for production), `verbose` (many rarely
+      useful info, less verbose than debug) and `debug`.

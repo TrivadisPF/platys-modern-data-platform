@@ -1,0 +1,138 @@
+name: Jikkou
+id: jikkou
+category:
+  id: 05_engine
+  name: engine
+  color: blue
+arch: [x86-64]
+
+links:
+  website: https://streamthoughts.github.io/jikkou/
+  documentation: https://streamthoughts.github.io/jikkou/docs/
+  github: https://github.com/streamthoughts/jikkou
+
+description: >
+  A command-line tool to help you automate the management of the configurations
+  that live on your Apache Kafka clusters.
+
+enable:
+  platys_init: JIKKOU
+  example: |
+    platys init --enable-services JIKKOU
+    platys gen
+
+usage:
+  - title: Usage
+    content: |
+      Place desired state of Kafka Topics, ACLs, or Quotas into the `./scripts/jikkou/topic-specs.yml` file.
+      
+      Here a sample of a `topic-specs.yml` file
+      
+      ```yaml
+      version: 1
+      specs:
+        topics:
+        - name: 'my-first-topic-with-jikkou'
+          partitions: 12
+          replication_factor: 3
+          configs:
+            min.insync.replicas: 2
+      ```
+      
+      The file is applied the first time you start the stack using `docker-compose up -d` as well as anytime you apply the `docker-compose up -d` on an already running stack, where it will apply the necessary changes to get from the current to the desired state (if you have changed the topic-specs.yml file).
+
+parameters:
+  - name: JIKKOU_enable
+    default: "false"
+    since: "1.14.0"
+    description: >
+      Generate Jikkou service
+
+  - name: JIKKOU_exclude_resources_regexp
+    default: ""
+    since: "1.14.0"
+    description: >
+      Use `exclude` option specify a regex patterns to use for excluding
+      resources, when running the Jikkou tool.
+
+  - name: JIKKOU_include_resources_regexp
+    default: ""
+    since: "1.14.0"
+    description: >
+      Use `include` option specify a regex patterns to use for including
+      resources, when running the Jikkou tool.
+
+  - name: JIKKOU_set_labels
+    default: ""
+    since: "1.14.0"
+    description: >
+      A comma separated list of `key=value` pairs, one for each label to set.
+
+  - name: JIKKOU_set_values
+    default: ""
+    since: "1.14.0"
+    description: >
+      A comma separated list of `key=value` pairs, one for each value to set.
+
+  - name: JIKKOU_output_format
+    default: ""
+    since: "1.18.0"
+    description: >
+      the output format to use, allowed values are `text`, `compact`, `json`,
+      `yaml`.
+
+  - name: JIKKOU_logger_level
+    default: ""
+    since: "1.18.0"
+    description: >
+      Specify the log level verbosity to be used while running a command. Valid
+      level values are: `TRACE`, `DEBUG`, `INFO`, `WARN`, `ERROR`.
+
+  - name: JIKKOU_kafka_brokers_wait_for_enabled
+    default: "true"
+    since: "1.16.0"
+    description: >
+      Wait for kafka brokers to be available.
+
+  - name: JIKKOU_kafka_brokers_wait_for_min_available_enabled
+    default: "true"
+    since: "1.17.0"
+    description: >
+      Wait for the total number of Kafka brokers (value of `KAFKA_broker_nodes`)
+      to be available.
+
+  - name: JIKKOU_kafka_brokers_wait_for_retry_backoff_ms
+    default: "10000"
+    since: "1.17.0"
+    description: >
+      The amount of time to wait before verifying that brokers are available.
+
+  - name: JIKKOU_kafka_brokers_wait_for_timeout_ms
+    default: "120000"
+    since: "1.16.0"
+    description: >
+      Wait until brokers are available or this timeout is reached.
+
+  - name: JIKKOU_validation_default_topic_name_regex
+    default: "[a-zA-Z0-9\\._\\-]+"
+    since: "1.17.0"
+    description: >
+      The regex to use to validate the topic name against.
+
+  - name: JIKKOU_validation_default_topic_min_num_partitions
+    default: "1"
+    since: "1.17.0"
+    description: >
+      The minimum number of partitions to use when creating a topic.
+
+  - name: JIKKOU_validation_default_topic_min_replication_factor
+    default: "1"
+    since: "1.17.0"
+    description: >
+      The minimum number of replicas to use when creating a topic.
+
+  - name: JIKKOU_SERVER_enable
+    default: "false"
+    since: "1.18.0"
+    description: >
+      Generate Jikkou API server service

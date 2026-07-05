@@ -1,0 +1,69 @@
+name: Confluent Schema Registry
+id: schema-registry
+category:
+  id: 05_engine
+  name: engine
+  color: blue
+arch: [x86-64]
+
+links:
+  website: https://docs.confluent.io/1.0/schema-registry/docs/intro.html
+  documentation: https://docs.confluent.io/1.0/schema-registry/docs/intro.html
+  github: https://github.com/confluentinc/schema-registry
+
+description: >
+  Confluent Schema Registry for Kafka
+
+enable:
+  platys_init: SCHEMA_REGISTRY
+  example: |
+    platys init --enable-services SCHEMA_REGISTRY
+    platys gen
+
+usage:
+  - title: Uploading a Schema via script
+    content: |
+      using `curl`
+      
+      ```bash
+      export TOPIC=topicName
+      export SCHEMA=$(jq tostring $TOPIC-value.avsc)
+      
+      echo "{\"schema\":$SCHEMA}"
+      
+      curl -XPOST -H "Content-Type:application/json" -d"{\"schema\":$SCHEMA}" http://dataplatform:8081/subjects/$TOPIC-value/versions
+      ```
+      
+      using `httpie`
+      
+      ```bash
+      export TOPIC=topicName
+      http -v POST :8081/subjects/example.with-schema.user-value/versions \
+        Accept:application/vnd.schemaregistry.v1+json \
+        schema=@avro/src/main/avro/user.avsc
+      ```
+  - title: Downloading a schema (for a subject) from schema registry
+    content: |
+      using `curl`
+      
+      ```bash
+      export TOPIC=topicName
+      curl http://dataplatfor:8081/subjects/$TOPIC-value/versions/latest | jq -r '.schema|fromjson' > $TOPIC-value.avsc
+      ```
+      
+      using `httpie`
+      
+      
+      ```bash
+      export TOPIC=topicName
+      http http://dataplatform:8081/subjects/$TOPIC-value/versions/latest \
+        | jq -r '.schema|fromjson' \
+        > $TOPIC-value.avsc
+      ```
+
+parameters:
+  - name: SCHEMA_REGISTRY_enable
+    default: "false"
+    since: "1.0.0"
+    description: >
+      Enable Confluent Schema Registry.

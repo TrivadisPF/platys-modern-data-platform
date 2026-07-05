@@ -1,0 +1,109 @@
+name: Ofelia
+id: ofelia
+category:
+  id: 06_integration
+  name: integration
+  color: orange
+arch: [x86-64, arm]
+
+links:
+  documentation: https://github.com/mcuadros/ofelia
+  github: https://github.com/mcuadros/ofelia
+
+description: >
+  A docker job scheduler (aka. crontab for docker).
+
+enable:
+  platys_init: OFELIA
+  example: |
+    platys init --enable-services OFELIA
+    platys gen
+
+usage:
+  - title: Usage
+    content: |
+      you can also add it to any existing service, by adding labels using an override file:
+      
+      `docker-compose.override.yml`
+      
+      ```yml
+      services:
+        minio-mc:
+          labels:
+            ofelia.enabled: "true"
+            ofelia.job-exec.disk-usage.schedule: "@every 1m"
+            ofelia.job-exec.disk-usage.command: "mc du --depth=2 minio-1/"
+      ```
+      
+      See this cookbook recipe for more working examples.
+
+parameters:
+  - name: OFELIA_enable
+    default: "false"
+    since: "1.18.0"
+    description: >
+      Generate Ofelia service
+
+  - name: OFELIA_job_name
+    default: ""
+    since: "1.18.0"
+    description: >
+      Name of the job to run (do not use space, only `a-z` and the `-`) inside
+      Ofelia service. If set to a value, then `OFELIA_job_type`,
+      `OFELIA_job_schedule` and `OFELIA_job_command` as well as the other
+      relevant settings have to be set.
+
+  - name: OFELIA_job_type
+    default: "job-exec"
+    since: "1.18.0"
+    description: >
+      The job type, either `job-exec` (runs job inside a running container
+      specified by `OFELIA_job_container`), `job-run` (runs job in a new
+      container, using the `OFELIA_job_image`) or `job-local` (runs the command
+      in the ofelia service).
+
+  - name: OFELIA_job_command
+    default: ""
+    since: "1.18.0"
+    description: >
+      The command to execute.
+
+  - name: OFELIA_job_schedule
+    default: ""
+    since: "1.18.0"
+    description: >
+      The schedule to apply, use the Scheduling format of the Go implementation
+      of `crontab`. E.g. `@every 10s` or `0 0 1 * * *` (every night at 1 AM).
+
+  - name: OFELIA_job_container
+    default: ""
+    since: "1.18.0"
+    description: >
+      The name of the existing container to run the command on, if
+      `OFELIA_job_type` is `job-exec`.
+
+  - name: OFELIA_job_image
+    default: ""
+    since: "1.18.0"
+    description: >
+      The name of the image to start a new container, if `OFELIA_job_type` is
+      `job-run`.
+
+  - name: OFELIA_job_network
+    default: ""
+    since: "1.18.0"
+    description: >
+      The docker network, where the services are running on.
+
+  - name: OFELIA_log_to_folder
+    default: "false"
+    since: "1.18.0"
+    description: >
+      Log the output to the `/var/log/` folder?
+
+  - name: OFELIA_env_variables
+    default: ""
+    since: "1.18.0"
+    description: >
+      A comma-separated list of key-value pairs to setup as environment variable
+      in the ofelia service: `=,=`.

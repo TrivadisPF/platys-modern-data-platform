@@ -1,0 +1,62 @@
+name: JanusGraph
+id: janusgraph
+category:
+  id: 09_storage
+  name: storage
+  color: purple
+arch: [x86-64]
+
+links:
+  website: https://janusgraph.org/
+  documentation: https://docs.janusgraph.org/
+  github: https://github.com/janusgraph/janusgraph/
+
+description: >
+  ```bash platys init --enable-services JANUSGRAPH platys gen ```
+
+enable:
+  platys_init: JANUSGRAPH
+  example: |
+    platys init --enable-services JANUSGRAPH
+    platys gen
+
+usage:
+  - title: Using the Gremlin Console
+    content: |
+      To start a gremlin console
+      
+      ```bash
+      docker-compose -f docker-compose.yml run --rm \
+          -e GREMLIN_REMOTE_HOSTS=janusgraph-1 janusgraph-1 ./bin/gremlin.sh    
+      ```
+      
+      ```groovy
+      :remote connect tinkerpop.server conf/remote.yaml
+      g = traversal().withRemote('conf/remote-graph.properties')
+      g.addV('demigod').property('name', 'hercules').iterate()    
+      g.V()
+      ```
+  - title: Initialise JanusGraph
+    content: |
+      When the container is started it will execute files with the extension `.groovy` that are found in `./init/janusgraph/` with the Gremlin Console. These scripts are only executed after the JanusGraph Server instance was started. So, they can connect to it and execute Gremlin traversals.
+      
+      For example, to add a vertex to the graph, create a file `./init/janusgraph/add-vertex.groovy` with the following content
+      
+      ```groovy
+      g = traversal().withRemote('conf/remote-graph.properties')
+      g.addV('demigod').property('name', 'hercules').iterate()
+      ```
+
+parameters:
+  - name: JANUSGRAPH_enable
+    default: "false"
+    since: "1.16.0"
+    description: >
+      Generate JanusGraph service
+
+  - name: JANUSGRAPH_props_template
+    default: "berkeleyje"
+    since: "1.16.0"
+    description: >
+      JanusGraph properties file template to use, one of `berkeleyje`,
+      `berkeleyje-es`, `berkeleyje-lucene`, `cql-es`, `cql`, `inmemory`.

@@ -1,0 +1,183 @@
+name: Apache Flink
+id: flink
+category:
+  id: 05_engine
+  name: engine
+  color: blue
+arch: [x86-64, arm]
+
+links:
+  website: https://flink.apache.org/
+  documentation: https://nightlies.apache.org/flink/flink-docs-master/
+  github: https://github.com/apache/flink
+
+description: >
+  Apache Flink is a framework and distributed processing engine for stateful
+  computations over unbounded and bounded data streams. Flink has been designed
+  to run in all common cluster environments perform computations at in-memory
+  speed and at any scale.
+
+enable:
+  platys_init: FLINK
+  example: |
+    platys init --enable-services FLINK
+    platys gen
+
+usage:
+  - title: Usage
+    content: |
+      Navigate to <http://dataplatform:28237>
+      
+      To connect to the CLI use 
+      
+      ```bash
+      docker exec -ti flink-sql-cli ./bin/sql-client.sh
+      ```
+  - title: Automatically download dependencies
+    content: |
+      you can specify maven and github release dependencies using `FLINK_install_maven_dep` and `FLINK_install_file_dep` config setting.
+      
+      For example to download from maven repository using a maven coordinate:
+      
+      ```yaml
+      FLINK_install_maven_dep: 'org.apache.flink:flink-sql-connector-kafka:3.4.0-1.20'
+      ```
+      
+      and to download an artefact from Github release page (specify it in the format `"<owner>:<project>:<version>:<artefact-name>`):
+      
+      ```yaml
+      FLINK_install_file_dep: 'knaufk:flink-faker:v0.5.3:flink-faker-0.5.3.jar'
+      ```
+      
+      You can specify multiple dependencies comma separated.
+
+parameters:
+  - name: FLINK_enable
+    default: "false"
+    since: "1.13.0"
+    description: >
+      Generate Flink services
+
+  - name: FLINK_base_version
+    default: "1.20"
+    since: "1.19.0"
+    description: >
+      The flink base version to use, either `1.20` or `2.1` or `2.2`.
+
+  - name: FLINK_java_version
+    default: "17"
+    since: "1.19.0"
+    description: >
+      The java version to use, either `11` or `17` or `21` (if Flink 2.x is
+      used).
+
+  - name: FLINK_deployment_mode
+    default: "session"
+    since: "1.16.0"
+    description: >
+      The Flink deployment mode, either `session` or `application`.
+
+  - name: FLINK_taskmanagers
+    default: "1"
+    since: "1.13.0"
+    description: >
+      number of Flink TaskManager nodes
+
+  - name: FLINK_taskmanagers_memory_process_size
+    default: "1728m"
+    since: "1.20.0"
+    description: >
+      Total process memory size for each TaskManager. Includes JVM heap, managed
+      memory, network buffers, and overhead. Use suffixes `m` (MB) or `g` (GB).
+
+  - name: FLINK_state_backend_type
+    default: "hashmap"
+    since: "1.19.0"
+    description: >
+      The Flink state backend to use, either `hashmap` or `rocksdb`.
+
+  - name: FLINK_state_checkpoints_dir
+    default: "file:///tmp/flink-checkpoints"
+    since: "1.19.0"
+    description: >
+      Directory for checkpointing filesystem. Use prefix `file:///` for local
+      filesystem or `s3://` for remote S3 filesystem.
+
+  - name: FLINK_state_savepoints_dir
+    default: "file:///tmp/flink-savepoints"
+    since: "1.19.0"
+    description: >
+      Directory for savepointing filesystem. Use prefix `file:///` for local
+      filesystem or `s3://` for remote S3 filesystem.
+
+  - name: FLINK_catalog_store_kind
+    default: "generic_in_memory"
+    since: "1.19.0"
+    description: >
+      Catalog Store is used to store the configuration of catalogs. When using
+      Catalog Store, the configurations of catalogs created in the session will
+      be persisted in the corresponding external system of Catalog Store. Either
+      `generic_in_memory` for in-memory or `file` to store in `./conf/catalogs`.
+
+  - name: FLINK_enable_build_in_plugins
+    default: ""
+    since: "1.16.0"
+    description: >
+      enable plugins provided with Flink. Should contain a list of plugin jar
+      file names separated by `;`. A valid plugin name is for example
+      `flink-s3-fs-hadoop-1.15.4.jar`.
+
+  - name: FLINK_install_maven_dep
+    default: ""
+    since: "1.16.0"
+    description: >
+      a comma separated list of maven dependencies to download to
+      `/opt/flink/lib`. Specify the maven coordinates like
+      `group:artefact:version`, will download transitive dependencies.
+
+  - name: FLINK_install_file_dep
+    default: ""
+    since: "1.16.0"
+    description: >
+      a comma separated list of files to download to `/opt/flink/lib`.
+
+  - name: FLINK_additional_plugins
+    default: ""
+    since: "1.19.0"
+    description: >
+      provide a comma-separated list of additional plugins (name of the JAR) to
+      make available to Flink. Place the plugin JAR into `./plugins/flink`. A
+      plugin can be a custom UDF.
+
+  - name: FLINK_python_enabled
+    default: "false"
+    since: "1.18.0"
+    description: >
+      Use a Flink image with a Python installation?
+
+  - name: FLINK_python_provide_requirements_file
+    default: "false"
+    since: "1.18.0"
+    description: >
+      Copy the file `./custom-conf/flink/requirements.txt` file with additional
+      python dependencies into the container?
+
+  - name: FLINK_python_version
+    default: "3.10"
+    since: "1.18.0"
+    description: >
+      The Python version to use. Currently `3.10` is the only one supported.
+
+  - name: FLINK_volume_map_flink_distro
+    default: "false"
+    since: "1.18.0"
+    description: >
+      Volume map the Flink distribution folder to the outside to be used in
+      Zeppelin. Be careful if you enable it as it will be a named volume which is
+      not automatically removed when removing the docker compose stack.
+
+  - name: FLINK_SQL_CLI_enable
+    default: "false"
+    since: "1.13.0"
+    description: >
+      Generate Flink SQL CLI service

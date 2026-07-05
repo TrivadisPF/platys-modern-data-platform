@@ -1,0 +1,80 @@
+name: Browserless
+id: browserless
+category:
+  id: 19_tools
+  name: tools
+  color: silver
+arch: [x86-64]
+
+links:
+  website: https://www.browserless.io/
+  documentation: https://docs.browserless.io/
+  github: https://github.com/browserless/browserless
+
+description: >
+  Browserless is a headless browser service that runs Chromium in a Docker
+  container, exposing it over HTTP. It provides REST APIs and WebSocket
+  endpoints compatible with Puppeteer, Playwright, and Selenium, making it
+  ideal for web scraping, PDF generation, screenshot capture, and automated
+  browser testing.
+
+enable:
+  platys_init: BROWSERLESS
+  example: |
+    platys init --enable-services BROWSERLESS
+    platys gen
+
+usage:
+  - title: Usage
+    content: |
+      Navigate to <http://dataplatform:28423> for the built-in UI (API playground and debugger).
+  - title: REST API examples
+    content: |
+      **Take a screenshot:**
+      ```bash
+      curl -X POST http://dataplatform:28423/screenshot \
+        -H 'Content-Type: application/json' \
+        -d '{"url": "https://example.com"}' \
+        --output screenshot.png
+      ```
+      
+      **Generate a PDF:**
+      ```bash
+      curl -X POST http://dataplatform:28423/pdf \
+        -H 'Content-Type: application/json' \
+        -d '{"url": "https://example.com"}' \
+        --output page.pdf
+      ```
+      
+      **Puppeteer / Playwright connection:**
+      ```javascript
+      const browser = await puppeteer.connect({
+        browserWSEndpoint: 'ws://dataplatform:28423'
+      });
+      ```
+      
+      When a token is set, append it as a query parameter:
+      ```
+      ws://dataplatform:28423?token=my-secret-token
+      ```
+
+parameters:
+  - name: BROWSERLESS_enable
+    default: "false"
+    since: "1.20.0"
+    description: >
+      Generate Browserless service
+
+  - name: BROWSERLESS_browser_type
+    default: "chromium"
+    since: "1.20.0"
+    description: >
+      Which browser type to run, either chromium` or `chrome` or 'firefox' or
+      `webkit`.
+
+  - name: BROWSERLESS_token
+    default: ""
+    since: "1.20.0"
+    sensitive: true
+    description: >
+      The token to use, if empty then no token is needed.

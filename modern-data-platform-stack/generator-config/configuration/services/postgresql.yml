@@ -1,0 +1,146 @@
+name: PostgreSQL
+id: postgresql
+category:
+  id: 09_storage
+  name: storage
+  color: purple
+arch: [x86-64, arm]
+
+links:
+  website: http://www.postgresql.org
+  documentation: https://www.postgresql.org/docs/
+  github: https://github.com/postgres/postgres
+
+description: >
+  PostgreSQL is a powerful, open source object-relational database system with
+  over 30 years of active development that has earned it a strong reputation
+  for reliability, feature robustness, and performance.
+
+enable:
+  platys_init: POSTRESQL
+  example: |
+    platys init --enable-services POSTRESQL
+    platys gen
+
+usage:
+  - title: Connect to the Postgresql CLI
+    content: |
+      ``` bash
+      docker exec -ti postgresql psql -d demodb -U demo
+      ```
+  - title: Connect through JDBC
+    content: |
+      * **JDBC Url:**  	`jdbc:postgresql://dataplatform/postgres`
+      * **JDBC Driver Class Name:** 	`org.postgresql.Driver`
+  - title: How to create tables and add data when starting Postgresql?
+    content: |
+      Navigate to `./init/postgresql` and create a sql file
+      
+      ```bash
+      cd ./init/postgresql
+      nano 01_create_driver.sql
+      ```
+      
+      and add the following commands:
+      
+      ```sql
+      DROP TABLE IF EXISTS driver;
+      CREATE TABLE IF NOT EXISTS driver (id BIGINT, first_name CHARACTER VARYING(45), last_name CHARACTER VARYING(45), available CHARACTER VARYING(1), birthdate DATE, last_update TIMESTAMP);
+      ALTER TABLE driver ADD CONSTRAINT driver_pk PRIMARY KEY (id);
+      
+      INSERT INTO "driver" ("id", "first_name", "last_name", "available", "birthdate", "last_update") VALUES (10,'Diann', 'Butler', 'Y', '10-JUN-68', CURRENT_TIMESTAMP);
+      INSERT INTO "driver" ("id", "first_name", "last_name", "available", "birthdate", "last_update") VALUES (11,'Micky', 'Isaacson', 'Y', '31-AUG-72' ,CURRENT_TIMESTAMP);
+      INSERT INTO "driver" ("id", "first_name", "last_name", "available", "birthdate", "last_update") VALUES (12,'Laurence', 'Lindsey', 'Y', '19-MAY-78' ,CURRENT_TIMESTAMP);
+      INSERT INTO "driver" ("id", "first_name", "last_name", "available", "birthdate", "last_update") VALUES (13,'Pam', 'Harrington', 'Y','10-JUN-68' ,CURRENT_TIMESTAMP);
+      INSERT INTO "driver" ("id", "first_name", "last_name", "available", "birthdate", "last_update") VALUES (14,'Brooke', 'Ferguson', 'Y','10-DEC-66' ,CURRENT_TIMESTAMP);
+      ```
+      
+      Connect to Postgresql CLI to see that the table has been created:
+      
+      ```
+      docker exec -ti postgresql psql -d demodb -U demo -c "SELECT * FROM driver"
+      ```
+
+parameters:
+  - name: POSTGRESQL_enable
+    default: "false"
+    since: "1.0.0"
+    description: >
+      Generate PostgreSQL service
+
+  - name: POSTGRESQL_extension
+    default: ""
+    since: "1.18.0"
+    description: >
+      An additional extension bundle (flavour) to use instead of the standard
+      postgres. Either `postgis`, `age`, `pgvector`, `vchord`, `posgis_we` or
+      `pgduckdb`
+
+  - name: POSTGRESQL_alternative_docker_image
+    default: ""
+    since: "1.18.0"
+    description: >
+      An alternative docker image to use instead of the standard (official) one
+      or a one overwritten by the `POSTGRESQL_extension`. Has to be a full docker
+      image 'coordinate' in the form of `:`.
+
+  - name: POSTGRESQL_volume_map_data
+    default: "false"
+    since: "1.0.0"
+    description: >
+      Volume map data folder into the Postgresql service
+
+  - name: POSTGRESQL_database
+    default: "postgres"
+    since: "1.8.0"
+    description: >
+      Name of the Postgresql database
+
+  - name: POSTGRESQL_user
+    default: "demo"
+    since: "1.8.0"
+    description: >
+      Name of the Postgresql user
+
+  - name: POSTGRESQL_password
+    default: "abc123!"
+    since: "1.8.0"
+    sensitive: true
+    description: >
+      Password for the Postgresql user
+
+  - name: POSTGRESQL_multiple_databases
+    default: "demodb"
+    since: "1.13.0"
+    description: >
+      A comma-separated list of Postgresql databases to create
+
+  - name: POSTGRESQL_multiple_users
+    default: "demo"
+    since: "1.13.0"
+    description: >
+      A comma-separated list of Postgresql users to create. Must be of same size
+      as `POSTGRESQL_multiple_databases`.
+
+  - name: POSTGRESQL_multiple_passwords
+    default: "abc123!"
+    since: "1.13.0"
+    sensitive: true
+    description: >
+      A comma-separated list of Postgresql passwords for the users to create.
+      Must be of same size as `POSTGRESQL_multiple_databases`.
+
+  - name: POSTGRESQL_multiple_addl_roles
+    default: ""
+    since: "1.16.0"
+    description: >
+      A comma-separated list of Postgresql roles to assign to the the users. Must
+      be of same size as `POSTGRESQL_multiple_databases`. You can specify
+      multiple roles for each user `role1 role2,role1 role2`.
+
+  - name: POSTGRESQL_wal_level
+    default: ""
+    since: "1.15.0"
+    description: >
+      Configure Postgresql `wal_level` configuration setting. Either `replica`,
+      `minimal`, `logical`. Use `logical` to enable CDC with Debezium.

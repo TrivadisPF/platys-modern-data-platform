@@ -1,0 +1,63 @@
+name: Gremlin Console
+id: gremlin-console
+category:
+  id: 09_storage
+  name: storage
+  color: purple
+arch: [x86-64]
+
+links:
+  website: https://tinkerpop.apache.org/
+  documentation: https://tinkerpop.apache.org/docs/current/tutorials/the-gremlin-console/
+  github: https://github.com/apache/tinkerpop
+
+description: >
+  ```bash platys init --enable-services GREMLIN_CONSOLE platys gen ```
+
+enable:
+  platys_init: GREMLIN_CONSOLE
+  example: |
+    platys init --enable-services GREMLIN_CONSOLE
+    platys gen
+
+usage:
+  - title: Using the Gremlin Console
+    content: |
+      To start a gremlin console
+      
+      ```bash
+      docker exec -ti gremlin-console ./bin/gremlin.sh    
+      ```
+      
+      and then connect to 
+      
+      ```groovy
+      :remote connect tinkerpop.server conf/remote.yaml
+      g = traversal().withRemote('conf/remote-graph.properties')
+      g.addV('demigod').property('name', 'hercules').iterate()    
+      g.V()
+      ```
+  - title: Initialise JanusGraph
+    content: |
+      When the container is started it will execute files with the extension `.groovy` that are found in `./init/janusgraph/` with the Gremlin Console. These scripts are only executed after the JanusGraph Server instance was started. So, they can connect to it and execute Gremlin traversals.
+      
+      For example, to add a vertex to the graph, create a file `./init/janusgraph/add-vertex.groovy` with the following content
+      
+      ```groovy
+      g = traversal().withRemote('conf/remote-graph.properties')
+      g.addV('demigod').property('name', 'hercules').iterate()
+      ```
+
+parameters:
+  - name: GREMLIN_CONSOLE_enable
+    default: "false"
+    since: "1.16.0"
+    description: >
+      Generate Gremlin Console service
+
+  - name: GREMLIN_CONSOLE_remote_host
+    default: "janusgraph"
+    since: "1.16.0"
+    description: >
+      The hostname of an external Gremlin Server instance to connect to from
+      gremlin console.
