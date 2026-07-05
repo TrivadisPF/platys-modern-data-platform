@@ -30840,8 +30840,6 @@ services:
     hostname: zammad-railsserver
     labels:
       com.platys.name: "zammad"
-      com.platys.webui.title: "Zammad UI"
-      com.platys.webui.url: "http://dataplatform:28425"
     depends_on:
       zammad-memcached:
         condition: service_healthy
@@ -30988,6 +30986,47 @@ services:
     command: ["zammad-websocket"]    
     restart: {{container_restart_policy}}
 
+  zammad-nginx:
+    image: ghcr.io/zammad/zammad:{{__ZAMMAD_version}}
+    container_name: zammad-nginx
+    hostname: zammad-nginx
+    labels:
+      com.platys.name: "zammad"
+      com.platys.webui.title: "Zammad UI"
+      com.platys.webui.url: "http://dataplatform:28425"  
+    ports:
+      - 28425:8080      
+    depends_on:
+      zammad-memcached:
+        condition: service_healthy
+      zammad-postgresql:
+        condition: service_healthy
+      zammad-redis:
+        condition: service_healthy
+    environment:
+      - MEMCACHE_SERVERS=zammad-memcached:11211
+      - POSTGRESQL_DB={{ZAMMAD_db_name | default('zammad_production')}}
+      - POSTGRESQL_HOST=zammad-postgresql
+      - POSTGRESQL_USER={{ZAMMAD_db_user | default('zammad')}}
+      - POSTGRESQL_PASS={{ZAMMAD_db_password | default('zammad')}}
+      - POSTGRESQL_PORT=5432
+      - POSTGRESQL_OPTIONS=?pool=50
+      - REDIS_URL=redis://zammad-redis:6379
+      - BACKUP_DIR=/var/tmp/zammad
+      - BACKUP_TIME=03:00
+      - BACKUP_ON_START=true
+      - HOLD_DAYS=10
+    {% if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    command: ["zammad-nginx"]    
+    restart: {{container_restart_policy}}
+
   zammad-elasticsearch:
     image: elasticsearch:{{__ZAMMAD_elasticsearch_version}}
     container_name: zammad-elasticsearch
@@ -31085,7 +31124,7 @@ services:
     volumes:
       - ./data-transfer:/data-transfer
     command: ["zammad-init"]
-    restart: {{container_restart_policy}}  
+    restart: "no"
     init: true    
 {% endif %}   {#  ZAMMAD_enable #}
 
