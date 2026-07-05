@@ -30847,6 +30847,8 @@ services:
         condition: service_healthy
       zammad-redis:
         condition: service_healthy
+    extra_hosts:
+      - "host.docker.internal:host-gateway"             
     environment:
       - MEMCACHE_SERVERS=zammad-memcached:11211
       - POSTGRESQL_DB={{ZAMMAD_db_name | default('zammad_production')}}
@@ -30877,12 +30879,14 @@ services:
       start_period: 120s
       retries: 3
 
+  {% if ZAMMAD_backup_enabled | default(true) %}
   zammad-backup:
     image: ghcr.io/zammad/zammad:{{__ZAMMAD_version}}
     container_name: zammad-backup
     hostname: zammad-backup
     labels:
       com.platys.name: "zammad"
+    command: ["zammad-backup"]
     user: 0:0
     depends_on:
       zammad-memcached:
@@ -30908,9 +30912,10 @@ services:
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
-      - ./data-transfer:/data-transfer
-    command: ["zammad-backup"]      
+      - zammad-backup:/var/tmp/zammad
+      - zammad-storage:/opt/zammad/storage
     restart: {{container_restart_policy}}
+  {% endif %}   {#  ZAMMAD_backup_enabled #}
 
   zammad-scheduler:
     image: ghcr.io/zammad/zammad:{{__ZAMMAD_version}}
