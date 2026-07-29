@@ -16188,7 +16188,7 @@ services:
     environment:
       MLFLOW_HOST: 0.0.0.0
       MLFLOW_PORT: 5500
-      MLFLOW_ARTIFACTS_DESTINATION: '{{MLFOW_SERVER_artifact_root | default ('/mlruns')}}'
+      MLFLOW_ARTIFACTS_DESTINATION: '{{MLFLOW_SERVER_artifact_root | default ('/mlruns')}}'
       MLFLOW_GUNICORN_OPTS: "--log-level debug"
     {%if MINIO_enable or RUSTFS_enable or external['S3_enable'] | default(false) %}
       MLFLOW_S3_ENDPOINT_URL: {{s3Endpoint if s3Endpoint is defined and s3Endpoint else omit}}
@@ -28985,15 +28985,15 @@ services:
   {% endif %}   {# GRAVITINO_mcp_server_enabled #}
 {% endif %}   {# GRAVITINO_enable #}
 
-{% if GRAVITINO_ICEBERG_REST_SERVER_enabled | default(false) %}
+{% if GRAVITINO_ICEBERG_REST_SERVER_enable | default(false) %}
   # https://gravitino.apache.org/docs/1.0.1/iceberg-rest-service
   gravitino-iceberg-rest:
     image: apache/gravitino-iceberg-rest:{{__GRAVITINO_version}}
     container_name: gravitino-iceberg-rest
     hostname: gravitino-iceberg-rest
     labels:
-      com.platys.name: gravitino
-      com.platys.description: powerful open data catalog
+      com.platys.name: gravitino-iceberg-rest
+      com.platys.description: Gravitino Iceberg REST Server
       com.platys.restapi.title: Gravitino Iceberg REST Server
       com.platys.restapi.url: http://dataplatform:28287
     ports:
@@ -29023,7 +29023,7 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}      
     restart: {{container_restart_policy}}
-{% endif %}   {# GRAVITINO_ICEBERG_REST_SERVER_enabled #}
+{% endif %}   {# GRAVITINO_ICEBERG_REST_SERVER_enable #}
 
 {% if NIMTABLE_enable | default(false) %}
   #  ================================== Nimtabe ========================================== #
