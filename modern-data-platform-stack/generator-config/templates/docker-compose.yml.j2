@@ -828,7 +828,7 @@ networks:
   {% set SCHEMA_REGISTRY_enable = true -%}
 {% endif -%}   {# KSQLDB_enable #}
 
-{% if (SCHEMA_REGISTRY_enable and SCHEMA_REGISTRY_flavour | lower) == 'apicurio' and APICURIO_auth_enabled | default(false) -%}
+{% if (SCHEMA_REGISTRY_enable and SCHEMA_REGISTRY_flavour | lower) == 'apicurio' and SCHEMA_REGISTRY_apicurio_auth_enabled | default(false) -%}
 # enforce keycloak dependencies
   {% set KEYCLOAK_enable = true -%}
 {% endif -%}   {# PLATFORM_ARM_enable #}
@@ -4021,38 +4021,38 @@ services:
     environment:
       QUARKUS_PROFILE: prod
       QUARKUS_HTTP_CORS_ORIGINS: '*'
-      APICURIO_STORAGE_KIND: '{{SCHEMA_REGISTRY_apicurio_storage}}'
+      SCHEMA_REGISTRY_apicurio_STORAGE_KIND: '{{SCHEMA_REGISTRY_apicurio_storage}}'
     {% if (SCHEMA_REGISTRY_apicurio_storage | lower) == 'kafkasql'  %}
-      APICURIO_KAFKASQL_BOOTSTRAP_SERVERS: '{{ns.bootstrapServers}}'
-      APICURIO_KAFKASQL_TOPIC: 'kafkasql-journal'
+      SCHEMA_REGISTRY_apicurio_KAFKASQL_BOOTSTRAP_SERVERS: '{{ns.bootstrapServers}}'
+      SCHEMA_REGISTRY_apicurio_KAFKASQL_TOPIC: 'kafkasql-journal'
     {% endif -%}   {#  SCHEMA_REGISTRY_apicurio_storage == kafkasql #}
     {% if (SCHEMA_REGISTRY_apicurio_storage | lower) == 'sql'  %}
-      APICURIO_STORAGE_SQL_KIND: 'postgresql'
-      APICURIO_DATASOURCE_URL: jdbc:postgresql://{{ns.postgresqlHost}}/{{SCHEMA_REGISTRY_apicurio_sql_storage_database}}
-      APICURIO_DATASOURCE_USERNAME: {{SCHEMA_REGISTRY_apicurio_sql_storage_user}}
-      APICURIO_DATASOURCE_PASSWORD: {{SCHEMA_REGISTRY_apicurio_sql_storage_password}}§
+      SCHEMA_REGISTRY_apicurio_STORAGE_SQL_KIND: 'postgresql'
+      SCHEMA_REGISTRY_apicurio_DATASOURCE_URL: jdbc:postgresql://{{ns.postgresqlHost}}/{{SCHEMA_REGISTRY_apicurio_sql_storage_database}}
+      SCHEMA_REGISTRY_apicurio_DATASOURCE_USERNAME: {{SCHEMA_REGISTRY_apicurio_sql_storage_user}}
+      SCHEMA_REGISTRY_apicurio_DATASOURCE_PASSWORD: {{SCHEMA_REGISTRY_apicurio_sql_storage_password}}§
     {% endif -%}   {#  SCHEMA_REGISTRY_apicurio_storage == sql #}
-    {% if APICURIO_auth_enabled | default(false) %}
-      AUTH_ENABLED: '{{APICURIO_auth_enabled}}'
+    {% if SCHEMA_REGISTRY_apicurio_auth_enabled | default(false) %}
+      AUTH_ENABLED: '{{SCHEMA_REGISTRY_apicurio_auth_enabled}}'
       KEYCLOAK_URL: 'http://${PUBLIC_IP:-127.0.0.1}:28204/auth'
       KEYCLOAK_REALM: 'registry'
       KEYCLOAK_API_CLIENT_ID: 'registry-api'
       KEYCLOAK_UI_CLIENT_ID: 'apicurio-registry'
-      REGISTRY_AUTH_ANONYMOUS_READ_ACCESS_ENABLED: '{{APICURIO_auth_anonymous_read_access_enabled}}'
+      REGISTRY_AUTH_ANONYMOUS_READ_ACCESS_ENABLED: '{{SCHEMA_REGISTRY_apicurio_auth_anonymous_read_access_enabled}}'
       ROLE_BASED_AUTHZ_ENABLED: 'True'
       ROLE_BASED_AUTHZ_SOURCE: 'token'
 #     OWNER_ONLY_AUTHZ_ENABLED
 #     REGISTRY_AUTH_ADMIN_OVERRIDE_ENABLED: 'True'
 #     REGISTRY_AUTH_ADMIN_OVERRIDE_ROLE: ''
 #     CLIENT_CREDENTIALS_BASIC_AUTH_ENABLED: 'True'
-      {% if APICURIO_basic_auth_enabled | default(false) %}
+      {% if SCHEMA_REGISTRY_apicurio_basic_auth_enabled | default(false) %}
       CLIENT_CREDENTIALS_BASIC_AUTH_ENABLED: 'True'
-      {% endif -%}   {#  APICURIO_basic_auth_enabled #}
-    {% endif -%}   {#  APICURIO_auth_enabled #}
-    {% if APICURIO_eventsourcing_enabled | default(false) %}
-      APICURIO_KAFKASQL_BOOTSTRAP_SERVERS: '{{ns.bootstrapServers}}'
-      APICURIO_EVENTS_KAFKA_TOPIC: '{{APICURIO_eventsourcing_kafka_topic}}'
-    {% endif -%}   {#  APICURIO_eventsourcing_enabled #}
+      {% endif -%}   {#  SCHEMA_REGISTRY_apicurio_basic_auth_enabled #}
+    {% endif -%}   {#  SCHEMA_REGISTRY_apicurio_auth_enabled #}
+    {% if SCHEMA_REGISTRY_apicurio_eventsourcing_enabled | default(false) %}
+      SCHEMA_REGISTRY_apicurio_KAFKASQL_BOOTSTRAP_SERVERS: '{{ns.bootstrapServers}}'
+      SCHEMA_REGISTRY_apicurio_EVENTS_KAFKA_TOPIC: '{{SCHEMA_REGISTRY_apicurio_eventsourcing_kafka_topic}}'
+    {% endif -%}   {#  SCHEMA_REGISTRY_apicurio_eventsourcing_enabled #}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -31495,7 +31495,7 @@ services:
       - ./data-transfer:/data-transfer
       - ./security/keycloak/server.keystore:/opt/keycloak/conf/server.keystore
     {% if (SCHEMA_REGISTRY_enable and SCHEMA_REGISTRY_flavour | lower) == 'apicurio' | default(false) %}
-      - ./security/apicurio-registry/keycloak/apicurio-realm{{"-with-users" if APICURIO_auth_import_default_users}}.json:/opt/keycloak/data/import/apicurio-realm.json
+      - ./security/apicurio-registry/keycloak/apicurio-realm{{"-with-users" if SCHEMA_REGISTRY_apicurio_auth_import_default_users}}.json:/opt/keycloak/data/import/apicurio-realm.json
     {% endif -%}
     {% if KAFKA_enable and ns.secureKafkaEnabled %}
       - ./security/kafka/keycloak/kafka-authbearer.json:/opt/keycloak/data/import/kafka-realm.json
