@@ -26,7 +26,7 @@ networks:
 {% set __CONFLUENT_CCC_NG_version = CONFLUENT_CCC_NG_version | default('latest') -%}
 {% set __KAFKA_INIT_version = KAFKA_INIT_version | default('latest') -%}
 {% set __KAFKA_MM2_version = KAFKA_MM2_version | default('latest') -%}
-{% set __APICURIO_SCHEMA_REGISTRY_version = APICURIO_SCHEMA_REGISTRY_version | default('latest') -%}
+{% set __SCHEMA_REGISTRY_apicurio_version = SCHEMA_REGISTRY_apicurio_version | default('latest') -%}
 {% set __ZOONAVIGATOR_version = ZOONAVIGATOR_version | default('latest') -%}
 {% set __ZOONAVIGATOR_API_version = ZOONAVIGATOR_API_version | default('latest') -%}
 {% set __KSQLDB_version = KSQLDB_version | default('latest') -%}
@@ -879,7 +879,7 @@ networks:
   {% set KAFKA_enable = false -%}
   {% set CONFLUENT_CCC_enable = false -%}
   {% set CONFLUENT_CCC_NG_enable = false -%}
-  {% set APICURIO_SCHEMA_REGISTRY_enable = false -%}
+  {% set SCHEMA_REGISTRY_apicurio_enable = false -%}
   {% set AUTOMQ_enable = false -%}
   {% set MATERIALIZE_enable = false -%}
   {% set HSTREAMDB_enable = false -%}
@@ -2016,7 +2016,7 @@ services:
       KAFKA_SUPER_USERS: "{% for user in KAFKA_super_users.split(',') -%}User:{{ user }}{% if not loop.last %};{% endif %} {%- endfor %}"
       {% endif -%} {# KAFKA_super_users #}
     {% if (SCHEMA_REGISTRY_enable or external['SCHEMA_REGISTRY_enable']) | default(false) %}
-      KAFKA_CONFLUENT_SCHEMA_REGISTRY_URL: '{{ns.schemaRegistryUrl}}'
+      KAFKA_SCHEMA_REGISTRY_confluent_URL: '{{ns.schemaRegistryUrl}}'
     {% endif %}  
     {% endif -%} {# KAFKA_authorizer_enabled and ns.secureKafkaEnabled #}
     {% if (CONFLUENT_CCC_enable or CONFLUENT_CCC_NG_enable) and (KAFKA_edition | lower) == 'enterprise' | default(false) %}
@@ -3931,19 +3931,19 @@ services:
     environment:
       SCHEMA_REGISTRY_HOST_NAME: schema-registry-{{loop.index}}
       SCHEMA_REGISTRY_LISTENERS: "http://0.0.0.0:{{port}}"
-    {% if CONFLUENT_SCHEMA_REGISTRY_use_zookeeper_election %}
+    {% if SCHEMA_REGISTRY_confluent_use_zookeeper_election %}
       SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL: 'zookeeper-1:2181'
     {% endif %}
       SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: '{{ns.bootstrapServers}}'
-      SCHEMA_REGISTRY_GROUP_ID: "{{CONFLUENT_SCHEMA_REGISTRY_group_id}}"
-      SCHEMA_REGISTRY_LEADER_ELIGIBILITY: "{{CONFLUENT_SCHEMA_REGISTRY_leader_eligibility}}"
-      SCHEMA_REGISTRY_MODE_MUTABILITY: "{{CONFLUENT_SCHEMA_REGISTRY_mode_mutability}}"
-      SCHEMA_REGISTRY_SCHEMA_COMPATIBILITY_LEVEL: "{{CONFLUENT_SCHEMA_REGISTRY_schema_compatibility_level}}"
-      SCHEMA_REGISTRY_KAFKASTORE_TOPIC_REPLICATION_FACTOR: {{CONFLUENT_SCHEMA_REGISTRY_replication_factor}}
+      SCHEMA_REGISTRY_GROUP_ID: "{{SCHEMA_REGISTRY_confluent_group_id}}"
+      SCHEMA_REGISTRY_LEADER_ELIGIBILITY: "{{SCHEMA_REGISTRY_confluent_leader_eligibility}}"
+      SCHEMA_REGISTRY_MODE_MUTABILITY: "{{SCHEMA_REGISTRY_confluent_mode_mutability}}"
+      SCHEMA_REGISTRY_SCHEMA_COMPATIBILITY_LEVEL: "{{SCHEMA_REGISTRY_confluent_schema_compatibility_level}}"
+      SCHEMA_REGISTRY_KAFKASTORE_TOPIC_REPLICATION_FACTOR: {{SCHEMA_REGISTRY_confluent_replication_factor}}
       SCHEMA_REGISTRY_ACCESS_CONTROL_ALLOW_ORIGIN: '*'
       SCHEMA_REGISTRY_ACCESS_CONTROL_ALLOW_METHODS: 'GET,POST,PUT,OPTIONS'
-      SCHEMA_REGISTRY_LOG4J_ROOT_LOGLEVEL: "{{CONFLUENT_SCHEMA_REGISTRY_log4j_root_loglevel}}"
-      SCHEMA_REGISTRY_DEBUG: "{{CONFLUENT_SCHEMA_REGISTRY_debug}}"
+      SCHEMA_REGISTRY_LOG4J_ROOT_LOGLEVEL: "{{SCHEMA_REGISTRY_confluent_log4j_root_loglevel}}"
+      SCHEMA_REGISTRY_DEBUG: "{{SCHEMA_REGISTRY_confluent_debug}}"
     {% if ns.secureKafkaEnabled %}
       SCHEMA_REGISTRY_KAFKASTORE_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: "https"
       SCHEMA_REGISTRY_KAFKASTORE_SECURITY_PROTOCOL: "{{ns.securityProtocolBROKER}}"
@@ -4006,7 +4006,7 @@ services:
     {% set http_external_port = 8081 + loop.index - 1 %}
     {% set http_port = 8080 + loop.index - 1 %}
   apicurio-registry-{{loop.index}}:
-    image: apicurio/apicurio-registry:{{__APICURIO_SCHEMA_REGISTRY_version}}
+    image: apicurio/apicurio-registry:{{__SCHEMA_REGISTRY_apicurio_version}}
     hostname: apicurio-registry-{{loop.index}}
     container_name: apicurio-registry-{{loop.index}}
     labels:
@@ -4021,17 +4021,17 @@ services:
     environment:
       QUARKUS_PROFILE: prod
       QUARKUS_HTTP_CORS_ORIGINS: '*'
-      APICURIO_STORAGE_KIND: '{{APICURIO_SCHEMA_REGISTRY_storage}}'
-    {% if (APICURIO_SCHEMA_REGISTRY_storage | lower) == 'kafkasql'  %}
+      APICURIO_STORAGE_KIND: '{{SCHEMA_REGISTRY_apicurio_storage}}'
+    {% if (SCHEMA_REGISTRY_apicurio_storage | lower) == 'kafkasql'  %}
       APICURIO_KAFKASQL_BOOTSTRAP_SERVERS: '{{ns.bootstrapServers}}'
       APICURIO_KAFKASQL_TOPIC: 'kafkasql-journal'
-    {% endif -%}   {#  APICURIO_SCHEMA_REGISTRY_storage == kafkasql #}
-    {% if (APICURIO_SCHEMA_REGISTRY_storage | lower) == 'sql'  %}
+    {% endif -%}   {#  SCHEMA_REGISTRY_apicurio_storage == kafkasql #}
+    {% if (SCHEMA_REGISTRY_apicurio_storage | lower) == 'sql'  %}
       APICURIO_STORAGE_SQL_KIND: 'postgresql'
-      APICURIO_DATASOURCE_URL: jdbc:postgresql://{{ns.postgresqlHost}}/{{APICURIO_SCHEMA_REGISTRY_sql_storage_database}}
-      APICURIO_DATASOURCE_USERNAME: {{APICURIO_SCHEMA_REGISTRY_sql_storage_user}}
-      APICURIO_DATASOURCE_PASSWORD: {{APICURIO_SCHEMA_REGISTRY_sql_storage_password}}§
-    {% endif -%}   {#  APICURIO_SCHEMA_REGISTRY_storage == sql #}
+      APICURIO_DATASOURCE_URL: jdbc:postgresql://{{ns.postgresqlHost}}/{{SCHEMA_REGISTRY_apicurio_sql_storage_database}}
+      APICURIO_DATASOURCE_USERNAME: {{SCHEMA_REGISTRY_apicurio_sql_storage_user}}
+      APICURIO_DATASOURCE_PASSWORD: {{SCHEMA_REGISTRY_apicurio_sql_storage_password}}§
+    {% endif -%}   {#  SCHEMA_REGISTRY_apicurio_storage == sql #}
     {% if APICURIO_auth_enabled | default(false) %}
       AUTH_ENABLED: '{{APICURIO_auth_enabled}}'
       KEYCLOAK_URL: 'http://${PUBLIC_IP:-127.0.0.1}:28204/auth'
