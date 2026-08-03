@@ -843,7 +843,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28274 | 8000 | presidio-anonymizer |
 28275 | 8181 | lakekeeper |
 28276 | 8888 | seaweedfs-1 |
-28277 |  |   |
+28277 | 8181 | seaweedfs-1 |
 28278 | 5050 | allure |
 28279 | 5252 | allure-ui |
 28280 | 3000 | nimtable-web |
