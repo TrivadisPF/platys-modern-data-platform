@@ -3079,7 +3079,7 @@ services:
       - RW_TELEMETRY_TYPE="docker-compose"
       - RW_SECRET_STORE_PRIVATE_KEY_HEX=0123456789abcdef0123456789abcdef
       - RW_LICENSE_KEY=
-    {%if MINIO_enable or RUSTFS_enable or external['S3_enable'] | default(false) %}
+    {%if MINIO_enable or RUSTFS_enable or SEAWEEDFS_enable or external['S3_enable'] | default(false) %}
       - RW_S3_ENDPOINT={{s3Endpoint | default(omit) }}
       - RW_IS_FORCE_PATH_STYLE={{s3PathStyleAccess | default(omit) }}
       - AWS_REGION={{s3DefaultRegion | default(omit) }}
@@ -3187,7 +3187,7 @@ services:
       - RUST_BACKTRACE="1"
       # If ENABLE_TELEMETRY is not set, telemetry will start by default
       - ENABLE_TELEMETRY={{RISINGWAVE_telemetry_enabled | default(false) }}
-    {%if MINIO_enable or RUSTFS_enable or external['S3_enable'] | default(false) %}
+    {%if MINIO_enable or RUSTFS_enable or SEAWEEDFS_enable or external['S3_enable'] | default(false) %}
       - RW_S3_ENDPOINT={{s3Endpoint | default(omit) }}
       - RW_IS_FORCE_PATH_STYLE={{s3PathStyleAccess | default(omit) }}
       - AWS_REGION={{s3DefaultRegion | default(omit) }}
@@ -3246,7 +3246,7 @@ services:
       - RUST_BACKTRACE="1"
       # If ENABLE_TELEMETRY is not set, telemetry will start by default
       - ENABLE_TELEMETRY={{RISINGWAVE_telemetry_enabled | default(false) }}
-    {%if MINIO_enable or RUSTFS_enable or external['S3_enable'] | default(false) %}
+    {%if MINIO_enable or RUSTFS_enable or SEAWEEDFS_enable or external['S3_enable'] | default(false) %}
       - RW_S3_ENDPOINT={{s3Endpoint | default(omit) }}
       - RW_IS_FORCE_PATH_STYLE={{s3PathStyleAccess | default(omit) }}
       - AWS_REGION={{s3DefaultRegion | default(omit) }}
@@ -3357,7 +3357,7 @@ services:
       - RUST_BACKTRACE="1"
       # If ENABLE_TELEMETRY is not set, telemetry will start by default
       - ENABLE_TELEMETRY={{RISINGWAVE_telemetry_enabled | default(false) }}
-    {%if MINIO_enable or RUSTFS_enable or external['S3_enable'] | default(false) %}
+    {%if MINIO_enable or RUSTFS_enable or SEAWEEDFS_enable or external['S3_enable'] | default(false) %}
       - RW_S3_ENDPOINT={{s3Endpoint | default(omit) }}
       - RW_IS_FORCE_PATH_STYLE={{s3PathStyleAccess | default(omit) }}
       - AWS_REGION={{s3DefaultRegion | default(omit) }}
@@ -6369,7 +6369,7 @@ services:
       - MYSQL_USER={{ns.mysqlUser}}
       - MYSQL_PASSWORD={{ns.mysqlPassword}}      
     {% endif -%}  {#  MYSQL_enable #}
-    {%if MINIO_enable or RUSTFS_enable or external['S3_enable'] | default(false) %}
+    {%if MINIO_enable or RUSTFS_enable or SEAWEEDFS_enable or external['S3_enable'] | default(false) %}
       - S3_ENDPOINT={{s3Endpoint | default(omit) }}
       - S3_PATH_STYLE_ACCESS='{{s3PathStyleAccess}}'
       - AWS_REGION={{s3DefaultRegion | default(omit) }}
@@ -6598,7 +6598,7 @@ services:
     env_file:
       - ./conf/hadoop.env
     environment:
-    {%if MINIO_enable or RUSTFS_enable or external['S3_enable'] | default(false) %}
+    {%if MINIO_enable or RUSTFS_enable or SEAWEEDFS_enable or external['S3_enable'] | default(false) %}
       HIVE_SITE_CONF_fs_s3a_endpoint: {{s3Endpoint | default(omit) }}
       HIVE_SITE_CONF_fs_s3a_access_key: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
       HIVE_SITE_CONF_fs_s3a_secret_key: {{s3SecretAccessKey}}
@@ -6653,7 +6653,7 @@ services:
       SPARK_PUBLIC_DNS: ${PUBLIC_IP:-127.0.0.1}
       # env vars for config files
 #     INIT_DAEMON_STEP: setup_spark
-    {%if MINIO_enable or RUSTFS_enable or external['S3_enable'] | default(false) %}
+    {%if MINIO_enable or RUSTFS_enable or SEAWEEDFS_enable or external['S3_enable'] | default(false) %}
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_endpoint: '{{s3Endpoint | default(omit) }}'
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_access_key: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
@@ -6666,7 +6666,7 @@ services:
     {%if HADOOP_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_defaultFS: hdfs://namenode:9000
       SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined and SPARK_sql_warehouse_dir | length else 'hdfs://namenode:9000/user/hive/warehouse'}}
-    {%elif MINIO_enable or RUSTFS_enable or external['S3_enable'] | default(false) %}
+    {%elif MINIO_enable or RUSTFS_enable or SEAWEEDFS_enable or external['S3_enable'] | default(false) %}
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_defaultFS: s3a://{{s3AdminBucketName}}
       SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined and SPARK_sql_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/hive/warehouse'}}
     {% else %}
@@ -6863,7 +6863,7 @@ services:
       SPARK_WORKER_OPTS: '{{SPARK_worker_opts if SPARK_worker_opts is defined and SPARK_worker_opts else omit }}'
       SPARK_PUBLIC_DNS: ${PUBLIC_IP:-127.0.0.1}
       # env vars for config files
-    {%if MINIO_enable or RUSTFS_enable or external['S3_enable'] | default(false) %}
+    {%if MINIO_enable or RUSTFS_enable or SEAWEEDFS_enable or external['S3_enable'] | default(false) %}
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_endpoint: '{{s3Endpoint | default(omit) }}'
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_access_key: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
@@ -6876,7 +6876,7 @@ services:
     {%if HADOOP_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_defaultFS: hdfs://namenode:9000
       SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined and SPARK_sql_warehouse_dir | length else 'hdfs://namenode:9000/user/hive/warehouse'}}
-    {%elif MINIO_enable or RUSTFS_enable or external['S3_enable'] | default(false) %}
+    {%elif MINIO_enable or RUSTFS_enable or SEAWEEDFS_enable or external['S3_enable'] | default(false) %}
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_defaultFS: s3a://{{s3AdminBucketName}}
       SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined and SPARK_sql_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/hive/warehouse'}}
     {% else %}
@@ -7056,7 +7056,7 @@ services:
     ports:
       - 28117:18080
     environment:
-    {%if MINIO_enable or RUSTFS_enable or external['S3_enable'] | default(false) %}
+    {%if MINIO_enable or RUSTFS_enable or SEAWEEDFS_enable or external['S3_enable'] | default(false) %}
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_endpoint: '{{s3Endpoint | default(omit) }}'
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_access_key: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
@@ -7069,7 +7069,7 @@ services:
     {%if HADOOP_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_defaultFS: hdfs://namenode:9000
       SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined and SPARK_sql_warehouse_dir | length else 'hdfs://namenode:9000/user/hive/warehouse'}}
-    {%elif MINIO_enable or RUSTFS_enable or external['S3_enable'] | default(false) %}
+    {%elif MINIO_enable or RUSTFS_enable or SEAWEEDFS_enable or external['S3_enable'] | default(false) %}
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_defaultFS: s3a://{{s3AdminBucketName}}
       SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined and SPARK_sql_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/hive/warehouse'}}
     {% else %}
@@ -7248,7 +7248,7 @@ services:
     {% else %}
       SPARK_MASTER_URL: '{{ns.sparkMasterUrl}}'
     {% endif -%}   {#  SPARK_THRIFTSERVER_use_local_spark  #}          
-    {%if MINIO_enable or RUSTFS_enable or external['S3_enable'] | default(false) %}
+    {%if MINIO_enable or RUSTFS_enable or SEAWEEDFS_enable or external['S3_enable'] | default(false) %}
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_endpoint: '{{s3Endpoint | default(omit) }}'
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_access_key: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
@@ -7261,7 +7261,7 @@ services:
     {%if HADOOP_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_defaultFS: hdfs://namenode:9000
       SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined and SPARK_sql_warehouse_dir | length else 'hdfs://namenode:9000/user/hive/warehouse'}}
-    {%elif MINIO_enable or RUSTFS_enable or external['S3_enable'] | default(false) %}
+    {%elif MINIO_enable or RUSTFS_enable or SEAWEEDFS_enable or external['S3_enable'] | default(false) %}
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_defaultFS: s3a://{{s3AdminBucketName}}
       SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined and SPARK_sql_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/hive/warehouse'}}
     {% else %}
@@ -7455,7 +7455,7 @@ services:
       {% else %}
       SPARK_MASTER_URL: '{{ns.sparkMasterUrl}}'
       {% endif -%}   {#  KYUUBI_use_local_spark  #}    
-    {%if MINIO_enable or RUSTFS_enable or external['S3_enable'] | default(false) %}
+    {%if MINIO_enable or RUSTFS_enable or SEAWEEDFS_enable or external['S3_enable'] | default(false) %}
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_endpoint: '{{s3Endpoint | default(omit) }}'
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_access_key: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
@@ -7468,7 +7468,7 @@ services:
     {%if HADOOP_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_defaultFS: hdfs://namenode:9000
       SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined and SPARK_sql_warehouse_dir | length else 'hdfs://namenode:9000/user/hive/warehouse'}}
-    {%elif MINIO_enable or RUSTFS_enable or external['S3_enable'] | default(false) %}
+    {%elif MINIO_enable or RUSTFS_enable or SEAWEEDFS_enable or external['S3_enable'] | default(false) %}
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_defaultFS: s3a://{{s3AdminBucketName}}
       SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined and SPARK_sql_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/hive/warehouse'}}
     {% else %}
@@ -7650,7 +7650,7 @@ services:
     environment:
       SPARK_MASTER: spark://spark-master:7077
       DEPLOY_MODE: client
-    {%if MINIO_enable or RUSTFS_enable or external['S3_enable'] | default(false) %}
+    {%if MINIO_enable or RUSTFS_enable or SEAWEEDFS_enable or external['S3_enable'] | default(false) %}
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_endpoint: '{{s3Endpoint | default(omit) }}'
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_access_key: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
@@ -7663,7 +7663,7 @@ services:
     {%if HADOOP_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_defaultFS: hdfs://namenode:9000
       SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined and SPARK_sql_warehouse_dir | length else 'hdfs://namenode:9000/user/hive/warehouse'}}
-    {%elif MINIO_enable or RUSTFS_enable or external['S3_enable'] | default(false) %}
+    {%elif MINIO_enable or RUSTFS_enable or SEAWEEDFS_enable or external['S3_enable'] | default(false) %}
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_defaultFS: s3a://{{s3AdminBucketName}}
       SPARK_DEFAULTS_CONF_spark_sql_warehouse_dir: {{SPARK_sql_warehouse_dir if SPARK_sql_warehouse_dir is defined and SPARK_sql_warehouse_dir | length else 's3a://' ~ s3AdminBucketName ~ '/hive/warehouse'}}
     {% else %}
@@ -7849,7 +7849,7 @@ services:
         heartbeat.timeout: 5000        
         rest.flamegraph.enabled: true
         web.backpressure.refresh-interval: 10000
-    {%if MINIO_enable or RUSTFS_enable or external['S3_enable'] | default(false) %}
+    {%if MINIO_enable or RUSTFS_enable or SEAWEEDFS_enable or external['S3_enable'] | default(false) %}
         s3.access.key: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
         s3.secret.key: {{s3SecretAccessKey}}
         s3.fs.impl: org.apache.hadoop.fs.s3a.S3AFileSystem
@@ -7861,7 +7861,7 @@ services:
         metrics.reporter.prom.factory.class: org.apache.flink.metrics.prometheus.PrometheusReporterFactory
         metrics.reporter.prom.port: 9249
     {% endif -%}    {#  PROMETHEUS_enable #}
-    {%if MINIO_enable or RUSTFS_enable or external['S3_enable'] | default(false) %}
+    {%if MINIO_enable or RUSTFS_enable or SEAWEEDFS_enable or external['S3_enable'] | default(false) %}
       - s3.access.key={{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
       - s3.secret.key={{s3SecretAccessKey}}
       - s3.fs.impl=org.apache.hadoop.fs.s3a.S3AFileSystem
@@ -7877,7 +7877,7 @@ services:
     {% if HIVE_METASTORE_enable | default(false) %}
       - HIVE_SITE_CONF_hive_metastore_local=false
       - HIVE_SITE_CONF_hive_metastore_uris=thrift://{{ns.hiveMetastore}}
-      {%if MINIO_enable or RUSTFS_enable or external['S3_enable'] | default(false) %}
+      {%if MINIO_enable or RUSTFS_enable or SEAWEEDFS_enable or external['S3_enable'] | default(false) %}
       - HIVE_SITE_CONF_fs_defaultFS=s3a://{{s3AdminBucketName}}
       - HIVE_SITE_CONF_fs_s3a_endpoint={{s3Endpoint | default(omit) }}
       - HIVE_SITE_CONF_fs_s3a_access_key={{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
@@ -7970,14 +7970,14 @@ services:
         state.savepoints.dir: {{FLINK_state_savepoints_dir}}
         heartbeat.interval: 1000
         heartbeat.timeout: 5000        
-    {%if MINIO_enable or RUSTFS_enable or external['S3_enable'] | default(false) %}
+    {%if MINIO_enable or RUSTFS_enable or SEAWEEDFS_enable or external['S3_enable'] | default(false) %}
         s3.access.key: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
         s3.secret.key: {{s3SecretAccessKey}}
         s3.fs.impl: org.apache.hadoop.fs.s3a.S3AFileSystem
         s3.endpoint: {{s3Endpoint | default(omit) }}
         s3.path.style.access: {{s3PathStyleAccess}}
     {% endif -%}    {#  MINIO_enable #}
-    {%if MINIO_enable or RUSTFS_enable or external['S3_enable'] | default(false) %}
+    {%if MINIO_enable or RUSTFS_enable or SEAWEEDFS_enable or external['S3_enable'] | default(false) %}
       - s3.access.key={{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
       - s3.secret.key={{s3SecretAccessKey}}
       - s3.fs.impl=org.apache.hadoop.fs.s3a.S3AFileSystem
@@ -7994,7 +7994,7 @@ services:
     {% if HIVE_METASTORE_enable | default(false) %}
       - HIVE_SITE_CONF_hive_metastore_local=false
       - HIVE_SITE_CONF_hive_metastore_uris=thrift://{{ns.hiveMetastore}}
-      {%if MINIO_enable or RUSTFS_enable or external['S3_enable'] | default(false) %}
+      {%if MINIO_enable or RUSTFS_enable or SEAWEEDFS_enable or external['S3_enable'] | default(false) %}
       - HIVE_SITE_CONF_fs_defaultFS=s3a://{{s3AdminBucketName}}
       - HIVE_SITE_CONF_fs_s3a_endpoint={{s3Endpoint | default(omit) }}
       - HIVE_SITE_CONF_fs_s3a_access_key={{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
@@ -8068,7 +8068,7 @@ services:
     {% if HIVE_METASTORE_enable | default(false) %}
       - HIVE_SITE_CONF_hive_metastore_local=false
       - HIVE_SITE_CONF_hive_metastore_uris=thrift://{{ns.hiveMetastore}}
-      {%if MINIO_enable or RUSTFS_enable or external['S3_enable'] | default(false) %}
+      {%if MINIO_enable or RUSTFS_enable or SEAWEEDFS_enable or external['S3_enable'] | default(false) %}
       - HIVE_SITE_CONF_fs_defaultFS=s3a://{{s3AdminBucketName}}
       - HIVE_SITE_CONF_fs_s3a_endpoint={{s3Endpoint | default(omit) }}
       - HIVE_SITE_CONF_fs_s3a_access_key={{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
@@ -8136,7 +8136,7 @@ services:
     {% if HIVE_METASTORE_enable | default(false) %}
       - HIVE_SITE_CONF_hive_metastore_local=false
       - HIVE_SITE_CONF_hive_metastore_uris=thrift://{{ns.hiveMetastore}}
-      {%if MINIO_enable or RUSTFS_enable or external['S3_enable'] | default(false) %}
+      {%if MINIO_enable or RUSTFS_enable or SEAWEEDFS_enable or external['S3_enable'] | default(false) %}
       - HIVE_SITE_CONF_fs_defaultFS=s3a://{{s3AdminBucketName}}
       - HIVE_SITE_CONF_fs_s3a_endpoint={{s3Endpoint | default(omit) }}
       - HIVE_SITE_CONF_fs_s3a_access_key={{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
@@ -8905,7 +8905,7 @@ services:
       MAPRED_CONF_yarn_app_mapreduce_am_env: HADOOP_MAPRED_HOME=/opt/hadoop-{{__HADOOP_version}}/
       MAPRED_CONF_mapreduce_map_env: HADOOP_MAPRED_HOME=/opt/hadoop-{{__HADOOP_version}}/
       MAPRED_CONF_mapreduce_reduce_env: HADOOP_MAPRED_HOME=/opt/hadoop-{{__HADOOP_version}}/
-  {%elif MINIO_enable or RUSTFS_enable or external['S3_enable'] | default(false) %}
+  {%elif MINIO_enable or RUSTFS_enable or SEAWEEDFS_enable or external['S3_enable'] | default(false) %}
       HIVE_SITE_CONF_fs_defaultFS: 's3a://{{s3AdminBucketName}}'
       HIVE_SITE_CONF_fs_s3a_endpoint: '{{s3Endpoint | default(omit) }}'
       HIVE_SITE_CONF_fs_s3a_access_key: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
@@ -8973,7 +8973,7 @@ services:
       CORE_CONF_fs_defaultFS: hdfs://namenode:9000
       HIVE_SITE_CONF_hive_metastore_warehouse_dir: hdfs://namenode:9000/user/hive/warehouse
       HIVE_SITE_CONF_hive_metastore_warehouse_external_dir: hdfs://namenode:9000/user/hive/warehouse      
-  {%elif MINIO_enable or RUSTFS_enable or external['S3_enable'] | default(false) %}
+  {%elif MINIO_enable or RUSTFS_enable or SEAWEEDFS_enable or external['S3_enable'] | default(false) %}
       {#  overrite which is set by default in entrpoint.sh of docker image #}
       CORE_CONF_fs_defaultFS: 'file:///tmp'
       HIVE_SITE_CONF_fs_defaultFS: 'file:///tmp'
@@ -12553,7 +12553,7 @@ services:
     {% else %}
       NIFI_WEB_HTTP_PORT: '{{externalPort}}'
     {% endif -%}   {#  NIFI_run_unsecure #}
-    {%if MINIO_enable or RUSTFS_enable or external['S3_enable'] | default(false) %}
+    {%if MINIO_enable or RUSTFS_enable or SEAWEEDFS_enable or external['S3_enable'] | default(false) %}
       S3_ENDPOINT: '{{s3Endpoint | default(omit) }}'
       S3_PATH_STYLE_ACCESS: '{{s3PathStyleAccess}}'
       S3_REGION: {{s3DefaultRegion if s3DefaultRegion is defined and s3DefaultRegion else omit}}
@@ -12603,7 +12603,7 @@ services:
     {% if NIFI_volume_map_logs %}
       - ./container-volume/nifi/nifi-{{loop.index}}/logs:/opt/nifi/nifi-current/logs
     {% endif %}
-    {%if MINIO_enable or RUSTFS_enable or external['S3_enable'] | default(false) %}
+    {%if MINIO_enable or RUSTFS_enable or SEAWEEDFS_enable or external['S3_enable'] | default(false) %}
       - aws-credentials-vol:/opt/nifi/nifi-current/.aws:RO
     {% endif %}        
     {%if NIFI_python_provide_requirements_file  | default(false) %}
@@ -12693,7 +12693,7 @@ services:
     {% else %}
       NIFI_WEB_HTTP_PORT: '{{externalPort}}'
     {% endif -%}   {#  NIFI2_run_unsecure #}
-    {%if MINIO_enable or RUSTFS_enable or external['S3_enable'] | default(false) %}
+    {%if MINIO_enable or RUSTFS_enable or SEAWEEDFS_enable or external['S3_enable'] | default(false) %}
       S3_ENDPOINT: '{{s3Endpoint | default(omit) }}'
       S3_PATH_STYLE_ACCESS: '{{s3PathStyleAccess}}'
       S3_REGION: {{s3DefaultRegion if s3DefaultRegion is defined and s3DefaultRegion else omit}}
@@ -12748,7 +12748,7 @@ services:
     {% if NIFI2_volume_map_logs %}
       - ./container-volume/nifi2/nifi2-{{loop.index}}/logs:/opt/nifi/nifi-current/logs
     {% endif %}
-    {%if MINIO_enable or RUSTFS_enable or external['S3_enable'] | default(false) %}
+    {%if MINIO_enable or RUSTFS_enable or SEAWEEDFS_enable or external['S3_enable'] | default(false) %}
       - aws-credentials-vol:/opt/nifi/nifi-current/.aws:RO
     {% endif %}
       - nifi-config-vol:/opt/nifi/nifi-current/conf
@@ -13053,7 +13053,7 @@ services:
       N8N_AVAILABLE_BINARY_DATA_MODES: {{N8N_available_binary_data_modes}}
       N8N_DEFAULT_BINARY_DATA_MODE: {{N8N_default_binary_data_mode}}
       N8N_BINARY_DATA_STORAGE_PATH: '/home/node/.n8n/binaryData'
-    {%if MINIO_enable or RUSTFS_enable or external['S3_enable'] | default(false) %}
+    {%if MINIO_enable or RUSTFS_enable or SEAWEEDFS_enable or external['S3_enable'] | default(false) %}
       N8N_EXTERNAL_STORAGE_S3_HOST: {{s3Endpoint | default(omit) }}
       N8N_EXTERNAL_STORAGE_S3_BUCKET_NAME: {{N8N_s3_bucket_name}}
       N8N_EXTERNAL_STORAGE_S3_BUCKET_REGION: {{s3DefaultRegion}}
@@ -13138,7 +13138,7 @@ services:
       N8N_AVAILABLE_BINARY_DATA_MODES: {{N8N_available_binary_data_modes}}
       N8N_DEFAULT_BINARY_DATA_MODE: {{N8N_default_binary_data_mode}}
       N8N_BINARY_DATA_STORAGE_PATH: '/home/node/.n8n/binaryData'
-    {%if MINIO_enable or RUSTFS_enable or external['S3_enable'] | default(false) %}
+    {%if MINIO_enable or RUSTFS_enable or SEAWEEDFS_enable or external['S3_enable'] | default(false) %}
       N8N_EXTERNAL_STORAGE_S3_HOST: {{s3Endpoint | default(omit) }}
       N8N_EXTERNAL_STORAGE_S3_BUCKET_NAME: {{N8N_s3_bucket_name}}
       N8N_EXTERNAL_STORAGE_S3_BUCKET_REGION: {{s3DefaultRegion}}
@@ -13562,7 +13562,7 @@ services:
       ELASTICSEARCH_PORT: 9200
       ELASTICSEARCH_SCHEME: http
     {% endif -%}   {#  ELASTICSEARCH_enable #}
-    {%if MINIO_enable or RUSTFS_enable or external['S3_enable'] | default(false) %}
+    {%if MINIO_enable or RUSTFS_enable or SEAWEEDFS_enable or external['S3_enable'] | default(false) %}
       S3_ENDPOINT: '{{s3Endpoint | default(omit) }}'
       S3_BUCKET_NAME: '{{FLUENTD_s3_bucket_name}}'
       S3_BUCKET_REGION: '{{s3DefaultRegion if s3DefaultRegion is defined and s3DefaultRegion else omit}}'
@@ -14372,7 +14372,7 @@ services:
       SPARK_HOME: /opt/bitnami/spark
       JAVA_HOME: /opt/bitnami/java      
     {% endif -%}   {#  SPARK_enable #}
-    {%if MINIO_enable or RUSTFS_enable or external['S3_enable'] | default(false) %}
+    {%if MINIO_enable or RUSTFS_enable or SEAWEEDFS_enable or external['S3_enable'] | default(false) %}
       AIRFLOW_VAR_S3_ENDPOINT: {{s3Endpoint | default(omit) }}
       AIRFLOW_VAR_S3_ACCESS_KEY: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
       AIRFLOW_VAR_S3_SECRET_ACCESS_KEY: {{s3SecretAccessKey}}
@@ -14431,7 +14431,7 @@ services:
       - spark-{{__SPARK_version | replace('.','-')}}-java-vol:/opt/bitnami/java:RO
       - ./container-volume/spark/logs/:/var/log/spark/logs       
     {% endif -%}   {#  SPARK_enable #}
-    {%if MINIO_enable or RUSTFS_enable or external['S3_enable'] | default(false) %}
+    {%if MINIO_enable or RUSTFS_enable or SEAWEEDFS_enable or external['S3_enable'] | default(false) %}
     #  - aws-credentials-vol:/home/airflow/.aws:RO
     {% endif %}  
     {% if AIRFLOW_volume_map_docker_daemon %}
@@ -14521,7 +14521,7 @@ services:
       SPARK_HOME: /opt/bitnami/spark
       JAVA_HOME: /opt/bitnami/java      
     {% endif -%}   {#  SPARK_enable #}
-    {%if MINIO_enable or RUSTFS_enable or external['S3_enable'] | default(false) %}
+    {%if MINIO_enable or RUSTFS_enable or SEAWEEDFS_enable or external['S3_enable'] | default(false) %}
       AIRFLOW_VAR_S3_ENDPOINT: {{s3Endpoint | default(omit) }}
       AIRFLOW_VAR_S3_ACCESS_KEY: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
       AIRFLOW_VAR_S3_SECRET_ACCESS_KEY: {{s3SecretAccessKey}}
@@ -14580,7 +14580,7 @@ services:
       - spark-{{__SPARK_version | replace('.','-')}}-java-vol:/opt/bitnami/java:RO
       - ./container-volume/spark/logs/:/var/log/spark/logs       
     {% endif -%}   {#  SPARK_enable #}
-    {%if MINIO_enable or RUSTFS_enable or external['S3_enable'] | default(false) %}
+    {%if MINIO_enable or RUSTFS_enable or SEAWEEDFS_enable or external['S3_enable'] | default(false) %}
     #  - aws-credentials-vol:/home/airflow/.aws:RO
     {% endif %}      
     {% if AIRFLOW_volume_map_docker_daemon %}
@@ -14664,7 +14664,7 @@ services:
       SPARK_HOME: /opt/bitnami/spark
       JAVA_HOME: /opt/bitnami/java      
     {% endif -%}   {#  SPARK_enable #}
-    {%if MINIO_enable or RUSTFS_enable or external['S3_enable'] | default(false) %}
+    {%if MINIO_enable or RUSTFS_enable or SEAWEEDFS_enable or external['S3_enable'] | default(false) %}
       AIRFLOW_VAR_S3_ENDPOINT: {{s3Endpoint | default(omit) }}
       AIRFLOW_VAR_S3_ACCESS_KEY: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
       AIRFLOW_VAR_S3_SECRET_ACCESS_KEY: {{s3SecretAccessKey}}
@@ -14723,7 +14723,7 @@ services:
       - spark-{{__SPARK_version | replace('.','-')}}-java-vol:/opt/bitnami/java:RO
       - ./container-volume/spark/logs/:/var/log/spark/logs       
     {% endif -%}   {#  SPARK_enable #}
-    {%if MINIO_enable or RUSTFS_enable or external['S3_enable'] | default(false) %}
+    {%if MINIO_enable or RUSTFS_enable or SEAWEEDFS_enable or external['S3_enable'] | default(false) %}
     #  - aws-credentials-vol:/home/airflow/.aws:RO
     {% endif %}      
     {% if AIRFLOW_volume_map_docker_daemon %}
@@ -14806,7 +14806,7 @@ services:
       SPARK_HOME: /opt/bitnami/spark
       JAVA_HOME: /opt/bitnami/java      
     {% endif -%}   {#  SPARK_enable #}
-    {%if MINIO_enable or RUSTFS_enable or external['S3_enable'] | default(false) %}
+    {%if MINIO_enable or RUSTFS_enable or SEAWEEDFS_enable or external['S3_enable'] | default(false) %}
       AIRFLOW_VAR_S3_ENDPOINT: {{s3Endpoint | default(omit) }}
       AIRFLOW_VAR_S3_ACCESS_KEY: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
       AIRFLOW_VAR_S3_SECRET_ACCESS_KEY: {{s3SecretAccessKey}}
@@ -14865,7 +14865,7 @@ services:
       - spark-{{__SPARK_version | replace('.','-')}}-java-vol:/opt/bitnami/java:RO
       - ./container-volume/spark/logs/:/var/log/spark/logs       
     {% endif -%}   {#  SPARK_enable #}
-    {%if MINIO_enable or RUSTFS_enable or external['S3_enable'] | default(false) %}
+    {%if MINIO_enable or RUSTFS_enable or SEAWEEDFS_enable or external['S3_enable'] | default(false) %}
     #  - aws-credentials-vol:/home/airflow/.aws:RO
     {% endif %}      
     {% if AIRFLOW_volume_map_docker_daemon %}
@@ -14954,7 +14954,7 @@ services:
       SPARK_HOME: /opt/bitnami/spark
       JAVA_HOME: /opt/bitnami/java      
     {% endif -%}   {#  SPARK_enable #}
-    {%if MINIO_enable or RUSTFS_enable or external['S3_enable'] | default(false) %}
+    {%if MINIO_enable or RUSTFS_enable or SEAWEEDFS_enable or external['S3_enable'] | default(false) %}
       AIRFLOW_VAR_S3_ENDPOINT: {{s3Endpoint | default(omit) }}
       AIRFLOW_VAR_S3_ACCESS_KEY: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
       AIRFLOW_VAR_S3_SECRET_ACCESS_KEY: {{s3SecretAccessKey}}
@@ -15013,7 +15013,7 @@ services:
       - spark-{{__SPARK_version | replace('.','-')}}-java-vol:/opt/bitnami/java:RO
       - ./container-volume/spark/logs/:/var/log/spark/logs       
     {% endif -%}   {#  SPARK_enable #}
-    {%if MINIO_enable or RUSTFS_enable or external['S3_enable'] | default(false) %}
+    {%if MINIO_enable or RUSTFS_enable or SEAWEEDFS_enable or external['S3_enable'] | default(false) %}
     #  - aws-credentials-vol:/home/airflow/.aws:RO
     {% endif %}      
     {% if AIRFLOW_volume_map_docker_daemon %}
@@ -15097,7 +15097,7 @@ services:
       SPARK_HOME: /opt/bitnami/spark
       JAVA_HOME: /opt/bitnami/java      
     {% endif -%}   {#  SPARK_enable #}
-    {%if MINIO_enable or RUSTFS_enable or external['S3_enable'] | default(false) %}
+    {%if MINIO_enable or RUSTFS_enable or SEAWEEDFS_enable or external['S3_enable'] | default(false) %}
       AIRFLOW_VAR_S3_ENDPOINT: {{s3Endpoint | default(omit) }}
       AIRFLOW_VAR_S3_ACCESS_KEY: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
       AIRFLOW_VAR_S3_SECRET_ACCESS_KEY: {{s3SecretAccessKey}}
@@ -15155,7 +15155,7 @@ services:
       - spark-{{__SPARK_version | replace('.','-')}}-java-vol:/opt/bitnami/java:RO
       - ./container-volume/spark/logs/:/var/log/spark/logs       
     {% endif -%}   {#  SPARK_enable #}
-    {%if MINIO_enable or RUSTFS_enable or external['S3_enable'] | default(false) %}
+    {%if MINIO_enable or RUSTFS_enable or SEAWEEDFS_enable or external['S3_enable'] | default(false) %}
     #  - aws-credentials-vol:/home/airflow/.aws:RO
     {% endif %}      
     {% if AIRFLOW_volume_map_docker_daemon %}
@@ -15254,7 +15254,7 @@ services:
       SPARK_HOME: /opt/bitnami/spark
       JAVA_HOME: /opt/bitnami/java      
     {% endif -%}   {#  SPARK_enable #}
-    {%if MINIO_enable or RUSTFS_enable or external['S3_enable'] | default(false) %}
+    {%if MINIO_enable or RUSTFS_enable or SEAWEEDFS_enable or external['S3_enable'] | default(false) %}
       AIRFLOW_VAR_S3_ENDPOINT: {{s3Endpoint | default(omit) }}
       AIRFLOW_VAR_S3_ACCESS_KEY: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
       AIRFLOW_VAR_S3_SECRET_ACCESS_KEY: {{s3SecretAccessKey}}
@@ -15486,7 +15486,7 @@ services:
       SPARK_HOME: /opt/bitnami/spark
       JAVA_HOME: /opt/bitnami/java      
     {% endif -%}   {#  SPARK_enable #}
-    {%if MINIO_enable or RUSTFS_enable or external['S3_enable'] | default(false) %}
+    {%if MINIO_enable or RUSTFS_enable or SEAWEEDFS_enable or external['S3_enable'] | default(false) %}
       AIRFLOW_VAR_S3_ENDPOINT: {{s3Endpoint | default(omit) }}
       AIRFLOW_VAR_S3_ACCESS_KEY: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
       AIRFLOW_VAR_S3_SECRET_ACCESS_KEY: {{s3SecretAccessKey}}
@@ -15738,7 +15738,7 @@ services:
       - "5050:5050"
       - "4050-4054:4050-4054"
     environment:
-  {%if MINIO_enable or RUSTFS_enable or external['S3_enable'] | default(false) %}
+  {%if MINIO_enable or RUSTFS_enable or SEAWEEDFS_enable or external['S3_enable'] | default(false) %}
       # for awscli & s3cmd
       AWS_ACCESS_KEY_ID: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
       AWS_SECRET_ACCESS_KEY: {{s3SecretAccessKey}}
@@ -15853,7 +15853,7 @@ services:
       MAVEN_DOWNLOAD_JARS: {{JUPYTER_download_jars}}
       # remove some JARS if they are conflicting with the ones installed above
       REMOVE_JARS: "guava-14.0.1.jar"
-  {%if MINIO_enable or RUSTFS_enable or external['S3_enable'] | default(false) %}
+  {%if MINIO_enable or RUSTFS_enable or SEAWEEDFS_enable or external['S3_enable'] | default(false) %}
       # for awscli & s3cmd
       AWS_ACCESS_KEY_ID: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
       AWS_SECRET_ACCESS_KEY: ${PLATYS_AWS_SECRET_ACCESS_KEY:-{{s3SecretAccessKey}}}
@@ -16117,7 +16117,7 @@ services:
       - "28315:10000"
     environment:
       DUMMY: make-it-valid
-    {%if MINIO_enable or RUSTFS_enable or external['S3_enable'] | default(false) %}
+    {%if MINIO_enable or RUSTFS_enable or SEAWEEDFS_enable or external['S3_enable'] | default(false) %}
       S3_ENDPOINT_URL: {{s3Endpoint if s3Endpoint is defined and s3Endpoint else omit}}
       AWS_ACCESS_KEY_ID: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
       AWS_SECRET_ACCESS_KEY: {{s3SecretAccessKey}}
@@ -16201,7 +16201,7 @@ services:
       MLFLOW_PORT: 5500
       MLFLOW_ARTIFACTS_DESTINATION: '{{MLFLOW_SERVER_artifact_root | default ('/mlruns')}}'
       MLFLOW_GUNICORN_OPTS: "--log-level debug"
-    {%if MINIO_enable or RUSTFS_enable or external['S3_enable'] | default(false) %}
+    {%if MINIO_enable or RUSTFS_enable or SEAWEEDFS_enable or external['S3_enable'] | default(false) %}
       MLFLOW_S3_ENDPOINT_URL: {{s3Endpoint if s3Endpoint is defined and s3Endpoint else omit}}
       MLFLOW_S3_UPLOAD_EXTRA_ARGS: "{}"
       AWS_ACCESS_KEY_ID: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
@@ -18297,7 +18297,7 @@ services:
       PGUSER: {{LIGHTDASH_postgres_user}}
       PGPASSWORD: {{LIGHTDASH_postgres_password}}
       PGDATABASE: {{LIGHTDASH_postgres_dbname}}
-    {%if MINIO_enable or RUSTFS_enable or external['S3_enable'] | default(false) %}
+    {%if MINIO_enable or RUSTFS_enable or SEAWEEDFS_enable or external['S3_enable'] | default(false) %}
       S3_ENDPOINT: '{{s3Endpoint | default(omit) }}'
       S3_REGION: {{s3DefaultRegion if s3DefaultRegion is defined and s3DefaultRegion else omit}}
       S3_ACCESS_KEY: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
@@ -21842,7 +21842,7 @@ services:
       - seccomp:unconfined
     depends_on:
       - etcd-1
-      - {{s3ServiceName if MINIO_enable or RUSTFS_enable | default(false) else omit }}
+      - {{s3ServiceName if MINIO_enable or RUSTFS_enable or SEAWEEDFS_enable | default(false) else omit }}
     ports:
       # grpc
       - "28341:19530"
@@ -25221,7 +25221,7 @@ services:
       ICEBERG_REST_CATALOG_URI: {{TRINO_iceberg_rest_catalog_url if TRINO_iceberg_rest_catalog_url is defined and TRINO_iceberg_rest_catalog_url | length else 'http://iceberg-rest-catalog:8181'}}
       ICEBERG_REST_CATALOG_WAREHOUSE: {{TRINO_iceberg_rest_catalog_warehouse if TRINO_iceberg_rest_catalog_warehouse is defined and TRINO_iceberg_rest_catalog_warehouse | length else 's3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
   {% endif %}
-  {%if MINIO_enable or RUSTFS_enable or external['S3_enable'] | default(false) %}
+  {%if MINIO_enable or RUSTFS_enable or SEAWEEDFS_enable or external['S3_enable'] | default(false) %}
       S3_ENDPOINT: {{s3Endpoint | default(omit) }}
       S3_REGION: {{s3DefaultRegion | default(omit) }}
       S3_AWS_ACCESS_KEY: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
@@ -25389,7 +25389,7 @@ services:
       - ./conf/{{conf_dir}}/{{deployment_type}}/config{{'-dp' if TRINO_starburstdata_enable_data_product is defined and TRINO_starburstdata_enable_data_product else ''}}.properties:{{trino_etc_dir}}/config.properties
       - ./conf/{{conf_dir}}/{{deployment_type}}/node.properties:{{trino_etc_dir}}/node.properties
       - ./conf/{{conf_dir}}/{{deployment_type}}/log-debug.properties:{{trino_etc_dir}}/log.properties
-{% if MINIO_enable or RUSTFS_enable or external['S3_enable'] | default(false) %}
+{% if MINIO_enable or RUSTFS_enable or SEAWEEDFS_enable or external['S3_enable'] | default(false) %}
   {%if HIVE_METASTORE_enable | default(false) %}
       - './conf/{{conf_dir}}/catalog/hive.properties:/catalog/minio.properties'
       - './conf/{{conf_dir}}/catalog/hive.properties:/catalog/hive.properties'
@@ -25613,7 +25613,7 @@ services:
       ICEBERG_REST_CATALOG_URI: {{TRINO_iceberg_rest_catalog_url if TRINO_iceberg_rest_catalog_url is defined and TRINO_iceberg_rest_catalog_url | length else 'http://iceberg-rest-catalog:8181'}}
       ICEBERG_REST_CATALOG_WAREHOUSE: {{TRINO_iceberg_rest_catalog_warehouse if TRINO_iceberg_rest_catalog_warehouse is defined and TRINO_iceberg_rest_catalog_warehouse | length else 's3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
   {% endif %}
-  {%if MINIO_enable or RUSTFS_enable or external['S3_enable'] | default(false) %}
+  {%if MINIO_enable or RUSTFS_enable or SEAWEEDFS_enable or external['S3_enable'] | default(false) %}
       S3_ENDPOINT: {{s3Endpoint | default(omit) }}
       S3_REGION: {{s3DefaultRegion | default(omit) }}
       S3_AWS_ACCESS_KEY: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
@@ -25775,7 +25775,7 @@ services:
       - ./conf/{{conf_dir}}/{{deployment_type}}/worker.config.properties:{{trino_etc_dir}}/config.properties
       - ./conf/{{conf_dir}}/{{deployment_type}}/node.properties:{{trino_etc_dir}}/node.properties
       - ./conf/{{conf_dir}}/{{deployment_type}}/log-debug.properties:{{trino_etc_dir}}/log.properties
-{% if MINIO_enable or RUSTFS_enable or external['S3_enable'] | default(false) %}
+{% if MINIO_enable or RUSTFS_enable or SEAWEEDFS_enable or external['S3_enable'] | default(false) %}
   {%if HIVE_METASTORE_enable | default(false) %}
       - './conf/{{conf_dir}}/catalog/hive.properties:/catalog/minio.properties'
       - './conf/{{conf_dir}}/catalog/hive.properties:/catalog/hive.properties'
@@ -26149,7 +26149,7 @@ services:
       ICEBERG_REST_CATALOG_URI: {{PRESTO_iceberg_rest_catalog_url if PRESTO_iceberg_rest_catalog_url is defined and PRESTO_iceberg_rest_catalog_url | length else 'http://iceberg-rest-catalog:8181'}}
       ICEBERG_REST_CATALOG_WAREHOUSE: {{PRESTO_iceberg_rest_catalog_warehouse if PRESTO_iceberg_rest_catalog_warehouse is defined and PRESTO_iceberg_rest_catalog_warehouse | length else 's3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
   {% endif %}
-  {%if MINIO_enable or RUSTFS_enable or external['S3_enable'] | default(false) %}
+  {%if MINIO_enable or RUSTFS_enable or SEAWEEDFS_enable or external['S3_enable'] | default(false) %}
       S3_ENDPOINT: {{s3Endpoint | default(omit) }}
       S3_REGION: {{s3DefaultRegion | default(omit) }}
       S3_AWS_ACCESS_KEY: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
@@ -26272,7 +26272,7 @@ services:
       - ./data-transfer:/data-transfer
       - ./conf/presto/{{deployment_type}}/config.properties:{{presto_etc_dir}}/config.properties
       - ./conf/presto/{{deployment_type}}/node.properties:{{presto_etc_dir}}/node.properties
-{% if MINIO_enable or RUSTFS_enable or external['S3_enable'] | default(false) %}
+{% if MINIO_enable or RUSTFS_enable or SEAWEEDFS_enable or external['S3_enable'] | default(false) %}
   {%if HIVE_METASTORE_enable | default(false) %}
       - './conf/presto/catalog/hive.properties:{{presto_etc_dir}}/catalog/minio.properties'
       - './conf/presto/catalog/hive.properties:{{presto_etc_dir}}/catalog/hive.properties'
@@ -26410,7 +26410,7 @@ services:
       ICEBERG_REST_CATALOG_URI: {{PRESTO_iceberg_rest_catalog_url if PRESTO_iceberg_rest_catalog_url is defined and PRESTO_iceberg_rest_catalog_url | length else 'http://iceberg-rest-catalog:8181'}}
       ICEBERG_REST_CATALOG_WAREHOUSE: {{PRESTO_iceberg_rest_catalog_warehouse if PRESTO_iceberg_rest_catalog_warehouse is defined and PRESTO_iceberg_rest_catalog_warehouse | length else 's3a://' ~ s3AdminBucketName ~ '/iceberg/warehouse'}}
   {% endif %}
-  {%if MINIO_enable or RUSTFS_enable or external['S3_enable'] | default(false) %}
+  {%if MINIO_enable or RUSTFS_enable or SEAWEEDFS_enable or external['S3_enable'] | default(false) %}
       S3_ENDPOINT: {{s3Endpoint | default(omit) }}
       S3_REGION: {{s3DefaultRegion | default(omit) }}
       S3_AWS_ACCESS_KEY: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
@@ -26534,7 +26534,7 @@ services:
       - ./conf/presto/{{deployment_type}}/worker.config.properties:{{presto_etc_dir}}/config.properties
       - ./conf/presto/{{deployment_type}}/node.properties:{{presto_etc_dir}}/node.properties
 
-{% if MINIO_enable or RUSTFS_enable or external['S3_enable'] | default(false) %}
+{% if MINIO_enable or RUSTFS_enable or SEAWEEDFS_enable or external['S3_enable'] | default(false) %}
   {%if HIVE_METASTORE_enable | default(false) %}
       - './conf/presto/catalog/hive.properties:{{presto_etc_dir}}/catalog/minio.properties'
       - './conf/presto/catalog/hive.properties:{{presto_etc_dir}}/catalog/hive.properties'
@@ -27954,6 +27954,7 @@ services:
     environment:
       - AWS_ACCESS_KEY=${PLATYS_AWS_ACCESS_KEY:-{{SEAWEEDFS_access_key | default('admin') }}}
       - AWS_SECRET_ACCESS_KEY=${PLATYS_AWS_SECRET_ACCESS_KEY:-{{SEAWEEDFS_secret_key | default('abc123abc123!') }}}
+      - S3_TABLE_BUCKET={{SEAWEEDFS_s3_table_bucket | default('') }}
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -28530,7 +28531,7 @@ services:
       - QUARKUS_DATASOURCE_MYSQL_PASSWORD={{MYSQL_password}}
       - QUARKUS_DATASOURCE_MYSQL_JDBC_URL=jdbc:mysql://mysql:3306/{{MYSQL_database}}
     {% endif -%}   {#  NESSIE_store_type #}
-    {%if MINIO_enable or RUSTFS_enable or external['S3_enable'] | default(false) %}
+    {%if MINIO_enable or RUSTFS_enable or SEAWEEDFS_enable or external['S3_enable'] | default(false) %}
       # using MinIO as the object store.
       - NESSIE_CATALOG_DEFAULT_WAREHOUSE=warehouse
       - NESSIE_CATALOG_WAREHOUSES_WAREHOUSE_LOCATION={{NESSIE_warehouse_location}}
@@ -28847,7 +28848,7 @@ services:
         condition: service_healthy
     {% endif %}            
     environment:
-    {%if MINIO_enable or RUSTFS_enable or external['S3_enable'] | default(false) %}
+    {%if MINIO_enable or RUSTFS_enable or SEAWEEDFS_enable or external['S3_enable'] | default(false) %}
       AWS_ACCESS_KEY_ID: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
       AWS_SECRET_ACCESS_KEY: {{s3SecretAccessKey}}
       AWS_REGION: {{s3DefaultRegion | default(omit) }}
@@ -29129,7 +29130,7 @@ services:
       - 28281:8182
     environment:
       - JAVA_OPTS=-Xmx32g -Xms512m
-    {%if MINIO_enable or RUSTFS_enable or external['S3_enable'] | default(false) %}
+    {%if MINIO_enable or RUSTFS_enable or SEAWEEDFS_enable or external['S3_enable'] | default(false) %}
       - AWS_ACCESS_KEY_ID={{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
       - AWS_SECRET_ACCESS_KEY={{s3SecretAccessKey}}
       - AWS_REGION={{s3DefaultRegion | default(omit) }}
@@ -34032,7 +34033,7 @@ services:
     env_file: {{PLATYS_MDP_INIT_env_filename if PLATYS_MDP_INIT_env_filename is defined and PLATYS_MDP_INIT_env_filename and PLATYS_MDP_INIT_env_filename | length else ".env"}}
     {% endif -%}   {#  NIFI2_enable #}   
     environment:
-    {% if MINIO_enable or RUSTFS_enable or external['S3_enable'] | default(false) %}    
+    {% if MINIO_enable or RUSTFS_enable or SEAWEEDFS_enable or external['S3_enable'] | default(false) %}    
       AWS_ACCESS_KEY: {{s3AccessKey | mandatory('s3AccessKey must be defined') }}
       AWS_SECRET_ACCESS_KEY: {{s3SecretAccessKey}}
       AWS_REGION: '{{s3Region | default(omit) }}'
@@ -34046,11 +34047,17 @@ services:
       MINIO_URL: http://minio-1:9000
     {% endif -%}   {#  MINIO_enable #}   
     {% if RUSTFS_enable | default(false) %}    
-      MC_HOST_rustfs-1: http://{{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}:{{s3SecretAccessKey}}@rustfs-1:9000    
+      MC_HOST_rustfs-1: http://{{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the RUSTFS_access_key in config.yml') }}:{{s3SecretAccessKey}}@rustfs-1:9000    
       RUSTFS_ACCESS_KEY_ID: ${PLATYS_AWS_ACCESS_KEY:-{{RUSTFS_access_key | default('admin') }}}
       RUSTFS_SECRET_ACCESS_KEY: ${PLATYS_AWS_SECRET_ACCESS_KEY:-{{RUSTFS_secret_key | default('abc123abc123!') }}}
       RUSTFS_URL: http://rustfs-1:9000
     {% endif -%}   {#  RUSTFS_enable #}   
+    {% if SEAWEEDFS_enable | default(false) %}    
+      MC_HOST_seaweedfs-1: http://{{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the SEAWEEDFS_access_key in config.yml') }}:{{s3SecretAccessKey}}@seaweeedfs-1:8333    
+      RUSTFS_ACCESS_KEY_ID: ${PLATYS_AWS_ACCESS_KEY:-{{SEAWEEDFS_access_key | default('admin') }}}
+      RUSTFS_SECRET_ACCESS_KEY: ${PLATYS_AWS_SECRET_ACCESS_KEY:-{{SEAWEEDFS_secret_key | default('abc123abc123!') }}}
+      RUSTFS_URL: http://seaweedfs-1:8333
+    {% endif -%}   {#  SEAWEEDFS_enable #}   
     {% if LAKEFS_enable | default(false) %}
       LAKEFS_URL: http://lakefs:8000
       LAKEFS_USER: {{LAKEFS_user_name | default(lakefs) }}
@@ -34161,7 +34168,7 @@ volumes:
 {%if FLINK_enable and FLINK_volume_map_flink_distro | default(false) %}
   flink-vol:
 {% endif %}
-{%if PLATYS_MDP_INIT_enable and (MINIO_enable or RUSTFS_enable or external['S3_enable']) | default(false) %}
+{%if PLATYS_MDP_INIT_enable and (MINIO_enable or RUSTFS_enable or SEAWEEDFS_enable or external['S3_enable']) | default(false) %}
   aws-credentials-vol:
 {% endif %}
 {%if NIFI2_enable | default(false) %}
