@@ -89,6 +89,12 @@ def write_service(svc):
     arch = svc.get("arch", ["x86-64"])
     lines.append(f"    arch: [{', '.join(arch)}]")
 
+    # tags / dependencies
+    tags = svc.get("tags") or []
+    lines.append(f"    tags: [{', '.join(str(t) for t in tags)}]")
+    deps = svc.get("dependencies") or []
+    lines.append(f"    dependencies: [{', '.join(str(d) for d in deps)}]")
+
     # links
     links = svc.get("links") or {}
     if links:
