@@ -383,8 +383,8 @@ services:
   - name: Apache Kafka CLI
     id: kafka-cli
     arch: [x86-64]
-    tags: []
-    dependencies: []
+    tags: [cli]
+    dependencies: [kafka]
     links:
       website: http://kafka.apache.org
       documentation: https://kafka.apache.org/documentation
@@ -650,9 +650,160 @@ services:
     parameters:
       - name: SCHEMA_REGISTRY_enable
         default: "false"
-        since: "1.0.0"
+        since: "1.14.0"
         description: >
-          Enable Confluent Schema Registry.
+          Generate the Schema Registry service.
+
+      - name: SCHEMA_REGISTRY_flavour
+        default: "confluent"
+        since: "1.14.0"
+        allowed_values: [confluent, apicurio]
+        description: >
+          Which schema registry implementation to use, either `confluent` or
+          `apicurio`.
+
+      - name: SCHEMA_REGISTRY_nodes
+        default: "1"
+        since: "1.14.0"
+        description: >
+          Number of Schema Registry nodes.
+
+      - name: SCHEMA_REGISTRY_kafka_username
+        default: "schemaregistry"
+        since: "1.14.0"
+        description: >
+          Kafka username for the Schema Registry service.
+
+      - name: SCHEMA_REGISTRY_kafka_password
+        default: "schemaregistry-secret"
+        since: "1.14.0"
+        sensitive: true
+        description: >
+          Kafka password for the Schema Registry service.
+
+      - name: SCHEMA_REGISTRY_confluent_use_zookeeper_election
+        default: "false"
+        since: "1.14.0"
+        description: >
+          Use Zookeeper for election of the master Schema Registry node.
+
+      - name: SCHEMA_REGISTRY_confluent_group_id
+        default: "schema-registry"
+        since: "1.14.0"
+        description: >
+          The group ID for this Schema Registry instance.
+
+      - name: SCHEMA_REGISTRY_confluent_replication_factor
+        default: "1"
+        since: "1.14.0"
+        description: >
+          Replication factor to use for the `_schemas` topic.
+
+      - name: SCHEMA_REGISTRY_confluent_leader_eligibility
+        default: "true"
+        since: "1.14.0"
+        description: >
+          If `true`, this node can participate in primary election. In a
+          multi-colocated setup, turn this off for clusters in the secondary
+          data center.
+
+      - name: SCHEMA_REGISTRY_confluent_mode_mutability
+        default: "true"
+        since: "1.14.0"
+        description: >
+          If `true`, the mode of this Schema Registry node can be changed.
+
+      - name: SCHEMA_REGISTRY_confluent_schema_compatibility_level
+        default: "backward"
+        since: "1.14.0"
+        allowed_values: [none, backward, backward_transitive, forward, forward_transitive, full, full_transitive]
+        description: >
+          The schema compatibility type. One of `none`, `backward`,
+          `backward_transitive`, `forward`, `forward_transitive`, `full` or
+          `full_transitive`.
+
+      - name: SCHEMA_REGISTRY_confluent_log4j_root_loglevel
+        default: "info"
+        since: "1.14.0"
+        description: >
+          Change the rootLogger log level of the Schema Registry.
+
+      - name: SCHEMA_REGISTRY_confluent_debug
+        default: "false"
+        since: "1.14.0"
+        description: >
+          Boolean indicating whether extra debugging information is generated
+          in some error response entities.
+
+      - name: SCHEMA_REGISTRY_apicurio_storage
+        default: "kafkasql"
+        since: "1.19.0"
+        allowed_values: [memory, sql, kafkasql]
+        description: >
+          The storage type for Apicurio Registry: `memory` for in-memory, `sql`
+          for database (PostgreSQL), or `kafkasql` for Kafka-based storage.
+
+      - name: SCHEMA_REGISTRY_apicurio_sql_storage_database
+        default: "apicuriodb"
+        since: "1.14.0"
+        description: >
+          The database name to use when storage is `sql`.
+
+      - name: SCHEMA_REGISTRY_apicurio_sql_storage_user
+        default: "apicurio"
+        since: "1.14.0"
+        description: >
+          The database user to use when storage is `sql`.
+
+      - name: SCHEMA_REGISTRY_apicurio_sql_storage_password
+        default: "abc123!"
+        since: "1.14.0"
+        sensitive: true
+        description: >
+          The database password to use when storage is `sql`.
+
+      - name: SCHEMA_REGISTRY_apicurio_auth_enabled
+        default: "false"
+        since: "1.14.0"
+        description: >
+          Enable authentication via Keycloak. If set to `true`,
+          `KEYCLOAK_enable` will be enabled automatically.
+
+      - name: SCHEMA_REGISTRY_apicurio_auth_anonymous_read_access_enabled
+        default: "false"
+        since: "1.14.0"
+        description: >
+          Allow anonymous users (REST API calls with no credentials) to make
+          read-only calls to the REST API.
+
+      - name: SCHEMA_REGISTRY_apicurio_auth_import_default_users
+        default: "false"
+        since: "1.14.0"
+        description: >
+          If `true`, imports the pre-defined users `sr-view`, `sr-dev` and
+          `sr-admin` into the `registry` Keycloak realm.
+
+      - name: SCHEMA_REGISTRY_apicurio_basic_auth_enabled
+        default: "false"
+        since: "1.14.0"
+        description: >
+          Enable basic authentication. Requires
+          `SCHEMA_REGISTRY_apicurio_auth_enabled` to be `true` and Keycloak
+          configured accordingly.
+
+      - name: SCHEMA_REGISTRY_apicurio_eventsourcing_enabled
+        default: "false"
+        since: "1.14.0"
+        description: >
+          Enable event sourcing, causing the registry to emit events when
+          changes are made.
+
+      - name: SCHEMA_REGISTRY_apicurio_eventsourcing_kafka_topic
+        default: "registry-events"
+        since: "1.14.0"
+        description: >
+          The Kafka topic to use for event sourcing when the transport is set
+          to `kafka`.
 
   - name: Schema Registry UI
     id: schema-registry-ui
@@ -1758,8 +1909,8 @@ services:
   - name: kcat (formerly known as Kafkacat)
     id: kcat
     arch: [x86-64]
-    tags: []
-    dependencies: []
+    tags: [cli]
+    dependencies: [kafka]
     links:
       website: https://github.com/edenhill/kcat
       documentation: https://github.com/edenhill/kcat
@@ -2020,7 +2171,7 @@ services:
         description: >
           Generate KAdmin service
 
-  - name: CMAK (Cluster Manager for Apache Kafka, previously known as Kafka Manager)
+  - name: CMAK
     id: cmak
     arch: [x86-64]
     tags: []
@@ -2030,7 +2181,8 @@ services:
       documentation: https://github.com/yahoo/CMAK
       github: https://github.com/yahoo/CMAK
     description: >
-      CMAK is a tool for managing Apache Kafka clusters.
+      CMAK (Cluster Manager for Apache Kafka) is a tool for managing Apache
+      Kafka clusters.
     enable:
       platys_init: CMAK
       example: |
@@ -2786,7 +2938,7 @@ services:
     id: kafka-connector-board
     arch: [x86-64]
     tags: []
-    dependencies: []
+    dependencies: [kafka-connect]
     links:
       documentation: https://github.com/tranglolab/kafka_connectors_board
       github: https://github.com/tranglolab/kafka_connectors_board
@@ -5640,7 +5792,7 @@ services:
   - name: Apache ActiveMQ
     id: activemq
     arch: [x86-64]
-    tags: []
+    tags: [messaging, message-broker]
     dependencies: []
     links:
       website: https://activemq.apache.org/
@@ -7594,7 +7746,7 @@ services:
   - name: Adminer
     id: adminer
     arch: [x86-64]
-    tags: []
+    tags: [ui]
     dependencies: []
     links:
       website: https://www.adminer.org/
@@ -7938,7 +8090,7 @@ services:
   - name: adminMongo
     id: admin-mongo
     arch: [x86-64]
-    tags: []
+    tags: [ui]
     dependencies: []
     links:
       documentation: https://github.com/adicom-systems/adminMongo
@@ -11535,8 +11687,8 @@ services:
   - name: Adminio UI
     id: adminio
     arch: [x86-64]
-    tags: []
-    dependencies: []
+    tags: [ui]
+    dependencies: [minio]
     links:
       documentation: https://github.com/rzrbld/adminio-ui/
       github: https://github.com/rzrbld/adminio-ui
@@ -17611,7 +17763,7 @@ services:
     id: kafka-lag-exporter
     arch: [x86-64]
     tags: []
-    dependencies: []
+    dependencies: [kafka]
     links:
       website: https://github.com/seglo/kafka-lag-exporter
       documentation: https://github.com/seglo/kafka-lag-exporter
@@ -18571,7 +18723,10 @@ services:
       documentation: https://docs.ckan.org/en/2.9/
       github: https://github.com/ckan/ckan
     description: >
-      ```bash platys init --enable-services CKAN platys gen ```
+      CKAN is an open-source DMS (data management system) for powering data
+      hubs and data portals. CKAN makes it easy to publish, share and use data.
+      It powers catalog.data.gov, open.canada.ca/data, data.humdata.org among
+      many other sites.
     enable:
       platys_init: CKAN
       example: |
@@ -21043,7 +21198,7 @@ services:
   - name: Zookeeper
     id: zookeeper
     arch: [x86-64]
-    tags: []
+    tags: [engine]
     dependencies: []
     links:
       website: https://zookeeper.apache.org/
@@ -21081,12 +21236,11 @@ services:
         description: >
           number of Zookeeper nodes
 
-      - name: ZOOKEEPER_navigator_enable
+      - name: ZOOKEEPER_volume_map_data
         default: "false"
         since: "1.1.0"
         description: >
-          Zookeeper Navigator is a UI for managing and viewing zookeeper
-          cluster.
+          Volume map the data and log folders of Zookeeper.
 
   - name: Zoonavigator
     id: zoonavigator
@@ -22034,6 +22188,34 @@ services:
         description: >
           Generate Confluent Control Center Next Generation service
 
+  - name: Gravitino Iceberg REST Server
+    id: gravitino-iceberg-rest
+    arch: [x86-64]
+    tags: []
+    dependencies: []
+    links:
+      website: https://gravitino.apache.org/
+      documentation: https://gravitino.apache.org/docs
+      github: https://github.com/apache/gravitino
+    description: >
+      World's most powerful open data catalog for building a high-performance,
+      geo-distributed and federated metadata lake.
+    enable:
+      platys_init: GRAVITINO_ICERBERG_REST
+      example: |
+        platys init --enable-services GRAVITINO_ICEBERG_REST
+        platys gen
+    usage:
+      - title: Usage
+        content: |
+          Navigate to <http://dataplatform:28287>.
+    parameters:
+      - name: GRAVITINO_ICEBERG_REST_enable
+        default: "false"
+        since: "1.19.0"
+        description: >
+          Generate Gravitino Iceberg REST service
+
   - name: Kafbat UI
     id: kafbat-ui
     arch: [x86-64]
@@ -22200,6 +22382,86 @@ services:
         since: "1.0.0"
         description: >
           Enable Moat.
+
+  - name: Neo4J Knowledge Graph Builder
+    id: neo4j-kg-builder
+    arch: [x86-64]
+    tags: []
+    dependencies: [neo4j]
+    links:
+      website: https://neo4j.com/labs/genai-ecosystem/llm-graph-builder/
+      documentation: https://neo4j.com/docs/llm-graph-builder/
+      github: https://github.com/neo4j-labs/llm-graph-builder
+    description: >
+      Neo4j LLM Knowledge Graph Builder transforms unstructured data into a
+      structured Neo4j knowledge graph using large language models. It provides
+      a backend REST API and a React frontend for uploading documents (PDF,
+      text, YouTube, Wikipedia, S3, web pages) and extracting entities and
+      relationships into Neo4j automatically.
+    enable:
+      platys_init: NEO4J,NEO4J_KG_BUILDER
+      example: |
+        platys init --enable-services NEO4J,NEO4J_KG_BUILDER
+        platys gen
+    usage:
+      - title: Open the Knowledge Graph Builder UI
+        content: |
+          Navigate to <http://dataplatform:28415>.
+    usage:
+      - title: Access the backend REST API
+        content: |
+          The REST API is available at <http://dataplatform:28414>.
+    parameters:
+      - name: NEO4J_KG_BUILDER_enable
+        default: "false"
+        since: "1.17.0"
+        description: >
+          Enable the Neo4j Knowledge Graph Builder service (backend +
+          frontend).
+
+      - name: NEO4J_KG_BUILDER_openai_api_key
+        default: ""
+        since: "1.17.0"
+        sensitive: true
+        description: >
+          OpenAI API key used by the Knowledge Graph Builder backend for
+          LLM-based entity extraction.
+
+      - name: NEO4J_KG_BUILDER_diffbot_api_key
+        default: ""
+        since: "1.17.0"
+        sensitive: true
+        description: >
+          Diffbot API key for the Diffbot LLM extraction model. Leave empty if
+          not using Diffbot.
+
+      - name: NEO4J_KG_BUILDER_embedding_model
+        default: ""
+        since: "1.17.0"
+        description: >
+          Embedding model to use for vector embeddings. Leave empty to use the
+          default model configured in the backend.
+
+      - name: NEO4J_KG_BUILDER_knn_min_score
+        default: "0.94"
+        since: "1.17.0"
+        description: >
+          Minimum similarity score threshold for k-nearest-neighbour graph
+          relationships created between similar document chunks.
+
+      - name: NEO4J_KG_BUILDER_is_embedding
+        default: "true"
+        since: "1.17.0"
+        description: >
+          Whether to generate and store vector embeddings for extracted graph
+          chunks.
+
+      - name: NEO4J_KG_BUILDER_ollama_model
+        default: "llama3.2"
+        since: "1.17.0"
+        description: >
+          Ollama model name to use for local LLM inference. The backend
+          connects to Ollama via host.docker.internal:11434.
 
   - name: Apache NiFi
     id: nifi2
