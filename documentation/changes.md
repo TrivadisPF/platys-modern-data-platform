@@ -9,7 +9,8 @@ See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/plat
  * Kafbat UI
  * RisingWave Events API
  * Apache MiNiFi C++
- * 
+ * SeaweedFS
+ 
 ### Version upgrades
  
  * Update `nifi-toolkit v2` to `2.10.0`
