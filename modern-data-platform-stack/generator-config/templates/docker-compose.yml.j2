@@ -340,7 +340,7 @@ networks:
 {% set __RSTUDIO_version = RSTUDIO_version | default('latest') -%}
 {% set __SHINY_SERVER_version = SHINY_SERVER_version | default('latest') -%}
 
-{% set __DATAIKU_DSS_version = DATAIKU_DSS_version | default('latest') -%}
+{% set __DATAIKU_version = DATAIKU_version | default('latest') -%}
 
 {% set __MLFLOW_SERVER_version = MLFLOW_SERVER_version | default('latest') -%}
 
@@ -1005,7 +1005,7 @@ networks:
   {% set VERBA_enable = false -%}
   {% set RAGFLOW_enable = false -%}
   {% set NEO4j_KG_BUILDER_enable = false -%}
-  {% set DATAIKU_DSS_enable = false -%}
+  {% set DATAIKU_enable = false -%}
   {% set KIE_SERVER_enable = false -%}
   {% set METABASE_enable = false -%}
   {% set LIGHTDASH_enable = false -%}
@@ -16102,12 +16102,12 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {#  SHINY_SERVER_enable  #}
 
-{%if DATAIKU_DSS_enable | default(false) %}
+{%if DATAIKU_enable | default(false) %}
   #  ================================== Dataiku Data Science Studio  ========================================== #
   dataiku-dss:
-    image: dataiku/dss:{{__DATAIKU_DSS_version}}
-    container_name: dataiku-dss
-    hostname: dataiku-dss
+    image: dataiku/dss:{{__DATAIKU_version}}
+    container_name: dataiku
+    hostname: dataiku
     labels:
       com.platys.name: 'dataiku'
       com.platys.description: "Platform for Everyday AI"
@@ -16128,7 +16128,7 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
-    {% if DATAIKU_DSS_volume_map_data %}
+    {% if DATAIKU_volume_map_data %}
       - "./container-volume/dataiku-dss/work:/home/dataiku/dss"
     {% endif %}
     {%if use_timezone | default(false) %}
@@ -16139,7 +16139,7 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
-{% endif %}   {#  DATAIKU_DSS_enable  #}
+{% endif %}   {#  DATAIKU_enable  #}
 
 {%if MLFLOW_SERVER_enable | default(false) %}
   #  ================================== MLflow Server ========================================== #
