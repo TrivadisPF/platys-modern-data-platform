@@ -659,6 +659,8 @@ networks:
 
 {% set __RUSTFS_version = RUSTFS_version | default('latest') -%}
 
+{% set __SEAWEEDFS_version = SEAWEEDFS_version | default('latest') -%}
+
 {% set __GARAGE_version = GARAGE_version | default('latest') -%}
 {% set __GARAGE_WEBUI_version = GARAGE_WEBUI_version | default('latest') -%}
 
@@ -1134,7 +1136,8 @@ networks:
   {% set MINIO_MC_enable = false -%}
   {% set MINIO_CONSOLE_enable = false -%}
   {% set MINIO_WEB_enable = false -%}
-  {% set RUSTFS_enable = false -%}  
+  {% set RUSTFS_enable = false -%}
+  {% set SEAWEEDFS_enable = false -%}
   {% set GARAGE_enable = false -%}
   {% set GARAGE_WEBUI_enable = false -%}
   {% set LAKEFS_enable = false -%}
@@ -1602,6 +1605,14 @@ networks:
     {% set s3SecretAccessKey = '${PLATYS_AWS_SECRET_ACCESS_KEY:-' ~ RUSTFS_secret_key ~'}' %}
     {% set s3DefaultRegion = 'us-east-1' %}
     {% set s3AdminBucketName = RUSTFS_admin_bucket_name %}
+  {% elif s3_service_to_use == 'seaweedfs' %}
+    {% set s3ServiceName = 'seaweedfs-1' %}
+    {% set s3EndpointStorage = 'http://seaweedfs-1:8333' %}
+    {% set s3PathStyleAccess = 'true' %}
+    {% set s3AccessKey = '${PLATYS_AWS_ACCESS_KEY:-' ~ SEAWEEDFS_access_key ~'}' %}
+    {% set s3SecretAccessKey = '${PLATYS_AWS_SECRET_ACCESS_KEY:-' ~ SEAWEEDFS_secret_key ~'}' %}
+    {% set s3DefaultRegion = 'us-east-1' %}
+    {% set s3AdminBucketName = SEAWEEDFS_admin_bucket_name %}
   {% endif %}
 {% endif %}   {# external['s3Endpoint'] #}
 
@@ -27922,6 +27933,49 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {#  RUSTFS_enable #}
 
+{% if SEAWEEDFS_enable | default(false) %}
+  #  ================================== SeaweedFS (S3 Storage) ========================================== #
+  seaweedfs-1:
+    image: chrislusf/seaweedfs:{{__SEAWEEDFS_version}}
+    container_name: seaweedfs-1
+    hostname: seaweedfs-1
+    labels:
+      com.platys.name: "seaweedfs"
+      com.platys.description: "Software-defined Object Storage"
+      com.platys.webui.title: "SeaweedFS Master UI"
+      com.platys.webui.url: "http://dataplatform:9333"
+      com.platys.password.envvars: "PLATYS_AWS_SECRET_ACCESS_KEY"      
+    ports:
+      - "8333:8333"     # S3 endpoint
+      - "9333:9333"     # Master UI
+      - "28276:8888"    # Filer UI
+      - "23646:23646"   # Admin UI
+    environment:
+      - AWS_ACCESS_KEY=${PLATYS_AWS_ACCESS_KEY:-{{SEAWEEDFS_access_key | default('admin') }}}
+      - AWS_SECRET_ACCESS_KEY=${PLATYS_AWS_SECRET_ACCESS_KEY:-{{SEAWEEDFS_secret_key | default('abc123abc123!') }}}
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {%if SEAWEEDFS_volume_map_data | default(false) %}
+      - ./container-volume/seaweedfs/data:/data
+    {% endif -%}   {#  SEAWEEDFS_volume_map_data #}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9333/cluster/status"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+{% endif %}   {#  SEAWEEDFS_enable #}
+
 {% if GARAGE_enable | default(false) %}
   #  ================================== Garage (S3 Storage) ========================================== #
   garage:
@@ -34111,6 +34165,9 @@ volumes:
 {% endif %}
 {%if NIFI2_enable | default(false) %}
   nifi-config-vol:
+{% endif %}
+{%if SEAWEEDFS_enable and not SEAWEEDFS_volume_map_data | default(false) %}
+  seaweedfs-data:
 {% endif %}
 {%if SPARK_enable %}
   spark-{{__SPARK_version | replace('.','-')}}-vol:

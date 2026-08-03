@@ -265,6 +265,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 8200 | 8200 | vault |
 8222 | 8222 | nats-1 |
 8288 | 8288 | vector-admin |
+8333 | 8333 | seaweedfs-1 |
 9380 | 9380 | ragflow |
 8443 | 8443 | kong (proxy ssl) |
 8444 | 8444 | kong (admin api ssl) |
@@ -334,6 +335,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 9099 | 9099 | kafka-8     |
 9192 | 9192 | lenses-box     |
 9292 | 9292 | pact-broker     |
+9333 | 9333 | seaweedfs-1 |
 9343 | 9343 | klaw-cluster-api |
 9363 | 9363 | proton-server (Prometheus Metrics) |
 9393 | 9393 | spring-dataflow-server |
@@ -446,6 +448,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 19632 | 19630 | streamsets-transformer-1 |
 19999 | 9999 | influxdb2 |
 21000 | 21000 | atlas |
+23646 | 23646 | seaweedfs-1 |
 23817 | 23817 | infinity (thrift) |
 23820 | 23820 | infinity (http) |
 24224 | 24224 | fluentd |
@@ -839,8 +842,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28273 | 3000 | presidio-analyzer |
 28274 | 8000 | presidio-anonymizer |
 28275 | 8181 | lakekeeper |
-28276 | | |
-28277 | | |
+28276 | 8888 | seaweedfs-1 |
+28277 |  |   |
 28278 | 5050 | allure |
 28279 | 5252 | allure-ui |
 28280 | 3000 | nimtable-web |
