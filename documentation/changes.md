@@ -25,6 +25,7 @@ See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/plat
 
  * rename `CONFLUENT_SCHEMA_REGISTRY_xxxx` to `SCHEMA_REGISTRY_confluent_xxxx`
  * rename `APICURIO_SCHEMA_REGISTRY_xxxx` to `SCHEMA_REGISTRY_apicurio_xxxx`
+ * rename `DATAIKU_DSS_xxxx` to `DATAIKU_xxxx`
 
 ## What's new in 1.20.0
 
