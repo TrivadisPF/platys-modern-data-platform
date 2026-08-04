@@ -2161,17 +2161,17 @@ For each service there might be some other settings, such as controlling the num
 | `TYK_PUMP_enable`                             	| `false` 	| 1.16.0 	| Generate Tyk Pump service                                                                                                                                             	|
 | `TYK_PUMP_backend_type`                             	| `mongo` 	| 1.16.0 	| Backend to use for Tyk Pump, either `mongo`, `postgres` or `kafka` |
 | [**_Kong API Gateway_**](./services/kong-gateway.md)   &nbsp;&nbsp;&nbsp;&nbsp;![x86-64](./images/x86-64.png)                     	|         	|       	|                                                                                                                                                                                     	|             	|                                	|
-| `KONG_enable`                             	| `false` 	| 1.16.0 	| Generate Kong API Gateway service                                                                                                                                             	|
-| `KONG_nodes`                             	| `1` 	| 1.16.0 	| Number of Kong nodes to enable.                                                                                                                                             	|
-| `KONG_use_declarative_config`                             	| `false` 	| 1.16.0 	| Map declarative configuration into the `/kong` folder. If enabled, place config file(s) into `custom-conf/kong/`. |
-| `KONG_use_db`                             	| `false` 	| 1.16.0 	| Should a database be used as a backend or should it run db-less? |
-| `KONG_db_type`                             	| `postgres` 	| 1.16.0 	| The database backend to use for Kong, either ``postgres` for Postgresql database or `cassandra` for Apache Cassandra (deprecated by Kong and will no longer be available in Kong 4.x). |
-| `KONG_log_level`                             	| `info` 	| 1.16.0 	| The log level to use for Kong service. |
-| `KONG_volume_map_working`                             	| `false` 	| 1.16.0 	| Volume map working directory folder into the Kong service.      |
-| `KONG_volume_map_data`                             	| `false` 	| 1.16.0 	| Volume map data folder into the Kong service.      |
-| `KONG_license_data`  
+| `KONG_GATEWAY_enable`                             	| `false` 	| 1.16.0 	| Generate Kong API Gateway service                                                                                                                                             	|
+| `KONG_GATEWAY_nodes`                             	| `1` 	| 1.16.0 	| Number of Kong nodes to enable.                                                                                                                                             	|
+| `KONG_GATEWAY_use_declarative_config`                             	| `false` 	| 1.16.0 	| Map declarative configuration into the `/kong` folder. If enabled, place config file(s) into `custom-conf/kong/`. |
+| `KONG_GATEWAY_use_db`                             	| `false` 	| 1.16.0 	| Should a database be used as a backend or should it run db-less? |
+| `KONG_GATEWAY_db_type`                             	| `postgres` 	| 1.16.0 	| The database backend to use for Kong, either ``postgres` for Postgresql database or `cassandra` for Apache Cassandra (deprecated by Kong and will no longer be available in Kong 4.x). |
+| `KONG_GATEWAY_log_level`                             	| `info` 	| 1.16.0 	| The log level to use for Kong service. |
+| `KONG_GATEWAY_volume_map_working`                             	| `false` 	| 1.16.0 	| Volume map working directory folder into the Kong service.      |
+| `KONG_GATEWAY_volume_map_data`                             	| `false` 	| 1.16.0 	| Volume map data folder into the Kong service.      |
+| `KONG_GATEWAY_license_data`  
                            	| `` 	| 1.16.0 	| The enterprise license, if you want to run the enterprise subscription. |
-| `KONG_plugins`                             	| `` 	| 1.16.0 	| A list of custom plugins to enable. |
+| `KONG_GATEWAY_plugins`                             	| `` 	| 1.16.0 	| A list of custom plugins to enable. |
 | [**_Kong Deck_**](./services/kong-deck.md)   &nbsp;&nbsp;&nbsp;&nbsp;![x86-64](./images/x86-64.png)                     	|         	|       	|                                                                                                                                                                                     	|             	|                                	|
 | `KONG_DECK_enable`                             	| `false` 	| 1.16.0 	| Generate Kong Deck service                                                                                                                                             	|
 | [**_Konga_**](./services/konga.md)   &nbsp;&nbsp;&nbsp;&nbsp;![x86-64](./images/x86-64.png)                     	|         	|       	|                                                                                                                                                                                     	|             	|                                	|

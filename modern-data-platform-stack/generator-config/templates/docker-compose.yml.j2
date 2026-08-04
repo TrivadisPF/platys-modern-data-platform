@@ -594,10 +594,10 @@ networks:
 {% set __GRAPHQL_MESH_version = GRAPHQL_MESH_version | default('latest') -%}
 {% set __DIRECTUS_version = DIRECTUS_version | default('latest') -%}
 
-{% set __TYK_version = TYK_version | default('latest') -%}
+{% set __TYK_GATEWAY_version = TYK_GATEWAY_version | default('latest') -%}
 {% set __TYK_PUMP_version = TYK_PUMP_version | default('latest') -%}
 
-{% set __KONG_version = KONG_version | default('latest') -%}
+{% set __KONG_GATEWAY_version = KONG_GATEWAY_version | default('latest') -%}
 {% set __KONG_DECK_version = KONG_DECK_version | default('latest') -%}
 {% set __KONGA_version = KONGA_version | default('latest') -%}
 {% set __KONG_ADMIN_UI_version = KONG_ADMIN_UI_version | default('latest') -%}
@@ -1100,10 +1100,10 @@ networks:
   {% set HASURA_enable = false -%}
   {% set GRAPHQL_MESH_enable = false -%}
   {% set DIRECTUS_enable = false -%}
-  {% set TYK_enable = false -%}
+  {% set TYK_GATEWAY_enable = false -%}
   {% set TYK_PUMP_enable = false -%}
   {% set TYK_DASHBOARD_enable = false -%}
-  {% set KONG_enable = false -%}
+  {% set KONG_GATEWAY_enable = false -%}
   {% set KONG_DECK_enable = false -%}
   {% set KONGA_enable = false -%}
   {% set KONG_ADMIN_UI_enable = false -%}
@@ -26885,14 +26885,14 @@ services:
       com.platys.restapi.url: "http://dataplatform:28280"
     ports:
       - 28280:8080
-    {%if TYK_edition == 'pro' | default(false) %}
+    {%if TYK_GATEWAY_edition == 'pro' | default(false) %}
     env_file:
       - ./conf/tyk/tyk.env
-    {% endif -%}   {#  TYK_edition #}
+    {% endif -%}   {#  TYK_GATEWAY_edition #}
     environment:
       - TYK_GW_LISTENPORT=8080
       - TYK_GW_SECRET={{TYK_secret}}
-    {%if TYK_edition == 'pro' | default(false) %}
+    {%if TYK_GATEWAY_edition == 'pro' | default(false) %}
       - TYK_GW_NODESECRET={{TYK_secret}}
       - TYK_GW_POLICIES_POLICYSOURCE=service
       - TYK_GW_POLICIES_POLICYCONNECTIONSTRING=http://tyk-dashboard:3000
@@ -26907,7 +26907,7 @@ services:
       - TYK_GW_STORAGE_ADDRS=tyk-redis:6379
       - TYK_GW_ENABLEANALYTICS=true
       - TYK_GW_ANALYTICSCONFIG_TYPE=mongo
-    {% endif -%}   {#  TYK_edition #}
+    {% endif -%}   {#  TYK_GATEWAY_edition #}
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -27010,7 +27010,7 @@ services:
     restart: {{container_restart_policy}}
   {% endif %}   {#  TYK_PUMP_enable #}
 
-  {%if TYK_edition == 'pro' | default(false) %}
+  {%if TYK_GATEWAY_edition == 'pro' | default(false) %}
   tyk-dashboard:
     image: tykio/tyk-dashboard:{{__TYK_version}}
     container_name: tyk-dashboard
@@ -27059,15 +27059,15 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     command: ["mongod", "--smallfiles"]
     restart: {{container_restart_policy}}
-  {% endif %}   {#  TYK_edition == 'pro' #}
+  {% endif %}   {#  TYK_GATEWAY_edition == 'pro' #}
 
 {% endif %}   {#  TYK_GATEWAY_enable #}
 
-{% if KONG_enable | default(false) %}
+{% if KONG_GATEWAY_enable | default(false) %}
   #  ================================== Kong Gateway ========================================== #
-  {% for num in range(KONG_nodes| default(1) ) %}
+  {% for num in range(KONG_GATEWAY_nodes| default(1) ) %}
   kong-gateway-{{loop.index}}:
-    image: kong/kong-gateway:{{__KONG_version}}
+    image: kong/kong-gateway:{{__KONG_GATEWAY_version}}
     container_name: kong-gateway-{{loop.index}}
     hostname: kong-gateway-{{loop.index}}
     labels:
@@ -27095,25 +27095,25 @@ services:
       - 8002:8002
     {% endif -%}  {# loop.index == 1 #}
     environment:
-      - KONG_LOG_LEVEL={{KONG_log_level | default('info')}}
-      - KONG_PLUGINS={{KONG_plugins}}
-  {%if not KONG_use_db | default(false) %}
+      - KONG_LOG_LEVEL={{KONG_GATEWAY_log_level | default('info')}}
+      - KONG_PLUGINS={{KONG_GATEWAY_plugins}}
+  {%if not KONG_GATEWAY_use_db | default(false) %}
       - KONG_DATABASE=off
-  {% else -%}   {#  KONG_db_type = 'postgres' #}
-    {%if KONG_db_type == 'postgres' | default(false) %}
+  {% else -%}   {#  KONG_GATEWAY_db_type = 'postgres' #}
+    {%if KONG_GATEWAY_db_type == 'postgres' | default(false) %}
       - KONG_DATABASE=postgres
       - KONG_PG_DATABASE=kongdb
       - KONG_PG_HOST=kong-db
       - KONG_PG_USER=kong
       - KONG_PG_PASSWORD=abc123!
 #      - KONG_PG_PASSWORD_FILE= /run/secrets/kong_postgres_password
-    {% endif -%}   {#  KONG_db_type = 'postgres' #}
-    {%if KONG_db_type == 'cassandra' | default(false) %}
+    {% endif -%}   {#  KONG_GATEWAY_db_type = 'postgres' #}
+    {%if KONG_GATEWAY_db_type == 'cassandra' | default(false) %}
       - KONG_DATABASE=cassandra
       - KONG_CASSANDRA_CONTACT_POINTS=cassandra-1
-    {% endif -%}   {#  KONG_db_type = 'cassandra' #}
-  {% endif -%}   {# KONG_use #}
-      - KONG_DECLARATIVE_CONFIG={{'/kong' if KONG_use_declarative_config else omit}}
+    {% endif -%}   {#  KONG_GATEWAY_db_type = 'cassandra' #}
+  {% endif -%}   {# KONG_GATEWAY_use_db #}
+      - KONG_DECLARATIVE_CONFIG={{'/kong' if KONG_GATEWAY_use_declarative_config else omit}}
       - KONG_ADMIN_ACCESS_LOG=/dev/stdout
       - KONG_PROXY_ACCESS_LOG=/dev/stdout
       - KONG_ADMIN_ERROR_LOG=/dev/stderr
@@ -27125,21 +27125,21 @@ services:
       - KONG_ADMIN_GUI_URL=http://${PUBLIC_IP:-127.0.0.1}:8002
       - KONG_ADMIN_API_URI=http://${PUBLIC_IP:-127.0.0.1}:8001
     {% endif -%}  {# loop.index == 1 #}
-    {% if KONG_volume_map_working %}
+    {% if KONG_GATEWAY_volume_map_working %}
       - KONG_PREFIX=/var/run/kong
-    {% endif -%}   {#  KONG_volume_map_working #}
-      - KONG_LICENSE_DATA={{KONG_license_data}}
+    {% endif -%}   {#  KONG_GATEWAY_volume_map_working #}
+      - KONG_LICENSE_DATA={{KONG_GATEWAY_license_data}}
       #- KONG_ENFORCE_RBAC=
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
-    {% if KONG_volume_map_working %}
+    {% if KONG_GATEWAY_volume_map_working %}
       - ./container-volume/kong:/var/run/kong
-    {% endif -%}   {#  KONG_volume_map_working #}
+    {% endif -%}   {#  KONG_GATEWAY_volume_map_working #}
 #      - kong_tmp_vol:/tmp
-    {%if KONG_use_declarative_config | default(false) %}
+    {%if KONG_GATEWAY_use_declarative_config | default(false) %}
       - ./custom-conf/kong:/kong
     {% endif -%}   {#  use_timezone #}
     {%if use_timezone | default(false) %}
@@ -27153,7 +27153,7 @@ services:
     restart: {{container_restart_policy}}
   {% endfor %}
 
-  {% if KONG_db_type == 'postgres' | default(false) %}
+  {% if KONG_GATEWAY_db_type == 'postgres' | default(false) %}
   kong-db:
     image: postgres:9.5
     container_name: kong-db
@@ -27171,9 +27171,9 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
-    {% if KONG_volume_map_data %}
+    {% if KONG_GATEWAY_volume_map_data %}
       - ./container-volume/kong/data:/var/lib/postgresql/data
-    {% endif -%}   {#  KONG_volume_map_data #}
+    {% endif -%}   {#  KONG_GATEWAY_volume_map_data #}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -27183,11 +27183,11 @@ services:
     stdin_open: true
     tty: true
     restart: {{container_restart_policy}}
-  {% endif -%}   {#  KONG_db_type == 'postgres' #}
+  {% endif -%}   {#  KONG_GATEWAY_db_type == 'postgres' #}
 
-  {% if KONG_use_db| default(false) %}
+  {% if KONG_GATEWAY_use_db| default(false) %}
   kong-migrations:
-    image: kong:{{__KONG_version}}
+    image: kong:{{__KONG_GATEWAY_version}}
     container_name: kong-migrations
     hostname: kong-migrations
     labels:
@@ -27195,18 +27195,18 @@ services:
       com.platys.description: ""
     command: kong migrations bootstrap
     environment:
-    {%if KONG_db_type == 'postgres' | default(false) %}
+    {%if KONG_GATEWAY_db_type == 'postgres' | default(false) %}
       - KONG_DATABASE=postgres
       - KONG_PG_DATABASE=kongdb
       - KONG_PG_HOST=kong-db
       - KONG_PG_USER=kong
 #      - KONG_PG_PASSWORD_FILE= /run/secrets/kong_postgres_password
       - KONG_PG_PASSWORD=abc123!
-    {% endif -%}   {#  KONG_db_type = 'postgres' #}
-    {%if KONG_db_type == 'cassandra' | default(false) %}
+    {% endif -%}   {#  KONG_GATEWAY_db_type = 'postgres' #}
+    {%if KONG_GATEWAY_db_type == 'cassandra' | default(false) %}
       - KONG_DATABASE=cassandra
       - KONG_CASSANDRA_CONTACT_POINTS=cassandra-1
-    {% endif -%}   {#  KONG_db_type = 'cassandra' #}
+    {% endif -%}   {#  KONG_GATEWAY_db_type = 'cassandra' #}
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -27224,7 +27224,7 @@ services:
     restart: on-failure
 
   kong-migrations-up:
-    image: kong:{{__KONG_version}}
+    image: kong:{{__KONG_GATEWAY_version}}
     container_name: kong-migrations-up
     hostname: kong-migrations-up
     labels:
@@ -27232,18 +27232,18 @@ services:
       com.platys.description: ""
     command: kong migrations up && kong migrations finish
     environment:
-    {%if KONG_db_type == 'postgres' | default(false) %}
+    {%if KONG_GATEWAY_db_type == 'postgres' | default(false) %}
       - KONG_DATABASE=postgres
       - KONG_PG_DATABASE=kongdb
       - KONG_PG_HOST=kong-db
       - KONG_PG_USER=kong
 #      - KONG_PG_PASSWORD_FILE= /run/secrets/kong_postgres_password
       - KONG_PG_PASSWORD=abc123!
-    {% endif -%}   {#  KONG_db_type = 'postgres' #}
-    {%if KONG_db_type == 'cassandra' | default(false) %}
+    {% endif -%}   {#  KONG_GATEWAY_db_type = 'postgres' #}
+    {%if KONG_GATEWAY_db_type == 'cassandra' | default(false) %}
       - KONG_DATABASE=cassandra
       - KONG_CASSANDRA_CONTACT_POINTS=cassandra-1
-    {% endif -%}   {#  KONG_db_type = 'cassandra' #}
+    {% endif -%}   {#  KONG_GATEWAY_db_type = 'cassandra' #}
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -27259,7 +27259,7 @@ services:
 #    secrets:
 #      - kong_postgres_password
     restart: on-failure
-  {% endif -%}   {#  KONG_use_db #}
+  {% endif -%}   {#  KONG_GATEWAY_use_db #}
 
   {% if KONG_DECK_enable | default(false) %}
   #  ================================== Kong decK  ========================================== #
@@ -27335,7 +27335,7 @@ services:
     ports:
       - "28286:80"
     environment:
-      - KONG_DATABASE={{KONG_db_type}}
+      - KONG_DATABASE={{KONG_GATEWAY_db_type}}
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -27375,7 +27375,7 @@ services:
     {% endif -%}   {#  use_timezone #}
     restart: {{container_restart_policy}}
   {% endif %}   {# KONG_MAP_enable #}
-{% endif %}   {#  KONG_enable #}
+{% endif %}   {#  KONG_GATEWAY_enable #}
 
 {% if CURITY_enable | default(false) %}
   #  ================================== Curity Identity Server ========================================== #
