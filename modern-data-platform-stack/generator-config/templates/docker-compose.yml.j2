@@ -21306,7 +21306,7 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {#  INFLUXDB_enable #}
 
-{% if INFLUXDB_CHRONOGRAF_enable | default(false) %}
+{% if CHRONOGRAF_enable | default(false) %}
   #  ================================== InfluxData Chronograf ========================================== #
   chronograf:
     image: chronograf:{{__CHRONOGRAF_version}}
@@ -21335,7 +21335,7 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
-    {% if INFLUXDB_CHRONOGRAF_volume_map_data %}
+    {% if CHRONOGRAF_volume_map_data %}
       - "./container-volume/chronograf:/var/lib/chronograf"
     {% endif %}
     {%if use_timezone | default(false) %}
@@ -21346,9 +21346,9 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
-{% endif %}   {#  INFLUXDB_CHRONOGRAF_enable #}
+{% endif %}   {#  CHRONOGRAF_enable #}
 
-{% if INFLUXDB_KAPACITOR_enable | default(false) %}
+{% if KAPACITOR_enable | default(false) %}
   #  ================================== InfluxData Kapacitor ========================================== #
   kapacitor:
     image: kapacitor:{{__KAPACITOR_version}}
@@ -21371,7 +21371,7 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
-    {% if INFLUXDB_KAPACITOR_volume_map_data %}
+    {% if KAPACITOR_volume_map_data %}
       - "./container-volume/kapacitor:/var/lib/kapacitor"
     {% endif %}
     {%if use_timezone | default(false) %}
@@ -21382,9 +21382,9 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
-{% endif %}   {# INFLUXDB_KAPACITOR_enable #}
+{% endif %}   {# KAPACITOR_enable #}
 
-{% if INFLUXDB_TELEGRAF_enable | default(false) %}
+{% if TELEGRAF_enable | default(false) %}
   #  ================================== InfluxData Telegraf ========================================== #
   telegraf:
     image: telegraf:{{__TELEGRAF_version}}
@@ -21395,7 +21395,7 @@ services:
       com.platys.description: "Agent for collecting, processing, aggregating, and writing metrics"
     environment:
       HOSTNAME: telegraf
-      INFLUXDB_TOKEN: ${PLATYS_INFLUXDB_TOKEN:-{{INFLUXDB_TELEGRAF_influx_token}}}
+      INFLUXDB_TOKEN: ${PLATYS_INFLUXDB_TOKEN:-{{TELEGRAF_influx_token}}}
     {% if INFLUXDB2_enable | default(false) %}  
       INFLUXDB_ORGANIZATION: {{INFLUXDB2_org}}
       INFLUXDB_BUCKET: {{INFLUXDB2_bucket}}
@@ -21403,21 +21403,21 @@ services:
     {% if INFLUXDB3_enable | default(false) %}  
       INFLUXDB_DATABASE: {{INFLUXDB3_database if INFLUXDB3_database is defined and INFLUXDB3_database else omit}}
     {% endif %}
-    {% if INFLUXDB_TELEGRAF_monitor_docker_host_enabled | default(false) %}
+    {% if TELEGRAF_monitor_docker_host_enabled | default(false) %}
       HOST_ETC: /hostfs/etc
       HOST_PROC: /hostfs/proc
       HOST_SYS: /hostfs/sys
       HOST_VAR: /hostfs/var
       HOST_RUN: /hostfs/run
       HOST_MOUNT_PREFIX: /hostfs
-    {% endif -%}   {#  INFLUXDB_TELEGRAF_monitor_docker_host_enabled #}
+    {% endif -%}   {#  TELEGRAF_monitor_docker_host_enabled #}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
-    {% if INFLUXDB_TELEGRAF_custom_conf_file is defined and INFLUXDB_TELEGRAF_custom_conf_file and INFLUXDB_TELEGRAF_custom_conf_file | length | default(false) %}
-      - ./custom-conf/telegraf/{{INFLUXDB_TELEGRAF_custom_conf_file}}:/etc/telegraf/telegraf.conf
+    {% if TELEGRAF_custom_conf_file is defined and TELEGRAF_custom_conf_file and TELEGRAF_custom_conf_file | length | default(false) %}
+      - ./custom-conf/telegraf/{{TELEGRAF_custom_conf_file}}:/etc/telegraf/telegraf.conf
     {% else %}
       {% if INFLUXDB_enable | default(false) %}  
       - ./conf/telegraf/telegraf-influxdb.conf:/etc/telegraf/telegraf.conf
@@ -21428,12 +21428,12 @@ services:
       {% if INFLUXDB3_enable | default(false) %}  
       - ./conf/telegraf/telegraf-influxdb3.conf:/etc/telegraf/telegraf.conf
       {% endif %}
-    {% endif -%}   {#  INFLUXDB_TELEGRAF_custom_conf_file #}
+    {% endif -%}   {#  TELEGRAF_custom_conf_file #}
       # Mount for Docker API access
       - /var/run/docker.sock:/var/run/docker.sock
-    {% if INFLUXDB_TELEGRAF_monitor_docker_host_enabled | default(false) %}
+    {% if TELEGRAF_monitor_docker_host_enabled | default(false) %}
       - /:/hostfs:ro
-    {% endif -%}   {#  INFLUXDB_TELEGRAF_monitor_docker_host_enabled #}
+    {% endif -%}   {#  TELEGRAF_monitor_docker_host_enabled #}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -21442,7 +21442,7 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
-{% endif %}   {#  INFLUXDB_TELEGRAF_enable #}
+{% endif %}   {#  TELEGRAF_enable #}
 
 {% if INFLUXDB2_enable | default(false) %}
   #  ================================== InfluxDB 2 ========================================== #

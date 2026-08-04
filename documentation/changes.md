@@ -31,6 +31,9 @@ See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/plat
  * rename `AXON_xxxx` to `AXON_SERVER_xxxx` 
  * rename `ZOOKEEPER_NAVIGATOR_xxxx` to `ZOONAVIGATOR_xxxx` 
  * rename `UNSTRUCTURED_xxxx` to `UNSTRUCTURED_API_xxxx` 
+ * rename `INFLUXDB_CHRONOGRAF_xxxx` to `CHRONOGRAF_xxxx`
+ * rename `INFLUXDB_TELEGRAF_xxxx` to `TELEGRAF_xxxx`
+ * rename `INFLUXDB_KAPACITOR_xxxx` to `KAPACITOR_xxxx`
 
 ## What's new in 1.20.0
 

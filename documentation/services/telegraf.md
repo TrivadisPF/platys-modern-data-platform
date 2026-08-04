@@ -7,6 +7,6 @@ Telegraf is a plugin-driven server agent for collecting & reporting metrics, and
 ## How to enable?
 
 ```
-platys init --enable-services INFLUXDB, INFLUXDB_TELEGRAF
+platys init --enable-services INFLUXDB, TELEGRAF
 platys gen
 ```
