@@ -7,7 +7,7 @@ Enterprise OPA is a distribution of Open Policy Agent with enterprise-grade feat
 ## How to enable?
 
 ```
-platys init --enable-services STYRA
+platys init --enable-services STYRA_EOPA
 platys gen
 ```
 
