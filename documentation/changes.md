@@ -19,7 +19,7 @@ See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/plat
 
 ### Enhancements
 
- * 
+ * Add ui mode for defining a platform using a Web-UI
 
 ### Breaking Changes
 
@@ -28,6 +28,7 @@ See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/plat
  * rename `DATAIKU_DSS_xxxx` to `DATAIKU_xxxx`
  * rename `TYK_xxxx` to `TYK_GATEWAY_xxxx`
  * rename `KONG_xxxx` to `KONG_GATEWAY_xxxx`
+ * rename `AXON_xxxx` to `AXON_SERVER_xxxx` 
 
 ## What's new in 1.20.0
 
