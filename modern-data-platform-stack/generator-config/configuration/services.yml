@@ -6642,10 +6642,54 @@ services:
         description: >
           Enable HiveMQ Web UI.
 
-  - name: MQTTX
-    id: mqttx
+  - name: MQTTX CLI
+    id: mqttx-cli
     arch: [x86-64]
-    tags: []
+    tags: [cli]
+    dependencies: []
+    links:
+      website: https://mqttx.app/
+      documentation: https://mqttx.app/docs/cli/introduction
+      github: https://github.com/emqx/MQTTX
+    description: >
+      A Powerful and All-in-One MQTT 5.0 client toolbox for Desktop, CLI and
+      WebSocket. This container runs the MQTTX CLI.
+    enable:
+      platys_init: MQTTX_CLI
+      example: |
+        platys init --enable-services MQTTX_CLI
+        platys gen
+    usage:
+      - title: Running the CLI
+        content: |
+          ```bash
+          docker exec -ti mqttx-cli mqttx
+          ```
+    usage:
+      - title: Using the Simulator
+        content: |
+          List the built-in scenarios
+          
+          ```bash
+          docker exec -ti mqttx-cli mqttx ls --scenarios
+          ```
+          
+          Run the `smart_home` scenario
+          
+          ```bash
+          docker exec -ti mqttx-cli mqttx simulate -sc smart_home -c 100 conn -h 'mosquitto-1' -p 1883
+          ```
+    parameters:
+      - name: MQTTX_CLI_enable
+        default: "false"
+        since: "1.18.0"
+        description: >
+          Generate MQTTX CLI service.
+
+  - name: MQTTX Web
+    id: mqttx-web
+    arch: [x86-64]
+    tags: [ui]
     dependencies: []
     links:
       website: https://mqttx.app/
@@ -6653,34 +6697,22 @@ services:
       github: https://github.com/emqx/MQTTX
     description: >
       A Powerful and All-in-One MQTT 5.0 client toolbox for Desktop, CLI and
-      WebSocket.
+      WebSocket. This container runs the MQTTX web client.
     enable:
-      platys_init: MQTTX_CLI
+      platys_init: MQTTX_WEB
       example: |
-        platys init --enable-services MQTTX_CLI
+        platys init --enable-services MQTTX_WEB
         platys gen
     usage:
-      - title: Web
+      - title: Usage
         content: |
           Navigate to <http://dataplatform:28367>.
-    usage:
-      - title: CLI
-        content: |
-          ```bash
-          docker exec -ti mqttx-cli mqttx
-          ```
     parameters:
-      - name: MQTTX_CLI_enable
-        default: "false"
-        since: "1.18.0"
-        description: >
-          Generate MQTTX CLI service
-
       - name: MQTTX_WEB_enable
         default: "false"
         since: "1.18.0"
         description: >
-          Generate MQTTX Web service
+          Generate MQTTX Web service.
 
   - name: MQTT UI
     id: mqtt-ui
@@ -12294,16 +12326,16 @@ services:
       This is a Web UI for minio s3 server. Web UI works on top of REST API -
       adminio-API.
     enable:
-      platys_init: ADMINIO_UI
+      platys_init: ADMINIO
       example: |
-        platys init --enable-services ADMINIO_UI
+        platys init --enable-services ADMINIO
         platys gen
     usage:
       - title: Usage
         content: |
           Navigate to <http://dataplatform:28190>
     parameters:
-      - name: ADMINIO_UI_enable
+      - name: ADMINIO_enable
         default: "false"
         since: "1.11.0"
         description: >
@@ -13166,11 +13198,38 @@ services:
           Location of the warehouse. Used to determine the base location of a
           table.
 
-      - name: NESSIE_cli_enabled
+  - name: Nessie CLI
+    id: nessie-cli
+    arch: [x86-64]
+    tags: [cli]
+    dependencies: [nessie]
+    links:
+      website: https://projectnessie.org/
+      documentation: https://projectnessie.org/features/
+      github: https://github.com/projectnessie/nessie
+    description: >
+      Transactional Catalog for Data Lakes with Git-like semantics. This
+      container runs the Nessie CLI.
+    enable:
+      platys_init: NESSIE_CLI
+      example: |
+        platys init --enable-services NESSIE_CLI
+        platys gen
+    usage:
+      - title: Running the CLI
+        content: |
+          The container starts the CLI already connected to Nessie. Attach to it
+          interactively:
+          
+          ```bash
+          docker attach nessie-cli
+          ```
+    parameters:
+      - name: NESSIE_CLI_enable
         default: "false"
         since: "1.18.0"
         description: >
-          Also generate the `nessie-cli` service.
+          Generate the `nessie-cli` service.
 
   - name: Apache Iceberg REST Catalog
     id: iceberg-rest-catalog
@@ -13995,6 +14054,30 @@ services:
           plugin into `./plugins/trino/connector`. A plugin can be a connector
           or a custom UDF.
 
+  - name: Trino CLI
+    id: trino-cli
+    arch: [x86-64]
+    tags: [cli]
+    dependencies: [trino]
+    links:
+      website: https://trino.io/
+      documentation: https://trino.io/docs/current/client/cli.html
+      github: https://github.com/trinodb/trino
+    description: >
+      Distributed SQL Query Engine for Big Data. This container runs the Trino
+      CLI.
+    enable:
+      platys_init: TRINO_CLI
+      example: |
+        platys init --enable-services TRINO_CLI
+        platys gen
+    usage:
+      - title: Running the CLI
+        content: |
+          ```bash
+          docker exec -it trino-cli trino --server trino-1:8080
+          ```
+    parameters:
       - name: TRINO_CLI_enable
         default: "true"
         since: "1.11.0"

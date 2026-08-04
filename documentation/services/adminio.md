@@ -7,7 +7,7 @@ This is a Web UI for minio s3 server. Web UI works on top of REST API - adminio-
 ## How to enable?
 
 ```
-platys init --enable-services ADMINIO_UI
+platys init --enable-services ADMINIO
 platys gen
 ```
 
