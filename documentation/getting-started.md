@@ -114,7 +114,7 @@ You can see the configuration options, available through this platform stack, si
       #
       # ===== Apache Zookeeper Navigator ========
       #
-      ZOOKEEPER_NAVIGATOR_enable: false
+      ZOONAVIGATOR_enable: false
       #
       # ===== Apache Kafka ========
       #

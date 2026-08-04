@@ -93,7 +93,7 @@ cat > config.yml << EOL
       #
       # ===== Apache Zookeeper Navigator ========
       #
-      ZOOKEEPER_NAVIGATOR_enable: false
+      ZOONAVIGATOR_enable: false
       #
       # ===== Apache Kafka ========
       #
