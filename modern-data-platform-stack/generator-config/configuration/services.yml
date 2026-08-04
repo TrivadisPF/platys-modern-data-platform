@@ -2174,11 +2174,33 @@ services:
         description: >
           The minimum number of replicas to use when creating a topic.
 
+  - name: Jikkou API Server
+    id: jikkou-server
+    arch: [x86-64]
+    tags: []
+    dependencies: [kafka]
+    links:
+      website: https://streamthoughts.github.io/jikkou/
+      documentation: https://streamthoughts.github.io/jikkou/docs/
+      github: https://github.com/streamthoughts/jikkou
+    description: >
+      Jikkou API Server exposes the Resource as Code capabilities of Jikkou for
+      Apache Kafka over a REST API.
+    enable:
+      platys_init: JIKKOU_SERVER
+      example: |
+        platys init --enable-services JIKKOU_SERVER
+        platys gen
+    usage:
+      - title: Usage
+        content: |
+          The REST API is exposed on <http://dataplatform:28388>.
+    parameters:
       - name: JIKKOU_SERVER_enable
         default: "false"
         since: "1.18.0"
         description: >
-          Generate Jikkou API server service
+          Generate Jikkou API server service.
 
   - name: Kadmin
     id: kadmin
@@ -20374,7 +20396,7 @@ services:
           Generate Microcks service
 
   - name: MockServer
-    id: mockserver
+    id: mock-server
     arch: [x86-64]
     tags: []
     dependencies: []
@@ -21110,6 +21132,63 @@ services:
         since: "1.17.0"
         description: >
           Volume map `db-data` folder into the Focalboard service.
+
+  - name: Zammad
+    id: zammad
+    arch: [x86-64, arm]
+    tags: []
+    dependencies: []
+    links:
+      website: https://zammad.org/
+      documentation: https://docs.zammad.org/
+      github: https://github.com/zammad/zammad
+    description: >
+      Open source customer support and helpdesk ticketing system. Zammad
+      provides a unified interface for managing customer communications across
+      email, chat, phone, and social media, with a full-featured REST API and
+      extensive reporting.
+    enable:
+      platys_init: ZAMMAD
+      example: |
+        platys init --enable-services ZAMMAD
+        platys gen
+    usage:
+      - title: Connect to Zammad
+        content: |
+          Navigate to <http://dataplatform:28460>
+    parameters:
+      - name: ZAMMAD_enable
+        default: "false"
+        since: "1.21.0"
+        description: >
+          Generate Zammad services (nginx, railsserver, scheduler, websocket,
+          backup, init, elasticsearch, memcached, postgresql, redis)
+
+      - name: ZAMMAD_backup_enabled
+        default: "false"
+        since: "1.21.0"
+        description: >
+          Enable the `zammad-backup` container that runs scheduled database and
+          storage backups. Set to `false` to skip the backup service.
+
+      - name: ZAMMAD_db_name
+        default: "zammad_production"
+        since: "1.21.0"
+        description: >
+          Name of the PostgreSQL database for Zammad.
+
+      - name: ZAMMAD_db_user
+        default: "zammad"
+        since: "1.21.0"
+        description: >
+          PostgreSQL user for Zammad.
+
+      - name: ZAMMAD_db_password
+        default: "zammad"
+        since: "1.21.0"
+        sensitive: true
+        description: >
+          PostgreSQL password for Zammad.
 
   - name: Excalidraw
     id: excalidraw
@@ -21993,6 +22072,48 @@ services:
         since: "1.18.0"
         description: >
           Generate Docker in Docker service
+
+  - name: Docker Registry
+    id: docker-registry
+    arch: [x86-64]
+    tags: []
+    dependencies: []
+    links:
+      website: https://distribution.github.io/distribution/
+      documentation: https://distribution.github.io/distribution/about/
+      github: https://github.com/distribution/distribution
+    description: >
+      Docker Registry is a stateless, highly scalable server side application
+      that stores and lets you distribute Docker images. Comes bundled with a
+      web UI for browsing the registry.
+    enable:
+      platys_init: DOCKER_REGISTRY
+      example: |
+        platys init --enable-services DOCKER_REGISTRY
+        platys gen
+    usage:
+      - title: Usage
+        content: |
+          The registry REST API is exposed on <http://dataplatform:5020/v2>,
+          and the web UI on <http://dataplatform:28307>.
+    parameters:
+      - name: DOCKER_REGISTRY_enable
+        default: "false"
+        since: "1.17.0"
+        description: >
+          Generate Docker Registry service.
+
+      - name: DOCKER_REGISTRY_volume_map_data
+        default: "false"
+        since: "1.17.0"
+        description: >
+          Volume map the data folder into the Docker Registry service.
+
+      - name: DOCKER_REGISTRY_volume_map_custom_config
+        default: "false"
+        since: "1.17.0"
+        description: >
+          Volume map a custom `config.yml` into the Docker Registry service.
 
   - name: Jenkins
     id: jenkins
@@ -22885,61 +23006,4 @@ services:
         sensitive: true
         description: >
           Password for the root/admin user.
-
-  - name: Zammad
-    id: zammad
-    arch: [x86-64, arm]
-    tags: []
-    dependencies: []
-    links:
-      website: https://zammad.org/
-      documentation: https://docs.zammad.org/
-      github: https://github.com/zammad/zammad
-    description: >
-      Open source customer support and helpdesk ticketing system. Zammad
-      provides a unified interface for managing customer communications across
-      email, chat, phone, and social media, with a full-featured REST API and
-      extensive reporting.
-    enable:
-      platys_init: ZAMMAD
-      example: |
-        platys init --enable-services ZAMMAD
-        platys gen
-    usage:
-      - title: Connect to Zammad
-        content: |
-          Navigate to <http://dataplatform:28460>
-    parameters:
-      - name: ZAMMAD_enable
-        default: "false"
-        since: "1.21.0"
-        description: >
-          Generate Zammad services (nginx, railsserver, scheduler, websocket,
-          backup, init, elasticsearch, memcached, postgresql, redis)
-
-      - name: ZAMMAD_backup_enabled
-        default: "false"
-        since: "1.21.0"
-        description: >
-          Enable the `zammad-backup` container that runs scheduled database and
-          storage backups. Set to `false` to skip the backup service.
-
-      - name: ZAMMAD_db_name
-        default: "zammad_production"
-        since: "1.21.0"
-        description: >
-          Name of the PostgreSQL database for Zammad.
-
-      - name: ZAMMAD_db_user
-        default: "zammad"
-        since: "1.21.0"
-        description: >
-          PostgreSQL user for Zammad.
-
-      - name: ZAMMAD_db_password
-        default: "zammad"
-        since: "1.21.0"
-        sensitive: true
-        description: >
-          PostgreSQL password for Zammad.
 
