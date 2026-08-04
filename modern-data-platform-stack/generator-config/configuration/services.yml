@@ -3614,7 +3614,7 @@ services:
           to be set to `true`.
 
   - name: Spark History Server
-    id: spark-historyserver
+    id: spark-history
     arch: [x86-64]
     tags: []
     dependencies: []
@@ -8559,7 +8559,7 @@ services:
           Cassandra user password.
 
   - name: Reaper
-    id: cassandra-reaper
+    id: reaper
     arch: [x86-64]
     tags: []
     dependencies: []
@@ -13841,6 +13841,28 @@ services:
           The number of queries a cluster accepts. Once a cluster has more
           running queries than this no further queries will be send to it and
           they will be queued in trino-lb instead.
+
+  - name: Moat
+    id: moat
+    arch: [x86-64]
+    tags: []
+    dependencies: []
+    links:
+      documentation: https://moat-io.github.io/moat/
+      github: https://github.com/moat-io/moat
+    description: >
+      A Data Control Plane for Trino & OPA.
+    enable:
+      platys_init: MOAT
+      example: |
+        platys init --enable-services MOAT
+        platys gen
+    parameters:
+      - name: MOAT_enable
+        default: "false"
+        since: "1.0.0"
+        description: >
+          Enable Moat.
 
   - name: Presto
     id: presto
@@ -19967,42 +19989,30 @@ services:
       Tyk is an open source Enterprise API Gateway, supporting REST, GraphQL,
       TCP and gRPC protocols.
     enable:
-      platys_init: TYK
+      platys_init: TYK_GATEWAY
       example: |
         platys init --enable-services TYK
         platys gen
     parameters:
-      - name: TYK_enable
+      - name: TYK_GATEWAY_enable
         default: "false"
         since: "1.16.0"
         description: >
           Generate Tyk API Gateway service
 
-      - name: TYK_edition
+      - name: TYK_GATEWAY_edition
         default: "oss"
         since: "1.16.0"
         description: >
           The edition of Tyk to use, either `oss` for Open Source or `pro` for
           Professional edition.
 
-      - name: TYK_secret
+      - name: TYK_GATEWAY_secret
         default: "abc123!"
         since: "1.16.0"
         sensitive: true
         description: >
           The secret for the gateway.
-
-      - name: TYK_PUMP_enable
-        default: "false"
-        since: "1.16.0"
-        description: >
-          Generate Tyk Pump service
-
-      - name: TYK_PUMP_backend_type
-        default: "mongo"
-        since: "1.16.0"
-        description: >
-          Backend to use for Tyk Pump, either `mongo`, `postgres` or `kafka`
 
   - name: Tyk Dashboard
     id: tyk-dashboard
@@ -20047,9 +20057,9 @@ services:
       analytics into a persistent data store, such as MongoDB, where the
       traffic can be analysed.
     enable:
-      platys_init: TYK,TYK_PUMP
+      platys_init: TYK_GATEWAY,TYK_PUMP
       example: |
-        platys init --enable-services TYK,TYK_PUMP
+        platys init --enable-services TYK_GATEWAY,TYK_PUMP
         platys gen
     parameters:
       - name: TYK_PUMP_enable
@@ -20057,6 +20067,13 @@ services:
         since: "1.0.0"
         description: >
           Enable Tyk Pump.
+
+      - name: TYK_PUMP_backend_type
+        default: "mongo"
+        since: "1.0.0"
+        allowed_values: [mongo, postgres, kafka]
+        description: >
+          Backend to use for Tyk Pump, either `mongo`, `postgres` or `kafka`
 
   - name: Swagger Editor
     id: swagger-editor
@@ -22614,28 +22631,6 @@ services:
         since: "1.20.0"
         description: >
           The docker compose profile the service should run in.
-
-  - name: Moat
-    id: moat
-    arch: [x86-64]
-    tags: []
-    dependencies: []
-    links:
-      documentation: https://moat-io.github.io/moat/
-      github: https://github.com/moat-io/moat
-    description: >
-      A Data Control Plane for Trino & OPA.
-    enable:
-      platys_init: MOAT
-      example: |
-        platys init --enable-services MOAT
-        platys gen
-    parameters:
-      - name: MOAT_enable
-        default: "false"
-        since: "1.0.0"
-        description: >
-          Enable Moat.
 
   - name: MongoDB
     id: mongo
