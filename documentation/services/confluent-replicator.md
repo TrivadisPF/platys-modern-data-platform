@@ -7,7 +7,7 @@ Confluent Replicator allows you to easily and reliably replicate topics from one
 ## How to enable?
 
 ```bash
-platys init --enable-services KAFKA_REPLICATOR
+platys init --enable-services CONFLUENT_REPLICATOR
 platys gen
 ```
 
