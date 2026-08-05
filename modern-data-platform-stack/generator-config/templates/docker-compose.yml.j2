@@ -25,7 +25,7 @@ networks:
 {% set __CONFLUENT_CCC_version = CONFLUENT_CCC_version | default('latest') -%}
 {% set __CONFLUENT_CCC_NG_version = CONFLUENT_CCC_NG_version | default('latest') -%}
 {% set __KAFKA_INIT_version = KAFKA_INIT_version | default('latest') -%}
-{% set __KAFKA_MM2_version = KAFKA_MM2_version | default('latest') -%}
+{% set __KAFKA_MIRROR_MAKER2_version = KAFKA_MIRROR_MAKER2_version | default('latest') -%}
 {% set __SCHEMA_REGISTRY_apicurio_version = SCHEMA_REGISTRY_apicurio_version | default('latest') -%}
 {% set __ZOONAVIGATOR_version = ZOONAVIGATOR_version | default('latest') -%}
 {% set __ZOONAVIGATOR_API_version = ZOONAVIGATOR_API_version | default('latest') -%}
@@ -892,7 +892,7 @@ networks:
   {% set ARROYO_enable = false -%}
   {% set SQLFLOW_enable = false -%}
   {% set CONFLUENT_REPLICATOR_enable = false -%}
-  {% set KAFKA_MM2_enable = false -%}
+  {% set KAFKA_MIRROR_MAKER2_enable = false -%}
   {% set LENSES_BOX_enable = false -%}
   {% set KCAT_enable = false -%}
   {% set KASKADE_enable = false -%}
@@ -4434,13 +4434,13 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {# KAFKA_enable and CONFLUENT_REPLICATOR_enable #}
 
-{% if ((KAFKA_enable or external['KAFKA_enable']) and (KAFKA_edition | lower) == 'enterprise' and KAFKA_MM2_enable) | default(false) %}
+{% if ((KAFKA_enable or external['KAFKA_enable']) and (KAFKA_edition | lower) == 'enterprise' and KAFKA_MIRROR_MAKER2_enable) | default(false) %}
   mirror-maker{{dataCenter}}-1:
-    image: trivadis/mirrormaker2:{{__KAFKA_MM2_version}}
+    image: trivadis/mirrormaker2:{{__KAFKA_MIRROR_MAKER2_version}}
     container_name: mirror-maker{{dataCenter}}-1:
     hostname: mirror-maker{{dataCenter}}-1:
     labels:
-      com.platys.name: "mirror-maker2"
+      com.platys.name: "kafka-mirror-maker2"
       com.platys.description: "Kafka MirrorMaker2"
     environment:
       MM2: ''
@@ -4458,7 +4458,7 @@ services:
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
-{% endif %}   {# KAFKA_enable and KAFKA_MM2_enable #}
+{% endif %}   {# KAFKA_enable and KAFKA_MIRROR_MAKER2_enable #}
 
 {% if (LENSES_BOX_enable) | default(false) %}
   #  ================================== Lenses Box ========================================== #

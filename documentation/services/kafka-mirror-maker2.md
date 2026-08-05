@@ -7,7 +7,7 @@ Adminer (formerly phpMinAdmin) is a full-featured database management tool writt
 ## How to enable?
 
 ```
-platys init --enable-services KAFKA_MM2
+platys init --enable-services KAFKA_MIRROR_MAKER2
 platys gen
 ```
 
