@@ -4434,7 +4434,7 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {# KAFKA_enable and CONFLUENT_REPLICATOR_enable #}
 
-{% if ((KAFKA_enable or external['KAFKA_enable']) and (KAFKA_edition | lower) == 'enterprise' and KAFKA_MIRROR_MAKER2_enable) | default(false) %}
+{% if ((KAFKA_enable or external['KAFKA_enable']) and KAFKA_MIRROR_MAKER2_enable) | default(false) %}
   mirror-maker{{dataCenter}}-1:
     image: trivadis/mirrormaker2:{{__KAFKA_MIRROR_MAKER2_version}}
     container_name: mirror-maker{{dataCenter}}-1:
@@ -20367,6 +20367,7 @@ services:
       com.platys.description: "Search-engine NoSQL store"
       com.platys.restapi.title: "OpenSearch REST API"
       com.platys.restapi.url: "http://dataplatform:{{external_port}}"
+      com.platys.password.envvars: "PLATYS_OPENSEARCH_ADMIN_PASSWORD"      
       com.platys.manual.step.msgs: "sudo sysctl -w vm.max_map_count=262144"
     ports:
       - "{{external_port}}:9200"
@@ -20376,7 +20377,7 @@ services:
       - node.name=opensearch-{{loop.index}}
       {% if OPENSEARCH_nodes > 1 %}
       - discovery.seed_hosts={{nsOS.opensearchHosts}}
-      - cluster.initial_master_nodes={{nsOS.opensearchHosts}}
+      - cluster.initial_cluster_manager_nodes={{nsOS.opensearchHosts}}
       {% else %}
       - discovery.type=single-node
       - "DISABLE_INSTALL_DEMO_CONFIG=true"   # disables execution of install_demo_configuration.sh bundled with security plugin, which installs demo certificates and security configurations to OpenSearch
@@ -20384,6 +20385,7 @@ services:
       {% endif %}
       - "bootstrap.memory_lock=true" # along with the memlock settings below, disables swapping
       - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m" # minimum and maximum Java heap size, recommend setting both to 50% of system RAM
+      - OPENSEARCH_INITIAL_ADMIN_PASSWORD={{OPENSEARCH_initial_admin_password:-{{PLATYS_OPENSEARCH_ADMIN_PASSWORD}}}
       - "http.cors.enabled=true"
       - http.cors.allow-origin="http://${DOCKER_HOST_IP:-localhost}:28275,http://${PUBLIC_IP:-127.0.0.1}:28275,http://dejavu:1358,http://dataplatform:28125,http://dataplatform:28125,http://${PUBLIC_IP:-127.0.0.1}:28125,http://${DOCKER_HOST_IP:-localhost}:28125,http://127.0.0.1:1358"
       - http.cors.allow-headers="X-Requested-With,X-Auth-Token,Content-Type,Content-Length,Authorization"
@@ -20392,7 +20394,7 @@ services:
     {% endif -%}   {#  use_timezone #}
     ulimits:
       memlock:
-        soft: -1
+        soft: -1  # Set memlock to unlimited (no soft or hard limit)
         hard: -1
       nofile:
         soft: 65536 # maximum number of open files for the OpenSearch user, set to at least 65536 on modern systems
@@ -20433,8 +20435,8 @@ services:
       - 'OPENSEARCH_HOSTS=["https://opensearch-1:9200","https://opensearch-2:9200"]'
       {% else %}
       - 'OPENSEARCH_HOSTS=["http://opensearch-1:9200"]'
-      - "DISABLE_SECURITY_DASHBOARDS_PLUGIN=true"   # disables security dashboards plugin in OpenSearch Dashboards
       {% endif %}
+      - "DISABLE_SECURITY_DASHBOARDS_PLUGIN=true"   # disables security dashboards plugin in OpenSearch Dashboards
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -27970,6 +27972,8 @@ services:
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
+    # `weed mini` runs an all-in-one dev server: S3 API on 8333 and the built-in Iceberg REST catalog on 8181.
+    command: mini -dir=/data
     restart: {{container_restart_policy}}
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9333/cluster/status"]
