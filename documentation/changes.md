@@ -36,6 +36,7 @@ See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/plat
  * rename `INFLUXDB_TELEGRAF_xxxx` to `TELEGRAF_xxxx`
  * rename `INFLUXDB_KAPACITOR_xxxx` to `KAPACITOR_xxxx`
  * rename `KAFKA_REPLICATOR_xxxx` to `CONFLUENT_REPLICATOR_xxxx`
+ * changed default for search service in DataHub to OpenSearch
 
 ## What's new in 1.20.0
 

@@ -9990,7 +9990,7 @@ services:
       com.platys.restapi.title: "DataHub MAE Consumer"
       com.platys.restapi.url: "http://dataplatform:28145"
     depends_on:
-      - kafka-setup
+      - datahub-upgrade
       - {{'datahub-elasticsearch' if DATAHUB_search_service_impl == 'elasticsearch' else 'datahub-opensearch'}}
       - datahub-neo4j
     ports:
@@ -10073,7 +10073,7 @@ services:
       com.platys.restapi.title: "DataHub MCE Consumer"
       com.platys.restapi.url: "http://dataplatform:28146"
     depends_on:
-      - kafka-setup
+      - datahub-upgrade
       - datahub-gms
     ports:
       - "28146:9090"
@@ -10155,7 +10155,7 @@ services:
   {% endif -%}   {#  DATAHUB_mce_consumer_standalone #}
 
   datahub-mysql:
-    image: mariadb:10.5.8
+    image: mysql:8.2
     hostname: datahub-mysql
     container_name: datahub-mysql
     labels:
@@ -10167,6 +10167,7 @@ services:
       - MYSQL_DATABASE=datahub
       - MYSQL_USER=datahub
       - MYSQL_PASSWORD=datahub
+      - MYSQL_ROOT_HOST='%'
       - MYSQL_ROOT_PASSWORD=datahub
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
@@ -10186,11 +10187,13 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
     healthcheck:
-      interval: 5s
+      test:
+      - CMD-SHELL
+      - mysqladmin ping -h mysql -u $$MYSQL_USER --password=$$MYSQL_PASSWORD
+      timeout: 10s
+      interval: 2s
       retries: 5
       start_period: 20s
-      test: mysqladmin ping -h mysql -u $$MYSQL_USER --password=$$MYSQL_PASSWORD
-      timeout: 5s
 
   {%if (DATAHUB_graph_service_impl | lower) == 'neo4j'  | default(true) %}
   datahub-neo4j:
@@ -10311,7 +10314,7 @@ services:
 
   {%if DATAHUB_search_service_impl == 'opensearch' %}
   datahub-opensearch:
-    image: opensearchproject/opensearch:{{__OPENSEARCH_version}}
+    image: opensearchproject/opensearch:2.19.3
     hostname: datahub-opensearch
     container_name: datahub-opensearch
     labels:
@@ -10365,90 +10368,19 @@ services:
       datahub_setup_job: true
       com.platys.name: "datahub"
     depends_on:
-      datahub-elasticsearch-setup:
-        condition: service_completed_successfully
-      datahub-kafka-setup:
-        condition: service_completed_successfully
-      datahub-mysql-setup:
-        condition: service_completed_successfully
-    {%if (DATAHUB_graph_service_impl | lower) == 'neo4j'  | default(true) %}
-      datahub-neo4j:
-        condition: service_healthy
-    {% endif -%}   {#  DATAHUB_graph_service_impl #}
+      - {{'datahub-elasticsearch' if DATAHUB_search_service_impl == 'elasticsearch' else 'datahub-opensearch'}}
     environment:
-      - BACKFILL_BROWSE_PATHS_V2=true
-      - DATAHUB_GMS_HOST=datahub-gms
-      - DATAHUB_GMS_PORT=8080       
+      - DATAHUB_SQL_SETUP_ENABLED=true      # handles MySQL/Postgres setup
+      - ELASTICSEARCH_HOST={{'datahub-elasticsearch' if DATAHUB_search_service_impl == 'elasticsearch' else 'datahub-opensearch'}}
+      - ELASTICSEARCH_PORT=9200
+      - ELASTICSEARCH_PROTOCOL=http
       - EBEAN_DATASOURCE_DRIVER=com.mysql.jdbc.Driver
       - EBEAN_DATASOURCE_HOST=datahub-mysql:3306
       - EBEAN_DATASOURCE_USERNAME=datahub
       - EBEAN_DATASOURCE_PASSWORD=datahub
-      - EBEAN_DATASOURCE_URL=jdbc:mysql://datahub-mysql:3306/datahub?verifyServerCertificate=false&useSSL=true&useUnicode=yes&characterEncoding=UTF-8&enabledTLSProtocols=TLSv1.2
-      - ELASTICSEARCH_HOST={{'datahub-elasticsearch' if DATAHUB_search_service_impl == 'elasticsearch' else 'datahub-opensearch'}}
-      - ELASTICSEARCH_PORT=9200
-      - ELASTICSEARCH_INDEX_BUILDER_MAPPINGS_REINDEX=true
-      - ELASTICSEARCH_INDEX_BUILDER_SETTINGS_REINDEX=true
-      - ELASTICSEARCH_BUILD_INDICES_CLONE_INDICES=false
-      - ENTITY_REGISTRY_CONFIG_PATH=/datahub/datahub-gms/resources/entity-registry.yml
-      - GRAPH_SERVICE_IMPL={{DATAHUB_graph_service_impl}}
+      - EBEAN_DATASOURCE_URL=jdbc:mysql://datahub-mysql:3306/datahub?verifyServerCertificate=false&useSSL=true&useUnicode=yes&characterEncoding=UTF-8&enabledTLSProtocols=TLSv1.2      
       - KAFKA_BOOTSTRAP_SERVER={{ns.bootstrapServers}}
       - KAFKA_SCHEMAREGISTRY_URL={{ns.schemaRegistryUrl}}
-    {%if (DATAHUB_graph_service_impl | lower) == 'neo4j'  | default(true) %}
-      - NEO4J_HOST=datahub-neo4j:7474
-      - NEO4J_URI=bolt://${PUBLIC_IP:-127.0.0.1}:17688
-      - NEO4J_USERNAME=neo4j
-      - NEO4J_PASSWORD=abc123!
-    {% endif -%}   {#  DATAHUB_graph_service_impl #}
-      - REPROCESS_DEFAULT_BROWSE_PATHS_V2=false
-    command:
-      - -u
-      - SystemUpdate
-    volumes:
-      - ./data-transfer:/data-transfer
-    {%if use_timezone | default(false) %}
-      - "./etc/timezone:/etc/timezone:ro"
-      - "./etc/localtime:/etc/localtime:ro"
-    {% endif -%}   {#  use_timezone #}
-    init: true
-
-  datahub-mysql-setup:
-    image: acryldata/datahub-mysql-setup:head
-    hostname: datahub-mysql-setup
-    container_name: datahub-mysql-setup
-    labels:
-      com.platys.name: "datahub"
-    depends_on:
-      - datahub-mysql
-    environment:
-      - MYSQL_HOST=datahub-mysql
-      - MYSQL_PORT=3306
-      - MYSQL_USERNAME=datahub
-      - MYSQL_PASSWORD=datahub
-      - DATAHUB_DB_NAME=datahub
-    {%if use_timezone | default(false) %}
-      - TZ={{use_timezone}}
-    {% endif -%}   {#  use_timezone #}
-    volumes:
-      - ./data-transfer:/data-transfer
-    {%if use_timezone | default(false) %}
-      - "./etc/timezone:/etc/timezone:ro"
-      - "./etc/localtime:/etc/localtime:ro"
-    {% endif -%}   {#  use_timezone #}
-    init: true
-
-  datahub-elasticsearch-setup:
-    image: acryldata/datahub-elasticsearch-setup:{{__DATAHUB_version}}
-    hostname: datahub-elasticsearch-setup
-    container_name: datahub-elasticsearch-setup
-    labels:
-      datahub_setup_job: true
-      com.platys.name: "datahub"
-    depends_on:
-      - {{'datahub-elasticsearch' if DATAHUB_search_service_impl == 'elasticsearch' else 'datahub-opensearch'}}
-    environment:
-      - ELASTICSEARCH_HOST={{'datahub-elasticsearch' if DATAHUB_search_service_impl == 'elasticsearch' else 'datahub-opensearch'}}
-      - ELASTICSEARCH_PORT=9200
-      - ELASTICSEARCH_PROTOCOL=http
       - DATAHUB_ANALYTICS_ENABLED={{DATAHUB_analytics_enabled | lower | default(false)}}
       - USE_AWS_ELASTICSEARCH={{false if DATAHUB_search_service_impl == 'elasticsearch' else true}}
       - ELASTICSEARCH_USE_SSL=false
@@ -10461,52 +10393,7 @@ services:
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
-    init: true
-
-  datahub-kafka-setup:
-    image: acryldata/datahub-kafka-setup:head
-    hostname: datahub-kafka-setup
-    container_name: datahub-kafka-setup
-    labels:
-      com.platys.name: "datahub"
-    depends_on:
-      kafka-1:
-        condition: service_healthy
-      schema-registry-1:
-        condition: service_healthy      
-    environment:
-      - DATAHUB_PRECREATE_TOPICS={{DATAHUB_precreate_topics| lower | default(false)}}
-      - KAFKA_BOOTSTRAP_SERVER={{ns.bootstrapServers}}
-    {% if ns.secureKafkaEnabled %}
-      - SPRING_KAFKA_PROPERTIES_SECURITY_PROTOCOL='{{ns.securityProtocolBROKER}}'
-      {% if ns.securityProtocolBROKER == 'SASL_PLAINTEXT' %}
-      - SPRING_KAFKA_PROPERTIES_SASL_MECHANISM='{{ns.saslMechanismBROKER}}'
-      - SPRING_KAFKA_PROPERTIES_SASL_JAAS_CONFIG='{{ns.loginModuleBROKER}} required username=\"{{ns.kafkaToolsDefaultUsername}}\" password=\"{{ns.kafkaToolsDefaultPassword}}\";'
-      {% elif ns.securityProtocolBROKER == 'SSL' %}
-      - SPRING_KAFKA_PROPERTIES_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM='https'
-      - SPRING_KAFKA_PROPERTIES_SSL_TRUSTSTORE_LOCATION=/certs/client.ts.p12
-      - SPRING_KAFKA_PROPERTIES_SSL_TRUSTSTORE_PASSWORD={{KAFKA_client_truststore_password}}
-        {% if KAFKA_ssl_client_authentication_enabled | default(false) %}
-      - SPRING_KAFKA_PROPERTIES_SSL_KEYSTORE_TYPE="PKCS12"
-      - SPRING_KAFKA_PROPERTIES_SSL_KEYSTORE_LOCATION=/certs/client.ks.p12
-      - SPRING_KAFKA_PROPERTIES_SSL_KEYSTORE_PASSWORD={{KAFKA_client_keystore_password}}
-      - SPRING_KAFKA_PROPERTIES_SSL_KEY_PASSWORD={{KAFKA_client_key_password}}
-        {% endif -%}   {#  KAFKA_ssl_client_authentication_enabled #}
-      {% endif -%}   {#  ns.securityProtocol #}
-    {% endif -%}   {#  secureKafkaEnabled #}
-      - KAFKA_ZOOKEEPER_CONNECT=zookeeper-1:2181
-    {%if use_timezone | default(false) %}
-      - TZ={{use_timezone}}
-    {% endif -%}   {#  use_timezone #}
-    volumes:
-      - ./data-transfer:/data-transfer
-    {% if ns.secureKafkaEnabled and ns.securityProtocol == 'SSL' %}
-      - ./security/kafka/client-certs:/certs
-    {% endif -%} {#  ns.secureKafkaEnabled #}
-    {%if use_timezone | default(false) %}
-      - "./etc/timezone:/etc/timezone:ro"
-      - "./etc/localtime:/etc/localtime:ro"
-    {% endif -%}   {#  use_timezone #}
+    comman: "-u SystemUpdate"
     init: true
 
   {%if DATAHUB_provision_sample_data %}
