@@ -9744,12 +9744,23 @@ services:
     ports:
       - "28144:9002"
     environment:
+      - DATAHUB_APP_VERSION={{__DATAHUB_version}}
+      - DATAHUB_BASE_PATH=/
+      - DATAHUB_GMS_BASE_PATH=/
       - DATAHUB_GMS_HOST=datahub-gms
       - DATAHUB_GMS_PORT=8080
-      - DATAHUB_SECRET=${PLATYS_DATAHUB_PASSWORD:-{{DATAHUB_secret | default('abc123!abc123!')}}}
-      - DATAHUB_APP_VERSION=1.0
       - DATAHUB_PLAY_MEM_BUFFER_SIZE=10MB
-      - JAVA_OPTS=-Xms512m -Xmx512m -Dhttp.port=9002 -Dconfig.file=datahub-frontend/conf/application.conf -Djava.security.auth.login.config=datahub-frontend/conf/jaas.conf -Dlogback.configurationFile=datahub-frontend/conf/logback.xml -Dlogback.debug=false -Dpidfile.path=/dev/null
+      - DATAHUB_SECRET=${PLATYS_DATAHUB_PASSWORD:-{{DATAHUB_secret | default('abc123!abc123!')}}}
+      - DATAHUB_SYSTEM_CLIENT_SECRET=JohnSnowKnowsNothing
+      - DATAHUB_TRACKING_TOPIC=DataHubUsageEvent_v1
+      - ELASTIC_CLIENT_HOST={{'datahub-elasticsearch' if DATAHUB_search_service_impl == 'elasticsearch' else 'datahub-opensearch'}}
+      - ELASTIC_CLIENT_PORT=9200
+      - FRONTEND_BEFORE_SERVICE_UNBIND_TIMEOUT=10s
+      - FRONTEND_GRACEFUL_SHUTDOWN_ENABLED=false
+      - FRONTEND_SERVICE_REQUESTS_DONE_TIMEOUT=65s
+      - FRONTEND_SERVICE_STOP_TIMEOUT=15s      
+      - JAVA_OPTS=-Xms512m -Xmx512m -Dhttp.port=9002 -Dconfig.file=datahub-frontend/conf/application.conf -Djava.security.auth.login.config=datahub-frontend/conf/jaas.conf
+        -Dlogback.configurationFile=datahub-frontend/conf/logback.xml -Dlogback.debug=false -Dpidfile.path=/dev/null
       - KAFKA_BOOTSTRAP_SERVER={{ns.bootstrapServer}}
     {% if ns.secureKafkaEnabled %}
       - SPRING_KAFKA_PROPERTIES_SECURITY_PROTOCOL='{{ns.securityProtocolBROKER}}'
@@ -9768,9 +9779,9 @@ services:
         {% endif -%}   {#  KAFKA_ssl_client_authentication_enabled #}
       {% endif -%}   {#  ns.securityProtocol #}
     {% endif -%}   {#  secureKafkaEnabled #}
-      - DATAHUB_TRACKING_TOPIC=DataHubUsageEvent_v1
-      - ELASTIC_CLIENT_HOST={{'datahub-elasticsearch' if DATAHUB_search_service_impl == 'elasticsearch' else 'datahub-opensearch'}}
-      - ELASTIC_CLIENT_PORT=9200
+      - LOG_AGGREGATOR_ENDPOINT=''
+      - PLAY_HTTP_CONTEXT=/
+      - THEME_V2_DEFAULT=true
     {% if PROMETHEUS_enable  | default(false) %}  
       - ENABLE_PROMETHEUS=true
     {% endif -%}   {#  PROMETHEUS_enable #}
@@ -9816,9 +9827,16 @@ services:
     ports:
       - "28142:8080"
     environment:
-      - SKIP_ELASTICSEARCH_CHECK=false
+      - ALTERNATE_MCP_VALIDATION=true
+      - CONFIG_ENTITY_REGISTRY_USE_OPTIMIZED_LOADING=true
+      - DATAHUB_BASE_PATH=/
+      - DATAHUB_GMS_BASE_PATH=/
+      - DATAHUB_OBJECT_STORAGE_URI=file:///tmp/datahub-object-storage
       - DATAHUB_SERVER_TYPE={{DATAHUB_server_type | default('quickstart') }}
+      - DATAHUB_SYSTEM_CLIENT_SECRET=JohnSnowKnowsNothing
       - DATAHUB_TELEMETRY_ENABLED={{DATAHUB_telemetry_enabled | default(false)}}
+      - DATAHUB_TOKEN_SERVICE_SALT=${DATAHUB_TOKEN_SERVICE_SALT}
+      - DATAHUB_TOKEN_SERVICE_SIGNING_KEY=${DATAHUB_TOKEN_SERVICE_SIGNING_KEY}
       - DATAHUB_UPGRADE_HISTORY_KAFKA_CONSUMER_GROUP_ID=generic-duhe-consumer-job-client-gms
       - EBEAN_DATASOURCE_DRIVER=com.mysql.jdbc.Driver
       - EBEAN_DATASOURCE_HOST=datahub-mysql:3306
@@ -9826,21 +9844,26 @@ services:
       - EBEAN_DATASOURCE_USERNAME=datahub
       - EBEAN_DATASOURCE_PASSWORD=datahub
       - ELASTICSEARCH_HOST={{'datahub-elasticsearch' if DATAHUB_search_service_impl == 'elasticsearch' else 'datahub-opensearch'}}
+      - ELASTICSEARCH_IMPLEMENTATION={{DATAHUB_search_service_impl}}
       - ELASTICSEARCH_INDEX_BUILDER_SETTINGS_REINDEX=true
       - ELASTICSEARCH_INDEX_BUILDER_MAPPINGS_REINDEX=true
       - ELASTICSEARCH_LIMIT_RESULTS_STRICT=true
       - ELASTICSEARCH_PORT=9200
+      - ELASTICSEARCH_PROTOCOL=http
+      - ELASTICSEARCH_USE_SSL=false
       - ENTITY_REGISTRY_CONFIG_PATH=/datahub/datahub-gms/resources/entity-registry.yml
       - ENTITY_SERVICE_ENABLE_RETENTION=true
+      - ENTITY_VERSIONING_ENABLED=true
       - ES_BULK_REFRESH_POLICY=WAIT_UNTIL
-      - GRAPH_SERVICE_IMPL={{DATAHUB_graph_service_impl}}
+      - EXTRACT_JAR_ENABLED=true
+      - GMS_LIFECYCLE_TIMEOUT=65s
       - GRAPH_SERVICE_DIFF_MODE_ENABLED={{DATAHUB_graph_service_diff_mode_enabled | default(false)}}
-    {%if (DATAHUB_graph_service_impl | lower) == 'neo4j'  | default(true) %}
-      - NEO4J_HOST=http://datahub-neo4j:7474
-      - NEO4J_URI=bolt://${PUBLIC_IP:-127.0.0.1}:17688
-      - NEO4J_USERNAME=neo4j
-      - NEO4J_PASSWORD=abc123!
-    {% endif -%}   {#  DATAHUB_graph_service_impl #}
+      - GRAPH_SERVICE_IMPL={{DATAHUB_graph_service_impl}}
+      - GRAPHQL_SHAPE_LOGGING_DURATION_THRESHOLD_MS=3000
+      - GRAPHQL_SHAPE_LOGGING_ENABLED=false
+      - GRAPHQL_SHAPE_LOGGING_ERROR_COUNT_THRESHOLD=1
+      - GRAPHQL_SHAPE_LOGGING_FIELD_COUNT_THRESHOLD=100
+      - GRAPHQL_SHAPE_LOGGING_RESPONSE_SIZE_THRESHOLD_BYTES=1048576      
       - JAVA_OPTS=-Xms1g -Xmx1g
       - KAFKA_BOOTSTRAP_SERVER={{ns.bootstrapServer}}
     {% if ns.secureKafkaEnabled %}
@@ -9862,39 +9885,51 @@ services:
     {% endif -%}   {#  secureKafkaEnabled #}
       - KAFKA_CONSUMER_STOP_ON_DESERIALIZATION_ERROR=true
       - KAFKA_SCHEMAREGISTRY_URL={{ns.schemaRegistryUrl}}
+      - LOG_AGGREGATOR_ENDPOINT=
     {%if not DATAHUB_mae_consumer_standalone | default(true) %}
       - MAE_CONSUMER_ENABLED=true
     {% endif -%}   {#  not DATAHUB_mae_consumer_standalone #}
     {%if not DATAHUB_mce_consumer_standalone | default(true) %}
       - MCE_CONSUMER_ENABLED=true
     {% endif -%}   {#  not DATAHUB_mce_consumer_standalone #}
-      - METADATA_SERVICE_AUTH_ENABLED=false
-      - JAVA_TOOL_OPTIONS=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5001
-      - BOOTSTRAP_SYSTEM_UPDATE_WAIT_FOR_SYSTEM_UPDATE=false
-      - SEARCH_SERVICE_ENABLE_CACHE=false
-      - LINEAGE_SEARCH_CACHE_ENABLED=false
-      - SHOW_BROWSE_V2=true
-      - ER_MODEL_RELATIONSHIP_FEATURE_ENABLED=false
-      - THEME_V2_DEFAULT=true
-      - THEME_V2_TOGGLEABLE=true
-      - SHOW_NAV_BAR_REDESIGN=true   
-      - PLATFORM_BROWSE_V2=true   
-      - SHOW_STATS_TAB_REDESIGN=true
-      - AUTH_POLICIES_ENABLED={{DATAHUB_auth_policies_enabled | lower | default(false)}}
+      - MCL_CONSUMER_BATCH_ENABLED=true
+      - MCP_CONSUMER_BATCH_ENABLED=true
+      - METADATA_SERVICE_AUTH_ENABLED=false      
+    {%if (DATAHUB_graph_service_impl | lower) == 'neo4j'  | default(true) %}
+      - NEO4J_HOST=http://datahub-neo4j:7474
+      - NEO4J_URI=bolt://${PUBLIC_IP:-127.0.0.1}:17688
+      - NEO4J_USERNAME=neo4j
+      - NEO4J_PASSWORD=abc123!
+    {% endif -%}   {#  DATAHUB_graph_service_impl #}
       - PE_CONSUMER_ENABLED=true
+      - POLICY_CACHE_REFRESH_INTERVAL_SECONDS=120
+      - SCHEMA_REGISTRY_TYPE=KAFKA
+      - SEARCH_BAR_API_VARIANT=SEARCH_ACROSS_ENTITIES
+      - SERVER_SHUTDOWN_MODE=immediate
+      - SHOW_HAS_SIBLINGS_FILTER=true
+      - SHOW_HOME_PAGE_REDESIGN=true
+      - SHOW_INGESTION_PAGE_REDESIGN=true
+      - SHOW_SEARCH_BAR_AUTOCOMPLETE_REDESIGN=true
+      - STRICT_URN_VALIDATION_ENABLED=true
+      - THEME_V2_DEFAULT=true
       - UI_INGESTION_ENABLED={{DATAHUB_ui_ingestion_enabled | lower | default(false)}}
+      - USAGE_AGGREGATION_ALIGNMENT_PERIOD_SECONDS=3600
+      - USAGE_AGGREGATION_ENABLED=true
+      - USAGE_AGGREGATION_FLUSH_INTERVAL_SECONDS=30
+      - USAGE_AGGREGATION_INCLUDE_AGENT_NAME=true
+      - ZDU_STAGE_10=true
+      - ZDU_STAGE_20=true
       - UI_INGESTION_DEFAULT_CLI_VERSION={{DATAHUB_ui_ingestion_default_cli_version | default('latest')}}
-      - DATAHUB_ANALYTICS_ENABLED={{DATAHUB_analytics_enabled | lower | default(false)}}
-    {% if PROMETHEUS_enable  | default(false) %}  
+    {% if PROMETHEUS_enable  | default(false) %}
       - ENABLE_PROMETHEUS=true
     {% endif -%}   {#  PROMETHEUS_enable #}
-    {% if JAEGER_enable  | default(false) %}  
+    {% if JAEGER_enable  | default(false) %}
       - ENABLE_OTEL=true
       - OTEL_TRACES_EXPORTER=jaeger
       - OTEL_EXPORTER_JAEGER_ENDPOINT=http://jaeger:14250
       - OTEL_METRICS_EXPORTER=none
-      - OTEL_SERVICE_NAME=datahub-gms      
-    {% endif -%}   {#  OTEL_enable #}      
+      - OTEL_SERVICE_NAME=datahub-gms
+    {% endif -%}   {#  OTEL_enable #}
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -10167,7 +10202,6 @@ services:
       - MYSQL_DATABASE=datahub
       - MYSQL_USER=datahub
       - MYSQL_PASSWORD=datahub
-      - MYSQL_ROOT_HOST='%'
       - MYSQL_ROOT_PASSWORD=datahub
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
@@ -10181,7 +10215,7 @@ services:
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
-    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_bin --default-authentication-plugin=mysql_native_password
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_bin --default-authentication-plugin=caching_sha2_password
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
@@ -10370,20 +10404,54 @@ services:
     depends_on:
       - {{'datahub-elasticsearch' if DATAHUB_search_service_impl == 'elasticsearch' else 'datahub-opensearch'}}
     environment:
+      - BACKFILL_BROWSE_PATHS_V2=true
+      - CREATE_USER=false
+      - CREATE_USER_PASSWORD=datahub
+      - CREATE_USER_USERNAME=datahub
+      - DATAHUB_BASE_PATH=/
+      - DATAHUB_GMS_BASE_PATH=/
+      - DATAHUB_GMS_HOST=datahub-gms
+      - DATAHUB_GMS_PORT=8080
+      - DATAHUB_PRECREATE_TOPICS=true    
       - DATAHUB_SQL_SETUP_ENABLED=true      # handles MySQL/Postgres setup
-      - ELASTICSEARCH_HOST={{'datahub-elasticsearch' if DATAHUB_search_service_impl == 'elasticsearch' else 'datahub-opensearch'}}
-      - ELASTICSEARCH_PORT=9200
-      - ELASTICSEARCH_PROTOCOL=http
+      - DATAHUB_SYSTEM_CLIENT_SECRET=${DATAHUB_SYSTEM_CLIENT_SECRET:-JohnSnowKnowsNothing}
+      - DATAHUB_TOKEN_SERVICE_SALT=${DATAHUB_TOKEN_SERVICE_SALT}
+      - DATAHUB_TOKEN_SERVICE_SIGNING_KEY=${DATAHUB_TOKEN_SERVICE_SIGNING_KEY}
       - EBEAN_DATASOURCE_DRIVER=com.mysql.jdbc.Driver
       - EBEAN_DATASOURCE_HOST=datahub-mysql:3306
       - EBEAN_DATASOURCE_USERNAME=datahub
       - EBEAN_DATASOURCE_PASSWORD=datahub
       - EBEAN_DATASOURCE_URL=jdbc:mysql://datahub-mysql:3306/datahub?verifyServerCertificate=false&useSSL=true&useUnicode=yes&characterEncoding=UTF-8&enabledTLSProtocols=TLSv1.2      
+      - ELASTICSEARCH_BUILD_INDICES_CLONE_INDICES=false
+      - ELASTICSEARCH_HOST={{'datahub-elasticsearch' if DATAHUB_search_service_impl == 'elasticsearch' else 'datahub-opensearch'}}
+      - ELASTICSEARCH_IMPLEMENTATION=elasticsearch
+      - ELASTICSEARCH_INDEX_BUILDER_MAPPINGS_REINDEX=true
+      - ELASTICSEARCH_INDEX_BUILDER_REFRESH_INTERVAL_SECONDS=3
+      - ELASTICSEARCH_INDEX_BUILDER_SETTINGS_REINDEX=true
+      - ELASTICSEARCH_PORT=9200
+      - ELASTICSEARCH_PROTOCOL=http
+      - ELASTICSEARCH_USE_SSL=false
       - KAFKA_BOOTSTRAP_SERVER={{ns.bootstrapServers}}
       - KAFKA_SCHEMAREGISTRY_URL={{ns.schemaRegistryUrl}}
       - DATAHUB_ANALYTICS_ENABLED={{DATAHUB_analytics_enabled | lower | default(false)}}
-      - USE_AWS_ELASTICSEARCH={{false if DATAHUB_search_service_impl == 'elasticsearch' else true}}
-      - ELASTICSEARCH_USE_SSL=false
+      - ENTITY_REGISTRY_CONFIG_PATH=/datahub/datahub-gms/resources/entity-registry.yml
+      - ENTITY_SERVICE_ENABLE_RETENTION=true
+      - ENTITY_VERSIONING_ENABLED=true
+      - GRAPH_SERVICE_IMPL=neo4j
+    {%if (DATAHUB_graph_service_impl | lower) == 'neo4j'  | default(true) %}
+      - NEO4J_HOST=datahub-neo4j:7474
+      - NEO4J_URI=bolt://${PUBLIC_IP:-127.0.0.1}:17688
+      - NEO4J_USERNAME=neo4j
+      - NEO4J_PASSWORD=abc123!
+    {% endif -%}   {#  DATAHUB_graph_service_impl #}
+      - REPROCESS_DEFAULT_BROWSE_PATHS_V2=false
+      - SCHEMA_REGISTRY_SYSTEM_UPDATE=true
+      - SCHEMA_REGISTRY_TYPE=KAFKA
+      - SPRING_KAFKA_PROPERTIES_AUTO_REGISTER_SCHEMAS=true
+      - SPRING_KAFKA_PROPERTIES_USE_LATEST_VERSION=true
+      - USE_CONFLUENT_SCHEMA_REGISTRY=true
+      - ZDU_STAGE_10=true
+      - ZDU_STAGE_20=true
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
