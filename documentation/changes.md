@@ -17,6 +17,7 @@ See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/plat
  * Update `n8n` to `2.28.4`
  * Update `kestra` to `v1.3`
  * Update `datahub` to `v1.7.0`
+ * Update `ollama` to `0.32.12`
 
 ### Enhancements
 
