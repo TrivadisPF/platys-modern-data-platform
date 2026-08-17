@@ -10241,7 +10241,7 @@ services:
 
   {%if (DATAHUB_graph_service_impl | lower) == 'neo4j'  | default(true) %}
   datahub-neo4j:
-    image: neo4j:4.4.9-community
+    image: neo4j:4.4.28-community
     hostname: datahub-neo4j
     container_name: datahub-neo4j
     labels:
@@ -16319,6 +16319,7 @@ services:
       - 11434:11434
     tty: true
     environment:
+      OLLAMA_KEEP_ALIVE: "24h"
       OLLAMA_DEBUG: {{1 if OLLAMA_debug else 0}}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
@@ -16336,6 +16337,12 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s    
   {%if OLLAMA_llm is defined and OLLAMA_llm and OLLAMA_llm | length %}
   ollama-pull-model:
     image: genai-stack/pull-model:latest
@@ -29779,6 +29786,7 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer
+      - ./container-volume/nats/nats-1/data:/data
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -29786,6 +29794,14 @@ services:
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
+    command:
+      - "--name=nats-1"
+      - "--cluster_name=c1"
+      - "--cluster=nats://nats-1:6222"
+#      - "--routes=nats-route://nats-1:6222,nats-route://nats-2:6222,nats-route://nats-3:6222"
+      - "--http_port=8222"
+      - "--js"
+      - "--sd=/data"    
     restart: {{container_restart_policy}}
 {% endif %}   {#  NATS_enable #}
 
