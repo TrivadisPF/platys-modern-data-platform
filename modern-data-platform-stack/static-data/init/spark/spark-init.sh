@@ -85,9 +85,9 @@ function configure() {
 #configure /etc/hadoop/httpfs-site.xml httpfs HTTPFS_CONF
 #configure /etc/hadoop/kms-site.xml kms KMS_CONF
 
-configure_hive /opt/bitnami/spark/conf/hive-site.xml hive HIVE_SITE_CONF
+configure_hive /opt/spark/conf/hive-site.xml hive HIVE_SITE_CONF
 
-configure_spark /opt/bitnami/spark/conf/spark-defaults.conf spark SPARK_DEFAULTS_CONF
+configure_spark /opt/spark/conf/spark-defaults.conf spark SPARK_DEFAULTS_CONF
 
 if [ "$MULTIHOMED_NETWORK" = "1" ]; then
     echo "Configuring for multihomed network"
@@ -168,7 +168,7 @@ done
 if [ ${SPARK_INSTALL_JAVA_PACKAGES} ]
 then
   # using python for the download, as spark bitnami docker images don't come with curl installed
-  /maven-download.sh central ${SPARK_INSTALL_JAVA_PACKAGES} /opt/bitnami/spark/jars python
+  /maven-download.sh central ${SPARK_INSTALL_JAVA_PACKAGES} /opt/spark/jars python
 fi
 
 if [ "${SPARK_INSTALL_PYTHON_PACKAGES}" ]
