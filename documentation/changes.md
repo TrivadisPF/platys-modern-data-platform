@@ -10,6 +10,7 @@ See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/plat
  * RisingWave Events API
  * Apache MiNiFi C++
  * SeaweedFS
+ * Nexus
  
 ### Version upgrades
  

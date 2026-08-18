@@ -737,6 +737,7 @@ networks:
 {% set __DOCKER_REGISTRY_version = DOCKER_REGISTRY_version | default('latest') -%}
 {% set __DOCKER_REGISTRY_UI_version = DOCKER_REGISTRY_UI_version | default('latest') -%}
 {% set __JENKINS_version = JENKINS_version | default('latest') -%}
+{% set __NEXUS_version = NEXUS_version | default('latest') -%}
 {% set __ALLURE_version = ALLURE_version | default('latest') -%}
 {% set __GITWEB_version = GITWEB_version | default('latest') -%}
 {% set __HAWTIO_version = HAWTIO_version | default('latest') -%}
@@ -1197,6 +1198,7 @@ networks:
   {% set DOCKER_REGISTRY_enable = false -%}
   {% set DOCKER_REGISTRY_UI_enable = false -%}
   {% set JENKINS_enable = false -%}
+  {% set NEXUS_enable = false -%}
   {% set ALLURE_enable = false -%}
   {% set GITWEB_enable = false -%}
   {% set HAWTIO_enable = false -%}
@@ -33220,6 +33222,39 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
 {% endif %}   {# JENKINS_enable #}
+
+{% if NEXUS_enable | default(false) %}
+  #  ================================== Sonatype Nexus ========================================== #
+  nexus:
+    image: sonatype/nexus3:{{__NEXUS_version}}
+    container_name: nexus
+    hostname: nexus
+    labels:
+      com.platys.name: 'nexus'
+      com.platys.description: 'Sonatype Nexus Repository Manager'
+      com.platys.webui.title: "Nexus UI"
+      com.platys.webui.url: "http://dataplatform:28426"
+    ports:
+      - "28426:8081"
+    environment:
+      INSTALL4J_ADD_JVM_PARAMS: "-Xms{{NEXUS_jvm_min_heap}} -Xmx{{NEXUS_jvm_max_heap}} -XX:MaxDirectMemorySize={{NEXUS_jvm_max_heap}}"
+  {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+  {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+  {% if NEXUS_volume_map_data %}
+      - ./container-volume/nexus/data:/nexus-data
+  {% endif -%}   {#  NEXUS_volume_map_data #}
+  {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+  {% endif -%}   {#  use_timezone #}
+  {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+  <<: *logging
+  {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+{% endif %}   {# NEXUS_enable #}
 
 {% if ALLURE_enable | default(false) %}
   #  ================================== Allure Report ========================================== #
