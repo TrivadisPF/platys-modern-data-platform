@@ -15,4 +15,4 @@ platys gen
 
 ## How to use it?
 
-Configure  to <http://dataplatform:28403/sse> if transport configuration setting is left to default.
+Configure  to <http://dataplatform:28486/sse> if transport configuration setting is left to default.

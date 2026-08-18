@@ -15,7 +15,7 @@ platys gen
 
 
 
-Navitage to <http://dataplatform:28401?token=<token> and login with username and password specified in the configuration. 
+Navitage to <http://dataplatform:28484?token=<token> and login with username and password specified in the configuration.
 
 Pass the token using `?token=<token>`.
 
@@ -29,7 +29,7 @@ docker exec -it openclaw openclaw devices approve <request-id>
 to access a remote gateway, create an SSH tunnel from your local machine
 
 ```bash
-ssh -N -L 28401:127.0.0.1:28401 root@187.124.0.29
+ssh -N -L 28484:127.0.0.1:28484 root@187.124.0.29
 ```
 
 

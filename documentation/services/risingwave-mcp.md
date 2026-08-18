@@ -13,4 +13,4 @@ platys gen
 
 ## How to use it?
 
-Configure your MCP client to connect to <http://dataplatform:28409/mcp>.
+Configure your MCP client to connect to <http://dataplatform:28492/mcp>.
