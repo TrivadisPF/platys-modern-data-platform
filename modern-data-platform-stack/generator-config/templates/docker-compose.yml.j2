@@ -7098,9 +7098,10 @@ services:
 
   {% if SPARK_HISTORY_enable | default(false) %}
   spark-history:
-    image: bitnamilegacy/spark:{{__SPARK_version}}
+    image: apache/spark:{{__SPARK_version}}
     container_name: spark-history
     hostname: spark-history
+    user: root    
     labels:
       com.platys.name: 'spark-history'
       com.platys.description: "Spark History Server"
@@ -7281,16 +7282,18 @@ services:
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
-    command: /opt/bitnami/spark/bin/spark-class org.apache.spark.deploy.history.HistoryServer
+    entrypoint: [/docker-entrypoint-initdb.d/spark-init.sh]
+    command: [/opt/spark/bin/spark-class, org.apache.spark.deploy.history.HistoryServer]
     restart: {{container_restart_policy}}
   {% endif %}   {#  SPARK_HISTORY_enable #}
 {% endif %}   {#  SPARK_enable #}
 
 {% if SPARK_THRIFTSERVER_enable | default(false) %}
   spark-thriftserver:
-    image: bitnamilegacy/spark:{{__SPARK_version}}
+    image: apache/spark:{{__SPARK_version}}
     container_name: spark-thriftserver
     hostname: spark-thriftserver
+    user: root    
     labels:
       com.platys.name: 'spark-thriftserver'
       com.platys.description: "Spark Thriftserver"
@@ -7476,6 +7479,13 @@ services:
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
+    entrypoint: [/docker-entrypoint-initdb.d/spark-init.sh]
+    command:
+      - /opt/spark/bin/spark-submit
+      - --class
+      - org.apache.spark.sql.hive.thriftserver.HiveThriftServer2
+      - --master
+      - spark://spark-master:7077    
     restart: {{container_restart_policy}}
 {% endif %}   {#  SPARK_THRIFTSERVER_enable #}
 
