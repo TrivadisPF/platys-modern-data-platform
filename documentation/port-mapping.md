@@ -810,36 +810,36 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28424 | 8000 | risingwave-events-api |
 28425 | 8080 | zammad-nginx |
 28426 | 8081 | nexus |
-28242 | 3000 | openlit |
-28243 | 8123 | clickhouse |
-28244 | 9000 | clickhouse |
-28245 | 8080 | kestra |
-28246 | 8081 | kestra |
-28247 | 4040 | ngrok |
-28248 | 3002 | firecrawl-api |
-28249 | 8443 | duckdb-ui |
-28250 | 4040 | nvidia-nim-1 |
-28251 | 4040 | nvidia-nim-2 |
-28252 | 4040 | nvidia-nim-3 |
-28253 | 4040 | nvidia-nim-4 |
-28254 | 4040 | nvidia-nim-5 |
-28256 | 4040 | nvidia-nim-6 |
-28257 | 7860 | nllb |
-28258 | 8000 | supabase-kong |
-28259 | 8443 | supabase-kong |
-28260 | 8082 | supabase-studio |
-28261 | 8123 | quackflight |
-28262 | 8080 | jenkins |
-28263 | 8181 | influxdb3 |
-28264 | 8888 | influxdb3-explorer |
-28265 | 8000 | graphiti |
-28266 | 8000 | graphiti-mcp |
-28267 | 8080 | trino-lb (http) |
-28268 | 8443 | trino-lb (https) |
-28269 | 9090 | trino-lb (prometheus) |
-28270 | 8080 | trino-gateway |
-28271 | 8000 | neo4j-mcp |
-28272 | |  |
+28427 | 3000 | openlit |
+28428 | 8123 | clickhouse |
+28429 | 9000 | clickhouse |
+28430 | 8080 | kestra |
+28431 | 8081 | kestra |
+28432 | 4040 | ngrok |
+28433 | 3002 | firecrawl-api |
+28434 | 8443 | duckdb-ui |
+28435 | 4040 | nvidia-nim-1 |
+28436 | 4040 | nvidia-nim-2 |
+28437 | 4040 | nvidia-nim-3 |
+28438 | 4040 | nvidia-nim-4 |
+28439 | 4040 | nvidia-nim-5 |
+28440 | 4040 | nvidia-nim-6 |
+28441 | 7860 | nllb |
+28442 | 8000 | supabase-kong |
+28443 | 8443 | supabase-kong |
+28444 | 8082 | supabase-studio |
+28445 | 8123 | quackflight |
+28446 | 8080 | jenkins |
+28447 | 8181 | influxdb3 |
+28448 | 8888 | influxdb3-explorer |
+28449 | 8000 | graphiti |
+28450 | 8000 | graphiti-mcp |
+28451 | 8080 | trino-lb (http) |
+28452 | 8443 | trino-lb (https) |
+28453 | 9090 | trino-lb (prometheus) |
+28454 | 8080 | trino-gateway |
+28455 | 8000 | neo4j-mcp |
+
 28273 | 3000 | presidio-analyzer |
 28274 | 8000 | presidio-anonymizer |
 28275 | 8181 | lakekeeper |
@@ -861,6 +861,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28291 | 7687 | puppygraph |
 28292 | 8888 | kouncil |
 28293 | 9090 | cruise-control |
+
+
 28394 | 9090 | ccc-prometheus |
 28395 | 9093 | ccc-prometheus-alertmanager |
 28396 | 8080 | xtdb |

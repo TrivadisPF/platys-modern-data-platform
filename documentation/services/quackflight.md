@@ -16,7 +16,7 @@ platys gen
 Execute DuckDB queries using the HTTP POST/GET API (compatible with the ClickHouse HTTP API)
 
 ```bash
-curl -X POST "http://dataplatform:28261" \
+curl -X POST "http://dataplatform:28445" \
    -H "Content-Type: application/json" \
    -d 'SELECT version()'  
 ```   

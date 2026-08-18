@@ -8474,9 +8474,9 @@ services:
       com.platys.name: 'firecrawl'
       com.platys.description: "Scrape, crawl and extract data from web"
       com.platys.restapi.title: "Firecrawl API"
-      com.platys.restapi.url: "http://dataplatform:28248"
+      com.platys.restapi.url: "http://dataplatform:28433"
     ports:
-      - "28248:3002"
+      - "28433:3002"
     ulimits:
       nofile:
         soft: 65535
@@ -8913,8 +8913,8 @@ services:
       com.platys.name: 'nllb'
       com.platys.description: "No Language Left Behind (NLLB) translation service"
       com.platys.restapi.title: "NLLB API"
-      com.platys.restapi.url: "http://dataplatform:28257/api/schema/swagger"
-    {%if NLLB_gpu_enabled | default(false) %}      
+      com.platys.restapi.url: "http://dataplatform:28441/api/schema/swagger"
+    {%if NLLB_gpu_enabled | default(false) %}
     runtime: nvidia
     deploy:
       resources:
@@ -8922,10 +8922,10 @@ services:
           devices:
             - driver: nvidia
               count: 1
-              capabilities: [gpu]          
+              capabilities: [gpu]
     {% endif -%}   {#  NLLB_gpu_enabled #}
     ports:
-      - "28257:7860"
+      - "28441:7860"
     environment:
       SERVER_PORT: 7860
       OMP_NUM_THREADS: 5
@@ -15622,18 +15622,18 @@ services:
       com.platys.name: 'kestra'
       com.platys.description: "Orchestration Engine"
       com.platys.webui.title: "Kestra UI"
-      com.platys.webui.url: "http://dataplatform:28245"
+      com.platys.webui.url: "http://dataplatform:28430"
       com.platys.restapi.title: Kestra UI
-      com.platys.restapi.url: http://dataplatform:28245/api/v1/usages/all      
+      com.platys.restapi.url: http://dataplatform:28430/api/v1/usages/all
       com.platys.password.envvars: "PLATYS_KESTRA_PASSWORD"
   {% if KESTRA_flavour | default('standalone') == 'standalone' %}
     depends_on:
       postgresql:
-        condition: service_started    
+        condition: service_started
   {% endif -%}   {#  KESTRA_flavour  #}
     ports:
-      - "28245:8080"      
-      - "28246:8081"      
+      - "28430:8080"
+      - "28431:8081"      
     environment:
       KESTRA_CONFIGURATION: |
         datasources:
@@ -15678,7 +15678,7 @@ services:
             enabled: {{KESTRA_provision_tutorial_flows | default(false)}}    
           variables:
             envVarsPrefix: KESTRA_            
-          url: http://${PUBLIC_IP:-127.0.0.1}:28245/
+          url: http://${PUBLIC_IP:-127.0.0.1}:28430/
     {% if KESTRA_env_variables is defined and KESTRA_env_variables and KESTRA_env_variables | length | default(false) %}
       {% for envvar in KESTRA_env_variables.split(",") %}
       {{"KESTRA_"}}{{envvar.split('=')[0]}}: "{{envvar.split('=')[1]}}"
@@ -16444,7 +16444,7 @@ services:
 {%if NVIDIA_NIM_enable and (NVIDIA_NIM_images is defined and NVIDIA_NIM_images and NVIDIA_NIM_images | length) | default(false) %}
   #  ================================== Nvidia NIMs  ========================================== #
   {% for image in NVIDIA_NIM_images.split(",") %}
-    {% set external_port = 28250 + loop.index - 1 %}
+    {% set external_port = 28435 + loop.index - 1 %}
   nvidia-nim-{{loop.index}}:
     image: {{image}}
   {% if NVIDIA_NIM_gpu_enabled | default(false) %}
@@ -17347,13 +17347,13 @@ services:
       com.platys.name: 'openlit'
       com.platys.description: 'LLM engineering platform'
       com.platys.webui.title: 'OpenLIT UI'
-      com.platys.webui.url: "http://dataplatform:28242"
+      com.platys.webui.url: "http://dataplatform:28427"
       com.platys.restapi.title: 'OpenLIT REST API'
-      com.platys.restapi.url: "http://dataplatform:28242/api/"
+      com.platys.restapi.url: "http://dataplatform:28427/api/"
     depends_on:
       - clickhouse
     ports:
-      - "28242:3000"
+      - "28427:3000"
     environment:
       TELEMETRY_ENABLED: true
       INIT_DB_HOST: clickhouse
@@ -20775,9 +20775,9 @@ services:
       com.platys.name: "neo4j-mcp"
       com.platys.description: "MCP Server for Neo4J"
       com.platys.restapi.title: "MCP Server for Neo4J"
-      com.platys.restapi.url: "http://dataplatform:28271"
+      com.platys.restapi.url: "http://dataplatform:28455"
     ports:
-      - "28271:8000"
+      - "28455:8000"
     environment:
       NEO4J_URI: bolt://neo4j-1:7687
   {% if NEO4J_MCP_output_transport == 'stdio' %}    
@@ -20820,12 +20820,12 @@ services:
       com.platys.name: "graphiti"
       com.platys.description: "Real-Time Knowledge Graphs"
       com.platys.restapi.title: "Graphiti API"
-      com.platys.restapi.url: "http://dataplatform:28265/redoc"
+      com.platys.restapi.url: "http://dataplatform:28449/redoc"
     depends_on:
       neo4j-1:
-        condition: service_healthy      
+        condition: service_healthy
     ports:
-      - "28265:8000"
+      - "28449:8000"
     environment:
       - OPENAI_API_KEY={{ns.openaiApiKey if ns.openaiApiKey is defined and ns.openaiApiKey and ns.openaiApiKey | length else omit }}
       - OPENAI_BASE_URL={{ns.openaiBaseUrl if ns.openaiBaseUrl is defined and ns.openaiBaseUrl and ns.openaiBaseUrl | length else omit }}
@@ -20872,12 +20872,12 @@ services:
       com.platys.name: "graphiti"
       com.platys.description: "Real-Time Knowledge Graphs (MCP)"
       com.platys.restapi.title: "Graphiti MCP Server"
-      com.platys.restapi.url: "http://dataplatform:28266/sse"
+      com.platys.restapi.url: "http://dataplatform:28450/sse"
     depends_on:
       neo4j-1:
-        condition: service_healthy      
+        condition: service_healthy
     ports:
-      - "28266:8000"
+      - "28450:8000"
     environment:
       - OPENAI_API_KEY={{ns.openaiApiKey if ns.openaiApiKey is defined and ns.openaiApiKey and ns.openaiApiKey | length else omit }}
       - OPENAI_BASE_URL={{ns.openaiBaseUrl if ns.openaiBaseUrl is defined and ns.openaiBaseUrl and ns.openaiBaseUrl | length else omit }}
@@ -21549,9 +21549,9 @@ services:
       com.platys.name: "influxdb3"
       com.platys.description: "Timeseries Database"
       com.platys.restapi.title: "InfluxDB 3.0 Rest API"
-      com.platys.restapi.url: "http://dataplatform:28263/api/v3"
+      com.platys.restapi.url: "http://dataplatform:28447/api/v3"
     ports:
-      - 28263:8181
+      - 28447:8181
     {%if use_timezone | default(false) %}
     environment:
       TZ: {{use_timezone}}
@@ -21607,9 +21607,9 @@ services:
       com.platys.name: "influxdb3-explorer"
       com.platys.description: "Timeseries Database UI"
       com.platys.webui.title: "InfluxDB 3.0 Explorer"
-      com.platys.webui.url: "http://dataplatform:28264"
+      com.platys.webui.url: "http://dataplatform:28448"
     ports:
-      - 28264:8080
+      - 28448:8080
     environment:
       SESSION_SECRET_KEY: {{INFLUXDB3_EXPLORER_session_secret_key}}
       DATABASE_URL: "/db/sqlite.db"
@@ -22054,9 +22054,9 @@ services:
       com.platys.description: "Analytical in-process SQL DBMS"
     {%if DUCKDB_ui_enabled | default(false) %}  
       com.platys.webui.title: "DuckDB UI"
-      com.platys.webui.url: "https://dataplatform:28249"
+      com.platys.webui.url: "https://dataplatform:28434"
     ports:
-      - "28249:8443"
+      - "28434:8443"
     {% endif -%}   {# DUCKDB_ui_enabled #}
     environment:
       DUMMY: 1
@@ -22098,11 +22098,11 @@ services:
       com.platys.name: "quackflight"
       com.platys.description: "DuckDB API Server"
       com.platys.webui.title: "QuackFlight UI"
-      com.platys.webui.url: "http://dataplatform:28261"
+      com.platys.webui.url: "http://dataplatform:28445"
       com.platys.restapi.title: "QuackFlight UI"
-      com.platys.restapi.url: "http://dataplatform:28261"
+      com.platys.restapi.url: "http://dataplatform:28445"
     ports:
-      - "28261:8123"
+      - "28445:8123"
       - "8815:8815"
     {%if use_timezone | default(false) %}
     environment:
@@ -22577,8 +22577,8 @@ services:
       com.platys.description: "Real-time analytics database"
       com.platys.password.envvars: "PLATYS_CLICKHOUSE_PASSWORD"      
     ports:
-      - "28243:8123"       
-      - "28244:9000" 
+      - "28428:8123"
+      - "28429:9000"
     environment:
       - CLICKHOUSE_DB={{CLICKHOUSE_db_name}}
       - CLICKHOUSE_USER={{CLICKHOUSE_username}}
@@ -22616,7 +22616,7 @@ services:
     ports:
       - "5521:5521"       
     environment:
-      - VITE_CLICKHOUSE_URL=http://${PUBLIC_IP:-127.0.0.1}:28243
+      - VITE_CLICKHOUSE_URL=http://${PUBLIC_IP:-127.0.0.1}:28428
       - VITE_CLICKHOUSE_USER={{CLICKHOUSE_username}}
       - VITE_CLICKHOUSE_PASS=${PLATYS_CLICKHOUSE_PASSWORD:-{{CLICKHOUSE_password}}}
     {%if use_timezone | default(false) %}
@@ -23799,9 +23799,9 @@ services:
       com.platys.name: "supabase"
       com.platys.description: "Supabase Studio"
       com.platys.webui.title: "Supabase Studio UI"
-      com.platys.webui.url: "http://dataplatform:28260"
+      com.platys.webui.url: "http://dataplatform:28444"
     ports:
-      - 28260:8082      
+      - 28444:8082
     environment:
       STUDIO_PG_META_URL: http://supabase-meta:8080
       POSTGRES_PASSWORD: ${PLATYS_SUPABASE_DB_PASSWORD:-{{SUPABASE_db_password}}}
@@ -23858,11 +23858,11 @@ services:
       com.platys.name: "kong"
       com.platys.description: "Supabase Kong"
       com.platys.webui.title: "Supabase UI"
-      com.platys.webui.url: "http://dataplatform:28258"
-      com.platys.password.envvars: "PLATYS_SUPABASE_DASHBOARD_PASSWORD"      
+      com.platys.webui.url: "http://dataplatform:28442"
+      com.platys.password.envvars: "PLATYS_SUPABASE_DASHBOARD_PASSWORD"
     ports:
-      - 28258:8000/tcp
-      - 28259:8443/tcp      
+      - 28442:8000/tcp
+      - 28443:8443/tcp      
     environment:
       KONG_DATABASE: "off"
       KONG_DECLARATIVE_CONFIG: /home/kong/kong.yml
@@ -26060,11 +26060,11 @@ services:
       com.platys.name: "trino-gateway"
       com.platys.description: "Trino Gateway"
       com.platys.webui.title: "Trino Gateway"
-      com.platys.webui.url: "http://dataplatform:28270"
+      com.platys.webui.url: "http://dataplatform:28454"
       com.platys.restapi.title: "Trino Gateway API"
-      com.platys.restapi.url: "http://dataplatform:28270/entity/GATEWAY_BACKEND"
+      com.platys.restapi.url: "http://dataplatform:28454/entity/GATEWAY_BACKEND"
     ports:
-      - "28270:8080"
+      - "28454:8080"
     environment:
       - RULES_ENGINE_ENABLED={{TRINO_GATEWAY_rules_engine_enabled | default('false') }}
       - RULES_TYPE={{TRINO_GATEWAY_rules_type if TRINO_GATEWAY_rules_type is defined and TRINO_GATEWAY_rules_type and TRINO_GATEWAY_rules_type | length else '' }}
@@ -26130,15 +26130,15 @@ services:
       com.platys.name: "trino-lb"
       com.platys.description: "Trino Load Balancer"
       com.platys.webui.title: "Trino Load Balancer UI"
-      com.platys.webui.url: "http://dataplatform:28267"
+      com.platys.webui.url: "http://dataplatform:28451"
     ports:
-      - "28267:8080"
-      - "28268:8443"
-      - "28269:9090"
+      - "28451:8080"
+      - "28452:8443"
+      - "28453:9090"
     environment:
       - TRINO_LB_TRACING_ENABLED=false
       - TRINO_LB_EXTERNAL_IP=${PUBLIC_IP:-127.0.0.1}
-      - TRINO_LB_PORT=28267
+      - TRINO_LB_PORT=28451
       - TRINO_LB_SCHEME=http
       - TRINO_LB_MAX_RUNNING_QUERIES={{TRINO_LB_max_running_queries | default(1) }}
     {%if use_timezone | default(false) %}
@@ -32954,10 +32954,10 @@ services:
       com.platys.name: "ngrok"
       com.platys.description: "Globally distributed reverse proxy"
       com.platys.webui.title: "ngrok UI"
-      com.platys.webui.url: "https://dataplatform:28247"
+      com.platys.webui.url: "https://dataplatform:28432"
       com.platys.password.envvars: "PLATYS_NGROK_AUTH_TOKEN"
     ports:
-      - 28247:4040
+      - 28432:4040
     environment:
       NGROK_PORTS: {{NGROK_expose_ports}}
       NGROK_AUTHTOKEN: ${PLATYS_NGROK_AUTH_TOKEN:-{{NGROK_auth_token}}}
@@ -33194,9 +33194,9 @@ services:
       com.platys.name: "jenkins"
       com.platys.description: "Autmation sever (CI)"
       com.platys.webui.title: "Jenkins UI"
-      com.platys.webui.url: "http://dataplatform:28262"
+      com.platys.webui.url: "http://dataplatform:28446"
     ports:
-      - "28262:8080"
+      - "28446:8080"
       - "50000:50000"
     environment:
       DOCKER_HOST: tcp://docker-dind:2376

@@ -13,12 +13,12 @@ platys gen
 
 ## How to use it?
 
-REST API documentation available [here](http://dataplatform:28257/api/schema/swagger).
+REST API documentation available [here](http://dataplatform:28441/api/schema/swagger).
 
 Translate
 
 ```bash
-curl 'http://dataplatform:28257/api/v4/translator?text=Hello&source=eng_Latn&target=spa_Latn'
+curl 'http://dataplatform:28441/api/v4/translator?text=Hello&source=eng_Latn&target=spa_Latn'
 ```
 
 
