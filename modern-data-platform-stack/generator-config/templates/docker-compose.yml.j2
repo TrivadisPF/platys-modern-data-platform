@@ -108,6 +108,15 @@ networks:
 {% elif (SPARK_base_version | lower) == '3.5'  %}
   {% set __SPARK_version = SPARK_3_5_version -%}
   {% set __LIVY_version = LIVY_version ~ "-spark" ~ SPARK_3_5_version.split(".")[0]  ~ "." ~ SPARK_3_5_version.split(".")[1] -%}
+{% elif (SPARK_base_version | lower) == '4.0'  %}
+  {% set __SPARK_version = SPARK_4_0_version -%}
+  {% set __LIVY_version = LIVY_version ~ "-spark" ~ SPARK_4_0_version.split(".")[0]  ~ "." ~ SPARK_4_0_version.split(".")[1] -%}
+{% elif (SPARK_base_version | lower) == '4.1'  %}
+  {% set __SPARK_version = SPARK_4_1_version -%}
+  {% set __LIVY_version = LIVY_version ~ "-spark" ~ SPARK_4_1_version.split(".")[0]  ~ "." ~ SPARK_4_1_version.split(".")[1] -%}
+{% elif (SPARK_base_version | lower) == '4.2'  %}
+  {% set __SPARK_version = SPARK_4_2_version -%}
+  {% set __LIVY_version = LIVY_version ~ "-spark" ~ SPARK_4_2_version.split(".")[0]  ~ "." ~ SPARK_4_2_version.split(".")[1] -%}
 {% endif -%}
 
 {% set __KYUUBI_version = KYUUBI_version | default('latest') -%}
@@ -1479,18 +1488,7 @@ networks:
  {% if UNITY_CATALOG_enable and 'delta' in (table_formats_to_use | default('') | lower) | default(false) %}
   {% set ns.sparkTableFormatJar = ns.sparkTableFormatJar ~ ",/opt/bitnami/spark/jars/unitycatalog-spark_2.12-0.2.1.jar,/opt/bitnami/spark/jars/unitycatalog-client-0.2.1.jar" -%}
   {% set ns.sparkDeltaJavaPackages = ns.sparkDeltaJavaPackages ~ ",io.unitycatalog:unitycatalog-spark_2.12:0.2.1,io.unitycatalog:unitycatalog-client:0.2.1" -%}
-  {% set ns.sparkDeltaPythonPackages = "delta-spark==0.2.1" -%}
-{% endif %}
- {% if NESSIE_enable | default(false) %}
-  {% set ns.sparkIcebergJavaPackages = "org.apache.iceberg:iceberg-spark-runtime-3.5_2.12:1.10.1,org.apache.iceberg:iceberg-aws-bundle:1.10.1,org.projectnessie.nessie-integrations:nessie-spark-extensions-3.5_2.12:0.100.0" -%}
- {% elif LAKEFS_enable | default(false) %}
-  {% set ns.sparkIcebergJavaPackages = "org.apache.iceberg:iceberg-spark-runtime-3.5_2.12:1.10.1,org.apache.iceberg:iceberg-aws-bundle:1.10.1,io.lakefs:lakefs-iceberg:0.1.4,io.lakefs:lakefs-spark-extensions_2.12:0.0.3" -%}
- {% elif POLARIS_enable | default(false) %}
-  {% set ns.sparkIcebergJavaPackages = "org.apache.iceberg:iceberg-spark-runtime-3.5_2.12:1.10.1,org.apache.iceberg:iceberg-aws-bundle:1.10.1,org.apache.polaris:polaris-spark-3.5_2.13:1.2.0-incubating" -%}
- {% else %}
-  {% set ns.sparkIcebergJavaPackages = "org.apache.iceberg:iceberg-spark-runtime-3.5_2.12:1.10.1,org.apache.iceberg:iceberg-aws-bundle:1.10.1" -%}
- {% endif %}
-  {% set ns.sparkHudiJavaPackages ="org.apache.hudi:hudi-spark3.4-bundle_2.12:0.15.0" -%}
+  {% set ns.sparkDeltaPythonPackages = "delta-spark==3.3.2" -%}
 {% elif (SPARK_base_version | lower) == '4.0'  %}
   {% set ns.sparkTableFormatJar = '' -%}
   {% if 'iceberg' in (table_formats_to_use | default('') | lower) -%}
@@ -1517,7 +1515,63 @@ networks:
  {% else %}
   {% set ns.sparkIcebergJavaPackages = "org.apache.iceberg:iceberg-spark-runtime-4.0_2.13:1.10.1,org.apache.iceberg:iceberg-aws-bundle:1.10.1" -%}
  {% endif %}
+ {% set ns.sparkHudiJavaPackages ="org.apache.hudi:hudi-spark3.4-bundle_2.12:0.15.0" -%}
+{% elif (SPARK_base_version | lower) == '4.1'  %}
+  {% set ns.sparkTableFormatJar = '' -%}
+  {% if 'iceberg' in (table_formats_to_use | default('') | lower) -%}
+    {% set ns.sparkTableFormatJar = ns.sparkTableFormatJar ~ (',' if ns.sparkTableFormatJar else '') ~ "/opt/bitnami/spark/jars/iceberg-spark-runtime-4.1_2.13-1.10.1.jar" -%}
+  {% endif -%}
+  {% if 'delta' in (table_formats_to_use | default('') | lower) -%}
+    {% set ns.sparkTableFormatJar = ns.sparkTableFormatJar ~ (',' if ns.sparkTableFormatJar else '') ~ "/opt/bitnami/spark/jars/delta-spark_2.13-4.1.0.jar,/opt/bitnami/spark/jars/delta-storage-3.3.2.jar" -%}
+  {% endif -%}
+  {% if 'hudi' in (table_formats_to_use | default('') | lower) -%}
+    {% set ns.sparkTableFormatJar = ns.sparkTableFormatJar ~ (',' if ns.sparkTableFormatJar else '') ~ "/opt/bitnami/spark/jars/hudi-spark4.1.x_2.13-1.2.0.jar" -%}
+  {% endif -%}
+  {% set ns.sparkDeltaJavaPackages = "io.delta:delta-spark_2.13:4.1.0,io.delta:delta-storage:4.1.0" -%}
+  {% set ns.sparkDeltaPythonPackages = "delta-spark==4.1.0" -%}
+ {% if UNITY_CATALOG_enable and 'delta' in (table_formats_to_use | default('') | lower) | default(false) %}
+  {% set ns.sparkTableFormatJar = ns.sparkTableFormatJar ~ ",/opt/bitnami/spark/jars/unitycatalog-spark_2.13-0.4.1.jar,/opt/bitnami/spark/jars/unitycatalog-client-0.4.1.jar" -%}
+  {% set ns.sparkDeltaJavaPackages = ns.sparkDeltaJavaPackages ~ ",io.unitycatalog:unitycatalog-spark_2.13:0.4.1,io.unitycatalog:unitycatalog-client:0.4.1" -%}
+  {% set ns.sparkDeltaPythonPackages = "delta-spark==4.1.0" -%}
+ {% endif %}
+ {% if NESSIE_enable | default(false) %}
+  {% set ns.sparkIcebergJavaPackages = "org.apache.iceberg:iceberg-spark-runtime-3.5_2.12:1.10.1,org.apache.iceberg:iceberg-aws-bundle:1.10.1,org.projectnessie.nessie-integrations:nessie-spark-extensions-3.5_2.12:0.100.0" -%}
+ {% elif LAKEFS_enable | default(false) %}
+  {% set ns.sparkIcebergJavaPackages = "org.apache.iceberg:iceberg-spark-runtime-3.5_2.12:1.10.1,org.apache.iceberg:iceberg-aws-bundle:1.10.1,io.lakefs:lakefs-iceberg:0.1.4,io.lakefs:lakefs-spark-extensions_2.12:0.0.3" -%}
+ {% elif POLARIS_enable | default(false) %}
+  {% set ns.sparkIcebergJavaPackages = "org.apache.iceberg:iceberg-spark-runtime-3.5_2.12:1.10.1,org.apache.iceberg:iceberg-aws-bundle:1.10.1,org.apache.polaris:polaris-spark-3.5_2.13:1.2.0-incubating" -%}
+ {% else %}
+  {% set ns.sparkIcebergJavaPackages = "org.apache.iceberg:iceberg-spark-runtime-3.5_2.12:1.10.1,org.apache.iceberg:iceberg-aws-bundle:1.10.1" -%}
+ {% endif %}
   {% set ns.sparkHudiJavaPackages ="org.apache.hudi:hudi-spark3.4-bundle_2.12:0.15.0" -%}
+{% elif (SPARK_base_version | lower) == '4.2'  %}
+  {% set ns.sparkTableFormatJar = '' -%}
+  {% if 'iceberg' in (table_formats_to_use | default('') | lower) -%}
+    {% set ns.sparkTableFormatJar = ns.sparkTableFormatJar ~ (',' if ns.sparkTableFormatJar else '') ~ "/opt/bitnami/spark/jars/iceberg-spark-runtime-4.1_2.13-1.10.1.jar" -%}
+  {% endif -%}
+  {% if 'delta' in (table_formats_to_use | default('') | lower) -%}
+    {% set ns.sparkTableFormatJar = ns.sparkTableFormatJar ~ (',' if ns.sparkTableFormatJar else '') ~ "/opt/bitnami/spark/jars/delta-spark_2.13-4.1.0.jar,/opt/bitnami/spark/jars/delta-storage-3.3.2.jar" -%}
+  {% endif -%}
+  {% if 'hudi' in (table_formats_to_use | default('') | lower) -%}
+    {% set ns.sparkTableFormatJar = ns.sparkTableFormatJar ~ (',' if ns.sparkTableFormatJar else '') ~ "/opt/bitnami/spark/jars/hudi-spark4.1.x_2.13-1.2.0.jar" -%}
+  {% endif -%}
+  {% set ns.sparkDeltaJavaPackages = "io.delta:delta-spark_2.13:4.1.0,io.delta:delta-storage:4.1.0" -%}
+  {% set ns.sparkDeltaPythonPackages = "delta-spark==4.1.0" -%}
+ {% if UNITY_CATALOG_enable and 'delta' in (table_formats_to_use | default('') | lower) | default(false) %}
+  {% set ns.sparkTableFormatJar = ns.sparkTableFormatJar ~ ",/opt/bitnami/spark/jars/unitycatalog-spark_2.13-0.4.1.jar,/opt/bitnami/spark/jars/unitycatalog-client-0.4.1.jar" -%}
+  {% set ns.sparkDeltaJavaPackages = ns.sparkDeltaJavaPackages ~ ",io.unitycatalog:unitycatalog-spark_2.13:0.4.1,io.unitycatalog:unitycatalog-client:0.4.1" -%}
+  {% set ns.sparkDeltaPythonPackages = "delta-spark==4.1.0" -%}
+ {% endif %}
+ {% if NESSIE_enable | default(false) %}
+  {% set ns.sparkIcebergJavaPackages = "org.apache.iceberg:iceberg-spark-runtime-3.5_2.12:1.10.1,org.apache.iceberg:iceberg-aws-bundle:1.10.1,org.projectnessie.nessie-integrations:nessie-spark-extensions-3.5_2.12:0.100.0" -%}
+ {% elif LAKEFS_enable | default(false) %}
+  {% set ns.sparkIcebergJavaPackages = "org.apache.iceberg:iceberg-spark-runtime-3.5_2.12:1.10.1,org.apache.iceberg:iceberg-aws-bundle:1.10.1,io.lakefs:lakefs-iceberg:0.1.4,io.lakefs:lakefs-spark-extensions_2.12:0.0.3" -%}
+ {% elif POLARIS_enable | default(false) %}
+  {% set ns.sparkIcebergJavaPackages = "org.apache.iceberg:iceberg-spark-runtime-3.5_2.12:1.10.1,org.apache.iceberg:iceberg-aws-bundle:1.10.1,org.apache.polaris:polaris-spark-3.5_2.13:1.2.0-incubating" -%}
+ {% else %}
+  {% set ns.sparkIcebergJavaPackages = "org.apache.iceberg:iceberg-spark-runtime-3.5_2.12:1.10.1,org.apache.iceberg:iceberg-aws-bundle:1.10.1" -%}
+ {% endif %}
+  {% set ns.sparkHudiJavaPackages ="org.apache.hudi:hudi-spark3.4-bundle_2.12:0.15.0" -%}  
 {% else -%}
   {% set ns.sparkTableFormatJar = '' -%}
   {% if 'iceberg' in (table_formats_to_use | default('') | lower) -%}
@@ -6626,7 +6680,7 @@ services:
 {% if SPARK_enable | default(false) %}
   #  ================================== Apache Spark ========================================== #
   spark-master:
-    image: bitnamilegacy/spark:{{__SPARK_version}}
+    image: apache/spark:{{__SPARK_version}}
     container_name: spark-master
     hostname: spark-master
     labels:
@@ -6634,23 +6688,18 @@ services:
       com.platys.description: "Spark Master Node"
       com.platys.webui.title: 'Spark UI'
       com.platys.webui.url: "http://dataplatform:28304"
+    user: root      
     ports:
       - 28304:28304
       - 6066:6066
       - 7077:7077
-      - "4040-4044:4040-4044"
+      - 4040-4044:4040-4044
     environment:
-      # bitnami env vars
-      SPARK_MODE: master
-      SPARK_MASTER_URL: spark://spark-master:7077
-      SPARK_RPC_AUTHENTICATION_ENABLED: no
-      SPARK_RPC_ENCRYPTION_ENABLED: no
-      SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED: no
-      SPARK_SSL_ENABLED: no
-      # spark standard env vars
+      SPARK_MASTER_HOST: spark-master
+      SPARK_MASTER_PORT: 7077
       SPARK_MASTER_WEBUI_PORT: 28304
-      SPARK_MASTER_OPTS: '{{SPARK_master_opts if SPARK_master_opts is defined and SPARK_master_opts else omit }}'
       SPARK_PUBLIC_DNS: ${PUBLIC_IP:-127.0.0.1}
+      SPARK_MASTER_OPTS: '{{SPARK_master_opts if SPARK_master_opts is defined and SPARK_master_opts else omit }}'
       # env vars for config files
 #     INIT_DAEMON_STEP: setup_spark
     {%if MINIO_enable or RUSTFS_enable or SEAWEEDFS_enable or external['S3_enable'] | default(false) %}
@@ -6824,6 +6873,8 @@ services:
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
+    entrypoint: ["/docker-entrypoint-initdb.d/spark-init.sh"]
+    command: ["/opt/spark/bin/spark-class", "org.apache.spark.deploy.master.Master"]
     restart: {{container_restart_policy}}
     healthcheck:
       test: ["CMD-SHELL", "python3 -c 'import socket; socket.create_connection((\"localhost\", 28304), timeout=5)'"]
@@ -6837,9 +6888,10 @@ services:
       {% set webui_port = 28111 + loop.index - 1 %}
 
   spark-worker-{{loop.index}}:
-    image: bitnamilegacy/spark:{{__SPARK_version}}
+    image: apache/spark:{{__SPARK_version}}
     container_name: spark-worker-{{loop.index}}
     hostname: spark-worker-{{loop.index}}
+    user: root    
     labels:
       com.platys.name: 'spark'
       com.platys.description: "Spark Worker Node"
@@ -6849,19 +6901,12 @@ services:
     ports:
       - "{{external_port}}:{{webui_port}}"
     environment:
-      # bitnami env vars
-      SPARK_MODE: worker
-      SPARK_MASTER_URL: spark://spark-master:7077
-      SPARK_RPC_AUTHENTICATION_ENABLED: no
-      SPARK_RPC_ENCRYPTION_ENABLED: no
-      SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED: no
-      SPARK_SSL_ENABLED: no
       # spark standard env vars
       SPARK_WORKER_WEBUI_PORT: "{{webui_port}}"
-      SPARK_WORKER_CORES: '{{SPARK_worker_cores if SPARK_worker_cores is defined and SPARK_worker_cores else omit }}'
-      SPARK_WORKER_MEMORY: '{{SPARK_worker_memory if SPARK_worker_memory is defined and SPARK_worker_memory else omit }}'
       SPARK_WORKER_OPTS: '{{SPARK_worker_opts if SPARK_worker_opts is defined and SPARK_worker_opts else omit }}'
       SPARK_PUBLIC_DNS: ${PUBLIC_IP:-127.0.0.1}
+      SPARK_WORKER_CORES: '{{SPARK_worker_cores if SPARK_worker_cores is defined and SPARK_worker_cores else omit }}'
+      SPARK_WORKER_MEMORY: '{{SPARK_worker_memory if SPARK_worker_memory is defined and SPARK_worker_memory else omit }}'
       # env vars for config files
     {%if MINIO_enable or RUSTFS_enable or SEAWEEDFS_enable or external['S3_enable'] | default(false) %}
       SPARK_DEFAULTS_CONF_spark_hadoop_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
@@ -7027,6 +7072,8 @@ services:
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
+    entrypoint: ["/docker-entrypoint-initdb.d/spark-init.sh"]
+    command: ["/opt/spark/bin/spark-class", "org.apache.spark.deploy.worker.Worker", "spark://spark-master:7077"]
     restart: {{container_restart_policy}}
     healthcheck:
       test: ["CMD-SHELL", "python3 -c 'import socket; socket.create_connection((\"localhost\", {{webui_port}}), timeout=5)'"]
