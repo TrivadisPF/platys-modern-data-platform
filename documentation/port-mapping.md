@@ -190,7 +190,6 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 6381 | 6379 | redis-replica-2 |
 6382 | 6379 | redis-replica-3 |
 6385 | 6379 | redis-stack-1 |
-6385 | 6379 | redash-redis |
 6386 | 6379 | tyk-redis |
 6387 | 6379 | ragflow-redis |
 6388 | 6379 | langwatch-redis |
@@ -198,6 +197,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 6390 | 6379 | valkey-replica-1 |
 6391 | 6379 | valkey-replica-2 |
 6392 | 6379 | valkey-replica-3 |
+6393 | 6379 | redash-redis |
 6543 | 6543 | supabase-supavisor |
 6570 | 6570 | hserver-1 |
 6831 | 6831 | jaeger (udp) |
@@ -299,7 +299,6 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 9043 | 9042 | dse-2 |
 9044 | 9042 | dse-3 |
 9047 | 9047 | dremio |
-9097 | 9097 | mcp-trino |
 9101 | 9001 | mosquitto-1 |
 9102 | 9002 | mosquitto-2 |
 9103 | 9003 | mosquitto-3 |
@@ -877,6 +876,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28490 | 8080 | cockroachdb-2 |
 28491 | 8080 | cockroachdb-3 |
 28492 | 8000 | risingwave-mcp |
+28493 | 9097 | mcp-trino |
 
 ## Ports > 28500
 
