@@ -85,6 +85,14 @@ function configure() {
 #configure /etc/hadoop/httpfs-site.xml httpfs HTTPFS_CONF
 #configure /etc/hadoop/kms-site.xml kms KMS_CONF
 
+mkdir -p /opt/spark/conf
+
+# Copy conf templates from conf.default into conf (mirrors the Bitnami startup pattern).
+# Files mounted directly into conf/ are left in place; this only fills in what's missing.
+if [ -d /opt/spark/conf.default ]; then
+  cp -n /opt/spark/conf.default/* /opt/spark/conf/ 2>/dev/null || true
+fi
+
 configure_hive /opt/spark/conf/hive-site.xml hive HIVE_SITE_CONF
 
 configure_spark /opt/spark/conf/spark-defaults.conf spark SPARK_DEFAULTS_CONF
