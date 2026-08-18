@@ -838,7 +838,6 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28453 | 9090 | trino-lb (prometheus) |
 28454 | 8080 | trino-gateway |
 28455 | 8000 | neo4j-mcp |
-
 28456 | 3000 | presidio-analyzer |
 28457 | 8000 | presidio-anonymizer |
 28458 | 8181 | lakekeeper |
