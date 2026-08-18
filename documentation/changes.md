@@ -18,10 +18,12 @@ See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/plat
  * Update `kestra` to `v1.3`
  * Update `datahub` to `v1.7.0`
  * Update `ollama` to `0.32.12`
+ * Update `kyuubi` to `1.12.0-all`
 
 ### Enhancements
 
  * Add ui mode for defining a platform using a Web-UI
+ * Add support for Spark 4.x
 
 ### Breaking Changes
 
@@ -38,6 +40,7 @@ See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/plat
  * rename `INFLUXDB_KAPACITOR_xxxx` to `KAPACITOR_xxxx`
  * rename `KAFKA_REPLICATOR_xxxx` to `CONFLUENT_REPLICATOR_xxxx`
  * changed default for search service in DataHub to OpenSearch
+ * changed docker image for Apache Spark to `apache/spark`
 
 ## What's new in 1.20.0
 
