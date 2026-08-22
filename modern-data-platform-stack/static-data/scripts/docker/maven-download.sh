@@ -21,7 +21,7 @@ download_file_using_python() {
     local DOWNLOAD_FILE="$1"
     local DOWNLOAD_URL="$2"
 
-    python -c "
+    python3 -c "
 import sys, requests
 
 def download_file(url, local_filename):
