@@ -60,6 +60,8 @@ There are some overall settings which will control the behaviour for all or a gr
 | `LMSTUDIO_url`                             	| `http://${PUBLIC_IP}:1234/v1` 	| 1.18.0 | the base url of the LMStudio service (in the format `http://<host>:<port>`) |  
 | `SEARXNG_enable`                             	| `false` | 1.18.0 | Use external SearXNG service. Specify the SearXNG URL through the `SEARXNG_url ` property.  |  
 | `SEARXNG_url`                             	| `` 	| 1.18.0 | the url of the [SearXNG instance](https://searx.space/#). |
+| `NEXUS_enable`                             	| `false` | 1.20.0 | Use an external Sonatype Nexus Repository Manager. When enabled, services that download Maven artifacts (Spark, Flink, Jupyter, etc.) resolve dependencies through the external Nexus instance specified by `NEXUS_url`. |
+| `NEXUS_url`                             	| `` 	| 1.20.0 | Base URL of the external Nexus instance (e.g. `http://nexus.example.com:8081`). Only required when `NEXUS_enable` is `true`. |
 
 ## Platform Services
 
