@@ -9,5 +9,5 @@ done
 
 # Downloading Maven dependencies
 if [ -d "/usr/local/spark/jars" ]; then
-	/maven-download.sh nexus ${MAVEN_DOWNLOAD_JARS} /usr/local/spark/jars
+	/maven-download.sh ${MAVEN_DOWNLOAD_REPO} ${MAVEN_DOWNLOAD_JARS} /usr/local/spark/jars
 fi

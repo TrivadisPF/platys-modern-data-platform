@@ -14,13 +14,13 @@ set -e
 
 # If there's not maven repository url set externally,
 # default to the ones below
-MAVEN_REPO_CENTRAL=${MAVEN_REPO_CENTRAL:-"https://repo1.maven.org/maven2"}
-MAVEN_REPO_CONFLUENT=${MAVEN_REPO_CONFLUENT:-"https://packages.confluent.io/maven"}
-# Set MAVEN_REPO_NEXUS to your Nexus repository URL, e.g.:
-#   MAVEN_REPO_NEXUS=http://nexus:8081/repository/maven-public
-MAVEN_REPO_NEXUS=${MAVEN_REPO_NEXUS:-""}
-MAVEN_REPO_NEXUS_USER=${MAVEN_REPO_NEXUS_USER:-""}
-MAVEN_REPO_NEXUS_PASSWORD=${MAVEN_REPO_NEXUS_PASSWORD:-""}
+MAVEN_DOWNLOAD_REPO_CENTRAL=${MAVEN_DOWNLOAD_REPO_CENTRAL:-"https://repo1.maven.org/maven2"}
+MAVEN_DOWNLOAD_REPO_CONFLUENT=${MAVEN_DOWNLOAD_REPO_CONFLUENT:-"https://packages.confluent.io/maven"}
+# Set MAVEN_DOWNLOAD_REPO_NEXUS to your Nexus repository URL, e.g.:
+#   MAVEN_DOWNLOAD_REPO_NEXUS=http://nexus:8081/repository/maven-public
+MAVEN_DOWNLOAD_REPO_NEXUS=${MAVEN_DOWNLOAD_REPO_NEXUS:-""}
+MAVEN_DOWNLOAD_REPO_NEXUS_USER=${MAVEN_DOWNLOAD_REPO_NEXUS_USER:-""}
+MAVEN_DOWNLOAD_REPO_NEXUS_PASSWORD=${MAVEN_DOWNLOAD_REPO_NEXUS_PASSWORD:-""}
 
 download_file_using_python() {
     local DOWNLOAD_FILE="$1"
@@ -110,19 +110,19 @@ maven_dep() {
 }
 
 maven_central_dep() {
-    maven_dep $MAVEN_REPO_CENTRAL $1 $2 $3 $4
+    maven_dep $MAVEN_DOWNLOAD_REPO_CENTRAL $1 $2 $3 $4
 }
 
 maven_confluent_dep() {
-    maven_dep $MAVEN_REPO_CONFLUENT $1 $2 $3 $4
+    maven_dep $MAVEN_DOWNLOAD_REPO_CONFLUENT $1 $2 $3 $4
 }
 
 maven_nexus_dep() {
-    if [ -z "$MAVEN_REPO_NEXUS" ]; then
-        echo "ERROR: MAVEN_REPO_NEXUS is not set" >&2
+    if [ -z "$MAVEN_DOWNLOAD_REPO_NEXUS" ]; then
+        echo "ERROR: MAVEN_DOWNLOAD_REPO_NEXUS is not set" >&2
         exit 1
     fi
-    maven_dep "$MAVEN_REPO_NEXUS" "$1" "$2" "${3:-python}" "$MAVEN_REPO_NEXUS_USER" "$MAVEN_REPO_NEXUS_PASSWORD"
+    maven_dep "$MAVEN_DOWNLOAD_REPO_NEXUS" "$1" "$2" "${3:-python}" "$MAVEN_DOWNLOAD_REPO_NEXUS_USER" "$MAVEN_DOWNLOAD_REPO_NEXUS_PASSWORD"
 }
 
 case $1 in
