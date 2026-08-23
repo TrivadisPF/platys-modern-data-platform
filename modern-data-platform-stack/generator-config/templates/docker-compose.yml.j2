@@ -6876,6 +6876,7 @@ services:
       MAVEN_DOWNLOAD_REPO_NEXUS: {{ns.nexusUrl}}/repository/maven-public
       MAVEN_DOWNLOAD_REPO_NEXUS_USER: admin
       MAVEN_DOWNLOAD_REPO_NEXUS_PASSWORD: ${PLATYS_NEXUS_ADMIN_PASSWORD:-{{NEXUS_admin_password}}}
+      SPARK_DEFAULTS_CONF_spark_jars_ivy: /opt/ivy-cache
       SPARK_DEFAULTS_CONF_spark_jars_ivySettings: {{SPARK_jars_ivySettings}}
     {%if jmx_monitoring_with_prometheus_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_metrics_conf: /opt/spark/conf/metrics.properties
@@ -6898,7 +6899,7 @@ services:
     {% endif -%}   {#  jmx_monitoring_with_prometheus_enable  #}
     {%if AIRFLOW_enable or ZEPPELIN_enable or JUPYTER_enable | default(false) %}
       - spark-{{__SPARK_version | replace('.','-')}}-vol:/opt/spark
-      - spark-{{__SPARK_version | replace('.','-')}}-java-vol:/opt/bitnami/java
+      - spark-{{__SPARK_version | replace('.','-')}}-java-vol:/opt/java
     {% endif -%}   {#  AIRFLOW_enable or ZEPPELIN_enable or JUPYTER_enable  #}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
@@ -7086,6 +7087,7 @@ services:
       MAVEN_DOWNLOAD_REPO_NEXUS: {{ns.nexusUrl}}/repository/maven-public
       MAVEN_DOWNLOAD_REPO_NEXUS_USER: admin
       MAVEN_DOWNLOAD_REPO_NEXUS_PASSWORD: ${PLATYS_NEXUS_ADMIN_PASSWORD:-{{NEXUS_admin_password}}}
+      SPARK_DEFAULTS_CONF_spark_jars_ivy: /opt/ivy-cache      
       SPARK_DEFAULTS_CONF_spark_jars_ivySettings: {{SPARK_jars_ivySettings}}
     {%if jmx_monitoring_with_prometheus_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_metrics_conf: /opt/spark/conf/metrics.properties
@@ -7286,6 +7288,7 @@ services:
       MAVEN_DOWNLOAD_REPO_NEXUS: {{ns.nexusUrl}}/repository/maven-public
       MAVEN_DOWNLOAD_REPO_NEXUS_USER: admin
       MAVEN_DOWNLOAD_REPO_NEXUS_PASSWORD: ${PLATYS_NEXUS_ADMIN_PASSWORD:-{{NEXUS_admin_password}}}
+      SPARK_DEFAULTS_CONF_spark_jars_ivy: /opt/ivy-cache      
       SPARK_DEFAULTS_CONF_spark_jars_ivySettings: {{SPARK_jars_ivySettings}}
     {%if jmx_monitoring_with_prometheus_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_metrics_conf: /opt/spark/conf/metrics.properties
@@ -7484,6 +7487,7 @@ services:
       MAVEN_DOWNLOAD_REPO_NEXUS: {{ns.nexusUrl}}/repository/maven-public
       MAVEN_DOWNLOAD_REPO_NEXUS_USER: admin
       MAVEN_DOWNLOAD_REPO_NEXUS_PASSWORD: ${PLATYS_NEXUS_ADMIN_PASSWORD:-{{NEXUS_admin_password}}}
+      SPARK_DEFAULTS_CONF_spark_jars_ivy: /opt/ivy-cache      
       SPARK_DEFAULTS_CONF_spark_jars_ivySettings: {{SPARK_jars_ivySettings}}
     {%if jmx_monitoring_with_prometheus_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_metrics_conf: /opt/spark/conf/metrics.properties
@@ -7498,7 +7502,7 @@ services:
       - ./conf/spark/spark-defaults.conf:/opt/spark/conf.default/spark-defaults.conf
       - ./init/spark:/docker-entrypoint-initdb.d
       # we override the run.sh script to start thriftserver instead of master/worker
-      - ./scripts/spark/run-thriftserver.sh:/opt/bitnami/scripts/spark/run.sh
+      # - ./scripts/spark/run-thriftserver.sh:/opt/bitnami/scripts/spark/run.sh
       - ./scripts/docker/maven-download.sh:/maven-download.sh
       - ./container-volume/spark/logs/:/var/log/spark/logs
       - ./scripts/docker/wait-for-it.sh:/usr/src/app/wait-for-it.sh
@@ -7702,6 +7706,7 @@ services:
       MAVEN_DOWNLOAD_REPO_NEXUS: {{ns.nexusUrl}}/repository/maven-public
       MAVEN_DOWNLOAD_REPO_NEXUS_USER: admin
       MAVEN_DOWNLOAD_REPO_NEXUS_PASSWORD: ${PLATYS_NEXUS_ADMIN_PASSWORD:-{{NEXUS_admin_password}}}
+      SPARK_DEFAULTS_CONF_spark_jars_ivy: /opt/ivy-cache      
       SPARK_DEFAULTS_CONF_spark_jars_ivySettings: {{SPARK_jars_ivySettings}}
     {%if jmx_monitoring_with_prometheus_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_metrics_conf: /opt/spark/conf/metrics.properties
@@ -7901,6 +7906,7 @@ services:
       MAVEN_DOWNLOAD_REPO_NEXUS: {{ns.nexusUrl}}/repository/maven-public
       MAVEN_DOWNLOAD_REPO_NEXUS_USER: admin
       MAVEN_DOWNLOAD_REPO_NEXUS_PASSWORD: ${PLATYS_NEXUS_ADMIN_PASSWORD:-{{NEXUS_admin_password}}}
+      SPARK_DEFAULTS_CONF_spark_jars_ivy: /opt/ivy-cache      
       SPARK_DEFAULTS_CONF_spark_jars_ivySettings: {{SPARK_jars_ivySettings}}
     {%if jmx_monitoring_with_prometheus_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_metrics_conf: /opt/spark/conf/metrics.properties
@@ -14447,7 +14453,7 @@ services:
       AIRFLOW__METRICS__STATSD_PREFIX: "airflow"    
     {%if SPARK_enable | default(false) %}
       SPARK_HOME: /opt/spark
-      JAVA_HOME: /opt/bitnami/java      
+      JAVA_HOME: /opt/java      
     {% endif -%}   {#  SPARK_enable #}
     {%if MINIO_enable or RUSTFS_enable or SEAWEEDFS_enable or external['S3_enable'] | default(false) %}
       AIRFLOW_VAR_S3_ENDPOINT: {{s3Endpoint | default(omit) }}
@@ -14505,7 +14511,7 @@ services:
     {% endif -%}   {#  AIRFLOW_volume_map_custom_conf #}
     {%if SPARK_enable | default(false) %}
       - spark-{{__SPARK_version | replace('.','-')}}-vol:/opt/spark:RO
-      - spark-{{__SPARK_version | replace('.','-')}}-java-vol:/opt/bitnami/java:RO
+      - spark-{{__SPARK_version | replace('.','-')}}-java-vol:/opt/java:RO
       - ./container-volume/spark/logs/:/var/log/spark/logs       
     {% endif -%}   {#  SPARK_enable #}
     {%if MINIO_enable or RUSTFS_enable or SEAWEEDFS_enable or external['S3_enable'] | default(false) %}
@@ -14596,7 +14602,7 @@ services:
     {% endif -%}   {#  AIRFLOW_volume_map_custom_conf #}
     {%if SPARK_enable | default(false) %}
       SPARK_HOME: /opt/spark
-      JAVA_HOME: /opt/bitnami/java      
+      JAVA_HOME: /opt/java      
     {% endif -%}   {#  SPARK_enable #}
     {%if MINIO_enable or RUSTFS_enable or SEAWEEDFS_enable or external['S3_enable'] | default(false) %}
       AIRFLOW_VAR_S3_ENDPOINT: {{s3Endpoint | default(omit) }}
@@ -14654,7 +14660,7 @@ services:
     {% endif -%}   {#  AIRFLOW_volume_map_custom_conf #}
     {%if SPARK_enable | default(false) %}
       - spark-{{__SPARK_version | replace('.','-')}}-vol:/opt/spark:RO
-      - spark-{{__SPARK_version | replace('.','-')}}-java-vol:/opt/bitnami/java:RO
+      - spark-{{__SPARK_version | replace('.','-')}}-java-vol:/opt/java:RO
       - ./container-volume/spark/logs/:/var/log/spark/logs       
     {% endif -%}   {#  SPARK_enable #}
     {%if MINIO_enable or RUSTFS_enable or SEAWEEDFS_enable or external['S3_enable'] | default(false) %}
@@ -14739,7 +14745,7 @@ services:
     {% endif -%}   {#  AIRFLOW_volume_map_custom_conf #}
     {%if SPARK_enable | default(false) %}
       SPARK_HOME: /opt/spark
-      JAVA_HOME: /opt/bitnami/java      
+      JAVA_HOME: /opt/java      
     {% endif -%}   {#  SPARK_enable #}
     {%if MINIO_enable or RUSTFS_enable or SEAWEEDFS_enable or external['S3_enable'] | default(false) %}
       AIRFLOW_VAR_S3_ENDPOINT: {{s3Endpoint | default(omit) }}
@@ -14797,7 +14803,7 @@ services:
     {% endif -%}   {#  AIRFLOW_volume_map_custom_conf #}
     {%if SPARK_enable | default(false) %}
       - spark-{{__SPARK_version | replace('.','-')}}-vol:/opt/spark:RO
-      - spark-{{__SPARK_version | replace('.','-')}}-java-vol:/opt/bitnami/java:RO
+      - spark-{{__SPARK_version | replace('.','-')}}-java-vol:/opt/java:RO
       - ./container-volume/spark/logs/:/var/log/spark/logs       
     {% endif -%}   {#  SPARK_enable #}
     {%if MINIO_enable or RUSTFS_enable or SEAWEEDFS_enable or external['S3_enable'] | default(false) %}
@@ -14881,7 +14887,7 @@ services:
     {% endif -%}   {#  AIRFLOW_volume_map_custom_conf #}
     {%if SPARK_enable | default(false) %}
       SPARK_HOME: /opt/spark
-      JAVA_HOME: /opt/bitnami/java      
+      JAVA_HOME: /opt/java      
     {% endif -%}   {#  SPARK_enable #}
     {%if MINIO_enable or RUSTFS_enable or SEAWEEDFS_enable or external['S3_enable'] | default(false) %}
       AIRFLOW_VAR_S3_ENDPOINT: {{s3Endpoint | default(omit) }}
@@ -14939,7 +14945,7 @@ services:
     {% endif -%}   {#  AIRFLOW_volume_map_custom_conf #}
     {%if SPARK_enable | default(false) %}
       - spark-{{__SPARK_version | replace('.','-')}}-vol:/opt/spark:RO
-      - spark-{{__SPARK_version | replace('.','-')}}-java-vol:/opt/bitnami/java:RO
+      - spark-{{__SPARK_version | replace('.','-')}}-java-vol:/opt/java:RO
       - ./container-volume/spark/logs/:/var/log/spark/logs       
     {% endif -%}   {#  SPARK_enable #}
     {%if MINIO_enable or RUSTFS_enable or SEAWEEDFS_enable or external['S3_enable'] | default(false) %}
@@ -15029,7 +15035,7 @@ services:
     {% endif -%}   {#  AIRFLOW_volume_map_custom_conf #}
     {%if SPARK_enable | default(false) %}
       SPARK_HOME: /opt/spark
-      JAVA_HOME: /opt/bitnami/java      
+      JAVA_HOME: /opt/java      
     {% endif -%}   {#  SPARK_enable #}
     {%if MINIO_enable or RUSTFS_enable or SEAWEEDFS_enable or external['S3_enable'] | default(false) %}
       AIRFLOW_VAR_S3_ENDPOINT: {{s3Endpoint | default(omit) }}
@@ -15087,7 +15093,7 @@ services:
     {% endif -%}   {#  AIRFLOW_volume_map_custom_conf #}
     {%if SPARK_enable | default(false) %}
       - spark-{{__SPARK_version | replace('.','-')}}-vol:/opt/spark:RO
-      - spark-{{__SPARK_version | replace('.','-')}}-java-vol:/opt/bitnami/java:RO
+      - spark-{{__SPARK_version | replace('.','-')}}-java-vol:/opt/java:RO
       - ./container-volume/spark/logs/:/var/log/spark/logs       
     {% endif -%}   {#  SPARK_enable #}
     {%if MINIO_enable or RUSTFS_enable or SEAWEEDFS_enable or external['S3_enable'] | default(false) %}
@@ -15172,7 +15178,7 @@ services:
     {% endif -%}   {#  AIRFLOW_volume_map_custom_conf #}
     {%if SPARK_enable | default(false) %}
       SPARK_HOME: /opt/spark
-      JAVA_HOME: /opt/bitnami/java      
+      JAVA_HOME: /opt/java      
     {% endif -%}   {#  SPARK_enable #}
     {%if MINIO_enable or RUSTFS_enable or SEAWEEDFS_enable or external['S3_enable'] | default(false) %}
       AIRFLOW_VAR_S3_ENDPOINT: {{s3Endpoint | default(omit) }}
@@ -15229,7 +15235,7 @@ services:
     {% endif -%}   {#  AIRFLOW_volume_map_custom_conf #}
     {%if SPARK_enable | default(false) %}
       - spark-{{__SPARK_version | replace('.','-')}}-vol:/opt/spark:RO
-      - spark-{{__SPARK_version | replace('.','-')}}-java-vol:/opt/bitnami/java:RO
+      - spark-{{__SPARK_version | replace('.','-')}}-java-vol:/opt/java:RO
       - ./container-volume/spark/logs/:/var/log/spark/logs       
     {% endif -%}   {#  SPARK_enable #}
     {%if MINIO_enable or RUSTFS_enable or SEAWEEDFS_enable or external['S3_enable'] | default(false) %}
@@ -15329,7 +15335,7 @@ services:
     {% endif -%}   {#  AIRFLOW_volume_map_custom_conf #}
     {%if SPARK_enable | default(false) %}
       SPARK_HOME: /opt/spark
-      JAVA_HOME: /opt/bitnami/java      
+      JAVA_HOME: /opt/java      
     {% endif -%}   {#  SPARK_enable #}
     {%if MINIO_enable or RUSTFS_enable or SEAWEEDFS_enable or external['S3_enable'] | default(false) %}
       AIRFLOW_VAR_S3_ENDPOINT: {{s3Endpoint | default(omit) }}
@@ -15561,7 +15567,7 @@ services:
     {% endif -%}   {#  AIRFLOW_volume_map_custom_conf #}
     {%if SPARK_enable | default(false) %}
       SPARK_HOME: /opt/spark
-      JAVA_HOME: /opt/bitnami/java      
+      JAVA_HOME: /opt/java      
     {% endif -%}   {#  SPARK_enable #}
     {%if MINIO_enable or RUSTFS_enable or SEAWEEDFS_enable or external['S3_enable'] | default(false) %}
       AIRFLOW_VAR_S3_ENDPOINT: {{s3Endpoint | default(omit) }}

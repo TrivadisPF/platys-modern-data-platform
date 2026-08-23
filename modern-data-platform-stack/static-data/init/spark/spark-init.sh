@@ -78,16 +78,9 @@ function configure() {
     done
 }
 
-# comment out hadoop configuration with update to bitnami spark 
-#configure /etc/hadoop/core-site.xml core CORE_CONF
-#configure /etc/hadoop/hdfs-site.xml hdfs HDFS_CONF
-#configure /etc/hadoop/yarn-site.xml yarn YARN_CONF
-#configure /etc/hadoop/httpfs-site.xml httpfs HTTPFS_CONF
-#configure /etc/hadoop/kms-site.xml kms KMS_CONF
-
 mkdir -p /opt/spark/conf
 
-# Copy conf templates from conf.default into conf (mirrors the Bitnami startup pattern).
+# Copy conf templates from conf.default into conf 
 # Files mounted directly into conf/ are left in place; this only fills in what's missing.
 if [ -d /opt/spark/conf.default ]; then
   cp -n /opt/spark/conf.default/* /opt/spark/conf/ 2>/dev/null || true
@@ -175,7 +168,7 @@ done
 
 if [ ${SPARK_INSTALL_JAVA_PACKAGES} ]
 then
-  # using python for the download, as spark bitnami docker images don't come with curl installed
+  # using python for the download, as spark docker images don't come with curl installed (with apache/spark this is no longer true, but we use python as it supports Nexus)
   /maven-download.sh ${MAVEN_DOWNLOAD_REPO} ${SPARK_INSTALL_JAVA_PACKAGES} /opt/spark/jars python
 fi
 

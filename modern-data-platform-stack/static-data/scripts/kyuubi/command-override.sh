@@ -5,9 +5,6 @@ set -o nounset
 set -o pipefail
 set -o xtrace
 
-# Load Spark environment settings
-# /opt/bitnami/scripts/spark-env.sh
-
 export KYUUBI_INITSCRIPTS_DIR="/docker-entrypoint-initdb.d"
 export KYUUBI_DEFAULT_CONF_DIR="${KYUUBI_HOME}/conf.default"
 export KYUUBI_CONF_DIR="${KYUUBI_HOME}/conf"
