@@ -15913,6 +15913,11 @@ services:
   {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
   {% endif -%}   {#  use_timezone #}
+  {%if NEXUS_enable | default(false) %}
+    depends_on:
+      nexus:
+        condition: service_healthy
+  {% endif -%}   {#  NEXUS_enable #}
     volumes:
       - ./data-transfer:/data-transfer
   {% if JUPYTER_upload_data_transfer_to_workspace_enabled %}
@@ -33261,6 +33266,12 @@ services:
   {% endif -%}   {#  logging_driver is defined ... #}
     entrypoint: ["/bin/sh", "/nexus-init/entrypoint.sh"]    
     restart: {{container_restart_policy}}
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8081/service/rest/v1/status"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 120s    
 {% endif %}   {# NEXUS_enable #}
 
 {% if ALLURE_enable | default(false) %}
