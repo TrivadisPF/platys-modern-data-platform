@@ -1,0 +1,82 @@
+name: Apache Spark Connect
+id: spark-connect
+arch: [x86-64]
+
+tags: []
+dependencies: [spark]
+links:
+  website: https://spark.apache.org/
+  documentation: https://spark.apache.org/docs/latest/spark-connect-overview.html
+  github: https://github.com/apache/spark
+
+description: >
+  Spark Connect introduces a decoupled client-server architecture for Apache Spark
+  that allows remote connectivity from any language or tool over a gRPC interface.
+  Clients (Python, Scala, Java, R) connect to the Spark Connect server without
+  embedding a Spark driver, enabling lightweight, language-agnostic access to Spark.
+
+enable:
+  platys_init: SPARK,SPARK_CONNECT
+  example: |
+    platys init --enable-services SPARK,SPARK_CONNECT
+    platys gen
+
+usage:
+  - title: Connect with PySpark
+    content: |
+      Install the PySpark client:
+
+      ```bash
+      pip install pyspark
+      ```
+
+      Connect from Python using the Spark Connect URL:
+
+      ```python
+      from pyspark.sql import SparkSession
+
+      spark = SparkSession.builder \
+          .remote("sc://dataplatform:15002") \
+          .getOrCreate()
+
+      df = spark.range(10)
+      df.show()
+      ```
+
+  - title: Spark Connect UI
+    content: |
+      Navigate to <http://dataplatform:24040> to view the Spark application UI
+      for the Connect server.
+
+parameters:
+  - name: SPARK_CONNECT_enable
+    default: "false"
+    since: "1.20.0"
+    description: >
+      Generate a dedicated Spark Connect server container. The server connects to
+      the Spark master and exposes a gRPC endpoint (port 15002) for remote client
+      connections. Requires `SPARK_enable: true`.
+
+  - name: SPARK_CONNECT_use_local_spark
+    default: "false"
+    since: "1.20.0"
+    description: >
+      Run the Spark Connect server in local mode (`local[*]`) instead of connecting
+      to the Spark master cluster. Useful for lightweight, standalone usage without
+      a full Spark cluster.
+
+  - name: SPARK_CONNECT_cores_max
+    default: ""
+    since: "1.20.0"
+    description: >
+      Maximum number of CPU cores to request from the cluster for the Spark Connect
+      server. If not set, defaults to `spark.deploy.defaultCores` (configured via
+      `SPARK_MASTER_OPTS`). Has no effect when `SPARK_CONNECT_use_local_spark` is `true`.
+
+  - name: SPARK_CONNECT_executor_memory
+    default: ""
+    since: "1.20.0"
+    description: >
+      Amount of memory to use per executor process, using JVM memory notation
+      (e.g. `512m`, `2g`). If not set, defaults to `1g`. Has no effect when
+      `SPARK_CONNECT_use_local_spark` is `true`.
