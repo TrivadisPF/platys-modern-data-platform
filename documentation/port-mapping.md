@@ -392,7 +392,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 14042 | 4042 | jupyter (spark ui) |
 14043 | 4043 | jupyter (spark ui) |
 14044 | 4044 | jupyter (spark ui) |
-15002 | 15002 | spark-master (spark-connect) |
+15002 | 15002 | spark-connect |
 15433 | 5433| yb-tserver-1 |
 15672 | 15672 | rabbitmq (ui) |
 16379 | 6379| yb-tserver-1 |
@@ -451,6 +451,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 23646 | 23646 | seaweedfs-1 |
 23817 | 23817 | infinity (thrift) |
 23820 | 23820 | infinity (http) |
+24040 | 24040 | spark-connect |
 24224 | 24224 | fluentd |
 24225 | 24224 | fluent-bit |
 26257 | 26257 | cockroachdb-1 |
