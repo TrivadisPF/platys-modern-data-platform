@@ -6724,6 +6724,9 @@ services:
       - 6066:6066
       - 7077:7077
       - 4040-4044:4040-4044
+  {%if SPARK_connect_enabled | default(false) %}
+      - 15002:15002    # Spark Connect / gRPC
+  {% endif -%}   {#  SPARK_connect_enabled #}
     environment:
       SPARK_MASTER_HOST: spark-master
       SPARK_MASTER_PORT: 7077
@@ -6913,7 +6916,22 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
     entrypoint: ["/docker-entrypoint-initdb.d/spark-init.sh"]
+  {%if SPARK_connect_enabled | default(false) %}
+    command:
+      - bash
+      - -c
+      - |
+        /opt/spark/bin/spark-class org.apache.spark.deploy.master.Master &
+        MASTER_PID=$$!
+        until nc -z localhost 7077 2>/dev/null; do sleep 1; done
+        /opt/spark/sbin/start-connect-server.sh \
+          --master spark://spark-master:7077 \
+          --conf spark.connect.grpc.binding.port=15002 \
+          --packages org.apache.spark:spark-connect_{{'2.13' if (SPARK_base_version | float) >= 4.0 else '2.12'}}:{{__SPARK_version}}
+        wait $$MASTER_PID
+  {% else %}
     command: ["/opt/spark/bin/spark-class", "org.apache.spark.deploy.master.Master"]
+  {% endif -%}   {#  SPARK_connect_enabled #}
     restart: {{container_restart_policy}}
     healthcheck:
       test: ["CMD-SHELL", "python3 -c 'import socket; socket.create_connection((\"localhost\", 28304), timeout=5)'"]
