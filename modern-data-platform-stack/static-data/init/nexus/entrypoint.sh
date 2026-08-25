@@ -50,6 +50,13 @@ if [ ! -f "/nexus-data/.setup-complete" ]; then
     -H "Content-Type: application/json" \
     -d @/nexus-init/pypi-proxy.json || true
 
+  # create PyPI proxy repo
+  curl -sf -o /dev/null \
+    -u "admin:${ADMIN_PASS}" \
+    -X POST "${NEXUS_URL}/service/rest/v1/repositories/docker/proxy" \
+    -H "Content-Type: application/json" \
+    -d @/nexus-init/docker-proxy.json || true    
+
   # mark setup as done so restarts skip this block
   touch /nexus-data/.setup-complete
   echo "Setup complete."
