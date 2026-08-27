@@ -1819,9 +1819,14 @@ networks:
 {#  ================================== Nexus Settings ========================================== #}
 
 {% if (external['NEXUS_enable']) | default(false) %}
-    {% set ns.nexusUrl = external['NEXUS_url'] %}
+    {% set ns.nexusUrl = 'http://' ~ external['NEXUS_endpoint'] %}
+    {% set ns.nexusDockerImagePrefix = external['NEXUS_endpoint'] ~ '/image-registry/' %}
+{% elif NEXUS_enable %}
+    {% set ns.nexusUrl = 'http://' ~ 'nexus:8081' %}
+    {% set ns.nexusDockerImagePrefix = 'nexus:8081/image-registry/' %}
 {% else %}
     {% set ns.nexusUrl = 'http://nexus:8081' %}
+    {% set ns.nexusDockerImagePrefix = '' %}
 {% endif %}   {# external['NEXUS_enable'] #}
 
 {#  ================================== Extension Fields ========================================== #}
@@ -6710,7 +6715,7 @@ services:
 {% if SPARK_enable | default(false) %}
   #  ================================== Apache Spark ========================================== #
   spark-master:
-    image: apache/spark:{{__SPARK_version}}
+    image: {{ns.nexusDockerImagePrefix if use_nexus_for_docker_images}}apache/spark:{{__SPARK_version}}
     container_name: spark-master
     hostname: spark-master
     labels:
