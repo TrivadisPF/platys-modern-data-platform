@@ -213,6 +213,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 7050 | 7050 | kudu-tserver-1 |
 7051 | 7051 | kudo-master-1 |
 7077 | 7077 | spark-master |
+7080 | 7080 | coder |
 7199 | 7199 | cassandra-1 |
 7200 | 7199 | cassandra-2 |
 7201 | 7199 | cassandra-3 |
@@ -878,6 +879,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28491 | 8080 | cockroachdb-3 |
 28492 | 8000 | risingwave-mcp |
 28493 | 9097 | mcp-trino |
+
 
 ## Ports > 28500
 

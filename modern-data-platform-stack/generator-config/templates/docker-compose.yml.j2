@@ -719,6 +719,7 @@ networks:
 {% set __DRAWIO_version = DRAWIO_version | default('latest') -%}
 {% set __FIREFOX_version = FIREFOX_version | default('latest') -%}
 {% set __BROWSERLESS_version = BROWSERLESS_version | default('latest') -%}
+{% set __CODER_version = CODER_version | default('latest') -%}
 {% set __FILE_BROWSER_version = FILE_BROWSER_version | default('latest') -%}
 {% set __VAULT_version = VAULT_version | default('latest') -%}
 {% set __KEYCLOAK_version = KEYCLOAK_version | default('latest') -%}
@@ -1188,6 +1189,7 @@ networks:
   {% set DRAWIO_enable = false -%}
   {% set FIREFOX_enable = false -%}
   {% set BROWSERLESS_enable = false -%}
+  {% set CODER_enable = false -%}
   {% set FILE_BROWSER_enable = false -%}
   {% set ETCD_E3W_enable = false -%}
   {% set DOCKER_EXEC_WEBCONSOLE_enable = false -%}
@@ -31734,6 +31736,46 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
 {% endif %}   {# BROWSERLESS_enable #}
+
+{% if CODER_enable | default(false) %}
+  #  ================================== Coder ========================================== #
+  coder:
+    image: ghcr.io/coder/coder:{{__CODER_version}}
+    container_name: coder
+    hostname: coder
+    labels:
+      com.platys.name: "coder"
+      com.platys.description: "Cloud development environments on your infrastructure"
+      com.platys.webui.title: "Coder UI"
+      com.platys.webui.url: "http://dataplatform:7080"
+    depends_on:
+      - postgresql
+    ports:
+      - "7080:7080"
+    environment:
+      CODER_PG_CONNECTION_URL: "postgresql://{{CODER_postgres_user}}:{{CODER_postgres_password}}@postgresql/{{CODER_postgres_dbname}}?sslmode=disable"
+      CODER_HTTP_ADDRESS: "0.0.0.0:7080"
+      CODER_ACCESS_URL: http://${PUBLIC_IP:-dataplatform}:7080
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer
+    {% if CODER_mount_docker_socket | default(true) %}
+      - /var/run/docker.sock:/var/run/docker.sock
+    {% endif -%}   {#  CODER_mount_docker_socket #}
+    {% if CODER_volume_mount_data | default(true) %}
+      - container-volume/coder:/home/coder
+    {% endif -%}   {#  CODER_volume_mount_data #}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined #}
+    restart: {{container_restart_policy}}
+{% endif %}   {# CODER_enable #}
 
 {% if FILE_BROWSER_enable | default(false) %}
   #  ================================== File Browser ================= #

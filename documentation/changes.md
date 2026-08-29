@@ -11,6 +11,7 @@ See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/plat
  * Apache MiNiFi C++
  * SeaweedFS
  * Nexus
+ * Coder
  
 ### Version upgrades
  
