@@ -1378,7 +1378,7 @@ services:
     usage:
       - title: Usage
         content: |
-          Configure your MCP client to connect to <http://dataplatform:28409/mcp>.
+          Configure your MCP client to connect to <http://dataplatform:28492/mcp>.
     parameters:
       - name: RISINGWAVE_MCP_enable
         default: "false"
@@ -3763,6 +3763,86 @@ services:
         description: >
           The catalog to use.
 
+  - name: Apache Spark Connect
+    id: spark-connect
+    arch: [x86-64]
+    tags: []
+    dependencies: [spark]
+    links:
+      website: https://spark.apache.org/
+      documentation: https://spark.apache.org/docs/latest/spark-connect-overview.html
+      github: https://github.com/apache/spark
+    description: >
+      Spark Connect introduces a decoupled client-server architecture for
+      Apache Spark that allows remote connectivity from any language or tool
+      over a gRPC interface. Clients (Python, Scala, Java, R) connect to the
+      Spark Connect server without embedding a Spark driver, enabling
+      lightweight, language-agnostic access to Spark.
+    enable:
+      platys_init: SPARK,SPARK_CONNECT
+      example: |
+        platys init --enable-services SPARK,SPARK_CONNECT
+        platys gen
+    usage:
+      - title: Connect with PySpark
+        content: |
+          Install the PySpark client:
+          
+          ```bash
+          pip install pyspark
+          ```
+          
+          Connect from Python using the Spark Connect URL:
+          
+          ```python
+          from pyspark.sql import SparkSession
+          
+          spark = SparkSession.builder \
+              .remote("sc://dataplatform:15002") \
+              .getOrCreate()
+          
+          df = spark.range(10)
+          df.show()
+          ```
+    usage:
+      - title: Spark Connect UI
+        content: |
+          Navigate to <http://dataplatform:24040> to view the Spark application UI
+          for the Connect server.
+    parameters:
+      - name: SPARK_CONNECT_enable
+        default: "false"
+        since: "1.20.0"
+        description: >
+          Generate a dedicated Spark Connect server container. The server
+          connects to the Spark master and exposes a gRPC endpoint (port 15002)
+          for remote client connections. Requires `SPARK_enable: true`.
+
+      - name: SPARK_CONNECT_use_local_spark
+        default: "false"
+        since: "1.20.0"
+        description: >
+          Run the Spark Connect server in local mode (`local[*]`) instead of
+          connecting to the Spark master cluster. Useful for lightweight,
+          standalone usage without a full Spark cluster.
+
+      - name: SPARK_CONNECT_cores_max
+        default: ""
+        since: "1.20.0"
+        description: >
+          Maximum number of CPU cores to request from the cluster for the Spark
+          Connect server. If not set, defaults to `spark.deploy.defaultCores`
+          (configured via `SPARK_MASTER_OPTS`). Has no effect when
+          `SPARK_CONNECT_use_local_spark` is `true`.
+
+      - name: SPARK_CONNECT_executor_memory
+        default: ""
+        since: "1.20.0"
+        description: >
+          Amount of memory to use per executor process, using JVM memory
+          notation (e.g. `512m`, `2g`). If not set, defaults to `1g`. Has no
+          effect when `SPARK_CONNECT_use_local_spark` is `true`.
+
   - name: Kyuubi
     id: kyuubi
     arch: [x86-64]
@@ -5997,7 +6077,7 @@ services:
     usage:
       - title: Usage
         content: |
-          Navigate to <http://dataplatform:28245>.
+          Navigate to <http://dataplatform:28430>.
     parameters:
       - name: KESTRA_enable
         default: "false"
@@ -7327,7 +7407,7 @@ services:
     usage:
       - title: Usage
         content: |
-          Configure  to <http://dataplatform:28404/sse> if transport configuration setting is left to default.
+          Configure  to <http://dataplatform:28487/sse> if transport configuration setting is left to default.
     parameters:
       - name: POSTGRESQL_MCP_enable
         default: "false"
@@ -8724,7 +8804,7 @@ services:
     usage:
       - title: Usage
         content: |
-          Configure  to <http://dataplatform:28403/sse> if transport configuration setting is left to default.
+          Configure  to <http://dataplatform:28486/sse> if transport configuration setting is left to default.
     parameters:
       - name: MONGO_MCP_enable
         default: "false"
@@ -10960,7 +11040,7 @@ services:
     usage:
       - title: Usage
         content: |
-          Navigate to <http://dataplatform:28289>.
+          Navigate to <http://dataplatform:28472>.
     parameters:
       - name: PUPPYGRAPH_enable
         default: "false"
@@ -11674,7 +11754,7 @@ services:
     usage:
       - title: Usage
         content: |
-          Navigate to <http://dataplatform:28264>.
+          Navigate to <http://dataplatform:28448>.
     parameters:
       - name: INFLUXDB3_EXPLORER_enable
         default: "false"
@@ -13361,7 +13441,7 @@ services:
     usage:
       - title: Usage
         content: |
-          Navigate to <http://dataplatform:28275>.
+          Navigate to <http://dataplatform:28458>.
     parameters:
       - name: LAKEKEEPER_enable
         default: "false"
@@ -13417,7 +13497,7 @@ services:
     usage:
       - title: Usage
         content: |
-          Navigate to <http://dataplatform:28284>.
+          Navigate to <http://dataplatform:28467>.
     parameters:
       - name: POLARIS_enable
         default: "false"
@@ -13476,7 +13556,7 @@ services:
     usage:
       - title: Usage
         content: |
-          Navigate to <http://dataplatform:28286>.
+          Navigate to <http://dataplatform:28469>.
     parameters:
       - name: GRAVITINO_enable
         default: "false"
@@ -13545,7 +13625,7 @@ services:
     usage:
       - title: Usage
         content: |
-          Navigate to <http://dataplatform:28280>.
+          Navigate to <http://dataplatform:28463>.
     parameters:
       - name: NIMTABLE_enable
         default: "false"
@@ -14106,7 +14186,7 @@ services:
     usage:
       - title: Usage
         content: |
-          Navigate to <http://dataplatform:28270>.
+          Navigate to <http://dataplatform:28454>.
     parameters:
       - name: TRINO_GATEWAY_enable
         default: "false"
@@ -14519,7 +14599,7 @@ services:
           Execute DuckDB queries using the HTTP POST/GET API (compatible with the ClickHouse HTTP API)
           
           ```bash
-          curl -X POST "http://dataplatform:28261" \
+          curl -X POST "http://dataplatform:28445" \
              -H "Content-Type: application/json" \
              -d 'SELECT version()'  
           ```
@@ -15296,7 +15376,7 @@ services:
     usage:
       - title: Usage
         content: |
-          Navigate to <http://dataplatform:28405>.
+          Navigate to <http://dataplatform:28488>.
     parameters:
       - name: BETTER_CHATBOT_enable
         default: "false"
@@ -15835,7 +15915,7 @@ services:
     usage:
       - title: Usage
         content: |
-          Navitage to <http://dataplatform:28401?token=<token> and login with username and password specified in the configuration. 
+          Navitage to <http://dataplatform:28484?token=<token> and login with username and password specified in the configuration.
           
           Pass the token using `?token=<token>`.
           
@@ -15849,7 +15929,7 @@ services:
           to access a remote gateway, create an SSH tunnel from your local machine
           
           ```bash
-          ssh -N -L 28401:127.0.0.1:28401 root@187.124.0.29
+          ssh -N -L 28484:127.0.0.1:28484 root@187.124.0.29
           ```
     parameters:
       - name: OPENCLAW_enable
@@ -16543,12 +16623,12 @@ services:
     usage:
       - title: Usage
         content: |
-          REST API documentation available [here](http://dataplatform:28257/api/schema/swagger).
+          REST API documentation available [here](http://dataplatform:28441/api/schema/swagger).
           
           Translate
           
           ```bash
-          curl 'http://dataplatform:28257/api/v4/translator?text=Hello&source=eng_Latn&target=spa_Latn'
+          curl 'http://dataplatform:28441/api/v4/translator?text=Hello&source=eng_Latn&target=spa_Latn'
           ```
     parameters:
       - name: NLLB_enable
@@ -17342,7 +17422,7 @@ services:
     usage:
       - title: Usage
         content: |
-          Navigate to <http://dataplatform:28242>.
+          Navigate to <http://dataplatform:28427>.
     parameters:
       - name: OPENLIT_enable
         default: "false"
@@ -18864,7 +18944,7 @@ services:
     usage:
       - title: Usage
         content: |
-          Navigate to <http://dataplatform:28292>
+          Navigate to <http://dataplatform:28476>
     parameters:
       - name: CRUISE_CONTROL_enable
         default: "false"
@@ -19294,7 +19374,7 @@ services:
     usage:
       - title: Usage
         content: |
-          For the Open Data Discovery Platform UI, navigate to <http://dataplatform:28399>. 
+          For the Open Data Discovery Platform UI, navigate to <http://dataplatform:28482>.
           
           If authentication is enabled, by default the user `admin` with password `abc123!` can be used.
     usage:
@@ -21314,6 +21394,92 @@ services:
           Map the platform root into the editor, so files can be edited which
           are part of the platform.
 
+  - name: Coder
+    id: coder
+    arch: [x86-64]
+    tags: []
+    dependencies: [postgresql]
+    links:
+      website: https://coder.com
+      documentation: https://coder.com/docs
+      github: https://github.com/coder/coder
+    description: >
+      Coder is an open-source platform for creating and managing cloud
+      development environments (CDEs) running on your own infrastructure.
+      Developers connect to remote workspaces via VS Code, JetBrains, or a
+      browser-based IDE, with reproducible environments defined as Terraform
+      templates.
+    enable:
+      platys_init: CODER
+      example: |
+        platys init --enable-services POSTGRESQL,CODER
+        platys gen
+    usage:
+      - title: Open the Coder UI
+        content: |
+          Navigate to <http://dataplatform:28494>.
+          
+          On first access create an admin account, then define workspace templates
+          and provision developer workspaces.
+    usage:
+      - title: Use the Coder CLI
+        content: |
+          Install the CLI:
+          
+          ```bash
+          curl -L https://coder.com/install.sh | sh
+          ```
+          
+          Authenticate and create a workspace:
+          
+          ```bash
+          coder login http://dataplatform:28494
+          coder templates list
+          coder create my-workspace --template <template-name>
+          ```
+    parameters:
+      - name: CODER_enable
+        default: "false"
+        since: "1.20.0"
+        description: >
+          Enable the Coder cloud development environment service. Requires
+          POSTGRESQL_enable: true.
+
+      - name: CODER_access_url
+        default: "http://dataplatform:28494"
+        since: "1.20.0"
+        description: >
+          The URL at which Coder is accessible. Must be reachable from both
+          browsers and workspace agents. Change this to your public IP or
+          hostname when deploying on a remote server.
+
+      - name: CODER_postgres_dbname
+        default: "coder"
+        since: "1.20.0"
+        description: >
+          PostgreSQL database name for Coder.
+
+      - name: CODER_postgres_user
+        default: "coder"
+        since: "1.20.0"
+        description: >
+          PostgreSQL user for Coder.
+
+      - name: CODER_postgres_password
+        default: "abc123!"
+        since: "1.20.0"
+        sensitive: true
+        description: >
+          PostgreSQL password for Coder.
+
+      - name: CODER_mount_docker_socket
+        default: "true"
+        since: "1.20.0"
+        description: >
+          Mount the host Docker socket (/var/run/docker.sock) into Coder so it
+          can provision Docker-based workspaces without an external
+          provisioner.
+
   - name: Taiga
     id: taiga
     arch: [x86-64]
@@ -22412,7 +22578,7 @@ services:
     usage:
       - title: Usage
         content: |
-          Navigate to <http://dataplatform:28247>.
+          Navigate to <http://dataplatform:28432>.
     parameters:
       - name: NGROK_enable
         default: "false"
@@ -22521,12 +22687,14 @@ services:
         content: |
           Navigate to <http://dataplatform:28426>.
           
-          The default admin password is printed to the container log on first startup
-          and stored in `/nexus-data/admin.password` inside the container.
-          Retrieve it with:
+          The default admin password is configured using `NEXUS_admin_password`
           
-          ```bash
-          docker exec nexus cat /nexus-data/admin.password
+          To retrieve the configured repositories, perform
+          
+          ```
+          curl -u admin:abc123!abc123! \
+                 http://localhost:28426/service/rest/v1/repositories \
+                | python3 -m json.tool | grep -E '"name"|"format"|"type"'
           ```
     parameters:
       - name: NEXUS_enable
@@ -22557,6 +22725,13 @@ services:
           Maximum JVM heap size passed to Nexus via INSTALL4J_ADD_JVM_PARAMS
           (-Xmx and -XX:MaxDirectMemorySize).
 
+      - name: NEXUS_admin_password
+        default: "abc123!abc123!"
+        since: "1.20.0"
+        description: >
+          Password to set for the Nexus `admin` user during first-time
+          initialisation.
+
   - name: Jenkins
     id: jenkins
     arch: [x86-64]
@@ -22577,7 +22752,7 @@ services:
     usage:
       - title: Web UI
         content: |
-          Navigate to <http://dataplatform:28262>.
+          Navigate to <http://dataplatform:28446>.
     parameters:
       - name: JENKINS_enable
         default: "false"
@@ -22613,7 +22788,7 @@ services:
     usage:
       - title: Usage
         content: |
-          Navigate to <http://dataplatform:28279>.
+          Navigate to <http://dataplatform:28462>.
     parameters:
       - name: ALLURE_enable
         default: "false"
@@ -22802,7 +22977,7 @@ services:
     usage:
       - title: Usage
         content: |
-          Navigate to <http://dataplatform:28282>.
+          Navigate to <http://dataplatform:28465>.
     parameters:
       - name: EHRBASE_enable
         default: "false"
@@ -22834,7 +23009,7 @@ services:
     usage:
       - title: Usage
         content: |
-          Navigate to <http://dataplatform:28283>.
+          Navigate to <http://dataplatform:28466>.
     parameters:
       - name: OPENEHR_TOOL_enable
         default: "false"
@@ -23261,7 +23436,7 @@ services:
     usage:
       - title: Usage
         content: |
-          Navigate to <http://dataplatform:28287>.
+          Navigate to <http://dataplatform:28470>.
     parameters:
       - name: GRAVITINO_ICEBERG_REST_enable
         default: "false"
