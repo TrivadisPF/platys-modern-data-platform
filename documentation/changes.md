@@ -23,6 +23,7 @@ See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/plat
  * Update `kyuubi` to `1.12.0-all`
  * Update `hasura` to `v2.50.3-ce`
  * Update `trino` to `483`
+ * Update `hive-metastore` to `4.2.1`
 
 ### Enhancements
 
