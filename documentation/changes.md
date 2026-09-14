@@ -21,7 +21,7 @@ See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/plat
  * Update `datahub` to `v1.7.0`
  * Update `ollama` to `0.32.12`
  * Update `kyuubi` to `1.12.0-all`
- * Update `hasura` to `v2.50.2-ce`
+ * Update `hasura` to `v2.50.3-ce`
  * Update `trino` to `483`
 
 ### Enhancements
