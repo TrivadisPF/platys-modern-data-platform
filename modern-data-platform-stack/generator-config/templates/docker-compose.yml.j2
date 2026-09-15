@@ -3322,7 +3322,7 @@ services:
       - "--listen-addr=0.0.0.0:6660"
       - "--advertise-addr=risingwave-compactor-1:6660"
       - "--prometheus-listener-addr=0.0.0.0:1260"
-      - "--meta-address=http://risingwave-meta-1:5690:z"
+      - "--meta-address=http://risingwave-meta-1:5690"
       - "--config-path=/risingwave.toml"
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
     <<: *logging
@@ -3382,7 +3382,7 @@ services:
       - "--listen-addr=0.0.0.0:5688"
       - "--advertise-addr=risingwave-compute-1:5688"      
       - "--prometheus-listener-addr=0.0.0.0:1222"
-      - "--meta-address=http://risingwave-meta-1:5690:z"
+      - "--meta-address=http://risingwave-meta-1:5690"
       - "--config-path=/risingwave.toml"
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
     <<: *logging
@@ -3435,7 +3435,7 @@ services:
     command:
       - frontend-node
       - "--listen-addr=0.0.0.0:4566"
-      - "--meta-addr=http://risingwave-meta-1:5690:z"
+      - "--meta-addr=http://risingwave-meta-1:5690"
       - "--advertise-addr=risingwave-frontend-1:4566"
       - "--config-path=/risingwave.toml"
       - "--prometheus-listener-addr=0.0.0.0:2222"
@@ -3499,14 +3499,14 @@ services:
       - "{{'--prometheus-endpoint=http://prometheus-1:9090' if PROMETHEUS_enable | default(false)}}"      
       - "--backend=sql"      
     {% if RISINGWAVE_meta_store_type | lower == 'sqlite' | default(false) %}
-      - "--sql-endpoint=sqlite:///tmp/metadata.db?mode=rwc:z"
+      - "--sql-endpoint=sqlite:///tmp/metadata.db?mode=rwc"
     {%- elif RISINGWAVE_meta_store_type | lower == 'postgresql' | default(false) %}      
-      - "--sql-endpoint=postgres://{{RISINGWAVE_meta_store_username}}:${PLATYS_RISINGWAVE_DATABASE_PASSWORD:-{{RISINGWAVE_meta_store_password | default('abc123!') }}}@postgresql:5432/{{RISINGWAVE_meta_store_database}}:z"
+      - "--sql-endpoint=postgres://{{RISINGWAVE_meta_store_username}}:${PLATYS_RISINGWAVE_DATABASE_PASSWORD:-{{RISINGWAVE_meta_store_password | default('abc123!') }}}@postgresql:5432/{{RISINGWAVE_meta_store_database}}"
     {%- elif RISINGWAVE_meta_store_type | lower == 'mysql' | default(false) %}      
-      - "--sql-endpoint=mysql://{{RISINGWAVE_meta_store_username}}:${PLATYS_RISINGWAVE_DATABASE_PASSWORD:-{{RISINGWAVE_meta_store_password | default('abc123!') }}}@mysql:3306/{{RISINGWAVE_meta_store_database}}:z"
+      - "--sql-endpoint=mysql://{{RISINGWAVE_meta_store_username}}:${PLATYS_RISINGWAVE_DATABASE_PASSWORD:-{{RISINGWAVE_meta_store_password | default('abc123!') }}}@mysql:3306/{{RISINGWAVE_meta_store_database}}"
     {% endif %}      
     {% if RISINGWAVE_state_store_type | lower == 's3' | default(false) %}
-      - "--state-store=hummock+s3://{{RISINGWAVE_s3_bucket_name}}:z"
+      - "--state-store=hummock+s3://{{RISINGWAVE_s3_bucket_name}}"
     {% endif %}            
       - "--data-directory={{RISINGWAVE_data_directory}}"
       - "--config-path=/risingwave.toml"
@@ -5990,10 +5990,10 @@ services:
       - KLAW_CLUSTERAPI_ACCESS_BASE64_SECRET=VGhpc0lzRXhhY3RseUEzMkNoYXJTdHJpbmdTZWNyZXQK
       - SPRING_DATASOURCE_URL=jdbc:h2:file:/klaw/klawprodb;DB_CLOSE_ON_EXIT=FALSE;DB_CLOSE_DELAY=-1;MODE=MySQL;CASE_INSENSITIVE_IDENTIFIERS=TRUE;
       - KLAW_CORAL_ENABLED=true
-      - KLAW_UIAPI_SERVERS=http://klaw-core:9097:z
+      - KLAW_UIAPI_SERVERS=http://klaw-core:9097
       - KLAW_QUICKSTART_ENABLED={{KLAW_quickstart_enabled | default(false)}}
       - KLAW_DOCKER_INTERNAL_HOST=host.docker.internal
-      - KLAW_DOCKER_CLUSTERAPI_HOST=http://klaw-cluster-api:9343:z
+      - KLAW_DOCKER_CLUSTERAPI_HOST=http://klaw-cluster-api:9343
       - KLAW_DOCKER_KAFKA_CLUSTER={{ns.bootstrapServers}}
     {% if ns.secureKafkaEnabled %}
       {% if ns.securityProtocolBROKER == 'SASL_PLAINTEXT' %}
@@ -6010,7 +6010,7 @@ services:
       - KLAW_DOCKER_KAFKA_CLUSTER_SECURITYPROTOCOL=SSL
       {% endif -%}   {#  ns.securityProtocol #}
     {% endif -%}   {#  ns.secureKafkaEnabled #}
-      - KLAW_DOCKER_SR_CLUSTER={{ ns.schemaRegistryUrl | replace('http://','') }}:z
+      - KLAW_DOCKER_SR_CLUSTER={{ ns.schemaRegistryUrl | replace('http://','') }}
       - KLAW_QUICKSTART_DEFAULT_USER1={{KLAW_quickstart_username_1 if KLAW_quickstart_username_1 is defined and KLAW_quickstart_username_1 and KLAW_quickstart_username_1 | length else omit}}
       - KLAW_QUICKSTART_DEFAULT_USER2={{KLAW_quickstart_username_2 if KLAW_quickstart_username_2 is defined and KLAW_quickstart_username_2 and KLAW_quickstart_username_2 | length else omit}}
       - KLAW_QUICKSTART_DEFAULT_PWD=${PLATYS_KLAW_QUICKSTART_USER_PASSWORD:-{{KLAW_quickstart_password}}}
@@ -8323,9 +8323,9 @@ services:
     {% endif -%}    {#  NIFI_python_provide_requirements_file #}
     {% if HIVE_METASTORE_enable | default(false) %}
       - HIVE_SITE_CONF_hive_metastore_local=false
-      - HIVE_SITE_CONF_hive_metastore_uris=thrift://{{ns.hiveMetastore}}:z
+      - HIVE_SITE_CONF_hive_metastore_uris=thrift://{{ns.hiveMetastore}}
       {%if MINIO_enable or RUSTFS_enable or SEAWEEDFS_enable or external['S3_enable'] | default(false) %}
-      - HIVE_SITE_CONF_fs_defaultFS=s3a://{{s3AdminBucketName}}:z
+      - HIVE_SITE_CONF_fs_defaultFS=s3a://{{s3AdminBucketName}}
       - HIVE_SITE_CONF_fs_s3a_endpoint={{s3Endpoint | default(omit) }}
       - HIVE_SITE_CONF_fs_s3a_access_key={{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
       - HIVE_SITE_CONF_fs_s3a_secret_key={{s3SecretAccessKey}}
@@ -8440,9 +8440,9 @@ services:
     {% endif -%}    {#  NIFI_python_provide_requirements_file #}
     {% if HIVE_METASTORE_enable | default(false) %}
       - HIVE_SITE_CONF_hive_metastore_local=false
-      - HIVE_SITE_CONF_hive_metastore_uris=thrift://{{ns.hiveMetastore}}:z
+      - HIVE_SITE_CONF_hive_metastore_uris=thrift://{{ns.hiveMetastore}}
       {%if MINIO_enable or RUSTFS_enable or SEAWEEDFS_enable or external['S3_enable'] | default(false) %}
-      - HIVE_SITE_CONF_fs_defaultFS=s3a://{{s3AdminBucketName}}:z
+      - HIVE_SITE_CONF_fs_defaultFS=s3a://{{s3AdminBucketName}}
       - HIVE_SITE_CONF_fs_s3a_endpoint={{s3Endpoint | default(omit) }}
       - HIVE_SITE_CONF_fs_s3a_access_key={{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
       - HIVE_SITE_CONF_fs_s3a_secret_key={{s3SecretAccessKey}}
@@ -8514,9 +8514,9 @@ services:
     {% endif -%}    {#  NIFI_python_provide_requirements_file #}
     {% if HIVE_METASTORE_enable | default(false) %}
       - HIVE_SITE_CONF_hive_metastore_local=false
-      - HIVE_SITE_CONF_hive_metastore_uris=thrift://{{ns.hiveMetastore}}:z
+      - HIVE_SITE_CONF_hive_metastore_uris=thrift://{{ns.hiveMetastore}}
       {%if MINIO_enable or RUSTFS_enable or SEAWEEDFS_enable or external['S3_enable'] | default(false) %}
-      - HIVE_SITE_CONF_fs_defaultFS=s3a://{{s3AdminBucketName}}:z
+      - HIVE_SITE_CONF_fs_defaultFS=s3a://{{s3AdminBucketName}}
       - HIVE_SITE_CONF_fs_s3a_endpoint={{s3Endpoint | default(omit) }}
       - HIVE_SITE_CONF_fs_s3a_access_key={{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
       - HIVE_SITE_CONF_fs_s3a_secret_key={{s3SecretAccessKey}}
@@ -8582,9 +8582,9 @@ services:
     {% endif -%}    {#  FLINK_python_provide_requirements_file #}
     {% if HIVE_METASTORE_enable | default(false) %}
       - HIVE_SITE_CONF_hive_metastore_local=false
-      - HIVE_SITE_CONF_hive_metastore_uris=thrift://{{ns.hiveMetastore}}:z
+      - HIVE_SITE_CONF_hive_metastore_uris=thrift://{{ns.hiveMetastore}}
       {%if MINIO_enable or RUSTFS_enable or SEAWEEDFS_enable or external['S3_enable'] | default(false) %}
-      - HIVE_SITE_CONF_fs_defaultFS=s3a://{{s3AdminBucketName}}:z
+      - HIVE_SITE_CONF_fs_defaultFS=s3a://{{s3AdminBucketName}}
       - HIVE_SITE_CONF_fs_s3a_endpoint={{s3Endpoint | default(omit) }}
       - HIVE_SITE_CONF_fs_s3a_access_key={{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
       - HIVE_SITE_CONF_fs_s3a_secret_key={{s3SecretAccessKey}}
@@ -9708,7 +9708,7 @@ services:
     ports:
       - "28297:80"
     environment:
-      - LDAP_URI=ldap://{{LDAP_USER_MANAGER_ldap_host}}:z
+      - LDAP_URI=ldap://{{LDAP_USER_MANAGER_ldap_host}}
       - LDAP_BASE_DN=dc=platysplatform,dc=io
       - LDAP_REQUIRE_STARTTLS=FALSE
       - LDAP_ADMINS_GROUP=admins
@@ -9963,15 +9963,15 @@ services:
       - "7002:7002"
     environment:
     {%if OPAL_broadcast_enabled and OPAL_broadcast_type=='postgres' | default(false) %}
-      - OPAL_BROADCAST_URI=postgres://{{POSTGRESQL_user}}:{{POSTGRESQL_password}}@postgresql:5432/{{POSTGRESQL_database}}:z
+      - OPAL_BROADCAST_URI=postgres://{{POSTGRESQL_user}}:{{POSTGRESQL_password}}@postgresql:5432/{{POSTGRESQL_database}}
       # number of uvicorn workers to run inside the opal-server container
       - UVICORN_NUM_WORKERS=2
     {%elif OPAL_broadcast_enabled and OPAL_broadcast_type=='kafka' | default(false) %}
-      - OPAL_BROADCAST_URI=kafka://kafka-1:19092:z
+      - OPAL_BROADCAST_URI=kafka://kafka-1:19092
       # number of uvicorn workers to run inside the opal-server container
       - UVICORN_NUM_WORKERS=2
     {%elif OPAL_broadcast_enabled and OPAL_broadcast_type=='redis' | default(false) %}
-      - OPAL_BROADCAST_URI=redis://redis-1:6379:z
+      - OPAL_BROADCAST_URI=redis://redis-1:6379
       # number of uvicorn workers to run inside the opal-server container
       - UVICORN_NUM_WORKERS=2
     {% endif -%}   {# OPAL_broadcast_enabled #}
@@ -9985,7 +9985,7 @@ services:
     {%elif OPAL_policy_source_type | lower == 'api' | default(false) %}
       - OPAL_POLICY_BUNDLE_URL={{OPAL_policy_bundle_url}}
     {% endif -%}   {#  OPAL_policy_engine #}
-      - OPAL_DATA_CONFIG_SOURCES={"config":{"entries":[{"url":"http://opal-server:7002/policy-data","topics":["policy_data"],"dst_path":"/static"}]}}:z
+      - OPAL_DATA_CONFIG_SOURCES={"config":{"entries":[{"url":"http://opal-server:7002/policy-data","topics":["policy_data"],"dst_path":"/static"}]}}
       - OPAL_LOG_FORMAT_INCLUDE_PID=true
       - OPAL_POLICY_REPO_WEBHOOK_SECRET={{OPAL_policy_repo_webhook_secret if OPAL_policy_repo_webhook_secret is defined and OPAL_policy_repo_webhook_secret and OPAL_policy_repo_webhook_secret | length else omit}}
     {%if OPAL_policy_engine | lower == 'cedar' | default(false) %}
@@ -10030,7 +10030,7 @@ services:
       - "28408:8181"      
     {% endif -%}   {#  OPAL_inline_opa_enabled #}
     environment:
-      - OPAL_SERVER_URL=http://opal-server:7002:z
+      - OPAL_SERVER_URL=http://opal-server:7002
       - OPAL_LOG_FORMAT_INCLUDE_PID=true
       # - OPAL_OFFLINE_MODE_ENABLED=true
       - OPAL_DATA_TOPICS=policy_data
@@ -10042,7 +10042,7 @@ services:
       - OPAL_OFFLINE_MODE_ENABLED=false
     {% endif -%}   {#  OPAL_inline_opa_enabled #}
     {%if OPA_enable | default(false) %}
-      - OPAL_POLICY_STORE_URL=http://opa:8181:z
+      - OPAL_POLICY_STORE_URL=http://opa:8181
     {% endif -%}   {#  OPA_enable #}
       - OPAL_INLINE_CEDAR_ENABLED={{OPAL_inline_cedar_enabled}}
     {%if OPAL_inline_cedar_enabled | default(false) %}
@@ -10261,7 +10261,7 @@ services:
     {% if JAEGER_enable  | default(false) %}  
       - ENABLE_OTEL=true
       - OTEL_TRACES_EXPORTER=jaeger
-      - OTEL_EXPORTER_JAEGER_ENDPOINT=http://jaeger:14250:z
+      - OTEL_EXPORTER_JAEGER_ENDPOINT=http://jaeger:14250
       - OTEL_METRICS_EXPORTER=none
       - OTEL_SERVICE_NAME=datahub-gms      
     {% endif -%}   {#  OTEL_enable #}
@@ -10305,7 +10305,7 @@ services:
       - CONFIG_ENTITY_REGISTRY_USE_OPTIMIZED_LOADING=true
       - DATAHUB_BASE_PATH=/
       - DATAHUB_GMS_BASE_PATH=/
-      - DATAHUB_OBJECT_STORAGE_URI=file:///tmp/datahub-object-storage:z
+      - DATAHUB_OBJECT_STORAGE_URI=file:///tmp/datahub-object-storage
       - DATAHUB_SERVER_TYPE={{DATAHUB_server_type | default('quickstart') }}
       - DATAHUB_SYSTEM_CLIENT_SECRET=JohnSnowKnowsNothing
       - DATAHUB_TELEMETRY_ENABLED={{DATAHUB_telemetry_enabled | default(false)}}
@@ -10315,7 +10315,7 @@ services:
       - DATAHUB_ANALYTICS_ENABLED={{DATAHUB_analytics_enabled | lower | default(false)}}      
       - EBEAN_DATASOURCE_DRIVER=com.mysql.jdbc.Driver
       - EBEAN_DATASOURCE_HOST=datahub-mysql:3306
-      - EBEAN_DATASOURCE_URL=jdbc:mysql://datahub-mysql:3306/datahub?verifyServerCertificate=false&useSSL=true&useUnicode=yes&characterEncoding=UTF-8:z
+      - EBEAN_DATASOURCE_URL=jdbc:mysql://datahub-mysql:3306/datahub?verifyServerCertificate=false&useSSL=true&useUnicode=yes&characterEncoding=UTF-8
       - EBEAN_DATASOURCE_USERNAME=datahub
       - EBEAN_DATASOURCE_PASSWORD=datahub
       - ELASTICSEARCH_HOST={{'datahub-elasticsearch' if DATAHUB_search_service_impl == 'elasticsearch' else 'datahub-opensearch'}}
@@ -10371,8 +10371,8 @@ services:
       - MCP_CONSUMER_BATCH_ENABLED=true
       - METADATA_SERVICE_AUTH_ENABLED=false      
     {%if (DATAHUB_graph_service_impl | lower) == 'neo4j'  | default(true) %}
-      - NEO4J_HOST=http://datahub-neo4j:7474:z
-      - NEO4J_URI=bolt://${PUBLIC_IP:-127.0.0.1}:17688:z
+      - NEO4J_HOST=http://datahub-neo4j:7474
+      - NEO4J_URI=bolt://${PUBLIC_IP:-127.0.0.1}:17688
       - NEO4J_USERNAME=neo4j
       - NEO4J_PASSWORD=abc123!
     {% endif -%}   {#  DATAHUB_graph_service_impl #}
@@ -10405,7 +10405,7 @@ services:
     {% if JAEGER_enable  | default(false) %}
       - ENABLE_OTEL=true
       - OTEL_TRACES_EXPORTER=jaeger
-      - OTEL_EXPORTER_JAEGER_ENDPOINT=http://jaeger:14250:z
+      - OTEL_EXPORTER_JAEGER_ENDPOINT=http://jaeger:14250
       - OTEL_METRICS_EXPORTER=none
       - OTEL_SERVICE_NAME=datahub-gms
     {% endif -%}   {#  OTEL_enable #}
@@ -10476,7 +10476,7 @@ services:
     {% endif -%}   {#  secureKafkaEnabled #}
       - METADATA_AUDIT_EVENT_NAME=MetadataAuditEvent_v4
       - METADATA_CHANGE_LOG_VERSIONED_TOPIC_NAME=MetadataChangeLog_Versioned_v1
-      - SCHEMA_REGISTRY_URL=http://schema-registry-1:8081:z
+      - SCHEMA_REGISTRY_URL=http://schema-registry-1:8081
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -10546,7 +10546,7 @@ services:
       - GRAPH_SERVICE_IMPL={{DATAHUB_graph_service_impl}}
     {%if (DATAHUB_graph_service_impl | lower) == 'neo4j'  | default(true) %}
       - NEO4J_HOST=datahub-neo4j:7474
-      - NEO4J_URI=bolt://${PUBLIC_IP:-127.0.0.1}:17688:z
+      - NEO4J_URI=bolt://${PUBLIC_IP:-127.0.0.1}:17688
       - NEO4J_USERNAME=neo4j
       - NEO4J_PASSWORD=abc123!
     {% endif -%}   {#  DATAHUB_graph_service_impl #}
@@ -10560,7 +10560,7 @@ services:
     {% if JAEGER_enable  | default(false) %}  
       - ENABLE_OTEL=true
       - OTEL_TRACES_EXPORTER=jaeger
-      - OTEL_EXPORTER_JAEGER_ENDPOINT=http://jaeger:14250:z
+      - OTEL_EXPORTER_JAEGER_ENDPOINT=http://jaeger:14250
       - OTEL_METRICS_EXPORTER=none
       - OTEL_SERVICE_NAME=datahub-mae-consumer     
     {% endif -%}   {#  OTEL_enable #}       
@@ -10604,7 +10604,7 @@ services:
       - GRAPH_SERVICE_DIFF_MODE_ENABLED={{DATAHUB_graph_service_diff_mode_enabled | lower | default(false)}}
     {%if (DATAHUB_graph_service_impl | lower) == 'neo4j'  | default(true) %}
       - NEO4J_HOST=datahub-neo4j:7474
-      - NEO4J_URI=bolt://${PUBLIC_IP:-127.0.0.1}:17688:z
+      - NEO4J_URI=bolt://${PUBLIC_IP:-127.0.0.1}:17688
       - NEO4J_USERNAME=neo4j
       - NEO4J_PASSWORD=abc123!
     {% endif -%}   {#  DATAHUB_graph_service_impl #}
@@ -10653,7 +10653,7 @@ services:
     {% if JAEGER_enable  | default(false) %}  
       - ENABLE_OTEL=true
       - OTEL_TRACES_EXPORTER=jaeger
-      - OTEL_EXPORTER_JAEGER_ENDPOINT=http://jaeger:14250:z
+      - OTEL_EXPORTER_JAEGER_ENDPOINT=http://jaeger:14250
       - OTEL_METRICS_EXPORTER=none
       - OTEL_SERVICE_NAME=datahub-mce-consumer     
     {% endif -%}   {#  OTEL_enable #}       
@@ -10820,7 +10820,7 @@ services:
       - "5602:5601"
     environment:
       - SERVER_HOST=0.0.0.0
-      - ELASTICSEARCH_HOSTS="http://{{'datahub-elasticsearch' if DATAHUB_search_service_impl == 'elasticsearch' else 'datahub-opensearch'}}:9200:z"
+      - ELASTICSEARCH_HOSTS="http://{{'datahub-elasticsearch' if DATAHUB_search_service_impl == 'elasticsearch' else 'datahub-opensearch'}}:9200"
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -10859,7 +10859,7 @@ services:
       - "bootstrap.memory_lock=true" # along with the memlock settings below, disables swapping
       - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m -Dlog4j2.formatMsgNoLookups=true" # minimum and maximum Java heap size, recommend setting both to 50% of system RAM
       - "http.cors.enabled=true"
-      - http.cors.allow-origin="http://${DOCKER_HOST_IP:-localhost}:28275,http://${PUBLIC_IP:-127.0.0.1}:28275,http://dejavu:1358,http://dataplatform:28125,http://dataplatform:28125,http://${PUBLIC_IP:-127.0.0.1}:28125,http://${DOCKER_HOST_IP:-localhost}:28125,http://127.0.0.1:1358:z"
+      - http.cors.allow-origin="http://${DOCKER_HOST_IP:-localhost}:28275,http://${PUBLIC_IP:-127.0.0.1}:28275,http://dejavu:1358,http://dataplatform:28125,http://dataplatform:28125,http://${PUBLIC_IP:-127.0.0.1}:28125,http://${DOCKER_HOST_IP:-localhost}:28125,http://127.0.0.1:1358"
       - http.cors.allow-headers="X-Requested-With,X-Auth-Token,Content-Type,Content-Length,Authorization"
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
@@ -10933,7 +10933,7 @@ services:
       - GRAPH_SERVICE_IMPL=neo4j
     {%if (DATAHUB_graph_service_impl | lower) == 'neo4j'  | default(true) %}
       - NEO4J_HOST=datahub-neo4j:7474
-      - NEO4J_URI=bolt://${PUBLIC_IP:-127.0.0.1}:17688:z
+      - NEO4J_URI=bolt://${PUBLIC_IP:-127.0.0.1}:17688
       - NEO4J_USERNAME=neo4j
       - NEO4J_PASSWORD=abc123!
     {% endif -%}   {#  DATAHUB_graph_service_impl #}
@@ -10997,7 +10997,7 @@ services:
     entrypoint: "tail -f /dev/null"
     tty: true
     environment:
-      - DATAHUB_GMS_URL=http://datahub-gms:8080:z
+      - DATAHUB_GMS_URL=http://datahub-gms:8080
       - DATAHUB_GMS_PROTOCOL=http
       - DATAHUB_DEBUG=false
     {%if use_timezone | default(false) %}
@@ -11600,7 +11600,7 @@ services:
     ports:
       - 28482:8080
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://odd-platform-db:5432/odd_platform_db:z
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://odd-platform-db:5432/odd_platform_db
       - SPRING_DATASOURCE_USERNAME=odd_platform
       - SPRING_DATASOURCE_PASSWORD=abc123!
       - MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE=health,info,metrics,prometheus
@@ -11609,7 +11609,7 @@ services:
     {% endif -%}   {#  PROMETHEUS_enable #}
     {% if JAEGER_enable  | default(false) %}        
       - METRICS_EXPORT_ENABLED=true
-      - METRICS_EXPORT_OTLP_ENDPOINT=http://jaeger:14250:z
+      - METRICS_EXPORT_OTLP_ENDPOINT=http://jaeger:14250
     {% endif -%}   {#  JAEGER_enable #}
     {% if ODD_PLATFORM_notifications_enabled | default(false) %}        
       - NOTIFICATIONS_ENABLED=true
@@ -11692,7 +11692,7 @@ services:
       odd-platform:    
         condition: service_healthy              
     environment:
-      - PLATFORM_HOST_URL=http://odd-platform:8080:z
+      - PLATFORM_HOST_URL=http://odd-platform:8080
       - PYTHONUNBUFFERED=1
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
@@ -11727,7 +11727,7 @@ services:
       odd-platform:    
         condition: service_healthy                 
     environment:
-      - PLATFORM_HOST_URL=http://odd-platform:8080:z
+      - PLATFORM_HOST_URL=http://odd-platform:8080
       - TOKEN={{ODD_PLATFORM_token | default(omit) }}
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
@@ -11765,8 +11765,8 @@ services:
     ports:
       - 5000:5000
     environment:
-      - METADATASERVICE_BASE=http://amundsenmetadata:5000:z
-      - SEARCHSERVICE_BASE=http://amundsensearch:5000:z
+      - METADATASERVICE_BASE=http://amundsenmetadata:5000
+      - SEARCHSERVICE_BASE=http://amundsensearch:5000
       - FRONTEND_SVC_CONFIG_MODULE_CLASS=amundsen_application.config.TestConfig
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
@@ -11835,7 +11835,7 @@ services:
       - amundsen-neo4j    
     environment:
   {%if (AMUNDSEN_metastore | lower) == 'amundsen' | default(false) %}
-      - PROXY_HOST=bolt://amundsen-neo4j:z
+      - PROXY_HOST=bolt://amundsen-neo4j
   {% else -%}   {#  AMUNDSEN_metastore #}
       - PROXY_ENDPOINT=amundsen-elasticsearch
       - CREDENTIALS_PROXY_USER=admin
@@ -11955,7 +11955,7 @@ services:
       - LOGGING_DIRECTORY=./logs
       - INFRASTRUCTURE_LAMBDA_ARN=
       - SANDBOX=true
-      - HOST=http://localhost:8080:z
+      - HOST=http://localhost:8080
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -12258,7 +12258,7 @@ services:
     depends_on:
       - marquez-api
     environment:
-      - MARQUEZ_URL=http://marquez-api:5000:z
+      - MARQUEZ_URL=http://marquez-api:5000
       - SEARCH_ENABLED={{MARQUEZ_search_enabled | default(false)}}
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
@@ -12294,7 +12294,7 @@ services:
     environment:
       - CKAN_SITE_ID=default
       - CKAN_PORT=5000
-      - CKAN_SITE_URL=http://${PUBLIC_IP:-127.0.0.1}:28294:z
+      - CKAN_SITE_URL=http://${PUBLIC_IP:-127.0.0.1}:28294
 #      - CKAN_SITE_URL=http://ckan:5000
       - CKAN_SYSADMIN_NAME=ckan_admin
       - CKAN_SYSADMIN_PASSWORD={{CKAN_sysadmin_password}}
@@ -12306,8 +12306,8 @@ services:
       - CKAN_SMTP_PASSWORD=password
       - CKAN_SMTP_MAIL_FROM=ckan@localhost
       - REDIS_VERSION=6
-      - REDIS_URL=redis://ckan-redis:6379/1:z
-      - TEST_CKAN_REDIS_URL=redis://redis:6379/1:z
+      - REDIS_URL=redis://ckan-redis:6379/1
+      - TEST_CKAN_REDIS_URL=redis://redis:6379/1
       - POSTGRES_HOST=ckan-db
       - POSTGRES_USER=ckan
       - POSTGRES_PASSWORD={{CKAN_postgres_password}}
@@ -12321,15 +12321,15 @@ services:
       - CKAN__HARVEST__MQ__REDIS_DB=1
 
       - CKAN__WEBASSETS__PATH=/srv/app/data/webassets
-      - CKAN__DATAPUSHER__URL=http://ckan-datapusher:8800:z
-      - CKAN__DATAPUSHER__CALLBACK_URL_BASE=http://ckan:5000/:z
+      - CKAN__DATAPUSHER__URL=http://ckan-datapusher:8800
+      - CKAN__DATAPUSHER__CALLBACK_URL_BASE=http://ckan:5000/
 
       - CKAN_VERSION={{__CKAN_version}}
       - CKAN_CORE_NAME=ckan
-      - CKAN_SQLALCHEMY_URL=postgresql://ckan:{{CKAN_postgres_password}}@ckan-db/ckan:z
-      - CKAN_DATASTORE_WRITE_URL=postgresql://ckan:{{CKAN_postgres_password}}@ckan-db/datastore:z
-      - CKAN_DATASTORE_READ_URL=postgresql://datastore_ro:{{CKAN_postgres_readonly_password}}@ckan-db/datastore:z
-      - CKAN_SOLR_URL=http://ckan-solr:8983/solr/ckan:z
+      - CKAN_SQLALCHEMY_URL=postgresql://ckan:{{CKAN_postgres_password}}@ckan-db/ckan
+      - CKAN_DATASTORE_WRITE_URL=postgresql://ckan:{{CKAN_postgres_password}}@ckan-db/datastore
+      - CKAN_DATASTORE_READ_URL=postgresql://datastore_ro:{{CKAN_postgres_readonly_password}}@ckan-db/datastore
+      - CKAN_SOLR_URL=http://ckan-solr:8983/solr/ckan
       - CKAN_MAX_UPLOAD_SIZE_MB=10
     {%if CKAN_use_s3_store and (MINIO_enable or external['S3_enable']) | default(false) %}
       # S3/MINIO settings
@@ -12381,7 +12381,7 @@ services:
       - DATAPUSHER_DOWNLOAD_TIMEOUT=30
       - DATAPUSHER_SSL_VERIFY=false
       - DATAPUSHER_REWRITE_RESOURCES=true
-      - DATAPUSHER_REWRITE_URL=http://ckan:5000:z
+      - DATAPUSHER_REWRITE_URL=http://ckan:5000
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -12506,7 +12506,7 @@ services:
       - "8686:8686" # JMX
     environment:
       #- DATAVERSE_FQDN=localhost
-      - DATAVERSE_SITEURL=http://${PUBLIC_IP:-127.0.0.1}:28394:z
+      - DATAVERSE_SITEURL=http://${PUBLIC_IP:-127.0.0.1}:28394
       - DATAVERSE_DB_HOST=dataverse-postgresql
       - DATAVERSE_DB_USER=dataverse
       - DATAVERSE_DB_PASSWORD=abc123!
@@ -12555,7 +12555,7 @@ services:
       - DATAVERSE_AUTH_OIDC_ENABLED=1
       - DATAVERSE_AUTH_OIDC_CLIENT_ID=test
       - DATAVERSE_AUTH_OIDC_CLIENT_SECRET=94XHrfNRwXsjqTqApRrwWmhDLDHpIYV8
-      - DATAVERSE_AUTH_OIDC_AUTH_SERVER_URL=http://${PUBLIC_IP:-127.0.0.1}:28204/realms/dataverse:z
+      - DATAVERSE_AUTH_OIDC_AUTH_SERVER_URL=http://${PUBLIC_IP:-127.0.0.1}:28204/realms/dataverse
     {% endif -%}   {#  KEYCLOAK_enable #}
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
@@ -12580,7 +12580,7 @@ services:
     image: docker.io/gdcc/configbaker:{{DATAVERSE_version}}
 
     environment:
-      - DATAVERSE_URL=http://${PUBLIC_IP:-127.0.0.1}:28394:z
+      - DATAVERSE_URL=http://${PUBLIC_IP:-127.0.0.1}:28394
       - TIMEOUT=10m
     volumes:
       - ./data-transfer:/data-transfer:z
@@ -12602,9 +12602,9 @@ services:
     init: true
     environment:
       - API_TOKEN=${API_TOKEN}
-      - DATAVERSE_URL=http://dataverse:8080:z
+      - DATAVERSE_URL=http://dataverse:8080
       - TIMEOUT=10m
-      - PREVIEWERS_PROVIDER_URL={{DATAVERSE_previewers_provider_url | default("https://gdcc.github.io/dataverse-previewers")}}:z
+      - PREVIEWERS_PROVIDER_URL={{DATAVERSE_previewers_provider_url | default("https://gdcc.github.io/dataverse-previewers")}}
       - INCLUDE_PREVIEWERS={{DATAVERSE_previewers_include | default("")}}
       - EXCLUDE_PREVIEWERS={{DATAVERSE_previewers_exclude | default("")}}
       - REMOVE_EXISTING={{DATAVERSE_previewers_remove_existing | default(omit)}}
@@ -12622,7 +12622,7 @@ services:
       - load
     environment:
       - API_TOKEN=${API_TOKEN}
-      - DATAVERSE_URL=http://${PUBLIC_IP:-127.0.0.1}:28394:z
+      - DATAVERSE_URL=http://${PUBLIC_IP:-127.0.0.1}:28394
     volumes:
       - ./data-transfer:/data-transfer:z
       - ./scripts/python/run_pip_and_python.sh:/app/run_pip_and_python.sh:ro
@@ -12696,7 +12696,7 @@ services:
       - "28395:8080"
     environment:
       - NGINX_HTTP_PORT=8080
-      - PREVIEWERS_PROVIDER_URL=http://${PUBLIC_IP:-127.0.0.1}:28395:z
+      - PREVIEWERS_PROVIDER_URL=http://${PUBLIC_IP:-127.0.0.1}:28395
       - VERSIONS="v1.4,betatest"
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
@@ -13732,7 +13732,7 @@ services:
     entrypoint: /bin/sh
     command:
       - "-c"
-      - "n8n import:credentials --separate --input=/docker-entrypoint-initdb.d/credentials && n8n import:workflow --separate --input=/docker-entrypoint-initdb.d/workflows:z"
+      - "n8n import:credentials --separate --input=/docker-entrypoint-initdb.d/credentials && n8n import:workflow --separate --input=/docker-entrypoint-initdb.d/workflows"
     init: true      
 {% endif %}   {#  N8N_enable  #}
 
@@ -14247,8 +14247,8 @@ services:
     ports:
       - "9393:9393"
     environment:
-      - SPRING_CLOUD_DATAFLOW_APPLICATIONPROPERTIES_STREAM_SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS=PLAINTEXT://{{ns.bootstrapServer}}:z
-      - SPRING_CLOUD_DATAFLOW_APPLICATIONPROPERTIES_STREAM_SPRING_CLOUD_STREAM_KAFKA_STREAMS_BINDER_BROKERS=PLAINTEXT://{{ns.bootstrapServer}}:z
+      - SPRING_CLOUD_DATAFLOW_APPLICATIONPROPERTIES_STREAM_SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS=PLAINTEXT://{{ns.bootstrapServer}}
+      - SPRING_CLOUD_DATAFLOW_APPLICATIONPROPERTIES_STREAM_SPRING_CLOUD_STREAM_KAFKA_STREAMS_BINDER_BROKERS=PLAINTEXT://{{ns.bootstrapServer}}
       - SPRING_CLOUD_DATAFLOW_APPLICATIONPROPERTIES_STREAM_SPRING_CLOUD_STREAM_KAFKA_BINDER_ZKNODES=zookeeper-1:2181
       - SPRING_CLOUD_DATAFLOW_APPLICATIONPROPERTIES_STREAM_SPRING_CLOUD_STREAM_KAFKA_STREAMS_BINDER_ZKNODES=zookeeper-1:2181
 
@@ -14256,9 +14256,9 @@ services:
 
       - SPRING_CLOUD_DATAFLOW_APPLICATIONPROPERTIES_TASK_SPRING_CLOUD_TASK_CLOSECONTEXTENABLED=true
 
-      - SPRING_CLOUD_SKIPPER_CLIENT_SERVER_URI=http://spring-skipper-server:7577/api:z
+      - SPRING_CLOUD_SKIPPER_CLIENT_SERVER_URI=http://spring-skipper-server:7577/api
 
-      - SPRING_DATASOURCE_URL=jdbc:mysql://spring-dataflow-mysql:3306/dataflow:z
+      - SPRING_DATASOURCE_URL=jdbc:mysql://spring-dataflow-mysql:3306/dataflow
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=rootpw
       - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.mariadb.jdbc.Driver
@@ -14298,7 +14298,7 @@ services:
     environment:
       - SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_LOCAL_ACCOUNTS_DEFAULT_PORTRANGE_LOW=20000
       - SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_LOCAL_ACCOUNTS_DEFAULT_PORTRANGE_HIGH=20100
-      - SPRING_DATASOURCE_URL=jdbc:mysql://spring-dataflow-mysql:3306/dataflow:z
+      - SPRING_DATASOURCE_URL=jdbc:mysql://spring-dataflow-mysql:3306/dataflow
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=rootpw
       - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.mariadb.jdbc.Driver
@@ -14488,7 +14488,7 @@ services:
     environment:
       - AIRBYTE_VERSION={{__AIRBYTE_version}}
       - DATABASE_PASSWORD={{AIRBYTE_database_password}}
-      - DATABASE_URL=jdbc:postgresql://{{AIRBYTE_database_host}}:{{AIRBYTE_database_port}}/{{AIRBYTE_database_db}}:z
+      - DATABASE_URL=jdbc:postgresql://{{AIRBYTE_database_host}}:{{AIRBYTE_database_port}}/{{AIRBYTE_database_db}}
       - DATABASE_USER={{AIRBYTE_database_user}}
       - LOG_LEVEL={{AIRBYTE_log_level}}
 #      - RUN_DATABASE_MIGRATION_ON_STARTUP=
@@ -14519,7 +14519,7 @@ services:
       - CONFIG_DATABASE_URL=${CONFIG_DATABASE_URL:-}
       - CONFIG_DATABASE_USER=${CONFIG_DATABASE_USER:-}
       - DATABASE_PASSWORD={{AIRBYTE_database_password}}
-      - DATABASE_URL=jdbc:postgresql://{{AIRBYTE_database_host}}:{{AIRBYTE_database_port}}/{{AIRBYTE_database_db}}:z
+      - DATABASE_URL=jdbc:postgresql://{{AIRBYTE_database_host}}:{{AIRBYTE_database_port}}/{{AIRBYTE_database_db}}
       - DATABASE_USER={{AIRBYTE_database_user}}
       - POSTGRES_PASSWORD={{AIRBYTE_database_password}}
       - POSTGRES_USER={{AIRBYTE_database_user}}
@@ -14557,7 +14557,7 @@ services:
       - CONFIGS_DATABASE_MINIMUM_FLYWAY_MIGRATION_VERSION={{AIRBYTE_configs_database_minimum_flyway_migration_version}}
       - CONFIG_ROOT=/data
       - DATABASE_PASSWORD={{AIRBYTE_database_password}}
-      - DATABASE_URL=jdbc:postgresql://{{AIRBYTE_database_host}}:{{AIRBYTE_database_port}}/{{AIRBYTE_database_db}}:z
+      - DATABASE_URL=jdbc:postgresql://{{AIRBYTE_database_host}}:{{AIRBYTE_database_port}}/{{AIRBYTE_database_db}}
       - DATABASE_USER={{AIRBYTE_database_user}}
       - DEPLOYMENT_MODE=
       - INTERNAL_API_HOST=airbyte-server:8001
@@ -14585,12 +14585,12 @@ services:
       - SYNC_JOB_MAX_TIMEOUT_DAYS=3
       - TEMPORAL_HOST=airbyte-temporal:7233
       - TRACKING_STRATEGY=segment
-      - WEBAPP_URL=http://${PUBLIC_IP:-127.0.0.1}:28271/:z
+      - WEBAPP_URL=http://${PUBLIC_IP:-127.0.0.1}:28271/
       - WORKER_ENVIRONMENT=docker
       - WORKSPACE_DOCKER_MOUNT=airbyte_workspace
       - WORKSPACE_ROOT=/tmp/workspace
       - METRIC_CLIENT=
-      - OTEL_COLLECTOR_ENDPOINT="http://host.docker.internal:4317:z"
+      - OTEL_COLLECTOR_ENDPOINT="http://host.docker.internal:4317"
       - JOB_ERROR_REPORTING_STRATEGY=logging
       - JOB_ERROR_REPORTING_SENTRY_DSN=
       - ACTIVITY_MAX_ATTEMPT=
@@ -14642,7 +14642,7 @@ services:
       - CONFIGS_DATABASE_MINIMUM_FLYWAY_MIGRATION_VERSION={{AIRBYTE_configs_database_minimum_flyway_migration_version}}
       - CONFIG_ROOT=/data
       - DATABASE_PASSWORD={{AIRBYTE_database_password}}
-      - DATABASE_URL=jdbc:postgresql://{{AIRBYTE_database_host}}:{{AIRBYTE_database_port}}/{{AIRBYTE_database_db}}:z
+      - DATABASE_URL=jdbc:postgresql://{{AIRBYTE_database_host}}:{{AIRBYTE_database_port}}/{{AIRBYTE_database_db}}
       - DATABASE_USER={{AIRBYTE_database_user}}
       - JOB_MAIN_CONTAINER_CPU_LIMIT=''
       - JOB_MAIN_CONTAINER_CPU_REQUEST=''
@@ -14656,7 +14656,7 @@ services:
       - TRACKING_STRATEGY=segment
       - JOB_ERROR_REPORTING_STRATEGY=logging
       - JOB_ERROR_REPORTING_SENTRY_DSN=
-      - WEBAPP_URL=http://${PUBLIC_IP:-127.0.0.1}:28271/:z
+      - WEBAPP_URL=http://${PUBLIC_IP:-127.0.0.1}:28271/
       - WORKER_ENVIRONMENT=
       - WORKSPACE_ROOT=/tmp/workspace
       - GITHUB_STORE_BRANCH=
@@ -14763,7 +14763,7 @@ services:
       - AIRBYTE_VERSION={{__AIRBYTE_version}}
       - CONFIGS_DATABASE_MINIMUM_FLYWAY_MIGRATION_VERSION={{AIRBYTE_configs_database_minimum_flyway_migration_version}}
       - DATABASE_PASSWORD={{AIRBYTE_database_password}}
-      - DATABASE_URL=jdbc:postgresql://{{AIRBYTE_database_host}}:{{AIRBYTE_database_port}}/{{AIRBYTE_database_db}}:z
+      - DATABASE_URL=jdbc:postgresql://{{AIRBYTE_database_host}}:{{AIRBYTE_database_port}}/{{AIRBYTE_database_db}}
       - DATABASE_USER={{AIRBYTE_database_user}}
       - DEPLOYMENT_MODE=${DEPLOYMENT_MODE}
       - LOG_LEVEL={{AIRBYTE_log_level}}
@@ -18466,7 +18466,7 @@ services:
       - 28373:8000
     environment:
     {% if WEAVIATE_enable | default(false) %}
-      - WEAVIATE_URL_VERBA=http://weaviate:8080:z
+      - WEAVIATE_URL_VERBA=http://weaviate:8080
       ## IF YOU WANT AUTHENTICATION, UNCOMENT BELLOW
       ## AND ADD WEAVIATE SERVICE
       #- WEAVIATE_API_KEY_VERBA=adminkey
@@ -18530,7 +18530,7 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"    
     environment:
-      - HF_ENDPOINT={{'https://hf-mirror.com' if RAGFLOW_use_huggingface_mirror else omit}}:z
+      - HF_ENDPOINT={{'https://hf-mirror.com' if RAGFLOW_use_huggingface_mirror else omit}}
       - MACOS={{'1' if RAGFLOW_use_macos_optimization else omit}}
       - DB_TYPE={{RAGFLOW_db_type | default("mysql")}}
       - STORAGE_IMPL=MINIO
@@ -18625,7 +18625,7 @@ services:
       - "host.docker.internal:host-gateway"    
     environment:
   {% if NEO4J_enable | default(false) %}    
-      - NEO4J_URI=neo4j://${PUBLIC_IP:-127.0.0.1}:7687:z
+      - NEO4J_URI=neo4j://${PUBLIC_IP:-127.0.0.1}:7687
       - NEO4J_PASSWORD=${PLATYS_NEO4J_PASSWORD:-{{NEO4J_password}}}
       - NEO4J_USERNAME=neo4j
       - NEO4J_DATABASE=neo4j
@@ -18633,7 +18633,7 @@ services:
       - OPENAI_API_KEY={{NEO4J_KG_BUILDER_openai_api_key}}
       - DIFFBOT_API_KEY={{NEO4J_KG_BUILDER_diffbot_api_key}}
       - EMBEDDING_MODEL={{NEO4J_KG_BUILDER_embedding_model}}
-      - LANGCHAIN_ENDPOINT=https://api.smith.langchain.com:z
+      - LANGCHAIN_ENDPOINT=https://api.smith.langchain.com
       - LANGCHAIN_TRACING_V2=false
       - LANGCHAIN_PROJECT=""
       - LANGCHAIN_API_KEY=""
@@ -18652,7 +18652,7 @@ services:
 #      - LLM_MODEL_CONFIG_groq_llama3_70b=${LLM_MODEL_CONFIG_groq_llama3_70b-}
 #      - LLM_MODEL_CONFIG_bedrock_claude_3_5_sonnet=${LLM_MODEL_CONFIG_bedrock_claude_3_5_sonnet-}
 #     - LLM_MODEL_CONFIG_fireworks_qwen_72b=${LLM_MODEL_CONFIG_fireworks_qwen_72b-}
-      - LLM_MODEL_CONFIG_ollama_llama3={{NEO4J_KG_BUILDER_ollama_model}},http://host.docker.internal:11434:z
+      - LLM_MODEL_CONFIG_ollama_llama3={{NEO4J_KG_BUILDER_ollama_model}},http://host.docker.internal:11434
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -18683,8 +18683,8 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"    
     environment:
-      - VITE_BACKEND_API_URL="http://${PUBLIC_IP:-127.0.0.1}:8000:z"
-      - VITE_BLOOM_URL="https://workspace-preview.neo4j.io/workspace/explore?connectURL={CONNECT_URL}&search=Show+me+a+graph&featureGenAISuggestions=true&featureGenAISuggestionsInternal=true:z"
+      - VITE_BACKEND_API_URL="http://${PUBLIC_IP:-127.0.0.1}:8000"
+      - VITE_BLOOM_URL="https://workspace-preview.neo4j.io/workspace/explore?connectURL={CONNECT_URL}&search=Show+me+a+graph&featureGenAISuggestions=true&featureGenAISuggestionsInternal=true"
       - VITE_REACT_APP_SOURCES="local,youtube,wiki,s3,web"
       - VITE_LLM_MODELS="diffbot,openai_gpt_3.5,openai_gpt_4o"
       - VITE_ENV="DEV"
@@ -18933,7 +18933,7 @@ services:
       - POSTGRES_DB=superset
       - POSTGRES_USER=superset
       - POSTGRES_PASSWORD=superset
-      - PYTHONPATH=/app/pythonpath:/app/docker/pythonpath_dev:z
+      - PYTHONPATH=/app/pythonpath:/app/docker/pythonpath_dev
       - REDIS_HOST=superset-redis
       - REDIS_PORT=6379
       - FLASK_ENV=development
@@ -18974,7 +18974,7 @@ services:
       - POSTGRES_DB=superset
       - POSTGRES_USER=superset
       - POSTGRES_PASSWORD=superset
-      - PYTHONPATH=/app/pythonpath:/app/docker/pythonpath_dev:z
+      - PYTHONPATH=/app/pythonpath:/app/docker/pythonpath_dev
       - REDIS_HOST=superset-redis
       - REDIS_PORT=6379
       - FLASK_ENV=development
@@ -19014,7 +19014,7 @@ services:
       - POSTGRES_DB=superset
       - POSTGRES_USER=superset
       - POSTGRES_PASSWORD=superset
-      - PYTHONPATH=/app/pythonpath:/app/docker/pythonpath_dev:z
+      - PYTHONPATH=/app/pythonpath:/app/docker/pythonpath_dev
       - REDIS_HOST=superset-redis
       - REDIS_PORT=6379
       - FLASK_ENV=development
@@ -19057,7 +19057,7 @@ services:
       - POSTGRES_DB=superset
       - POSTGRES_USER=superset
       - POSTGRES_PASSWORD=superset
-      - PYTHONPATH=/app/pythonpath:/app/docker/pythonpath_dev:z
+      - PYTHONPATH=/app/pythonpath:/app/docker/pythonpath_dev
       - REDIS_HOST=superset-redis
       - REDIS_PORT=6379
       - FLASK_ENV=development
@@ -19099,7 +19099,7 @@ services:
       - POSTGRES_DB=superset
       - POSTGRES_USER=superset
       - POSTGRES_PASSWORD=superset
-      - PYTHONPATH=/app/pythonpath:/app/docker/pythonpath_dev:z
+      - PYTHONPATH=/app/pythonpath:/app/docker/pythonpath_dev
       - REDIS_HOST=superset-redis
       - REDIS_PORT=6379
       - FLASK_ENV=development
@@ -19863,16 +19863,16 @@ services:
     volumes:
       - ./data-transfer:/data-transfer:z
     {% if REDIS_overrides_config_file is defined and REDIS_overrides_config_file and REDIS_overrides_config_file | length %}
-      - ./custom-conf/{{'redis' if REDIS_edition | lower == 'redis' else 'valkey'}}/{{REDIS_overrides_config_file}}:/opt/bitnami/{{'redis' if REDIS_edition | lower == 'redis' else 'valkey'}}/mounted-etc/{{REDIS_overrides_config_file}}:z
+      - ./custom-conf/{{'redis' if REDIS_edition | lower == 'redis' else 'valkey'}}/{{REDIS_overrides_config_file}}:/opt/bitnami/{{'redis' if REDIS_edition | lower == 'redis' else 'valkey'}}/mounted-etc/{{REDIS_overrides_config_file}}
     {% endif %}
     {% if REDIS_password_file is defined and REDIS_password_file and REDIS_password_file | length %}
-      - ./security/{{'redis' if REDIS_edition | lower == 'redis' else 'valkey'}}/{{REDIS_password_file}}:/opt/bitnami/{{'redis' if REDIS_edition | lower == 'redis' else 'valkey'}}/mounted-etc/{{REDIS_password_file}}:z
+      - ./security/{{'redis' if REDIS_edition | lower == 'redis' else 'valkey'}}/{{REDIS_password_file}}:/opt/bitnami/{{'redis' if REDIS_edition | lower == 'redis' else 'valkey'}}/mounted-etc/{{REDIS_password_file}}
     {% endif %}
     {% if REDIS_aclfile is defined and REDIS_aclfile and REDIS_aclfile | length %}
-      - ./security/{{'redis' if REDIS_edition | lower == 'redis' else 'valkey'}}/{{REDIS_aclfile}}:/opt/bitnami/{{'redis' if REDIS_edition | lower == 'redis' else 'valkey'}}/mounted-etc/{{REDIS_aclfile}}:z
+      - ./security/{{'redis' if REDIS_edition | lower == 'redis' else 'valkey'}}/{{REDIS_aclfile}}:/opt/bitnami/{{'redis' if REDIS_edition | lower == 'redis' else 'valkey'}}/mounted-etc/{{REDIS_aclfile}}
     {% endif %}
     {% if REDIS_volume_map_data %}
-      - "./container-volume/{{'redis' if REDIS_edition | lower == 'redis' else 'valkey'}}/data:/bitnami/{{'redis' if REDIS_edition | lower == 'redis' else 'valkey'}}/data:z"
+      - "./container-volume/{{'redis' if REDIS_edition | lower == 'redis' else 'valkey'}}/data:/bitnami/{{'redis' if REDIS_edition | lower == 'redis' else 'valkey'}}/data"
     {% endif %}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
@@ -19933,15 +19933,15 @@ services:
     volumes:
       - ./data-transfer:/data-transfer:z
     {% if REDIS_overrides_config_file is defined and REDIS_overrides_config_file and REDIS_overrides_config_file | length %}
-      - ./custom-conf/{{'redis' if REDIS_edition | lower == 'redis' else 'valkey'}}/{{REDIS_overrides_config_file}}:/opt/bitnami/{{'redis' if REDIS_edition | lower == 'redis' else 'valkey'}}/mounted-etc/{{REDIS_overrides_config_file}}:z
+      - ./custom-conf/{{'redis' if REDIS_edition | lower == 'redis' else 'valkey'}}/{{REDIS_overrides_config_file}}:/opt/bitnami/{{'redis' if REDIS_edition | lower == 'redis' else 'valkey'}}/mounted-etc/{{REDIS_overrides_config_file}}
     {% endif %}    {% if REDIS_password_file is defined and REDIS_password_file and REDIS_password_file | length %}
-      - ./security/{{'redis' if REDIS_edition | lower == 'redis' else 'valkey'}}/{{REDIS_password_file}}:/opt/bitnami/{{'redis' if REDIS_edition | lower == 'redis' else 'valkey'}}/mounted-etc/{{REDIS_password_file}}:z
+      - ./security/{{'redis' if REDIS_edition | lower == 'redis' else 'valkey'}}/{{REDIS_password_file}}:/opt/bitnami/{{'redis' if REDIS_edition | lower == 'redis' else 'valkey'}}/mounted-etc/{{REDIS_password_file}}
     {% endif %}
     {% if REDIS_password_file is defined and REDIS_password_file and REDIS_password_file | length %}
-      - ./security/{{'redis' if REDIS_edition | lower == 'redis' else 'valkey'}}/{{REDIS_password_file}}:/opt/bitnami/{{'redis' if REDIS_edition | lower == 'redis' else 'valkey'}}/mounted-etc/{{REDIS_password_file}}:z
+      - ./security/{{'redis' if REDIS_edition | lower == 'redis' else 'valkey'}}/{{REDIS_password_file}}:/opt/bitnami/{{'redis' if REDIS_edition | lower == 'redis' else 'valkey'}}/mounted-etc/{{REDIS_password_file}}
     {% endif %}
     {% if REDIS_volume_map_data %}
-      - "./container-volume/{{'redis' if REDIS_edition | lower == 'redis' else 'valkey'}}/data/redis-replica-{{loop.index}}:/bitnami/{{'redis' if REDIS_edition | lower == 'redis' else 'valkey'}}/data:z"
+      - "./container-volume/{{'redis' if REDIS_edition | lower == 'redis' else 'valkey'}}/data/redis-replica-{{loop.index}}:/bitnami/{{'redis' if REDIS_edition | lower == 'redis' else 'valkey'}}/data"
     {% endif %}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
@@ -20585,7 +20585,7 @@ services:
       - ME_CONFIG_MONGODB_ADMINPASSWORD=${PLATYS_MONGO_PASSWORD:-{{MONGO_root_password}}}
       - ME_CONFIG_MONGODB_AUTH_DATABASE=admin
     {% else %}
-      - ME_CONFIG_MONGODB_URL=mongodb://mongo-1:27017:z
+      - ME_CONFIG_MONGODB_URL=mongodb://mongo-1:27017
     {% endif -%}   {#  MONGO_root_username #}
       - ME_CONFIG_MONGODB_ENABLE_ADMIN=true
     {%if MONGO_EXPRESS_username is defined and MONGO_EXPRESS_username and MONGO_EXPRESS_username | length > 0 %}  
@@ -20738,9 +20738,9 @@ services:
       test:
         - CMD-SHELL
     {% if ELASTICSEARCH_security_enabled | default(false) %}     
-        - curl -u elastic:${PLATYS_ELASTICSEARCH_PASSWORD:-{{ELASTICSEARCH_password}}} -s http://localhost:9200/_cat/health?h=status | grep -q green:z
+        - curl -u elastic:${PLATYS_ELASTICSEARCH_PASSWORD:-{{ELASTICSEARCH_password}}} -s http://localhost:9200/_cat/health?h=status | grep -q green
     {% else -%}   {#  ELASTICSEARCH_security_enabled #}  
-        - curl -s http://localhost:9200/_cat/health?h=status | grep -q green:z
+        - curl -s http://localhost:9200/_cat/health?h=status | grep -q green
     {% endif -%}   {#  ELASTICSEARCH_security_enabled #}  
       retries: 300
       interval: 10s
@@ -20759,7 +20759,7 @@ services:
     volumes:
       - ./data-transfer:/data-transfer:z
     command:
-      - '--es.uri=http://elasticsearch-1:9200':z
+      - '--es.uri=http://elasticsearch-1:9200'
     restart: {{container_restart_policy}}
   {% endif %}   {#  jmx_monitoring_with_prometheus_enable #}
 {% endif %}   {#  ELASTICSEARCH_enable #}
@@ -21010,7 +21010,7 @@ services:
       - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m" # minimum and maximum Java heap size, recommend setting both to 50% of system RAM
       - OPENSEARCH_INITIAL_ADMIN_PASSWORD=${PLATYS_OPENSEARCH_ADMIN_PASSWORD:-{{OPENSEARCH_initial_admin_password}}}
       - "http.cors.enabled=true"
-      - http.cors.allow-origin="http://${DOCKER_HOST_IP:-localhost}:28275,http://${PUBLIC_IP:-127.0.0.1}:28275,http://dejavu:1358,http://dataplatform:28125,http://dataplatform:28125,http://${PUBLIC_IP:-127.0.0.1}:28125,http://${DOCKER_HOST_IP:-localhost}:28125,http://127.0.0.1:1358:z"
+      - http.cors.allow-origin="http://${DOCKER_HOST_IP:-localhost}:28275,http://${PUBLIC_IP:-127.0.0.1}:28275,http://dejavu:1358,http://dataplatform:28125,http://dataplatform:28125,http://${PUBLIC_IP:-127.0.0.1}:28125,http://${DOCKER_HOST_IP:-localhost}:28125,http://127.0.0.1:1358"
       - http.cors.allow-headers="X-Requested-With,X-Auth-Token,Content-Type,Content-Length,Authorization"
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
@@ -21056,9 +21056,9 @@ services:
       - "5601"
     environment:
       {% if OPENSEARCH_nodes > 1 %}
-      - 'OPENSEARCH_HOSTS=["https://opensearch-1:9200","https://opensearch-2:9200"]':z
+      - 'OPENSEARCH_HOSTS=["https://opensearch-1:9200","https://opensearch-2:9200"]'
       {% else %}
-      - 'OPENSEARCH_HOSTS=["http://opensearch-1:9200"]':z
+      - 'OPENSEARCH_HOSTS=["http://opensearch-1:9200"]'
       {% endif %}
       - "DISABLE_SECURITY_DASHBOARDS_PLUGIN=true"   # disables security dashboards plugin in OpenSearch Dashboards
     {%if use_timezone | default(false) %}
@@ -21263,7 +21263,7 @@ services:
     {% if (NEO4J_edition | lower) == 'enterprise'  %}
       - NEO4J_ACCEPT_LICENSE_AGREEMENT=yes
     {% endif -%}   {#  use_timezone #}
-      - NEO4J_AUTH=neo4j/${PLATYS_NEO4J_PASSWORD:-{{NEO4J_password}}}:z
+      - NEO4J_AUTH=neo4j/${PLATYS_NEO4J_PASSWORD:-{{NEO4J_password}}}
     {% if (NEO4J_major_version | lower) == '5' %}
       {% if not NEO4J_server_config_strict_validation_enabled %}
       - NEO4J_server_config_strict__validation_enabled=false
@@ -21418,7 +21418,7 @@ services:
       - LLM_TEMPERATURE=0.7
       - MODEL_NAME={{ns.openaiModelName if ns.openaiModelName is defined and ns.openaiModelName and ns.openaiModelName | length else omit }}
       - SMALL_MODEL_NAME={{ns.openaiSmallModelName if ns.openaiSmallModelName is defined and ns.openaiSmallModelName and ns.openaiSmallModelName | length else omit }}
-      - NEO4J_URI=bolt://neo4j-1:7687:z
+      - NEO4J_URI=bolt://neo4j-1:7687
       - NEO4J_USER=neo4j
       - NEO4J_PASSWORD=${PLATYS_NEO4J_PASSWORD:-{{NEO4J_password}}}
       - PORT=8000
@@ -21470,7 +21470,7 @@ services:
       - LLM_TEMPERATURE=0.7
       - MODEL_NAME={{ns.openaiModelName if ns.openaiModelName is defined and ns.openaiModelName and ns.openaiModelName | length else omit }}
       - SMALL_MODEL_NAME={{ns.openaiSmallModelName if ns.openaiSmallModelName is defined and ns.openaiSmallModelName and ns.openaiSmallModelName | length else omit }}
-      - NEO4J_URI=bolt://neo4j-1:7687:z
+      - NEO4J_URI=bolt://neo4j-1:7687
       - NEO4J_USER=neo4j
       - NEO4J_PASSWORD=${PLATYS_NEO4J_PASSWORD:-{{NEO4J_password}}}
       - PORT=8000
@@ -22193,7 +22193,7 @@ services:
       - --aws-endpoint={{s3Endpoint | default(omit) }}
       - --aws-allow-http
       {% endif %}
-      - --plugin-dir=/var/lib/influxdb3/plugins   # Optional: only needed for processing engine plugins:z
+      - --plugin-dir=/var/lib/influxdb3/plugins   # Optional: only needed for processing engine plugins
     healthcheck:
       test: ["CMD", "curl", "-f", "-H", "Authorization: Bearer apiv3_test", "http://localhost:8181/ping"]
       interval: 5s
@@ -23246,7 +23246,7 @@ services:
     ports:
       - "5521:5521"       
     environment:
-      - VITE_CLICKHOUSE_URL=http://${PUBLIC_IP:-127.0.0.1}:28428:z
+      - VITE_CLICKHOUSE_URL=http://${PUBLIC_IP:-127.0.0.1}:28428
       - VITE_CLICKHOUSE_USER={{CLICKHOUSE_username}}
       - VITE_CLICKHOUSE_PASS=${PLATYS_CLICKHOUSE_PASSWORD:-{{CLICKHOUSE_password}}}
     {%if use_timezone | default(false) %}
@@ -24260,7 +24260,7 @@ services:
     environment:
       # The standard connection URI format, documented at
       # https://www.postgresql.org/docs/current/static/libpq-connect.html#LIBPQ-CONNSTRING
-      - PGRST_DB_URI=postgres://{{POSTGRESQL_user}}:{{POSTGRESQL_password}}@postgresql:5432/{{POSTGRESQL_database}}:z
+      - PGRST_DB_URI=postgres://{{POSTGRESQL_user}}:{{POSTGRESQL_password}}@postgresql:5432/{{POSTGRESQL_database}}
       # The name of which database schema to expose to REST clients
       - PGRST_DB_SCHEMA={{POSTGRESQL_schema}}
       # The database role to use when no client authentication is provided
@@ -26167,7 +26167,7 @@ services:
       - './conf/{{conf_dir}}/catalog/adls.properties:/catalog/adls.properties':z
 {%- endif -%}
 {%- if (KAFKA_enable or external['KAFKA_enable']) and (TRINO_kafka_descriptor_supplier == 'schema-registry' or (TRINO_kafka_descriptor_supplier == 'file' and TRINO_kafka_table_names))  | default(false) %}
-      - './conf/{{conf_dir}}/catalog/kafka-{{ 'file' if TRINO_kafka_descriptor_supplier | lower == 'file' else 'schema-registry' }}.properties:/catalog/kafka.properties':z
+      - './conf/{{conf_dir}}/catalog/kafka-{{ 'file' if TRINO_kafka_descriptor_supplier | lower == 'file' else 'schema-registry' }}.properties:/catalog/kafka.properties'
       - './conf/{{conf_dir}}/kafka/descriptor:{{trino_etc_dir}}/kafka/':z
   {% if ns.secureKafkaEnabled and ns.securityProtocolBROKER == 'SASL_PLAINTEXT' %}
       - './security/kafka/sasl-scram/client.properties:{{trino_etc_dir}}/kafka-configuration.properties':z
@@ -26555,7 +26555,7 @@ services:
       - './conf/{{conf_dir}}/catalog/adls.properties:/catalog/adls.properties':z
   {% endif %}
   {%if KAFKA_enable or external['KAFKA_enable'] | default(false) %}
-      - ./conf/{{conf_dir}}/catalog/kafka-{{'file' if TRINO_kafka_descriptor_supplier | lower == 'file' else 'schema-registry'}}.properties:/catalog/kafka.properties:z
+      - ./conf/{{conf_dir}}/catalog/kafka-{{'file' if TRINO_kafka_descriptor_supplier | lower == 'file' else 'schema-registry'}}.properties:/catalog/kafka.properties
       - './conf/{{conf_dir}}/kafka/descriptor/:{{trino_etc_dir}}/kafka/':z
     {% if ns.secureKafkaEnabled and ns.securityProtocolBROKER == 'SASL_PLAINTEXT' %}
       - './security/kafka/sasl-scram/client.properties:{{trino_etc_dir}}/kafka-configuration.properties':z
@@ -27053,7 +27053,7 @@ services:
   {% endif %}
 {%- endif -%}  {#  MINIO_enable #}
 {%- if (KAFKA_enable or external['KAFKA_enable']) and (PRESTO_kafka_descriptor_supplier == 'schema-registry' or (PRESTO_kafka_descriptor_supplier == 'file' and PRESTO_kafka_table_names))  | default(false) %}
-      - './conf/{{conf_dir}}/catalog/kafka-{{ 'file' if PRESTO_kafka_descriptor_supplier | lower == 'file' else 'schema-registry' }}.properties:/catalog/kafka.properties':z
+      - './conf/{{conf_dir}}/catalog/kafka-{{ 'file' if PRESTO_kafka_descriptor_supplier | lower == 'file' else 'schema-registry' }}.properties:/catalog/kafka.properties'
       - './conf/{{conf_dir}}/kafka/descriptor:{{presto_etc_dir}}/kafka/':z
   {% if ns.secureKafkaEnabled and ns.securityProtocolBROKER == 'SASL_PLAINTEXT' %}
       - './security/kafka/sasl-scram/client.properties:{{presto_etc_dir}}/kafka-configuration.properties':z
@@ -27316,7 +27316,7 @@ services:
   {% endif %}
 {%- endif -%}  {#  MINIO_enable #}
 {%- if (KAFKA_enable or external['KAFKA_enable']) and (PRESTO_kafka_descriptor_supplier == 'schema-registry' or (PRESTO_kafka_descriptor_supplier == 'file' and PRESTO_kafka_table_names))  | default(false) %}
-      - './conf/{{conf_dir}}/catalog/kafka-{{ 'file' if PRESTO_kafka_descriptor_supplier | lower == 'file' else 'schema-registry' }}.properties:/catalog/kafka.properties':z
+      - './conf/{{conf_dir}}/catalog/kafka-{{ 'file' if PRESTO_kafka_descriptor_supplier | lower == 'file' else 'schema-registry' }}.properties:/catalog/kafka.properties'
       - './conf/{{conf_dir}}/kafka/descriptor:{{presto_etc_dir}}/kafka/':z
   {% if ns.secureKafkaEnabled and ns.securityProtocolBROKER == 'SASL_PLAINTEXT' %}
       - './security/kafka/sasl-scram/client.properties:{{presto_etc_dir}}/kafka-configuration.properties':z
@@ -27446,7 +27446,7 @@ services:
       - 32010:32010      
       - '45678:45678'
     environment:
-      - DREMIO_JAVA_SERVER_EXTRA_OPTS=-Dpaths.dist=file:///opt/dremio/data/dist:z
+      - DREMIO_JAVA_SERVER_EXTRA_OPTS=-Dpaths.dist=file:///opt/dremio/data/dist
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -27645,11 +27645,11 @@ services:
     {%if TYK_GATEWAY_edition == 'pro' | default(false) %}
       - TYK_GW_NODESECRET={{TYK_secret}}
       - TYK_GW_POLICIES_POLICYSOURCE=service
-      - TYK_GW_POLICIES_POLICYCONNECTIONSTRING=http://tyk-dashboard:3000:z
+      - TYK_GW_POLICIES_POLICYCONNECTIONSTRING=http://tyk-dashboard:3000
       - TYK_GW_POLICIES_POLICYRECORDNAME=tyk_policies
       - TYK_GW_POLICIES_ALLOWEXPLICITPOLICYID=true
       - TYK_GW_USEDBAPPCONFIGS=true
-      - TYK_GW_DBAPPCONFOPTIONS_CONNECTIONSTRING=http://tyk-dashboard:3000:z
+      - TYK_GW_DBAPPCONFOPTIONS_CONNECTIONSTRING=http://tyk-dashboard:3000
       - TYK_GW_DBAPPCONFOPTIONS_NODEISSEGMENTED=false
       - TYK_GW_DBAPPCONFOPTIONS_TAGS=
       - TYK_GW_DISABLEDASHBOARDZEROCONF=false
@@ -27737,14 +27737,14 @@ services:
     {%if TYK_PUMP_backend_type == 'mongo' | default(false) %}
       - TYK_PMP_PUMPS_MAIN_TYPE=mongo
       - TYK_PMP_PUMPS_MAIN_META_COLLECTIONNAME=tyk_analytics
-      - TYK_PMP_PUMPS_MAIN_META_MONGOURL=mongodb://tyk-mongo:27017/tyk_analytics:z
+      - TYK_PMP_PUMPS_MAIN_META_MONGOURL=mongodb://tyk-mongo:27017/tyk_analytics
       - TYK_PMP_PUMPS_MAIN_META_MAXINSERTBATCHSIZEBYTES=80000
       - TYK_PMP_PUMPS_MAIN_META_MAXDOCUMENTSIZEBYTES=20112
       - TYK_PMP_PUMPS_MAINAGG_TYPE=mongo-pump-aggregate
-      - TYK_PMP_PUMPS_MAINAGG_META_MONGOURL=mongodb://tyk-mongo:27017/tyk_analytics:z
+      - TYK_PMP_PUMPS_MAINAGG_META_MONGOURL=mongodb://tyk-mongo:27017/tyk_analytics
       - TYK_PMP_PUMPS_MAINAGG_META_USEMIXEDCOLLECTION=true
       - TYK_PMP_UPTIMEPUMPCONFIG_COLLECTIONNAME=tyk_uptime_analytics
-      - TYK_PMP_UPTIMEPUMPCONFIG_MONGOURL=mongodb://tyk-mongo:27017/tyk_analytics:z
+      - TYK_PMP_UPTIMEPUMPCONFIG_MONGOURL=mongodb://tyk-mongo:27017/tyk_analytics
       - TYK_PMP_UPTIMEPUMPCONFIG_MAXINSERTBATCHSIZEBYTES=500000
       - TYK_PMP_UPTIMEPUMPCONFIG_MAXDOCUMENTSIZEBYTES=200000
     {% endif -%}   {#  use_timezone #}
@@ -27778,7 +27778,7 @@ services:
     environment:
       - TYK_DB_LICENSEKEY=${TYK_DB_LICENSEKEY}
       - TYK_DB_STORAGE_MAIN_TYPE=mongo
-      - TYK_DB_STORAGE_MAIN_CONNECTIONSTRING=mongodb://tyk-mongo:27017/tyk_analytics:z
+      - TYK_DB_STORAGE_MAIN_CONNECTIONSTRING=mongodb://tyk-mongo:27017/tyk_analytics
     env_file:
       - ./conf/tyk/tyk_analytics.env
     volumes:
@@ -27877,8 +27877,8 @@ services:
       - KONG_PROXY_LISTEN=0.0.0.0:8000
       - KONG_ADMIN_LISTEN=0.0.0.0:8001
       - KONG_ADMIN_GUI_LISTEN=0.0.0.0:8002
-      - KONG_ADMIN_GUI_URL=http://${PUBLIC_IP:-127.0.0.1}:8002:z
-      - KONG_ADMIN_API_URI=http://${PUBLIC_IP:-127.0.0.1}:8001:z
+      - KONG_ADMIN_GUI_URL=http://${PUBLIC_IP:-127.0.0.1}:8002
+      - KONG_ADMIN_API_URI=http://${PUBLIC_IP:-127.0.0.1}:8001
     {% endif -%}  {# loop.index == 1 #}
     {% if KONG_GATEWAY_volume_map_working %}
       - KONG_PREFIX=/var/run/kong
@@ -28609,7 +28609,7 @@ services:
       - RUSTFS_UNSAFE_BYPASS_DISK_CHECK={{ 'true' if not RUSTFS_volume_map_data else false }}
 #      - RUSTFS_TLS_PATH=/opt/tls
     {% if OTEL_COLLECTOR_enable | default(false) -%}
-      - RUSTFS_OBS_ENDPOINT=http://otel-collector:4318:z
+      - RUSTFS_OBS_ENDPOINT=http://otel-collector:4318
     {% endif -%}
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
@@ -29302,14 +29302,14 @@ services:
       - QUARKUS_DATASOURCE_POSTGRESQL_DB_KIND=postgresql
       - QUARKUS_DATASOURCE_POSTGRESQL_USERNAME={{ns.postgresqlUser}}
       - QUARKUS_DATASOURCE_POSTGRESQL_PASSWORD={{ns.postgresqlPassword}}
-      - QUARKUS_DATASOURCE_POSTGRESQL_JDBC_URL=jdbc:postgresql://{{ns.postgresqlHost}}:{{ns.postgresqlPort}}/{{ns.postgresqlDatabase}}:z
+      - QUARKUS_DATASOURCE_POSTGRESQL_JDBC_URL=jdbc:postgresql://{{ns.postgresqlHost}}:{{ns.postgresqlPort}}/{{ns.postgresqlDatabase}}
     {%elif NESSIE_store_type == 'mysql' %}
       - NESSIE_VERSION_STORE_TYPE=JDBC
       - NESSIE_VERSION_STORE_PERSIST_JDBC_DATASOURCE=mariadb
       - QUARKUS_DATASOURCE_MYSQL_DB_KIND=mariadb
       - QUARKUS_DATASOURCE_MYSQL_USERNAME={{MYSQL_user}}
       - QUARKUS_DATASOURCE_MYSQL_PASSWORD={{MYSQL_password}}
-      - QUARKUS_DATASOURCE_MYSQL_JDBC_URL=jdbc:mysql://mysql:3306/{{MYSQL_database}}:z
+      - QUARKUS_DATASOURCE_MYSQL_JDBC_URL=jdbc:mysql://mysql:3306/{{MYSQL_database}}
     {% endif -%}   {#  NESSIE_store_type #}
     {%if MINIO_enable or RUSTFS_enable or SEAWEEDFS_enable or external['S3_enable'] | default(false) %}
       # using MinIO as the object store.
@@ -29321,23 +29321,23 @@ services:
       - nessie.catalog.secrets.access-key.name={{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
       - nessie.catalog.secrets.access-key.secret={{s3SecretAccessKey}}
       - NESSIE_CATALOG_SERVICE_S3_DEFAULT_OPTIONS_ENDPOINT={{s3Endpoint | default(omit) }}
-      - NESSIE_CATALOG_SERVICE_S3_DEFAULT_OPTIONS_EXTERNAL_ENDPOINT=http://127.0.0.1:9002/:z
+      - NESSIE_CATALOG_SERVICE_S3_DEFAULT_OPTIONS_EXTERNAL_ENDPOINT=http://127.0.0.1:9002/
     {% endif %}  
     {% if JAEGER_enable | default(false) %}  
          # This example uses Jaeger as the OpenTelemetry traces collector.
-      - quarkus.otel.exporter.otlp.endpoint=http://jaeger:4317:z
+      - quarkus.otel.exporter.otlp.endpoint=http://jaeger:4317
     {% endif %}  
     {%if KEYCLOAK_enable | default(false) %}
       - NESSIE_SERVER_AUTHENTICATION_ENABLED=true
       - QUARKUS_OIDC_ENABLED=true
-      - QUARKUS_OIDC_AUTH_SERVER_URL=http://keycloak:8080/realms/iceberg:z
+      - QUARKUS_OIDC_AUTH_SERVER_URL=http://keycloak:8080/realms/iceberg
       - QUARKUS_OIDC_CLIENT_ID=client1
-      - QUARKUS_OIDC_TOKEN_ISSUER=http://127.0.0.1:8080/realms/iceberg:z
+      - QUARKUS_OIDC_TOKEN_ISSUER=http://127.0.0.1:8080/realms/iceberg
     {% endif %}  
     {%if AUTHELIA_enable | default(false) %}
       - NESSIE_SERVER_AUTHENTICATION_ENABLED=true
       - QUARKUS_OIDC_ENABLED=true
-      - QUARKUS_OIDC_AUTH_SERVER_URL=http://authelia:9091:z
+      - QUARKUS_OIDC_AUTH_SERVER_URL=http://authelia:9091
       - QUARKUS_OIDC_CLIENT_ID=nessie_client
       - QUARKUS_OIDC_CREDENTIALS_SECRET=s3cr3t
     {% endif %}  
@@ -29531,13 +29531,13 @@ services:
       - LAKEKEEPER__METRICS_PORT=9000
       - LAKEKEEPER__LISTEN_PORT=8181
       - LAKEKEEPER__PG_ENCRYPTION_KEY=This-is-NOT-Secure!
-      - LAKEKEEPER__PG_DATABASE_URL_READ=postgresql://postgres:abc123!@postgresql:5432/postgres:z
-      - LAKEKEEPER__PG_DATABASE_URL_WRITE=postgresql://postgres:abc123!@postgresql:5432/postgres:z
+      - LAKEKEEPER__PG_DATABASE_URL_READ=postgresql://postgres:abc123!@postgresql:5432/postgres
+      - LAKEKEEPER__PG_DATABASE_URL_WRITE=postgresql://postgres:abc123!@postgresql:5432/postgres
       - LAKEKEEPER__AUTHZ_BACKEND=allowall
       - LAKEKEEPER__SERVE_SWAGGER_UI=true
     {% if LAKEKEEPER_secret_backend == 'kv2' and VAULT_enable | default(false) %}
       - LAKEKEEPER__SECRET_BACKEND=kv2
-      - LAKEKEEPER__KV2__URL=http://vault:8200:z
+      - LAKEKEEPER__KV2__URL=http://vault:8200
       - LAKEKEEPER__KV2__USER:='{{VAULT_username}}'
       - LAKEKEEPER__KV2__PASSWORD='${PLATYS_VAULT_PASSWORD:-{{VAULT_password}}}'
       - LAKEKEEPER__KV2__SECRET_MOUNT='kv/data/iceberg'
@@ -29548,7 +29548,7 @@ services:
       - LAKEKEEPER__KAFKA_TOPIC='lakekeeper'
       - LAKEKEEPER__KAFKA_CONFIG='{"bootstrap.servers"="{{ns.bootstrapServers}}","security.protocol"="{{ns.securityProtocolBROKER}}"}'
     {%elif LAKEKEEPER_publish_events_enabled | default(false) and NATS_enable | default(false) %}
-      - LAKEKEEPER__NATS_ADDRESS='nats://nats-1:4222':z
+      - LAKEKEEPER__NATS_ADDRESS='nats://nats-1:4222'
       - LAKEKEEPER__NATS_TOPIC='lakekeeper'
 #      - LAKEKEEPER__NATS_USER=
 #      - LAKEKEEPER__NATS_PASSWORD='${PLATYS_NATS_PASSWORD:-{{NATS_password}}}'
@@ -29589,8 +29589,8 @@ services:
       - 28458:8181
     environment:
       - LAKEKEEPER__PG_ENCRYPTION_KEY=This-is-NOT-Secure!
-      - LAKEKEEPER__PG_DATABASE_URL_READ=postgresql://postgres:abc123!@postgresql:5432/postgres:z
-      - LAKEKEEPER__PG_DATABASE_URL_WRITE=postgresql://postgres:abc123!@postgresql:5432/postgres:z
+      - LAKEKEEPER__PG_DATABASE_URL_READ=postgresql://postgres:abc123!@postgresql:5432/postgres
+      - LAKEKEEPER__PG_DATABASE_URL_WRITE=postgresql://postgres:abc123!@postgresql:5432/postgres
       - LAKEKEEPER__AUTHZ_BACKEND=allowall
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
@@ -29886,8 +29886,8 @@ services:
     ports:
       - 28463:3000
     environment:
-      - JAVA_API_URL=http://nimtable:8182:z
-      - DATABASE_URL=postgresql://postgres:abc123!@postgresql:5432/postgres:z
+      - JAVA_API_URL=http://nimtable:8182
+      - DATABASE_URL=postgresql://postgres:abc123!@postgresql:5432/postgres
       - JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
       - ADMIN_USERNAME=admin
       - ADMIN_PASSWORD=admin   
@@ -30625,7 +30625,7 @@ services:
     command:
       - "--name=nats-1"
       - "--cluster_name=c1"
-      - "--cluster=nats://nats-1:6222:z"
+      - "--cluster=nats://nats-1:6222"
 #      - "--routes=nats-route://nats-1:6222,nats-route://nats-2:6222,nats-route://nats-3:6222"
       - "--http_port=8222"
       - "--js"
@@ -31757,7 +31757,7 @@ services:
       - POSTGRESQL_PASS={{ZAMMAD_db_password | default('zammad')}}
       - POSTGRESQL_PORT=5432
       - POSTGRESQL_OPTIONS=?pool=50
-      - REDIS_URL=redis://zammad-redis:6379:z
+      - REDIS_URL=redis://zammad-redis:6379
       - BACKUP_DIR=/var/tmp/zammad
       - BACKUP_TIME=03:00
       - BACKUP_ON_START=true
@@ -31803,7 +31803,7 @@ services:
       - POSTGRESQL_PASS={{ZAMMAD_db_password | default('zammad')}}
       - POSTGRESQL_PORT=5432
       - POSTGRESQL_OPTIONS=?pool=50
-      - REDIS_URL=redis://zammad-redis:6379:z
+      - REDIS_URL=redis://zammad-redis:6379
       - BACKUP_DIR=/var/tmp/zammad
       - BACKUP_TIME=03:00
       - BACKUP_ON_START=true
@@ -31838,7 +31838,7 @@ services:
       - POSTGRESQL_PASS={{ZAMMAD_db_password | default('zammad')}}
       - POSTGRESQL_PORT=5432
       - POSTGRESQL_OPTIONS=?pool=50
-      - REDIS_URL=redis://zammad-redis:6379:z
+      - REDIS_URL=redis://zammad-redis:6379
       - BACKUP_DIR=/var/tmp/zammad
       - BACKUP_TIME=03:00
       - BACKUP_ON_START=true
@@ -31875,7 +31875,7 @@ services:
       - POSTGRESQL_PASS={{ZAMMAD_db_password | default('zammad')}}
       - POSTGRESQL_PORT=5432
       - POSTGRESQL_OPTIONS=?pool=50
-      - REDIS_URL=redis://zammad-redis:6379:z
+      - REDIS_URL=redis://zammad-redis:6379
       - BACKUP_DIR=/var/tmp/zammad
       - BACKUP_TIME=03:00
       - BACKUP_ON_START=true
@@ -31916,7 +31916,7 @@ services:
       - POSTGRESQL_PASS={{ZAMMAD_db_password | default('zammad')}}
       - POSTGRESQL_PORT=5432
       - POSTGRESQL_OPTIONS=?pool=50
-      - REDIS_URL=redis://zammad-redis:6379:z
+      - REDIS_URL=redis://zammad-redis:6379
       - BACKUP_DIR=/var/tmp/zammad
       - BACKUP_TIME=03:00
       - BACKUP_ON_START=true
@@ -32022,7 +32022,7 @@ services:
       - POSTGRESQL_PASS={{ZAMMAD_db_password | default('zammad')}}
       - POSTGRESQL_PORT=5432
       - POSTGRESQL_OPTIONS=?pool=50
-      - REDIS_URL=redis://zammad-redis:6379:z
+      - REDIS_URL=redis://zammad-redis:6379
       - BACKUP_DIR=/var/tmp/zammad
       - BACKUP_TIME=03:00
       - BACKUP_ON_START=true
@@ -32332,10 +32332,10 @@ services:
     ports:
       - 8200:8200
     environment:
-      - VAULT_ADDR=http://0.0.0.0:8200:z
+      - VAULT_ADDR=http://0.0.0.0:8200
 #      - VAULT_LOCAL_CONFIG='{"listener": [{"tcp":{"address": "0.0.0.0:8200","tls_disable":"0", "tls_cert_file":"/data/vault-volume/certificate.pem", "tls_key_file":"/data/vault-volume/key.pem"}}], "default_lease_ttl": "168h", "max_lease_ttl": "720h"}, "ui": true}'
-      - VAULT_API_ADDR=http://0.0.0.0:8200:z
-      - VAULT_ADDRESS=http://0.0.0.0:8200:z
+      - VAULT_API_ADDR=http://0.0.0.0:8200
+      - VAULT_ADDRESS=http://0.0.0.0:8200
     {% if VAULT_use_dev_mode | default(false) %}
       - VAULT_DEV_LISTEN_ADDRESS=0.0.0.0:8200
       - VAULT_DEV_ROOT_TOKEN_ID={{VAULT_dev_mode_token}}
@@ -32376,7 +32376,7 @@ services:
       vault:
         condition: service_healthy    
     environment:
-      - VAULT_ADDR=http://vault:8200:z
+      - VAULT_ADDR=http://vault:8200
       - VAULT_TOKEN={{VAULT_dev_mode_token}}   
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
@@ -32566,7 +32566,7 @@ services:
       - PACT_BROKER_PORT='9292'
       - PACT_BROKER_BASIC_AUTH_USERNAME=pact
       - PACT_BROKER_BASIC_AUTH_PASSWORD=abc123!
-      - PACT_BROKER_DATABASE_URL="postgres://postgres:password@postgres/postgres:z"
+      - PACT_BROKER_DATABASE_URL="postgres://postgres:password@postgres/postgres"
       - PACT_BROKER_LOG_LEVEL=INFO
       - PACT_BROKER_SQL_LOG_LEVEL=DEBUG
       - PACT_BROKER_DATABASE_CONNECT_MAX_RETRIES="5"
@@ -32695,8 +32695,8 @@ services:
     ports:
       - 28381:8080
     environment:
-      - APPLICATION_HOST_WEB=http://${PUBLIC_IP:-127.0.0.1}:28381:z
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://data-mesh-manager-postgresql:5432/data_mesh_mgr_db:z
+      - APPLICATION_HOST_WEB=http://${PUBLIC_IP:-127.0.0.1}:28381
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://data-mesh-manager-postgresql:5432/data_mesh_mgr_db
       - SPRING_DATASOURCE_USERNAME={{DATA_MESH_MANAGER_postgres_username}}
       - SPRING_DATASOURCE_PASSWORD=${PLATYS_DATA_MESH_MANAGER_POSTGRESQL_PASSWORD:-{{DATA_MESH_MANAGER_postgres_password}}}
       - SPRING_MAIL_HOST={{DATA_MESH_MANAGER_mail_host}}
@@ -32758,7 +32758,7 @@ services:
       com.platys.description: "Data Mesh Manager Connector Databricks"
       com.platys.password.envvars: "PLATYS_DATA_MESH_MANAGER_POSTGRESQL_PASSWORD"    
     environment:
-      - DATAMESHMANAGER_CLIENT_HOST=http://data-mesh-manager:8080:z
+      - DATAMESHMANAGER_CLIENT_HOST=http://data-mesh-manager:8080
       - DATAMESHMANAGER_CLIENT_APIKEY=
       - DATAMESHMANAGER_CLIENT_DATABRICKS_WORKSPACE_HOST={{DATA_MESH_MANAGER_CONNECTOR_DATABRICKS_workspace_host}}
       - DATAMESHMANAGER_CLIENT_DATABRICKS_WORKSPACE_CLIENTID={{DATA_MESH_MANAGER_CONNECTOR_DATABRICKS_workspace_clientid}}
@@ -32801,8 +32801,8 @@ services:
     ports:
       - 28382:8080
     environment:
-      - APPLICATION_HOST_WEB=http://${PUBLIC_IP:-127.0.0.1}:28382:z
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://data-contract-manager-postgresql:5432/data_contract_mgr_db:z
+      - APPLICATION_HOST_WEB=http://${PUBLIC_IP:-127.0.0.1}:28382
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://data-contract-manager-postgresql:5432/data_contract_mgr_db
       - SPRING_DATASOURCE_USERNAME={{DATA_CONTRACT_MANAGER_postgres_username}}
       - SPRING_DATASOURCE_PASSWORD=${PLATYS_DATA_CONTRACT_MANAGER_POSTGRESQL_PASSWORD:-{{DATA_CONTRACT_MANAGER_postgres_password}}}
       - SPRING_MAIL_HOST={{DATA_CONTRACT_MANAGER_mail_host}}
@@ -32966,13 +32966,13 @@ services:
       - 28203:8080
     environment:
       - SPRING_PROFILES_ACTIVE=prod
-      - SPRING_DATA_MONGODB_URI=mongodb://mongo:27017:z
+      - SPRING_DATA_MONGODB_URI=mongodb://mongo:27017
       - SPRING_DATA_MONGODB_DATABASE=microcks
-      - POSTMAN_RUNNER_URL=http://postman:3000:z
-      - TEST_CALLBACK_URL=http://microcks:8080:z
+      - POSTMAN_RUNNER_URL=http://postman:3000
+      - TEST_CALLBACK_URL=http://microcks:8080
       - SERVICES_UPDATE_INTERVAL=0 0 0/2 * * *
-      - KEYCLOAK_URL=http://keycloak:28204/auth:z
-      - KEYCLOAK_PUBLIC_URL=http://${PUBLIC_IP}:28204/auth:z
+      - KEYCLOAK_URL=http://keycloak:28204/auth
+      - KEYCLOAK_PUBLIC_URL=http://${PUBLIC_IP}:28204/auth
       - JAVA_OPTIONS=-Dspring.security.oauth2.resourceserver.jwt.issuer-uri=http://${PUBLIC_IP}:28204/realms/microcks -Dspring.security.oauth2.resourceserver.jwt.jwk-set-uri=http://keycloak:28204/realms/microcks/protocol/openid-connect/certs
       #- LOGGING_LEVEL_IO_GITHUB_MICROCKS=DEBUG
       #- MAX_UPLOAD_FILE_SIZE=3MB      
@@ -33601,11 +33601,11 @@ services:
     entrypoint: /usr/local/bin/etcd
     command:
             - '--name=etcd-1'
-            - '--initial-advertise-peer-urls=http://etcd-1:2380':z
-            - '--listen-peer-urls=http://0.0.0.0:2380':z
-            - '--listen-client-urls=http://0.0.0.0:2379':z
-            - '--advertise-client-urls=http://etcd-1:2379':z
-            - '--listen-metrics-urls=http://0.0.0.0:2381':z
+            - '--initial-advertise-peer-urls=http://etcd-1:2380'
+            - '--listen-peer-urls=http://0.0.0.0:2380'
+            - '--listen-client-urls=http://0.0.0.0:2379'
+            - '--advertise-client-urls=http://etcd-1:2379'
+            - '--listen-metrics-urls=http://0.0.0.0:2381'
             - '--max-txn-ops=999999'
             - '--max-request-bytes=10485760'
             - '--auto-compaction-mode=periodic'
@@ -33625,7 +33625,7 @@ services:
       test:
         - CMD
         - etcdctl
-        - --endpoints=http://localhost:2379:z
+        - --endpoints=http://localhost:2379
         - endpoint
         - health
       interval: 1s
@@ -33653,7 +33653,7 @@ services:
       - HTTP_PORT=8081
       - ETCD=etcd-1:2379
       - EDITABLE={{1 if ETCD_BROWSER_allow_edit else omit}}
-      - CORS=http://localhost:28310,http://localhost:8081,http://localhost:8080,http://${PUBLIC_IP:-127.0.0.1}:28310,http://${DOCKER_HOST_IP:-localhost}:28310:z
+      - CORS=http://localhost:28310,http://localhost:8081,http://localhost:8080,http://${PUBLIC_IP:-127.0.0.1}:28310,http://${DOCKER_HOST_IP:-localhost}:28310
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -34466,7 +34466,7 @@ services:
     ports:
       - "{{80 + (dataCenterId * 1) if (MARKDOWN_VIEWER_use_port_80 | default(true) )  else 8008 }}:{{3000 if MARKDOWN_VIEWER_edition == 'markdown-madness' else 80}}"
     volumes:
-      - ./artefacts:{{"/docs" if MARKDOWN_VIEWER_edition == 'markdown-madness' else "/home/python/markdown"}}:z
+      - ./artefacts:{{"/docs" if MARKDOWN_VIEWER_edition == 'markdown-madness' else "/home/python/markdown"}}
   {% if MARKDOWN_VIEWER_edition == 'markdown-madness' | default(false) %}
       - ./conf/markdown-viewer/markdown-madness.yml:/docs/.madness.yml:z
   {% endif -%}   {# MARKDOWN_VIEWER_use_markdown_madness_impl #}
