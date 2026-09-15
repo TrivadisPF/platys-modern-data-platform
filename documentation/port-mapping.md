@@ -879,6 +879,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28491 | 8080 | cockroachdb-3 |
 28492 | 8000 | risingwave-mcp |
 28493 | 9097 | mcp-trino |
+28494 | 8080 | polaris-ui |
 
 
 ## Ports > 28500

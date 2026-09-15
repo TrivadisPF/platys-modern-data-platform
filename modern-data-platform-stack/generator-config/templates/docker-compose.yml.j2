@@ -696,6 +696,7 @@ networks:
 {% set __LAKEKEEPER_version = LAKEKEEPER_version | default('latest') -%}
 
 {% set __POLARIS_version = POLARIS_version | default('latest') -%}
+{% set __POLARIS_UI_version = POLARIS_UI_version | default('latest') -%}
 
 {% set __GRAVITINO_version = GRAVITINO_version | default('latest') -%}
 
@@ -29926,13 +29927,47 @@ services:
  
         touch /tmp/polaris-setup-done
         tail -f /dev/null
-    init: true  
-    restart:  no         
+    init: true
+    restart:  no
     healthcheck:
       interval: 1s
       timeout: 10s
       retries: 240
-      test: ["CMD", "test", "-f", "/tmp/polaris-setup-done"]                
+      test: ["CMD", "test", "-f", "/tmp/polaris-setup-done"]
+
+  {% if POLARIS_ui_enabled | default(false) %}
+  #  ================================== Polaris UI ========================================== #
+  polaris-ui:
+    image: docker.io/apache/polaris-console:{{__POLARIS_UI_version}}
+    container_name: polaris-ui
+    hostname: polaris-ui
+    labels:
+      com.platys.name: "polaris-ui"
+      com.platys.description: "Web UI for Apache Polaris Iceberg REST Catalog"
+      com.platys.webui.title: "Polaris UI"
+      com.platys.webui.url: "http://dataplatform:28494"
+    ports:
+      - 28494:8080
+    depends_on:
+      - polaris
+    environment:
+      VITE_POLARIS_API_URL: http://polaris:8181
+      VITE_POLARIS_REALM: {{POLARIS_realm | default('POLARIS')}}
+      VITE_POLARIS_PRINCIPAL_SCOPE: PRINCIPAL_ROLE:ALL
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer:z
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+  {% endif %}  {# POLARIS_ui_enabled #}
 {% endif %}   {# POLARIS_enable #}
 
 {% if GRAVITINO_enable | default(false) %}
@@ -31488,10 +31523,7 @@ services:
       PUID: 1000
       PGID: 1000
       PASSWORD: 'abc123!'
-      HASHED_PASSWORD: 'abc123!' #optional
       SUDO_PASSWORD: 'abc123!' #optional
-      SUDO_PASSWORD_HASH: 'abc123!' #optional
-      #PROXY_DOMAIN=code-server.my.domain #optional
       DEFAULT_WORKSPACE: /config/workspace #optional
       PWA_APPNAME: code-server      
     {%if use_timezone | default(false) %}
