@@ -16305,7 +16305,7 @@ services:
   {% if ZEPPELIN_volume_map_data %}
       - ./container-volume/spark/notebooks:/opt/zeppelin/{{ZEPPELIN_notebook_dir}}:z
   {% endif -%}   {#  ZEPPELIN_volume_map_data #}
-      - './conf/awscli/s3cfg.template:/root/.s3cfg.template':z
+      - ./conf/awscli/s3cfg.template:/root/.s3cfg.template:z
   {%if SPARK_enable | default(false) %}
       - spark-{{__SPARK_version | replace('.','-')}}-vol:/opt/spark:RO
   {% endif -%}   {#  SPARK_enable #}
@@ -26127,143 +26127,143 @@ services:
       - ./conf/{{conf_dir}}/{{deployment_type}}/log-debug.properties:{{trino_etc_dir}}/log.properties:z
 {% if MINIO_enable or RUSTFS_enable or SEAWEEDFS_enable or external['S3_enable'] | default(false) %}
   {%if HIVE_METASTORE_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/hive.properties:/catalog/minio.properties':z
-      - './conf/{{conf_dir}}/catalog/hive.properties:/catalog/hive.properties':z
+      - ./conf/{{conf_dir}}/catalog/hive.properties:/catalog/minio.properties:z
+      - ./conf/{{conf_dir}}/catalog/hive.properties:/catalog/hive.properties:z
   {% endif %}
   {%if 'iceberg' in (table_formats_to_use | default('') | lower) %}
     {%if HIVE_METASTORE_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/iceberg-hive.properties:/catalog/iceberg_hive.properties':z
+      - ./conf/{{conf_dir}}/catalog/iceberg-hive.properties:/catalog/iceberg_hive.properties:z
     {% if __HIVE_METASTORE_version == "4.2.0" | default(false) %}
-      - './conf/{{conf_dir}}/catalog/iceberg-hive-rest.properties:/catalog/iceberg_hive_rest.properties':z
+      - ./conf/{{conf_dir}}/catalog/iceberg-hive-rest.properties:/catalog/iceberg_hive_rest.properties:z
     {% endif %}  
     {% endif %}  
     {%if TRINO_with_iceberg_rest_catalog | default(false) %}
-      - './conf/{{conf_dir}}/catalog/iceberg-rest.properties:/catalog/iceberg_rest.properties':z
+      - ./conf/{{conf_dir}}/catalog/iceberg-rest.properties:/catalog/iceberg_rest.properties:z
     {% endif %}
     {%if LAKEKEEPER_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/iceberg-lakekeeper.properties:/catalog/iceberg_lakekeeper.properties':z
+      - ./conf/{{conf_dir}}/catalog/iceberg-lakekeeper.properties:/catalog/iceberg_lakekeeper.properties:z
     {% endif %}
     {%if POLARIS_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/iceberg-polaris.properties:/catalog/iceberg_polaris.properties':z
+      - ./conf/{{conf_dir}}/catalog/iceberg-polaris.properties:/catalog/iceberg_polaris.properties:z
     {% endif %}
     {%if GRAVITINO_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/iceberg-gravitino.properties:/catalog/iceberg_gravitino.properties':z
+      - ./conf/{{conf_dir}}/catalog/iceberg-gravitino.properties:/catalog/iceberg_gravitino.properties:z
     {% endif %}
     {%if NESSIE_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/iceberg-nessie.properties:/catalog/iceberg_nessie.properties':z
+      - ./conf/{{conf_dir}}/catalog/iceberg-nessie.properties:/catalog/iceberg_nessie.properties:z
     {% endif %}
   {% endif -%}  {#  'iceberg' in (table_formats_to_use | default('') | lower) #}
   {%if 'delta' in (table_formats_to_use | default('') | lower) | default(false) %}
-      - './conf/{{conf_dir}}/catalog/delta.properties:/catalog/delta.properties':z
+      - ./conf/{{conf_dir}}/catalog/delta.properties:/catalog/delta.properties:z
   {% endif -%} 
   {%if 'hudi' in (table_formats_to_use | default('') | lower) | default(false) %}
-      - './conf/{{conf_dir}}/catalog/hudi.properties:/catalog/hudi.properties':z
+      - ./conf/{{conf_dir}}/catalog/hudi.properties:/catalog/hudi.properties:z
   {% endif %}
   {%if UNITY_CATALOG_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/iceberg-unity.properties:/catalog/iceberg_unity.properties':z
+      - ./conf/{{conf_dir}}/catalog/iceberg-unity.properties:/catalog/iceberg_unity.properties:z
   {% endif %}
 {%- endif -%}  {#  MINIO_enable #}
 {%- if external['ADLS_enable'] | default(false) %}
-      - './conf/{{conf_dir}}/catalog/adls.properties:/catalog/adls.properties':z
+      - ./conf/{{conf_dir}}/catalog/adls.properties:/catalog/adls.properties:z
 {%- endif -%}
 {%- if (KAFKA_enable or external['KAFKA_enable']) and (TRINO_kafka_descriptor_supplier == 'schema-registry' or (TRINO_kafka_descriptor_supplier == 'file' and TRINO_kafka_table_names))  | default(false) %}
       - './conf/{{conf_dir}}/catalog/kafka-{{ 'file' if TRINO_kafka_descriptor_supplier | lower == 'file' else 'schema-registry' }}.properties:/catalog/kafka.properties'
-      - './conf/{{conf_dir}}/kafka/descriptor:{{trino_etc_dir}}/kafka/':z
+      - ./conf/{{conf_dir}}/kafka/descriptor:{{trino_etc_dir}}/kafka/:z
   {% if ns.secureKafkaEnabled and ns.securityProtocolBROKER == 'SASL_PLAINTEXT' %}
-      - './security/kafka/sasl-scram/client.properties:{{trino_etc_dir}}/kafka-configuration.properties':z
+      - ./security/kafka/sasl-scram/client.properties:{{trino_etc_dir}}/kafka-configuration.properties:z
   {% else %}
-      - './conf/{{conf_dir}}/kafka/client.properties:{{trino_etc_dir}}/kafka-configuration.properties':z
+      - ./conf/{{conf_dir}}/kafka/client.properties:{{trino_etc_dir}}/kafka-configuration.properties:z
   {%- endif -%}
   {%- if ns.secureKafkaEnabled and ns.securityProtocol == 'SSL' %}
-      - './security/kafka/client-certs:/certs':z
+      - ./security/kafka/client-certs:/certs:z
   {%- endif -%}
 {%- endif -%}
 
   {% if HADOOP_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/hdfs.properties:/catalog/hdfs.properties':z
+      - ./conf/{{conf_dir}}/catalog/hdfs.properties:/catalog/hdfs.properties:z
   {% endif %}
 
   {% if TRINO_with_hive_metastore_db_catalog and HIVE_METASTORE_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/hive_metastore_db.properties:/catalog/hive_metastore_db.properties':z
+      - ./conf/{{conf_dir}}/catalog/hive_metastore_db.properties:/catalog/hive_metastore_db.properties:z
   {% endif %}
   {% if POSTGRESQL_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/postgresql.properties:/catalog/postgresql.properties':z
+      - ./conf/{{conf_dir}}/catalog/postgresql.properties:/catalog/postgresql.properties:z
   {% endif %}
   {% if TIMESCALEDB_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/timescaledb.properties:/catalog/timescaledb.properties':z
+      - ./conf/{{conf_dir}}/catalog/timescaledb.properties:/catalog/timescaledb.properties:z
   {% endif %}
   {% if MYSQL_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/mysql.properties:/catalog/mysql.properties':z
+      - ./conf/{{conf_dir}}/catalog/mysql.properties:/catalog/mysql.properties:z
   {% endif %}
   {% if MARIADB_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/mariadb.properties:/catalog/mariadb.properties':z
+      - ./conf/{{conf_dir}}/catalog/mariadb.properties:/catalog/mariadb.properties:z
   {% endif %}
   {% if SQLSERVER_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/sqlserver.properties:/catalog/sqlserver.properties':z
+      - ./conf/{{conf_dir}}/catalog/sqlserver.properties:/catalog/sqlserver.properties:z
   {% endif %}
   {% if ORACLE_EE_enable or ORACLE_XE_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/oracle.properties:/catalog/oracle.properties':z
+      - ./conf/{{conf_dir}}/catalog/oracle.properties:/catalog/oracle.properties:z
   {% endif %}
   {% if IGNITE_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/ignite.properties:/catalog/ignite.properties':z
+      - ./conf/{{conf_dir}}/catalog/ignite.properties:/catalog/ignite.properties:z
   {% endif %}
   {% if REDIS_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/redis.properties:/catalog/redis.properties':z
+      - ./conf/{{conf_dir}}/catalog/redis.properties:/catalog/redis.properties:z
   {% endif %}
   {% if REDIS_STACK_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/redis-stack.properties:/catalog/redis-stack.properties':z
-      - './conf/{{conf_dir}}/catalog/redis-search.properties:/catalog/redis-search.properties':z
+      - ./conf/{{conf_dir}}/catalog/redis-stack.properties:/catalog/redis-stack.properties:z
+      - ./conf/{{conf_dir}}/catalog/redis-search.properties:/catalog/redis-search.properties:z
   {% endif %}
   {% if SINGLE_STORE_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/singlestore.properties:/catalog/singlestore.properties':z
+      - ./conf/{{conf_dir}}/catalog/singlestore.properties:/catalog/singlestore.properties:z
   {% endif %}
   {% if MONGO_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/mongo.properties:/catalog/mongo.properties':z
+      - ./conf/{{conf_dir}}/catalog/mongo.properties:/catalog/mongo.properties:z
   {% endif %}
   {% if ELASTICSEARCH_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/elasticsearch.properties:/catalog/elasticsearch.properties':z
+      - ./conf/{{conf_dir}}/catalog/elasticsearch.properties:/catalog/elasticsearch.properties:z
   {% endif %}
   {% if OPENSEARCH_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/opensearch.properties:/catalog/opensearch.properties':z
+      - ./conf/{{conf_dir}}/catalog/opensearch.properties:/catalog/opensearch.properties:z
   {% endif %}
   {% if PINOT_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/pinot.properties:/catalog/pinot.properties':z
+      - ./conf/{{conf_dir}}/catalog/pinot.properties:/catalog/pinot.properties:z
   {% endif %}
   {% if DRUID_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/druid.properties:/catalog/druid.properties':z
+      - ./conf/{{conf_dir}}/catalog/druid.properties:/catalog/druid.properties:z
   {% endif %}
   {% if CLICKHOUSE_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/clickhouse.properties:/catalog/clickhouse.properties':z
+      - ./conf/{{conf_dir}}/catalog/clickhouse.properties:/catalog/clickhouse.properties:z
   {% endif %}
   {% if external['SNOWFLAKE_enable'] | default(false) %}
-      - './conf/{{conf_dir}}/catalog/snowflake.properties:/catalog/snowflake.properties':z
+      - ./conf/{{conf_dir}}/catalog/snowflake.properties:/catalog/snowflake.properties:z
   {% endif %}    
   {% if PROMETHEUS_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/prometheus.properties:/catalog/prometheus.properties':z
+      - ./conf/{{conf_dir}}/catalog/prometheus.properties:/catalog/prometheus.properties:z
   {% endif %}
   {% if LOKI_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/loki.properties:/catalog/loki.properties':z
+      - ./conf/{{conf_dir}}/catalog/loki.properties:/catalog/loki.properties:z
   {% endif %}  
   {% if TRINO_with_duckdb_catalog | default(false) %}
-      - './conf/{{conf_dir}}/catalog/duckdb.properties:/catalog/duckdb.properties':z
+      - ./conf/{{conf_dir}}/catalog/duckdb.properties:/catalog/duckdb.properties:z
   {% endif %}
   {% if TRINO_with_faker_catalog | default(false) %}
-      - './conf/{{conf_dir}}/catalog/faker.properties:/catalog/faker.properties':z
+      - ./conf/{{conf_dir}}/catalog/faker.properties:/catalog/faker.properties:z
   {% endif %}
   {% if TRINO_with_tpch_catalog | default(false) %}
-      - './conf/{{conf_dir}}/catalog/tpch.properties:/catalog/tpch.properties':z
+      - ./conf/{{conf_dir}}/catalog/tpch.properties:/catalog/tpch.properties:z
   {% endif %}
   {% if TRINO_with_tpcds_catalog | default(false) %}
-      - './conf/{{conf_dir}}/catalog/tpcds.properties:/catalog/tpcds.properties':z
+      - ./conf/{{conf_dir}}/catalog/tpcds.properties:/catalog/tpcds.properties:z
   {% endif %}
   {% if TRINO_with_memory_catalog | default(false) %}
-      - './conf/{{conf_dir}}/catalog/memory.properties:/catalog/memory.properties':z
+      - ./conf/{{conf_dir}}/catalog/memory.properties:/catalog/memory.properties:z
   {% endif %}
   {% if TRINO_with_jmx_catalog | default(false) %}
-      - './conf/{{conf_dir}}/catalog/jmx.properties:/catalog/jmx.properties':z
+      - ./conf/{{conf_dir}}/catalog/jmx.properties:/catalog/jmx.properties:z
   {% endif %}
   {% if TRINO_with_gsheets_catalog | default(false) %}
-      - './conf/{{conf_dir}}/catalog/gsheets.properties:/catalog/gsheets.properties':z
+      - ./conf/{{conf_dir}}/catalog/gsheets.properties:/catalog/gsheets.properties:z
   {% endif %}  
   {% if TRINO_event_listeners is defined and TRINO_event_listeners | length | default(false) %}
     {% for eventListener in (TRINO_event_listeners.split(',')) %}
@@ -26295,7 +26295,7 @@ services:
   {% endif %}
   {% if TRINO_additional_catalogs is defined and TRINO_additional_catalogs | default(false) %}
     {% for catalogName in (TRINO_additional_catalogs.split(',')) %}
-      - './custom-conf/{{conf_dir}}/catalog/{{catalogName}}.properties:/catalog/{{catalogName}}.properties':z
+      - ./custom-conf/{{conf_dir}}/catalog/{{catalogName}}.properties:/catalog/{{catalogName}}.properties:z
     {% endfor %}
   {% endif %}
   {% if TRINO_additional_plugins is defined and TRINO_additional_plugins | default(false) %}
@@ -26515,138 +26515,138 @@ services:
       - ./conf/{{conf_dir}}/{{deployment_type}}/log-debug.properties:{{trino_etc_dir}}/log.properties:z
 {% if MINIO_enable or RUSTFS_enable or SEAWEEDFS_enable or external['S3_enable'] | default(false) %}
   {%if HIVE_METASTORE_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/hive.properties:/catalog/minio.properties':z
-      - './conf/{{conf_dir}}/catalog/hive.properties:/catalog/hive.properties':z
+      - ./conf/{{conf_dir}}/catalog/hive.properties:/catalog/minio.properties:z
+      - ./conf/{{conf_dir}}/catalog/hive.properties:/catalog/hive.properties:z
   {% endif %}
   {%if 'iceberg' in (table_formats_to_use | default('') | lower) %}
     {%if HIVE_METASTORE_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/iceberg-hive.properties:/catalog/iceberg_hive.properties':z
+      - ./conf/{{conf_dir}}/catalog/iceberg-hive.properties:/catalog/iceberg_hive.properties:z
     {% if __HIVE_METASTORE_version == "4.2.0" | default(false) %}
-      - './conf/{{conf_dir}}/catalog/iceberg-hive-rest.properties:/catalog/iceberg_hive_rest.properties':z
+      - ./conf/{{conf_dir}}/catalog/iceberg-hive-rest.properties:/catalog/iceberg_hive_rest.properties:z
     {% endif %}  
     {% endif %}  
     {%if TRINO_with_iceberg_rest_catalog | default(false) %}
-      - './conf/{{conf_dir}}/catalog/iceberg-rest.properties:/catalog/iceberg_rest.properties':z
+      - ./conf/{{conf_dir}}/catalog/iceberg-rest.properties:/catalog/iceberg_rest.properties:z
     {% endif %}
     {%if LAKEKEEPER_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/iceberg-lakekeeper.properties:/catalog/iceberg_lakekeeper.properties':z
+      - ./conf/{{conf_dir}}/catalog/iceberg-lakekeeper.properties:/catalog/iceberg_lakekeeper.properties:z
     {% endif %}
     {%if POLARIS_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/iceberg-polaris.properties:/catalog/iceberg_polaris.properties':z
+      - ./conf/{{conf_dir}}/catalog/iceberg-polaris.properties:/catalog/iceberg_polaris.properties:z
     {% endif %}
     {%if GRAVITINO_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/iceberg-gravitino.properties:/catalog/iceberg_gravitino.properties':z
+      - ./conf/{{conf_dir}}/catalog/iceberg-gravitino.properties:/catalog/iceberg_gravitino.properties:z
     {% endif %}
     {%if NESSIE_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/iceberg-nessie.properties:/catalog/iceberg_nessie.properties':z
+      - ./conf/{{conf_dir}}/catalog/iceberg-nessie.properties:/catalog/iceberg_nessie.properties:z
     {% endif %}
   {% endif %}  {#  'iceberg' in (table_formats_to_use | default('') | lower) #}
   {%if 'delta' in (table_formats_to_use | default('') | lower) | default(false) %}
-      - './conf/{{conf_dir}}/catalog/delta.properties:/catalog/delta.properties':z
+      - ./conf/{{conf_dir}}/catalog/delta.properties:/catalog/delta.properties:z
   {% endif %} 
   {%if 'hudi' in (table_formats_to_use | default('') | lower) | default(false) %}
-      - './conf/{{conf_dir}}/catalog/hudi.properties:/catalog/hudi.properties':z
+      - ./conf/{{conf_dir}}/catalog/hudi.properties:/catalog/hudi.properties:z
   {% endif %}
   {%if UNITY_CATALOG_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/iceberg-unity.properties:/catalog/iceberg_unity.properties':z
+      - ./conf/{{conf_dir}}/catalog/iceberg-unity.properties:/catalog/iceberg_unity.properties:z
   {% endif %}
 {%- endif -%}  {#  MINIO_enable #}
   {%if external['ADLS_enable'] | default(false) %}
-      - './conf/{{conf_dir}}/catalog/adls.properties:/catalog/adls.properties':z
+      - ./conf/{{conf_dir}}/catalog/adls.properties:/catalog/adls.properties:z
   {% endif %}
   {%if KAFKA_enable or external['KAFKA_enable'] | default(false) %}
       - ./conf/{{conf_dir}}/catalog/kafka-{{'file' if TRINO_kafka_descriptor_supplier | lower == 'file' else 'schema-registry'}}.properties:/catalog/kafka.properties
-      - './conf/{{conf_dir}}/kafka/descriptor/:{{trino_etc_dir}}/kafka/':z
+      - ./conf/{{conf_dir}}/kafka/descriptor/:{{trino_etc_dir}}/kafka/:z
     {% if ns.secureKafkaEnabled and ns.securityProtocolBROKER == 'SASL_PLAINTEXT' %}
-      - './security/kafka/sasl-scram/client.properties:{{trino_etc_dir}}/kafka-configuration.properties':z
+      - ./security/kafka/sasl-scram/client.properties:{{trino_etc_dir}}/kafka-configuration.properties:z
     {% else %}
-      - './conf/{{conf_dir}}/kafka/client.properties:{{trino_etc_dir}}/kafka-configuration.properties':z
+      - ./conf/{{conf_dir}}/kafka/client.properties:{{trino_etc_dir}}/kafka-configuration.properties:z
     {% endif %}
   {% endif %}
   {%if HADOOP_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/hdfs.properties:/catalog/hdfs.properties':z
+      - ./conf/{{conf_dir}}/catalog/hdfs.properties:/catalog/hdfs.properties:z
   {% endif %}
   {% if TRINO_with_hive_metastore_db_catalog and HIVE_METASTORE_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/hive_metastore_db.properties:/catalog/hive_metastore_db.properties':z
+      - ./conf/{{conf_dir}}/catalog/hive_metastore_db.properties:/catalog/hive_metastore_db.properties:z
   {% endif %}    
   {% if POSTGRESQL_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/postgresql.properties:/catalog/postgresql.properties':z
+      - ./conf/{{conf_dir}}/catalog/postgresql.properties:/catalog/postgresql.properties:z
   {% endif %}
   {% if TIMESCALEDB_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/timescaledb.properties:/catalog/timescaledb.properties':z
+      - ./conf/{{conf_dir}}/catalog/timescaledb.properties:/catalog/timescaledb.properties:z
   {% endif %}  
   {% if MYSQL_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/mysql.properties:/catalog/mysql.properties':z
+      - ./conf/{{conf_dir}}/catalog/mysql.properties:/catalog/mysql.properties:z
   {% endif %}
   {% if MARIADB_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/mariadb.properties:/catalog/mariadb.properties':z
+      - ./conf/{{conf_dir}}/catalog/mariadb.properties:/catalog/mariadb.properties:z
   {% endif %}
   {% if SQLSERVER_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/sqlserver.properties:/catalog/sqlserver.properties':z
+      - ./conf/{{conf_dir}}/catalog/sqlserver.properties:/catalog/sqlserver.properties:z
   {% endif %}
   {% if ORACLE_EE_enable or ORACLE_XE_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/oracle.properties:/catalog/oracle.properties':z
+      - ./conf/{{conf_dir}}/catalog/oracle.properties:/catalog/oracle.properties:z
   {% endif %}
   {% if IGNITE_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/ignite.properties:/catalog/ignite.properties':z
+      - ./conf/{{conf_dir}}/catalog/ignite.properties:/catalog/ignite.properties:z
   {% endif %}  
   {% if REDIS_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/redis.properties:/catalog/redis.properties':z
+      - ./conf/{{conf_dir}}/catalog/redis.properties:/catalog/redis.properties:z
   {% endif %}
   {% if REDIS_STACK_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/redis-stack.properties:/catalog/redis-stack.properties':z
-      - './conf/{{conf_dir}}/catalog/redis-search.properties:/catalog/redis-search.properties':z
+      - ./conf/{{conf_dir}}/catalog/redis-stack.properties:/catalog/redis-stack.properties:z
+      - ./conf/{{conf_dir}}/catalog/redis-search.properties:/catalog/redis-search.properties:z
   {% endif %}
   {% if SINGLE_STORE_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/singlestore.properties:/catalog/singlestore.properties':z
+      - ./conf/{{conf_dir}}/catalog/singlestore.properties:/catalog/singlestore.properties:z
   {% endif %}  
   {% if MONGO_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/mongo.properties:/catalog/mongo.properties':z
+      - ./conf/{{conf_dir}}/catalog/mongo.properties:/catalog/mongo.properties:z
   {% endif %}
   {% if ELASTICSEARCH_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/elasticsearch.properties:/catalog/elasticsearch.properties':z
+      - ./conf/{{conf_dir}}/catalog/elasticsearch.properties:/catalog/elasticsearch.properties:z
   {% endif %}
   {% if OPENSEARCH_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/opensearch.properties:/catalog/opensearch.properties':z
+      - ./conf/{{conf_dir}}/catalog/opensearch.properties:/catalog/opensearch.properties:z
   {% endif %}
   {% if PINOT_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/pinot.properties:/catalog/pinot.properties':z
+      - ./conf/{{conf_dir}}/catalog/pinot.properties:/catalog/pinot.properties:z
   {% endif %}
   {% if DRUID_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/druid.properties:/catalog/druid.properties':z
+      - ./conf/{{conf_dir}}/catalog/druid.properties:/catalog/druid.properties:z
   {% endif %}
   {% if CLICKHOUSE_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/clickhouse.properties:/catalog/clickhouse.properties':z
+      - ./conf/{{conf_dir}}/catalog/clickhouse.properties:/catalog/clickhouse.properties:z
   {% endif %}
   {% if external['SNOWFLAKE_enable'] | default(false) %}
-      - './conf/{{conf_dir}}/catalog/snowflake.properties:/catalog/snowflake.properties':z
+      - ./conf/{{conf_dir}}/catalog/snowflake.properties:/catalog/snowflake.properties:z
   {% endif %}  
   {% if PROMETHEUS_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/prometheus.properties:/catalog/prometheus.properties':z
+      - ./conf/{{conf_dir}}/catalog/prometheus.properties:/catalog/prometheus.properties:z
   {% endif %}
   {% if LOKI_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/loki.properties:/catalog/loki.properties':z
+      - ./conf/{{conf_dir}}/catalog/loki.properties:/catalog/loki.properties:z
   {% endif %}
   {% if TRINO_with_duckdb_catalog | default(false) %}
-      - './conf/{{conf_dir}}/catalog/duckdb.properties:/catalog/duckdb.properties':z
+      - ./conf/{{conf_dir}}/catalog/duckdb.properties:/catalog/duckdb.properties:z
   {% endif %}  
   {% if TRINO_with_faker_catalog | default(false) %}
-      - './conf/{{conf_dir}}/catalog/faker.properties:/catalog/faker.properties':z
+      - ./conf/{{conf_dir}}/catalog/faker.properties:/catalog/faker.properties:z
   {% endif %}  
   {% if TRINO_with_tpch_catalog | default(false) %}
-      - './conf/{{conf_dir}}/catalog/tpch.properties:/catalog/tpch.properties':z
+      - ./conf/{{conf_dir}}/catalog/tpch.properties:/catalog/tpch.properties:z
   {% endif %}
   {% if TRINO_with_tpcds_catalog | default(false) %}
-      - './conf/{{conf_dir}}/catalog/tpcds.properties:/catalog/tpcds.properties':z
+      - ./conf/{{conf_dir}}/catalog/tpcds.properties:/catalog/tpcds.properties:z
   {% endif %}
   {% if TRINO_with_memory_catalog | default(false) %}
-      - './conf/{{conf_dir}}/catalog/memory.properties:/catalog/memory.properties':z
+      - ./conf/{{conf_dir}}/catalog/memory.properties:/catalog/memory.properties:z
   {% endif %}
   {% if TRINO_with_jmx_catalog | default(false) %}
-      - './conf/{{conf_dir}}/catalog/jmx.properties:/catalog/jmx.properties':z
+      - ./conf/{{conf_dir}}/catalog/jmx.properties:/catalog/jmx.properties:z
   {% endif %}
   {% if TRINO_with_gsheets_catalog | default(false) %}
-      - './conf/{{conf_dir}}/catalog/gsheets.properties:/catalog/gsheets.properties':z
+      - ./conf/{{conf_dir}}/catalog/gsheets.properties:/catalog/gsheets.properties:z
   {% endif %}    
   {% if TRINO_event_listeners is defined and TRINO_event_listeners | length | default(false) %}
     {% for eventListener in (TRINO_event_listeners.split(',')) %}
@@ -26678,7 +26678,7 @@ services:
   {% endif %}
   {% if TRINO_additional_catalogs is defined and TRINO_additional_catalogs | default(false) %}
     {% for catalogName in (TRINO_additional_catalogs.split(',')) %}
-      - './custom-conf/{{conf_dir}}/catalog/{{catalogName}}.properties:/catalog/{{catalogName}}.properties':z
+      - ./custom-conf/{{conf_dir}}/catalog/{{catalogName}}.properties:/catalog/{{catalogName}}.properties:z
     {% endfor %}
   {% endif %}
   {% if TRINO_additional_plugins is defined and TRINO_additional_plugins | default(false) %}
@@ -27016,115 +27016,115 @@ services:
       - ./conf/presto/{{deployment_type}}/node.properties:{{presto_etc_dir}}/node.properties:z
 {% if MINIO_enable or RUSTFS_enable or SEAWEEDFS_enable or external['S3_enable'] | default(false) %}
   {%if HIVE_METASTORE_enable | default(false) %}
-      - './conf/presto/catalog/hive.properties:{{presto_etc_dir}}/catalog/minio.properties':z
-      - './conf/presto/catalog/hive.properties:{{presto_etc_dir}}/catalog/hive.properties':z
+      - ./conf/presto/catalog/hive.properties:{{presto_etc_dir}}/catalog/minio.properties:z
+      - ./conf/presto/catalog/hive.properties:{{presto_etc_dir}}/catalog/hive.properties:z
   {% endif %}
   {%if 'iceberg' in (table_formats_to_use | default('') | lower) %}
     {%if HIVE_METASTORE_enable | default(false) %}
-      - './conf/presto/catalog/iceberg-hive.properties:{{presto_etc_dir}}/catalog/iceberg_hive.properties':z
+      - ./conf/presto/catalog/iceberg-hive.properties:{{presto_etc_dir}}/catalog/iceberg_hive.properties:z
     {% if __HIVE_METASTORE_version == "4.2.0" | default(false) %}
-      - './conf/presto/catalog/iceberg-hive-rest.properties:{{presto_etc_dir}}/catalog/iceberg_hive_rest.properties':z
+      - ./conf/presto/catalog/iceberg-hive-rest.properties:{{presto_etc_dir}}/catalog/iceberg_hive_rest.properties:z
     {% endif %}  
     {% endif %}  
     {%if TRINO_with_iceberg_rest_catalog | default(false) %}
-      - './conf/presto/catalog/iceberg-rest.properties:{{presto_etc_dir}}/catalog/iceberg_rest.properties':z
+      - ./conf/presto/catalog/iceberg-rest.properties:{{presto_etc_dir}}/catalog/iceberg_rest.properties:z
     {% endif %}
     {%if LAKEKEEPER_enable | default(false) %}
-      - './conf/presto/catalog/iceberg-lakekeeper.properties:{{presto_etc_dir}}/catalog/iceberg_lakekeeper.properties':z
+      - ./conf/presto/catalog/iceberg-lakekeeper.properties:{{presto_etc_dir}}/catalog/iceberg_lakekeeper.properties:z
     {% endif %}
     {%if POLARIS_enable | default(false) %}
-      - './conf/presto/catalog/iceberg-polaris.properties:{{presto_etc_dir}}/catalog/iceberg_polaris.properties':z
+      - ./conf/presto/catalog/iceberg-polaris.properties:{{presto_etc_dir}}/catalog/iceberg_polaris.properties:z
     {% endif %}
     {%if GRAVITINO_enable | default(false) %}
-      - './conf/presto/catalog/iceberg-gravitino.properties:{{presto_etc_dir}}/catalog/iceberg_gravitino.properties':z
+      - ./conf/presto/catalog/iceberg-gravitino.properties:{{presto_etc_dir}}/catalog/iceberg_gravitino.properties:z
     {% endif %}
     {%if NESSIE_enable | default(false) %}
-      - './conf/presto/catalog/iceberg-nessie.properties:{{presto_etc_dir}}/catalog/iceberg_nessie.properties':z
+      - ./conf/presto/catalog/iceberg-nessie.properties:{{presto_etc_dir}}/catalog/iceberg_nessie.properties:z
     {% endif %}
   {% endif -%}  {#  'iceberg' in (table_formats_to_use | default('') | lower) #}
   {%if 'delta' in (table_formats_to_use | default('') | lower) | default(false) %}
-      - './conf/presto/catalog/delta.properties:{{presto_etc_dir}}/catalog/delta.properties':z
+      - ./conf/presto/catalog/delta.properties:{{presto_etc_dir}}/catalog/delta.properties:z
   {% endif -%} 
   {%if 'hudi' in (table_formats_to_use | default('') | lower) | default(false) %}
-      - './conf/presto/catalog/hudi.properties:{{presto_etc_dir}}/catalog/hudi.properties':z
+      - ./conf/presto/catalog/hudi.properties:{{presto_etc_dir}}/catalog/hudi.properties:z
   {% endif %}
   {%if UNITY_CATALOG_enable | default(false) %}
-      - './conf/presto/catalog/iceberg-unity.properties:{{presto_etc_dir}}/catalog/iceberg_unity.properties':z
+      - ./conf/presto/catalog/iceberg-unity.properties:{{presto_etc_dir}}/catalog/iceberg_unity.properties:z
   {% endif %}
 {%- endif -%}  {#  MINIO_enable #}
 {%- if (KAFKA_enable or external['KAFKA_enable']) and (PRESTO_kafka_descriptor_supplier == 'schema-registry' or (PRESTO_kafka_descriptor_supplier == 'file' and PRESTO_kafka_table_names))  | default(false) %}
       - './conf/{{conf_dir}}/catalog/kafka-{{ 'file' if PRESTO_kafka_descriptor_supplier | lower == 'file' else 'schema-registry' }}.properties:/catalog/kafka.properties'
-      - './conf/{{conf_dir}}/kafka/descriptor:{{presto_etc_dir}}/kafka/':z
+      - ./conf/{{conf_dir}}/kafka/descriptor:{{presto_etc_dir}}/kafka/:z
   {% if ns.secureKafkaEnabled and ns.securityProtocolBROKER == 'SASL_PLAINTEXT' %}
-      - './security/kafka/sasl-scram/client.properties:{{presto_etc_dir}}/kafka-configuration.properties':z
+      - ./security/kafka/sasl-scram/client.properties:{{presto_etc_dir}}/kafka-configuration.properties:z
   {% else %}
-      - './conf/{{conf_dir}}/kafka/client.properties:{{presto_etc_dir}}/kafka-configuration.properties':z
+      - ./conf/{{conf_dir}}/kafka/client.properties:{{presto_etc_dir}}/kafka-configuration.properties:z
   {%- endif -%}
   {%- if ns.secureKafkaEnabled and ns.securityProtocol == 'SSL' %}
-      - './security/kafka/client-certs:/certs':z
+      - ./security/kafka/client-certs:/certs:z
   {%- endif -%}
 {%- endif -%}
 
   {%if HADOOP_enable | default(false) %}
-      - './conf/presto/catalog/hdfs.properties:{{presto_etc_dir}}/catalog/hdfs.properties':z
+      - ./conf/presto/catalog/hdfs.properties:{{presto_etc_dir}}/catalog/hdfs.properties:z
   {% endif %}
   {% if PRESTO_with_hive_metastore_db_catalog and HIVE_METASTORE_enable | default(false) %}
-      - './conf/presto/catalog/hive_metastore_db.properties:{{presto_etc_dir}}/catalog/hive_metastore_db.properties':z
+      - ./conf/presto/catalog/hive_metastore_db.properties:{{presto_etc_dir}}/catalog/hive_metastore_db.properties:z
   {% endif %}
   {% if POSTGRESQL_enable | default(false) %}
-      - './conf/presto/catalog/postgresql.properties:{{presto_etc_dir}}/catalog/postgresql.properties':z
+      - ./conf/presto/catalog/postgresql.properties:{{presto_etc_dir}}/catalog/postgresql.properties:z
   {% endif %}
   {% if MYSQL_enable | default(false) %}
-      - './conf/presto/catalog/mysql.properties:{{presto_etc_dir}}/catalog/mysql.properties':z
+      - ./conf/presto/catalog/mysql.properties:{{presto_etc_dir}}/catalog/mysql.properties:z
   {% endif %}
   {% if MARIADB_enable | default(false) %}
-      - './conf/presto/catalog/mariadb.properties:{{presto_etc_dir}}/catalog/mariadb.properties':z
+      - ./conf/presto/catalog/mariadb.properties:{{presto_etc_dir}}/catalog/mariadb.properties:z
   {% endif %}
   {% if SQLSERVER_enable | default(false) %}
-      - './conf/presto/catalog/sqlserver.properties:{{presto_etc_dir}}/catalog/sqlserver.properties':z
+      - ./conf/presto/catalog/sqlserver.properties:{{presto_etc_dir}}/catalog/sqlserver.properties:z
   {% endif %}
   {% if ORACLE_EE_enable or ORACLE_XE_enable | default(false) %}
-      - './conf/presto/catalog/oracle.properties:{{presto_etc_dir}}/catalog/oracle.properties':z
+      - ./conf/presto/catalog/oracle.properties:{{presto_etc_dir}}/catalog/oracle.properties:z
   {% endif %}
   {% if IGNITE_enable | default(false) %}
-      - './conf/presto/catalog/ignite.properties:{{presto_etc_dir}}/catalog/ignite.properties':z
+      - ./conf/presto/catalog/ignite.properties:{{presto_etc_dir}}/catalog/ignite.properties:z
   {% endif %}
   {% if REDIS_enable | default(false) %}
-      - './conf/presto/catalog/redis.properties:{{presto_etc_dir}}/catalog/redis.properties':z
+      - ./conf/presto/catalog/redis.properties:{{presto_etc_dir}}/catalog/redis.properties:z
   {% endif %}
   {% if REDIS_STACK_enable | default(false) %}
-      - './conf/presto/catalog/redis-stack.properties:{{presto_etc_dir}}/catalog/redis-stack.properties':z
-      - './conf/presto/catalog/redis-search.properties:{{presto_etc_dir}}/catalog/redis-search.properties':z
+      - ./conf/presto/catalog/redis-stack.properties:{{presto_etc_dir}}/catalog/redis-stack.properties:z
+      - ./conf/presto/catalog/redis-search.properties:{{presto_etc_dir}}/catalog/redis-search.properties:z
   {% endif %}
   {% if SINGLE_STORE_enable | default(false) %}
-      - './conf/presto/catalog/singlestore.properties:{{presto_etc_dir}}/catalog/singlestore.properties':z
+      - ./conf/presto/catalog/singlestore.properties:{{presto_etc_dir}}/catalog/singlestore.properties:z
   {% endif %}
   {% if MONGO_enable | default(false) %}
-      - './conf/presto/catalog/mongo.properties:{{presto_etc_dir}}/catalog/mongo.properties':z
+      - ./conf/presto/catalog/mongo.properties:{{presto_etc_dir}}/catalog/mongo.properties:z
   {% endif %}
   {% if ELASTICSEARCH_enable | default(false) %}
-      - './conf/presto/catalog/elasticsearch.properties:{{presto_etc_dir}}/catalog/elasticsearch.properties':z
+      - ./conf/presto/catalog/elasticsearch.properties:{{presto_etc_dir}}/catalog/elasticsearch.properties:z
   {% endif %}
   {% if OPENSEARCH_enable | default(false) %}
-      - './conf/presto/catalog/opensearch.properties:{{presto_etc_dir}}/catalog/opensearch.properties':z
+      - ./conf/presto/catalog/opensearch.properties:{{presto_etc_dir}}/catalog/opensearch.properties:z
   {% endif %}
   {% if PINOT_enable | default(false) %}
-      - './conf/presto/catalog/pinot.properties:{{presto_etc_dir}}/catalog/pinot.properties':z
+      - ./conf/presto/catalog/pinot.properties:{{presto_etc_dir}}/catalog/pinot.properties:z
   {% endif %}
   {% if DRUID_enable | default(false) %}
-      - './conf/presto/catalog/druid.properties:{{presto_etc_dir}}/catalog/druid.properties':z
+      - ./conf/presto/catalog/druid.properties:{{presto_etc_dir}}/catalog/druid.properties:z
   {% endif %}
   {% if CLICKHOUSE_enable | default(false) %}
-      - './conf/presto/catalog/clickhouse.properties:{{presto_etc_dir}}/catalog/clickhouse.properties':z
+      - ./conf/presto/catalog/clickhouse.properties:{{presto_etc_dir}}/catalog/clickhouse.properties:z
   {% endif %}
   {% if external['SNOWFLAKE_enable'] | default(false) %}
-      - './conf/presto/catalog/snowflake.properties:{{presto_etc_dir}}/catalog/snowflake.properties':z
+      - ./conf/presto/catalog/snowflake.properties:{{presto_etc_dir}}/catalog/snowflake.properties:z
   {% endif %}    
   {% if PROMETHEUS_enable | default(false) %}
-      - './conf/presto/catalog/prometheus.properties:{{presto_etc_dir}}/catalog/prometheus.properties':z
+      - ./conf/presto/catalog/prometheus.properties:{{presto_etc_dir}}/catalog/prometheus.properties:z
   {% endif %}
   {% if LOKI_enable | default(false) %}
-      - './conf/presto/catalog/loki.properties:{{presto_etc_dir}}/catalog/loki.properties':z
+      - ./conf/presto/catalog/loki.properties:{{presto_etc_dir}}/catalog/loki.properties:z
   {% endif %}  
 
     {%if use_timezone | default(false) %}
@@ -27279,115 +27279,115 @@ services:
 
 {% if MINIO_enable or RUSTFS_enable or SEAWEEDFS_enable or external['S3_enable'] | default(false) %}
   {%if HIVE_METASTORE_enable | default(false) %}
-      - './conf/presto/catalog/hive.properties:{{presto_etc_dir}}/catalog/minio.properties':z
-      - './conf/presto/catalog/hive.properties:{{presto_etc_dir}}/catalog/hive.properties':z
+      - ./conf/presto/catalog/hive.properties:{{presto_etc_dir}}/catalog/minio.properties:z
+      - ./conf/presto/catalog/hive.properties:{{presto_etc_dir}}/catalog/hive.properties:z
   {% endif %}
   {%if 'iceberg' in (table_formats_to_use | default('') | lower) %}
     {%if HIVE_METASTORE_enable | default(false) %}
-      - './conf/presto/catalog/iceberg-hive.properties:{{presto_etc_dir}}/catalog/iceberg_hive.properties':z
+      - ./conf/presto/catalog/iceberg-hive.properties:{{presto_etc_dir}}/catalog/iceberg_hive.properties:z
     {% if __HIVE_METASTORE_version == "4.2.0" | default(false) %}
-      - './conf/presto/catalog/iceberg-hive-rest.properties:{{presto_etc_dir}}/catalog/iceberg_hive_rest.properties':z
+      - ./conf/presto/catalog/iceberg-hive-rest.properties:{{presto_etc_dir}}/catalog/iceberg_hive_rest.properties:z
     {% endif %}  
     {% endif %}  
     {%if TRINO_with_iceberg_rest_catalog | default(false) %}
-      - './conf/presto/catalog/iceberg-rest.properties:{{presto_etc_dir}}/catalog/iceberg_rest.properties':z
+      - ./conf/presto/catalog/iceberg-rest.properties:{{presto_etc_dir}}/catalog/iceberg_rest.properties:z
     {% endif %}
     {%if LAKEKEEPER_enable | default(false) %}
-      - './conf/presto/catalog/iceberg-lakekeeper.properties:{{presto_etc_dir}}/catalog/iceberg_lakekeeper.properties':z
+      - ./conf/presto/catalog/iceberg-lakekeeper.properties:{{presto_etc_dir}}/catalog/iceberg_lakekeeper.properties:z
     {% endif %}
     {%if POLARIS_enable | default(false) %}
-      - './conf/presto/catalog/iceberg-polaris.properties:{{presto_etc_dir}}/catalog/iceberg_polaris.properties':z
+      - ./conf/presto/catalog/iceberg-polaris.properties:{{presto_etc_dir}}/catalog/iceberg_polaris.properties:z
     {% endif %}
     {%if GRAVITINO_enable | default(false) %}
-      - './conf/presto/catalog/iceberg-gravitino.properties:{{presto_etc_dir}}/catalog/iceberg_gravitino.properties':z
+      - ./conf/presto/catalog/iceberg-gravitino.properties:{{presto_etc_dir}}/catalog/iceberg_gravitino.properties:z
     {% endif %}
     {%if NESSIE_enable | default(false) %}
-      - './conf/presto/catalog/iceberg-nessie.properties:{{presto_etc_dir}}/catalog/iceberg_nessie.properties':z
+      - ./conf/presto/catalog/iceberg-nessie.properties:{{presto_etc_dir}}/catalog/iceberg_nessie.properties:z
     {% endif %}
   {% endif -%}  {#  'iceberg' in (table_formats_to_use | default('') | lower) #}
   {%if 'delta' in (table_formats_to_use | default('') | lower) | default(false) %}
-      - './conf/presto/catalog/delta.properties:{{presto_etc_dir}}/catalog/delta.properties':z
+      - ./conf/presto/catalog/delta.properties:{{presto_etc_dir}}/catalog/delta.properties:z
   {% endif -%} 
   {%if 'hudi' in (table_formats_to_use | default('') | lower) | default(false) %}
-      - './conf/presto/catalog/hudi.properties:{{presto_etc_dir}}/catalog/hudi.properties':z
+      - ./conf/presto/catalog/hudi.properties:{{presto_etc_dir}}/catalog/hudi.properties:z
   {% endif %}
   {%if UNITY_CATALOG_enable | default(false) %}
-      - './conf/presto/catalog/iceberg-unity.properties:{{presto_etc_dir}}/catalog/iceberg_unity.properties':z
+      - ./conf/presto/catalog/iceberg-unity.properties:{{presto_etc_dir}}/catalog/iceberg_unity.properties:z
   {% endif %}
 {%- endif -%}  {#  MINIO_enable #}
 {%- if (KAFKA_enable or external['KAFKA_enable']) and (PRESTO_kafka_descriptor_supplier == 'schema-registry' or (PRESTO_kafka_descriptor_supplier == 'file' and PRESTO_kafka_table_names))  | default(false) %}
       - './conf/{{conf_dir}}/catalog/kafka-{{ 'file' if PRESTO_kafka_descriptor_supplier | lower == 'file' else 'schema-registry' }}.properties:/catalog/kafka.properties'
-      - './conf/{{conf_dir}}/kafka/descriptor:{{presto_etc_dir}}/kafka/':z
+      - ./conf/{{conf_dir}}/kafka/descriptor:{{presto_etc_dir}}/kafka/:z
   {% if ns.secureKafkaEnabled and ns.securityProtocolBROKER == 'SASL_PLAINTEXT' %}
-      - './security/kafka/sasl-scram/client.properties:{{presto_etc_dir}}/kafka-configuration.properties':z
+      - ./security/kafka/sasl-scram/client.properties:{{presto_etc_dir}}/kafka-configuration.properties:z
   {% else %}
-      - './conf/{{conf_dir}}/kafka/client.properties:{{presto_etc_dir}}/kafka-configuration.properties':z
+      - ./conf/{{conf_dir}}/kafka/client.properties:{{presto_etc_dir}}/kafka-configuration.properties:z
   {%- endif -%}
   {%- if ns.secureKafkaEnabled and ns.securityProtocol == 'SSL' %}
-      - './security/kafka/client-certs:/certs':z
+      - ./security/kafka/client-certs:/certs:z
   {%- endif -%}
 {%- endif -%}  
 
   {%if HADOOP_enable | default(false) %}
-      - './conf/{{conf_dir}}/catalog/hdfs.properties:/catalog/hdfs.properties':z
+      - ./conf/{{conf_dir}}/catalog/hdfs.properties:/catalog/hdfs.properties:z
   {% endif %}
   {% if PRESTO_with_hive_metastore_db_catalog and HIVE_METASTORE_enable | default(false) %}
-      - './conf/presto/catalog/hive_metastore_db.properties:{{presto_etc_dir}}/catalog/hive_metastore_db.properties':z
+      - ./conf/presto/catalog/hive_metastore_db.properties:{{presto_etc_dir}}/catalog/hive_metastore_db.properties:z
   {% endif %}
   {% if POSTGRESQL_enable | default(false) %}
-      - './conf/presto/catalog/postgresql.properties:{{presto_etc_dir}}/catalog/postgresql.properties':z
+      - ./conf/presto/catalog/postgresql.properties:{{presto_etc_dir}}/catalog/postgresql.properties:z
   {% endif %}
   {% if MYSQL_enable | default(false) %}
-      - './conf/presto/catalog/mysql.properties:{{presto_etc_dir}}/catalog/mysql.properties':z
+      - ./conf/presto/catalog/mysql.properties:{{presto_etc_dir}}/catalog/mysql.properties:z
   {% endif %}
   {% if MARIADB_enable | default(false) %}
-      - './conf/presto/catalog/mariadb.properties:{{presto_etc_dir}}/catalog/mariadb.properties':z
+      - ./conf/presto/catalog/mariadb.properties:{{presto_etc_dir}}/catalog/mariadb.properties:z
   {% endif %}
   {% if SQLSERVER_enable | default(false) %}
-      - './conf/presto/catalog/sqlserver.properties:{{presto_etc_dir}}/catalog/sqlserver.properties':z
+      - ./conf/presto/catalog/sqlserver.properties:{{presto_etc_dir}}/catalog/sqlserver.properties:z
   {% endif %}
   {% if ORACLE_EE_enable or ORACLE_XE_enable | default(false) %}
-      - './conf/presto/catalog/oracle.properties:{{presto_etc_dir}}/catalog/oracle.properties':z
+      - ./conf/presto/catalog/oracle.properties:{{presto_etc_dir}}/catalog/oracle.properties:z
   {% endif %}
   {% if IGNITE_enable | default(false) %}
-      - './conf/presto/catalog/ignite.properties:{{presto_etc_dir}}/catalog/ignite.properties':z
+      - ./conf/presto/catalog/ignite.properties:{{presto_etc_dir}}/catalog/ignite.properties:z
   {% endif %}
   {% if REDIS_enable | default(false) %}
-      - './conf/presto/catalog/redis.properties:{{presto_etc_dir}}/catalog/redis.properties':z
+      - ./conf/presto/catalog/redis.properties:{{presto_etc_dir}}/catalog/redis.properties:z
   {% endif %}
   {% if REDIS_STACK_enable | default(false) %}
-      - './conf/presto/catalog/redis-stack.properties:{{presto_etc_dir}}/catalog/redis-stack.properties':z
-      - './conf/presto/catalog/redis-search.properties:{{presto_etc_dir}}/catalog/redis-search.properties':z
+      - ./conf/presto/catalog/redis-stack.properties:{{presto_etc_dir}}/catalog/redis-stack.properties:z
+      - ./conf/presto/catalog/redis-search.properties:{{presto_etc_dir}}/catalog/redis-search.properties:z
   {% endif %}
   {% if SINGLE_STORE_enable | default(false) %}
-      - './conf/presto/catalog/singlestore.properties:{{presto_etc_dir}}/catalog/singlestore.properties':z
+      - ./conf/presto/catalog/singlestore.properties:{{presto_etc_dir}}/catalog/singlestore.properties:z
   {% endif %}
   {% if MONGO_enable | default(false) %}
-      - './conf/presto/catalog/mongo.properties:{{presto_etc_dir}}/catalog/mongo.properties':z
+      - ./conf/presto/catalog/mongo.properties:{{presto_etc_dir}}/catalog/mongo.properties:z
   {% endif %}
   {% if ELASTICSEARCH_enable | default(false) %}
-      - './conf/presto/catalog/elasticsearch.properties:{{presto_etc_dir}}/catalog/elasticsearch.properties':z
+      - ./conf/presto/catalog/elasticsearch.properties:{{presto_etc_dir}}/catalog/elasticsearch.properties:z
   {% endif %}
   {% if OPENSEARCH_enable | default(false) %}
-      - './conf/presto/catalog/opensearch.properties:{{presto_etc_dir}}/catalog/opensearch.properties':z
+      - ./conf/presto/catalog/opensearch.properties:{{presto_etc_dir}}/catalog/opensearch.properties:z
   {% endif %}
   {% if PINOT_enable | default(false) %}
-      - './conf/presto/catalog/pinot.properties:{{presto_etc_dir}}/catalog/pinot.properties':z
+      - ./conf/presto/catalog/pinot.properties:{{presto_etc_dir}}/catalog/pinot.properties:z
   {% endif %}
   {% if DRUID_enable | default(false) %}
-      - './conf/presto/catalog/druid.properties:{{presto_etc_dir}}/catalog/druid.properties':z
+      - ./conf/presto/catalog/druid.properties:{{presto_etc_dir}}/catalog/druid.properties:z
   {% endif %}
   {% if CLICKHOUSE_enable | default(false) %}
-      - './conf/presto/catalog/clickhouse.properties:{{presto_etc_dir}}/catalog/clickhouse.properties':z
+      - ./conf/presto/catalog/clickhouse.properties:{{presto_etc_dir}}/catalog/clickhouse.properties:z
   {% endif %}
   {% if external['SNOWFLAKE_enable'] | default(false) %}
-      - './conf/presto/catalog/snowflake.properties:{{presto_etc_dir}}/catalog/snowflake.properties':z
+      - ./conf/presto/catalog/snowflake.properties:{{presto_etc_dir}}/catalog/snowflake.properties:z
   {% endif %}    
   {% if PROMETHEUS_enable | default(false) %}
-      - './conf/presto/catalog/prometheus.properties:{{presto_etc_dir}}/catalog/prometheus.properties':z
+      - ./conf/presto/catalog/prometheus.properties:{{presto_etc_dir}}/catalog/prometheus.properties:z
   {% endif %}
   {% if LOKI_enable | default(false) %}
-      - './conf/presto/catalog/loki.properties:{{presto_etc_dir}}/catalog/loki.properties':z
+      - ./conf/presto/catalog/loki.properties:{{presto_etc_dir}}/catalog/loki.properties:z
   {% endif %}  
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
@@ -28920,7 +28920,7 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer:z
-      - './conf/awscli/s3cfg.template:/root/.s3cfg.template':z
+      - ./conf/awscli/s3cfg.template:/root/.s3cfg.template:z
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -34622,7 +34622,7 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer:z
-      - './s3-bucket:/opt/s3fs/bucket:rshared':z
+      - ./s3-bucket:/opt/s3fs/bucket:rshared:z
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
