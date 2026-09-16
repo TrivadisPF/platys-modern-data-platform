@@ -696,7 +696,7 @@ networks:
 {% set __LAKEKEEPER_version = LAKEKEEPER_version | default('latest') -%}
 
 {% set __POLARIS_version = POLARIS_version | default('latest') -%}
-{% set __POLARIS_UI_version = POLARIS_UI_version | default('latest') -%}
+{% set __POLARIS_ui_version = POLARIS_ui_version | default('latest') -%}
 
 {% set __GRAVITINO_version = GRAVITINO_version | default('latest') -%}
 
@@ -29654,6 +29654,15 @@ services:
       polaris.features."ALLOW_INSECURE_STORAGE_TYPES": "true"
       polaris.features."SUPPORTED_CATALOG_STORAGE_TYPES": "[\"FILE\",\"S3\",\"GCS\",\"AZURE\"]"
       polaris.readiness.ignore-severe-issues: "true"
+    {% if POLARIS_ui_enabled |  default(false) %}
+      QUARKUS_HTTP_CORS_ENABLED: true
+      QUARKUS_HTTP_CORS_ORIGINS: http://${PUBLIC_IP}:28494
+      QUARKUS_HTTP_CORS_METHODS: GET,POST,PUT,DELETE,PATCH,OPTIONS
+      QUARKUS_HTTP_CORS_HEADERS: Content-Type,Authorization,Polaris-Realm,X-Request-ID
+      QUARKUS_HTTP_CORS_EXPOSED_HEADERS: '*'
+      QUARKUS_HTTP_CORS_ACCESS_CONTROL_ALLOW_CREDENTIALS: true
+      QUARKUS_HTTP_CORS_ACCESS_CONTROL_MAX_AGE: PT10M         
+    {% endif %}   {#  POLARIS_ui_enabled #}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -29938,7 +29947,7 @@ services:
   {% if POLARIS_ui_enabled | default(false) %}
   #  ================================== Polaris UI ========================================== #
   polaris-ui:
-    image: docker.io/apache/polaris-console:{{__POLARIS_UI_version}}
+    image: docker.io/trivadis/polaris-console:{{__POLARIS_ui_version}}
     container_name: polaris-ui
     hostname: polaris-ui
     labels:
@@ -29951,7 +29960,8 @@ services:
     depends_on:
       - polaris
     environment:
-      VITE_POLARIS_API_URL: http://polaris:8181
+      VITE_POLARIS_API_URL: http://${PUBLIC_IP}:28467
+      VITE_OAUTH_TOKEN_URL: http://${PUBLIC_IP}:28467/api/catalog/v1/oauth/tokens
       VITE_POLARIS_REALM: {{POLARIS_realm | default('POLARIS')}}
       VITE_POLARIS_PRINCIPAL_SCOPE: PRINCIPAL_ROLE:ALL
     {%if use_timezone | default(false) %}
