@@ -29728,7 +29728,7 @@ services:
     environment:
       - CLIENT_ID={{POLARIS_client_id | default('admin')}}
       - CLIENT_SECRET=${PLATYS_POLARIS_CLIENT_SECRET:-{{POLARIS_client_secret | default('abc123!')}}}
-      - CATALOG_NAME=quickstart_catalog
+      - CATALOG_NAME={{polarisCatalogName}}
       - REALM={{POLARIS_realm | default('postgres')}}
     volumes:
       - ./init/polaris/:/polaris:z
@@ -29821,12 +29821,12 @@ services:
         }
         echo "✅ Principal role created"
 
-        echo "Creating catalog role 'quickstart_catalog_role'..."
+        echo "Creating catalog role '{{polarisCatalogName}}_role'..."
         RESPONSE=$$(curl --fail-with-body -s -S -X POST http://polaris:8181/api/management/v1/catalogs/$$CATALOG_NAME/catalog-roles \
           -H "Authorization: Bearer $$TOKEN" \
           -H "Polaris-Realm: $$REALM" \
           -H "Content-Type: application/json" \
-          -d '{"catalogRole": {"name": "quickstart_catalog_role", "properties": {}}}' 2>&1) && echo -n "" || {
+          -d '{"catalogRole": {"name": "{{polarisCatalogName}}_role", "properties": {}}}' 2>&1) && echo -n "" || {
           echo "❌ Failed to create catalog role"
           echo "$$RESPONSE" >&2
           exit 1
@@ -29850,7 +29850,7 @@ services:
           -H "Authorization: Bearer $$TOKEN" \
           -H "Polaris-Realm: $$REALM" \
           -H "Content-Type: application/json" \
-          -d '{"catalogRole": {"name": "quickstart_catalog_role"}}' 2>&1) && echo -n "" || {
+          -d '{"catalogRole": {"name": "{{polarisCatalogName}}_role"}}' 2>&1) && echo -n "" || {
           echo "❌ Failed to assign catalog role"
           echo "$$RESPONSE" >&2
           exit 1
@@ -29858,7 +29858,7 @@ services:
         echo "✅ Catalog role assigned"
 
         echo "Granting CATALOG_MANAGE_CONTENT privilege..."
-        RESPONSE=$$(curl --fail-with-body -s -S -X PUT http://polaris:8181/api/management/v1/catalogs/$$CATALOG_NAME/catalog-roles/quickstart_catalog_role/grants \
+        RESPONSE=$$(curl --fail-with-body -s -S -X PUT http://polaris:8181/api/management/v1/catalogs/$$CATALOG_NAME/catalog-roles/{{polarisCatalogName}}_role/grants \
           -H "Authorization: Bearer $$TOKEN" \
           -H "Polaris-Realm: $$REALM" \
           -H "Content-Type: application/json" \
