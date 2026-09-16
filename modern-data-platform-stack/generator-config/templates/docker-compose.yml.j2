@@ -746,6 +746,7 @@ networks:
 {% set __HAWTIO_version = HAWTIO_version | default('latest') -%}
 {% set __SPRING_BOOT_ADMIN_version = SPRING_BOOT_ADMIN_version | default('latest') -%}
 {% set __WETTY_version = WETTY_version | default('latest') -%}
+{% set __MITMPROXY_version = MITMPROXY_version | default('latest') -%}
 
 {% set __RANETO_version = RANETO_version | default('latest') -%}
 {% set __MARKDOWN_MADNESS_version = MARKDOWN_MADNESS_version | default('latest') -%}
@@ -1209,6 +1210,7 @@ networks:
   {% set HAWTIO_enable = false -%}
   {% set SPRING_BOOT_ADMIN_enable = false -%}
   {% set WETTY_enable = false -%}
+  {% set MITMPROXY_enable = false -%}
   {% set RANETO_enable = false -%}
   {% set MARKDOWN_MADNESS_enable = false -%}
   {% set MARKDOWN_VIEWER_enable = false -%}
@@ -34609,6 +34611,44 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
 {% endif %}   {# WETTY_enable #}
+
+{% if MITMPROXY_enable | default(false) %}
+  #  ================================== mitmproxy ========================================== #
+  mitmproxy:
+    image: docker.io/mitmproxy/mitmproxy:{{__MITMPROXY_version}}
+    container_name: mitmproxy
+    hostname: mitmproxy
+    labels:
+      com.platys.name: "mitmproxy"
+      com.platys.description: "Interactive HTTPS proxy for debugging and testing"
+      com.platys.webui.title: "mitmproxy Web UI"
+      com.platys.webui.url: "http://dataplatform:9050"
+    ports:
+      - "9051:8080"
+      - "9050:8081"
+    command:
+      - mitmweb
+      - --web-host
+      - 0.0.0.0
+      - --web-port
+      - "8081"
+      - --mode
+      - regular@8080
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer:z
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+{% endif %}   {# MITMPROXY_enable #}
 
 {% if PYTHON_enable | default(false) %}
   #  ================================== python ========================================== #

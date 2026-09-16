@@ -13,7 +13,8 @@ See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/plat
  * Nexus
  * Coder
  * Polaris Console (UI)
- * Cosmo Router
+ * Wundergraph Cosmo Platform
+ * mitmproxy
  
 ### Version upgrades
  
