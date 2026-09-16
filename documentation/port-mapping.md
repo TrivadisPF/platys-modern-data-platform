@@ -880,6 +880,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28492 | 8000 | risingwave-mcp |
 28493 | 9097 | mcp-trino |
 28494 | 8080 | polaris-ui |
+28495 | 3002 | cosmo-router |
 
 
 ## Ports > 28500

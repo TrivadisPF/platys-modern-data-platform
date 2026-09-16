@@ -603,6 +603,7 @@ networks:
 
 {% set __HASURA_version = HASURA_version | default('latest') -%}
 {% set __GRAPHQL_MESH_version = GRAPHQL_MESH_version | default('latest') -%}
+{% set __COSMO_ROUTER_version = COSMO_ROUTER_version | default('latest') -%}
 {% set __DIRECTUS_version = DIRECTUS_version | default('latest') -%}
 
 {% set __TYK_GATEWAY_version = TYK_GATEWAY_version | default('latest') -%}
@@ -1113,6 +1114,7 @@ networks:
   {% set DRILL_enable = false -%}
   {% set HASURA_enable = false -%}
   {% set GRAPHQL_MESH_enable = false -%}
+  {% set COSMO_ROUTER_enable = false -%}
   {% set DIRECTUS_enable = false -%}
   {% set TYK_GATEWAY_enable = false -%}
   {% set TYK_PUMP_enable = false -%}
@@ -27570,6 +27572,42 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  GRAPHQL_MESH_enable #}
+
+{% if COSMO_ROUTER_enable | default(false) %}
+  #  ================================== Cosmo Router ========================================== #
+  cosmo-router:
+    image: ghcr.io/wundergraph/cosmo/router:{{__COSMO_ROUTER_version}}
+    container_name: cosmo-router
+    hostname: cosmo-router
+    platform: linux/amd64
+    labels:
+      com.platys.name: "cosmo-router"
+      com.platys.description: "WunderGraph Cosmo GraphQL Router"
+      com.platys.webui.title: "Cosmo Router"
+      com.platys.webui.url: "http://dataplatform:28495"
+    ports:
+      - 28495:3002
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      DEV_MODE: "true"
+      LISTEN_ADDR: "0.0.0.0:3002"
+      EXECUTION_CONFIG_FILE_PATH: "/config/config.json"
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer:z
+      - ./conf/cosmo-router/config.json:/config/config.json:z
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  COSMO_ROUTER_enable #}
 
 {% if DIRECTUS_enable | default(false) %}
   #  ================================== Directus ========================================== #
