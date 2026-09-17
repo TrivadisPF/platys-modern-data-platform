@@ -30204,9 +30204,12 @@ services:
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
+    # Mount configuration files
+    configs:
+      - source: nimtable-config.yaml
+        target: /nimtable/config.yaml    
     volumes:
       - ./data-transfer:/data-transfer:z
-      - ./conf/nimtable/config.yaml:/nimtable/config.yaml:z
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -35498,3 +35501,17 @@ volumes:
   airbyte-db-vol:
     name: airbyte_db_vol
 {% endif %}
+
+configs:
+  # Nimtable config file to be mounted into the Docker containers.
+  # See backend/config.yaml for more complete example
+  nimtable-config.yaml:
+    content: |
+      server:
+        port: 8182
+        host: 0.0.0.0
+      database:
+        # You can also point to your own Postgres database, instead of using the one provided by docker-compose.
+        url: jdbc:postgresql://postgresql:5432/nimtable_db
+        username: nimtable
+        password: abc123!
