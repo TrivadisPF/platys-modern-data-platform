@@ -29720,9 +29720,9 @@ services:
     restart: {{container_restart_policy}}
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8182/q/health"]
-      interval: 5s
+      interval: 10s
       timeout: 5s
-      retries: 5
+      retries: 15
     
   {% if POLARIS_persistence_type == 'relational-jdbc' and POLARIS_db_type == 'postgresql' %}
   polaris-db-setup:
@@ -30000,7 +30000,8 @@ services:
     ports:
       - 28494:8080
     depends_on:
-      - polaris
+      polaris:
+        condition: service_healthy
     environment:
       VITE_POLARIS_API_URL: http://${PUBLIC_IP}:28467
       VITE_OAUTH_TOKEN_URL: http://${PUBLIC_IP}:28467/api/catalog/v1/oauth/tokens
