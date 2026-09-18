@@ -747,6 +747,7 @@ networks:
 {% set __SPRING_BOOT_ADMIN_version = SPRING_BOOT_ADMIN_version | default('latest') -%}
 {% set __WETTY_version = WETTY_version | default('latest') -%}
 {% set __MITMPROXY_version = MITMPROXY_version | default('latest') -%}
+{% set __FORGEJO_version = FORGEJO_version | default('9') -%}
 
 {% set __RANETO_version = RANETO_version | default('latest') -%}
 {% set __MARKDOWN_MADNESS_version = MARKDOWN_MADNESS_version | default('latest') -%}
@@ -1211,6 +1212,7 @@ networks:
   {% set SPRING_BOOT_ADMIN_enable = false -%}
   {% set WETTY_enable = false -%}
   {% set MITMPROXY_enable = false -%}
+  {% set FORGEJO_enable = false -%}
   {% set RANETO_enable = false -%}
   {% set MARKDOWN_MADNESS_enable = false -%}
   {% set MARKDOWN_VIEWER_enable = false -%}
@@ -34653,6 +34655,39 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
 {% endif %}   {# MITMPROXY_enable #}
+
+{% if FORGEJO_enable | default(false) %}
+  #  ================================== Forgejo ========================================== #
+  forgejo:
+    image: codeberg.org/forgejo/forgejo:{{__FORGEJO_version}}
+    container_name: forgejo
+    hostname: forgejo
+    labels:
+      com.platys.name: "forgejo"
+      com.platys.description: "Lightweight self-hosted Git service"
+      com.platys.webui.title: "Forgejo UI"
+      com.platys.webui.url: "http://dataplatform:3004"
+    ports:
+      - "3004:3000"
+      - "2223:22"
+    environment:
+      - USER_UID=1000
+      - USER_GID=1000
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./container-volume/forgejo:/data:z
+      - ./data-transfer:/data-transfer:z
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+{% endif %}   {# FORGEJO_enable #}
 
 {% if PYTHON_enable | default(false) %}
   #  ================================== python ========================================== #

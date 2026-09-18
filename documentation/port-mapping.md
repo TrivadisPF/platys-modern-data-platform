@@ -64,6 +64,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 2185 | 2185 | zookeeper-5 |
 2186 | 2186 | zookeeper-6 |
 2222 | 22 | sftp |
+2223 | 22 | forgejo (SSH) |
 2376 | 2376 | docker-dind |
 2379 | 2379 | etcd-1 (client req) |
 2380 | 2380 | etcd-1 (peer comm) |
@@ -77,6 +78,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 3001 | 3000 | wetty (dc1) |
 3002 | 3000 | wetty (dc2 |
 3003 | 3003 | opik-backend |
+3004 | 3000 | forgejo (web UI) |
 3005 | 3000 | marquez-web |
 3010 | 3000 | postman |
 3006 | 3000 | retool-api |

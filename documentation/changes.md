@@ -15,6 +15,7 @@ See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/plat
  * Polaris Console (UI)
  * Wundergraph Cosmo Platform
  * mitmproxy
+ * Forgejo
  
 ### Version upgrades
  
