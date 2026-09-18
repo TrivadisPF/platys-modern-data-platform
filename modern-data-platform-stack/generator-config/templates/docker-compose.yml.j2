@@ -29805,13 +29805,13 @@ services:
             "type": "INTERNAL",
             "readOnly": false,
             "properties": {
-              "default-base-location": "s3://bucket123"
+              "default-base-location": "{{POLARIS_storage_location is POLARIS_storage_location is defined and POLARIS_storage_location else 's3a://admin-bucket'}}"
             },
             "storageConfigInfo": {
               "storageType": "S3",
-              "allowedLocations": ["s3://bucket123"],
-              "endpoint": "http://localhost:9000",
-              "endpointInternal": "http://rustfs:9000",
+              "allowedLocations": ["{{POLARIS_storage_location is POLARIS_storage_location is defined and POLARIS_storage_location else 's3a://admin-bucket'}}"],
+              "endpoint": "{{s3EndpointStorage if s3EndpointStorage is defined and s3EndpointStorage else 'endpoint-not-defined'}}",
+              "endpointInternal": "{{s3EndpointStorage if s3EndpointStorage is defined and s3EndpointStorage else 'endpoint-not-defined'}}",
               "pathStyleAccess": true,
               "region": "us-west-2"
             }
@@ -29831,12 +29831,12 @@ services:
         echo "✅ Catalog created"
 
         echo ""
-        echo "Creating principal 'quickstart_user'..."
+        echo "Creating principal 'polaris_user'..."
         PRINCIPAL_RESPONSE=$$(curl --fail-with-body -s -X POST http://polaris:8181/api/management/v1/principals \
           -H "Authorization: Bearer $$TOKEN" \
           -H "Polaris-Realm: $$REALM" \
           -H "Content-Type: application/json" \
-          -d '{"principal": {"name": "quickstart_user", "properties": {}}}' 2>&1) || {
+          -d '{"principal": {"name": "polaris_user", "properties": {}}}' 2>&1) || {
           echo "❌ Failed to create principal"
           echo "$$PRINCIPAL_RESPONSE" >&2
           exit 1
@@ -29851,12 +29851,12 @@ services:
         fi
         echo "✅ Principal created with clientId: $$USER_CLIENT_ID"
 
-        echo "Creating principal role 'quickstart_user_role'..."
+        echo "Creating principal role 'polaris_user_role'..."
         RESPONSE=$$(curl --fail-with-body -s -S -X POST http://polaris:8181/api/management/v1/principal-roles \
           -H "Authorization: Bearer $$TOKEN" \
           -H "Polaris-Realm: $$REALM" \
           -H "Content-Type: application/json" \
-          -d '{"principalRole": {"name": "quickstart_user_role", "properties": {}}}' 2>&1) && echo -n "" || {
+          -d '{"principalRole": {"name": "polaris_user_role", "properties": {}}}' 2>&1) && echo -n "" || {
           echo "❌ Failed to create principal role"
           echo "$$RESPONSE" >&2
           exit 1
@@ -29876,11 +29876,11 @@ services:
         echo "✅ Catalog role created"
 
         echo "Assigning principal role to principal..."
-        RESPONSE=$$(curl --fail-with-body -s -S -X PUT http://polaris:8181/api/management/v1/principals/quickstart_user/principal-roles \
+        RESPONSE=$$(curl --fail-with-body -s -S -X PUT http://polaris:8181/api/management/v1/principals/polaris_user/principal-roles \
           -H "Authorization: Bearer $$TOKEN" \
           -H "Polaris-Realm: $$REALM" \
           -H "Content-Type: application/json" \
-          -d '{"principalRole": {"name": "quickstart_user_role"}}' 2>&1) && echo -n "" || {
+          -d '{"principalRole": {"name": "polaris_user_role"}}' 2>&1) && echo -n "" || {
           echo "❌ Failed to assign principal role"
           echo "$$RESPONSE" >&2
           exit 1
@@ -29888,7 +29888,7 @@ services:
         echo "✅ Principal role assigned"
 
         echo "Assigning catalog role to principal role..."
-        RESPONSE=$$(curl --fail-with-body -s -S -X PUT http://polaris:8181/api/management/v1/principal-roles/quickstart_user_role/catalog-roles/$$CATALOG_NAME \
+        RESPONSE=$$(curl --fail-with-body -s -S -X PUT http://polaris:8181/api/management/v1/principal-roles/polaris_user_role/catalog-roles/$$CATALOG_NAME \
           -H "Authorization: Bearer $$TOKEN" \
           -H "Polaris-Realm: $$REALM" \
           -H "Content-Type: application/json" \
@@ -29917,9 +29917,9 @@ services:
         echo "=========================================="
         echo ""
         echo "Catalog: $$CATALOG_NAME"
-        echo "  Storage: S3 (RustFS)"
-        echo "  Location: s3://bucket123"
-        echo "  RustFS UI: http://localhost:9001"
+        echo "  Storage: S3"
+        echo "  Location: {{POLARIS_storage_location is POLARIS_storage_location is defined and POLARIS_storage_location else 's3a://admin-bucket'}}"
+        echo "  S3 UI: {{s3EndpointStorage if s3EndpointStorage is defined and s3EndpointStorage else 'endpoint-not-defined'}}"
         echo ""
         echo "Root credentials:"
         echo "  Client ID:     $$CLIENT_ID"
