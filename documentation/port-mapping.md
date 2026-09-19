@@ -264,7 +264,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 8123 | 8123 | proton-server (HTTP batch) |
 8124 | 8124 | axon-server |
 8161 | 8161 | activemq |
-8182 | 8182 | janusgraph |
+8181 | 8181 | polaris |
+8182 | 8182 | polaris |
 8200 | 8200 | vault |
 8222 | 8222 | nats-1 |
 8288 | 8288 | vector-admin |
@@ -856,8 +857,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28464 | 8182 | nimtable |
 28465 | 8080 | ehrbase |
 28466 | 9000 | openehr-tool |
-28467 | 8081 | polaris |
-28468 | 8082 | polaris |
+28467 | 8182 | janusgraph |
+28468 |  |  |
 28469 | 8090 | gravitino |
 28470 | 9001 | gravitino-iceberg-rest |
 28471 | 8000 | gravitino-mcp-server |
