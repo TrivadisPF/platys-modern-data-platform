@@ -6816,6 +6816,11 @@ services:
       com.platys.webui.title: 'Spark UI'
       com.platys.webui.url: "http://dataplatform:28304"
     user: root      
+    depends_on:
+    {% if NEXUS_enable or  external['NEXUS_enable'] | default(false) %}
+      nexus:
+        condition: service_healthy
+    {% endif -%}   {#  NEXUS_enable #}
     ports:
       - 28304:28304
       - 6066:6066
@@ -34325,13 +34330,12 @@ services:
   <<: *logging
   {% endif -%}   {#  logging_driver is defined ... #}
     entrypoint: ["/bin/sh", "/nexus-init/entrypoint.sh"]    
-    restart: {{container_restart_policy}}
+    restart: {{container_restart_policy}}  
     healthcheck:
-      test: ["CMD", "curl", "-sf", "http://localhost:8081/service/rest/v1/status"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
-      start_period: 120s    
+      interval: 1s
+      timeout: 10s
+      retries: 240
+      test: ["CMD", "test", "-f", "/nexus-data/.setup-complete"]      
 {% endif %}   {# NEXUS_enable #}
 
 {% if ALLURE_enable | default(false) %}
