@@ -6991,6 +6991,7 @@ services:
       - ./conf/spark/hive-site.xml:/opt/spark/conf.default/hive-site.xml:z
       - ./conf/spark/spark-defaults.conf:/opt/spark/conf.default/spark-defaults.conf:z
       - ./init/spark:/docker-entrypoint-initdb.d:z
+      - ./conf/spark/ivy-settings.xml:/opt/spark/conf/ivy-settings.xml:z
       - ./scripts/docker/maven-download.sh:/maven-download.sh:z
       - ./scripts/spark/pyspark:/opt/spark/bin/pyspark:z
       - ./container-volume/spark/logs/:/var/log/spark/logs:z
@@ -7206,6 +7207,7 @@ services:
       - ./conf/spark/hive-site.xml:/opt/spark/conf.default/hive-site.xml:z
       - ./conf/spark/spark-defaults.conf:/opt/spark/conf.default/spark-defaults.conf:z
       - ./init/spark:/docker-entrypoint-initdb.d:z
+      - ./conf/spark/ivy-settings.xml:/opt/spark/conf/ivy-settings.xml:z
       - ./scripts/docker/maven-download.sh:/maven-download.sh:z
       - ./container-volume/spark/logs/:/var/log/spark/logs:z
     {%if jmx_monitoring_with_prometheus_enable | default(false) %}
@@ -7413,6 +7415,7 @@ services:
       - ./conf/spark/hive-site.xml:/opt/spark/conf/hive-site.xml:z
       - ./conf/spark/spark-defaults.conf:/opt/spark/conf/spark-defaults.conf:z
       - ./init/spark:/docker-entrypoint-initdb.d:z
+      - ./conf/spark/ivy-settings.xml:/opt/spark/conf/ivy-settings.xml:z
       - ./scripts/docker/maven-download.sh:/maven-download.sh:z
       - ./container-volume/spark/logs/:/var/log/spark/logs:z
     {%if jmx_monitoring_with_prometheus_enable | default(false) %}
@@ -7602,11 +7605,13 @@ services:
       MAVEN_DOWNLOAD_REPO_NEXUS: {{ns.nexusUrl}}/repository/maven-public
       MAVEN_DOWNLOAD_REPO_NEXUS_USER: admin
       MAVEN_DOWNLOAD_REPO_NEXUS_PASSWORD: ${PLATYS_NEXUS_ADMIN_PASSWORD:-{{NEXUS_admin_password}}}
-      SPARK_DEFAULTS_CONF_spark_jars_ivy: /opt/ivy-cache      
-      SPARK_DEFAULTS_CONF_spark_jars_ivySettings: {{SPARK_jars_ivySettings}}
       PIP_INDEX_URL: {{ns.nexusUrl}}/repository/pypi-proxy/simple/
       PIP_TRUSTED_HOST: nexus
+      SPARK_DEFAULTS_CONF_spark_jars_ivySettings: /opt/spark/conf/ivy-settings.xml
+    {% else %}
+      SPARK_DEFAULTS_CONF_spark_jars_ivySettings: {{SPARK_jars_ivySettings}}  
     {% endif -%}   {#  NEXUS_enable #}
+      SPARK_DEFAULTS_CONF_spark_jars_ivy: /opt/ivy-cache    
     {%if jmx_monitoring_with_prometheus_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_metrics_conf: /opt/spark/conf/metrics.properties
     {% endif -%}   {#  jmx_monitoring_with_prometheus_enable  #}
@@ -7620,7 +7625,6 @@ services:
       - ./conf/spark/spark-defaults.conf:/opt/spark/conf.default/spark-defaults.conf:z
       - ./init/spark:/docker-entrypoint-initdb.d:z
       - ./conf/spark/ivy-settings.xml:/opt/spark/conf/ivy-settings.xml:z
-      # we override the run.sh script to start spark connect instead of master/worker
       - ./scripts/docker/maven-download.sh:/maven-download.sh:z
       - ./container-volume/spark/logs/:/var/log/spark/logs:z
       - ./scripts/docker/wait-for-it.sh:/usr/src/app/wait-for-it.sh:z
@@ -7635,6 +7639,7 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
     entrypoint: [/docker-entrypoint-initdb.d/spark-init.sh]
+    # we override the run.sh script to start spark connect instead of master/worker
     command:
       - /opt/spark/bin/spark-submit
       - --class
@@ -8059,6 +8064,7 @@ services:
       - ./conf/spark/hive-site.xml:/opt/kyuubi/conf.default/hive-site.xml:z
       - ./conf/spark/spark-defaults.conf:/opt/kyuubi/conf.default/spark-defaults.conf:z
       - ./container-volume/spark/logs/:/var/log/spark/logs:z
+      - ./conf/spark/ivy-settings.xml:/opt/spark/conf/ivy-settings.xml:z
       - ./scripts/docker/maven-download.sh:/maven-download.sh:z
       - ./scripts/kyuubi/command-override.sh:/opt/kyuubi/bin/command-override.sh:z
       - ./init/kyuubi:/docker-entrypoint-initdb.d:z
@@ -8260,6 +8266,7 @@ services:
       - ./data-transfer:/data-transfer:z
       - ./plugins/spark/jars:/extra-jars:z
       - ./container-volume/spark/logs/:/var/log/spark/logs:z
+      - ./conf/spark/ivy-settings.xml:/opt/spark/conf/ivy-settings.xml:z
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
