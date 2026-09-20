@@ -3,7 +3,7 @@ set -e
 
 ADMIN_PASS="${NEXUS_ADMIN_PASSWORD:-admin123}"
 PASSWORD_FILE="/nexus-data/admin.password"
-NEXUS_URL="http://localhost:8081"
+NEXUS_URL="http://nexus:8081"
 
 # pre-seed password file on very first boot
 if [ ! -f "${PASSWORD_FILE}" ] && [ ! -f "/nexus-data/.setup-complete" ]; then
@@ -36,14 +36,13 @@ if [ ! -f "/nexus-data/.setup-complete" ]; then
   # remove the seed file
   rm -f "${PASSWORD_FILE}"
 
-  # disable anonymous access
+  # enable anonymous access
   curl -sf \
     -u "admin:${ADMIN_PASS}" \
     -X PUT "${NEXUS_URL}/service/rest/v1/security/anonymous" \
     -H "Content-Type: application/json" \
-    -d '{"enabled": false}' || true
+    -d '{"enabled": true,"userId":"anonymous","realmName":"NexusAuthorizingRealm"}' || true
 
-  # create PyPI proxy repo
   curl -sf -o /dev/null \
     -u "admin:${ADMIN_PASS}" \
     -X POST "${NEXUS_URL}/service/rest/v1/repositories/pypi/proxy" \
@@ -56,6 +55,12 @@ if [ ! -f "/nexus-data/.setup-complete" ]; then
     -X POST "${NEXUS_URL}/service/rest/v1/repositories/docker/proxy" \
     -H "Content-Type: application/json" \
     -d @/nexus-init/docker-proxy.json || true    
+
+  # Retrieve licence data and update acceptance
+  EULA_FILE="$(mktemp)_EULA.json"
+  curl -s -X GET -u "admin:${ADMIN_PASS}"  -H "accept: application/json" "$NEXUS_URL/service/rest/v1/system/eula" | sed 's/: false/: true/g' > $EULA_FILE
+  # Send back acceptance
+  curl -v -s -X POST -u "admin:${ADMIN_PASS}" -H "Content-Type: application/json; charset=UTF-8" -d "$(cat $EULA_FILE | sed 's/\n//g')" "$NEXUS_URL/service/rest/v1/system/eula"
 
   # mark setup as done so restarts skip this block
   touch /nexus-data/.setup-complete

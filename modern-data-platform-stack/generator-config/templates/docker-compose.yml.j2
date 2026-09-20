@@ -7598,7 +7598,7 @@ services:
       SPARK_DEFAULTS_CONF_spark_jars: {{SPARK_jars}}{{',' if SPARK_jars | length}}{{ns.sparkTableFormatJar | default('')}}
     {% endif -%}   {#  DATAHUB_enable or external['DATAHUB_enable'] #}
       MAVEN_DOWNLOAD_REPO: {{'nexus' if NEXUS_enable or  external['NEXUS_enable'] else 'central'}}
-    {% if NEXUS_enable | default(false) %}  
+    {% if NEXUS_enable or  external['NEXUS_enable'] | default(false) %}  
       MAVEN_DOWNLOAD_REPO_NEXUS: {{ns.nexusUrl}}/repository/maven-public
       MAVEN_DOWNLOAD_REPO_NEXUS_USER: admin
       MAVEN_DOWNLOAD_REPO_NEXUS_PASSWORD: ${PLATYS_NEXUS_ADMIN_PASSWORD:-{{NEXUS_admin_password}}}
@@ -7619,8 +7619,8 @@ services:
       - ./conf/spark/hive-site.xml:/opt/spark/conf.default/hive-site.xml:z
       - ./conf/spark/spark-defaults.conf:/opt/spark/conf.default/spark-defaults.conf:z
       - ./init/spark:/docker-entrypoint-initdb.d:z
-      # we override the run.sh script to start thriftserver instead of master/worker
-      # - ./scripts/spark/run-thriftserver.sh:/opt/bitnami/scripts/spark/run.sh
+      - ./conf/spark/ivy-settings.xml:/opt/spark/conf/ivy-settings.xml:z
+      # we override the run.sh script to start spark connect instead of master/worker
       - ./scripts/docker/maven-download.sh:/maven-download.sh:z
       - ./container-volume/spark/logs/:/var/log/spark/logs:z
       - ./scripts/docker/wait-for-it.sh:/usr/src/app/wait-for-it.sh:z
@@ -7638,7 +7638,9 @@ services:
     command:
       - /opt/spark/bin/spark-submit
       - --class
-      - org.apache.spark.sql.connect.service.SparkConnectServer  
+      - org.apache.spark.sql.connect.service.SparkConnectServer 
+      - --conf
+      - spark.jars.ivySettings=/opt/spark/conf/ivy-settings.xml       
     restart: {{container_restart_policy}}
 {% endif %}   {#  SPARK_CONNECT_enable #}
 
@@ -7828,6 +7830,7 @@ services:
       - ./conf/spark/hive-site.xml:/opt/spark/conf.default/hive-site.xml:z
       - ./conf/spark/spark-defaults.conf:/opt/spark/conf.default/spark-defaults.conf:z
       - ./init/spark:/docker-entrypoint-initdb.d:z
+      - ./conf/spark/ivy-settings.xml:/opt/spark/conf/ivy-settings.xml:z      
       # we override the run.sh script to start thriftserver instead of master/worker
       # - ./scripts/spark/run-thriftserver.sh:/opt/bitnami/scripts/spark/run.sh
       - ./scripts/docker/maven-download.sh:/maven-download.sh:z
@@ -7850,6 +7853,8 @@ services:
       - org.apache.spark.sql.hive.thriftserver.HiveThriftServer2
       - --master
       - spark://spark-master:7077
+      - --conf
+      - spark.jars.ivySettings=/opt/spark/conf/ivy-settings.xml      
     restart: {{container_restart_policy}}
 {% endif %}   {#  SPARK_THRIFTSERVER_enable #}
 
