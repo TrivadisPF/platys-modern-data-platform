@@ -888,13 +888,13 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28495 | 3002 | cosmo-router |
 
 
-## Ports > 28500
+## Ports > 28700
 
 Container Port(s) | Internal Port(s)           | Service (alternatives) |
 --------------------|------------------|-----------------------|
-28500 - 28510 | 28500 - 28510 | streamsets-1 (additional ports) |
-28510 - 28520 | 28510 - 28520 | nifi-1 (additional ports |
-28520 - 28530 | 28520 - 28530 | nifi2-1 (additional ports |
-28530 - 28600 | any | reserved for applications |
+28700 - 28710 | 28700 - 28710 | streamsets-1 (additional ports) |
+28710 - 28720 | 28710 - 28720 | nifi-1 (additional ports |
+28720 - 28730 | 28720 - 28730 | nifi2-1 (additional ports |
+28730 - 28800 | any | reserved for applications |
 
 An overview of the URL for the various web-based UIs can be found [here](./environment/README.md).
