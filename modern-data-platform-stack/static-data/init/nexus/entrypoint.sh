@@ -63,7 +63,7 @@ if [ ! -f "/nexus-data/.setup-complete" ]; then
   curl -v -s -X POST -u "admin:${ADMIN_PASS}" -H "Content-Type: application/json; charset=UTF-8" -d "$(cat $EULA_FILE | sed 's/\n//g')" "$NEXUS_URL/service/rest/v1/system/eula"
 
   # mark setup as done so restarts skip this block
-  touch /nexus-data/.setup-complete
+  touch /tmp/.setup-complete
   echo "Setup complete."
 
 fi
