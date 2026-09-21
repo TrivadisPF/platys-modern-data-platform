@@ -886,6 +886,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28493 | 9097 | mcp-trino |
 28494 | 8080 | polaris-ui |
 28495 | 3002 | cosmo-router |
+28496 | 8000 | dbt-workbench (backend API) |
+28497 | 3000 | dbt-workbench (frontend UI) |
 
 
 ## Ports > 28700

@@ -16,6 +16,7 @@ See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/plat
  * Wundergraph Cosmo Platform
  * mitmproxy
  * Forgejo
+ * dbt Workbench
  
 ### Version upgrades
  

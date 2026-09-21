@@ -748,6 +748,8 @@ networks:
 {% set __WETTY_version = WETTY_version | default('latest') -%}
 {% set __MITMPROXY_version = MITMPROXY_version | default('latest') -%}
 {% set __FORGEJO_version = FORGEJO_version | default('9') -%}
+{% set __DBT_WORKBENCH_BACKEND_version = DBT_WORKBENCH_BACKEND_version | default('latest') -%}
+{% set __DBT_WORKBENCH_FRONTEND_version = DBT_WORKBENCH_FRONTEND_version | default('latest') -%}
 
 {% set __RANETO_version = RANETO_version | default('latest') -%}
 {% set __MARKDOWN_MADNESS_version = MARKDOWN_MADNESS_version | default('latest') -%}
@@ -1213,6 +1215,7 @@ networks:
   {% set WETTY_enable = false -%}
   {% set MITMPROXY_enable = false -%}
   {% set FORGEJO_enable = false -%}
+  {% set DBT_WORKBENCH_enable = false -%}
   {% set RANETO_enable = false -%}
   {% set MARKDOWN_MADNESS_enable = false -%}
   {% set MARKDOWN_VIEWER_enable = false -%}
@@ -34639,6 +34642,87 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
 {% endif %}   {# FORGEJO_enable #}
+
+{% if DBT_WORKBENCH_enable | default(false) %}
+  #  ================================== dbt Workbench ========================================== #
+  dbt-workbench-backend:
+    image: ghcr.io/rezer-bleede/dbt-workbench-backend:{{__DBT_WORKBENCH_BACKEND_version}}
+    container_name: dbt-workbench-backend
+    hostname: dbt-workbench-backend
+    labels:
+      com.platys.name: "dbt-workbench"
+      com.platys.description: "dbt Workbench backend"
+    depends_on:
+      postgresql:
+        condition: service_healthy
+    ports:
+      - 28496:8000
+    environment:
+      - POSTGRES_HOST={{ns.postgresqlHost}}
+      - POSTGRES_USER={{DBT_WORKBENCH_db_user | default('dbt_workbench')}}
+      - POSTGRES_PASSWORD=${PLATYS_DBT_WORKBENCH_DB_PASSWORD:-{{DBT_WORKBENCH_db_password | default('abc123!')}}}
+      - POSTGRES_DB={{DBT_WORKBENCH_db_name | default('dbt_workbench')}}
+      - DBT_ARTIFACTS_PATH=/app/data/artifacts
+      - DBT_PROJECT_PATH=/app/data/repos/default
+      - BACKEND_PORT=8000
+      - SQL_WORKSPACE_DEFAULT_CONNECTION_URL=postgresql://{{DBT_WORKBENCH_db_user | default('dbt_workbench')}}:${PLATYS_DBT_WORKBENCH_DB_PASSWORD:-{{DBT_WORKBENCH_db_password | default('abc123!')}}}@{{ns.postgresqlHost}}:5432/{{DBT_WORKBENCH_db_name | default('dbt_workbench')}}
+      - AI_ENABLED={{DBT_WORKBENCH_ai_enabled | default(false) | lower}}
+      - AI_DEFAULT_MODE=direct
+      - AI_DEFAULT_DIRECT_PROVIDER=openai
+      - AI_DEFAULT_DIRECT_MODEL_OPENAI=
+      - AI_DEFAULT_DIRECT_MODEL_ANTHROPIC
+      - AI_ALLOW_SESSION_PROVIDER_OVERRIDE=true
+      - AI_MCP_LOCAL_ALLOWLIST_JSON={}      
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer:z
+      - ./container-volume/dbt-workbench/data:/app/data:z
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  dbt-workbench-frontend:
+    image: ghcr.io/rezer-bleede/dbt-workbench-frontend:{{__DBT_WORKBENCH_FRONTEND_version}}
+    container_name: dbt-workbench-frontend
+    hostname: dbt-workbench-frontend
+    labels:
+      com.platys.name: "dbt-workbench"
+      com.platys.description: "dbt Workbench — web-based IDE for dbt projects"
+      com.platys.webui.title: "dbt Workbench UI"
+      com.platys.webui.url: "http://dataplatform:28497"
+    depends_on:
+      dbt-workbench-backend:
+        condition: service_healthy
+    ports:
+      - 28497:3000
+    {%if use_timezone | default(false) %}
+    environment:
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer:z
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+{% endif %}   {# DBT_WORKBENCH_enable #}
 
 {% if PYTHON_enable | default(false) %}
   #  ================================== python ========================================== #
