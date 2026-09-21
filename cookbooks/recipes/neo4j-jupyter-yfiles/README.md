@@ -58,7 +58,7 @@ The movie database is loaded into Neo4j.
 
 ## Using yFiles Graph from Jupyter
 
-Navigate to <http://dataplatform:28888> and login with the token specified above, i.e. `abc123!`.
+Navigate to <http://dataplatform:38888> and login with the token specified above, i.e. `abc123!`.
 
 Create a new notebook and add and execute the following cells:
 

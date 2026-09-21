@@ -478,7 +478,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28087 | 8443 | trino-1 (tls) |
 28088 | 8443 | trino-2 (tls) |
 28089 | 8443 | trino-3 (tls) |
-28888 | 8888 | jupyter |
+38888 | 8888 | jupyter |
 28889 | 8888 | anaconda |
 29042 | 9042 | cassandra-1 |
 29043 | 9042 | cassandra-2 |

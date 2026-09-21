@@ -34,7 +34,7 @@ docker-compose up -d
 
 ## Working with MLflow
 
-Navigate to Jupyter on <http://dataplatform:28888>. 
+Navigate to Jupyter on <http://dataplatform:38888>. 
 
 Create a new notebook and add the following cell
 

@@ -60,7 +60,7 @@ total 57056
  
 ## Using Jupyter to read the Airports.avro file
 
-Navigate to Jupyter on <http://dataplatform:28888>. 
+Navigate to Jupyter on <http://dataplatform:38888>. 
 
 Enter `abc123!` into the **Password or token** field and click on **Log in**:
 

@@ -50,6 +50,7 @@ See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/plat
  * rename `KAFKA_REPLICATOR_xxxx` to `CONFLUENT_REPLICATOR_xxxx`
  * changed default for search service in DataHub to OpenSearch
  * changed docker image for Apache Spark to `apache/spark`
+ * Jupyter external port changed to `38888` (used to be `28888`)
 
 ## What's new in 1.20.0
 
