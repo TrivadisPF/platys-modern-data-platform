@@ -34721,10 +34721,17 @@ services:
         condition: service_healthy
     ports:
       - 28497:3000
-    {%if use_timezone | default(false) %}
     environment:
+      - VITE_API_BASE_URL={{DBT_WORKBENCH_api_url | default('http://${PUBLIC_IP:-dataplatform}:28496')}}
+    {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        find /app/dist -name '*.js' -exec sed -i "s|http://localhost:8000|$$VITE_API_BASE_URL|g" {} \;
+        exec serve -s dist -l 3000
     volumes:
       - ./data-transfer:/data-transfer:z
     {%if use_timezone | default(false) %}
