@@ -34,7 +34,7 @@ validated-at:			13.11.2025
       
       POLARIS_enable: true
       POLARIS_persistence_type: 'relational-jdbc'
-      POLARIS_storage_location: 's3a://warehouse-bucket'
+      POLARIS_default_storage_location: 's3a://warehouse-bucket'
       
       NIMTABLE_enable: true
 ```

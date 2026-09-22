@@ -29848,7 +29848,8 @@ services:
       - CLIENT_ID={{POLARIS_admin_id | default('admin')}}
       - CLIENT_SECRET=${PLATYS_POLARIS_CLIENT_SECRET:-{{POLARIS_admin_secret | default('abc123!')}}}
       - S3_ENDPOINT={{s3EndpointStorage if s3EndpointStorage is defined and s3EndpointStorage else 'endpoint-not-defined'}}
-      - STORAGE_LOCATION={{POLARIS_storage_location if POLARIS_storage_location is defined and POLARIS_storage_location else 's3a://admin-bucket'}}
+      - DEFAULT_STORAGE_LOCATION={{POLARIS_default_storage_location if POLARIS_default_storage_location is defined and POLARIS_default_storage_location else 's3a://admin-bucket'}}
+      - ALLOWED_STORAGE_LOCATIONS={{POLARIS_allowed_storage_locations if POLARIS_allowed_storage_locations is defined and POLARIS_allowed_storage_locations else ''}}
       - CATALOG_NAME={{polarisCatalogName}}
       - REALM={{POLARIS_realm | default('postgres')}}
     volumes:
@@ -29859,12 +29860,14 @@ services:
       - >-
         source /polaris/obtain-token.sh &&
         echo Creating catalog... &&
+        ALLOWED_LOCS=$${ALLOWED_STORAGE_LOCATIONS:-"\"$$DEFAULT_STORAGE_LOCATION\""} &&
         export STORAGE_CONFIG_INFO='{"storageType":"S3",
           "endpoint":"'$$S3_ENDPOINT'",
           "endpointInternal":"'$$S3_ENDPOINT'",
+          "allowedLocations":['$$ALLOWED_LOCS'],
           "pathStyleAccess":true,
           "region":"us-east-1"}' &&
-        export STORAGE_LOCATION='{{POLARIS_storage_location if POLARIS_storage_location is defined and POLARIS_storage_location else 's3a://admin-bucket'}}' &&
+        export DEFAULT_STORAGE_LOCATION='{{POLARIS_default_storage_location if POLARIS_default_storage_location is defined and POLARIS_default_storage_location else 's3a://admin-bucket'}}' &&
         export CATALOG_NAME='{{polarisCatalogName}}' &&
         /polaris/create-catalog.sh POLARIS $$TOKEN &&
         echo Extra grants... &&
@@ -29884,7 +29887,7 @@ services:
         echo ""
         echo "Catalog: $$CATALOG_NAME"
         echo "  Storage: S3"
-        echo "  Location: {{POLARIS_storage_location if POLARIS_storage_location is defined and POLARIS_storage_location else 's3a://admin-bucket'}}"
+        echo "  Location: {{POLARIS_default_storage_location if POLARIS_default_storage_location is defined and POLARIS_default_storage_location else 's3a://admin-bucket'}}"
         echo "  S3 UI: {{s3EndpointStorage if s3EndpointStorage is defined and s3EndpointStorage else 'endpoint-not-defined'}}"
         echo ""
         echo "Root credentials:"
@@ -34668,6 +34671,7 @@ services:
     ports:
       - 28496:8000
     environment:
+      - AUTH_ENABLED=false
       - POSTGRES_HOST={{ns.postgresqlHost}}
       - POSTGRES_USER={{DBT_WORKBENCH_db_user | default('dbt_workbench')}}
       - POSTGRES_PASSWORD=${PLATYS_DBT_WORKBENCH_DB_PASSWORD:-{{DBT_WORKBENCH_db_password | default('abc123!')}}}
@@ -34742,6 +34746,12 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s    
 {% endif %}   {# DBT_WORKBENCH_enable #}
 
 {% if PYTHON_enable | default(false) %}

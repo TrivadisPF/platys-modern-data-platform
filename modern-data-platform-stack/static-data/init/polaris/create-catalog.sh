@@ -35,14 +35,14 @@ echo
 echo "Obtained access token: ${TOKEN}"
 
 STORAGE_TYPE="FILE"
-if [ -z "${STORAGE_LOCATION}" ]; then
-    echo "STORAGE_LOCATION is not set, using FILE storage type"
-    STORAGE_LOCATION="file:///var/tmp/quickstart_catalog/"
+if [ -z "${DEFAULT_STORAGE_LOCATION}" ]; then
+    echo "DEFAULT_STORAGE_LOCATION is not set, using FILE storage type"
+    DEFAULT_STORAGE_LOCATION="file:///var/tmp/quickstart_catalog/"
 else
-    echo "STORAGE_LOCATION is set to '$STORAGE_LOCATION'"
-    if [[ "$STORAGE_LOCATION" == s3* ]]; then
+    echo "DEFAULT_STORAGE_LOCATION is set to '$DEFAULT_STORAGE_LOCATION'"
+    if [[ "$DEFAULT_STORAGE_LOCATION" == s3* ]]; then
         STORAGE_TYPE="S3"
-    elif [[ "$STORAGE_LOCATION" == gs* ]]; then
+    elif [[ "$DEFAULT_STORAGE_LOCATION" == gs* ]]; then
         STORAGE_TYPE="GCS"
     else
         STORAGE_TYPE="AZURE"
@@ -51,7 +51,7 @@ else
 fi
 
 if [ -z "${STORAGE_CONFIG_INFO}" ]; then
-    STORAGE_CONFIG_INFO="{\"storageType\": \"$STORAGE_TYPE\", \"allowedLocations\": [\"$STORAGE_LOCATION\"]}"
+    STORAGE_CONFIG_INFO="{\"storageType\": \"$STORAGE_TYPE\", \"allowedLocations\": [\"$DEFAULT_STORAGE_LOCATION\"]}"
 
     if [[ "$STORAGE_TYPE" == "S3" ]]; then
         STORAGE_CONFIG_INFO=$(echo "$STORAGE_CONFIG_INFO" | jq --arg roleArn "$AWS_ROLE_ARN" '. + {roleArn: $roleArn}')
@@ -69,7 +69,7 @@ PAYLOAD='{
      "type": "INTERNAL",
      "readOnly": false,
      "properties": {
-       "default-base-location": "'$STORAGE_LOCATION'"
+       "default-base-location": "'$DEFAULT_STORAGE_LOCATION'"
      },
      "storageConfigInfo": '$STORAGE_CONFIG_INFO'
    }
