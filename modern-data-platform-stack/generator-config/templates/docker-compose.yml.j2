@@ -1724,6 +1724,7 @@ networks:
 {% if POLARIS_enable | default(false) %}
     {% set polarisEndpoint = 'http://polaris:8181/api/catalog' %}
     {% set polarisCatalogName = POLARIS_catalog_name if POLARIS_catalog_name is defined and POLARIS_catalog_name | length else 'polaris_catalog' %}
+    {% set polarisDefaultNamespace = POLARIS_namespace if POLARIS_namespace is defined and POLARIS_namespace | length else 'polaris_catalog' %}
     {% set polarisAdminCredential = POLARIS_admin_id ~ ':' ~ POLARIS_admin_secret %}
 {% endif %}   {# POLARIS_enable #}
 
@@ -6943,7 +6944,8 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalog_polaris_credential: {{polarisAdminCredential | default(omit) }}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_polaris_warehouse:  {{polarisCatalogName | default(omit) }}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_polaris_scope: 'PRINCIPAL_ROLE:ALL'
-      SPARK_DEFAULTS_CONF_spark_sql_catalog_polaris_header_X___Iceberg___Access___Delegation: vended-credentials
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_polaris_header_X___Iceberg___Access___Delegation: vended-credentials    
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_polaris_default___namespace: {{polarisDefaultNamespace}}      
     {% endif -%}   {#  table_formats_to_use #}
     {% if 'iceberg' in (table_formats_to_use | default('') | lower) and GRAVITINO_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_gravitino_type: rest
@@ -7165,6 +7167,7 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalog_polaris_warehouse:  {{polarisCatalogName | default(omit) }}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_polaris_scope: 'PRINCIPAL_ROLE:ALL'
       SPARK_DEFAULTS_CONF_spark_sql_catalog_polaris_header_X___Iceberg___Access___Delegation: vended-credentials
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_polaris_default___namespace: {{polarisDefaultNamespace}}      
     {% endif -%}   {#  table_formats_to_use #}
     {% if 'iceberg' in (table_formats_to_use | default('') | lower) and GRAVITINO_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_gravitino_type: rest
@@ -7376,6 +7379,7 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalog_polaris_warehouse:  {{polarisCatalogName | default(omit) }}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_polaris_scope: 'PRINCIPAL_ROLE:ALL'
       SPARK_DEFAULTS_CONF_spark_sql_catalog_polaris_header_X___Iceberg___Access___Delegation: vended-credentials
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_polaris_default___namespace: {{polarisDefaultNamespace}}      
     {% endif -%}   {#  table_formats_to_use #}
     {% if 'iceberg' in (table_formats_to_use | default('') | lower) and GRAVITINO_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_gravitino_type: rest
@@ -7587,6 +7591,7 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalog_polaris_warehouse:  {{polarisCatalogName | default(omit) }}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_polaris_scope: 'PRINCIPAL_ROLE:ALL'
       SPARK_DEFAULTS_CONF_spark_sql_catalog_polaris_header_X___Iceberg___Access___Delegation: vended-credentials
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_polaris_default___namespace: {{polarisDefaultNamespace}}      
     {% endif -%}   {#  table_formats_to_use #}
     {% if 'iceberg' in (table_formats_to_use | default('') | lower) and GRAVITINO_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_gravitino_type: rest
@@ -7800,6 +7805,7 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalog_polaris_warehouse:  {{polarisCatalogName | default(omit) }}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_polaris_scope: 'PRINCIPAL_ROLE:ALL'
       SPARK_DEFAULTS_CONF_spark_sql_catalog_polaris_header_X___Iceberg___Access___Delegation: vended-credentials
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_polaris_default___namespace: {{polarisDefaultNamespace}}      
     {% endif -%}   {#  table_formats_to_use #}
     {% if 'iceberg' in (table_formats_to_use | default('') | lower) and GRAVITINO_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_gravitino_type: rest
@@ -8029,6 +8035,7 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalog_polaris_warehouse:  {{polarisCatalogName | default(omit) }}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_polaris_scope: 'PRINCIPAL_ROLE:ALL'
       SPARK_DEFAULTS_CONF_spark_sql_catalog_polaris_header_X___Iceberg___Access___Delegation: vended-credentials
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_polaris_default___namespace: {{polarisDefaultNamespace}}
     {% endif -%}   {#  table_formats_to_use #}
     {% if 'iceberg' in (table_formats_to_use | default('') | lower) and GRAVITINO_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_gravitino_type: rest
@@ -8239,6 +8246,7 @@ services:
       SPARK_DEFAULTS_CONF_spark_sql_catalog_polaris_warehouse:  {{polarisCatalogName | default(omit) }}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_polaris_scope: 'PRINCIPAL_ROLE:ALL'
       SPARK_DEFAULTS_CONF_spark_sql_catalog_polaris_header_X___Iceberg___Access___Delegation: vended-credentials
+      SPARK_DEFAULTS_CONF_spark_sql_catalog_polaris_default___namespace: {{polarisDefaultNamespace}}      
     {% endif -%}   {#  table_formats_to_use #}
     {% if 'iceberg' in (table_formats_to_use | default('') | lower) and GRAVITINO_enable | default(false) %}
       SPARK_DEFAULTS_CONF_spark_sql_catalog_gravitino_type: rest
@@ -29850,6 +29858,8 @@ services:
       - S3_ENDPOINT={{s3EndpointStorage if s3EndpointStorage is defined and s3EndpointStorage else 'endpoint-not-defined'}}
       - DEFAULT_STORAGE_LOCATION={{POLARIS_default_storage_location if POLARIS_default_storage_location is defined and POLARIS_default_storage_location else 's3a://admin-bucket'}}
       - ALLOWED_STORAGE_LOCATIONS={{POLARIS_allowed_storage_locations if POLARIS_allowed_storage_locations is defined and POLARIS_allowed_storage_locations else ''}}
+      - NAMESPACE={{POLARIS_namespace | default('')}}
+      - NAMESPACE_STORAGE_LOCATION={{POLARIS_namespace_storage_location if POLARIS_namespace_storage_location is defined and POLARIS_namespace_storage_location else POLARIS_default_storage_location | default('s3a://admin-bucket')}}
       - CATALOG_NAME={{polarisCatalogName}}
       - REALM={{POLARIS_realm | default('postgres')}}
     volumes:
@@ -29878,6 +29888,17 @@ services:
           -X PUT \
           http://polaris:8181/api/management/v1/catalogs/{{polarisCatalogName}}/catalog-roles/catalog_admin/grants \
           -d '{"type":"catalog", "privilege":"CATALOG_MANAGE_CONTENT"}' &&
+        if [ -n "$$NAMESPACE" ]; then
+          echo "Creating default namespace '$$NAMESPACE'..." &&
+          curl --fail-with-body -s \
+            -H "Authorization: Bearer $$TOKEN" \
+            -H 'Content-Type: application/json' \
+            -H "Polaris-Realm: $$REALM" \
+            -X POST \
+            http://polaris:8181/api/catalog/v1/$$CATALOG_NAME/namespaces \
+            -d "{\"namespace\": [\"$$NAMESPACE\"], \"properties\": {\"location\": \"$$NAMESPACE_STORAGE_LOCATION/$$NAMESPACE\"}}" &&
+          echo "✅ Namespace '$$NAMESPACE' created";
+        fi &&
         echo Done. &&
 
         echo ""

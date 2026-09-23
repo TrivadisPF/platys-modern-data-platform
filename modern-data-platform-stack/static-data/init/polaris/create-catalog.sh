@@ -86,5 +86,26 @@ curl --fail-with-body \
    http://polaris:8181/api/management/v1/catalogs \
    -d "$PAYLOAD" -v
 
+
+if [ -n "${NAMESPACE}" ]; then
+  echo ">> Creating namespace: ${NAMESPACE}"
+  PAYLOAD='{
+    "namespace": ["'${NAMESPACE}'"],
+    "properties": {
+      "location": "'${NAMESPACE_STORAGE_LOCATION}/${NAMESPACE}'"
+    }
+  }'
+
+  echo $PAYLOAD
+
+  curl -s -X POST \
+    "${POLARIS_URL}/api/catalog/v1/${CATALOG_NAME}/namespaces" \
+    -H "Authorization: Bearer ${TOKEN}" \
+    -H "Content-Type: application/json" \
+    -d "$PAYLOAD"
+
+  echo ">> Namespace ${NAMESPACE} created"
+fi
+
 echo
 echo Done.
