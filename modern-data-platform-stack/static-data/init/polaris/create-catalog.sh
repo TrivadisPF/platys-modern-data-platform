@@ -32,7 +32,7 @@ if [ -z "$TOKEN" ]; then
 fi
 
 echo
-echo "Obtained access token: ${TOKEN}"
+echo ">> Obtained access token: ${TOKEN}"
 
 STORAGE_TYPE="FILE"
 if [ -z "${DEFAULT_STORAGE_LOCATION}" ]; then
@@ -61,7 +61,7 @@ if [ -z "${STORAGE_CONFIG_INFO}" ]; then
 fi
 
 echo
-echo Creating a catalog named $CATALOG_NAME in realm $realm...
+echo ">> Creating a catalog named $CATALOG_NAME in realm $realm..."
 
 PAYLOAD='{
    "catalog": {
@@ -86,9 +86,13 @@ curl --fail-with-body \
    http://polaris:8181/api/management/v1/catalogs \
    -d "$PAYLOAD" -v
 
+echo
+echo ">> Catalog named $CATALOG_NAME created..."
 
 if [ -n "${NAMESPACE}" ]; then
+  echo
   echo ">> Creating namespace: ${NAMESPACE}"
+
   PAYLOAD='{
     "namespace": ["'${NAMESPACE}'"],
     "properties": {
@@ -99,11 +103,12 @@ if [ -n "${NAMESPACE}" ]; then
   echo $PAYLOAD
 
   curl -s -X POST \
-    "${POLARIS_URL}/api/catalog/v1/${CATALOG_NAME}/namespaces" \
+    "http://polaris:8181/api/catalog/v1/${CATALOG_NAME}/namespaces" \
     -H "Authorization: Bearer ${TOKEN}" \
     -H "Content-Type: application/json" \
     -d "$PAYLOAD"
 
+  echo
   echo ">> Namespace ${NAMESPACE} created"
 fi
 
