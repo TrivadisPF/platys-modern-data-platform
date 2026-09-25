@@ -19003,7 +19003,7 @@ services:
 {% if SUPERSET_enable | default(false) %}
   #  ================================== Superset ========================================== #
   superset:
-    image: docker.io/apache/superset:{{__SUPERSET_version}}
+    image: apachesuperset.docker.scarf.sh/apache/superset:{{__SUPERSET_version}}
 
     hostname: superset
     container_name: superset
@@ -19015,24 +19015,31 @@ services:
     ports:
       - "28151:8088"
     user: "root"
+    depends_on:
+      superset-init:
+        condition: service_completed_successfully    
     environment:
       - DATABASE_DB=superset
       - DATABASE_HOST=superset-db
-      - DATABASE_PASSWORD=superset
+      - DATABASE_PASSWORD=abc123!
       - DATABASE_USER=superset
       - DATABASE_PORT=5432
       - DATABASE_DIALECT=postgresql
       - POSTGRES_DB=superset
       - POSTGRES_USER=superset
-      - POSTGRES_PASSWORD=superset
+      - POSTGRES_PASSWORD=abc123!
       - PYTHONPATH=/app/pythonpath:/app/docker/pythonpath_dev
       - REDIS_HOST=superset-redis
       - REDIS_PORT=6379
+      - FLASK_DEBUG=true
       - FLASK_ENV=development
+      - SUPERSET_LOG_LEVEL=info
       - SUPERSET_ENV=development
+      - SUPERSET_ENABLE_SWAGGER_UI=true
       - SUPERSET_LOAD_EXAMPLES={{ 'yes' if (SUPERSET_provision_examples ) else 'no' }}
       - CYPRESS_CONFIG=false
       - SUPERSET_PORT=8088
+      - SUPERSET_APP_ROOT="/"
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -19044,18 +19051,23 @@ services:
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
-    command: ["/app/docker/docker-bootstrap.sh", "app"]
+    command: ["/app/docker/docker-bootstrap.sh", "app-gunicorn"]
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
 
   superset-init:
-    image: docker.io/apache/superset:{{__SUPERSET_version}}
+    image: apachesuperset.docker.scarf.sh/apache/superset:{{__SUPERSET_version}}
 
     hostname: superset-init
     container_name: superset-init
     user: "root"
+    depends_on:
+      superset-db:
+        condition: service_started
+      superset-redis:
+        condition: service_started    
     environment:
       - DATABASE_DB=superset
       - DATABASE_HOST=superset-db
@@ -19086,9 +19098,11 @@ services:
     {% endif -%}   {#  use_timezone #}
     command: ["/app/docker/docker-init.sh"]
     init: true
+    healthcheck:
+      disable: true
 
   superset-worker:
-    image: docker.io/apache/superset:{{__SUPERSET_version}}
+    image: apachesuperset.docker.scarf.sh/apache/superset{{__SUPERSET_version}}
 
     hostname: superset-worker
     container_name: superset-worker
@@ -19096,6 +19110,9 @@ services:
       com.platys.name: "superset"
       com.platys.description: "modern data exploration and visualization platform"
     user: "root"
+    depends_on:
+      superset-init:
+        condition: service_completed_successfully    
     environment:
       - DATABASE_DB=superset
       - DATABASE_HOST=superset-db
@@ -19129,9 +19146,15 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "celery -A superset.tasks.celery_app:app inspect ping -d celery@$$HOSTNAME",
+        ]
 
   superset-worker-beat:
-    image: docker.io/apache/superset:{{__SUPERSET_version}}
+    image: apachesuperset.docker.scarf.sh/apache/superset:{{__SUPERSET_version}}
 
     hostname: superset-worker-beat
     container_name: superset-worker-beat
@@ -19139,6 +19162,9 @@ services:
       com.platys.name: "superset"
       com.platys.description: "modern data exploration and visualization platform"
     user: "root"
+    depends_on:
+      superset-init:
+        condition: service_completed_successfully    
     environment:
       - DATABASE_DB=superset
       - DATABASE_HOST=superset-db
@@ -19172,6 +19198,8 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
+    healthcheck:
+      disable: true
 
   superset-db:
     image: docker.io/postgres:10
