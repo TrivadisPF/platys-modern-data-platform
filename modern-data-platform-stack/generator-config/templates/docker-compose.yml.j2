@@ -28501,6 +28501,7 @@ services:
       retries: 3
   {% endfor %}
 
+  {% if MINIO_mc_enabled | default(false) %}
   #  ================================== Minio MC ========================================== #
   minio-mc:
     image: quay.io/minio/aistor/mc:{{__MINIO_MC_version}}
@@ -28553,6 +28554,7 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
+  {% endif %}   {#  MINIO_mc_enabled #}
 {% endif %}   {#  MINIO_enable #}
 
 {% if ADMINIO_enable | default(false) %}
@@ -28773,9 +28775,10 @@ services:
       retries: 3
       start_period: 40s 
 
+  {% if RUSTFS_mc_enabled | default(false) %}
   #  ================================== RustFS MC ========================================== #
   rustfs-mc:
-    image: quay.io/minio/aistor/mc:{{__MINIO_MC_version}}
+    image: quay.io/minio/aistor/xmc:{{__MINIO_MC_version}}
     container_name: rustfs-mc
     hostname: rustfs-mc
     labels:
@@ -28826,6 +28829,7 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
+  {% endif %}   {#  RUSTFS_mc_enabled #}
 {% endif %}   {#  RUSTFS_enable #}
 
 {% if SEAWEEDFS_enable | default(false) %}
