@@ -18,31 +18,99 @@
 
 set -eo pipefail
 
+# Make python interactive
+if [ "$DEV_MODE" == "true" ]; then
+    if [ "$(whoami)" = "root" ] && command -v uv > /dev/null 2>&1; then
+      # Always ensure superset-core is available
+      echo "Installing superset-core in editable mode"
+      uv pip install --no-deps -e /app/superset-core
+
+      # Only reinstall the main app for non-worker processes
+      if [ "$1" != "worker" ] && [ "$1" != "beat" ]; then
+        echo "Reinstalling the app in editable mode"
+        uv pip install -e .
+      fi
+    fi
+fi
 REQUIREMENTS_LOCAL="/app/docker/requirements-local.txt"
+PORT=${PORT:-8088}
 # If Cypress run – overwrite the password for admin and export env variables
 if [ "$CYPRESS_CONFIG" == "true" ]; then
-    export SUPERSET_CONFIG=tests.superset_test_config
     export SUPERSET_TESTENV=true
-    export ENABLE_REACT_CRUD_VIEWS=true
-    export SUPERSET__SQLALCHEMY_DATABASE_URI=postgresql+psycopg2://superset:superset@superset-db:5432/superset
+    export POSTGRES_DB=superset_cypress
+    export SUPERSET__SQLALCHEMY_DATABASE_URI=postgresql+psycopg2://superset:superset@db:5432/superset_cypress
+    PORT=8081
+fi
+# Skip postgres requirements installation for workers to avoid conflicts
+if [[ "$DATABASE_DIALECT" == postgres* ]] && [ "$(whoami)" = "root" ] && [ "$1" != "worker" ] && [ "$1" != "beat" ]; then
+    # older images may not have the postgres dev requirements installed
+    echo "Installing postgres requirements"
+    if command -v uv > /dev/null 2>&1; then
+        # Use uv in newer images
+        uv pip install -e .[postgres]
+    else
+        # Use pip in older images
+        pip install -e .[postgres]
+    fi
 fi
 #
 # Make sure we have dev requirements installed
 #
 if [ -f "${REQUIREMENTS_LOCAL}" ]; then
   echo "Installing local overrides at ${REQUIREMENTS_LOCAL}"
-  pip install -r "${REQUIREMENTS_LOCAL}"
+  if command -v uv > /dev/null 2>&1; then
+    uv pip install --no-cache-dir -r "${REQUIREMENTS_LOCAL}"
+  else
+    pip install --no-cache-dir -r "${REQUIREMENTS_LOCAL}"
+  fi
 else
   echo "Skipping local overrides"
 fi
 
-if [[ "${1}" == "worker" ]]; then
-  echo "Starting Celery worker..."
-  celery worker --app=superset.tasks.celery_app:app -Ofair -l INFO
-elif [[ "${1}" == "beat" ]]; then
-  echo "Starting Celery beat..."
-  celery beat --app=superset.tasks.celery_app:app --pidfile /tmp/celerybeat.pid -l INFO
-elif [[ "${1}" == "app" ]]; then
-  echo "Starting web app..."
-  flask run -p 8088 --with-threads --reload --debugger --host=0.0.0.0
-fi
+case "${1}" in
+  worker)
+    echo "Starting Celery worker..."
+    # setting up only 2 workers by default to contain memory usage in dev environments
+    celery --app=superset.tasks.celery_app:app worker -O fair -l INFO --concurrency=${CELERYD_CONCURRENCY:-2} ${WORKER_LOG_FILE:+--logfile=$WORKER_LOG_FILE}
+    ;;
+  beat)
+    echo "Starting Celery beat..."
+    rm -f /tmp/celerybeat.pid
+    celery --app=superset.tasks.celery_app:app beat --pidfile /tmp/celerybeat.pid -l INFO -s "${SUPERSET_HOME}"/celerybeat-schedule ${BEAT_LOG_FILE:+--logfile=$BEAT_LOG_FILE}
+    ;;
+  app)
+    echo "Starting web app (using development server)..."
+
+    # Default to Flask debug mode in this dev compose entrypoint so the Talisman
+    # dev CSP (which permits 'unsafe-eval' required by React Refresh / HMR) is
+    # served. Operators can still set FLASK_DEBUG=false in docker/.env-local
+    # to exercise the production-like CSP and error handling.
+    : "${FLASK_DEBUG:=1}"
+    export FLASK_DEBUG
+
+    # Werkzeug's interactive debugger (/console) is a separate, security-sensitive
+    # feature and must be opted into explicitly via SUPERSET_DEBUG_ENABLED=true.
+    if [[ "${SUPERSET_DEBUG_ENABLED:-}" == "true" ]]; then
+        DEBUGGER_FLAG="--debugger"
+        echo "  ⚠️  Werkzeug debugger enabled (requires PIN for /console access)"
+    else
+        DEBUGGER_FLAG="--no-debugger"
+        echo "  🔒 Werkzeug debugger disabled (set SUPERSET_DEBUG_ENABLED=true to enable)"
+    fi
+
+    flask run -p $PORT --reload $DEBUGGER_FLAG --host=0.0.0.0 \
+      --extra-files "/app/superset/extensions/.reload_trigger" \
+      --exclude-patterns "*/node_modules/*:*/.venv/*:*/build/*:*/__pycache__/*:*/superset-frontend/*:*/superset/__init__.py"
+    ;;
+  app-gunicorn)
+    echo "Starting web app..."
+    /usr/bin/run-server.sh
+    ;;
+  mcp)
+    echo "Starting MCP service..."
+    superset mcp run --host 0.0.0.0 --port ${MCP_PORT:-5008} --debug
+    ;;
+  *)
+    echo "Unknown Operation!!!"
+    ;;
+esac
