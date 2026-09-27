@@ -19066,6 +19066,12 @@ services:
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
     command: ["/app/docker/docker-bootstrap.sh", "app-gunicorn"]
+    healthcheck:
+      test: ["CMD-SHELL", "/app/docker/docker-healthcheck.sh"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
@@ -19992,12 +19998,40 @@ services:
       #CUBEJS_DB_EXPORT_BUCKET: admin-bucket
       #CUBEJS_DB_EXPORT_BUCKET_AWS_KEY: 
       #CUBEJS_DB_EXPORT_BUCKET_AWS_SECRET: 
-      #CUBEJS_DB_EXPORT_BUCKET_AWS_REGION:       
+      #CUBEJS_DB_EXPORT_BUCKET_AWS_REGION:     
+      CUBEJS_CUBESTORE_HOST=cubestore
+  
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer:z
+      - ./conf/cube:/cube/conf:z
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+
+  #  ================================== Cube Store ========================================== #
+  cubestore:
+    image: docker.io/cubejs/cubestore:latest
+    container_name: cubestore
+    hostname: cubestore
+    labels:
+      com.platys.name: "cubejs"
+      com.platys.description: "Cube Store — high-performance distributed SQL storage for Cube.js pre-aggregations"
+    environment:
+      CUBESTORE_REMOTE_DIR: /cube/data
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer:z
+      - ./container-volume/cubestore:/cube/data:z
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
