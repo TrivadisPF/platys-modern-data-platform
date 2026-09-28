@@ -16525,10 +16525,11 @@ services:
         conda create -y --name py310 python=3.10.12
         source /opt/conda/etc/profile.d/conda.sh
         conda activate py310
-        pip install ipykernel
     {% if NEXUS_enable | default(false) %}
-        pip config set global.index-url http://nexus:28426/repository/pypi-proxy/simple/
-        pip config set global.trusted-host nexus
+        NEXUS_PASS=$$(python3 -c "import urllib.parse, os; print(urllib.parse.quote(os.environ.get('MAVEN_DOWNLOAD_REPO_NEXUS_PASSWORD', 'abc123!abc123!')))")
+        NEXUS_INDEX_URL="http://admin:$${NEXUS_PASS}@nexus:8081/repository/pypi-proxy/simple/"
+    {% endif -%}   {#  NEXUS_enable #}
+        pip install ipykernel
     {% endif -%}   {#  NEXUS_enable #}
         python -m ipykernel install --user --name py310 --display-name "Python 3.10.12 (ipykernel)"
     {% endif -%}   {#  JUPYTER_edition ... #}
