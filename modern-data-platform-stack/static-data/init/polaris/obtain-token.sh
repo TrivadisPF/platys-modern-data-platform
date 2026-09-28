@@ -32,7 +32,7 @@ TOKEN=$(curl \
   -d grant_type=client_credentials \
   -d scope=PRINCIPAL_ROLE:ALL | jq -r .access_token)
 
-if [ -z "${TOKEN}" ]; then
+if [ -z "${TOKEN}" ] || [ "${TOKEN}" = "null" ]; then
   echo "Failed to obtain access token."
   exit 1
 fi
