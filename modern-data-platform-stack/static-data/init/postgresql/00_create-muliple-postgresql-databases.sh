@@ -63,3 +63,18 @@ if [ -n "$POSTGRES_MULTIPLE_DATABASES" ]; then
 	done
 	echo "Multiple databases created"
 fi
+
+if [ -n "${POSTGRES_MULTIPLE_SCHEMAS:-}" ]; then
+	echo "Multiple schema creation requested in database '$POSTGRES_DB': $POSTGRES_MULTIPLE_SCHEMAS"
+	IFS=', ' read -r -a schemas <<< "$POSTGRES_MULTIPLE_SCHEMAS"
+	for schema in "${schemas[@]}"; do
+		schema="${schema//[\'\"\`]/}"
+		if [ -n "$schema" ]; then
+			echo "Creating schema '$schema' in database '$POSTGRES_DB'..."
+			psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" \
+				-c "CREATE SCHEMA IF NOT EXISTS $schema;"
+			echo "Schema '$schema' created."
+		fi
+	done
+	echo "Multiple schemas created"
+fi
