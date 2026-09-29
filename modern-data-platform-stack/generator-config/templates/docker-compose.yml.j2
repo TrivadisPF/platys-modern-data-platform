@@ -6820,9 +6820,9 @@ services:
       com.platys.webui.title: 'Spark UI'
       com.platys.webui.url: "http://dataplatform:28304"
     user: root      
-    {% if (NEXUS_enable or external['NEXUS_enable'] | default(false)) or (DATAHUB_enable | default(false) and SPARK_datahub_agent_enabled | default(false)) %}
+    {% if NEXUS_enable | default(false) or (DATAHUB_enable | default(false) and SPARK_datahub_agent_enabled | default(false)) %}
     depends_on:
-      {% if NEXUS_enable or external['NEXUS_enable'] | default(false) %}
+      {% if NEXUS_enable | default(false) %}
       nexus:
         condition: service_healthy
       {% endif -%}   {#  NEXUS_enable #}
@@ -15051,9 +15051,13 @@ services:
     depends_on:
       airflow-init:
         condition: service_completed_successfully
-        required: true    
+        required: true
       airflow-db:
-        condition: service_healthy           
+        condition: service_healthy
+      {% if NEXUS_enable | default(false) %}
+      nexus:
+        condition: service_healthy
+      {% endif -%}   {#  NEXUS_enable #}
     command:
       - api-server
   {% if (AIRFLOW_volume_map_docker_daemon) %}
@@ -15204,7 +15208,11 @@ services:
         required: true
       airflow-db:
         condition: service_healthy
-        required: true      
+        required: true
+      {% if NEXUS_enable | default(false) %}
+      nexus:
+        condition: service_healthy
+      {% endif -%}   {#  NEXUS_enable #}
     command:
       - dag-processor
   {% if (AIRFLOW_volume_map_docker_daemon) %}
@@ -15352,7 +15360,11 @@ services:
         required: true
       airflow-db:
         condition: service_healthy
-        required: true       
+        required: true
+      {% if NEXUS_enable | default(false) %}
+      nexus:
+        condition: service_healthy
+      {% endif -%}   {#  NEXUS_enable #}
     command:
       - scheduler
   {% if (AIRFLOW_volume_map_docker_daemon) %}
@@ -15495,7 +15507,7 @@ services:
     labels:
       com.platys.name: 'airflow'
       com.platys.description: "Job Orchestration & Scheduler"
-    depends_on:  
+    depends_on:
       airflow-apiserver:
         condition: service_healthy
         required: true
@@ -15504,9 +15516,13 @@ services:
         required: true
       airflow-db:
         condition: service_healthy
-        required: true      
+        required: true
+      {% if NEXUS_enable | default(false) %}
+      nexus:
+        condition: service_healthy
+      {% endif -%}   {#  NEXUS_enable #}
     command:
-      - celery 
+      - celery
       - worker
   {% if (AIRFLOW_volume_map_docker_daemon) %}
     group_add:
@@ -15654,9 +15670,13 @@ services:
     depends_on:
       airflow-init:
         condition: service_completed_successfully
-        required: true    
+        required: true
       airflow-db:
-        condition: service_healthy          
+        condition: service_healthy
+      {% if NEXUS_enable | default(false) %}
+      nexus:
+        condition: service_healthy
+      {% endif -%}   {#  NEXUS_enable #}
     command: triggerer
   {% if (AIRFLOW_volume_map_docker_daemon) %}
     group_add:
