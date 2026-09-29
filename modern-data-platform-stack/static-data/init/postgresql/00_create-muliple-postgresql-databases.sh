@@ -60,12 +60,14 @@ if [ -n "$POSTGRES_MULTIPLE_DATABASES" ]; then
 	IFS=', ' read -r -a schemas <<< "${POSTGRES_MULTIPLE_SCHEMAS:-}"
 	for index in ${!databases[@]}; do
         if [[ $index < ${#databases[*]} && $index < ${#users[*]} && $index < ${#passwords[*]} ]] ; then
+			schema="${schemas[index]:-}"
+			addl_role="${addl_roles[index]:-}"
 			if [ -n "$POSTGRES_MULTIPLE_ADDL_ROLES" ] && [ -n "${POSTGRES_MULTIPLE_SCHEMAS:-}" ]; then
-              create_user_and_database_and_schema "${databases[index]//[\'\"\`]/}" "${users[index]//[\'\"\`]/}" "${passwords[index]//[\'\"\`]/}" "${addl_roles[index]//[\'\"\`]/}" "${schemas[index]//[\'\"\`]/}"
+              create_user_and_database_and_schema "${databases[index]//[\'\"\`]/}" "${users[index]//[\'\"\`]/}" "${passwords[index]//[\'\"\`]/}" "${addl_role//[\'\"\`]/}" "${schema//[\'\"\`]/}"
             elif [ -n "$POSTGRES_MULTIPLE_ADDL_ROLES" ]; then
-              create_user_and_database_and_schema "${databases[index]//[\'\"\`]/}" "${users[index]//[\'\"\`]/}" "${passwords[index]//[\'\"\`]/}" "${addl_roles[index]//[\'\"\`]/}" ""
+              create_user_and_database_and_schema "${databases[index]//[\'\"\`]/}" "${users[index]//[\'\"\`]/}" "${passwords[index]//[\'\"\`]/}" "${addl_role//[\'\"\`]/}" ""
             elif [ -n "${POSTGRES_MULTIPLE_SCHEMAS:-}" ]; then
-              create_user_and_database_and_schema "${databases[index]//[\'\"\`]/}" "${users[index]//[\'\"\`]/}" "${passwords[index]//[\'\"\`]/}" "" "${schemas[index]//[\'\"\`]/}"
+              create_user_and_database_and_schema "${databases[index]//[\'\"\`]/}" "${users[index]//[\'\"\`]/}" "${passwords[index]//[\'\"\`]/}" "" "${schema//[\'\"\`]/}"
             else
               create_user_and_database_and_schema "${databases[index]//[\'\"\`]/}" "${users[index]//[\'\"\`]/}" "${passwords[index]//[\'\"\`]/}" "" ""
 			fi
