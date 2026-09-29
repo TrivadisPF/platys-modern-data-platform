@@ -1312,13 +1312,13 @@ networks:
       {% set ns.controllerQuorumVoters = ns.controllerQuorumVoters ~ ',' ~ loop.index ~ "@" ~ serviceName ~ ":4" ~ port %}
     {% endif %}
 
-    {% if ns.serviceNames is not defined %}
-      {% set ns.serviceNames = serviceName %}
+    {% if ns.kafkaServiceNames is not defined %}
+      {% set ns.kafkaServiceNames = serviceName %}
       {% set ns.ports = port|string %}
       {% set ns.portsJMX = portJMX|string %}
       {% set ns.portsProm = portProm|string %}
     {% else %}
-      {% set ns.serviceNames = ns.serviceNames ~ ',' ~ serviceName %}
+      {% set ns.kafkaServiceNames = ns.kafkaServiceNames ~ ',' ~ serviceName %}
       {% set ns.ports = ns.ports ~ ',' ~ port %}
       {% set ns.portsJMX = ns.portsJMX ~ ',' ~ portJMX %}
       {% set ns.portsProm = ns.portsProm ~ ',' ~ portProm %}
@@ -2014,7 +2014,7 @@ services:
     {% set KAFKA_internal_replication_factor = KAFKA_broker_nodes -%}
   {% endif -%}
   #  ================================== Kafka ========================================== #
-  {% for serviceName in (ns.serviceNames.split(',')) %}
+  {% for serviceName in (ns.kafkaServiceNames.split(',')) %}
     {% set port = ns.ports.split(',')[loop.index-1] %}
     {% if KAFKA_use_standard_port_for_external_interface | default(false) %}
       {% set externalPort = port %}
@@ -2311,7 +2311,7 @@ services:
       timeout: 10s
       retries: 40
       start_period: 20s
-  {% endfor %} {# for serviceName in (ns.serviceNames) #}
+  {% endfor %} {# for serviceName in (ns.kafkaServiceNames) #}
 {% endif %} {# KAFKA_enable #}
 
 {% if (KAFKA_enable and not KAFKA_use_kraft_mode and ns.secureKafkaEnabled and (KAFKA_sasl_mechanism == 'SCRAM-SHA-256' or KAFKA_sasl_mechanism == 'SCRAM-SHA-512')) | default(false) %}
@@ -2343,7 +2343,7 @@ services:
     container_name: kafka-init
     hostname: kafka-init
     depends_on:
-      {{ns.serviceNames.split(',')[0]}}:
+      {{ns.kafkaServiceNames.split(',')[0]}}:
         condition: service_started
     environment:
       BOOTSTRAP_SERVERS: '{{ns.bootstrapServers}}'
@@ -2375,7 +2375,7 @@ services:
       com.platys.name: "kafka"
       com.platys.description: "Kafka Command Line utilities"
     depends_on:
-      kafka-1:
+      {{ns.kafkaServiceNames.split(',')[0]}}:
         condition: service_healthy      
     environment:
       BOOTSTRAP_SERVERS: '{{ns.bootstrapServers}}'
@@ -2421,7 +2421,7 @@ services:
     ports:
       - "{{external_port}}:{{port}}"
     depends_on:
-      kafka-1:
+      {{ns.kafkaServiceNames.split(',')[0]}}:
         condition: service_healthy      
     environment:
       CONNECT_BOOTSTRAP_SERVERS: '{{ns.bootstrapServers}}'
@@ -2589,7 +2589,7 @@ services:
       com.platys.restapi.title: 'ksqlDB Server REST API'
       com.platys.restapi.url: "http://dataplatform:{{external_port}}"
     depends_on:
-      kafka-1:
+      {{ns.kafkaServiceNames.split(',')[0]}}:
         condition: service_healthy
       schema-registry-1:
         condition: service_healthy      
@@ -3916,7 +3916,7 @@ services:
     ports:
       - "18086:8086"
     depends_on:
-      kafka-1:
+      {{ns.kafkaServiceNames.split(',')[0]}}:
         condition: service_healthy         
     environment:
       KAFKA_REST_BOOTSTRAP_SERVERS: '{{ns.bootstrapServers}}'
@@ -3981,7 +3981,7 @@ services:
     ports:
       - "1882:1882"
     depends_on:
-      kafka-1:
+      {{ns.kafkaServiceNames.split(',')[0]}}:
         condition: service_healthy         
     environment:
       KAFKA_MQTT_TOPIC_REGEX_LIST: {{KAFKA_MQTTPROXY_topic_regex_list}}
@@ -4075,7 +4075,7 @@ services:
     ports:
       - "{{external_port}}:{{port}}"
     depends_on:
-      kafka-1:
+      {{ns.kafkaServiceNames.split(',')[0]}}:
         condition: service_healthy      
     environment:
       SCHEMA_REGISTRY_HOST_NAME: schema-registry-{{loop.index}}
@@ -4943,7 +4943,7 @@ services:
       com.platys.webui.title: 'Kafka Topics UI'
       com.platys.webui.url: "http://dataplatform:28141"
     depends_on:
-      kafka-1:
+      {{ns.kafkaServiceNames.split(',')[0]}}:
         condition: service_healthy 
     ports:
       - "28141:8000"
@@ -6408,7 +6408,7 @@ services:
     container_name: cruise-control-init
     hostname: cruise-control-init
     depends_on:
-      kafka-1:
+      {{ns.kafkaServiceNames.split(',')[0]}}:
         condition: service_started
     environment:
       BOOTSTRAP_SERVERS: '{{ns.bootstrapServers}}'
@@ -6513,7 +6513,7 @@ services:
         condition: service_started    
   {% elif KAFKA_enable %}
     depends_on:
-      kafka-1:
+      {{ns.kafkaServiceNames.split(',')[0]}}:
         condition: service_started    
   {% endif -%}   {#  KESTRA_flavour  #}      
     extra_hosts:
@@ -31639,7 +31639,7 @@ services:
       com.platys.restapi.title: "IOEvent Cockpit API"
       com.platys.restapi.url: "http://dataplatform:8761"
     depends_on:
-      - kafka-1
+      - {{ns.kafkaServiceNames.split(',')[0]}}
       - elasticsearch-1
     ports:
       - 8761:8761
