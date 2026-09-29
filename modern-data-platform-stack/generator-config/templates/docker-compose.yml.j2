@@ -7,12 +7,12 @@ networks:
   default:
     name: {{platys['platform-name']}}
 
-{% if data_center_to_use > 0 and data_centers is defined and data_centers %}
-  {% set dataCenter = '-' ~ data_centers.split(',')[data_center_to_use-1] -%}
-  {% set dataCenterId = data_center_to_use - 1 %}
+{% if environment_to_use > 0 and environments is defined and environments %}
+  {% set environment = '-' ~ environments.split(',')[environment_to_use-1] -%}
+  {% set environmentId = environment_to_use - 1 %}
 {% else %}
-  {% set dataCenter = '' -%}
-  {% set dataCenterId = 0 %}
+  {% set environment = '' -%}
+  {% set environmentId = 0 %}
 {% endif %}
 
 {% set __PROVISIONING_DATA_version = PROVISIONING_DATA_version | default('latest') -%}
@@ -1292,11 +1292,11 @@ networks:
   {% endif %}  {# KAFKA_sasl_password #}
 {% else %} {# not external['KAFKA_sasl_username'] #}
     {#% for datacenter in (DATA_CENTER.split(',') | default([]) ) %#}
-  {% set dcName = dataCenter %}
-  {% set basePort = 9092 + dataCenterId * KAFKA_broker_nodes %}
-  {% set basePortJMX = 9992 + dataCenterId * KAFKA_broker_nodes %}
-  {% set basePortProm = 1234 + dataCenterId * KAFKA_broker_nodes %}
-  {% set serviceBaseName = "kafka" ~ dcName ~ "-" %}
+  {% set envName = environment %}
+  {% set basePort = 9092 + environmentId * KAFKA_broker_nodes %}
+  {% set basePortJMX = 9992 + environmentId * KAFKA_broker_nodes %}
+  {% set basePortProm = 1234 + environmentId * KAFKA_broker_nodes %}
+  {% set serviceBaseName = "kafka" ~ envName ~ "-" %}
 
   {% for num in range(KAFKA_broker_nodes | default(1) ) %}
     {% set port = basePort + loop.index-1 %}
@@ -1890,13 +1890,13 @@ services:
 {% if ZOOKEEPER_enable | default(false) %}
   #  ================================== Zookeeper ========================================== #
   {% for num in range(ZOOKEEPER_nodes | default('1') ) %}
-  {% set port = 2181 + (dataCenterId * ZOOKEEPER_nodes) + loop.index-1 %}
-  {% set promPort = 1240 + (dataCenterId * ZOOKEEPER_nodes) + loop.index-1 %}
-  zookeeper{{dataCenter}}-{{loop.index}}:
+  {% set port = 2181 + (environmentId * ZOOKEEPER_nodes) + loop.index-1 %}
+  {% set promPort = 1240 + (environmentId * ZOOKEEPER_nodes) + loop.index-1 %}
+  zookeeper{{environment}}-{{loop.index}}:
     image: docker.io/zookeeper:{{__ZOOKEEPER_version}}
 
-    container_name: zookeeper{{dataCenter}}-{{loop.index}}
-    hostname: zookeeper{{dataCenter}}-{{loop.index}}
+    container_name: zookeeper{{environment}}-{{loop.index}}
+    hostname: zookeeper{{environment}}-{{loop.index}}
     labels:
       com.platys.name: "zookeeper"
       com.platys.description: "Zookeeper Node {{loop.index}}"
@@ -1910,7 +1910,7 @@ services:
       ZOOKEEPER_INIT_LIMIT: 5
       ZOOKEEPER_SYNC_LIMIT: 2
     {% if ZOOKEEPER_nodes == 3 %}
-      ZOOKEEPER_SERVERS: zookeeper{{dataCenter}}-1:22888:23888;zookeeper{{dataCenter}}-2:32888:33888;zookeeper{{dataCenter}}-3:42888:43888
+      ZOOKEEPER_SERVERS: zookeeper{{environment}}-1:22888:23888;zookeeper{{environment}}-2:32888:33888;zookeeper{{environment}}-3:42888:43888
     {% endif %}
     {% if jmx_monitoring_with_prometheus_enable %}
       EXTRA_ARGS: -javaagent:/usr/share/jmx-exporter/jmx_prometheus_javaagent-1.1.0.jar=1234:/usr/share/jmx-exporter/zookeeper.yml
@@ -2025,8 +2025,8 @@ services:
     {% endif %}
     {% set portJMX = ns.portsJMX.split(',')[loop.index-1] %}
     {% set portProm = ns.portsProm.split(',')[loop.index-1] %}
-    {% set dcName = 'rack1' %}
-    {% set zookeeperPort = 2181 + (dataCenterId * ZOOKEEPER_nodes) %}
+    {% set envName = 'rack1' %}
+    {% set zookeeperPort = 2181 + (environmentId * ZOOKEEPER_nodes) %}
   {{serviceName}}:
   {% if (KAFKA_edition | lower) == 'enterprise' or (KAFKA_edition | lower) == 'community' | default(false) %}
     image: docker.io/confluentinc/{{ 'cp-server' if (KAFKA_edition | lower) == 'enterprise' else 'cp-kafka' }}:{{__CONFLUENT_PLATFORM_version}}
@@ -2045,7 +2045,7 @@ services:
       com.platys.description: "Kafka Broker {{loop.index}}"
     {% if not KAFKA_use_kraft_mode | default(false) %}
     depends_on:
-      - zookeeper{{dataCenter}}-1
+      - zookeeper{{environment}}-1
     {% endif %}
     ports:
       - "{{port}}:{{port}}"
@@ -2056,7 +2056,7 @@ services:
       - "{{portProm}}:1234"
     environment:
       KAFKA_BROKER_ID: {{loop.index}}
-      KAFKA_BROKER_RACK: '{{dcName}}'
+      KAFKA_BROKER_RACK: '{{envName}}'
       KAFKA_INTER_BROKER_LISTENER_NAME: BROKER
     {% if KAFKA_use_kraft_mode | default(false) %}
       KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
@@ -2067,7 +2067,7 @@ services:
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'CONTROLLER:{{ns.securityProtocolCONTROLLER}},BROKER:{{ns.securityProtocolBROKER}},LOCAL:{{ns.securityProtocolLOCAL}},DOCKERHOST:{{ns.securityProtocolDOCKERHOST}},EXTERNAL:{{ns.securityProtocolEXTERNAL}}'
       KAFKA_LISTENERS: 'CONTROLLER://{{serviceName}}:4{{port}},BROKER://{{serviceName}}:1{{port}},LOCAL://{{serviceName}}:3{{port}},DOCKERHOST://{{serviceName}}:{{dockerHostPort}},EXTERNAL://{{serviceName}}:{{externalPort}}'
     {% else %}
-      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper{{dataCenter}}-1:{{zookeeperPort}}'
+      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper{{environment}}-1:{{zookeeperPort}}'
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'BROKER:{{ns.securityProtocolBROKER}},LOCAL:{{ns.securityProtocolLOCAL}},DOCKERHOST:{{ns.securityProtocolDOCKERHOST}},EXTERNAL:{{ns.securityProtocolEXTERNAL}}'
       KAFKA_LISTENERS: 'BROKER://{{serviceName}}:1{{port}},LOCAL://{{serviceName}}:3{{port}},DOCKERHOST://{{serviceName}}:{{dockerHostPort}},EXTERNAL://{{serviceName}}:{{externalPort}}'
     {% endif %}
@@ -4284,12 +4284,12 @@ services:
 
 {% if ((KAFKA_enable or external['KAFKA_enable']) and (KAFKA_edition | lower) == 'enterprise' and CONFLUENT_CCC_enable) | default(false) %}
   #  ================================== Confluent Control Center ========================================== #
-  {% set externalPort = 9021 + dataCenterId %}
-  control-center{{dataCenter}}:
+  {% set externalPort = 9021 + environmentId %}
+  control-center{{environment}}:
     image: docker.io/confluentinc/cp-enterprise-control-center:{{__CONFLUENT_CCC_version}}
 
-    hostname: control-center{{dataCenter}}
-    container_name: control-center{{dataCenter}}
+    hostname: control-center{{environment}}
+    container_name: control-center{{environment}}
     labels:
       com.platys.name: "confluent-control-center"
       com.platys.description: "Confluent Control Center"
@@ -4355,12 +4355,12 @@ services:
 
 {% if ((KAFKA_enable or external['KAFKA_enable']) and (KAFKA_edition | lower) == 'enterprise' and CONFLUENT_CCC_NG_enable) | default(false) %}
   #  ================================== Confluent Control Center v2 (Next Generation) ========================================== #
-  {% set externalPort = 9025 + dataCenterId %}
-  control-center-ng{{dataCenter}}:
+  {% set externalPort = 9025 + environmentId %}
+  control-center-ng{{environment}}:
     image: docker.io/confluentinc/cp-enterprise-control-center-next-gen:{{__CONFLUENT_CCC_NG_version}}
 
-    hostname: control-center-ng{{dataCenter}}
-    container_name: control-center-ng{{dataCenter}}
+    hostname: control-center-ng{{environment}}
+    container_name: control-center-ng{{environment}}
     labels:
       com.platys.name: "confluent-control-center-ng"
       com.platys.description: "Confluent Control Center Next Gen."
@@ -4581,11 +4581,11 @@ services:
 {% endif %}   {# KAFKA_enable and CONFLUENT_REPLICATOR_enable #}
 
 {% if ((KAFKA_enable or external['KAFKA_enable']) and KAFKA_MIRROR_MAKER2_enable) | default(false) %}
-  mirror-maker{{dataCenter}}-1:
+  mirror-maker{{environment}}-1:
     image: docker.io/trivadis/mirrormaker2:{{__KAFKA_MIRROR_MAKER2_version}}
 
-    container_name: mirror-maker{{dataCenter}}-1:
-    hostname: mirror-maker{{dataCenter}}-1:
+    container_name: mirror-maker{{environment}}-1:
+    hostname: mirror-maker{{environment}}-1:
     labels:
       com.platys.name: "kafka-mirror-maker2"
       com.platys.description: "Kafka MirrorMaker2"
@@ -5015,12 +5015,12 @@ services:
 
 {% if ((KAFKA_enable or external['KAFKA_enable']) and CMAK_enable) | default(false) %}
   #  ================================== Cluster Manager for Apache Kafka (CMAK) ========================================== #
-  {% set externalPort = 28104 + dataCenterId %}
-  cmak{{dataCenter}}:
+  {% set externalPort = 28104 + environmentId %}
+  cmak{{environment}}:
     image: docker.io/trivadis/cmak:{{__CMAK_version}}
 
-    container_name: cmak{{dataCenter}}
-    hostname: cmak{{dataCenter}}
+    container_name: cmak{{environment}}
+    hostname: cmak{{environment}}
     labels:
       com.platys.name: "cmak"
       com.platys.description: "Kafka GUI"
@@ -5146,13 +5146,13 @@ services:
 
 {% if ((KAFKA_enable or external['KAFKA_enable']) and AKHQ_enable) | default(false) %}
   #  ================================== Apache Kafka HQ (AKHQ) ========================================== #
-  {% set externalPort = 28107 + dataCenterId %}
-  {% set monitoringExternalPort = 28320 + dataCenterId %}
-  akhq{{dataCenter}}:
+  {% set externalPort = 28107 + environmentId %}
+  {% set monitoringExternalPort = 28320 + environmentId %}
+  akhq{{environment}}:
     image: docker.io/tchiotludo/akhq:{{__AKHQ_version}}
 
-    container_name: akhq{{dataCenter}}
-    hostname: akhq{{dataCenter}}
+    container_name: akhq{{environment}}
+    hostname: akhq{{environment}}
     labels:
       com.platys.name: "akhq"
       com.platys.description: "Kafka GUI"
@@ -23055,7 +23055,7 @@ services:
       com.platys.name: "druid"
       com.platys.description: "Real-time analytics database"
     depends_on:
-      - zookeeper{{dataCenter}}-1
+      - zookeeper{{environment}}-1
       - druid-postgres
     ports:
       - "28146:8081"
@@ -23089,7 +23089,7 @@ services:
       com.platys.name: "druid"
       com.platys.description: "Real-time analytics database"
     depends_on:
-      - zookeeper{{dataCenter}}-1
+      - zookeeper{{environment}}-1
       - druid-postgres
       - druid-coordinator
     ports:
@@ -23125,7 +23125,7 @@ services:
       - ./container-volume/druid/storage:/opt/data:z
 #      - historical_var:/opt/druid/var
     depends_on:
-      - zookeeper{{dataCenter}}-1
+      - zookeeper{{environment}}-1
       - druid-postgres
       - druid-coordinator
     ports:
@@ -23157,7 +23157,7 @@ services:
       com.platys.name: "druid"
       com.platys.description: "Real-time analytics database"
     depends_on:
-      - zookeeper{{dataCenter}}-1
+      - zookeeper{{environment}}-1
       - druid-postgres
       - druid-coordinator
     ports:
@@ -23192,7 +23192,7 @@ services:
       com.platys.webui.title: "Druid Console UI"
       com.platys.webui.url: "http://dataplatform:28150/graph"
     depends_on:
-      - zookeeper{{dataCenter}}-1
+      - zookeeper{{environment}}-1
       - druid-postgres
       - druid-coordinator
     ports:
@@ -34753,12 +34753,12 @@ services:
 
 {% if WETTY_enable | default(false) %}
   #  ================================== Wetty ========================================== #
-  {% set externalPort = 3001 + dataCenterId %}
-  wetty{{dataCenter}}:
+  {% set externalPort = 3001 + environmentId %}
+  wetty{{environment}}:
     image: docker.io/wettyoss/wetty:{{__WETTY_version}}
 
-    container_name: wetty{{dataCenter}}
-    hostname: wetty{{dataCenter}}
+    container_name: wetty{{environment}}
+    hostname: wetty{{environment}}
     labels:
       com.platys.name: "wetty"
       com.platys.description: "A terminal window in Web-Browser"
@@ -35074,7 +35074,7 @@ services:
 
 {% if MARKDOWN_VIEWER_enable | default(false) %}
   #  ================================== markdown-viewer ========================================== #
-  markdown-viewer{{dataCenter}}:
+  markdown-viewer{{environment}}:
   {% if MARKDOWN_VIEWER_edition == 'markdown-madness' | default(false) %}
     image: docker.io/dannyben/madness:{{__MARKDOWN_MADNESS_version}}
 
@@ -35082,15 +35082,15 @@ services:
     image: docker.io/trivadis/markdown-web:{{__MARKDOWN_VIEWER_version}}
 
   {% endif -%}   {# MARKDOWN_VIEWER_use_markdown_madness_impl #}
-    container_name: markdown-viewer{{dataCenter}}
-    hostname: markdown-viewer{{dataCenter}}
+    container_name: markdown-viewer{{environment}}
+    hostname: markdown-viewer{{environment}}
     labels:
       com.platys.name: "markdown-viewer"
       com.platys.description: "Platys Platform homepage viewer"
       com.platys.webui.title: "Markdown Viewer UI"
-      com.platys.webui.url: "http://dataplatform:{{80 + (dataCenterId * 1) if (MARKDOWN_VIEWER_use_port_80 | default(true) )  else 8008 }}"
+      com.platys.webui.url: "http://dataplatform:{{80 + (environmentId * 1) if (MARKDOWN_VIEWER_use_port_80 | default(true) )  else 8008 + (environmentId * 1) }}"
     ports:
-      - "{{80 + (dataCenterId * 1) if (MARKDOWN_VIEWER_use_port_80 | default(true) )  else 8008 }}:{{3000 if MARKDOWN_VIEWER_edition == 'markdown-madness' else 80}}"
+      - "{{80 + (environmentId * 1) if (MARKDOWN_VIEWER_use_port_80 | default(true) )  else 8008 + (environmentId * 1) }}:{{3000 if MARKDOWN_VIEWER_edition == 'markdown-madness' else 80}}"
     volumes:
       - ./artefacts:{{"/docs" if MARKDOWN_VIEWER_edition == 'markdown-madness' else "/home/python/markdown"}}
   {% if MARKDOWN_VIEWER_edition == 'markdown-madness' | default(false) %}
@@ -35108,11 +35108,11 @@ services:
       retries: 3
       start_period: 1m
 
-  markdown-renderer{{dataCenter}}:
+  markdown-renderer{{environment}}:
     image: docker.io/trivadis/jinja2-renderer:0.8.1
 
-    container_name: markdown-renderer{{dataCenter}}
-    hostname: markdown-renderer{{dataCenter}}
+    container_name: markdown-renderer{{environment}}
+    hostname: markdown-renderer{{environment}}
     labels:
       com.platys.name: "markdown-renderer"
       com.platys.description: "Platys Platform homepage rendering"
@@ -35125,7 +35125,7 @@ services:
       PLATYS_PLATFORM_STACK: {{platys['platform-stack']}}
       PLATYS_PLATFORM_STACK_VERSION: {{platys['platform-stack-version']}}
       PLATYS_COPY_COOKBOOK_DATA: '{{copy_cookbook_data_folder}}'
-      PLATYS_DATACENTER: {{dataCenter.replace('-','') | default('') }}
+      PLATYS_DATACENTER: {{environment.replace('-','') | default('') }}
       SERVICE_LIST_VERSION: {{MARKDOWN_VIEWER_services_list_version}}
   {% if MARKDOWN_MADNESS_enable | default(false) %}
       PLATYS_ADDL_DOCUMENTATION: 'http://${PUBLIC_IP:-127.0.0.1}:28312'
