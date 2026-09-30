@@ -19128,9 +19128,9 @@ services:
       - "/bin/bash"
       - "-c"
       - |
-        echo 'psycopg2-binary' >> /app/docker/requirements-local.txt
+        uv pip install psycopg2-binary
         {% if SUPERSET_additional_requirements | default('') %}
-        for pkg in {{SUPERSET_additional_requirements}}; do echo "$pkg" >> /app/docker/requirements-local.txt; done
+        uv pip install {{SUPERSET_additional_requirements}}
         {% endif %}
         /app/docker/docker-bootstrap.sh app-gunicorn
     healthcheck:
@@ -19274,9 +19274,9 @@ services:
       - "/bin/bash"
       - "-c"
       - |
-        echo 'psycopg2-binary' >> /app/docker/requirements-local.txt
+        uv pip install psycopg2-binary
         {% if SUPERSET_additional_requirements | default('') %}
-        for pkg in {{SUPERSET_additional_requirements}}; do echo "$pkg" >> /app/docker/requirements-local.txt; done
+        uv pip install {{SUPERSET_additional_requirements}}
         {% endif %}
         /app/docker/docker-bootstrap.sh worker
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
@@ -19354,9 +19354,9 @@ services:
       - "/bin/bash"
       - "-c"
       - |
-        echo 'psycopg2-binary' >> /app/docker/requirements-local.txt
+        uv pip install psycopg2-binary
         {% if SUPERSET_additional_requirements | default('') %}
-        for pkg in {{SUPERSET_additional_requirements}}; do echo "$pkg" >> /app/docker/requirements-local.txt; done
+        uv pip install {{SUPERSET_additional_requirements}}
         {% endif %}
         /app/docker/docker-bootstrap.sh beat
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
@@ -19430,7 +19430,15 @@ services:
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
-    command: ['superset', 'mcp', 'run', '--host', '0.0.0.0', '--port', '5008']
+    command:
+      - "/bin/bash"
+      - "-c"
+      - |
+        uv pip install psycopg2-binary
+        {% if SUPERSET_additional_requirements | default('') %}
+        uv pip install {{SUPERSET_additional_requirements}}
+        {% endif %}
+        superset mcp run --host 0.0.0.0 --port 5008
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
