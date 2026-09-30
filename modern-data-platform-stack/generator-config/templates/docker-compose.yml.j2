@@ -10771,10 +10771,10 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
     healthcheck:
-      test: ["CMD", "mysql", "-h", "localhost", "-u", "${MYSQL_USER}", "-p${MYSQL_PASSWORD}", "-D", "${MYSQL_DATABASE}", "-e", "SELECT 1"]
-      timeout: 15s
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u datahub --password=datahub && mysql -h localhost -u datahub --password=datahub -D datahub -e 'SELECT 1' -q --silent"]
+      timeout: 10s
       interval: 10s
-      retries: 40
+      retries: 20
       start_period: 60s
 
   {%if (DATAHUB_graph_service_impl | lower) == 'neo4j'  | default(true) %}
