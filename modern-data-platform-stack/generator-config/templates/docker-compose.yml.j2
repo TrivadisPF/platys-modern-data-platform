@@ -19342,6 +19342,77 @@ services:
     healthcheck:
       disable: true
 
+  {% if SUPERSET_mcp_enabled | default(false) %}
+  superset-mcp:
+    image: apachesuperset.docker.scarf.sh/apache/superset:{{__SUPERSET_version}}
+
+    hostname: superset-mcp
+    container_name: superset-mcp
+    labels:
+      com.platys.name: "superset"
+      com.platys.description: "modern data exploration and visualization platform"
+    user: "root"
+    depends_on:
+      superset-init:
+        condition: service_completed_successfully
+    ports:
+      - 5008:5008    
+    environment:
+      - SUPERSET_CONFIG_PATH=/app/docker/superset_config.py
+      - PYTHONUNBUFFERED=1    
+      - COMPOSE_PROJECT_NAME=superset
+      - DEV_MODE=false      
+      - DATABASE_DB=superset
+      - DATABASE_HOST=superset-db
+      - DATABASE_PASSWORD=abc123!
+      - DATABASE_USER=superset
+      - DATABASE_PORT=5432
+      - DATABASE_DIALECT=postgresql
+      - POSTGRES_DB=superset
+      - POSTGRES_USER=superset
+      - POSTGRES_PASSWORD=abc123!
+      - EXAMPLES_DB=examples
+      - EXAMPLES_HOST=db
+      - EXAMPLES_USER=examples
+      # Make sure you set this to a unique secure random value on production
+      - EXAMPLES_PASSWORD=examples
+      - EXAMPLES_PORT=5432 
+      - FLASK_DEBUG=true             
+      - PYTHONPATH=/app/pythonpath:/app/docker/pythonpath_dev
+      - REDIS_HOST=superset-redis
+      - REDIS_PORT=6379
+      - SUPERSET_LOG_LEVEL=info      
+      - SUPERSET_ENV=development
+      - SUPERSET_ENABLE_SWAGGER_UI=true      
+      - SUPERSET_LOAD_EXAMPLES={{ 'yes' if (SUPERSET_provision_examples ) else 'no' }}
+      - CYPRESS_CONFIG=false
+      - SUPERSET_PORT=8088
+      - SUPERSET_APP_ROOT=/    
+      - SUPERSET_SECRET_KEY=R6RkJExzB1tD8L2CnPp3yM9pRiGbIR8RPFldjYoGsCSmMmte5QCVL0bN
+      - MAPBOX_API_KEY=''
+      - ENABLE_PLAYWRIGHT=false
+      - PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+      - BUILD_SUPERSET_FRONTEND_IN_DOCKER=true           
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer:z
+      - ./conf/superset:/app/docker:z
+    {% if SUPERSET_volume_map_superset_home | default(false) %}}  
+      - ./container-volume/superset:/app/superset_home
+    {% endif -%}   {#  SUPERSET_volume_map_superset_home #}      
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    command: ['superset', 'mcp', 'run', '--host', '0.0.0.0', '--port', '5008']
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+  {% endif -%}   {#  SUPERSET_mcp_enabled #}
+
   superset-db:
     image: docker.io/postgres:17
 
