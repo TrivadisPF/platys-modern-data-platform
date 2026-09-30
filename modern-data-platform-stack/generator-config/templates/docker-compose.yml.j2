@@ -10774,9 +10774,9 @@ services:
       - CMD-SHELL
       - mysqladmin ping -h localhost -u $$MYSQL_USER --password=$$MYSQL_PASSWORD
       timeout: 10s
-      interval: 2s
-      retries: 5
-      start_period: 20s
+      interval: 10s
+      retries: 20
+      start_period: 60s
 
   {%if (DATAHUB_graph_service_impl | lower) == 'neo4j'  | default(true) %}
   datahub-neo4j:
@@ -10814,11 +10814,11 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
     healthcheck:
-      interval: 5s
-      retries: 5
-      start_period: 10s
+      interval: 10s
+      retries: 20
+      start_period: 60s
       test: wget http://datahub-neo4j:7474
-      timeout: 5s    
+      timeout: 10s
   {% endif -%}   {#  DATAHUB_graph_service_impl #}
 
   {%if DATAHUB_search_service_impl == 'elasticsearch' %}
@@ -10859,11 +10859,11 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
     healthcheck:
-      interval: 1s
-      retries: 3
-      start_period: 20s
-      test: curl -sS --fail http://datahub-elasticsearch:9200}/_cluster/health?wait_for_status=yellow&timeout=0s
-      timeout: 5s      
+      interval: 10s
+      retries: 20
+      start_period: 60s
+      test: curl -sS --fail "http://datahub-elasticsearch:9200/_cluster/health?wait_for_status=yellow&timeout=0s"
+      timeout: 10s
     mem_limit: 1g
   {% endif -%}   {#  DATAHUB_search_service_impl == 'elasticsearch' #}
 
@@ -10946,6 +10946,12 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
+    healthcheck:
+      interval: 10s
+      retries: 20
+      start_period: 60s
+      test: curl -sS --fail "http://datahub-opensearch:9200/_cluster/health?wait_for_status=yellow&timeout=0s"
+      timeout: 10s
   {% endif -%}   {#  DATAHUB_search_service_impl == 'opensearch' #}
 
   datahub-upgrade:
@@ -10957,9 +10963,18 @@ services:
       datahub_setup_job: true
       com.platys.name: "datahub"
     depends_on:
-      - {{'datahub-elasticsearch' if DATAHUB_search_service_impl == 'elasticsearch' else 'datahub-opensearch'}}
-      - {{'schema-registry-1' if SCHEMA_REGISTRY_enable else omit}}
-      - datahub-mysql
+      {{'datahub-elasticsearch' if DATAHUB_search_service_impl == 'elasticsearch' else 'datahub-opensearch'}}:
+        condition: service_healthy
+      datahub-mysql:
+        condition: service_healthy
+      {% if (DATAHUB_graph_service_impl | lower) == 'neo4j' | default(true) %}
+      datahub-neo4j:
+        condition: service_healthy
+      {% endif %}
+      {% if SCHEMA_REGISTRY_enable | default(false) %}
+      schema-registry-1:
+        condition: service_healthy
+      {% endif %}
     environment:
       - BACKFILL_BROWSE_PATHS_V2=true
       - CREATE_USER=false
