@@ -15991,10 +15991,11 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
     healthcheck:
-      test: ["CMD", "pg_isready", "-U", "airflow", -p, '5432', -d, airflowdb]
+      test: [CMD-SHELL, "pg_isready -U airflow && psql -U airflow -d airflowdb -c 'SELECT 1' -q --no-align -t > /dev/null"]
       interval: 10s
-      retries: 5
-      start_period: 5s
+      timeout: 5s
+      retries: 15
+      start_period: 30s
 
   airflow-statsd-exporter:
     image: docker.io/prom/statsd-exporter:v0.24.0
@@ -19144,9 +19145,9 @@ services:
     user: "root"
     depends_on:
       superset-db:
-        condition: service_started
+        condition: service_healthy
       superset-redis:
-        condition: service_started    
+        condition: service_healthy
     environment:
       - ADMIN_PASSWORD=${PLATYS_SUPERSET_ADMIN_PASSWORD:-{{SUPERSET_admin_password | default("abc123!")}}}
       # common env variables
@@ -19402,6 +19403,12 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
+    healthcheck:
+      test: [CMD-SHELL, "pg_isready -U superset && psql -U superset -d superset -c 'SELECT 1' -q --no-align -t > /dev/null"]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 30s
 
   superset-redis:
     image: docker.io/redis:7
@@ -19425,6 +19432,12 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
 
 {% endif %}   {#  SUPERSET_enable #}
 
