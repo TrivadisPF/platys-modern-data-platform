@@ -2344,7 +2344,7 @@ services:
     hostname: kafka-init
     depends_on:
       {{ns.kafkaServiceNames.split(',')[0]}}:
-        condition: service_started
+        condition: service_healthy
     environment:
       BOOTSTRAP_SERVERS: '{{ns.bootstrapServers}}'
       KAFKA_TIMEOUT: 120
@@ -4142,10 +4142,11 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
     healthcheck:
-      start_period: 10s
-      interval: 15s
-      retries: 25
-      test: curl --fail --silent --insecure http://schema-registry-{{loop.index}}:{{port}}/subjects --output /dev/null || exit 1
+      test: ["CMD", "python3", "-c", "import urllib.request, sys; sys.exit(0) if urllib.request.urlopen('http://localhost:8081/subjects', timeout=5).status == 200 else sys.exit(1)"]
+      interval: 30s
+      timeout: 10s
+      retries: 30
+      start_period: 30s  
   {% endfor %}
 {% endif %}   {# KAFKA_enable and SCHEMA_REGISTRY_flavour == confluent #}
 
@@ -6409,7 +6410,7 @@ services:
     hostname: cruise-control-init
     depends_on:
       {{ns.kafkaServiceNames.split(',')[0]}}:
-        condition: service_started
+        condition: service_healthy
     environment:
       BOOTSTRAP_SERVERS: '{{ns.bootstrapServers}}'
       KAFKA_TIMEOUT: 120
@@ -6510,11 +6511,11 @@ services:
   {% if SCHEMA_REGISTRY_enable %}
     depends_on:
       schema-registry-1:
-        condition: service_started    
+        condition: service_healthy 
   {% elif KAFKA_enable %}
     depends_on:
       {{ns.kafkaServiceNames.split(',')[0]}}:
-        condition: service_started    
+        condition: service_healthy   
   {% endif -%}   {#  KESTRA_flavour  #}      
     extra_hosts:
       - "host.docker.internal:host-gateway"      
@@ -10770,12 +10771,10 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
     healthcheck:
-      test:
-      - CMD-SHELL
-      - mysqladmin ping -h localhost -u $$MYSQL_USER --password=$$MYSQL_PASSWORD
-      timeout: 10s
+      test: [CMD-SHELL, "mysqladmin ping -h localhost -u $$MYSQL_USER --password=$$MYSQL_PASSWORD && mysql -h localhost -u $$MYSQL_USER --password=$$MYSQL_PASSWORD -e 'SELECT 1' $$MYSQL_DATABASE"]
+      timeout: 15s
       interval: 10s
-      retries: 20
+      retries: 40
       start_period: 60s
 
   {%if (DATAHUB_graph_service_impl | lower) == 'neo4j'  | default(true) %}
@@ -11590,11 +11589,11 @@ services:
     container_name: openmetadata-ingestion
     depends_on:
       openmetadata-elasticsearch:
-        condition: service_started
+        condition: service_healthy
       openmetadata-mysql:
         condition: service_healthy
       openmetadata-server:
-        condition: service_started
+        condition: service_healthy
     labels:
       com.platys.name: "openmetadata"
       com.platys.description: "OpenMetadata Data Catalog Ingestion Service"
