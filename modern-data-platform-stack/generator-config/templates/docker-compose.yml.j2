@@ -19124,7 +19124,15 @@ services:
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
-    command: ["/app/docker/docker-bootstrap.sh", "app-gunicorn"]
+    command:
+      - "/bin/bash"
+      - "-c"
+      - |
+        echo 'psycopg2-binary' >> /app/docker/requirements-local.txt
+        {% if SUPERSET_additional_requirements | default('') %}
+        for pkg in {{SUPERSET_additional_requirements}}; do echo "$pkg" >> /app/docker/requirements-local.txt; done
+        {% endif %}
+        /app/docker/docker-bootstrap.sh app-gunicorn
     healthcheck:
       test: ["CMD-SHELL", "/app/docker/docker-healthcheck.sh"]
       interval: 30s
@@ -19342,7 +19350,15 @@ services:
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
-    command: ["/app/docker/docker-bootstrap.sh", "beat"]
+    command:
+      - "/bin/bash"
+      - "-c"
+      - |
+        echo 'psycopg2-binary' >> /app/docker/requirements-local.txt
+        {% if SUPERSET_additional_requirements | default('') %}
+        for pkg in {{SUPERSET_additional_requirements}}; do echo "$pkg" >> /app/docker/requirements-local.txt; done
+        {% endif %}
+        /app/docker/docker-bootstrap.sh beat
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
