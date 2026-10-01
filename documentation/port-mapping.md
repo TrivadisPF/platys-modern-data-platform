@@ -889,7 +889,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28495 | 3002 | cosmo-router |
 28496 | 8000 | dbt-workbench (backend API) |
 28497 | 3000 | dbt-workbench (frontend UI) |
-
+28498 | 3000 | dockhand |
 
 ## Ports > 28700
 

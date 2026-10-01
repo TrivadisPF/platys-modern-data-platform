@@ -17,6 +17,7 @@ See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/plat
  * mitmproxy
  * Forgejo
  * dbt Workbench
+ * dockhand
  
 ### Version upgrades
  

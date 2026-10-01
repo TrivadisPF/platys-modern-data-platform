@@ -34322,6 +34322,40 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {# PORTAINER_enable #}
 
+{% if DOCKHAND_enable | default(false) %}
+  #  ================================== Dockhand ========================================== #
+  dockhand:
+    image: docker.io/fnsys/dockhand:{{__DOCKHAND_version}}
+
+    container_name: dockhand
+    hostname: dockhand
+    labels:
+      com.platys.name: "dockhand"
+      com.platys.description: "Docker container management UI"
+      com.platys.webui.title: "Dockhand UI"
+      com.platys.webui.url: "http://dataplatform:28498"
+    ports:
+      - 28498:3000
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer:z
+      - /var/run/docker.sock:/var/run/docker.sock:z
+    {% if DOCKHAND_volume_map_data | default(false) %}
+      - ./container-volume/dockhand:/app/data:z
+    {% endif -%}   {#  DOCKHAND_volume_map_data #}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+{% endif %}   {# DOCKHAND_enable #}
+
 {% if DOCKER_EXEC_WEBCONSOLE_enable | default(false) %}
   #  ================================== Portainer ========================================== #
   docker-exec-webconsole:
