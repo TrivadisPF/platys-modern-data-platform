@@ -1,10 +1,4 @@
 {
-  "apiVersion": "dashboard.grafana.app/v2",
-  "kind": "Dashboard",
-  "metadata": {
-    "name": "klag"
-  },
-  "spec": {
   "annotations": [
     {
       "kind": "AnnotationQuery",
@@ -27,7 +21,7 @@
     }
   ],
   "cursorSync": "Crosshair",
-  "description": "Comprehensive Kafka consumer lag and health monitoring for Klag (https://github.com/themoah/klag). Lag, velocity, hot partitions, time-based lag, data-loss-prevention, topic size skew and JVM runtime metrics. Requires a Prometheus-compatible data source.",
+  "description": "Comprehensive Kafka consumer lag and health monitoring for Klag (https://github.com/themoah/klag). Lag, velocity, hot partitions, time-based lag, data-loss-prevention and JVM runtime metrics. Requires a Prometheus-compatible data source.",
   "editable": true,
   "elements": {
     "panel-1": {
@@ -49,7 +43,7 @@
                     "kind": "DataQuery",
                     "spec": {
                       "editorMode": "code",
-                      "expr": "klag_consumer_lag_sum{cluster_name=~\"$cluster_name\", consumer_group=~\"$consumer_group\", topic=~\"$topic\"}",
+                      "expr": "klag_consumer_lag_sum{consumer_group=~\"\"}",
                       "legendFormat": "{{consumer_group}}",
                       "range": true
                     },
@@ -168,7 +162,7 @@
                     "kind": "DataQuery",
                     "spec": {
                       "editorMode": "code",
-                      "expr": "max(klag_consumer_lag_sum{cluster_name=~\"$cluster_name\", consumer_group=~\"$consumer_group\", topic=~\"$topic\"})",
+                      "expr": "max(klag_consumer_lag_sum{consumer_group=~\"\"})",
                       "legendFormat": "Max Lag",
                       "range": true
                     },
@@ -255,7 +249,7 @@
                     "kind": "DataQuery",
                     "spec": {
                       "editorMode": "code",
-                      "expr": "count(count by (cluster_name, consumer_group) (klag_consumer_lag_sum{cluster_name=~\"$cluster_name\", consumer_group=~\"$consumer_group\"}))",
+                      "expr": "count(count by (consumer_group) (klag_consumer_lag_sum{consumer_group=~\"$consumer_group\"}))",
                       "legendFormat": "Groups",
                       "range": true
                     },
@@ -334,7 +328,7 @@
                     "kind": "DataQuery",
                     "spec": {
                       "editorMode": "code",
-                      "expr": "count(count by (cluster_name, topic) (klag_consumer_lag{cluster_name=~\"$cluster_name\", consumer_group=~\"$consumer_group\", topic=~\"$topic\"}))",
+                      "expr": "count(count by (topic) (klag_consumer_lag{consumer_group=~\"$consumer_group\", topic=~\"$topic\"}))",
                       "legendFormat": "Topics",
                       "range": true
                     },
@@ -417,7 +411,7 @@
                     "kind": "DataQuery",
                     "spec": {
                       "editorMode": "code",
-                      "expr": "sum(klag_topic_partitions{cluster_name=~\"$cluster_name\", topic=~\"$topic\"})",
+                      "expr": "sum(klag_topic_partitions{topic=~\"$topic\"})",
                       "legendFormat": "Partitions",
                       "range": true
                     },
@@ -496,7 +490,7 @@
                     "kind": "DataQuery",
                     "spec": {
                       "editorMode": "code",
-                      "expr": "klag_consumer_lag_velocity{cluster_name=~\"$cluster_name\", consumer_group=~\"$consumer_group\"}",
+                      "expr": "klag_consumer_lag_velocity{consumer_group=~\"$consumer_group\"}",
                       "legendFormat": "{{consumer_group}}",
                       "range": true
                     },
@@ -510,7 +504,7 @@
             "transformations": []
           }
         },
-        "description": "Raw lag velocity is messages/second multiplied by 100: 100 means 1 message/second. Positive values mean growing lag; negative values mean catching up. This panel does not divide the raw gauge by 100.",
+        "description": "",
         "id": 4,
         "links": [],
         "title": "Lag Velocity by Group (Positive = Growing)",
@@ -610,7 +604,7 @@
                     "kind": "DataQuery",
                     "spec": {
                       "editorMode": "code",
-                      "expr": "klag_consumer_group_state{cluster_name=~\"$cluster_name\", consumer_group=~\"$consumer_group\"}",
+                      "expr": "klag_consumer_group_state{consumer_group=~\"$consumer_group\"}",
                       "legendFormat": "__auto",
                       "instant": true,
                       "format": "table"
@@ -650,7 +644,7 @@
             ]
           }
         },
-        "description": "The state tag identifies the consumer group state. The value counts consecutive state changes and is 0 on the first observation or when the state holds. Classic rebalances use preparing_rebalance/completing_rebalance; KIP-848 uses assigning/reconciling. State alone does not prove that offsets are advancing.",
+        "description": "",
         "id": 5,
         "links": [],
         "title": "Consumer Group State",
@@ -717,19 +711,9 @@
                               "index": 4,
                               "text": "Completing Rebalance"
                             },
-                            "assigning": {
-                              "color": "yellow",
-                              "index": 5,
-                              "text": "Assigning"
-                            },
-                            "reconciling": {
-                              "color": "yellow",
-                              "index": 6,
-                              "text": "Reconciling"
-                            },
                             "unknown": {
                               "color": "orange",
-                              "index": 7,
+                              "index": 5,
                               "text": "Unknown"
                             }
                           },
@@ -820,7 +804,7 @@
                     "kind": "DataQuery",
                     "spec": {
                       "editorMode": "code",
-                      "expr": "klag_consumer_group_state{cluster_name=~\"$cluster_name\", consumer_group=~\"$consumer_group\"} > 0",
+                      "expr": "klag_consumer_group_state{consumer_group=~\"$consumer_group\"} > 0",
                       "legendFormat": "{{consumer_group}} ({{state}})",
                       "range": true
                     },
@@ -834,7 +818,7 @@
             "transformations": []
           }
         },
-        "description": "Groups whose state changed in a collection cycle. The value counts consecutive changes and resets to 0 once the state holds.",
+        "description": "Shows cumulative state changes over time. Spikes indicate state transitions (rebalances, failures).",
         "id": 20,
         "links": [],
         "title": "Consumer Group State Changes",
@@ -938,7 +922,7 @@
                     "kind": "DataQuery",
                     "spec": {
                       "editorMode": "code",
-                      "expr": "klag_consumer_lag_sum{cluster_name=~\"$cluster_name\", consumer_group=~\"$consumer_group\", topic=~\"$topic\"}",
+                      "expr": "klag_consumer_lag_sum{consumer_group=~\"\"}",
                       "legendFormat": "{{consumer_group}}",
                       "range": true
                     },
@@ -1026,7 +1010,7 @@
                     "kind": "DataQuery",
                     "spec": {
                       "editorMode": "code",
-                      "expr": "topk(10, klag_consumer_lag{cluster_name=~\"$cluster_name\", consumer_group=~\"$consumer_group\", topic=~\"$topic\"})",
+                      "expr": "topk(10, klag_consumer_lag{consumer_group=~\"$consumer_group\", topic=~\"$topic\"})",
                       "legendFormat": "{{consumer_group}} - {{topic}} [{{partition}}]",
                       "range": true
                     },
@@ -1135,7 +1119,7 @@
                     "kind": "DataQuery",
                     "spec": {
                       "editorMode": "code",
-                      "expr": "max(klag_consumer_lag_ms{cluster_name=~\"$cluster_name\", consumer_group=~\"$consumer_group\", topic=~\"$topic\", partition=\"\"})",
+                      "expr": "max(klag_consumer_lag_ms{consumer_group=~\"$consumer_group\", topic=~\"$topic\"})",
                       "legendFormat": "Max Time Lag",
                       "range": true
                     },
@@ -1149,7 +1133,7 @@
             "transformations": []
           }
         },
-        "description": "Maximum topic-level time-lag estimate in milliseconds. The partition=\"\" selector excludes per-partition series and selects the aggregate. Missing estimates are not proof of zero lag.",
+        "description": "",
         "id": 26,
         "links": [],
         "title": "Max Time Lag",
@@ -1222,7 +1206,7 @@
                     "kind": "DataQuery",
                     "spec": {
                       "editorMode": "code",
-                      "expr": "count(klag_consumer_lag_time_to_close_seconds{cluster_name=~\"$cluster_name\", consumer_group=~\"$consumer_group\", topic=~\"$topic\"}) or vector(0)",
+                      "expr": "count(klag_consumer_lag_time_to_close_seconds{consumer_group=~\"$consumer_group\", topic=~\"$topic\"}) or vector(0)",
                       "legendFormat": "Catching Up",
                       "range": true
                     },
@@ -1301,7 +1285,7 @@
                     "kind": "DataQuery",
                     "spec": {
                       "editorMode": "code",
-                      "expr": "klag_consumer_lag_ms{cluster_name=~\"$cluster_name\", consumer_group=~\"$consumer_group\", topic=~\"$topic\", partition=\"\"}",
+                      "expr": "klag_consumer_lag_ms{consumer_group=~\"$consumer_group\", topic=~\"$topic\"}",
                       "legendFormat": "{{consumer_group}} - {{topic}}",
                       "range": true
                     },
@@ -1315,7 +1299,7 @@
             "transformations": []
           }
         },
-        "description": "Topic-level lag estimate in milliseconds, from Kafka timestamps or poll-history interpolation. The partition=\"\" selector selects series without a partition label, avoiding duplicate aggregate and partition curves.",
+        "description": "Lag in milliseconds based on Kafka message timestamps",
         "id": 28,
         "links": [],
         "title": "Time Lag by Consumer Group",
@@ -1419,7 +1403,7 @@
                     "kind": "DataQuery",
                     "spec": {
                       "editorMode": "code",
-                      "expr": "klag_consumer_lag_time_to_close_seconds{cluster_name=~\"$cluster_name\", consumer_group=~\"$consumer_group\", topic=~\"$topic\"}",
+                      "expr": "klag_consumer_lag_time_to_close_seconds{consumer_group=~\"$consumer_group\", topic=~\"$topic\"}",
                       "legendFormat": "{{consumer_group}} - {{topic}}",
                       "range": true
                     },
@@ -1433,7 +1417,7 @@
             "transformations": []
           }
         },
-        "description": "Estimated seconds to catch up at the current rate, emitted only while catching up above TIME_LAG_MIN_MESSAGES. An absent series does not mean the group has caught up.",
+        "description": "Estimated seconds until lag reaches zero (only shown when consumer is catching up)",
         "id": 29,
         "links": [],
         "title": "Time to Close Lag (Catching Up Only)",
@@ -1528,7 +1512,7 @@
                     "kind": "DataQuery",
                     "spec": {
                       "editorMode": "code",
-                      "expr": "max(klag_consumer_lag_retention_percent{cluster_name=~\"$cluster_name\", consumer_group=~\"$consumer_group\", topic=~\"$topic\"}) / 100",
+                      "expr": "max(klag_consumer_lag_retention_percent{consumer_group=~\"$consumer_group\", topic=~\"$topic\"}) / 100",
                       "legendFormat": "Max Retention Risk",
                       "range": true
                     },
@@ -1619,7 +1603,7 @@
                     "kind": "DataQuery",
                     "spec": {
                       "editorMode": "code",
-                      "expr": "count(klag_consumer_lag_retention_percent{cluster_name=~\"$cluster_name\", consumer_group=~\"$consumer_group\", topic=~\"$topic\", partition=\"\"} > 5000) or vector(0)",
+                      "expr": "count(klag_consumer_lag_retention_percent{consumer_group=~\"$consumer_group\", topic=~\"$topic\"} > 5000) or vector(0)",
                       "legendFormat": "At Risk",
                       "range": true
                     },
@@ -1706,7 +1690,7 @@
                     "kind": "DataQuery",
                     "spec": {
                       "editorMode": "code",
-                      "expr": "klag_consumer_lag_retention_percent{cluster_name=~\"$cluster_name\", consumer_group=~\"$consumer_group\", topic=~\"$topic\", partition=\"\"} / 100",
+                      "expr": "klag_consumer_lag_retention_percent{consumer_group=~\"$consumer_group\", topic=~\"$topic\"} / 100",
                       "legendFormat": "{{consumer_group}} - {{topic}}",
                       "range": true
                     },
@@ -1720,7 +1704,7 @@
             "transformations": []
           }
         },
-        "description": "Topic-level retention risk. The raw gauge is percent multiplied by 100; this query divides by 100. The partition=\"\" selector keeps only aggregates. 100% means data loss has already occurred: the consumer is behind the log start offset.",
+        "description": "Percentage of topic retention consumed by consumer lag. High values indicate risk of data loss.",
         "id": 32,
         "links": [],
         "title": "Retention Percent by Consumer Group",
@@ -1824,7 +1808,7 @@
                     "kind": "DataQuery",
                     "spec": {
                       "editorMode": "code",
-                      "expr": "klag_consumer_lag_retention_percent{cluster_name=~\"$cluster_name\", consumer_group=~\"$consumer_group\", topic=~\"$topic\", partition=\"\"} / 100 > 50",
+                      "expr": "klag_consumer_lag_retention_percent{consumer_group=~\"$consumer_group\", topic=~\"$topic\"} / 100 > 50",
                       "legendFormat": "__auto",
                       "instant": true,
                       "format": "table"
@@ -1864,7 +1848,7 @@
             ]
           }
         },
-        "description": "Group/topic aggregates above 50% retention usage. The query divides the raw gauge by 100 before comparing to 50; partition=\"\" excludes per-partition series. Values below 100% indicate risk; 100% means data loss has already occurred because the consumer is behind the log start offset.",
+        "description": "Topics where consumer lag exceeds 50% of retention period. These are at risk of data loss.",
         "id": 33,
         "links": [],
         "title": "At Risk Topics (>50% Retention Used)",
@@ -1970,7 +1954,7 @@
                     "kind": "DataQuery",
                     "spec": {
                       "editorMode": "code",
-                      "expr": "count(klag_hot_partition_lag{cluster_name=~\"$cluster_name\", consumer_group=~\"$consumer_group\", topic=~\"$topic\"}) or vector(0)",
+                      "expr": "count(klag_hot_partition_lag{consumer_group=~\"$consumer_group\", topic=~\"$topic\"}) or vector(0)",
                       "legendFormat": "Hot Partitions",
                       "range": true
                     },
@@ -2057,7 +2041,7 @@
                     "kind": "DataQuery",
                     "spec": {
                       "editorMode": "code",
-                      "expr": "count(klag_hot_partition{cluster_name=~\"$cluster_name\", topic=~\"$topic\"}) or vector(0)",
+                      "expr": "count(klag_hot_partition{topic=~\"$topic\"}) or vector(0)",
                       "legendFormat": "Hot Partitions",
                       "range": true
                     },
@@ -2144,7 +2128,7 @@
                     "kind": "DataQuery",
                     "spec": {
                       "editorMode": "code",
-                      "expr": "klag_hot_partition_lag{cluster_name=~\"$cluster_name\", consumer_group=~\"$consumer_group\", topic=~\"$topic\"}",
+                      "expr": "klag_hot_partition_lag{consumer_group=~\"$consumer_group\", topic=~\"$topic\"}",
                       "legendFormat": "__auto",
                       "instant": true,
                       "format": "table"
@@ -2284,7 +2268,7 @@
                     "kind": "DataQuery",
                     "spec": {
                       "editorMode": "code",
-                      "expr": "klag_hot_partition_lag{cluster_name=~\"$cluster_name\", consumer_group=~\"$consumer_group\", topic=~\"$topic\"}",
+                      "expr": "klag_hot_partition_lag{consumer_group=~\"$consumer_group\", topic=~\"$topic\"}",
                       "legendFormat": "{{consumer_group}} - {{topic}} [{{partition}}]",
                       "range": true
                     },
@@ -2402,7 +2386,7 @@
                     "kind": "DataQuery",
                     "spec": {
                       "editorMode": "code",
-                      "expr": "klag_hot_partition{cluster_name=~\"$cluster_name\", topic=~\"$topic\"} / 100",
+                      "expr": "klag_hot_partition{topic=~\"$topic\"} / 100",
                       "legendFormat": "{{topic}} [{{partition}}]",
                       "range": true
                     },
@@ -2512,7 +2496,7 @@
                     "kind": "DataQuery",
                     "spec": {
                       "editorMode": "code",
-                      "expr": "klag_topic_partitions{cluster_name=~\"$cluster_name\", topic=~\"$topic\"}",
+                      "expr": "klag_topic_partitions{topic=~\"$topic\"}",
                       "legendFormat": "{{topic}}",
                       "range": true
                     },
@@ -2618,7 +2602,7 @@
                     "kind": "DataQuery",
                     "spec": {
                       "editorMode": "code",
-                      "expr": "sum by (cluster_name, topic) (rate(klag_partition_log_end_offset{cluster_name=~\"$cluster_name\", topic=~\"$topic\"}[5m]))",
+                      "expr": "sum by (topic) (rate(klag_partition_log_end_offset{topic=~\"$topic\"}[5m]))",
                       "legendFormat": "{{topic}}",
                       "range": true
                     },
@@ -2728,7 +2712,7 @@
                     "kind": "DataQuery",
                     "spec": {
                       "editorMode": "code",
-                      "expr": "topk(10, klag_partition_log_end_offset{cluster_name=~\"$cluster_name\", topic=~\"$topic\"} - on(cluster_name, consumer_group, topic, partition) klag_consumer_committed_offset{cluster_name=~\"$cluster_name\", consumer_group=~\"$consumer_group\"})",
+                      "expr": "topk(10, klag_partition_log_end_offset{topic=~\"$topic\"} - on(consumer_group, topic, partition) klag_consumer_committed_offset{consumer_group=~\"$consumer_group\"})",
                       "legendFormat": "{{consumer_group}} - {{topic}} [{{partition}}]",
                       "range": true
                     },
@@ -3652,916 +3636,6 @@
           "version": "13.1.0-26564065169"
         }
       }
-    },
-    "panel-34": {
-      "kind": "Panel",
-      "spec": {
-        "data": {
-          "kind": "QueryGroup",
-          "spec": {
-            "queries": [
-              {
-                "kind": "PanelQuery",
-                "spec": {
-                  "hidden": false,
-                  "query": {
-                    "datasource": {
-                      "name": "${datasource}"
-                    },
-                    "group": "prometheus",
-                    "kind": "DataQuery",
-                    "spec": {
-                      "editorMode": "code",
-                      "expr": "klag_consumer_commit_staleness_seconds{cluster_name=~\"$cluster_name\", consumer_group=~\"$consumer_group\", topic=~\"$topic\"}",
-                      "legendFormat": "{{consumer_group}} - {{topic}}",
-                      "range": true
-                    },
-                    "version": "v0"
-                  },
-                  "refId": "A"
-                }
-              }
-            ],
-            "queryOptions": {},
-            "transformations": []
-          }
-        },
-        "description": "Seconds since the committed offset last advanced (only reported while lag > 0). High and rising = a stuck/wedged consumer with pending work. Inferred from observed offset movement; resets on klag restart.",
-        "id": 34,
-        "links": [],
-        "title": "Commit Staleness by Consumer Group",
-        "vizConfig": {
-          "group": "timeseries",
-          "kind": "VizConfig",
-          "spec": {
-            "fieldConfig": {
-              "defaults": {
-                "color": {
-                  "mode": "palette-classic"
-                },
-                "custom": {
-                  "axisCenteredZero": false,
-                  "axisColorMode": "text",
-                  "axisLabel": "Staleness (s)",
-                  "axisPlacement": "auto",
-                  "barAlignment": 0,
-                  "drawStyle": "line",
-                  "fillOpacity": 10,
-                  "gradientMode": "none",
-                  "hideFrom": {
-                    "tooltip": false,
-                    "viz": false,
-                    "legend": false
-                  },
-                  "lineInterpolation": "linear",
-                  "lineWidth": 2,
-                  "pointSize": 5,
-                  "scaleDistribution": {
-                    "type": "linear"
-                  },
-                  "showPoints": "never",
-                  "spanNulls": false,
-                  "stacking": {
-                    "group": "A",
-                    "mode": "none"
-                  },
-                  "thresholdsStyle": {
-                    "mode": "area"
-                  }
-                },
-                "thresholds": {
-                  "mode": "absolute",
-                  "steps": [
-                    {
-                      "color": "green",
-                      "value": 0
-                    },
-                    {
-                      "color": "yellow",
-                      "value": 120
-                    },
-                    {
-                      "color": "red",
-                      "value": 300
-                    }
-                  ]
-                },
-                "unit": "s",
-                "decimals": 0
-              },
-              "overrides": []
-            },
-            "options": {
-              "legend": {
-                "calcs": [],
-                "displayMode": "list",
-                "placement": "bottom",
-                "showLegend": true
-              },
-              "tooltip": {
-                "mode": "multi",
-                "sort": "desc"
-              }
-            }
-          },
-          "version": "13.1.0-26564065169"
-        }
-      }
-    },
-    "panel-35": {
-      "kind": "Panel",
-      "spec": {
-        "data": {
-          "kind": "QueryGroup",
-          "spec": {
-            "queries": [
-              {
-                "kind": "PanelQuery",
-                "spec": {
-                  "hidden": false,
-                  "query": {
-                    "datasource": {
-                      "name": "${datasource}"
-                    },
-                    "group": "prometheus",
-                    "kind": "DataQuery",
-                    "spec": {
-                      "editorMode": "code",
-                      "expr": "count(klag_partition_under_replicated{cluster_name=~\"$cluster_name\", topic=~\"$topic\"}) or vector(0)",
-                      "legendFormat": "Under-Replicated Partitions",
-                      "range": true
-                    },
-                    "version": "v0"
-                  },
-                  "refId": "A"
-                }
-              }
-            ],
-            "queryOptions": {},
-            "transformations": []
-          }
-        },
-        "description": "",
-        "id": 35,
-        "links": [],
-        "title": "Under-Replicated Partitions",
-        "vizConfig": {
-          "group": "stat",
-          "kind": "VizConfig",
-          "spec": {
-            "fieldConfig": {
-              "defaults": {
-                "color": {
-                  "mode": "thresholds"
-                },
-                "thresholds": {
-                  "mode": "absolute",
-                  "steps": [
-                    {
-                      "color": "green",
-                      "value": 0
-                    },
-                    {
-                      "color": "yellow",
-                      "value": 1
-                    },
-                    {
-                      "color": "red",
-                      "value": 5
-                    }
-                  ]
-                },
-                "unit": "short",
-                "decimals": 0
-              },
-              "overrides": []
-            },
-            "options": {
-              "colorMode": "background",
-              "graphMode": "none",
-              "justifyMode": "auto",
-              "orientation": "auto",
-              "reduceOptions": {
-                "values": false,
-                "calcs": [
-                  "lastNotNull"
-                ],
-                "fields": ""
-              },
-              "textMode": "auto"
-            }
-          },
-          "version": "13.1.0-26564065169"
-        }
-      }
-    },
-    "panel-36": {
-      "kind": "Panel",
-      "spec": {
-        "data": {
-          "kind": "QueryGroup",
-          "spec": {
-            "queries": [
-              {
-                "kind": "PanelQuery",
-                "spec": {
-                  "hidden": false,
-                  "query": {
-                    "datasource": {
-                      "name": "${datasource}"
-                    },
-                    "group": "prometheus",
-                    "kind": "DataQuery",
-                    "spec": {
-                      "editorMode": "code",
-                      "expr": "klag_partition_under_replicated{cluster_name=~\"$cluster_name\", topic=~\"$topic\"}",
-                      "legendFormat": "__auto",
-                      "instant": true,
-                      "format": "table"
-                    },
-                    "version": "v0"
-                  },
-                  "refId": "A"
-                }
-              }
-            ],
-            "queryOptions": {},
-            "transformations": [
-              {
-                "group": "organize",
-                "kind": "Transformation",
-                "spec": {
-                  "options": {
-                    "excludeByName": {
-                      "Time": true,
-                      "job": true,
-                      "service_name": true
-                    },
-                    "indexByName": {
-                      "Time": 0,
-                      "topic": 1,
-                      "partition": 2,
-                      "Value": 3
-                    },
-                    "renameByName": {
-                      "topic": "Topic",
-                      "partition": "Partition",
-                      "Value": "Missing ISR"
-                    }
-                  }
-                }
-              }
-            ]
-          }
-        },
-        "description": "",
-        "id": 36,
-        "links": [],
-        "title": "Under-Replicated Partitions Detail",
-        "vizConfig": {
-          "group": "table",
-          "kind": "VizConfig",
-          "spec": {
-            "fieldConfig": {
-              "defaults": {
-                "color": {
-                  "mode": "thresholds"
-                },
-                "custom": {
-                  "align": "left",
-                  "cellOptions": {
-                    "type": "auto"
-                  },
-                  "inspect": false
-                },
-                "thresholds": {
-                  "mode": "absolute",
-                  "steps": [
-                    {
-                      "color": "green",
-                      "value": 0
-                    },
-                    {
-                      "color": "yellow",
-                      "value": 1
-                    },
-                    {
-                      "color": "red",
-                      "value": 2
-                    }
-                  ]
-                }
-              },
-              "overrides": [
-                {
-                  "matcher": {
-                    "id": "byName",
-                    "options": "Missing ISR"
-                  },
-                  "properties": [
-                    {
-                      "id": "custom.cellOptions",
-                      "value": {
-                        "mode": "basic",
-                        "type": "color-background"
-                      }
-                    }
-                  ]
-                }
-              ]
-            },
-            "options": {
-              "cellHeight": "sm",
-              "footer": {
-                "countRows": false,
-                "fields": "",
-                "reducer": [
-                  "sum"
-                ],
-                "show": false
-              },
-              "showHeader": true,
-              "sortBy": [
-                {
-                  "desc": true,
-                  "displayName": "Missing ISR"
-                }
-              ]
-            }
-          },
-          "version": "13.1.0-26564065169"
-        }
-      }
-    },
-    "panel-37": {
-      "kind": "Panel",
-      "spec": {
-        "data": {
-          "kind": "QueryGroup",
-          "spec": {
-            "queries": [
-              {
-                "kind": "PanelQuery",
-                "spec": {
-                  "hidden": false,
-                  "query": {
-                    "datasource": {
-                      "name": "${datasource}"
-                    },
-                    "group": "prometheus",
-                    "kind": "DataQuery",
-                    "spec": {
-                      "editorMode": "code",
-                      "expr": "klag_partition_under_replicated{cluster_name=~\"$cluster_name\", topic=~\"$topic\"}",
-                      "legendFormat": "{{topic}} [{{partition}}]",
-                      "range": true
-                    },
-                    "version": "v0"
-                  },
-                  "refId": "A"
-                }
-              }
-            ],
-            "queryOptions": {},
-            "transformations": []
-          }
-        },
-        "description": "Missing in-sync replica count per partition (replicaCount - inSyncReplicaCount). Only non-zero for under-replicated partitions.",
-        "id": 37,
-        "links": [],
-        "title": "Under-Replicated Partitions Over Time",
-        "vizConfig": {
-          "group": "timeseries",
-          "kind": "VizConfig",
-          "spec": {
-            "fieldConfig": {
-              "defaults": {
-                "color": {
-                  "mode": "palette-classic"
-                },
-                "custom": {
-                  "axisCenteredZero": false,
-                  "axisColorMode": "text",
-                  "axisLabel": "Missing Replicas",
-                  "axisPlacement": "auto",
-                  "barAlignment": 0,
-                  "drawStyle": "line",
-                  "fillOpacity": 10,
-                  "gradientMode": "none",
-                  "hideFrom": {
-                    "tooltip": false,
-                    "viz": false,
-                    "legend": false
-                  },
-                  "lineInterpolation": "linear",
-                  "lineWidth": 2,
-                  "pointSize": 5,
-                  "scaleDistribution": {
-                    "type": "linear"
-                  },
-                  "showPoints": "never",
-                  "spanNulls": false,
-                  "stacking": {
-                    "group": "A",
-                    "mode": "none"
-                  },
-                  "thresholdsStyle": {
-                    "mode": "off"
-                  }
-                },
-                "thresholds": {
-                  "mode": "absolute",
-                  "steps": [
-                    {
-                      "color": "green",
-                      "value": 0
-                    },
-                    {
-                      "color": "yellow",
-                      "value": 1
-                    },
-                    {
-                      "color": "red",
-                      "value": 2
-                    }
-                  ]
-                },
-                "unit": "short",
-                "decimals": 0
-              },
-              "overrides": []
-            },
-            "options": {
-              "legend": {
-                "calcs": [
-                  "last",
-                  "max"
-                ],
-                "displayMode": "table",
-                "placement": "bottom",
-                "showLegend": true
-              },
-              "tooltip": {
-                "mode": "multi",
-                "sort": "desc"
-              }
-            }
-          },
-          "version": "13.1.0-26564065169"
-        }
-      }
-    },
-    "panel-38": {
-      "kind": "Panel",
-      "spec": {
-        "data": {
-          "kind": "QueryGroup",
-          "spec": {
-            "queries": [
-              {
-                "kind": "PanelQuery",
-                "spec": {
-                  "hidden": false,
-                  "query": {
-                    "datasource": {
-                      "name": "${datasource}"
-                    },
-                    "group": "prometheus",
-                    "kind": "DataQuery",
-                    "spec": {
-                      "editorMode": "code",
-                      "expr": "max(klag_topic_size_skew{cluster_name=~\"$cluster_name\", topic=~\"$topic\"}) / 100 or vector(0)",
-                      "legendFormat": "Max size skew",
-                      "range": true
-                    },
-                    "version": "v0"
-                  },
-                  "refId": "A"
-                }
-              }
-            ],
-            "queryOptions": {},
-            "transformations": []
-          }
-        },
-        "description": "max/mean retained-size ratio. 1.0 = even; 2.0 = hottest partition holds 2\u00d7 the average. Requires DATA_SKEW_ENABLED=true.",
-        "id": 38,
-        "links": [],
-        "title": "Max Topic Size Skew",
-        "vizConfig": {
-          "group": "stat",
-          "kind": "VizConfig",
-          "spec": {
-            "fieldConfig": {
-              "defaults": {
-                "color": {
-                  "mode": "thresholds"
-                },
-                "thresholds": {
-                  "mode": "absolute",
-                  "steps": [
-                    {
-                      "color": "green",
-                      "value": 0
-                    },
-                    {
-                      "color": "yellow",
-                      "value": 1.5
-                    },
-                    {
-                      "color": "red",
-                      "value": 2
-                    }
-                  ]
-                },
-                "unit": "none",
-                "decimals": 2
-              },
-              "overrides": []
-            },
-            "options": {
-              "colorMode": "background",
-              "graphMode": "none",
-              "justifyMode": "auto",
-              "orientation": "auto",
-              "reduceOptions": {
-                "values": false,
-                "calcs": [
-                  "lastNotNull"
-                ],
-                "fields": ""
-              },
-              "textMode": "auto"
-            }
-          },
-          "version": "13.1.0-26564065169"
-        }
-      }
-    },
-    "panel-39": {
-      "kind": "Panel",
-      "spec": {
-        "data": {
-          "kind": "QueryGroup",
-          "spec": {
-            "queries": [
-              {
-                "kind": "PanelQuery",
-                "spec": {
-                  "hidden": false,
-                  "query": {
-                    "datasource": {
-                      "name": "${datasource}"
-                    },
-                    "group": "prometheus",
-                    "kind": "DataQuery",
-                    "spec": {
-                      "editorMode": "code",
-                      "expr": "klag_topic_size_skew{cluster_name=~\"$cluster_name\", topic=~\"$topic\"} / 100",
-                      "legendFormat": "__auto",
-                      "instant": true,
-                      "format": "table"
-                    },
-                    "version": "v0"
-                  },
-                  "refId": "A"
-                }
-              }
-            ],
-            "queryOptions": {},
-            "transformations": [
-              {
-                "group": "organize",
-                "kind": "Transformation",
-                "spec": {
-                  "options": {
-                    "excludeByName": {
-                      "Time": true,
-                      "job": true,
-                      "service_name": true
-                    },
-                    "indexByName": {
-                      "Time": 0,
-                      "topic": 1,
-                      "Value": 2
-                    },
-                    "renameByName": {
-                      "topic": "Topic",
-                      "Value": "Size skew"
-                    }
-                  }
-                }
-              }
-            ]
-          }
-        },
-        "description": "Retained-size skew per topic (max/mean). Empty until DATA_SKEW_ENABLED=true.",
-        "id": 39,
-        "links": [],
-        "title": "Topic Size Skew",
-        "vizConfig": {
-          "group": "table",
-          "kind": "VizConfig",
-          "spec": {
-            "fieldConfig": {
-              "defaults": {
-                "color": {
-                  "mode": "thresholds"
-                },
-                "custom": {
-                  "align": "left",
-                  "cellOptions": {
-                    "type": "auto"
-                  },
-                  "inspect": false
-                },
-                "thresholds": {
-                  "mode": "absolute",
-                  "steps": [
-                    {
-                      "color": "green",
-                      "value": 0
-                    },
-                    {
-                      "color": "yellow",
-                      "value": 1.5
-                    },
-                    {
-                      "color": "red",
-                      "value": 2
-                    }
-                  ]
-                },
-                "decimals": 2
-              },
-              "overrides": [
-                {
-                  "matcher": {
-                    "id": "byName",
-                    "options": "Size skew"
-                  },
-                  "properties": [
-                    {
-                      "id": "custom.cellOptions",
-                      "value": {
-                        "mode": "basic",
-                        "type": "color-background"
-                      }
-                    }
-                  ]
-                }
-              ]
-            },
-            "options": {
-              "cellHeight": "sm",
-              "footer": {
-                "countRows": false,
-                "fields": "",
-                "reducer": [
-                  "sum"
-                ],
-                "show": false
-              },
-              "showHeader": true,
-              "sortBy": [
-                {
-                  "desc": true,
-                  "displayName": "Size skew"
-                }
-              ]
-            }
-          },
-          "version": "13.1.0-26564065169"
-        }
-      }
-    },
-    "panel-40": {
-      "kind": "Panel",
-      "spec": {
-        "data": {
-          "kind": "QueryGroup",
-          "spec": {
-            "queries": [
-              {
-                "kind": "PanelQuery",
-                "spec": {
-                  "hidden": false,
-                  "query": {
-                    "datasource": {
-                      "name": "${datasource}"
-                    },
-                    "group": "prometheus",
-                    "kind": "DataQuery",
-                    "spec": {
-                      "editorMode": "code",
-                      "expr": "klag_topic_size_skew{cluster_name=~\"$cluster_name\", topic=~\"$topic\"} / 100",
-                      "legendFormat": "{{topic}}",
-                      "range": true
-                    },
-                    "version": "v0"
-                  },
-                  "refId": "A"
-                }
-              }
-            ],
-            "queryOptions": {},
-            "transformations": []
-          }
-        },
-        "description": "max/mean retained-size ratio per topic. Gauge is stored \u00d7100; this panel divides by 100. Requires DATA_SKEW_ENABLED=true.",
-        "id": 40,
-        "links": [],
-        "title": "Topic Size Skew Over Time",
-        "vizConfig": {
-          "group": "timeseries",
-          "kind": "VizConfig",
-          "spec": {
-            "fieldConfig": {
-              "defaults": {
-                "color": {
-                  "mode": "palette-classic"
-                },
-                "custom": {
-                  "axisCenteredZero": false,
-                  "axisColorMode": "text",
-                  "axisLabel": "max/mean ratio",
-                  "axisPlacement": "auto",
-                  "barAlignment": 0,
-                  "drawStyle": "line",
-                  "fillOpacity": 10,
-                  "gradientMode": "none",
-                  "hideFrom": {
-                    "tooltip": false,
-                    "viz": false,
-                    "legend": false
-                  },
-                  "lineInterpolation": "linear",
-                  "lineWidth": 2,
-                  "pointSize": 5,
-                  "scaleDistribution": {
-                    "type": "linear"
-                  },
-                  "showPoints": "never",
-                  "spanNulls": false,
-                  "stacking": {
-                    "group": "A",
-                    "mode": "none"
-                  },
-                  "thresholdsStyle": {
-                    "mode": "off"
-                  }
-                },
-                "thresholds": {
-                  "mode": "absolute",
-                  "steps": [
-                    {
-                      "color": "green",
-                      "value": 0
-                    },
-                    {
-                      "color": "yellow",
-                      "value": 1.5
-                    },
-                    {
-                      "color": "red",
-                      "value": 2
-                    }
-                  ]
-                },
-                "unit": "none",
-                "decimals": 2
-              },
-              "overrides": []
-            },
-            "options": {
-              "legend": {
-                "calcs": [
-                  "last",
-                  "max"
-                ],
-                "displayMode": "table",
-                "placement": "bottom",
-                "showLegend": true
-              },
-              "tooltip": {
-                "mode": "multi",
-                "sort": "desc"
-              }
-            }
-          },
-          "version": "13.1.0-26564065169"
-        }
-      }
-    },
-    "panel-41": {
-      "kind": "Panel",
-      "spec": {
-        "data": {
-          "kind": "QueryGroup",
-          "spec": {
-            "queries": [
-              {
-                "kind": "PanelQuery",
-                "spec": {
-                  "hidden": false,
-                  "query": {
-                    "datasource": {
-                      "name": "${datasource}"
-                    },
-                    "group": "prometheus",
-                    "kind": "DataQuery",
-                    "spec": {
-                      "editorMode": "code",
-                      "expr": "max by (cluster_name, topic, partition) (klag_partition_log_end_offset{cluster_name=~\"$cluster_name\", topic=~\"$topic\"} - klag_partition_log_start_offset{cluster_name=~\"$cluster_name\", topic=~\"$topic\"})",
-                      "legendFormat": "{{topic}} [{{partition}}]",
-                      "range": true
-                    },
-                    "version": "v0"
-                  },
-                  "refId": "A"
-                }
-              }
-            ],
-            "queryOptions": {},
-            "transformations": []
-          }
-        },
-        "description": "logEndOffset \u2212 logStartOffset from existing partition gauges. Use this to see which partition is fat when size skew is high.",
-        "id": 41,
-        "links": [],
-        "title": "Retained Messages by Partition",
-        "vizConfig": {
-          "group": "timeseries",
-          "kind": "VizConfig",
-          "spec": {
-            "fieldConfig": {
-              "defaults": {
-                "color": {
-                  "mode": "palette-classic"
-                },
-                "custom": {
-                  "axisCenteredZero": false,
-                  "axisColorMode": "text",
-                  "axisLabel": "retained messages",
-                  "axisPlacement": "auto",
-                  "barAlignment": 0,
-                  "drawStyle": "line",
-                  "fillOpacity": 10,
-                  "gradientMode": "none",
-                  "hideFrom": {
-                    "tooltip": false,
-                    "viz": false,
-                    "legend": false
-                  },
-                  "lineInterpolation": "linear",
-                  "lineWidth": 2,
-                  "pointSize": 5,
-                  "scaleDistribution": {
-                    "type": "linear"
-                  },
-                  "showPoints": "never",
-                  "spanNulls": false,
-                  "stacking": {
-                    "group": "A",
-                    "mode": "none"
-                  },
-                  "thresholdsStyle": {
-                    "mode": "off"
-                  }
-                },
-                "thresholds": {
-                  "mode": "absolute",
-                  "steps": [
-                    {
-                      "color": "green",
-                      "value": 0
-                    }
-                  ]
-                },
-                "unit": "short",
-                "decimals": 0
-              },
-              "overrides": []
-            },
-            "options": {
-              "legend": {
-                "calcs": [
-                  "last",
-                  "max"
-                ],
-                "displayMode": "table",
-                "placement": "bottom",
-                "showLegend": true
-              },
-              "tooltip": {
-                "mode": "multi",
-                "sort": "desc"
-              }
-            }
-          },
-          "version": "13.1.0-26564065169"
-        }
-      }
     }
   },
   "layout": {
@@ -4785,19 +3859,6 @@
                       "x": 0,
                       "y": 4
                     }
-                  },
-                  {
-                    "kind": "GridLayoutItem",
-                    "spec": {
-                      "element": {
-                        "kind": "ElementReference",
-                        "name": "panel-34"
-                      },
-                      "height": 8,
-                      "width": 24,
-                      "x": 0,
-                      "y": 8
-                    }
                   }
                 ]
               }
@@ -4948,125 +4009,6 @@
               }
             },
             "title": "Hot Partition Detection"
-          }
-        },
-        {
-          "kind": "RowsLayoutRow",
-          "spec": {
-            "collapse": false,
-            "layout": {
-              "kind": "GridLayout",
-              "spec": {
-                "items": [
-                  {
-                    "kind": "GridLayoutItem",
-                    "spec": {
-                      "element": {
-                        "kind": "ElementReference",
-                        "name": "panel-35"
-                      },
-                      "height": 4,
-                      "width": 6,
-                      "x": 0,
-                      "y": 0
-                    }
-                  },
-                  {
-                    "kind": "GridLayoutItem",
-                    "spec": {
-                      "element": {
-                        "kind": "ElementReference",
-                        "name": "panel-36"
-                      },
-                      "height": 8,
-                      "width": 18,
-                      "x": 6,
-                      "y": 0
-                    }
-                  },
-                  {
-                    "kind": "GridLayoutItem",
-                    "spec": {
-                      "element": {
-                        "kind": "ElementReference",
-                        "name": "panel-37"
-                      },
-                      "height": 4,
-                      "width": 24,
-                      "x": 0,
-                      "y": 8
-                    }
-                  }
-                ]
-              }
-            },
-            "title": "Under-Replicated Partitions (ISR)"
-          }
-        },
-        {
-          "kind": "RowsLayoutRow",
-          "spec": {
-            "collapse": false,
-            "layout": {
-              "kind": "GridLayout",
-              "spec": {
-                "items": [
-                  {
-                    "kind": "GridLayoutItem",
-                    "spec": {
-                      "element": {
-                        "kind": "ElementReference",
-                        "name": "panel-38"
-                      },
-                      "height": 4,
-                      "width": 6,
-                      "x": 0,
-                      "y": 0
-                    }
-                  },
-                  {
-                    "kind": "GridLayoutItem",
-                    "spec": {
-                      "element": {
-                        "kind": "ElementReference",
-                        "name": "panel-39"
-                      },
-                      "height": 8,
-                      "width": 18,
-                      "x": 6,
-                      "y": 0
-                    }
-                  },
-                  {
-                    "kind": "GridLayoutItem",
-                    "spec": {
-                      "element": {
-                        "kind": "ElementReference",
-                        "name": "panel-40"
-                      },
-                      "height": 8,
-                      "width": 12,
-                      "x": 0,
-                      "y": 8
-                    }
-                  },
-                  {
-                    "kind": "GridLayoutItem",
-                    "spec": {
-                      "element": {
-                        "kind": "ElementReference",
-                        "name": "panel-41"
-                      },
-                      "height": 8,
-                      "width": 12,
-                      "x": 12,
-                      "y": 8
-                    }
-                  }
-                ]
-              }
-            },
-            "title": "Topic Data Skew"
           }
         },
         {
@@ -5288,42 +4230,7 @@
           "text": "All",
           "value": "$__all"
         },
-        "definition": "label_values(klag_consumer_lag_sum, cluster_name)",
-        "hide": "dontHide",
-        "includeAll": true,
-        "label": "Cluster",
-        "multi": true,
-        "name": "cluster_name",
-        "options": [],
-        "query": {
-          "datasource": {
-            "name": "${datasource}"
-          },
-          "group": "prometheus",
-          "kind": "DataQuery",
-          "spec": {
-            "query": "label_values(klag_consumer_lag_sum, cluster_name)",
-            "refId": "PrometheusVariableQueryEditor-VariableQuery"
-          },
-          "version": "v0"
-        },
-        "refresh": "onTimeRangeChanged",
-        "regex": "",
-        "regexApplyTo": "value",
-        "skipUrlSync": false,
-        "sort": "alphabeticalAsc"
-      }
-    },
-    {
-      "kind": "QueryVariable",
-      "spec": {
-        "allValue": ".*",
-        "allowCustomValue": true,
-        "current": {
-          "text": "All",
-          "value": "$__all"
-        },
-        "definition": "label_values(klag_consumer_lag_sum{cluster_name=~\"$cluster_name\"}, consumer_group)",
+        "definition": "label_values(klag_consumer_lag_sum, consumer_group)",
         "hide": "dontHide",
         "includeAll": true,
         "label": "Consumer Group",
@@ -5337,7 +4244,7 @@
           "group": "prometheus",
           "kind": "DataQuery",
           "spec": {
-            "query": "label_values(klag_consumer_lag_sum{cluster_name=~\"$cluster_name\"}, consumer_group)",
+            "query": "label_values(klag_consumer_lag_sum, consumer_group)",
             "refId": "PrometheusVariableQueryEditor-VariableQuery"
           },
           "version": "v0"
@@ -5358,7 +4265,7 @@
           "text": "All",
           "value": "$__all"
         },
-        "definition": "label_values(klag_consumer_lag{cluster_name=~\"$cluster_name\"}, topic)",
+        "definition": "label_values(klag_consumer_lag, topic)",
         "hide": "dontHide",
         "includeAll": true,
         "label": "Topic",
@@ -5372,7 +4279,7 @@
           "group": "prometheus",
           "kind": "DataQuery",
           "spec": {
-            "query": "label_values(klag_consumer_lag{cluster_name=~\"$cluster_name\"}, topic)",
+            "query": "label_values(klag_consumer_lag, topic)",
             "refId": "PrometheusVariableQueryEditor-VariableQuery"
           },
           "version": "v0"
@@ -5385,5 +4292,4 @@
       }
     }
   ]
-}
 }
