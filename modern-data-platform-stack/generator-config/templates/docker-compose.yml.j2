@@ -936,6 +936,7 @@ networks:
   {% set KAFKA_CONNECTOR_BOARD_enable = false -%}
   {% set ZILLA_enable = false -%}
   {% set REMORA_enable = false -%}
+  {% set KAFKA_BACKUP_enable = false -%}
   {% set DEBEZIUM_SERVER_enable = false -%}
   {% set DEBEZIUM_UI_enable = false -%}
   {% set HADOOP_enable = false -%}
@@ -6424,6 +6425,42 @@ services:
       KAFKA_CREATE_TOPICS: '__CruiseControlMetrics:3:{{KAFKA_internal_replication_factor | default(1)}}'
     init: true        
 {% endif %}   {# KAFKA_enable and CRUISE_CONTROL_enable #}
+
+{% if ((KAFKA_enable or external['KAFKA_enable']) and KAFKA_BACKUP_enable) | default(false) %}
+  #  ================================== Kafka Backup ========================================== #
+  kafka-backup:
+    image: docker.io/osodevops/kafka-backup:{{__KAFKA_BACKUP_version}}
+    container_name: kafka-backup
+    hostname: kafka-backup
+    labels:
+      com.platys.name: "kafka-backup"
+      com.platys.description: "Backup and restore Kafka topics to/from S3-compatible object storage"
+    environment:
+      KAFKA_BROKERS: {{ns.bootstrapServer}}
+    {%if MINIO_enable or RUSTFS_enable or SEAWEEDFS_enable or external['S3_enable'] | default(false) %}
+      S3_ENDPOINT: {{s3Endpoint | default(omit) }}
+      S3_PATH_STYLE_ACCESS: '{{s3PathStyleAccess}}'
+      AWS_REGION: {{s3DefaultRegion | default(omit) }}
+      AWS_ACCESS_KEY_ID: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
+      AWS_SECRET_ACCESS_KEY: {{s3SecretAccessKey}}
+      S3_ACCESS_KEY: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
+      S3_SECRET_KEY: {{s3SecretAccessKey}}
+    {% endif -%}   {#  MINIO_enable #}
+      RUST_LOG: {{KAFKA_BACKUP_rust_log | default('info') }}
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer:z
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+{% endif %}   {# KAFKA_enable and KAFKA_BACKUP_enable #}
 
 {% if DEBEZIUM_SERVER_enable | default(false) %}
   #  ================================== Debezium UI ========================================== #
