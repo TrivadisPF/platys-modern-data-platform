@@ -25,6 +25,7 @@ networks:
 {% set __CONFLUENT_CCC_version = CONFLUENT_CCC_version | default('latest') -%}
 {% set __CONFLUENT_CCC_NG_version = CONFLUENT_CCC_NG_version | default('latest') -%}
 {% set __KAFKA_INIT_version = KAFKA_INIT_version | default('latest') -%}
+{% set __KAFKA_BACKUP_version = KAFKA_BACKUP_version | default('latest') -%}
 {% set __KAFKA_MIRROR_MAKER2_version = KAFKA_MIRROR_MAKER2_version | default('latest') -%}
 {% set __SCHEMA_REGISTRY_apicurio_version = SCHEMA_REGISTRY_apicurio_version | default('latest') -%}
 {% set __ZOONAVIGATOR_version = ZOONAVIGATOR_version | default('latest') -%}
@@ -6432,9 +6433,15 @@ services:
     image: docker.io/osodevops/kafka-backup:{{__KAFKA_BACKUP_version}}
     container_name: kafka-backup
     hostname: kafka-backup
+    platform: linux/amd64
     labels:
       com.platys.name: "kafka-backup"
       com.platys.description: "Backup and restore Kafka topics to/from S3-compatible object storage"
+    depends_on:
+    {% if KAFKA_enable | default(false) %}
+      {{ns.kafkaServiceNames.split(',')[0]}}:
+        condition: service_healthy
+    {% endif -%}   {#  KAFKA_enable #}
     environment:
       KAFKA_BROKERS: {{ns.bootstrapServer}}
     {%if MINIO_enable or RUSTFS_enable or SEAWEEDFS_enable or external['S3_enable'] | default(false) %}
@@ -6452,6 +6459,9 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer:z
+    {%if KAFKA_BACKUP_volume_map_data | default(false) %}
+      - ./container-volume/kafka-backup/data:/data:z
+    {% endif -%}   {#  KAFKA_BACKUP_volume_map_data #}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -34377,8 +34387,10 @@ services:
       com.platys.webui.url: "http://dataplatform:28498"
     ports:
       - 28498:3000
-    {%if use_timezone | default(false) %}
     environment:
+      DISABLE_WHATS_NEW: true
+      EXPORT_METRICS: false
+    {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:

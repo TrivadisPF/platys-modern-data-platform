@@ -1,0 +1,19 @@
+mode: backup
+backup_id: "daily-backup-001"
+
+source:
+  bootstrap_servers: ["kafka-1:9092"]
+  topics:
+    include: ["orders-*", "payments-*"]
+    exclude: ["*-internal"]
+
+storage:
+  backend: s3
+  bucket: my-kafka-backups
+  region: us-east-1
+  prefix: prod/
+
+backup:
+  compression: zstd
+  segment_max_bytes: 134217728  # 128MB
+  include_offset_headers: true   # default — adds x-original-offset / x-original-timestamp to every archived record
