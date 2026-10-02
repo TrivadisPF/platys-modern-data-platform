@@ -6176,6 +6176,8 @@ services:
     labels:
       com.platys.name: "klag"
       com.platys.description: "Kafka Lag Exporter"
+    ports:
+      - 28499:8888
     environment:
       KAFKA_BOOTSTRAP_SERVERS: {{ns.bootstrapServer}}
       
@@ -6197,12 +6199,13 @@ services:
         {% endif -%}   {#  KAFKA_ssl_client_authentication_enabled #}
       {% endif -%}   {#  ns.securityProtocol #}
     {% endif -%}   {#  secureKafkaEnabled #}      
-
       # metrics reporter
       METRICS_REPORTER: prometheus-1
       METRICS_INTERVAL_MS: 30000
       METRICS_GROUP_FILTER: *
-
+      MCP_ENABLED: {{KLAG_mcp_enabled | default(false) }}
+      MCP_AUTH_TOKEN: {{KLAG_mcp_auth_token if KLAG_mcp_auth_token is defined and KLAG_mcp_auth_token and KLAG_mcp_auth_token | length else omit }}
+      MCP_PATH: /mcp
       # jvm metrics
       METRICS_JVM_ENABLED: true    
     {%if use_timezone | default(false) %}

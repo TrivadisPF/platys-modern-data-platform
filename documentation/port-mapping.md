@@ -890,6 +890,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28496 | 8000 | dbt-workbench (backend API) |
 28497 | 3000 | dbt-workbench (frontend UI) |
 28498 | 3000 | dockhand |
+28499 | 8888 | klag |
 
 ## Ports > 28700
 
