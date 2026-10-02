@@ -6443,8 +6443,14 @@ services:
         condition: service_healthy
     {% endif -%}   {#  KAFKA_enable #}
     environment:
+      KAFKA_BACKUP_ID: kafka-backup
+      {% set parts = KAFKA_BACKUP_topics_include.split(',') | map('trim') | list %}
+      KAFKA_BACKUP_TOPICS_INCLUDE: '"{{ parts | join('", "') }}"'
+      #KAFKA_BACKUP_TOPICS_INCLUDE: "orders-*,payments-*"
       KAFKA_BROKERS: {{ns.bootstrapServer}}
     {%if MINIO_enable or RUSTFS_enable or SEAWEEDFS_enable or external['S3_enable'] | default(false) %}
+      S3_BUCKET: admin-bucket
+      S3_PREFIX: prod
       S3_ENDPOINT: {{s3Endpoint | default(omit) }}
       S3_PATH_STYLE_ACCESS: '{{s3PathStyleAccess}}'
       AWS_REGION: {{s3DefaultRegion | default(omit) }}
@@ -6471,9 +6477,9 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
     command:
-      - backup
-      - --config
-      - /config/backup.yaml
+      - sh
+      - -c
+      - "--config /tmp/backup.yaml"
     restart: {{container_restart_policy}}
 {% endif %}   {# KAFKA_enable and KAFKA_BACKUP_enable #}
 
