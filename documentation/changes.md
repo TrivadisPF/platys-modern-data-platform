@@ -34,6 +34,7 @@ See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/plat
  * Update `hive-metastore` to `4.2.1`
  * Update `polaris` to `1.8.0`
  * Update `confluent` to `8.3.2`
+ * Update `grafana` to `13.0.10-ubuntu`
 
 ### Enhancements
 
