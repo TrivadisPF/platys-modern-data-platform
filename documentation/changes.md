@@ -35,6 +35,8 @@ See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/plat
  * Update `polaris` to `1.8.0`
  * Update `confluent` to `8.3.2`
  * Update `grafana` to `13.0.10-ubuntu`
+ * Update `prometheus` to `v3.13.4`
+ * Update `prometheus-alertmanager` to `v0.34.1`
 
 ### Enhancements
 
