@@ -6204,7 +6204,7 @@ services:
       # metrics reporter
       METRICS_REPORTER: prometheus-1
       METRICS_INTERVAL_MS: 30000
-      METRICS_GROUP_FILTER: *
+      METRICS_GROUP_FILTER: '*'
       MCP_ENABLED: {{KLAG_mcp_enabled | default(false) }}
       MCP_AUTH_TOKEN: {{KLAG_mcp_auth_token if KLAG_mcp_auth_token is defined and KLAG_mcp_auth_token and KLAG_mcp_auth_token | length else omit }}
       MCP_PATH: /mcp
@@ -6446,7 +6446,8 @@ services:
       KAFKA_BACKUP_ID: kafka-backup
       {% set parts = KAFKA_BACKUP_topics_include.split(',') | map('trim') | list %}
       KAFKA_BACKUP_TOPICS_INCLUDE: '["{{ parts | join('", "') }}"]'
-      KAFKA_BACKUP_TOPICS_EXCLUDE: []
+      {% set parts = KAFKA_BACKUP_topics_exclude.split(',') | map('trim') | list %}
+      KAFKA_BACKUP_TOPICS_EXCLUDE: '["{{ parts | join('", "') }}"]'
       KAFKA_BROKERS: {{ns.bootstrapServer}}
     {%if MINIO_enable or RUSTFS_enable or SEAWEEDFS_enable or external['S3_enable'] | default(false) %}
       S3_BUCKET: admin-bucket
