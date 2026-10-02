@@ -6499,8 +6499,8 @@ services:
     labels:
       com.platys.name: "kafka-datagen"
       com.platys.description: "Generate and produce Avro messages to Kafka topics"
-      com.platys.webui.title: "Kafka data generator UI"
-      com.platys.webui.url: "http://dataplatform:28468/q/dev"
+      com.platys.restapi.title: "Kafka data generator UI"
+      com.platys.restapi.url: "http://dataplatform:28468/q/metrics"
     depends_on:
     {% if KAFKA_enable | default(false) %}
       {{ns.kafkaServiceNames.split(',')[0]}}:
@@ -6517,12 +6517,14 @@ services:
       TOPIC: {{KAFKA_DATAGEN_topic | default('') }}
       SCHEMA_FILE: {{KAFKA_DATAGEN_schema_file | default('') }}
       SCHEMA_KEYFIELD: {{KAFKA_DATAGEN_schema_keyfield | default('') }}
+      SCHEMA_REGISTRY_URL: {{ ns.schemaRegistryUrl }}
       RATE: 10
       MAX_RECORDS: 0
-      FORMAT: avro
-      mp.messaging.outgoing.generated.value.serializer: "io.confluent.kafka.serializers.KafkaAvroSerializer"
-      SCHEMA_REGISTRY_URL: {{ ns.schemaRegistryUrl }}
-      QUARKUS_OTEL_ENABLED: {{KAFKA_DATAGEN_quarkus_otel_enabled | default(false) }}
+      FORMAT: {{KAFKA_DATAGEN_format | default('json') }}
+    {%- if KAFKA_DATAGEN_format | default('json') == 'avro' %}
+      MP_MESSAGING_OUTGOING_GENERATED_VALUE_SERIALIZER: io.confluent.kafka.serializers.KafkaAvroSerializer
+      MP_MESSAGING_OUTGOING_GENERATED_SCHEMA_REGISTRY_URL: {{ ns.schemaRegistryUrl }}
+    {%- endif %}
       LATE_EVENTS_PERCENTAGE: 0
       LATE_EVENTS_MIN_MS: 0
       LATE_EVENTS_MAX_MS: 0
@@ -6540,6 +6542,8 @@ services:
       DUPLICATE_EVENT_CLEAN_RECORDS: 0
       DUPLICATE_EVENT_CLEAN_DURATION: PT0S
       LOG_DUPLICATE_EVENT: false
+
+      QUARKUS_OTEL_ENABLED: {{KAFKA_DATAGEN_quarkus_otel_enabled | default(false) }}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
