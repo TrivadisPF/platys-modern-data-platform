@@ -18,6 +18,7 @@ See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/plat
  * Forgejo
  * dbt Workbench
  * dockhand
+ * kafka-backup
  
 ### Version upgrades
  
