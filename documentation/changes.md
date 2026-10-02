@@ -19,6 +19,7 @@ See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/plat
  * dbt Workbench
  * dockhand
  * kafka-backup
+ * kafka-datagen
  
 ### Version upgrades
  
