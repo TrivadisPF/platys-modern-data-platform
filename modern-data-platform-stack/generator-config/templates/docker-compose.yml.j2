@@ -6521,8 +6521,8 @@ services:
       SCHEMA_FILE: {{KAFKA_DATAGEN_schema_file | default('') }}
       SCHEMA_KEYFIELD: {{KAFKA_DATAGEN_schema_keyfield | default('') }}
       SCHEMA_REGISTRY_URL: {{ ns.schemaRegistryUrl }}
-      RATE: 10
-      MAX_RECORDS: 0
+      RATE: {{KAFKA_DATAGEN_rate | default(10) }}
+      MAX_RECORDS: {{KAFKA_DATAGEN_max_records | default(0) }}
       FORMAT: {{KAFKA_DATAGEN_format | default('json') }}
     {% if KAFKA_DATAGEN_format | default('json') == 'avro' %}
       MP_MESSAGING_OUTGOING_GENERATED_VALUE_SERIALIZER: io.confluent.kafka.serializers.KafkaAvroSerializer
@@ -6532,22 +6532,20 @@ services:
       LATE_EVENTS_MIN_MS: 0
       LATE_EVENTS_MAX_MS: 0
       LOG_LATE_EVENT: false
-      POISON_PILL_ENABLED: false
+      POISON_PILL_ENABLED: {{KAFKA_DATAGEN_poison_pill_enabled | default(false) }}
       POISON_PILL_COUNT: -1
       POISON_PILL_INTERVAL: PT5M
       POISON_PILL_CLEAN_RECORDS: 0
       POISON_PILL_CLEAN_DURATION: PT0S
       POISON_PILL_TYPE: invalid-string
       LOG_POISON_PILL: false
-      DUPLICATE_EVENT_ENABLED: false
+      DUPLICATE_EVENT_ENABLED: {{KAFKA_DATAGEN_duplicate_event_enabled | default(false) }}
       DUPLICATE_EVENT_COUNT: -1
       DUPLICATE_EVENT_INTERVAL: PT5M
       DUPLICATE_EVENT_CLEAN_RECORDS: 0
       DUPLICATE_EVENT_CLEAN_DURATION: PT0S
       LOG_DUPLICATE_EVENT: false
-
-      QUARKUS_OTEL_TRACES_ENABLED: {{KAFKA_DATAGEN_quarkus_otel_enabled | default(false) }}
-      QUARKUS_OTEL_SDK_DISABLED: 'true'
+      QUARKUS_OTEL_SDK_DISABLED: {{not KAFKA_DATAGEN_quarkus_otel_disabled | default(true) }}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
