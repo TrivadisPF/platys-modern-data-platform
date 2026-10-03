@@ -1193,6 +1193,7 @@ networks:
   {% set JAEGER_enable = false -%}
   {% set PITCHFORK_enable = false -%}
   {% set TEMPO_enable = false -%}
+  {% set MIMIR_enable = false -%}
   {% set TAIGA_enable = false -%}
   {% set TASKCAFE_enable = false -%}
   {% set FOCALBOARD_enable = false -%}
@@ -23977,6 +23978,8 @@ services:
     command:
       - "--config.file=/etc/prometheus/prometheus.yml"
       - "--storage.tsdb.path=/prometheus"
+      - "--web.enable-lifecycle"
+      - "--web.enable-remote-write-receiver"
       - "--web.console.libraries=/usr/share/prometheus/console_libraries"
       - "--web.console.templates=/usr/share/prometheus/consoles"
       - "--web.listen-address=0.0.0.0:9090"
@@ -24073,6 +24076,50 @@ services:
   {% endif %}   {#  PROMETHEUS_ALERTMANAGER_enable #}
 
 {% endif %}   {#  PROMETHEUS_enable #}
+
+{% if MIMIR_enable | default(false) %}
+  #  ================================== Grafana Mimir ========================================== #
+  mimir:
+    image: docker.io/grafana/mimir:{{__MIMIR_version}}
+    container_name: mimir
+    hostname: mimir
+    labels:
+      com.platys.name: "mimir"
+      com.platys.description: "Grafana Mimir - scalable long-term storage for Prometheus metrics"
+      com.platys.webui.title: "Mimir UI"
+      com.platys.webui.url: "http://dataplatform:9008"
+      com.platys.restapi.title: "Mimir API"
+      com.platys.restapi.url: "http://dataplatform:9008"
+    ports:
+      - "9008:9009"
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer:z
+      - ./conf/mimir/mimir.yaml:/etc/mimir/mimir.yaml:z
+    {% if MIMIR_volume_map_data | default(false) %}
+      - ./container-volume/mimir:/data:z
+    {% endif -%}   {#  MIMIR_volume_map_data #}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:9008/ready"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    command:
+      - --config.file=/etc/mimir/mimir.yaml
+      - --target={{MIMIR_target | default('all') }}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  MIMIR_enable #}
 
 {% if TILE38_enable | default(false) %}
   #  ================================== Tile38 ========================================== #

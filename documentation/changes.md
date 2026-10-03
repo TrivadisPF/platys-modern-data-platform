@@ -20,6 +20,7 @@ See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/plat
  * dockhand
  * kafka-backup
  * kafka-datagen
+ * mimir
  
 ### Version upgrades
  

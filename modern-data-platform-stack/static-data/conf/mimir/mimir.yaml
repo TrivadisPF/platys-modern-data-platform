@@ -1,0 +1,79 @@
+# Mimir configuration for single-node deployment
+# This is a minimal configuration for local development/testing
+
+# Target configuration (all-in-one mode)
+target: all
+
+# Server configuration
+server:
+  http_listen_port: 9009
+  grpc_listen_port: 9095
+  log_level: info
+
+# Multi-tenancy disabled for simplicity
+multitenancy_enabled: false
+
+# Blocks storage configuration
+blocks_storage:
+  backend: filesystem
+  bucket_store:
+    sync_dir: /data/tsdb-sync
+  filesystem:
+    dir: /data/blocks
+  tsdb:
+    dir: /data/tsdb
+
+# Compactor configuration
+compactor:
+  data_dir: /data/compactor
+  sharding_ring:
+    kvstore:
+      store: memberlist
+
+# Distributor configuration
+distributor:
+  ring:
+    kvstore:
+      store: memberlist
+
+# Ingester configuration
+ingester:
+  ring:
+    kvstore:
+      store: memberlist
+    replication_factor: 1
+
+# Store-gateway configuration
+store_gateway:
+  sharding_ring:
+    replication_factor: 1
+    kvstore:
+      store: memberlist
+
+# Querier configuration
+querier:
+  max_concurrent: 20
+
+# Ruler storage (disabled for simplicity)
+ruler_storage:
+  backend: filesystem
+  filesystem:
+    dir: /data/rules
+
+# Alertmanager storage (disabled for simplicity)
+alertmanager_storage:
+  backend: filesystem
+  filesystem:
+    dir: /data/alertmanager
+
+# Limits configuration
+limits:
+  # Increase limits for development
+  ingestion_rate: 100000
+  ingestion_burst_size: 200000
+  max_global_series_per_user: 500000
+  max_global_series_per_metric: 50000
+
+# Memberlist configuration for single-node
+memberlist:
+  join_members: []

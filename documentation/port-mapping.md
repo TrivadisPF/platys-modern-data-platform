@@ -294,6 +294,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 9002 | 9000 | minio-3 |
 9003 | 9000 | minio-4 |
 9005 | 9000 | rustfs-1 |
+9008 | 9009 | mimir |
 9009 | 9009 | questdb |
 9010 | 9010 | minio-1 ui |
 9011 | 9011 | minio-2 ui |
@@ -859,7 +860,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28465 | 8080 | ehrbase |
 28466 | 9000 | openehr-tool |
 28467 | 8182 | janusgraph |
-28468 |  |  |
+28468 | 8080 | kafka-datagen |
 28469 | 8090 | gravitino |
 28470 | 9001 | gravitino-iceberg-rest |
 28471 | 8000 | gravitino-mcp-server |
