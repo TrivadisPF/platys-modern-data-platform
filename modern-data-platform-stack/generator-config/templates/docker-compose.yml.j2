@@ -6498,75 +6498,6 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {# KAFKA_enable and KAFKA_BACKUP_enable #}
 
-{% if ((KAFKA_enable or external['KAFKA_enable']) and KAFKA_DATAGEN_enable) | default(false) %}
-  #  ================================== Kafka Datagen ========================================== #
-  kafka-datagen:
-    image: docker.io/spoud/kafka-datagen:{{__KAFKA_DATAGEN_version}}
-    container_name: kafka-datagen
-    hostname: kafka-datagen
-    labels:
-      com.platys.name: "kafka-datagen"
-      com.platys.description: "Generate and produce Avro messages to Kafka topics"
-      com.platys.restapi.title: "Kafka data generator UI"
-      com.platys.restapi.url: "http://dataplatform:28468/q/metrics"
-    depends_on:
-    {% if KAFKA_enable | default(false) %}
-      {{ns.kafkaServiceNames.split(',')[0]}}:
-        condition: service_healthy
-    {% endif -%}   {#  KAFKA_enable #}
-    {% if SCHEMA_REGISTRY_enable | default(false) %}
-      schema-registry-1:
-        condition: service_healthy
-    {% endif -%}   {#  KAFKA_enable #}
-    ports:
-      - 28468:8080
-    environment:
-      KAFKA_BOOTSTRAP_SERVERS: {{ns.bootstrapServer}}
-      TOPIC: {{KAFKA_DATAGEN_topic | default('') }}
-      SCHEMA_FILE: {{KAFKA_DATAGEN_schema_file | default('') }}
-      SCHEMA_KEYFIELD: {{KAFKA_DATAGEN_schema_keyfield | default('') }}
-      SCHEMA_REGISTRY_URL: {{ ns.schemaRegistryUrl }}
-      RATE: {{KAFKA_DATAGEN_rate | default(10) }}
-      MAX_RECORDS: {{KAFKA_DATAGEN_max_records | default(0) }}
-      FORMAT: {{KAFKA_DATAGEN_format | default('json') }}
-    {% if KAFKA_DATAGEN_format | default('json') == 'avro' %}
-      MP_MESSAGING_OUTGOING_GENERATED_VALUE_SERIALIZER: io.confluent.kafka.serializers.KafkaAvroSerializer
-      MP_MESSAGING_OUTGOING_GENERATED_SCHEMA_REGISTRY_URL: {{ ns.schemaRegistryUrl }}
-    {% endif -%}   {#  KAFKA_DATAGEN_format == avro #}
-      LATE_EVENTS_PERCENTAGE: 0
-      LATE_EVENTS_MIN_MS: 0
-      LATE_EVENTS_MAX_MS: 0
-      LOG_LATE_EVENT: false
-      POISON_PILL_ENABLED: {{KAFKA_DATAGEN_poison_pill_enabled | default(false) }}
-      POISON_PILL_COUNT: -1
-      POISON_PILL_INTERVAL: PT5M
-      POISON_PILL_CLEAN_RECORDS: 0
-      POISON_PILL_CLEAN_DURATION: PT0S
-      POISON_PILL_TYPE: invalid-string
-      LOG_POISON_PILL: false
-      DUPLICATE_EVENT_ENABLED: {{KAFKA_DATAGEN_duplicate_event_enabled | default(false) }}
-      DUPLICATE_EVENT_COUNT: -1
-      DUPLICATE_EVENT_INTERVAL: PT5M
-      DUPLICATE_EVENT_CLEAN_RECORDS: 0
-      DUPLICATE_EVENT_CLEAN_DURATION: PT0S
-      LOG_DUPLICATE_EVENT: false
-      QUARKUS_OTEL_SDK_DISABLED: {{not KAFKA_DATAGEN_quarkus_otel_disabled | default(true) }}
-    {%if use_timezone | default(false) %}
-      TZ: {{use_timezone}}
-    {% endif -%}   {#  use_timezone #}
-    volumes:
-      - ./data-transfer:/data-transfer:z
-      - ./scripts/kafka-datagen:/schemas:z
-    {%if use_timezone | default(false) %}
-      - "./etc/timezone:/etc/timezone:ro"
-      - "./etc/localtime:/etc/localtime:ro"
-    {% endif -%}   {#  use_timezone #}
-    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
-    <<: *logging
-    {% endif -%}   {#  logging_driver is defined ... #}
-    restart: {{container_restart_policy}}
-{% endif %}   {# KAFKA_enable and KAFKA_DATAGEN_enable #}
-
 {% if DEBEZIUM_SERVER_enable | default(false) %}
   #  ================================== Debezium UI ========================================== #
   debezium-server:
@@ -6724,6 +6655,75 @@ services:
       {{'--report-benchmark' if SHADOW_TRAFFIC_report_benchmark | default(false) else ''}}
     restart: {{container_restart_policy}}
 {% endif %}   {# SHADOW_TRAFFIC_enable #}
+
+{% if ((KAFKA_enable or external['KAFKA_enable']) and KAFKA_DATAGEN_enable) | default(false) %}
+  #  ================================== Kafka Datagen ========================================== #
+  kafka-datagen:
+    image: docker.io/spoud/kafka-datagen:{{__KAFKA_DATAGEN_version}}
+    container_name: kafka-datagen
+    hostname: kafka-datagen
+    labels:
+      com.platys.name: "kafka-datagen"
+      com.platys.description: "Generate and produce Avro messages to Kafka topics"
+      com.platys.restapi.title: "Kafka data generator UI"
+      com.platys.restapi.url: "http://dataplatform:28468/q/metrics"
+    depends_on:
+    {% if KAFKA_enable | default(false) %}
+      {{ns.kafkaServiceNames.split(',')[0]}}:
+        condition: service_healthy
+    {% endif -%}   {#  KAFKA_enable #}
+    {% if SCHEMA_REGISTRY_enable | default(false) %}
+      schema-registry-1:
+        condition: service_healthy
+    {% endif -%}   {#  KAFKA_enable #}
+    ports:
+      - 28468:8080
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: {{ns.bootstrapServer}}
+      TOPIC: {{KAFKA_DATAGEN_topic | default('') }}
+      SCHEMA_FILE: {{KAFKA_DATAGEN_schema_file | default('') }}
+      SCHEMA_KEYFIELD: {{KAFKA_DATAGEN_schema_keyfield | default('') }}
+      SCHEMA_REGISTRY_URL: {{ ns.schemaRegistryUrl }}
+      RATE: {{KAFKA_DATAGEN_rate | default(10) }}
+      MAX_RECORDS: {{KAFKA_DATAGEN_max_records | default(0) }}
+      FORMAT: {{KAFKA_DATAGEN_format | default('json') }}
+    {% if KAFKA_DATAGEN_format | default('json') == 'avro' %}
+      MP_MESSAGING_OUTGOING_GENERATED_VALUE_SERIALIZER: io.confluent.kafka.serializers.KafkaAvroSerializer
+      MP_MESSAGING_OUTGOING_GENERATED_SCHEMA_REGISTRY_URL: {{ ns.schemaRegistryUrl }}
+    {% endif -%}   {#  KAFKA_DATAGEN_format == avro #}
+      LATE_EVENTS_PERCENTAGE: 0
+      LATE_EVENTS_MIN_MS: 0
+      LATE_EVENTS_MAX_MS: 0
+      LOG_LATE_EVENT: false
+      POISON_PILL_ENABLED: {{KAFKA_DATAGEN_poison_pill_enabled | default(false) }}
+      POISON_PILL_COUNT: -1
+      POISON_PILL_INTERVAL: PT5M
+      POISON_PILL_CLEAN_RECORDS: 0
+      POISON_PILL_CLEAN_DURATION: PT0S
+      POISON_PILL_TYPE: invalid-string
+      LOG_POISON_PILL: false
+      DUPLICATE_EVENT_ENABLED: {{KAFKA_DATAGEN_duplicate_event_enabled | default(false) }}
+      DUPLICATE_EVENT_COUNT: -1
+      DUPLICATE_EVENT_INTERVAL: PT5M
+      DUPLICATE_EVENT_CLEAN_RECORDS: 0
+      DUPLICATE_EVENT_CLEAN_DURATION: PT0S
+      LOG_DUPLICATE_EVENT: false
+      QUARKUS_OTEL_SDK_DISABLED: {{not KAFKA_DATAGEN_quarkus_otel_disabled | default(true) }}
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer:z
+      - ./scripts/kafka-datagen:/schemas:z
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+{% endif %}   {# KAFKA_enable and KAFKA_DATAGEN_enable #}
 
 {% if HADOOP_enable | default(false) %}
 
