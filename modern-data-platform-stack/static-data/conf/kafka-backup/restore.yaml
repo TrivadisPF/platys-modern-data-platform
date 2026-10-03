@@ -1,0 +1,33 @@
+mode: restore
+backup_id: "production-backup-001"
+
+# Target Kafka cluster (can be different from source)
+target:
+  bootstrap_servers:
+    - dr-broker-1.kafka.svc:9092
+    - dr-broker-2.kafka.svc:9092
+
+storage:
+  backend: filesystem
+  path: "/var/lib/kafka-backup/data"
+
+restore:
+  # Optional: Point-in-time recovery
+  # time_window_start: 1701417600000  # Unix ms timestamp
+  # time_window_end: 1701504000000
+
+  # Optional: Topic remapping
+  # topic_mapping:
+  #   orders: orders_restored
+  #   payments: payments_dr
+
+  # Consumer offset handling
+  consumer_group_strategy: skip  # Options: skip, header-based, timestamp-based, cluster-scan, manual
+
+  # Add x-original-* / x-source-partition headers to restored records (default: false).
+  # The backup already archived x-original-offset / x-original-timestamp by default;
+  # strip_offset_headers: true (v0.19.0+) restores records without any of them.
+  include_original_offset_header: true
+
+  # Dry run first to validate
+  dry_run: false

@@ -15,20 +15,33 @@ storage:
   path_style_access: ${S3_PATH_STYLE_ACCESS}
   prefix: ${S3_PREFIX}
 
+offset_storage:
+  db_path: /data/offsets.db
+  sync_interval_secs: 30
+  
 backup:
   compression: zstd
-  compression_level: 3
+  compression_level: 3          # Balanced performance
   start_offset: earliest        # Where a partition starts when there is no checkpoint: earliest, latest, or specific: {topic: {partition: offset}}
-  continuous: true              
+  continuous: true
+  stop_at_current_offsets: false              
   include_internal_topics: false
   internal_topics: []
   on_missing_topic : fail
-
-  segment_max_bytes: 134217728  # 128MB
+  source_cluster_id: "${KAFKA_CLUSTER_ID}"
+  
+  poll_interval_ms: 100  # Default: 100ms
+  segment_max_bytes: 134217728  # 128MB - balanced (default)
+  segment_max_interval_ms: 60000  # Force segment roll every 60s
   include_offset_headers: true   # default — adds x-original-offset / x-original-timestamp to every archived record
+
+  checkpoint_interval_secs: 30    # Checkpointing for resumable backups
 
 metrics:
   enabled: true
   port: 8080
   bind_address: "0.0.0.0"
-  path: "/metrics"
+  path: /metrics
+  update_interval_ms: 500
+  keep_alive_seconds: 60
+  max_partition_labels: 100

@@ -6446,7 +6446,7 @@ services:
         condition: service_healthy
     {% endif -%}   {#  KAFKA_enable #}
     environment:
-      KAFKA_BACKUP_ID: kafka-backup
+      KAFKA_BACKUP_ID: "kafka-backup-${START_TIMESTAMP:-$(date -u +%Y-%m-%dT%H:%M:%SZ)}"
     {% if KAFKA_BACKUP_topics_include is defined and KAFKA_BACKUP_topics_include and KAFKA_BACKUP_topics_include | length | default(false) %}  
       {% set parts = KAFKA_BACKUP_topics_include.split(',') | map('trim') | list %}
       KAFKA_BACKUP_TOPICS_INCLUDE: '["{{ parts | join('", "') }}"]'
@@ -6456,6 +6456,7 @@ services:
       KAFKA_BACKUP_TOPICS_EXCLUDE: '["{{ parts | join('", "') }}"]'
     {% endif -%}   {#  KAFKA_BACKUP_topics_exclude #}
       KAFKA_BROKERS: {{ns.bootstrapServer}}
+      KAFKA_CLUSTER_ID: {{KAFKA_cluster_id if KAFKA_cluster_id is defind and KAFKA_cluster_id and KAFKA_cluster_id | lenght else "undefined" }} 
     {%if MINIO_enable or RUSTFS_enable or SEAWEEDFS_enable or external['S3_enable'] | default(false) %}
       S3_BUCKET: admin-bucket
       S3_PREFIX: prod
