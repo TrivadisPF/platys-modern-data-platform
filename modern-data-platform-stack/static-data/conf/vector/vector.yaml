@@ -1,0 +1,68 @@
+# Vector configuration
+# See https://vector.dev/docs/reference/configuration/ for all options
+
+# Data directory for internal state (used when VECTOR_volume_map_data: true)
+data_dir: /var/lib/vector
+
+# API (used for the health check endpoint on port 9598)
+api:
+  enabled: true
+  address: "0.0.0.0:9598"
+
+# Sources — add your input sources here
+# Example: read from a file
+# sources:
+#   app_logs:
+#     type: file
+#     include:
+#       - /var/log/app/*.log
+
+# Example: receive logs over HTTP
+# sources:
+#   http_in:
+#     type: http_server
+#     address: "0.0.0.0:8080"
+#     encoding: json
+
+sources:
+  in:
+    type: "stdin"
+
+# Transforms — optional processing steps
+# transforms:
+#   parse_json:
+#     type: remap
+#     inputs: ["app_logs"]
+#     source: |
+#       . = parse_json!(.message)
+
+# Sinks — add your output destinations here
+# Example: send to Loki
+# sinks:
+#   loki_out:
+#     type: loki
+#     inputs: ["app_logs"]
+#     endpoint: "http://loki:3100"
+#     labels:
+#       source: vector
+
+# Example: send metrics to Prometheus remote_write (Mimir)
+# sinks:
+#   mimir_out:
+#     type: prometheus_remote_write
+#     inputs: ["your_metrics_source"]
+#     endpoint: "http://mimir:9009/api/v1/push"
+
+sinks:
+  out:
+    inputs:
+      - "in"
+    type: "console"
+    encoding:
+      codec: "text"
+
+  prometheus:
+    type: prometheus_exporter
+    inputs:
+      - internal_metrics
+    address: 0.0.0.0:9598      

@@ -21,6 +21,7 @@ See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/plat
  * kafka-backup
  * kafka-datagen
  * mimir
+ * vector
  
 ### Version upgrades
  

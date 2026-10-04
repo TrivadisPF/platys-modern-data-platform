@@ -285,6 +285,8 @@ networks:
 {% set __FLUENT_BIT_version = FLUENT_BIT_version | default('latest') -%}
 {% set __FILEBEAT_version = FILEBEAT_version | default('latest') -%}
 
+{% set __VECTOR_version = VECTOR_version | default('latest') -%}
+
 {% set __CONDUIT_version = CONDUIT_version | default('latest') -%}
 
 {% set __NODERED_version = NODERED_version | default('latest') -%}
@@ -14386,6 +14388,49 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  FILEBEAT_enable  #}
+
+{% if VECTOR_enable | default(false) %}
+  #  ================================== Vector ========================================== #
+  vector:
+    image: docker.io/timberio/vector:{{__VECTOR_version}}
+    container_name: vector
+    hostname: vector
+    labels:
+      com.platys.name: "vector"
+      com.platys.description: "High-performance observability data pipeline"
+    ports:
+      - "9598:9598"
+    volumes:
+      - ./data-transfer:/data-transfer:z
+      - ./conf/vector/vector.yaml:/etc/vector/vector.yaml:z
+    {%if VECTOR_volume_map_data | default(false) %}
+      - ./container-volume/vector:/var/lib/vector:z
+    {% endif -%}   {#  VECTOR_volume_map_data #}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    environment:
+      VECTOR_DANGEROUSLY_ALLOW_ENV_VAR_INTERPOLATION: true
+      VECTOR_ALLOW_EMPTY_CONFIG: true
+      VECTOR_CONFIG: /etc/vector/vector.yaml
+      VECTOR_LOG: {{VECTOR_log_level | default('info')}}
+      VECTOR_WATCH_CONFIG: {{VECTOR_watch_config_enabled | default(true) }}    # Watch for changes in the configuration file and reload accordingly
+      VECTOR_WATCH_CONFIG_POLL_INTERVAL_SECONDS: 30
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request, sys; sys.exit(0) if urllib.request.urlopen('http://localhost:9598/health', timeout=5).status == 200 else sys.exit(1)"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  VECTOR_enable #}
 
 {%if NODERED_enable | default(false) %}
   #  ================================== Node-RED ========================================== #

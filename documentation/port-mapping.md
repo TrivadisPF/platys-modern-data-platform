@@ -353,6 +353,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 9492 | 9492 | automq-1     |
 9493 | 9493 | automq-2     |
 9494 | 9494 | automq-3     |
+9598 | 9598 | vector |
 9600 | 9600 | zeebe-1 |
 9601 | 9600 | langwatch-opensearch  |
 9851 | 9851 | tile38 |
