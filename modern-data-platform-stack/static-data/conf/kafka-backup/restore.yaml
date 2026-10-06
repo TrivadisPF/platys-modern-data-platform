@@ -1,15 +1,18 @@
 mode: restore
-backup_id: "production-backup-001"
+backup_id: "${KAFKA_BACKUP_ID}"
 
 # Target Kafka cluster (can be different from source)
 target:
   bootstrap_servers:
-    - dr-broker-1.kafka.svc:9092
-    - dr-broker-2.kafka.svc:9092
+    - kafka-1:19092
 
 storage:
-  backend: filesystem
-  path: "/var/lib/kafka-backup/data"
+  backend: s3
+  bucket: ${S3_BUCKET}
+  region: ${AWS_REGION}
+  endpoint: ${S3_ENDPOINT}
+  path_style_access: ${S3_PATH_STYLE_ACCESS}
+  prefix: ${S3_PREFIX}
 
 restore:
   # Optional: Point-in-time recovery
@@ -17,8 +20,8 @@ restore:
   # time_window_end: 1701504000000
 
   # Optional: Topic remapping
-  # topic_mapping:
-  #   orders: orders_restored
+  # topic_mapping:
+  #   pub.orders-v1: pub.orders.replay-v1
   #   payments: payments_dr
 
   # Consumer offset handling
@@ -27,7 +30,7 @@ restore:
   # Add x-original-* / x-source-partition headers to restored records (default: false).
   # The backup already archived x-original-offset / x-original-timestamp by default;
   # strip_offset_headers: true (v0.19.0+) restores records without any of them.
-  include_original_offset_header: true
+  include_original_offset_header: false
 
   # Dry run first to validate
   dry_run: false
