@@ -2371,7 +2371,7 @@ For each service there might be some other settings, such as controlling the num
 | `MARKDOWN_MADNESS_watchtower_enabled` | `false` 	| 1.17.0 	| Enable watchtower. |
 | [**_Markdown Viewer_**](./services/markdown-viewer.md) &nbsp;&nbsp;&nbsp;&nbsp;![x86-64](./images/x86-64.png)                   	|         	|       	|                                                                                                                                                                                     	|             	
 | `MARKDOWN_VIEWER_enable` | `true` 	| 1.9.0 	| Generate a web page with the details on the data platform. |
-| `MARKDOWN_VIEWER_use_port_80` | `true` 	| 1.10.0 	| Use Port `80` for the markdown viewer? If set to `false`, port `8008` is used. |
+| `MARKDOWN_VIEWER_external_port` | `80` 	| 1.21.0 	| The external port to use for the markdown viewer. The ports `80-82` are reserved in the port mapping markdown as well as `8008-8010`. If `environment_to_use` is set to `2` or `3` then the port is increased by `+1` or `+2`. |
 | `MARKDOWN_VIEWER_use_public_ip` | `true` 	| 1.10.0 	| When rendering markdown pages, use the public IP address for links to services. If set to `false`, the docker host IP is used instead. |
 | `MARKDOWN_VIEWER_edition` | `markdown-madness` 	| 1.17.0 	| The markdown "engine" to use, either `markdown-web` or `markdown-madness`. |
 | `MARKDOWN_VIEWER_services_list_version` | `2` 	| 1.17.0 	| The version of the Services list to render. Either `1` (original) or `2` (with ports). |

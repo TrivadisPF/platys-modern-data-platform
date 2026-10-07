@@ -63,6 +63,7 @@ See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/plat
  * changed default for search service in DataHub to OpenSearch
  * changed docker image for Apache Spark to `apache/spark`
  * Jupyter external port changed to `38888` (used to be `28888`)
+ * replace `MARKDOWN_VIEWER_use_port_80` by `MARKDOWN_VIEWER_external_port` to have more control over the port used for the markdown viewer (needed for Podman if ports below `1024` are not permitted)
 
 ## What's new in 1.20.0
 

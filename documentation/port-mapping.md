@@ -7,9 +7,9 @@ This table reserves the external ports for the various services. Not all service
 Container Port(s) | Internal Port(s)           | Service (alternatives) |
 --------------------|------------------|-----------------------|
 21 | 21 | ftp |
-80 | 80 | markdown-viewer, markdown-viewer-dc1 or firefox |
-81 | 80 | markdown-viewer-dc2 |
-82 | 80 | markdown-viewer-dc3 |
+80 | 80 | markdown-viewer, markdown-viewer-env1 or firefox |
+81 | 80 | markdown-viewer-env2 |
+82 | 80 | markdown-viewer-env3 |
 1222 | 1222 | risingwave | 
 1234 | 1234 | kafka-1 (prometheus exporter) | 
 1235 | 1234 | kafka-2 (prometheus exporter) | 
@@ -239,9 +239,9 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 8000 | 8000 | kong (proxy) |
 8001 | 8001 | kong (admin api) |
 8002 | 8002 | kong (admin gui) |
-8008 | 80 | markdown-viewer, markdown-viewer-dc1 |
-8009 | 80 | markdown-viewer-dc2 |
-8010 | 80 | markdown-viewer-dc3 |
+8008 | 80 | markdown-viewer, markdown-viewer-env1 |
+8009 | 80 | markdown-viewer-env2 |
+8010 | 80 | markdown-viewer-env3 |
 8020 | 8020 | risingwave-console |
 8024 | 8024 | axon-server |
 8047 | 8047 | drill |
