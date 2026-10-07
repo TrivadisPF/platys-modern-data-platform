@@ -22,6 +22,7 @@ See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/plat
  * kafka-datagen
  * mimir
  * vector
+ * pREST
  
 ### Version upgrades
  
