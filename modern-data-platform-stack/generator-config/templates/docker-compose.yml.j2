@@ -556,6 +556,7 @@ networks:
 {% set __POSTGRESQL_PGDUCKDB_version = POSTGRESQL_PGDUCKDB_version | default('latest') -%}
 
 {% set __POSTGREST_version = POSTGREST_version | default('latest') -%}
+{% set __PREST_version = PREST_version | default('latest') -%}
 {% set __POSTGRESQL_MCP_version = POSTGRESQL_MCP_version | default('latest') -%}
 
 {% set __SUPABASE_STUDIO_version = SUPABASE_STUDIO_version | default('latest') -%}
@@ -1092,6 +1093,7 @@ networks:
   {% set GRAPHDB_enable = false -%}
   {% set TILE38_enable = false -%}
   {% set POSTGREST_enable = false -%}
+  {% set PREST_enable = false -%}
   {% set SUPABASE_enable = false -%}
   {% set ORACLE_XE_enable = false -%}
   {% set ORACLE_FREE_enable = false -%}
@@ -24968,6 +24970,65 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
   {% endif %}   {#  POSTGREST_enable #}
+
+  {% if PREST_enable | default(false) %}
+  #  ================================== pREST ========================================== #
+  prest:
+    image: docker.io/prest/prest:{{__PREST_version}}
+
+    container_name: prest
+    hostname: prest
+    labels:
+      com.platys.name: "prest"
+      com.platys.description: "REST API on PostgreSQL"
+      com.platys.restapi.title: "pREST Studio"
+      com.platys.restapi.url: "http://dataplatform:28215/_studio/"      
+      com.platys.restapi.title: "pREST API"
+      com.platys.restapi.url: "http://dataplatform:28215"
+    ports:
+      - "28215:3000"
+    environment:
+      - PREST_VERSION=2
+      - PREST_CONF=./prest.conf
+      - PREST_STUDIO_ENABLED=true
+      - PREST_DEBUG={{PREST_debug | default(false)}}
+      - PREST_AUTH_ENABLED={{PREST_auth_enabled | default(true)}}
+      - PREST_AUTH_USERNAME=prest
+      - PREST_AUTH_PASSWORD=abc123!
+      - PREST_PG_HOST={{PREST_pg_host | default('postgresql')}}
+      - PREST_PG_USER={{PREST_pg_user | default(POSTGRESQL_user)}}
+      - PREST_PG_PASS={{PREST_pg_password | default(POSTGRESQL_password)}}
+      - PREST_PG_DATABASE={{PREST_pg_database | default(POSTGRESQL_database)}}
+      - PREST_PG_PORT={{PREST_pg_port | default(5432)}}
+      - PREST_SSL_MODE={{PREST_ssl_mode | default('disable')}}
+      - PREST_CACHE_ENABLED={{PREST_cache_enabled | default(false)}}
+      - PREST_CACHE_TIME=10     # ttl in minutes
+      - PREST_CACHE_STORAGEPATH=/
+      - PREST_QUERIES_LOCATION="./queries"
+      - PREST_EXPOSE_ENABLED=true     # Set to true to activate exposure control. While false, everything is listable.
+      - PREST_EXPOSE_TABLES=true
+      - PREST_EXPOSE_SCHEMAS=true
+      - PREST_EXPOSE_DATABASES=true
+      - PREST_JSON_AGG_TYPE=jsonb_agg
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    depends_on:
+      {% if POSTGRESQL_enable | default(false) %}
+      postgresql:
+        condition: service_healthy
+      {% endif -%}   {#  POSTGRESQL_enable #}
+    volumes:
+      - ./data-transfer:/data-transfer:z
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+  {% endif %}   {#  PREST_enable #}
 
 {% endif %}   {#  POSTGRESQL_enable #}
 

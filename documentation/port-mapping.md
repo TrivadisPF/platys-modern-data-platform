@@ -616,6 +616,11 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28212 | 8098 | pinot-server-1 |
 28213 | 8098 | pinot-server-2 |
 28214 | 8098 | pinot-server-3 |
+28215 | 3000 | prest |
+28216 |  |  |
+28217 |  |  |
+28218 |  |  |
+28219 |  |  |
 28220 | 8000 | lakefs |
 28221 | 5000 | lakefs-webhook |
 28222 | 9000 | whisper |
