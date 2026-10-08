@@ -2835,7 +2835,7 @@ services:
       start_period: 30s
       interval: 30s
       retries: 25
-      test: curl --user ksqlDBUser:ksqlDBUser -fail --silent http://ksqldb-server-{{loop.index}}:{{port}}/info | grep RUNNING 1>/dev/null || exit 1
+      test: curl --noproxy '*' --user ksqlDBUser:ksqlDBUser -fail --silent http://ksqldb-server-{{loop.index}}:{{port}}/info | grep RUNNING 1>/dev/null || exit 1
   {% endfor %}
 
   # Access the cli by running:
@@ -3762,7 +3762,7 @@ services:
     command: coordinatorServer
     restart: {{container_restart_policy}}
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:9123/health || exit 1"]
+      test: ["CMD-SHELL", "curl --noproxy '*' -f http://localhost:9123/health || exit 1"]
       interval: 15s
       timeout: 10s
       retries: 5    
@@ -3809,7 +3809,7 @@ services:
     command: tabletServer
     restart: {{container_restart_policy}}
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:{{port}}/health || exit 1"]
+      test: ["CMD-SHELL", "curl --noproxy '*' -f http://localhost:{{port}}/health || exit 1"]
       interval: 15s
       timeout: 10s
       retries: 5
@@ -4152,7 +4152,7 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
     healthcheck:
-      test: ["CMD", "python3", "-c", "import urllib.request, sys; sys.exit(0) if urllib.request.urlopen('http://localhost:8081/subjects', timeout=5).status == 200 else sys.exit(1)"]
+      test: [CMD, python3, -c, "import http.client, sys; c=http.client.HTTPConnection('localhost',8081,timeout=5); c.request('GET','/subjects'); sys.exit(0) if c.getresponse().status==200 else sys.exit(1)"]
       interval: 30s
       timeout: 10s
       retries: 30
@@ -5017,7 +5017,7 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:8000/"]
+      test: ["CMD", "wget", "--no-proxy", "-q", "-O", "/dev/null", "http://localhost:8000/"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -5356,7 +5356,7 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:28179/actuator/health"]
+      test: ["CMD", "wget", "--no-proxy", "-q", "-O", "/dev/null", "http://localhost:28179/actuator/health"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -5458,7 +5458,7 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:28183/actuator/health"]
+      test: ["CMD", "wget", "--no-proxy", "-q", "-O", "/dev/null", "http://localhost:28183/actuator/health"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -10639,7 +10639,7 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
     healthcheck:
-      test: curl -sS --fail http://datahub-gms:8080/health
+      test: curl --noproxy '*' -sS --fail http://datahub-gms:8080/health
       start_period: 90s
       interval: 5s
       retries: 5
@@ -11011,7 +11011,7 @@ services:
       interval: 10s
       retries: 20
       start_period: 60s
-      test: curl -sS --fail "http://datahub-elasticsearch:9200/_cluster/health?wait_for_status=yellow&timeout=0s"
+      test: curl --noproxy '*' -sS --fail "http://datahub-elasticsearch:9200/_cluster/health?wait_for_status=yellow&timeout=0s"
       timeout: 10s
     mem_limit: 1g
   {% endif -%}   {#  DATAHUB_search_service_impl == 'elasticsearch' #}
@@ -11099,7 +11099,7 @@ services:
       interval: 10s
       retries: 20
       start_period: 60s
-      test: curl -sS --fail "http://datahub-opensearch:9200/_cluster/health?wait_for_status=yellow&timeout=0s"
+      test: curl --noproxy '*' -sS --fail "http://datahub-opensearch:9200/_cluster/health?wait_for_status=yellow&timeout=0s"
       timeout: 10s
   {% endif -%}   {#  DATAHUB_search_service_impl == 'opensearch' #}
 
@@ -11624,7 +11624,7 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
     healthcheck:
-      test: [ "CMD", "wget", "-q", "--spider",  "http://localhost:8586/healthcheck" ]
+      test: ["CMD", "wget", "--no-proxy", "-q", "-O", "/dev/null", "http://localhost:8586/healthcheck"]
 
   {% if OPENMETADATA_database_type == 'mysql' | default(false) %}
   openmetadata-mysql:
@@ -11728,7 +11728,7 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
     healthcheck:
-      test: "curl -s http://localhost:9200/_cluster/health?pretty | grep status | grep -qE 'green|yellow' || exit 1"
+      test: "curl --noproxy '*' -s http://localhost:9200/_cluster/health?pretty | grep status | grep -qE 'green|yellow' || exit 1"
       interval: 15s
       timeout: 10s
       retries: 10
@@ -12588,7 +12588,7 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
     healthcheck:
-      test: ["CMD", "wget", "-qO", "/dev/null", "http://localhost:5000"]
+      test: ["CMD", "wget", "--no-proxy", "-q", "-O", "/dev/null", "http://localhost:5000"]
 
   {% if CKAN_DATAPUSHER_enable  | default(false) %}
   ckan-datapusher:
@@ -12624,7 +12624,7 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
     healthcheck:
-      test: ["CMD", "wget", "-qO", "/dev/null", "http://localhost:8800"]
+      test: ["CMD", "wget", "--no-proxy", "-q", "-O", "/dev/null", "http://localhost:8800"]
   {% endif -%}   {#  CKAN_DATAPUSHER_enable #}
 
   ckan-db:
@@ -12684,7 +12684,7 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
     healthcheck:
-      test: ["CMD", "wget", "-qO", "/dev/null", "http://localhost:8983/solr/"]
+      test: ["CMD", "wget", "--no-proxy", "-q", "-O", "/dev/null", "http://localhost:8983/solr/"]
 
   ckan-redis:
     image: docker.io/redis:6
@@ -14426,7 +14426,7 @@ services:
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost:9598/health"]
+      test: ["CMD", "wget", "--no-proxy", "-q", "-O", "/dev/null", "http://localhost:9598/health"]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -16800,7 +16800,7 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:8888/api"]
+      test: ["CMD", "wget", "--no-proxy", "-q", "-O", "/dev/null", "http://localhost:8888/api"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -18454,7 +18454,7 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}    
     restart: {{container_restart_policy}}       
     healthcheck:
-      test: ["CMD-SHELL", "curl -s http://localhost:9200 || exit 1"]
+      test: ["CMD-SHELL", "curl --noproxy '*' -s http://localhost:9200 || exit 1"]
       interval: 30s
       timeout: 30s
       retries: 3
@@ -18612,7 +18612,7 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
     healthcheck:
-      test: [ "CMD", "sh", "-c", "wget --spider --quiet http://127.0.0.1:5000/healthcheck" ]
+      test: ["CMD", "wget", "--no-proxy", "-q", "-O", "/dev/null", "http://127.0.0.1:5000/healthcheck"]
       interval: 2s
       timeout: 60s
       retries: 30
@@ -19182,7 +19182,7 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
     healthcheck:
-      test: curl --fail -I http://localhost:3000/api/health || exit 1
+      test: curl --noproxy '*' --fail -I http://localhost:3000/api/health || exit 1
       interval: 15s
       timeout: 5s
       retries: 5    
@@ -21373,9 +21373,9 @@ services:
       test:
         - CMD-SHELL
     {% if ELASTICSEARCH_security_enabled | default(false) %}     
-        - curl -u elastic:${PLATYS_ELASTICSEARCH_PASSWORD:-{{ELASTICSEARCH_password}}} -s http://localhost:9200/_cat/health?h=status | grep -q green
+        - curl --noproxy '*' -u elastic:${PLATYS_ELASTICSEARCH_PASSWORD:-{{ELASTICSEARCH_password}}} -s http://localhost:9200/_cat/health?h=status | grep -q green
     {% else -%}   {#  ELASTICSEARCH_security_enabled #}  
-        - curl -s http://localhost:9200/_cat/health?h=status | grep -q green
+        - curl --noproxy '*' -s http://localhost:9200/_cat/health?h=status | grep -q green
     {% endif -%}   {#  ELASTICSEARCH_security_enabled #}  
       retries: 300
       interval: 10s
@@ -21559,7 +21559,7 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
     healthcheck:
-      test: curl --cacert /ca/ca.crt -s https://localhost:5601 >/dev/null; if [[ $$? == 52 ]]; then echo 0; else echo 1; fi
+      test: curl --noproxy '*' --cacert /ca/ca.crt -s https://localhost:5601 >/dev/null; if [[ $$? == 52 ]]; then echo 0; else echo 1; fi
       retries: 600
 
   kibana-init:
@@ -21978,7 +21978,7 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
     healthcheck:
-        test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider localhost:7474 || exit 1"]
+        test: ["CMD-SHELL", "wget --no-proxy -q -O /dev/null localhost:7474 || exit 1"]
         interval: 15s
         timeout: 30s
         retries: 10
@@ -22481,7 +22481,7 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
     healthcheck:
-      test: ["CMD-SHELL", "curl -f -H 'Accept: text/html' http://localhost:17200/index.html"]
+      test: ["CMD-SHELL", "curl --noproxy '*' -f -H 'Accept: text/html' http://localhost:17200/index.html"]
       interval: 10s
       timeout: 5s
       retries: 5    
@@ -24164,7 +24164,7 @@ services:
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
     healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost:9008/ready"]
+      test: ["CMD", "wget", "--no-proxy", "-q", "-O", "/dev/null", "http://localhost:9008/ready"]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -24685,7 +24685,7 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
     healthcheck:
-      test: curl --noproxy "localhost" -f -k http://localhost:8080/ords/ || exit 1
+      test: curl --noproxy '*' --noproxy "localhost" -f -k http://localhost:8080/ords/ || exit 1
       interval: 30s
       timeout: 10s
       retries: 150    
@@ -25996,7 +25996,7 @@ services:
     command: php -S 0.0.0.0:8080 -t /var/www/html
     restart: {{container_restart_policy}}
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://adminer:8080/"]
+      test: ["CMD", "wget", "--no-proxy", "-q", "-O", "/dev/null", "http://adminer:8080/"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -29420,7 +29420,7 @@ services:
         [
           "CMD",
           "sh", "-c",
-          "curl -f http://127.0.0.1:9000/health && curl -f http://127.0.0.1:9010/rustfs/console/health"
+          "curl --noproxy '*' -f http://127.0.0.1:9000/health && curl -f http://127.0.0.1:9010/rustfs/console/health"
         ]
       interval: 30s
       timeout: 10s
@@ -30709,7 +30709,7 @@ services:
     #entrypoint: /bin/bash /tmp/gravitino/init.sh
     restart: {{container_restart_policy}}
     healthcheck:
-      test: ["CMD", "curl -X GET -H 'Content-Type: application/json' http://127.0.0.1:8090/api/version || exit 1"]
+      test: ["CMD", "curl --noproxy '*' -X GET -H 'Content-Type: application/json' http://127.0.0.1:8090/api/version || exit 1"]
       interval: 5s
       timeout: 60s
       retries: 5
@@ -33077,7 +33077,7 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://drawio:8080 || exit 1"]
+      test: ["CMD-SHELL", "curl --noproxy '*' -f http://drawio:8080 || exit 1"]
       interval: 1m30s
       timeout: 10s
       retries: 5
@@ -33283,7 +33283,7 @@ services:
       - IPC_LOCK
     command: vault server {{"-dev" if VAULT_use_dev_mode else "-config=/vault/config/vault.json"}}
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://vault:8200/v1/sys/health"]
+      test: ["CMD", "wget", "--no-proxy", "-q", "-O", "/dev/null", "http://vault:8200/v1/sys/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -35465,7 +35465,7 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000"]
+      test: ["CMD", "wget", "--no-proxy", "-q", "-O", "/dev/null", "http://localhost:3000"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -35615,7 +35615,7 @@ services:
   {% endif -%}   {# MARKDOWN_VIEWER_use_markdown_madness_impl #}
     restart: {{container_restart_policy}}
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:3000 || exit 1"]
+      test: ["CMD-SHELL", "curl --noproxy '*' -f http://localhost:3000 || exit 1"]
       interval: 1m30s
       timeout: 10s
       retries: 3
