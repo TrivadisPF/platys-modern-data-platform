@@ -10639,7 +10639,7 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
     healthcheck:
-      test: curl --noproxy '*' -sS --fail http://datahub-gms:8080/health
+      test: curl --noproxy '*' -sS --fail http://localhost:8080/health
       start_period: 90s
       interval: 5s
       retries: 5
@@ -10966,7 +10966,7 @@ services:
       interval: 10s
       retries: 20
       start_period: 60s
-      test: wget http://datahub-neo4j:7474
+      test: ["CMD", "wget", "--no-proxy", "-q", "-O", "/dev/null", "http://localhost:7474"]
       timeout: 10s
   {% endif -%}   {#  DATAHUB_graph_service_impl #}
 
@@ -11011,7 +11011,7 @@ services:
       interval: 10s
       retries: 20
       start_period: 60s
-      test: curl --noproxy '*' -sS --fail "http://datahub-elasticsearch:9200/_cluster/health?wait_for_status=yellow&timeout=0s"
+      test: curl --noproxy '*' -sS --fail "http://localhost:9200/_cluster/health?wait_for_status=yellow&timeout=0s"
       timeout: 10s
     mem_limit: 1g
   {% endif -%}   {#  DATAHUB_search_service_impl == 'elasticsearch' #}
@@ -11099,7 +11099,7 @@ services:
       interval: 10s
       retries: 20
       start_period: 60s
-      test: curl --noproxy '*' -sS --fail "http://datahub-opensearch:9200/_cluster/health?wait_for_status=yellow&timeout=0s"
+      test: curl --noproxy '*' -sS --fail "http://localhost:9200/_cluster/health?wait_for_status=yellow&timeout=0s"
       timeout: 10s
   {% endif -%}   {#  DATAHUB_search_service_impl == 'opensearch' #}
 
@@ -25997,7 +25997,7 @@ services:
     command: php -S 0.0.0.0:8080 -t /var/www/html
     restart: {{container_restart_policy}}
     healthcheck:
-      test: ["CMD", "wget", "--no-proxy", "-q", "-O", "/dev/null", "http://adminer:8080/"]
+      test: ["CMD", "wget", "--no-proxy", "-q", "-O", "/dev/null", "http://localhost:8080/"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -29148,7 +29148,7 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://minio-1:9000/minio/health/live"]
+      test: ["CMD", "curl", "--no-proxy", "*", "-f", "http://localhost:9000/minio/health/live"]
       interval: 15s
       timeout: 20s
       retries: 3
@@ -33078,7 +33078,7 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "curl --noproxy '*' -f http://drawio:8080 || exit 1"]
+      test: ["CMD-SHELL", "curl --noproxy '*' -f http://localhost:8080 || exit 1"]
       interval: 1m30s
       timeout: 10s
       retries: 5
@@ -33284,7 +33284,7 @@ services:
       - IPC_LOCK
     command: vault server {{"-dev" if VAULT_use_dev_mode else "-config=/vault/config/vault.json"}}
     healthcheck:
-      test: ["CMD", "wget", "--no-proxy", "-q", "-O", "/dev/null", "http://vault:8200/v1/sys/health"]
+      test: ["CMD", "wget", "--no-proxy", "-q", "-O", "/dev/null", "http://localhost:8200/v1/sys/health"]
       interval: 30s
       timeout: 10s
       retries: 3
