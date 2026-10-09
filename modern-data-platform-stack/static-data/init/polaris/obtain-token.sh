@@ -19,8 +19,6 @@
 
 set -e
 
-#apk add --no-cache jq
-
 realm=${1:-"POLARIS"}
 
 TOKEN=$(curl \
