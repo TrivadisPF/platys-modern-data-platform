@@ -21,6 +21,7 @@ MAVEN_DOWNLOAD_REPO_CONFLUENT=${MAVEN_DOWNLOAD_REPO_CONFLUENT:-"https://packages
 MAVEN_DOWNLOAD_REPO_NEXUS=${MAVEN_DOWNLOAD_REPO_NEXUS:-""}
 MAVEN_DOWNLOAD_REPO_NEXUS_USER=${MAVEN_DOWNLOAD_REPO_NEXUS_USER:-""}
 MAVEN_DOWNLOAD_REPO_NEXUS_PASSWORD=${MAVEN_DOWNLOAD_REPO_NEXUS_PASSWORD:-""}
+MAVEN_DOWNLOAD_SSL_VERIFY=${MAVEN_DOWNLOAD_SSL_VERIFY:-"true"}
 
 download_file_using_python() {
     local DOWNLOAD_FILE="$1"
@@ -28,12 +29,13 @@ download_file_using_python() {
     local AUTH_USER="${3:-}"
     local AUTH_PASS="${4:-}"
 
+    local SSL_VERIFY_FLAG="$MAVEN_DOWNLOAD_SSL_VERIFY"
     python3 -c "
 import sys, os, requests
 
-def download_file(url, local_filename, user=None, password=None):
+def download_file(url, local_filename, user=None, password=None, ssl_verify=True):
     auth = (user, password) if user else None
-    with requests.get(url, stream=True, auth=auth) as r:
+    with requests.get(url, stream=True, auth=auth, verify=ssl_verify) as r:
         r.raise_for_status()
         with open(local_filename, 'wb') as f:
             for chunk in r.iter_content(chunk_size=8192):
@@ -44,9 +46,10 @@ url           = sys.argv[1]
 local_filename = sys.argv[2]
 user          = sys.argv[3] if len(sys.argv) > 3 and sys.argv[3] else None
 password      = sys.argv[4] if len(sys.argv) > 4 and sys.argv[4] else None
+ssl_verify    = sys.argv[5].lower() not in ('false', '0', 'no') if len(sys.argv) > 5 else True
 
-download_file(url, local_filename, user, password)
-" "$DOWNLOAD_URL" "$DOWNLOAD_FILE" "$AUTH_USER" "$AUTH_PASS"
+download_file(url, local_filename, user, password, ssl_verify)
+" "$DOWNLOAD_URL" "$DOWNLOAD_FILE" "$AUTH_USER" "$AUTH_PASS" "$SSL_VERIFY_FLAG"
 }
 
 maven_dep() {
@@ -88,13 +91,20 @@ maven_dep() {
       DOWNLOAD_URL="$REPO/$GROUP/$PACKAGE/$VERSION/$FILE"
       echo "Downloading $DOWNLOAD_URL ...."
 
+      CURL_SSL_OPT=""
+      WGET_SSL_OPT=""
+      if [ "$MAVEN_DOWNLOAD_SSL_VERIFY" = "false" ]; then
+          CURL_SSL_OPT="--insecure"
+          WGET_SSL_OPT="--no-check-certificate"
+      fi
+
       case $DOWNLOAD_STRATEGY in
         "curl" )
-            curl -sfSL -o "$DOWNLOAD_FILE" "$DOWNLOAD_URL" || true
+            curl -sfSL $CURL_SSL_OPT -o "$DOWNLOAD_FILE" "$DOWNLOAD_URL" || true
             mv "$DOWNLOAD_FILE" $MAVEN_DEP_DESTINATION || true
             ;;
         "wget" )
-            wget -q --show-progress --no-check-certificate -O "$DOWNLOAD_FILE" "$DOWNLOAD_URL" || true
+            wget -q --show-progress $WGET_SSL_OPT -O "$DOWNLOAD_FILE" "$DOWNLOAD_URL" || true
             mv "$DOWNLOAD_FILE" $MAVEN_DEP_DESTINATION || true
             ;;
         "python" )
