@@ -32,10 +32,14 @@ download_file_using_python() {
     local SSL_VERIFY_FLAG="$MAVEN_DOWNLOAD_SSL_VERIFY"
     python3 -c "
 import sys, os, requests
+from urllib.parse import urlparse
 
 def download_file(url, local_filename, user=None, password=None, ssl_verify=True):
     auth = (user, password) if user else None
-    with requests.get(url, stream=True, auth=auth, verify=ssl_verify) as r:
+    # bypass any outbound proxy for the target host
+    host = urlparse(url).hostname
+    proxies = {'http': None, 'https': None, 'no': host}
+    with requests.get(url, stream=True, auth=auth, proxies=proxies) as r:    with requests.get(url, stream=True, auth=auth, verify=ssl_verify) as r:
         r.raise_for_status()
         with open(local_filename, 'wb') as f:
             for chunk in r.iter_content(chunk_size=8192):
@@ -62,7 +66,7 @@ maven_dep() {
 
     case $DOWNLOAD_STRATEGY in
         "python" )
-            pip install requests
+            python3 -c "import requests" 2>/dev/null || pip install requests
             ;;
         "coursier" )
             curl -fLo cs https://git.io/coursier-cli-linux && chmod +x cs
