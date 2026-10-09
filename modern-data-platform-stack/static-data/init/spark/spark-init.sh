@@ -166,6 +166,9 @@ do
     wait_for_it ${i}
 done
 
+# Trust pypi.org to avoid SSL Error in pip install
+pip config set global.trusted-host "pypi.org files.pythonhosted.org pypi.python.org"
+
 if [ -n "${SPARK_INSTALL_JAVA_PACKAGES}" ]
 then 
   echo "Installing Maven Packages: ${SPARK_INSTALL_JAVA_PACKAGES}"

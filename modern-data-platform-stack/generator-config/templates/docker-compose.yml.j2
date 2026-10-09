@@ -12869,6 +12869,8 @@ services:
       - |
         git clone https://github.com/gschmutz/dataverse-sample-data
         cd dataverse-sample-data
+        # Trust pypi.org to avoid SSL Error in pip install
+        pip config set global.trusted-host "pypi.org files.pythonhosted.org pypi.python.org"        
         pip install -r requirements.txt
         python create_sample_data.py
     init: true
@@ -13344,6 +13346,8 @@ services:
         cat /tmp/nifi.properties.templ > /opt/nifi/nifi-current/conf/nifi.properties
     {% endif -%}
     {%if NIFI_python_provide_requirements_file  | default(false) %}
+        # Trust pypi.org to avoid SSL Error in pip install
+        pip config set global.trusted-host "pypi.org files.pythonhosted.org pypi.python.org"    
         pip install -r /opt/nifi/nifi-current/requirements.txt
     {% endif -%}   {#  NIFI_python_provide_requirements_file #}
         ../scripts/start.sh
@@ -13493,6 +13497,8 @@ services:
             && sed -i 's/nifi.security.user.login.identity.provider.expiration=.*/nifi.security.user.login.identity.provider.expiration=30 days/' /opt/nifi/nifi-current/conf/nifi.properties \
             || echo 'nifi.security.user.login.identity.provider.expiration=30 days' >> /opt/nifi/nifi-current/conf/nifi.properties  
           {%if NIFI2_python_provide_requirements_file  | default(false) %}
+          # Trust pypi.org to avoid SSL Error in pip install
+          pip config set global.trusted-host "pypi.org files.pythonhosted.org pypi.python.org"          
           pip install -r /opt/nifi/nifi-current/requirements.txt
           {% endif %}   {#  NIFI2_python_provide_requirements_file #}
           /tmp/pre-start.sh        
@@ -16684,7 +16690,10 @@ services:
         if ! conda env list | grep -q '^py312 '; then
           conda create -y -n py312 python=3.12.8 pip
         fi
-        conda run -n py312 pip install {{ZEPPELIN_python_packages if ZEPPELIN_python_packages is defined and ZEPPELIN_python_packages | length else omit }}
+        conda run -n py312 
+        # Trust pypi.org to avoid SSL Error in pip install
+        pip config set global.trusted-host "pypi.org files.pythonhosted.org pypi.python.org"
+        pip install {{ZEPPELIN_python_packages if ZEPPELIN_python_packages is defined and ZEPPELIN_python_packages | length else omit }}
         ./bin/zeppelin-init.sh
         ./bin/zeppelin.sh
     restart: {{container_restart_policy}}
@@ -16786,6 +16795,8 @@ services:
         conda create -y --name py310 python=3.10.12
         source /opt/conda/etc/profile.d/conda.sh
         conda activate py310
+        # Trust pypi.org to avoid SSL Error in pip install
+        pip config set global.trusted-host "pypi.org files.pythonhosted.org pypi.python.org"        
     {% if NEXUS_enable | default(false) %}
         NEXUS_PASS=$$(python3 -c "import urllib.parse, os; print(urllib.parse.quote(os.environ.get('MAVEN_DOWNLOAD_REPO_NEXUS_PASSWORD', 'abc123!abc123!')))")
         NEXUS_INDEX_URL="http://admin:$${NEXUS_PASS}@nexus:8081/repository/pypi-proxy/simple/"
@@ -16868,6 +16879,9 @@ services:
       - bash
       - -c
       - |
+        # Trust pypi.org to avoid SSL Error in pip install
+        pip config set global.trusted-host "pypi.org files.pythonhosted.org pypi.python.org"
+        
         pip install dockerspawner
     {% if JUPYTERHUB_use_postgres is defined and JUPYTERHUB_use_postgres  %}
         pip install psycopg2-binary
@@ -19333,6 +19347,8 @@ services:
       - "/bin/bash"
       - "-c"
       - |
+        # Trust pypi.org to avoid SSL Error in pip install
+        uv pip config set global.trusted-host "pypi.org files.pythonhosted.org pypi.python.org"
         uv pip install psycopg2-binary
         {% if SUPERSET_additional_requirements | default('') %}
         uv pip install {{SUPERSET_additional_requirements}}
@@ -19479,6 +19495,8 @@ services:
       - "/bin/bash"
       - "-c"
       - |
+        # Trust pypi.org to avoid SSL Error in pip install
+        uv pip config set global.trusted-host "pypi.org files.pythonhosted.org pypi.python.org"      
         uv pip install psycopg2-binary
         {% if SUPERSET_additional_requirements | default('') %}
         uv pip install {{SUPERSET_additional_requirements}}
@@ -19559,6 +19577,8 @@ services:
       - "/bin/bash"
       - "-c"
       - |
+        # Trust pypi.org to avoid SSL Error in pip install
+        uv pip config set global.trusted-host "pypi.org files.pythonhosted.org pypi.python.org"
         uv pip install psycopg2-binary
         {% if SUPERSET_additional_requirements | default('') %}
         uv pip install {{SUPERSET_additional_requirements}}
@@ -19639,6 +19659,8 @@ services:
       - "/bin/bash"
       - "-c"
       - |
+        # Trust pypi.org to avoid SSL Error in pip install
+        uv pip config set global.trusted-host "pypi.org files.pythonhosted.org pypi.python.org"      
         uv pip install psycopg2-binary
         {% if SUPERSET_additional_requirements | default('') %}
         uv pip install {{SUPERSET_additional_requirements}}
@@ -20300,6 +20322,8 @@ services:
       - sh
       - -c
       - |
+        # Trust pypi.org to avoid SSL Error in pip install
+        pip config set global.trusted-host "pypi.org files.pythonhosted.org pypi.python.org"      
     {% if STREAMLIT_python_packages is defined and STREAMLIT_python_packages and STREAMLIT_python_packages|length  %}
         pip install {{STREAMLIT_python_packages}}
     {% endif -%}   {#  PYTHON_python_packages #}
@@ -29886,6 +29910,8 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     entrypoint: >
       /bin/sh -c "
+      # Trust pypi.org to avoid SSL Error in pip install
+      pip config set global.trusted-host "pypi.org files.pythonhosted.org pypi.python.org"
       pip install pyiceberg["s3fs,hive,pyarrow,duckdb"];
       sleep infinity
       "    
@@ -35514,6 +35540,8 @@ services:
       - sh
       - -c
       - |
+        # Trust pypi.org to avoid SSL Error in pip install
+        pip config set global.trusted-host "pypi.org files.pythonhosted.org pypi.python.org"      
     {% if PYTHON_python_packages is defined and PYTHON_python_packages|length  %}
         pip install {{PYTHON_python_packages}}
     {% endif -%}   {#  PYTHON_python_packages #}
