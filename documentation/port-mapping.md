@@ -746,7 +746,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28346 | 8080 | akhq (env2)     |
 28347
 28348
-28349
+28349 | 3000 | dockhand |
 28350 | 3001 | vector-admin |
 28351 | 8000 | single-store |
 28352 | 9000 | single-store |
@@ -895,7 +895,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28495 | 3002 | cosmo-router |
 28496 | 8000 | dbt-workbench (backend API) |
 28497 | 3000 | dbt-workbench (frontend UI) |
-28498 | 3000 | dockhand |
+28498 |  |  |
 28499 | 8888 | klag |
 28500 |      |      |
 28511 | 3000 | nimtable-web |
