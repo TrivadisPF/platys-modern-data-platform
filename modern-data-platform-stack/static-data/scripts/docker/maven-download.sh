@@ -39,7 +39,7 @@ def download_file(url, local_filename, user=None, password=None, ssl_verify=True
     # bypass any outbound proxy for the target host
     host = urlparse(url).hostname
     proxies = {'http': None, 'https': None, 'no': host}
-    with requests.get(url, stream=True, auth=auth, proxies=proxies) as r:    with requests.get(url, stream=True, auth=auth, verify=ssl_verify) as r:
+    with requests.get(url, stream=True, auth=auth, proxies=proxies) as r:
         r.raise_for_status()
         with open(local_filename, 'wb') as f:
             for chunk in r.iter_content(chunk_size=8192):
