@@ -13,10 +13,10 @@ platys gen
 
 ## How to use it?
 
-Navigate to <http://dataplatform:28107>.
+Navigate to <http://dataplatform:28345>.
 If authentication is enabled, login with user `admin` and password `abc123!`.
 
-To use the REST API <http://dataplatform:28107/api> (see <https://akhq.io/docs/api.html>)
+To use the REST API <http://dataplatform:28345/api> (see <https://akhq.io/docs/api.html>)
 
 
 ### Monitoring API

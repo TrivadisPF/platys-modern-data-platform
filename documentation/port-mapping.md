@@ -75,8 +75,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 2482 | 2480 | arcadedb (mongodb port) |
 2483 | 27017 | arcadedb |
 3000 | 3000 | grafana |
-3001 | 3000 | wetty (dc1) |
-3002 | 3000 | wetty (dc2 |
+3001 | 3000 | wetty (env1) |
+3002 | 3000 | wetty (env2 |
 3003 | 3003 | opik-backend |
 3004 | 3000 | forgejo (web UI) |
 3005 | 3000 | marquez-web |
@@ -325,10 +325,10 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 9164 | 9160 | cassandra-5 |
 9083 | 9083 | hive-metastore |
 9084 | 9084 | hive-metastore (iceberg-rest) |
-9021 | 9021 | control-center (dc1) |
-9022 | 9021 | control-center (dc2) |
-9025 | 9021 | control-center-ng (dc1) |
-9026 | 9021 | control-center-ng (dc2) |
+9021 | 9021 | control-center (env1) |
+9022 | 9021 | control-center (env2) |
+9025 | 9021 | control-center-ng (env1) |
+9026 | 9021 | control-center-ng (env2) |
 9090 | 9090 | prometheus-1 |
 9091 | 9091 | prometheus-pushgateway |
 9092 | 9092 | kafka-1     |
@@ -526,11 +526,11 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28101 | 9010 | zoonavigator-api     |
 28102 | 8000 | schema-registry-ui   |
 28103 | 8000 | kafka-connect-ui     |
-28104 | 9000 | cmak (dc1) |
-28105 | 9000 | cmak (dc2) |
+28104 | 9000 | cmak (env1) |
+28105 | 9000 | cmak (env2) |
 28106 | 8080 | kadmin     |
-28107 | 8080 | akhq (dc1)    |
-28108 | 8080 | akhq (dc2)     |
+28107 |  |   |
+28108 |  |   |
 28110 | 9020 | kafdrop     |
 28111 | 28111 | spark-worker-1 |
 28112 | 28112 | spark-worker-2 |
@@ -717,8 +717,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28317 | 25 | maildev |
 28318 | 8025 | mailpit |
 28319 | 25 | mailpit |
-28320 | 25 | akhq (dc1) |
-28321 | 25 | akhq (dc1) |
+28320 | 25 | akhq (env1) |
+28321 | 25 | akhq (env1) |
 28322 | 80 | asyncapi-studio |
 28323 | 80 | taiga-front |
 28324 | 80 | taiga-gateway |
@@ -742,6 +742,11 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28342 | 9091 | milvus (metric) |
 28343 | 3000 | attu |
 28344 | 3001 | anything-llm |
+28345 | 8080 | akhq (env1)    |
+28346 | 8080 | akhq (env2)     |
+28347
+28348
+28349
 28350 | 3001 | vector-admin |
 28351 | 8000 | single-store |
 28352 | 9000 | single-store |
