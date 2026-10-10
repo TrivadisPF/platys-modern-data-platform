@@ -742,11 +742,6 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28342 | 9091 | milvus (metric) |
 28343 | 3000 | attu |
 28344 | 3001 | anything-llm |
-28345 | 80 | streamlit-1 |
-28346 | 80 | streamlit-2 |
-28347 | 80 | streamlit-3 |
-28348 | 80 | streamlit-4 |
-28349 | 80 | streamlit-5 |
 28350 | 3001 | vector-admin |
 28351 | 8000 | single-store |
 28352 | 9000 | single-store |
@@ -897,8 +892,15 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28497 | 3000 | dbt-workbench (frontend UI) |
 28498 | 3000 | dockhand |
 28499 | 8888 | klag |
+28500 |      |      |
 28511 | 3000 | nimtable-web |
 28512 | 8182 | nimtable |
+28513 |      | |
+28630 | 80 | streamlit-1 |
+28631 | 80 | streamlit-2 |
+28632 | 80 | streamlit-3 |
+28633 | 80 | streamlit-4 |
+28634 | 80 | streamlit-5 |
 
 ## Ports > 28700
 
