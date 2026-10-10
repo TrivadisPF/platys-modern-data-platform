@@ -861,8 +861,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28460 | 8181 | seaweedfs-1 |
 28461 | 5050 | allure |
 28462 | 5252 | allure-ui |
-28463 | 3000 | nimtable-web |
-28464 | 8182 | nimtable |
+28463 |  |  |
+28464 |  |  |
 28465 | 8080 | ehrbase |
 28466 | 9000 | openehr-tool |
 28467 | 8182 | janusgraph |
@@ -898,6 +898,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28497 | 3000 | dbt-workbench (frontend UI) |
 28498 | 3000 | dockhand |
 28499 | 8888 | klag |
+28511 | 3000 | nimtable-web |
+28512 | 8182 | nimtable |
 
 ## Ports > 28700
 
