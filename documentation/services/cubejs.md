@@ -13,7 +13,7 @@ platys gen
 
 ## How to use it?
 
-In dev mode, navigate to the Developer Playground at <http://dataplatform:4003>.
+In dev mode, navigate to the Developer Playground at <http://dataplatform:28464>.
 
-The Cube.js REST API is available at <http://dataplatform:4003/cubejs-api/v1>.
+The Cube.js REST API is available at <http://dataplatform:28464/cubejs-api/v1>.
 s

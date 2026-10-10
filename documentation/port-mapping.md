@@ -103,7 +103,6 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 4000 | 4000 | graphql-mesh |
 4001 | 4000 | supabase-analytics |
 4002 | 4000 | litellm |
-4003 | 4000 | cubejs |
 4004 | 4004 | log4brains |
 4040 | 4040 | spark-master (ui) |
 4041 | 4041 | spark-master (ui) |
@@ -862,7 +861,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28461 | 5050 | allure |
 28462 | 5252 | allure-ui |
 28463 | 8088 | superset  |
-28464 |  |  |
+28464 | 4000 | cubejs |
 28465 | 8080 | ehrbase |
 28466 | 9000 | openehr-tool |
 28467 | 8182 | janusgraph |
