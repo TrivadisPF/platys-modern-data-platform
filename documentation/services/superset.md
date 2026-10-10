@@ -13,5 +13,5 @@ platys gen
 
 ### How to use it?
 
-Navigate to <http://${PUBLIC_IP}:28151> and login with user `admin` and default password `abc123!`.
+Navigate to <http://${PUBLIC_IP}:28463> and login with user `admin` and default password `abc123!`.
 

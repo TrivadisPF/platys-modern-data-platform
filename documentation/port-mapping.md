@@ -571,8 +571,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28146 | 9092 | datahub-mce-consumer |
 28150 | 8888 | druid-router |
 28150 | 8888 | druid-sandbox |
-28151 | 8088 | superset |
-28152 | 8080 | superset |
+28151 |  |  |
+28152 |  |  |
 28154 | 8080 | penthao |
 28155 | 8080 | hawtio |
 28156 | 8080 | swagger-editor |
@@ -861,7 +861,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28460 | 8181 | seaweedfs-1 |
 28461 | 5050 | allure |
 28462 | 5252 | allure-ui |
-28463 |  |  |
+28463 | 8088 | superset  |
 28464 |  |  |
 28465 | 8080 | ehrbase |
 28466 | 9000 | openehr-tool |
