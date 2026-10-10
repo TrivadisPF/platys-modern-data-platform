@@ -65,6 +65,20 @@ if [ ! -f "/nexus-data/.setup-complete" ]; then
     -H "Content-Type: application/json" \
     -d '{"enabled": true,"userId":"anonymous","realmName":"NexusAuthorizingRealm"}' || true
 
+  # import PEM certificates into the Nexus truststore
+  CERT_DIR="${NEXUS_CERT_DIR:-/nexus-init/certs}"
+  if [ -d "${CERT_DIR}" ]; then
+    for pem in "${CERT_DIR}"/*.pem; do
+      [ -f "$pem" ] || continue
+      echo "Importing certificate: $pem"
+      curl -sf -o /dev/null \
+        -u "admin:${ADMIN_PASS}" \
+        -X POST "${NEXUS_URL}/service/rest/v1/security/ssl/truststore" \
+        -H "Content-Type: text/plain" \
+        --data-binary @"${pem}" || echo "  WARNING: failed to import $pem (may already exist)"
+    done
+  fi
+
   curl -sf -o /dev/null \
     -u "admin:${ADMIN_PASS}" \
     -X POST "${NEXUS_URL}/service/rest/v1/repositories/pypi/proxy" \
