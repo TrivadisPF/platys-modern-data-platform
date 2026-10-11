@@ -13239,7 +13239,7 @@ services:
       # HTTP
       - "{{externalPort}}:{{externalPort}}"
       # Remote Input Socket
-      - {{externalRemotePort}}:{{externalRemotePort}}/tcp:z
+      - {{externalRemotePort}}:{{externalRemotePort}}/tcp
       # Prometheus Port
       - {{externalPromPort}}:1234
   {%if loop.index == 1 | default(false) %}
@@ -13381,7 +13381,7 @@ services:
       # HTTP
       - "{{externalPort}}:{{externalPort}}"
       # Remote Input Socket
-      - {{externalRemotePort}}:{{externalRemotePort}}/tcp:z
+      - {{externalRemotePort}}:{{externalRemotePort}}/tcp
       # Prometheus Port
       - {{externalPromPort}}:1234
   {%if loop.index == 1 | default(false) %}
@@ -16221,6 +16221,12 @@ services:
       - ./conf/airflow/statsd/statsd.yaml:/home/statsd-mapping-configs.yaml:z
     entrypoint: ["/bin/sh", "-c", "--"]
     command: ["statsd_exporter --statsd.listen-udp=:9125 --web.listen-address=:9102 --log.level debug --statsd.mapping-config=/home/statsd-mapping-configs.yaml"]
+    healthcheck:
+      test: [CMD-SHELL, wget --no-proxy -q -O /dev/null http://localhost:9102/metrics || exit 1]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
     restart: {{container_restart_policy}}
 
   airflow-init:
@@ -20513,7 +20519,7 @@ services:
       com.platys.name: "memcached"
       com.platys.description: "distributed memory object caching system"
     ports:
-      - 11211:11211/tcp:z
+      - 11211:11211/tcp
     {%if use_timezone | default(false) %}
     environment:
       TZ: {{use_timezone}}
@@ -25334,8 +25340,8 @@ services:
       com.platys.webui.url: "http://dataplatform:28442"
       com.platys.password.envvars: "PLATYS_SUPABASE_DASHBOARD_PASSWORD"
     ports:
-      - 28442:8000/tcp:z
-      - 28443:8443/tcp:z
+      - 28442:8000/tcp
+      - 28443:8443/tcp
     environment:
       KONG_DATABASE: "off"
       KONG_DECLARATIVE_CONFIG: /home/kong/kong.yml
@@ -28913,7 +28919,7 @@ services:
       com.platys.webui.title: "Konga Admin GUI"
       com.platys.webui.url: "http://dataplatform:1337"
     ports:
-      - "1337:1337/tcp:z"
+      - "1337:1337/tcp"
     environment:
       NODE_ENV: production
     {%if use_timezone | default(false) %}
