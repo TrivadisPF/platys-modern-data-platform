@@ -40,6 +40,7 @@ See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/plat
  * Update `grafana` to `13.0.10-ubuntu`
  * Update `prometheus` to `v3.13.4`
  * Update `prometheus-alertmanager` to `v0.34.1`
+ * Update `nifi2` to `2.12.0`
 
 ### Enhancements
 
