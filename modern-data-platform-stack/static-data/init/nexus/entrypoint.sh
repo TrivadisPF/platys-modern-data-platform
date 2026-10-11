@@ -66,7 +66,7 @@ if [ ! -f "/nexus-data/.setup-complete" ]; then
     -d '{"enabled": true,"userId":"anonymous","realmName":"NexusAuthorizingRealm"}' || true
 
   # import PEM certificates into the Nexus truststore
-  CERT_DIR="${NEXUS_CERT_DIR:-/nexus-init/certs}"
+  CERT_DIR="${NEXUS_CERT_DIR:-/nexus-security/certs}"
   if [ -d "${CERT_DIR}" ]; then
     for pem in "${CERT_DIR}"/*.pem; do
       [ -f "$pem" ] || continue

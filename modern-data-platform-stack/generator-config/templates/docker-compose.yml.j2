@@ -16734,6 +16734,7 @@ services:
       MAVEN_DOWNLOAD_JARS: {{JUPYTER_download_jars}}
       # remove some JARS if they are conflicting with the ones installed above
       REMOVE_JARS: "guava-14.0.1.jar"
+      CONDA_SSL_VERIFY: 'false'
   {%if MINIO_enable or RUSTFS_enable or SEAWEEDFS_enable or external['S3_enable'] | default(false) %}
       # for awscli & s3cmd
       AWS_ACCESS_KEY_ID: {{s3AccessKey | mandatory('s3AccessKey must be defined, if using minIO use the MINIO_access_key in config.yml') }}
@@ -16799,7 +16800,9 @@ services:
         pip config set global.trusted-host "nexus pypi.org files.pythonhosted.org pypi.python.org"        
     {% if NEXUS_enable | default(false) %}
         NEXUS_PASS=$$(python3 -c "import urllib.parse, os; print(urllib.parse.quote(os.environ.get('MAVEN_DOWNLOAD_REPO_NEXUS_PASSWORD', 'abc123!abc123!')))")
-        NEXUS_INDEX_URL="http://admin:$${NEXUS_PASS}@nexus:8081/repository/pypi-proxy/simple/"
+        export PIP_INDEX_URL="http://admin:$${NEXUS_PASS}@nexus:8081/repository/pypi-proxy/simple/"
+        export PIP_TRUSTED_HOST="nexus"
+        pip config set global.trusted-host "nexus"        
     {% endif -%}   {#  NEXUS_enable #}
         pip install ipykernel
         python -m ipykernel install --user --name py310 --display-name "Python 3.10.12 (ipykernel)"
@@ -35152,6 +35155,7 @@ services:
     volumes:
       - ./data-transfer:/data-transfer:z
       - ./init/nexus:/nexus-init:ro
+      - ./security/nexus/certs:/nexus-security/certs:ro
   {% if NEXUS_volume_map_data %}
       - ./container-volume/nexus/data:/nexus-data:z
   {% endif -%}   {#  NEXUS_volume_map_data #}
