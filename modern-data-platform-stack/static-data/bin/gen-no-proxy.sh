@@ -16,7 +16,7 @@ if [ -z "$SERVICES" ]; then
     SERVICES=$(awk '/^services:/{f=1;next} f && /^[^ ]/{f=0} f && /^  [a-zA-Z0-9_-]+:/{line=substr($0,3); print substr(line,1,index(line,":")-1)}' "$COMPOSE_FILE" | tr '\n' ',' | sed 's/,$//')
 fi
 
-export NO_PROXY="localhost,127.0.0.1,${SUBNET},${SERVICES}"
+export NO_PROXY="localhost,127.0.0.1,${PUBLIC_IP},${DOCKER_HOST_IP},${SUBNET},${SERVICES}"
 export no_proxy="$NO_PROXY"
 
 echo "NO_PROXY=$NO_PROXY"
