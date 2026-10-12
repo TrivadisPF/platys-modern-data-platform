@@ -1,7 +1,14 @@
 #!/bin/bash
 # generate-no-proxy.sh
+#
+# DRY_RUN (default: true) only echoes the computed NO_PROXY values.
+# Set it to false to actually write them to the .env file, e.g.:
+#   DRY_RUN=false ./gen-no-proxy.sh
+#   ./gen-no-proxy.sh docker-compose.yml 10.89.0.0/16 .env false
 COMPOSE_FILE=${1:-docker-compose.yml}
 SUBNET=${2:-10.89.0.0/16}
+ENV_FILE=${3:-.env}
+DRY_RUN=${4:-${DRY_RUN:-true}}
 
 # Try docker compose or podman compose (both support config --services)
 SERVICES=""
@@ -16,8 +23,25 @@ if [ -z "$SERVICES" ]; then
     SERVICES=$(awk '/^services:/{f=1;next} f && /^[^ ]/{f=0} f && /^  [a-zA-Z0-9_-]+:/{line=substr($0,3); print substr(line,1,index(line,":")-1)}' "$COMPOSE_FILE" | tr '\n' ',' | sed 's/,$//')
 fi
 
-export NO_PROXY="localhost,127.0.0.1,${PUBLIC_IP},${DOCKER_HOST_IP},${SUBNET},${SERVICES}"
-export no_proxy="$NO_PROXY"
+NO_PROXY="localhost,127.0.0.1,${PUBLIC_IP},${DOCKER_HOST_IP},${SUBNET},${SERVICES}"
 
+if [ "$DRY_RUN" = "true" ]; then
+    echo "[dry-run] would write to $ENV_FILE (set NO_PROXY_DRY_RUN=false or pass 'false' as 4th arg to write):"
+    echo "NO_PROXY=$NO_PROXY"
+    echo "no_proxy=$NO_PROXY"
+    exit 0
+fi
+
+# Make sure the .env file exists
+touch "$ENV_FILE"
+
+# Remove any existing NO_PROXY/no_proxy entries, then append the fresh ones
+sed -i '/^NO_PROXY=/d; /^no_proxy=/d' "$ENV_FILE"
+{
+    echo "NO_PROXY=$NO_PROXY"
+    echo "no_proxy=$NO_PROXY"
+} >> "$ENV_FILE"
+
+echo "Wrote to $ENV_FILE:"
 echo "NO_PROXY=$NO_PROXY"
-echo "no_proxy=$no_proxy"
+echo "no_proxy=$NO_PROXY"
