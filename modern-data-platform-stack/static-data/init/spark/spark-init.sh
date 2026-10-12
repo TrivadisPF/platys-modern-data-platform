@@ -169,6 +169,29 @@ done
 # Trust pypi.org to avoid SSL Error in pip install
 pip config set global.trusted-host "pypi.org files.pythonhosted.org pypi.python.org"
 
+# Generate the Ivy settings file when a Nexus repository is configured.
+# NEXUS_HOST / NEXUS_URL are injected by the generated docker-compose.yml
+# (from the ns.nexusHost / ns.nexusUrl Platys variables).
+if [ -n "${NEXUS_URL}" ]; then
+  echo "Generating /opt/spark/conf/ivy-settings.xml for Nexus (${NEXUS_URL})"
+  mkdir -p /opt/spark/conf
+  cat > /opt/spark/conf/ivy-settings.xml <<EOF
+<ivysettings>
+  <settings defaultResolver="nexus"/>
+  <credentials host="${NEXUS_HOST}" realm="Sonatype Nexus Repository Manager"
+               username="${MAVEN_DOWNLOAD_REPO_NEXUS_USER:-admin}" passwd="${MAVEN_DOWNLOAD_REPO_NEXUS_PASSWORD}"/>
+  <resolvers>
+    <ibiblio name="nexus"
+             m2compatible="true"
+             root="${NEXUS_URL}/repository/maven-public/"/>
+  </resolvers>
+  <modules>
+    <module organisation="*" name="*" resolver="nexus"/>
+  </modules>
+</ivysettings>
+EOF
+fi
+
 if [ -n "${SPARK_INSTALL_JAVA_PACKAGES}" ]
 then 
   echo "Installing Maven Packages: ${SPARK_INSTALL_JAVA_PACKAGES}"
