@@ -24,6 +24,7 @@ if [ -z "$SERVICES" ]; then
 fi
 
 NO_PROXY="localhost,127.0.0.1,${PUBLIC_IP},${DOCKER_HOST_IP},${SUBNET},${SERVICES}"
+no_proxy=$NO_PROXY
 
 if [ "$DRY_RUN" = "true" ]; then
     echo "[dry-run] would write to $ENV_FILE (set NO_PROXY_DRY_RUN=false or pass 'false' as 4th arg to write):"
