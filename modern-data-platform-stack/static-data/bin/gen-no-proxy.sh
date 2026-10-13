@@ -29,19 +29,20 @@ if [ "$DRY_RUN" = "true" ]; then
     echo "[dry-run] would write to $ENV_FILE (set NO_PROXY_DRY_RUN=false or pass 'false' as 4th arg to write):"
     echo "NO_PROXY=$NO_PROXY"
     echo "no_proxy=$NO_PROXY"
-    exit 0
-fi
+else
+    # Make sure the .env file exists
+    touch "$ENV_FILE"
 
-# Make sure the .env file exists
-touch "$ENV_FILE"
+    # Remove any existing NO_PROXY/no_proxy entries, then append the fresh ones
+    sed -i '/^NO_PROXY=/d; /^no_proxy=/d' "$ENV_FILE"
+    {
+        echo "NO_PROXY=$NO_PROXY"
+        echo "no_proxy=$NO_PROXY"
+    } >> "$ENV_FILE"
 
-# Remove any existing NO_PROXY/no_proxy entries, then append the fresh ones
-sed -i '/^NO_PROXY=/d; /^no_proxy=/d' "$ENV_FILE"
-{
+    echo "Wrote to $ENV_FILE:"
     echo "NO_PROXY=$NO_PROXY"
     echo "no_proxy=$NO_PROXY"
-} >> "$ENV_FILE"
 
-echo "Wrote to $ENV_FILE:"
-echo "NO_PROXY=$NO_PROXY"
-echo "no_proxy=$NO_PROXY"
+fi
+
