@@ -11202,6 +11202,12 @@ services:
       - USE_CONFLUENT_SCHEMA_REGISTRY=true
       - ZDU_STAGE_10=true
       - ZDU_STAGE_20=true
+    {% if NEXUS_enable or  external['NEXUS_enable'] | default(false) %}
+      - PIP_INDEX_URL={{ns.nexusUrl}}/repository/pypi-proxy/simple/
+      - PIP_TRUSTED_HOST={{ns.nexusHost | default('')}}
+      - UV_INDEX_URL={{ns.nexusUrl}}/repository/pypi-proxy/simple/
+      - UV_NATIVE_TLS=true
+    {% endif -%}   {#  NEXUS_enable #}            
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -11227,6 +11233,13 @@ services:
         condition: service_healthy        
     {%if use_timezone | default(false) %}
     environment:
+      - DUMMY=1
+    {% if NEXUS_enable or  external['NEXUS_enable'] | default(false) %}
+      - PIP_INDEX_URL={{ns.nexusUrl}}/repository/pypi-proxy/simple/
+      - PIP_TRUSTED_HOST={{ns.nexusHost | default('')}}
+      - UV_INDEX_URL={{ns.nexusUrl}}/repository/pypi-proxy/simple/
+      - UV_NATIVE_TLS=true
+    {% endif -%}   {#  NEXUS_enable #}          
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
