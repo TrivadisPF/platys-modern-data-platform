@@ -10541,6 +10541,12 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
+    healthcheck:
+      test: curl --noproxy '*' -sS --fail http://localhost:9002/health
+      start_period: 90s
+      interval: 5s
+      retries: 10
+      timeout: 10s
 
   datahub-gms:
     image: docker.io/acryldata/datahub-gms:{{__DATAHUB_version}}
@@ -10690,8 +10696,8 @@ services:
       test: curl --noproxy '*' -sS --fail http://localhost:8080/health
       start_period: 90s
       interval: 5s
-      retries: 5
-      timeout: 5s
+      retries: 10
+      timeout: 10s
 
   {%if DATAHUB_actions_enabled | default(false) %}
   datahub-actions:
@@ -10763,7 +10769,13 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
-  {% endif -%}   {#  DATAHUB_actions_enabled #}
+    healthcheck:
+      test: ["CMD-SHELL", "ps aux | grep -v grep | grep -q 'datahub_actions' || exit 1"]
+      start_period: 60s
+      interval: 30s
+      retries: 10
+      timeout: 10s
+    {% endif -%}   {#  DATAHUB_actions_enabled #}
 
   {%if DATAHUB_mae_consumer_standalone | default(true) %}
   datahub-mae-consumer:
@@ -11099,6 +11111,12 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
+    healthcheck:
+      test: curl --noproxy '*' -sS --fail http://localhost:5601/api/status
+      start_period: 60s
+      interval: 10s
+      retries: 5
+      timeout: 5s
   {% endif -%}   {#  DATAHUB_use_kibana #}
 
   {%if DATAHUB_search_service_impl == 'opensearch' %}
@@ -11308,6 +11326,12 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
+    healthcheck:
+      test: ["CMD-SHELL", "ps aux | grep -v grep | grep -q 'tail' || exit 1"]
+      start_period: 10s
+      interval: 30s
+      retries: 10
+      timeout: 10s
 {% endif %}   {#  DATALAB_enable #}
 
 {% if OPENMETADATA_enable  | default(false) %}
