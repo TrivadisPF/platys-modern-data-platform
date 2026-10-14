@@ -98,6 +98,35 @@ if [ ! -f "/nexus-data/.setup-complete" ]; then
   # Send back acceptance
   curl -s -u "admin:${ADMIN_PASS}" -H "Content-Type: application/json; charset=UTF-8" -d "$(cat "$EULA_FILE")" "$NEXUS_URL/service/rest/v1/system/eula" || true
 
+  # enable "Use certificates stored in the Nexus truststore to connect to
+  # external systems" (httpClient.connection.useTrustStore) on maven-central.
+  # GET the current config, flip the flag, PUT it back so nothing else changes.
+  MAVEN_REPO="maven-central"
+  MAVEN_CFG="$(mktemp)_${MAVEN_REPO}.json"
+  if curl -sf -u "admin:${ADMIN_PASS}" -H "accept: application/json" \
+       "${NEXUS_URL}/service/rest/v1/repositories/maven/proxy/${MAVEN_REPO}" > "${MAVEN_CFG}"; then
+    # handle both a null "connection" block and an explicit useTrustStore=false
+    sed -i \
+      -e 's/"connection"[[:space:]]*:[[:space:]]*null/"connection":{"useTrustStore":true}/' \
+      -e 's/"useTrustStore"[[:space:]]*:[[:space:]]*false/"useTrustStore":true/' \
+      "${MAVEN_CFG}"
+
+    if grep -q '"useTrustStore"[[:space:]]*:[[:space:]]*true' "${MAVEN_CFG}"; then
+      curl -sf -o /dev/null \
+        -u "admin:${ADMIN_PASS}" \
+        -X PUT "${NEXUS_URL}/service/rest/v1/repositories/maven/proxy/${MAVEN_REPO}" \
+        -H "Content-Type: application/json" \
+        -d @"${MAVEN_CFG}" \
+        && echo "Enabled truststore usage on ${MAVEN_REPO}." \
+        || echo "  WARNING: failed to update ${MAVEN_REPO}."
+    else
+      echo "  WARNING: could not enable useTrustStore for ${MAVEN_REPO} (connection block not matched); left unchanged."
+    fi
+    rm -f "${MAVEN_CFG}"
+  else
+    echo "  WARNING: could not fetch ${MAVEN_REPO} config; skipping truststore update."
+  fi
+
   # mark setup as done so restarts skip this block
   touch /nexus-data/.setup-complete
   echo "Setup complete."
