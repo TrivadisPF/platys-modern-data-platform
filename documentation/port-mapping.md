@@ -616,9 +616,9 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28213 | 8098 | pinot-server-2 |
 28214 | 8098 | pinot-server-3 |
 28215 | 3000 | prest |
-28216 |  |  |
-28217 |  |  |
-28218 |  |  |
+28216 | 8080 | restate (ingress) |
+28217 | 9070 | restate (admin API) |
+28218 | 9071 | restate (metrics) |
 28219 |  |  |
 28220 | 8000 | lakefs |
 28221 | 5000 | lakefs-webhook |
@@ -897,7 +897,6 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28497 | 3000 | dbt-workbench (frontend UI) |
 28498 |  |  |
 28499 | 8888 | klag |
-28500 |      |      |
 28511 | 3000 | nimtable-web |
 28512 | 8182 | nimtable |
 28513 |      | |

@@ -277,6 +277,8 @@ networks:
 
 {% set __N8N_version = N8N_version | default('latest') -%}
 
+{% set __RESTATE_version = RESTATE_version | default('latest') -%}
+
 {% set __STREAMPIPES_version = STREAMPIPES_version | default('latest') -%}
 
 {% set __CRIBL_version = CRIBL_version | default('latest') -%}
@@ -991,6 +993,7 @@ networks:
   {% set NIFI_REGISTRY_enable = false -%}
   {% set NIFI_TOOLKIT_enable = false -%}
   {% set N8N_enable = false -%}
+  {% set RESTATE_enable = false -%}
   {% set STREAMSHEETS_enable = false -%}
   {% set CONDUIT_enable = false -%}
   {% set SPRING_DATAFLOW_enable = false -%}
@@ -14060,6 +14063,45 @@ services:
       - "n8n import:credentials --separate --input=/docker-entrypoint-initdb.d/credentials && n8n import:workflow --separate --input=/docker-entrypoint-initdb.d/workflows"
     init: true      
 {% endif %}   {#  N8N_enable  #}
+
+{% if RESTATE_enable | default(false) %}
+  #  ================================== Restate ========================================== #
+  restate:
+    image: ghcr.io/restatedev/restate:{{__RESTATE_version}}
+
+    container_name: restate
+    hostname: restate
+    labels:
+      com.platys.name: "restate"
+      com.platys.description: "Restate - Durable Execution Engine"
+      com.platys.restapi.title: "Restate Admin API"
+      com.platys.restapi.url: "http://dataplatform:28217"
+    ports:
+      - "28216:8080"   # Ingress port
+      - "28217:9070"   # Admin API port
+      - "28218:9071"   # Metrics port
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ./data-transfer:/data-transfer:z
+    {%if RESTATE_volume_map_data | default(false) %}
+      - ./container-volume/restate/data:/target:z
+    {% endif -%}   {#  RESTATE_volume_map_data #}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+    healthcheck:
+      test: curl --noproxy '*' -sS --fail http://localhost:9070/health
+      start_period: 30s
+      interval: 10s
+      retries: 5
+      timeout: 5s
+{% endif %}   {# RESTATE_enable #}
 
 {%if STREAMPIPES_enable | default(false) %}
   #  ================================== Apache StreamPipes ========================================== #
@@ -34571,9 +34613,12 @@ services:
     {% if ZAMMAD_enable | default(false) %}
       - ./scripts/grafana/dashboards/zammad:/etc/grafana/provisioning/dashboards/zammad:z
     {% endif -%}   {#  ZAMMAD_enable #}
-    {% if ZAMMAD_enable | default(false) %}
+    {% if VECTOR_enable | default(false) %}
       - ./scripts/grafana/dashboards/vector:/etc/grafana/provisioning/dashboards/vector:z
-    {% endif -%}   {#  ZAMMAD_enable #}
+    {% endif -%}   {#  VECTOR_enable #}
+    {% if RESTATE_enable | default(false) %}
+      - ./scripts/grafana/dashboards/restate:/etc/grafana/provisioning/dashboards/restate:z
+    {% endif -%}   {#  RESTATE_enable #}
    
     {% if PROMETHEUS_enable | default(false) %}
       - ./scripts/grafana/datasources/prometheus-datasource.yml:/etc/grafana/provisioning/datasources/prometheus-datasource.yml:z

@@ -23,6 +23,7 @@ See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/plat
  * mimir
  * vector
  * pREST
+ * restate
  
 ### Version upgrades
  
