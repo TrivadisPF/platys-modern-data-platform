@@ -1408,6 +1408,9 @@ networks:
       {% set ns.schemaRegistryUrl = 'http://apicurio-registry-1:8081/apis/ccompat/v6' %}
       {% set ns.schemaRegistryUrlExternal = ns.schemaRegistryUrlExternal ~ '/apis/ccompat/v6' %}
       {% set ns.schemaRegistryServiceName = 'apicurio-registry-1' %}
+    {% elif SCHEMA_REGISTRY_flavour == "karapace" %}
+      {% set ns.schemaRegistryUrl = 'http://karapace-schema-registry-1:8081' %}
+      {% set ns.schemaRegistryServiceName = 'karapace-schema-registry-1' %}
     {% else %}
       {% set ns.schemaRegistryUrl = 'http://<schema-registry-not-enabled>' %}
       {% set ns.schemaRegistryUrlExternal = 'http://<schema-registry-not-enabled>' %}
@@ -4107,7 +4110,7 @@ services:
       SCHEMA_REGISTRY_GROUP_ID: "{{SCHEMA_REGISTRY_confluent_group_id}}"
       SCHEMA_REGISTRY_LEADER_ELIGIBILITY: "{{SCHEMA_REGISTRY_confluent_leader_eligibility}}"
       SCHEMA_REGISTRY_MODE_MUTABILITY: "{{SCHEMA_REGISTRY_confluent_mode_mutability}}"
-      SCHEMA_REGISTRY_SCHEMA_COMPATIBILITY_LEVEL: "{{SCHEMA_REGISTRY_confluent_schema_compatibility_level}}"
+      SCHEMA_REGISTRY_SCHEMA_COMPATIBILITY_LEVEL: "{{SCHEMA_REGISTRY_schema_compatibility_level | lower}}"
       SCHEMA_REGISTRY_KAFKASTORE_TOPIC_REPLICATION_FACTOR: {{SCHEMA_REGISTRY_confluent_replication_factor}}
       SCHEMA_REGISTRY_ACCESS_CONTROL_ALLOW_ORIGIN: '*'
       SCHEMA_REGISTRY_ACCESS_CONTROL_ALLOW_METHODS: 'GET,POST,PUT,OPTIONS'
@@ -4270,6 +4273,85 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
 {% endif %}   {# KAFKA_enable and SCHEMA_REGISTRY_flavour == apicurio #}
+
+{% if (SCHEMA_REGISTRY_enable and SCHEMA_REGISTRY_flavour | lower) == 'karapace' | default(false) %}
+  #  ================================== Karapace Schema Registry ========================================== #
+  {% for num in range(SCHEMA_REGISTRY_nodes | default(1) ) %}
+    {% set external_port = 8081 + loop.index - 1 %}
+    {% set port = 8081 + loop.index - 1 %}
+  karapace-schema-registry-{{loop.index}}:
+    image: ghcr.io/aiven-open/karapace:{{__KARAPACE_SCHEMA_REGISTRY_version}}
+
+    hostname: karapace-schema-registry-{{loop.index}}
+    container_name: karapace-schema-registry-{{loop.index}}
+    labels:
+      com.platys.name: "karapace-schema-registry"
+      com.platys.description: "Karapace Schema Registry"
+      com.platys.restapi.title: 'Karapace Schema Registry REST API'
+      com.platys.restapi.url: "http://dataplatform:{{external_port}}"
+    ports:
+      - "{{external_port}}:{{port}}"
+    depends_on:
+      {{ns.kafkaServiceNames.split(',')[0]}}:
+        condition: service_healthy
+    environment:
+      KARAPACE_KARAPACE_REGISTRY: "true"
+      KARAPACE_ADVERTISED_HOSTNAME: karapace-schema-registry-{{loop.index}}
+      KARAPACE_BOOTSTRAP_URI: '{{ns.bootstrapServer}}'
+      KARAPACE_PORT: "{{port}}"
+      KARAPACE_HOST: "0.0.0.0"
+      KARAPACE_CLIENT_ID: karapace-schema-registry-{{loop.index}}
+      KARAPACE_GROUP_ID: "{{SCHEMA_REGISTRY_karapace_group_id | default('karapace-schema-registry')}}"
+      KARAPACE_MASTER_ELECTION_STRATEGY: "{{SCHEMA_REGISTRY_karapace_master_election_strategy | default('highest')}}"
+      KARAPACE_MASTER_ELIGIBILITY: "true"
+      KARAPACE_TOPIC_NAME: _schemas
+      KARAPACE_LOG_LEVEL: "{{SCHEMA_REGISTRY_karapace_log_level | default('INFO')}}"
+      KARAPACE_COMPATIBILITY: "{{SCHEMA_REGISTRY_schema_compatibility_level | upper}}"
+      KARAPACE_KAFKA_SCHEMA_READER_STRICT_MODE: "false"
+      KARAPACE_KAFKA_RETRIABLE_ERRORS_SILENCED: "true"
+    {% if ns.secureKafkaEnabled %}
+      {% if ns.securityProtocolBROKER == 'SASL_PLAINTEXT' %}
+      KARAPACE_SASL_MECHANISM: "{{ns.saslMechanismBROKER}}"
+      KARAPACE_SECURITY_PROTOCOL: "{{ns.securityProtocolBROKER}}"
+      KARAPACE_SASL_PLAIN_USERNAME: "{{SCHEMA_REGISTRY_kafka_username if SCHEMA_REGISTRY_kafka_username is defined and SCHEMA_REGISTRY_kafka_username | length else ns.kafkaToolsDefaultUsername}}"
+      KARAPACE_SASL_PLAIN_PASSWORD: "{{SCHEMA_REGISTRY_kafka_password if SCHEMA_REGISTRY_kafka_password is defined and SCHEMA_REGISTRY_kafka_password | length else ns.kafkaToolsDefaultPassword}}"
+      {% elif ns.securityProtocolBROKER == 'SSL' %}
+      KARAPACE_SECURITY_PROTOCOL: "SSL"
+      KARAPACE_SSL_CAFILE: /certs/client.ts.p12
+      KARAPACE_SSL_CERTFILE: /certs/client.ks.p12
+      KARAPACE_SSL_KEYFILE: /certs/client.key
+      {% endif -%}   {#  ns.securityProtocol #}
+    {% endif -%}   {#  ns.secureKafkaEnabled #}
+    {% if OTEL_COLLECTOR_enable | default(false) %}
+      KARAPACE_TELEMETRY__OTEL_ENDPOINT_URL: http://otel-collector:4317
+      KARAPACE_TELEMETRY__OTEL_METRICS_EXPORTER: OTLP
+      KARAPACE_TELEMETRY__OTEL_TRACES_EXPORTER: OTLP
+      KARAPACE_TELEMETRY__RESOURCE_SERVICE_NAME: karapace-schema-registry
+    {% endif -%}   {#  OTEL_COLLECTOR_enable #}
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer:z
+    {% if ns.secureKafkaEnabled and ns.securityProtocol == 'SSL' %}
+      - ./security/kafka/client-certs:/certs:z
+    {% endif -%} {#  ns.secureKafkaEnabled #}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+    healthcheck:
+      test: [CMD, python3, -c, "import http.client, sys; c=http.client.HTTPConnection('localhost',{{port}},timeout=5); c.request('GET','/subjects'); sys.exit(0) if c.getresponse().status==200 else sys.exit(1)"]
+      interval: 30s
+      timeout: 10s
+      retries: 30
+      start_period: 30s
+  {% endfor %}
+{% endif %}   {# KAFKA_enable and SCHEMA_REGISTRY_flavour == karapace #}
 
 {% if (SCHEMA_REGISTRY_enable and SCHEMA_REGISTRY_UI_enable) | default(false) %}
   #  ================================== Schema Registry UI ========================================== #
