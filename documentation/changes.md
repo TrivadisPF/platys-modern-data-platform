@@ -24,6 +24,7 @@ See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/plat
  * vector
  * pREST
  * restate
+ * karapace (as an additional schema-registry flavour)
  
 ### Version upgrades
  
@@ -47,6 +48,8 @@ See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/plat
 
  * Add ui mode for defining a platform using a Web-UI
  * Add support for Spark 4.x
+ * Improve support for Podman
+ * Add support for working with Nexus and a HTTP Proxy for accessing internet
 
 ### Breaking Changes
 
