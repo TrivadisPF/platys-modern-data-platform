@@ -33,6 +33,14 @@ REDPANDA_CONNECT_enable: true
 REDPANDA_CONNECT_mode: streams
 ```
 
+In `standard` mode, set `REDPANDA_CONNECT_watch_config_enabled: true` to watch the config file for changes and reload automatically (adds the `--watcher` flag to the `run` command):
+
+```yaml
+REDPANDA_CONNECT_enable: true
+REDPANDA_CONNECT_mode: standard
+REDPANDA_CONNECT_watch_config_enabled: true
+```
+
 ## Configuration
 
 In `standard` mode the stream processor is driven by a single config file at `conf/redpanda-connect/connect.yaml`, which is mounted into the container at `/connect.yaml`. In `streams` mode, add one YAML file per stream under `conf/redpanda-connect/streams/`. Edit the relevant file(s) to define your `input`, `pipeline`, and `output`, then re-run `platys gen`.
