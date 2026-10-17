@@ -35,7 +35,6 @@ networks:
 {% set __AUTOMQ_version = AUTOMQ_version | default('latest') -%}
 {% set __MATERIALIZE_version = MATERIALIZE_version | default('latest') -%}
 {% set __HSTREAMDB_version = HSTREAMDB_version | default('latest') -%}
-{% set __BENTHOS_version = BENTHOS_version | default('latest') -%}
 {% set __REDPANDA_CONNECT_version = REDPANDA_CONNECT_version | default('latest') -%}
 {% set __RISINGWAVE_version = RISINGWAVE_version | default('latest') -%}
 {% set __RISINGWAVE_CONSOLE_version = RISINGWAVE_CONSOLE_version | default('latest') -%}
@@ -913,7 +912,6 @@ networks:
   {% set AUTOMQ_enable = false -%}
   {% set MATERIALIZE_enable = false -%}
   {% set HSTREAMDB_enable = false -%}
-  {% set BENTHOS_enable = false -%}
   {% set REDPANDA_CONNECT_enable = false -%}
   {% set RISINGWAVE_enable = false -%}
   {% set FLUSS_enable = false -%}
@@ -3086,68 +3084,6 @@ services:
     restart: {{container_restart_policy}}
 
 {% endif %}   {# HSTOREDB_enable #}
-
-{% if BENTHOS_enable | default(false) %}
-  #  ================================== Benthos ========================================== #
-  benthos-1:
-    image: docker.io/jeffail/benthos:{{__BENTHOS_version}}
-
-    hostname: benthos-1
-    container_name: benthos-1
-    labels:
-      com.platys.name: "benthos"
-      com.platys.description: "Benthos Stream Processing"
-      com.platys.webui.title: "Benthos UI"
-      com.platys.webui.url: "http://dataplatform:4195"
-    ports:
-      - "4195:4195"
-    {%if use_timezone | default(false) %}
-    environment:
-      - TZ={{use_timezone}}
-    {% endif -%}   {#  use_timezone #}
-    volumes:
-      - ./data-transfer:/data-transfer:z
-      - ./scripts/benthos:/benthos:z
-    {%if use_timezone | default(false) %}
-      - "./etc/timezone:/etc/timezone:ro"
-      - "./etc/localtime:/etc/localtime:ro"
-    {% endif -%}   {#  use_timezone #}
-    command: [ '-w', '-c', '/benthos.yaml', '-w' ]
-    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
-    <<: *logging
-    {% endif -%}   {#  logging_driver is defined ... #}
-    restart: {{container_restart_policy}}
-
-  {% if BENTHOS_server_enabled | default(false) %}
-  benthos-server:
-    image: docker.io/jeffail/benthos:{{__BENTHOS_version}}
-
-    hostname: benthos-server
-    container_name: benthos-server
-    labels:
-      com.platys.name: "benthos"
-      com.platys.webui.title: "Benthos Server UI"
-      com.platys.webui.url: "http://dataplatform:4196"
-    ports:
-      - "4196:4196"
-    {%if use_timezone | default(false) %}
-    environment:
-      - TZ={{use_timezone}}
-    {% endif -%}   {#  use_timezone #}
-    volumes:
-      - ./data-transfer:/data-transfer:z
-      - ./scripts/benthos:/benthos:z
-    {%if use_timezone | default(false) %}
-      - "./etc/timezone:/etc/timezone:ro"
-      - "./etc/localtime:/etc/localtime:ro"
-    {% endif -%}   {#  use_timezone #}
-    command: ['blobl', 'server', '--no-open', '--host', '0.0.0.0', '--port', '4196']
-    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
-    <<: *logging
-    {% endif -%}   {#  logging_driver is defined ... #}
-    restart: {{container_restart_policy}}
-  {% endif %}   {#  BENTHOS_server_enabled #}
-{% endif %}   {#  BENTHOS_enable #}
 
 {% if RISINGWAVE_enable | default(false) %}
   #  ================================== RisingWave ========================================== #

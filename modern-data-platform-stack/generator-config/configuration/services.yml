@@ -1790,38 +1790,45 @@ services:
           A comma-separated list of scripts (the name), placed in
           `./scripts/sqlflow` to start SQLFlow with.
 
-  - name: Benthos
-    id: benthos
+  - name: Redpanda Connect
+    id: redpanda-connect
     arch: [x86-64]
     tags: []
     dependencies: []
     links:
-      website: https://www.benthos.dev/
-      documentation: https://www.benthos.dev/docs/about
-      github: https://github.com/benthosdev/benthos
+      website: https://www.redpanda.com/connect
+      documentation: https://docs.redpanda.com/redpanda-connect/about/
+      github: https://github.com/redpanda-data/connect
     description: >
-      Fancy stream processing made operationally mundane.
+      Redpanda Connect (formerly Benthos) is a high-performance, declarative stream
+      processor. It connects a wide range of sources and sinks with built-in mapping,
+      enrichment, and transformation, configured through a single YAML file.
     enable:
-      platys_init: BENTHOS
+      platys_init: REDPANDA_CONNECT
       example: |
-        platys init --enable-services BENTHOS
+        platys init --enable-services REDPANDA_CONNECT
         platys gen
     usage:
       - title: Usage
         content: |
           Navigate to <http://dataplatform:4195>.
     parameters:
-      - name: BENTHOS_enable
+      - name: REDPANDA_CONNECT_enable
         default: "false"
-        since: "1.16.0"
+        since: "1.20.0"
         description: >
-          Generate Benthos service
+          Generate Redpanda Connect stream processing service. The configuration is read
+          from conf/redpanda-connect/connect.yaml. When Kafka is enabled, the broker list
+          is injected via the KAFKA_BROKERS environment variable.
 
-      - name: BENTHOS_server_enabled
-        default: "false"
-        since: "1.16.0"
+      - name: REDPANDA_CONNECT_mode
+        default: "standard"
+        since: "1.20.0"
+        allowed_values: ["standard", "streams"]
         description: >
-          Generate Benthos Server with an interactive Bloblang editor.
+          Execution mode. 'standard' runs a single pipeline from conf/redpanda-connect/connect.yaml.
+          'streams' runs Redpanda Connect in streams mode, loading one stream per YAML file in
+          conf/redpanda-connect/streams/ (mounted into the container at /streams).
 
   - name: Nussknacker
     id: nussknacker
