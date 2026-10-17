@@ -16,9 +16,26 @@ Redpanda Connect (formerly Benthos) is a high-performance, declarative stream pr
 REDPANDA_CONNECT_enable: true
 ```
 
+## Execution modes
+
+Redpanda Connect can run in one of two modes, controlled by `REDPANDA_CONNECT_mode`:
+
+- **`standard`** (default) — runs a single pipeline from `conf/redpanda-connect/connect.yaml` (mounted at `/connect.yaml`).
+- **`streams`** — runs in [streams mode](https://docs.redpanda.com/redpanda-connect/guides/streams_mode/about/), loading one stream per YAML file in `conf/redpanda-connect/streams/` (mounted at `/streams`). Each file becomes a separate stream named after the file.
+
+```yaml
+# single pipeline (default)
+REDPANDA_CONNECT_enable: true
+REDPANDA_CONNECT_mode: standard
+
+# multiple streams
+REDPANDA_CONNECT_enable: true
+REDPANDA_CONNECT_mode: streams
+```
+
 ## Configuration
 
-The stream processor is driven by a single config file at `conf/redpanda-connect/connect.yaml`, which is mounted into the container at `/connect.yaml`. Edit it to define your `input`, `pipeline`, and `output`, then re-run `platys gen`.
+In `standard` mode the stream processor is driven by a single config file at `conf/redpanda-connect/connect.yaml`, which is mounted into the container at `/connect.yaml`. In `streams` mode, add one YAML file per stream under `conf/redpanda-connect/streams/`. Edit the relevant file(s) to define your `input`, `pipeline`, and `output`, then re-run `platys gen`.
 
 When Kafka is enabled in the stack, the broker list is injected into the container via the `KAFKA_BROKERS` environment variable. Reference it in the config like so:
 
