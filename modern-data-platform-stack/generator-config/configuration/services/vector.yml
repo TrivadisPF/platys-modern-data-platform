@@ -25,6 +25,14 @@ parameters:
     description: >
       Generate Vector observability data pipeline service
 
+  - name: VECTOR_nodes
+    default: "1"
+    since: "1.20.0"
+    description: >
+      Number of Vector instances to generate (vector-1, vector-2, …). Each node gets
+      its own config file (conf/vector/vector-N.yaml) and its own block of additional
+      port mappings starting from 28730 offset by node index.
+
   - name: VECTOR_volume_map_data
     default: "false"
     since: "1.20.0"
@@ -51,9 +59,10 @@ parameters:
       needed for collecting Docker container logs and metrics
 
   - name: VECTOR_additional_port_mappings
-    default: "0"
+    default: "[0]"
     since: "1.20.0"
     description: >
-      Number of additional ports to expose from the Vector service, mapped sequentially
-      starting from external port 28730. Use this when your Vector configuration listens
-      on extra ports (e.g. for syslog, Splunk HEC, or other sources).
+      Array of port counts, one entry per Vector node. Each element specifies how many
+      additional ports to expose for that node, allocated sequentially from external port
+      28730 (cumulative across nodes so they never overlap). For example, [2, 0, 3] gives
+      node 1 two ports (28730-28731), node 2 none, and node 3 three ports (28732-28734).

@@ -14614,29 +14614,31 @@ services:
 
 {% if VECTOR_enable | default(false) %}
   #  ================================== Vector ========================================== #
-  vector:
+  {% set ns_vector = namespace(base_port=28730) %}
+  {% for num in range(VECTOR_nodes | default(1)) %}
+    {% set node_ports = VECTOR_additional_port_mappings[loop.index - 1] | default(0) %}
+    {% set current_base = ns_vector.base_port + VECTOR_additional_port_mappings[loop.index - 2] | default(0) %}
+  vector-{{loop.index}}:
     image: docker.io/timberio/vector:{{__VECTOR_version}}
-    container_name: vector
-    hostname: vector
+    container_name: vector-{{loop.index}}
+    hostname: vector-{{loop.index}}
     labels:
       com.platys.name: "vector"
       com.platys.description: "High-performance observability data pipeline"
-    {% if VECTOR_additional_port_mappings | default(0) > 0 %}
+    {% if node_ports > 0 %}
     ports:
-    {% for num in range(VECTOR_additional_port_mappings | default(0) ) %}
-      {% set external_port = 28730 + loop.index - 1 %}
-      {% set webui_port = 28730 + loop.index - 1 %}
-      - "{{external_port}}:{{webui_port}}"      # additional port to be used as a source in the vector config (vector.yaml) 
+    {% for p in range(node_ports) %}
+      - "{{current_base + p}}:{{current_base + p}}"      # additional port to be used as a source in the vector config
     {% endfor %}
     {% endif -%}   {#  VECTOR_additional_port_mappings #}
     volumes:
       - ./data-transfer:/data-transfer:z
-      - ./conf/vector/vector.yaml:/etc/vector/vector.yaml:z
+      - ./conf/vector/vector-{{loop.index}}.yaml:/etc/vector/vector.yaml:z
     {%if VECTOR_volume_map_data | default(false) %}
-      - ./container-volume/vector:/var/lib/vector:z
+      - ./container-volume/vector-{{loop.index}}:/var/lib/vector:z
     {% endif -%}   {#  VECTOR_volume_map_data #}
     {%if VECTOR_volume_map_docker_daemon | default(true) %}
-      - ${PLATYS_DOCKER_SOCKET:-/var/run/docker.sock}:/var/run/docker.sock:z      
+      - ${PLATYS_DOCKER_SOCKET:-/var/run/docker.sock}:/var/run/docker.sock:z
     {% endif -%}   {#  VECTOR_volume_map_docker_daemon #}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
@@ -14649,6 +14651,12 @@ services:
       VECTOR_LOG: {{VECTOR_log_level | default('info')}}
       VECTOR_WATCH_CONFIG: {{VECTOR_watch_config_enabled | default(true) }}    # Watch for changes in the configuration file and reload accordingly
       VECTOR_WATCH_CONFIG_POLL_INTERVAL_SECONDS: 30
+    {% if (KAFKA_enable or external['KAFKA_enable']) | default(false) %}
+      - KAFKA_BOOTSTRAP_SERVERS={{ns.bootstrapServers}}
+    {% endif %}
+    {% if (SCHEMA_REGISTRY_enable or external['SCHEMA_REGISTRY_enable']) | default(false) %}
+      - KAFKA_SCHEMA_REGISTRY_URL={{ns.schemaRegistryUrl}}
+    {% endif %}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -14662,6 +14670,8 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
+    {% set ns_vector.base_port = current_base + node_ports %}
+  {% endfor %}  {#  VECTOR_nodes  #}
 {% endif %}   {#  VECTOR_enable #}
 
 {%if NODERED_enable | default(false) %}
