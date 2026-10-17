@@ -1,0 +1,37 @@
+# Redpanda Connect configuration
+# See https://docs.redpanda.com/redpanda-connect/about/ for all options
+
+# HTTP server exposing the health check and metrics endpoints (mapped to host port 4197)
+http:
+  address: 0.0.0.0:4195
+  enabled: true
+
+# Input — where data is read from
+# Example: consume from a Kafka/Redpanda topic (KAFKA_BROKERS is injected by Platys)
+# input:
+#   kafka_franz:
+#     seed_brokers: [ "${KAFKA_BROKERS}" ]
+#     topics: [ "my-input-topic" ]
+#     consumer_group: redpanda-connect
+input:
+  generate:
+    interval: 5s
+    mapping: |
+      root.message = "hello from redpanda connect"
+      root.timestamp = now()
+
+# Pipeline — optional processing steps
+# pipeline:
+#   processors:
+#     - mapping: |
+#         root = this
+#         root.processed_at = now()
+
+# Output — where data is written to
+# Example: produce to a Kafka/Redpanda topic
+# output:
+#   kafka_franz:
+#     seed_brokers: [ "${KAFKA_BROKERS}" ]
+#     topic: "my-output-topic"
+output:
+  stdout: {}

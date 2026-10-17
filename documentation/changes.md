@@ -25,6 +25,7 @@ See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/plat
  * pREST
  * restate
  * karapace (as an additional schema-registry flavour)
+ * redpanda-connect
  
 ### Version upgrades
  

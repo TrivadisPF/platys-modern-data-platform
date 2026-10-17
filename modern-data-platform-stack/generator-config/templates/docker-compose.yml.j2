@@ -36,6 +36,7 @@ networks:
 {% set __MATERIALIZE_version = MATERIALIZE_version | default('latest') -%}
 {% set __HSTREAMDB_version = HSTREAMDB_version | default('latest') -%}
 {% set __BENTHOS_version = BENTHOS_version | default('latest') -%}
+{% set __REDPANDA_CONNECT_version = REDPANDA_CONNECT_version | default('latest') -%}
 {% set __RISINGWAVE_version = RISINGWAVE_version | default('latest') -%}
 {% set __RISINGWAVE_CONSOLE_version = RISINGWAVE_CONSOLE_version | default('latest') -%}
 {% set __RISINGWAVE_MCP_version = RISINGWAVE_MCP_version | default('latest') -%}
@@ -913,6 +914,7 @@ networks:
   {% set MATERIALIZE_enable = false -%}
   {% set HSTREAMDB_enable = false -%}
   {% set BENTHOS_enable = false -%}
+  {% set REDPANDA_CONNECT_enable = false -%}
   {% set RISINGWAVE_enable = false -%}
   {% set FLUSS_enable = false -%}
   {% set TIMEPLUS_enable = false -%}
@@ -14653,7 +14655,7 @@ services:
     {% if (KAFKA_enable or external['KAFKA_enable']) | default(false) %}
       KAFKA_BOOTSTRAP_SERVERS: {{ns.bootstrapServers}}
     {% endif %}
-     {% if (SCHEMA_REGISTRY_enable or external['SCHEMA_REGISTRY_enable']) | default(false) %}
+    {% if (SCHEMA_REGISTRY_enable or external['SCHEMA_REGISTRY_enable']) | default(false) %}
       KAFKA_SCHEMA_REGISTRY_URL: {{ns.schemaRegistryUrl}}
     {% endif %}
     {%if use_timezone | default(false) %}
@@ -14671,6 +14673,51 @@ services:
     restart: {{container_restart_policy}}
   {% endfor %}  {#  VECTOR_nodes  #}
 {% endif %}   {#  VECTOR_enable #}
+
+{% if REDPANDA_CONNECT_enable | default(false) %}
+  #  ================================== Redpanda Connect ========================================== #
+  redpanda-connect:
+    image: docker.redpanda.com/redpandadata/connect:{{__REDPANDA_CONNECT_version}}
+
+    hostname: redpanda-connect
+    container_name: redpanda-connect
+    labels:
+      com.platys.name: "redpanda-connect"
+      com.platys.description: "Redpanda Connect Stream Processing"
+      com.platys.restapi.title: "Redpanda Connect REST API"
+      com.platys.restapi.url: "http://dataplatform:4195"
+    ports:
+      - "4195:4195"
+    environment:
+      DUMMY: 1
+    {% if (KAFKA_enable or external['KAFKA_enable']) | default(false) %}
+      KAFKA_BOOTSTRAP_SERVERS: {{ns.bootstrapServers}}
+    {% endif %}
+    {% if (SCHEMA_REGISTRY_enable or external['SCHEMA_REGISTRY_enable']) | default(false) %}
+      KAFKA_SCHEMA_REGISTRY_URL: {{ns.schemaRegistryUrl}}
+    {% endif %}
+    {% if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer:z
+      - ./conf/redpanda-connect/connect.yaml:/connect.yaml:ro
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    command: run /connect.yaml
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+    healthcheck:
+      test: ["CMD", "wget", "--no-proxy", "-q", "-O", "/dev/null", "http://localhost:4195/ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+{% endif %}   {#  REDPANDA_CONNECT_enable #}
 
 {%if NODERED_enable | default(false) %}
   #  ================================== Node-RED ========================================== #
@@ -34712,6 +34759,9 @@ services:
     {% if VECTOR_enable | default(false) %}
       - ./scripts/grafana/dashboards/vector:/etc/grafana/provisioning/dashboards/vector:z
     {% endif -%}   {#  VECTOR_enable #}
+    {% if REDPANDA_CONNECT_enable | default(false) %}
+      - ./scripts/grafana/dashboards/redpanda-connect:/etc/grafana/provisioning/dashboards/redpanda-connect:z
+    {% endif -%}   {#  REDPANDA_CONNECT_enable #}
     {% if RESTATE_enable | default(false) %}
       - ./scripts/grafana/dashboards/restate:/etc/grafana/provisioning/dashboards/restate:z
     {% endif -%}   {#  RESTATE_enable #}
