@@ -14614,10 +14614,9 @@ services:
 
 {% if VECTOR_enable | default(false) %}
   #  ================================== Vector ========================================== #
-  {% set ns_vector = namespace(base_port=28730) %}
   {% for num in range(VECTOR_nodes | default(1)) %}
     {% set node_ports = VECTOR_additional_port_mappings[loop.index - 1] | default(0) %}
-    {% set current_base = ns_vector.base_port + (loop.index - 1) * 3 | default(0) %}
+    {% set current_base = 28730 + (loop.index - 1) * 3 %}
   vector-{{loop.index}}:
     image: docker.io/timberio/vector:{{__VECTOR_version}}
     container_name: vector-{{loop.index}}
@@ -14670,7 +14669,6 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
-    {% set ns_vector.base_port = current_base + node_ports %}
   {% endfor %}  {#  VECTOR_nodes  #}
 {% endif %}   {#  VECTOR_enable #}
 
