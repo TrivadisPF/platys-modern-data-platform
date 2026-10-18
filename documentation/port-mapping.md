@@ -913,6 +913,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28710 - 28720 | 28710 - 28720 | nifi-1 (additional ports |
 28720 - 28730 | 28720 - 28730 | nifi2-1 (additional ports |
 28730 - 28740 | 28730 - 28740 | vector (additional ports |
+28740 - 28750 | 28740 - 28750 | redpanda-connect (additional ports |
 28800 - 28900 | any | reserved for applications |
 
 An overview of the URL for the various web-based UIs can be found [here](./environment/README.md).

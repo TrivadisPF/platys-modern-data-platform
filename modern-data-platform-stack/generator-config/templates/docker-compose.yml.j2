@@ -14624,6 +14624,11 @@ services:
       com.platys.restapi.url: "http://dataplatform:4195"
     ports:
       - "4195:4195"
+    {% for num in range(REDPANDA_CONNECT_additional_port_mappings | default(0) ) %}
+      {% set external_port = 28740 + loop.index - 1 %}
+      {% set container_port = 28740 + loop.index - 1 %}
+      - "{{external_port}}:{{container_port}}"
+    {% endfor %}
     environment:
       DUMMY: 1
     {% if (KAFKA_enable or external['KAFKA_enable']) | default(false) %}
@@ -14647,7 +14652,7 @@ services:
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
     {% if (REDPANDA_CONNECT_mode | default('standard')) == 'streams' %}
-    command: streams /streams/*.yaml
+    command: streams --bind-http {{ '--watcher ' if REDPANDA_CONNECT_watch_config_enabled | default(false) }}/streams/*.yaml
     {% else %}
     command: run {{ '--watcher ' if REDPANDA_CONNECT_watch_config_enabled | default(false) }}/connect.yaml
     {% endif -%}   {#  REDPANDA_CONNECT_mode #}

@@ -33,7 +33,7 @@ REDPANDA_CONNECT_enable: true
 REDPANDA_CONNECT_mode: streams
 ```
 
-In `standard` mode, set `REDPANDA_CONNECT_watch_config_enabled: true` to watch the config file for changes and reload automatically (adds the `--watcher` flag to the `run` command):
+Set `REDPANDA_CONNECT_watch_config_enabled: true` to watch the config file(s) for changes and reload automatically (adds the `--watcher` flag). This works in both `standard` and `streams` mode:
 
 ```yaml
 REDPANDA_CONNECT_enable: true
