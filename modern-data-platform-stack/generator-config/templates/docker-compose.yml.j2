@@ -14643,16 +14643,15 @@ services:
     volumes:
       - ./data-transfer:/data-transfer:z
     {% if (REDPANDA_CONNECT_mode | default('standard')) == 'streams' %}
-      - ./conf/redpanda-connect/streams:/streams:ro
-    {% else %}
-      - ./conf/redpanda-connect/connect.yaml:/connect.yaml:ro
+      - ./custom-conf/redpanda-connect/streams:/connect/streams:ro
     {% endif -%}   {#  REDPANDA_CONNECT_mode #}
+      - ./custom-conf/redpanda-connect/connect.yaml:/connect.yaml:ro
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
     {% if (REDPANDA_CONNECT_mode | default('standard')) == 'streams' %}
-    command: streams --bind-http {{ '--watcher ' if REDPANDA_CONNECT_watch_config_enabled | default(true) }}/streams/*.yaml
+    command: streams --bind-http -r /connect.yaml {{ '--watcher ' if REDPANDA_CONNECT_watch_config_enabled | default(true) }}/connect/streams/*.yaml
     {% else %}
     command: run {{ '--watcher ' if REDPANDA_CONNECT_watch_config_enabled | default(true) }}/connect.yaml
     {% endif -%}   {#  REDPANDA_CONNECT_mode #}
