@@ -13,6 +13,7 @@ See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/plat
  * Nexus
  * Coder
  * Polaris Console (UI)
+ * Spark Connect
  * Wundergraph Cosmo Platform
  * mitmproxy
  * Forgejo
@@ -26,7 +27,9 @@ See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/plat
  * restate
  * karapace (as an additional schema-registry flavour)
  * redpanda-connect
- 
+ * browserless
+ * zammad
+
 ### Version upgrades
  
  * Update `nifi-toolkit v2` to `2.10.0`
