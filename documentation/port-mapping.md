@@ -559,7 +559,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28137 | 9000 | portainer |
 28138 | 8080 | cadvisor |
 28139 | 8080 | airflow (2.x) or airflow-apiserver (3.x) |
-28140 | 8080 | code-server |
+28140 |  |  |
 28141 | 8000 | kafka-topics-ui |
 28142 | 8080 | datahub-gms |
 28143 | 9001 | datahub-frontend-ember |
@@ -743,7 +743,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28345 | 8080 | akhq (env1)    |
 28346 | 8080 | akhq (env2)     |
 28347 | 7080 | coder |
-28348
+28348 | 8443 | code-server |
 28349 | 3000 | dockhand |
 28350 | 3001 | vector-admin |
 28351 | 8000 | single-store |
