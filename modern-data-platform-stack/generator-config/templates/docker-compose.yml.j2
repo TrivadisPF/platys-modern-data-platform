@@ -33432,7 +33432,7 @@ services:
       PGID: 1000
       PASSWORD: 'abc123!'
       SUDO_PASSWORD: 'abc123!' #optional
-      DEFAULT_WORKSPACE: /config/workspace #optional
+      DEFAULT_WORKSPACE: {{CODE_SERVER_workspace_folder | default('/workspace')}}   #optional
       PWA_APPNAME: code-server
       DOCKER_MODS: {{CODE_SERVER_docker_mods | default('')}}      
     {% if NEXUS_enable or  external['NEXUS_enable'] | default(false) %}  
@@ -33451,11 +33451,14 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/home/coder/data-transfer:z
-    {% if CODE_SERVER_volume_map_platform_root %}
-      - ../:/home/coder/platform-root:Z
+    {% if CODE_SERVER_volume_map_workspace %}
+      - ./container-volume/code-server/workspace:{{CODE_SERVER_workspace_folder | default('/workspace')}}:Z
     {% endif %}
     {% if CODE_SERVER_volume_map_modcache %}
       - ./plugins/code-server/:/modcache:Z
+    {% endif %}
+    {% if CODE_SERVER_volume_map_platform_root %}
+      - ../:/home/coder/platform-root:Z
     {% endif %}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
@@ -33465,6 +33468,12 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
+    healthcheck:
+      test: curl --noproxy '*' -sS --fail http://localhost:8443/healthz
+      start_period: 30s
+      interval: 10s
+      retries: 5
+      timeout: 5s
 {% endif %}   {# CODE_SERVER_enable #}
 
 {% if CODER_enable | default(false) %}
