@@ -568,7 +568,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28146 | 9092 | datahub-mce-consumer |
 28150 | 8888 | druid-router |
 28150 | 8888 | druid-sandbox |
-28151 |  |  |
+28151 | 5000 | postgraphile |
 28152 |  |  |
 28154 | 8080 | penthao |
 28155 | 8080 | hawtio |

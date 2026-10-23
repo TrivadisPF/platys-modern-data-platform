@@ -609,6 +609,7 @@ networks:
 {% set __DRILL_version = DRILL_version | default('latest') -%}
 
 {% set __HASURA_version = HASURA_version | default('latest') -%}
+{% set __POST_GRAPHILE_version = POST_GRAPHILE_version | default('latest') -%}
 {% set __GRAPHQL_MESH_version = GRAPHQL_MESH_version | default('latest') -%}
 {% set __COSMO_ROUTER_version = COSMO_ROUTER_version | default('latest') -%}
 {% set __DIRECTUS_version = DIRECTUS_version | default('latest') -%}
@@ -1129,6 +1130,7 @@ networks:
   {% set DREMIO_enable = false -%}
   {% set DRILL_enable = false -%}
   {% set HASURA_enable = false -%}
+  {% set POST_GRAPHILE_enable = false -%}
   {% set GRAPHQL_MESH_enable = false -%}
   {% set COSMO_ROUTER_enable = false -%}
   {% set DIRECTUS_enable = false -%}
@@ -28573,6 +28575,54 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  HASURA_enable #}
+
+{% if POST_GRAPHILE_enable | default(false) %}
+  #  ================================== PostGraphile ========================================== #
+  postgraphile:
+    image: docker.io/graphile/postgraphile:{{__POST_GRAPHILE_version}}
+
+    container_name: postgraphile
+    hostname: postgraphile
+    labels:
+      com.platys.name: "postgraphile"
+      com.platys.description: "Instant, highly-performant GraphQL API for PostgreSQL"
+      com.platys.webui.title: "PostGraphile GraphiQL"
+      com.platys.webui.url: "http://dataplatform:28151/graphiql"
+    ports:
+      - '28151:5000'
+    command:
+      - --connection
+      - postgres://{{POST_GRAPHILE_postgres_user}}:${PLATYS_POSTGRESQL_PASSWORD:-{{POST_GRAPHILE_postgres_password}}}@postgresql:5432/{{POST_GRAPHILE_postgres_database}}
+      - --schema
+      - {{POST_GRAPHILE_schema | default('public')}}
+      - --host
+      - 0.0.0.0
+      - --port
+      - "5000"
+    {% if POST_GRAPHILE_watch | default(true) %}
+      - --watch
+    {% endif -%}   {#  POST_GRAPHILE_watch #}
+    {% if POST_GRAPHILE_enhance_graphiql | default(true) %}
+      - --enhance-graphiql
+    {% endif -%}   {#  POST_GRAPHILE_enhance_graphiql #}
+    {% if POST_GRAPHILE_dynamic_json | default(true) %}
+      - --dynamic-json
+    {% endif -%}   {#  POST_GRAPHILE_dynamic_json #}
+    {%if use_timezone | default(false) %}
+    environment:
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer:z
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  POST_GRAPHILE_enable #}
 
 {% if GRAPHQL_MESH_enable | default(false) %}
   #  ================================== GraphQL Mesh ========================================== #

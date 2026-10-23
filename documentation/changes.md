@@ -29,6 +29,7 @@ See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/plat
  * redpanda-connect
  * browserless
  * zammad
+ * postgraphile
 
 ### Version upgrades
  
