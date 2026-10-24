@@ -31,6 +31,7 @@ See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/plat
  * zammad
  * postgraphile
  * versitygw (Versity S3 Gateway)
+ * hive-console
 
 ### Version upgrades
  
