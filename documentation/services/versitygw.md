@@ -14,18 +14,18 @@ VersityGW is a high-performance, S3-compatible object storage gateway. It expose
 ## How to enable?
 
 ```bash
-platys init --enable-services VERSITY_GW
+platys init --enable-services VERSITYGW
 platys gen
 ```
 
 ```yaml
-VERSITY_GW_enable: true
+VERSITYGW_enable: true
 ```
 
 To make the rest of the stack use VersityGW as its internal S3 service, also set:
 
 ```yaml
-s3_service_to_use: versity_gw
+s3_service_to_use: versitygw
 ```
 
 ## How to use it?
@@ -33,18 +33,18 @@ s3_service_to_use: versity_gw
 - **S3 API**: <http://dataplatform:9006>
 - **Web UI**: <http://dataplatform:9007>
 
-Authenticate with the credentials from `VERSITY_GW_access_key` / `VERSITY_GW_secret_key` (overridable at runtime via `PLATYS_AWS_ACCESS_KEY` / `PLATYS_AWS_SECRET_ACCESS_KEY`).
+Authenticate with the credentials from `VERSITYGW_access_key` / `VERSITYGW_secret_key` (overridable at runtime via `PLATYS_AWS_ACCESS_KEY` / `PLATYS_AWS_SECRET_ACCESS_KEY`).
 
-The gateway runs the POSIX backend with a sidecar metadata store; the object data lives under `/data` and metadata under `/metadata` inside the container. Set `VERSITY_GW_volume_map_data: true` to persist both to `./container-volume/versitygw/` on the Docker host.
+The gateway runs the POSIX backend with a sidecar metadata store; the object data lives under `/data` and metadata under `/metadata` inside the container. Set `VERSITYGW_volume_map_data: true` to persist both to `./container-volume/versitygw/` on the Docker host.
 
 ## Creating buckets on startup
 
 To have buckets created automatically when the stack starts, enable the companion `mc` client and list the buckets you want:
 
 ```yaml
-VERSITY_GW_enable: true
-VERSITY_GW_mc_enabled: true
-VERSITY_GW_buckets: raw,refined,curated
+VERSITYGW_enable: true
+VERSITYGW_mc_enabled: true
+VERSITYGW_buckets: raw,refined,curated
 ```
 
 This starts a `versitygw-mc` container that waits for the gateway to be ready and runs `mc mb --ignore-existing` for each bucket.

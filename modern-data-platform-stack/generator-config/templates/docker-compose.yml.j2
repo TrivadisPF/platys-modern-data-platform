@@ -682,7 +682,7 @@ networks:
 {% set __SEAWEEDFS_version = SEAWEEDFS_version | default('latest') -%}
 
 {% set __GARAGE_version = GARAGE_version | default('latest') -%}
-{% set __VERSITY_GW_version = VERSITY_GW_version | default('latest') -%}
+{% set __VERSITYGW_version = VERSITYGW_version | default('latest') -%}
 {% set __GARAGE_WEBUI_version = GARAGE_WEBUI_version | default('latest') -%}
 
 {% set __S3MANAGER_version = S3MANAGER_version | default('latest') -%}
@@ -1174,7 +1174,7 @@ networks:
   {% set RUSTFS_enable = false -%}
   {% set SEAWEEDFS_enable = false -%}
   {% set GARAGE_enable = false -%}
-  {% set VERSITY_GW_enable = false -%}
+  {% set VERSITYGW_enable = false -%}
   {% set GARAGE_WEBUI_enable = false -%}
   {% set LAKEFS_enable = false -%}
   {% set NESSIE_enable = false -%}
@@ -1721,14 +1721,14 @@ networks:
     {% set s3SecretAccessKey = '${PLATYS_AWS_SECRET_ACCESS_KEY:-' ~ SEAWEEDFS_secret_key ~'}' %}
     {% set s3DefaultRegion = 'us-east-1' %}
     {% set s3AdminBucketName = SEAWEEDFS_admin_bucket_name %}
-  {% elif s3_service_to_use == 'versity_gw' %}
+  {% elif s3_service_to_use == 'versitygw' %}
     {% set s3ServiceName = 'versitygw' %}
     {% set s3EndpointStorage = 'http://versitygw:9000' %}
     {% set s3PathStyleAccess = 'true' %}
-    {% set s3AccessKey = '${PLATYS_AWS_ACCESS_KEY:-' ~ VERSITY_GW_access_key ~'}' %}
-    {% set s3SecretAccessKey = '${PLATYS_AWS_SECRET_ACCESS_KEY:-' ~ VERSITY_GW_secret_key ~'}' %}
-    {% set s3DefaultRegion = VERSITY_GW_region | default('us-east-1') %}
-    {% set s3AdminBucketName = VERSITY_GW_admin_bucket_name %}
+    {% set s3AccessKey = '${PLATYS_AWS_ACCESS_KEY:-' ~ VERSITYGW_access_key ~'}' %}
+    {% set s3SecretAccessKey = '${PLATYS_AWS_SECRET_ACCESS_KEY:-' ~ VERSITYGW_secret_key ~'}' %}
+    {% set s3DefaultRegion = VERSITYGW_region | default('us-east-1') %}
+    {% set s3AdminBucketName = VERSITYGW_admin_bucket_name %}
   {% endif %}
 {% endif %}   {# external['s3Endpoint'] #}
 
@@ -29966,10 +29966,10 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {#  GARAGE_WEBUI_enable #}
 
-{% if VERSITY_GW_enable | default(false) %}
+{% if VERSITYGW_enable | default(false) %}
   #  ================================== Versity S3 Gateway ========================================== #
   versitygw:
-    image: ghcr.io/versity/versitygw:{{__VERSITY_GW_version}}
+    image: ghcr.io/versity/versitygw:{{__VERSITYGW_version}}
 
     container_name: versitygw
     hostname: versitygw
@@ -29988,20 +29988,20 @@ services:
     command:
       - >-
         mkdir -p /data/artifacts /data/audit-logs /metadata && exec /usr/local/bin/versitygw --port
-        :9000 --webui :9001 --webui-no-tls --region {{VERSITY_GW_region | default('us-east-1')}} --health /health
+        :9000 --webui :9001 --webui-no-tls --region {{VERSITYGW_region | default('us-east-1')}} --health /health
         --disable-acl posix --sidecar /metadata /data
     environment:
-      ROOT_ACCESS_KEY: ${PLATYS_AWS_ACCESS_KEY:-{{VERSITY_GW_access_key | default('admin')}}}
-      ROOT_SECRET_KEY: ${PLATYS_AWS_SECRET_ACCESS_KEY:-{{VERSITY_GW_secret_key | default('abc123abc123!')}}}
+      ROOT_ACCESS_KEY: ${PLATYS_AWS_ACCESS_KEY:-{{VERSITYGW_access_key | default('admin')}}}
+      ROOT_SECRET_KEY: ${PLATYS_AWS_SECRET_ACCESS_KEY:-{{VERSITYGW_secret_key | default('abc123abc123!')}}}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer:z
-    {%if VERSITY_GW_volume_map_data | default(false) %}
+    {%if VERSITYGW_volume_map_data | default(false) %}
       - ./container-volume/versitygw/db:/data:z
       - ./container-volume/versitygw/metadata:/metadata:z
-    {% endif -%}   {#  VERSITY_GW_volume_map_data #}
+    {% endif -%}   {#  VERSITYGW_volume_map_data #}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -30016,7 +30016,7 @@ services:
       timeout: 20s
       retries: 3
 
-  {% if VERSITY_GW_mc_enabled | default(false) %}
+  {% if VERSITYGW_mc_enabled | default(false) %}
   #  ================================== VersityGW MC ========================================== #
   versitygw-mc:
     image: quay.io/minio/aistor/mc:{{__MINIO_MC_version}}
@@ -30026,7 +30026,7 @@ services:
       com.platys.name: "versitygw"
       com.platys.description: "VersityGW CLI"
     environment:
-      MC_HOST_versitygw: http://${PLATYS_AWS_ACCESS_KEY:-{{VERSITY_GW_access_key | default('admin')}}}:${PLATYS_AWS_SECRET_ACCESS_KEY:-{{VERSITY_GW_secret_key | default('abc123abc123!')}}}@versitygw:9000
+      MC_HOST_versitygw: http://${PLATYS_AWS_ACCESS_KEY:-{{VERSITYGW_access_key | default('admin')}}}:${PLATYS_AWS_SECRET_ACCESS_KEY:-{{VERSITYGW_secret_key | default('abc123abc123!')}}}@versitygw:9000
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -30043,20 +30043,20 @@ services:
       - |
         /usr/src/app/wait-for-it.sh -t 180 versitygw:9000
         mc mb --ignore-existing rustfs-1/{{s3AdminBucketName}}
-    {% if VERSITY_GW_buckets is defined and VERSITY_GW_buckets and VERSITY_GW_buckets | length %}
-        for bucket in $$(tr ',' '\n' <<< "{{VERSITY_GW_buckets}}")
+    {% if VERSITYGW_buckets is defined and VERSITYGW_buckets and VERSITYGW_buckets | length %}
+        for bucket in $$(tr ',' '\n' <<< "{{VERSITYGW_buckets}}")
         do
           mc mb --ignore-existing versitygw/$$bucket
         done
-    {% endif %}   {#  VERSITY_GW_buckets #}
+    {% endif %}   {#  VERSITYGW_buckets #}
         #
         while [ 1 -eq 1 ];do sleep 60;done
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
-  {% endif %}   {#  VERSITY_GW_mc_enabled #}
-{% endif %}   {#  VERSITY_GW_enable #}
+  {% endif %}   {#  VERSITYGW_mc_enabled #}
+{% endif %}   {#  VERSITYGW_enable #}
 
 {% if FILESTASH_enable | default(false) %}
   #  ================================== Filestash ========================================== #
