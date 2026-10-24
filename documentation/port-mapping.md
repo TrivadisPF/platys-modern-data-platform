@@ -291,6 +291,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 9002 | 9000 | minio-3 |
 9003 | 9000 | minio-4 |
 9005 | 9000 | rustfs-1 |
+9006 | 9000 | versitygw (S3 API) |
+9007 | 9001 | versitygw (WebUI) |
 9008 | 9009 | mimir |
 9009 | 9009 | questdb |
 9010 | 9010 | minio-1 ui |

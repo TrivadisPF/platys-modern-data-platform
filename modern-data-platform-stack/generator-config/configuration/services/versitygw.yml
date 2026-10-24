@@ -1,0 +1,84 @@
+name: Versity S3 Gateway
+id: versitygw
+arch: [x86-64]
+
+tags: []
+dependencies: []
+links:
+  website: https://www.versity.com/products/versitygw/
+  documentation: https://github.com/versity/versitygw/wiki
+  github: https://github.com/versity/versitygw
+  docker: https://github.com/versity/versitygw/pkgs/container/versitygw
+
+description: >
+  VersityGW is a high-performance, S3-compatible object storage gateway. It exposes
+  an AWS S3 API backed by a POSIX filesystem (and other backends), making existing
+  storage usable through the S3 protocol.
+
+enable:
+  platys_init: VERSITY_GW
+  example: |
+    platys init --enable-services VERSITY_GW
+    platys gen
+
+usage:
+  - title: Usage
+    content: |
+      The S3 API is available at <http://dataplatform:9006> and the Web UI at
+      <http://dataplatform:9007>.
+
+      Set `s3_service_to_use: versity_gw` to have the rest of the stack use VersityGW
+      as its internal S3 service.
+
+parameters:
+  - name: VERSITY_GW_enable
+    default: "false"
+    since: "1.21.0"
+    description: >
+      Generate Versity S3 Gateway service, an S3-compatible gateway backed by a POSIX filesystem.
+
+  - name: VERSITY_GW_access_key
+    default: "admin"
+    since: "1.21.0"
+    description: >
+      The S3 root access key. Can be overridden at runtime via the PLATYS_AWS_ACCESS_KEY
+      environment variable.
+
+  - name: VERSITY_GW_secret_key
+    default: "abc123abc123!"
+    since: "1.21.0"
+    description: >
+      The S3 root secret key. Can be overridden at runtime via the PLATYS_AWS_SECRET_ACCESS_KEY
+      environment variable.
+
+  - name: VERSITY_GW_region
+    default: "us-east-1"
+    since: "1.21.0"
+    description: >
+      The S3 region the gateway reports.
+
+  - name: VERSITY_GW_admin_bucket_name
+    default: "admin-bucket"
+    since: "1.21.0"
+    description: >
+      The admin bucket name used when s3_service_to_use is set to versity_gw.
+
+  - name: VERSITY_GW_volume_map_data
+    default: "false"
+    since: "1.21.0"
+    description: >
+      Volume map the gateway data (/data) and metadata (/metadata) folders into
+      ./container-volume/versitygw/ on the Docker host.
+
+  - name: VERSITY_GW_mc_enabled
+    default: "false"
+    since: "1.21.0"
+    description: >
+      Start a companion mc (MinIO client) container that creates the buckets listed in
+      VERSITY_GW_buckets once the gateway is up.
+
+  - name: VERSITY_GW_buckets
+    default: ""
+    since: "1.21.0"
+    description: >
+      Comma-separated list of buckets to create on startup. Requires VERSITY_GW_mc_enabled: true.
