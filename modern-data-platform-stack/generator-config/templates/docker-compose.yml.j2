@@ -610,6 +610,7 @@ networks:
 
 {% set __HASURA_version = HASURA_version | default('latest') -%}
 {% set __POST_GRAPHILE_version = POST_GRAPHILE_version | default('latest') -%}
+{% set __HIVE_CONSOLE_version = HIVE_CONSOLE_version | default('latest') -%}
 {% set __GRAPHQL_MESH_version = GRAPHQL_MESH_version | default('latest') -%}
 {% set __COSMO_ROUTER_version = COSMO_ROUTER_version | default('latest') -%}
 {% set __DIRECTUS_version = DIRECTUS_version | default('latest') -%}
@@ -1134,6 +1135,7 @@ networks:
   {% set POST_GRAPHILE_enable = false -%}
   {% set GRAPHQL_MESH_enable = false -%}
   {% set COSMO_ROUTER_enable = false -%}
+  {% set HIVE_CONSOLE_enable = false -%}
   {% set DIRECTUS_enable = false -%}
   {% set TYK_GATEWAY_enable = false -%}
   {% set TYK_PUMP_enable = false -%}
@@ -28699,6 +28701,314 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  COSMO_ROUTER_enable #}
+
+{% if HIVE_CONSOLE_enable | default(false) %}
+  #  ================================== GraphQL Hive Console ========================================== #
+  #  Reuses the Platys postgresql, redis-1, clickhouse, kafka and S3 services.
+  #  Requires: POSTGRESQL_enable, REDIS_enable, CLICKHOUSE_enable, KAFKA_enable and an S3 service (s3_service_to_use) to be enabled.
+  hive-console-migrations:
+    image: ghcr.io/graphql-hive/storage:{{__HIVE_CONSOLE_version}}
+    container_name: hive-console-migrations
+    hostname: hive-console-migrations
+    labels:
+      com.platys.name: "hive-console"
+      com.platys.description: "GraphQL Hive - DB migrations"
+    depends_on:
+      postgresql:
+        condition: service_healthy
+      redis-1:
+        condition: service_healthy
+      clickhouse:
+        condition: service_started
+    environment:
+      MIGRATOR: 'up'
+      CLICKHOUSE_MIGRATOR: 'up'
+      POSTGRES_HOST: postgresql
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: '{{POSTGRESQL_database}}'
+      POSTGRES_USER: '{{POSTGRESQL_user}}'
+      POSTGRES_PASSWORD: ${PLATYS_POSTGRESQL_PASSWORD:-{{POSTGRESQL_password}}}
+      REDIS_HOST: redis-1
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: '{{REDIS_password | default("")}}'
+      CLICKHOUSE_PROTOCOL: 'http'
+      CLICKHOUSE_HOST: 'clickhouse'
+      CLICKHOUSE_PORT: '8123'
+      CLICKHOUSE_USERNAME: '{{CLICKHOUSE_username}}'
+      CLICKHOUSE_PASSWORD: ${PLATYS_CLICKHOUSE_PASSWORD:-{{CLICKHOUSE_password}}}
+      TS_NODE_TRANSPILE_ONLY: 'true'
+      LOG_LEVEL: '{{HIVE_CONSOLE_log_level | default("debug")}}'
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: on-failure
+
+  hive-console-policy:
+    image: ghcr.io/graphql-hive/policy:{{__HIVE_CONSOLE_version}}
+    container_name: hive-console-policy
+    hostname: hive-console-policy
+    labels:
+      com.platys.name: "hive-console"
+      com.platys.description: "GraphQL Hive - Schema Policy service"
+    environment:
+      NODE_ENV: production
+      PORT: 3012
+      SERVER_HOST: '::'
+      SERVER_HOST_IPV6_ONLY: '0'
+      LOG_LEVEL: '{{HIVE_CONSOLE_log_level | default("debug")}}'
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+
+  hive-console-schema:
+    image: ghcr.io/graphql-hive/schema:{{__HIVE_CONSOLE_version}}
+    container_name: hive-console-schema
+    hostname: hive-console-schema
+    labels:
+      com.platys.name: "hive-console"
+      com.platys.description: "GraphQL Hive - Schema service"
+    depends_on:
+      redis-1:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3002
+      SERVER_HOST: '::'
+      SERVER_HOST_IPV6_ONLY: '0'
+      REDIS_HOST: redis-1
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: '{{REDIS_password | default("")}}'
+      ENCRYPTION_SECRET: '{{HIVE_CONSOLE_encryption_secret}}'
+      LOG_LEVEL: '{{HIVE_CONSOLE_log_level | default("debug")}}'
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+
+  hive-console-server:
+    image: ghcr.io/graphql-hive/server:{{__HIVE_CONSOLE_version}}
+    container_name: hive-console-server
+    hostname: hive-console-server
+    labels:
+      com.platys.name: "hive-console"
+      com.platys.description: "GraphQL Hive - GraphQL API server"
+      com.platys.restapi.title: "GraphQL Hive API"
+      com.platys.restapi.url: "http://dataplatform:28108/graphql"
+    depends_on:
+      hive-console-migrations:
+        condition: service_completed_successfully
+      postgresql:
+        condition: service_healthy
+      redis-1:
+        condition: service_healthy
+      clickhouse:
+        condition: service_started
+    ports:
+      - '28108:3001'
+    environment:
+      NODE_ENV: production
+      POSTGRES_HOST: postgresql
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: '{{POSTGRESQL_database}}'
+      POSTGRES_USER: '{{POSTGRESQL_user}}'
+      POSTGRES_PASSWORD: ${PLATYS_POSTGRESQL_PASSWORD:-{{POSTGRESQL_password}}}
+      CLICKHOUSE_PROTOCOL: 'http'
+      CLICKHOUSE_HOST: clickhouse
+      CLICKHOUSE_PORT: 8123
+      CLICKHOUSE_USERNAME: '{{CLICKHOUSE_username}}'
+      CLICKHOUSE_PASSWORD: ${PLATYS_CLICKHOUSE_PASSWORD:-{{CLICKHOUSE_password}}}
+      REDIS_HOST: redis-1
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: '{{REDIS_password | default("")}}'
+      SCHEMA_ENDPOINT: http://hive-console-schema:3002
+      SCHEMA_POLICY_ENDPOINT: http://hive-console-policy:3012
+      ENCRYPTION_SECRET: '{{HIVE_CONSOLE_encryption_secret}}'
+      WEB_APP_URL: 'http://${PUBLIC_IP:-localhost}:28107'
+      PORT: 3001
+      SERVER_HOST: '::'
+      SERVER_HOST_IPV6_ONLY: '0'
+      S3_ENDPOINT: '{{s3EndpointStorage}}'
+      S3_ACCESS_KEY_ID: {{s3AccessKey}}
+      S3_SECRET_ACCESS_KEY: {{s3SecretAccessKey}}
+      S3_BUCKET_NAME: artifacts
+      S3_AUDIT_LOG_ENDPOINT: '{{s3EndpointStorage}}'
+      S3_AUDIT_LOG_ACCESS_KEY_ID: {{s3AccessKey}}
+      S3_AUDIT_LOG_SECRET_ACCESS_KEY: {{s3SecretAccessKey}}
+      S3_AUDIT_LOG_BUCKET_NAME: audit-logs
+      CDN_AUTH_PRIVATE_KEY: '{{HIVE_CONSOLE_cdn_auth_private_key}}'
+      CDN_API: '1'
+      CDN_API_BASE_URL: 'http://${PUBLIC_IP:-localhost}:28108'
+      LOG_LEVEL: '{{HIVE_CONSOLE_log_level | default("debug")}}'
+      AUTH_ORGANIZATION_OIDC: '1'
+      AUTH_REQUIRE_EMAIL_VERIFICATION: '0'
+      GRAPHQL_PUBLIC_ORIGIN: http://${PUBLIC_IP:-localhost}:28108
+      SUPERTOKENS_REFRESH_TOKEN_KEY: '{{HIVE_CONSOLE_supertokens_refresh_token_key}}'
+      SUPERTOKENS_ACCESS_TOKEN_KEY: '{{HIVE_CONSOLE_supertokens_access_token_key}}'
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+
+  hive-console-workflows:
+    image: ghcr.io/graphql-hive/workflows:{{__HIVE_CONSOLE_version}}
+    container_name: hive-console-workflows
+    hostname: hive-console-workflows
+    labels:
+      com.platys.name: "hive-console"
+      com.platys.description: "GraphQL Hive - Workflows service"
+    depends_on:
+      postgresql:
+        condition: service_healthy
+      redis-1:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3014
+      SERVER_HOST: '::'
+      SERVER_HOST_IPV6_ONLY: '0'
+      POSTGRES_HOST: postgresql
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: '{{POSTGRESQL_database}}'
+      POSTGRES_USER: '{{POSTGRESQL_user}}'
+      POSTGRES_PASSWORD: ${PLATYS_POSTGRESQL_PASSWORD:-{{POSTGRESQL_password}}}
+      EMAIL_FROM: no-reply@graphql-hive.com
+      EMAIL_PROVIDER: sendmail
+      LOG_LEVEL: '{{HIVE_CONSOLE_log_level | default("debug")}}'
+      LOG_JSON: '1'
+      SCHEMA_ENDPOINT: http://hive-console-schema:3002
+      WEB_APP_URL: 'http://${PUBLIC_IP:-localhost}:28107'
+      REDIS_HOST: redis-1
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: '{{REDIS_password | default("")}}'
+      ENCRYPTION_SECRET: '{{HIVE_CONSOLE_encryption_secret}}'
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+
+  hive-console-usage:
+    image: ghcr.io/graphql-hive/usage:{{__HIVE_CONSOLE_version}}
+    container_name: hive-console-usage
+    hostname: hive-console-usage
+    labels:
+      com.platys.name: "hive-console"
+      com.platys.description: "GraphQL Hive - Usage ingestion API"
+    depends_on:
+      postgresql:
+        condition: service_healthy
+      redis-1:
+        condition: service_healthy
+    ports:
+      - '28109:3006'
+    environment:
+      NODE_ENV: production
+      KAFKA_CONNECTION_MODE: 'docker'
+      KAFKA_TOPIC: 'usage_reports_v2'
+      KAFKA_BROKER: {{ns.bootstrapServer}}
+      KAFKA_BUFFER_SIZE: 350
+      KAFKA_BUFFER_INTERVAL: 1000
+      KAFKA_BUFFER_DYNAMIC: '1'
+      POSTGRES_HOST: postgresql
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: '{{POSTGRESQL_database}}'
+      POSTGRES_USER: '{{POSTGRESQL_user}}'
+      POSTGRES_PASSWORD: ${PLATYS_POSTGRESQL_PASSWORD:-{{POSTGRESQL_password}}}
+      REDIS_HOST: redis-1
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: '{{REDIS_password | default("")}}'
+      PORT: 3006
+      SERVER_HOST: '::'
+      SERVER_HOST_IPV6_ONLY: '0'
+      LOG_LEVEL: '{{HIVE_CONSOLE_log_level | default("debug")}}'
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+
+  hive-console-usage-ingestor:
+    image: ghcr.io/graphql-hive/usage-ingestor:{{__HIVE_CONSOLE_version}}
+    container_name: hive-console-usage-ingestor
+    hostname: hive-console-usage-ingestor
+    labels:
+      com.platys.name: "hive-console"
+      com.platys.description: "GraphQL Hive - Usage ingestor"
+    depends_on:
+      clickhouse:
+        condition: service_started
+    environment:
+      NODE_ENV: production
+      KAFKA_CONNECTION_MODE: 'docker'
+      KAFKA_BROKER: {{ns.bootstrapServer}}
+      KAFKA_CONCURRENCY: '1'
+      KAFKA_CONSUMER_GROUP: 'usage-ingestor-v2'
+      KAFKA_TOPIC: 'usage_reports_v2'
+      CLICKHOUSE_PROTOCOL: 'http'
+      CLICKHOUSE_HOST: clickhouse
+      CLICKHOUSE_PORT: 8123
+      CLICKHOUSE_USERNAME: '{{CLICKHOUSE_username}}'
+      CLICKHOUSE_PASSWORD: ${PLATYS_CLICKHOUSE_PASSWORD:-{{CLICKHOUSE_password}}}
+      PORT: 3007
+      SERVER_HOST: '::'
+      SERVER_HOST_IPV6_ONLY: '0'
+      LOG_LEVEL: '{{HIVE_CONSOLE_log_level | default("debug")}}'
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+
+  hive-console-app:
+    image: ghcr.io/graphql-hive/app:{{__HIVE_CONSOLE_version}}
+    container_name: hive-console-app
+    hostname: hive-console-app
+    labels:
+      com.platys.name: "hive-console"
+      com.platys.description: "GraphQL Hive - Web Console"
+      com.platys.webui.title: "GraphQL Hive Console"
+      com.platys.webui.url: "http://dataplatform:28107"
+    ports:
+      - '28107:3000'
+    environment:
+      PORT: 3000
+      SERVER_HOST: '::'
+      SERVER_HOST_IPV6_ONLY: '0'
+      NODE_ENV: production
+      APP_BASE_URL: 'http://${PUBLIC_IP:-localhost}:28107'
+      GRAPHQL_PUBLIC_ENDPOINT: http://${PUBLIC_IP:-localhost}:28108/graphql
+      GRAPHQL_PUBLIC_SUBSCRIPTION_ENDPOINT: http://${PUBLIC_IP:-localhost}:28108/graphql
+      GRAPHQL_PUBLIC_ORIGIN: http://${PUBLIC_IP:-localhost}:28108
+      AUTH_REQUIRE_EMAIL_VERIFICATION: '0'
+      AUTH_ORGANIZATION_OIDC: '1'
+      LOG_LEVEL: '{{HIVE_CONSOLE_log_level | default("debug")}}'
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  HIVE_CONSOLE_enable #}
 
 {% if DIRECTUS_enable | default(false) %}
   #  ================================== Directus ========================================== #

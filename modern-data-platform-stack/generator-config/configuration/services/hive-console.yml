@@ -1,0 +1,73 @@
+name: GraphQL Hive Console
+id: hive-console
+arch: [x86-64]
+
+tags: []
+dependencies: [postgresql, redis, clickhouse, kafka]
+links:
+  website: https://the-guild.dev/graphql/hive
+  documentation: https://the-guild.dev/graphql/hive/docs
+  github: https://github.com/graphql-hive/console
+
+description: >
+  GraphQL Hive is an open-source schema registry, observability and governance
+  platform for GraphQL. The self-hosted Console is composed of several
+  micro-services (app, server, schema, policy, workflows, usage, usage-ingestor)
+  plus a one-off DB migration job, all prefixed with hive-console-.
+
+enable:
+  platys_init: HIVE_CONSOLE
+  example: |
+    platys init --enable-services POSTGRESQL,REDIS,CLICKHOUSE,KAFKA,MINIO,HIVE_CONSOLE
+    platys gen
+
+usage:
+  - title: Usage
+    content: |
+      The web console is available at <http://dataplatform:28107>, the GraphQL API at
+      <http://dataplatform:28108/graphql> and the usage ingestion API at
+      <http://dataplatform:28109>.
+
+      Hive Console reuses the Platys postgresql, redis-1, clickhouse, kafka and the
+      selected S3 service. These must be enabled alongside HIVE_CONSOLE. The S3 buckets
+      `artifacts` and `audit-logs`, and the Kafka topic `usage_reports_v2`, are required.
+
+parameters:
+  - name: HIVE_CONSOLE_enable
+    default: "false"
+    since: "1.21.0"
+    description: >
+      Generate GraphQL Hive Console (self-hosted). Requires POSTGRESQL, REDIS, CLICKHOUSE,
+      KAFKA and an S3 service (s3_service_to_use) to be enabled.
+
+  - name: HIVE_CONSOLE_log_level
+    default: "debug"
+    since: "1.21.0"
+    allowed_values: ["debug", "info", "warn", "error"]
+    description: >
+      Log level applied to all Hive Console services.
+
+  - name: HIVE_CONSOLE_encryption_secret
+    default: "wywyryf9p225kuvarygyb8pyszwkrecx"
+    since: "1.21.0"
+    description: >
+      32-character secret used to encrypt sensitive data at rest. Change for anything
+      beyond local testing.
+
+  - name: HIVE_CONSOLE_supertokens_access_token_key
+    default: "qhhhcepkvllbvdvccenbyfcganxoscxt"
+    since: "1.21.0"
+    description: >
+      SuperTokens access-token signing key. Change for anything beyond local testing.
+
+  - name: HIVE_CONSOLE_supertokens_refresh_token_key
+    default: "qhhhcepkvllbvdvccenbyfcganxoscxt"
+    since: "1.21.0"
+    description: >
+      SuperTokens refresh-token signing key. Change for anything beyond local testing.
+
+  - name: HIVE_CONSOLE_cdn_auth_private_key
+    default: "kglbtqvqfvncuujxqdfqcscghfxkbrgy"
+    since: "1.21.0"
+    description: >
+      Private key used to sign CDN access tokens. Change for anything beyond local testing.
