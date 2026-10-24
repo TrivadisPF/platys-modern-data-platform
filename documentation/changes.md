@@ -50,7 +50,8 @@ See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/plat
  * Update `prometheus` to `v3.13.4`
  * Update `prometheus-alertmanager` to `v0.34.1`
  * Update `nifi2` to `2.12.0`
-
+ * Update `clickhouse` to `26.10-alpine`
+ 
 ### Enhancements
 
  * Add ui mode for defining a platform using a Web-UI

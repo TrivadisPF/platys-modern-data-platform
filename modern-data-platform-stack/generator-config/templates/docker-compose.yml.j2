@@ -24169,6 +24169,12 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
+    healthcheck:
+      test: ['CMD', 'wget', '--no-proxy', '--spider', '-q', 'http://localhost:8123/ping']
+      interval: 5s
+      timeout: 5s
+      retries: 6
+      start_period: 10s
 {% endif %}  {#  CLICKHOUSE_enable #}
 
 {% if CLICKHOUSE_UI_enable | default(false) %}
@@ -28719,7 +28725,7 @@ services:
       redis-1:
         condition: service_healthy
       clickhouse:
-        condition: service_started
+        condition: service_healthy
     environment:
       MIGRATOR: 'up'
       CLICKHOUSE_MIGRATOR: 'up'
@@ -28812,7 +28818,7 @@ services:
       redis-1:
         condition: service_healthy
       clickhouse:
-        condition: service_started
+        condition: service_healthy
     ports:
       - '28108:3001'
     environment:
@@ -28953,7 +28959,7 @@ services:
       com.platys.description: "GraphQL Hive - Usage ingestor"
     depends_on:
       clickhouse:
-        condition: service_started
+        condition: service_healthy
     environment:
       NODE_ENV: production
       KAFKA_CONNECTION_MODE: 'docker'
