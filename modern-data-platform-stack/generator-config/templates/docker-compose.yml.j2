@@ -612,6 +612,7 @@ networks:
 {% set __POST_GRAPHILE_version = POST_GRAPHILE_version | default('latest') -%}
 {% set __HIVE_CONSOLE_version = HIVE_CONSOLE_version | default('latest') -%}
 {% set __HIVE_GATEWAY_version = HIVE_GATEWAY_version | default('latest') -%}
+{% set __HIVE_ROUTER_version = HIVE_ROUTER_version | default('latest') -%}
 {% set __GRAPHQL_MESH_version = GRAPHQL_MESH_version | default('latest') -%}
 {% set __COSMO_ROUTER_version = COSMO_ROUTER_version | default('latest') -%}
 {% set __DIRECTUS_version = DIRECTUS_version | default('latest') -%}
@@ -1138,6 +1139,7 @@ networks:
   {% set COSMO_ROUTER_enable = false -%}
   {% set HIVE_CONSOLE_enable = false -%}
   {% set HIVE_GATEWAY_enable = false -%}
+  {% set HIVE_ROUTER_enable = false -%}
   {% set DIRECTUS_enable = false -%}
   {% set TYK_GATEWAY_enable = false -%}
   {% set TYK_PUMP_enable = false -%}
@@ -29061,6 +29063,37 @@ services:
       retries: 5
       start_period: 20s
 {% endif %}   {#  HIVE_GATEWAY_enable #}
+
+{% if HIVE_ROUTER_enable | default(false) %}
+  #  ================================== GraphQL Hive Router ========================================== #
+  hive-router:
+    image: ghcr.io/graphql-hive/router:{{__HIVE_ROUTER_version}}
+    container_name: hive-router
+    hostname: hive-router
+    labels:
+      com.platys.name: "hive-router"
+      com.platys.description: "GraphQL Hive Router (Rust federation router)"
+      com.platys.restapi.title: "Hive Router GraphQL endpoint"
+      com.platys.restapi.url: "http://dataplatform:28148/graphql"
+    ports:
+      - '28148:4000'
+    environment:
+      SUPERGRAPH_FILE_PATH: /app/{{HIVE_ROUTER_supergraph_file | default('supergraph.graphql')}}
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer:z
+      - ./conf/hive-router/{{HIVE_ROUTER_supergraph_file | default('supergraph.graphql')}}:/app/{{HIVE_ROUTER_supergraph_file | default('supergraph.graphql')}}:ro
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  HIVE_ROUTER_enable #}
 
 {% if DIRECTUS_enable | default(false) %}
   #  ================================== Directus ========================================== #

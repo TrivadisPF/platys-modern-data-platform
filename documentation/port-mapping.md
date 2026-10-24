@@ -570,6 +570,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28145 | 9091 | datahub-mae-consumer |
 28146 | 9092 | datahub-mce-consumer |
 28147 | 4000 | hive-gateway |
+28148 | 4000 | hive-router |
 28150 | 8888 | druid-router |
 28150 | 8888 | druid-sandbox |
 28151 | 5000 | postgraphile |
