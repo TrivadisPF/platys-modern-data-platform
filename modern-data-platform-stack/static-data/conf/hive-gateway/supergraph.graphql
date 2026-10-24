@@ -1,0 +1,37 @@
+# Replace this with your composed Apollo Federation / Hive supergraph SDL.
+# Hive Gateway serves the supergraph defined in this file (see HIVE_GATEWAY_supergraph_file).
+#
+# You can produce a supergraph with the Hive CLI:
+#   hive schema:compose --output supergraph.graphql
+# or with Apollo rover:
+#   rover supergraph compose --config supergraph.yaml > supergraph.graphql
+#
+# The placeholder below defines a single subgraph with one field so the gateway can start.
+# Point the @join__graph url at a reachable GraphQL subgraph and extend the schema as needed.
+
+schema
+  @link(url: "https://specs.apollo.dev/link/v1.0")
+  @link(url: "https://specs.apollo.dev/join/v0.3", for: EXECUTION) {
+  query: Query
+}
+
+directive @join__graph(name: String!, url: String!) on ENUM_VALUE
+directive @join__type(graph: join__Graph!, key: join__FieldSet, extension: Boolean! = false, resolvable: Boolean! = true, isInterfaceObject: Boolean! = false) repeatable on OBJECT | INTERFACE | UNION | ENUM | INPUT_OBJECT | SCALAR
+directive @join__field(graph: join__Graph, requires: join__FieldSet, provides: join__FieldSet, type: String, external: Boolean, override: String, usedOverridden: Boolean) repeatable on FIELD_DEFINITION | INPUT_FIELD_DEFINITION
+directive @link(url: String, as: String, for: link__Purpose, import: [link__Import]) repeatable on SCHEMA
+
+scalar join__FieldSet
+scalar link__Import
+
+enum link__Purpose {
+  SECURITY
+  EXECUTION
+}
+
+enum join__Graph {
+  EXAMPLE @join__graph(name: "example", url: "http://example-subgraph:4001/graphql")
+}
+
+type Query @join__type(graph: EXAMPLE) {
+  hello: String @join__field(graph: EXAMPLE)
+}

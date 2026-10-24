@@ -611,6 +611,7 @@ networks:
 {% set __HASURA_version = HASURA_version | default('latest') -%}
 {% set __POST_GRAPHILE_version = POST_GRAPHILE_version | default('latest') -%}
 {% set __HIVE_CONSOLE_version = HIVE_CONSOLE_version | default('latest') -%}
+{% set __HIVE_GATEWAY_version = HIVE_GATEWAY_version | default('latest') -%}
 {% set __GRAPHQL_MESH_version = GRAPHQL_MESH_version | default('latest') -%}
 {% set __COSMO_ROUTER_version = COSMO_ROUTER_version | default('latest') -%}
 {% set __DIRECTUS_version = DIRECTUS_version | default('latest') -%}
@@ -1136,6 +1137,7 @@ networks:
   {% set GRAPHQL_MESH_enable = false -%}
   {% set COSMO_ROUTER_enable = false -%}
   {% set HIVE_CONSOLE_enable = false -%}
+  {% set HIVE_GATEWAY_enable = false -%}
   {% set DIRECTUS_enable = false -%}
   {% set TYK_GATEWAY_enable = false -%}
   {% set TYK_PUMP_enable = false -%}
@@ -29015,6 +29017,50 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  HIVE_CONSOLE_enable #}
+
+{% if HIVE_GATEWAY_enable | default(false) %}
+  #  ================================== GraphQL Hive Gateway ========================================== #
+  hive-gateway:
+    image: ghcr.io/graphql-hive/gateway:{{__HIVE_GATEWAY_version}}
+    container_name: hive-gateway
+    hostname: hive-gateway
+    labels:
+      com.platys.name: "hive-gateway"
+      com.platys.description: "GraphQL Hive Gateway (federation gateway)"
+      com.platys.restapi.title: "Hive Gateway GraphQL endpoint"
+      com.platys.restapi.url: "http://dataplatform:28147/graphql"
+    ports:
+      - '28147:4000'
+    command:
+      - supergraph
+      - /gateway/{{HIVE_GATEWAY_supergraph_file | default('supergraph.graphql')}}
+      - --host
+      - 0.0.0.0
+      - --port
+      - "4000"
+    environment:
+      LOG_LEVEL: '{{HIVE_GATEWAY_log_level | default("info")}}'
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer:z
+      - ./conf/hive-gateway/{{HIVE_GATEWAY_supergraph_file | default('supergraph.graphql')}}:/gateway/{{HIVE_GATEWAY_supergraph_file | default('supergraph.graphql')}}:ro
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+    healthcheck:
+      test: ['CMD', 'wget', '--no-proxy', '--spider', '-q', 'http://localhost:4000/healthcheck']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+{% endif %}   {#  HIVE_GATEWAY_enable #}
 
 {% if DIRECTUS_enable | default(false) %}
   #  ================================== Directus ========================================== #
