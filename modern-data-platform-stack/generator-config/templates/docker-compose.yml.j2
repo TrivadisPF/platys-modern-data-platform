@@ -613,6 +613,7 @@ networks:
 {% set __HIVE_CONSOLE_version = HIVE_CONSOLE_version | default('latest') -%}
 {% set __HIVE_GATEWAY_version = HIVE_GATEWAY_version | default('latest') -%}
 {% set __HIVE_ROUTER_version = HIVE_ROUTER_version | default('latest') -%}
+{% set __APOLLO_ROVER_CLI_version = APOLLO_ROVER_CLI_version | default('1.0.1') -%}
 {% set __GRAPHQL_MESH_version = GRAPHQL_MESH_version | default('latest') -%}
 {% set __COSMO_ROUTER_version = COSMO_ROUTER_version | default('latest') -%}
 {% set __DIRECTUS_version = DIRECTUS_version | default('latest') -%}
@@ -1141,6 +1142,7 @@ networks:
   {% set HIVE_GATEWAY_enable = false -%}
   {% set HIVE_ROUTER_enable = false -%}
   {% set HIVE_YOGA_SERVER_enable = false -%}
+  {% set APOLLO_ROVER_CLI_enable = false -%}
   {% set DIRECTUS_enable = false -%}
   {% set TYK_GATEWAY_enable = false -%}
   {% set TYK_PUMP_enable = false -%}
@@ -29164,6 +29166,39 @@ services:
       retries: 5
   {% endfor %}  {#  HIVE_YOGA_SERVER_nodes  #}
 {% endif %}   {#  HIVE_YOGA_SERVER_enable #}
+
+{% if APOLLO_ROVER_CLI_enable | default(false) %}
+  #  ================================== Apollo Rover CLI ========================================== #
+  apollo-rover-cli:
+    image: ghcr.io/apollographql/rover:{{__APOLLO_ROVER_CLI_version}}
+    container_name: apollo-rover-cli
+    hostname: apollo-rover-cli
+    labels:
+      com.platys.name: "apollo-rover-cli"
+      com.platys.description: "Apollo Rover CLI"
+    working_dir: /workspace
+    environment:
+      APOLLO_ELV2_LICENSE: accept
+    {% if APOLLO_ROVER_CLI_log_level is defined and APOLLO_ROVER_CLI_log_level and APOLLO_ROVER_CLI_log_level | length %}
+      APOLLO_LOG_LEVEL: {{APOLLO_ROVER_CLI_log_level}}
+    {% endif -%}   {#  APOLLO_ROVER_CLI_log_level #}
+      APOLLO_LOG_LEVEL:
+      APOLLO_REGISTRY_URL:
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./:/workspace
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+    entrypoint: ["sh", "-c", "{% for plugin in (APOLLO_ROVER_CLI_plugins or '').split(',') %}{% if plugin | trim %}rover plugin install {{plugin | trim}} && {% endif %}{% endfor %}exec sleep infinity"]
+{% endif %}   {#  APOLLO_ROVER_CLI_enable #}
 
 {% if DIRECTUS_enable | default(false) %}
   #  ================================== Directus ========================================== #

@@ -35,6 +35,7 @@ See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/plat
  * hive-gateway
  * hive-router
  * hive-yoga-server
+ * apollo-rover-cli
 
 ### Version upgrades
  
