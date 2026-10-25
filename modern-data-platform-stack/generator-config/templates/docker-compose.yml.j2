@@ -29112,12 +29112,11 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
+    # The hive-router image is distroless (only the /app/hive_router binary, no
+    # shell, wget or curl), so no in-container healthcheck command can run.
+    # Disable it rather than reference tools that don't exist in the image.
     healthcheck:
-      test: ['CMD', 'wget', '--no-proxy', '--spider', '-q', 'http://localhost:4000/health']
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 20s
+      test: [NONE]
 {% endif %}   {#  HIVE_ROUTER_enable #}
 
 {% if HIVE_YOGA_SERVER_enable | default(false) %}
