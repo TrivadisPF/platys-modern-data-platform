@@ -23,7 +23,7 @@ HIVE_GATEWAY_enable: true
 
 ## Configuration
 
-The gateway serves the supergraph defined in `conf/hive-gateway/supergraph.graphql` (mounted into the container at `/gateway/supergraph.graphql`). Replace the placeholder with your composed supergraph SDL, for example:
+The gateway serves the supergraph defined in `custom-conf/hive-gateway/supergraph.graphql` (mounted into the container at `/gateway/supergraph.graphql`). Replace the placeholder with your composed supergraph SDL, for example:
 
 ```bash
 # with the Hive CLI
