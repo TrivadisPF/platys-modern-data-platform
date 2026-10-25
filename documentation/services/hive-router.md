@@ -23,7 +23,7 @@ HIVE_ROUTER_enable: true
 
 ## Configuration
 
-The router serves the supergraph defined in `conf/hive-router/supergraph.graphql`, which is mounted into the container at `/app/supergraph.graphql` and referenced through the `SUPERGRAPH_FILE_PATH` environment variable. Replace the placeholder with your composed supergraph SDL, for example:
+The router serves the supergraph defined in `custom-conf/hive-router/supergraph.graphql`, which is mounted into the container at `/app/supergraph.graphql` and referenced through the `SUPERGRAPH_FILE_PATH` environment variable. Replace the placeholder with your composed supergraph SDL, for example:
 
 ```bash
 # with the Hive CLI
@@ -34,6 +34,8 @@ rover supergraph compose --config supergraph.yaml > supergraph.graphql
 ```
 
 Use a different file name by setting `HIVE_ROUTER_supergraph_file`.
+
+Additional router settings can be provided through a config file at `custom-conf/hive-router/router.config.yaml` (mounted at `/app/router.config.yaml`), configurable via `HIVE_ROUTER_config_file`. Set it to empty to run without a config file and rely solely on the environment variables. See the [router configuration docs](https://the-guild.dev/graphql/hive/docs/router/configuration) for available options.
 
 ## How to use it?
 

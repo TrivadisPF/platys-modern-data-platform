@@ -29078,13 +29078,31 @@ services:
     ports:
       - '28148:4000'
     environment:
+      LOG_LEVEL: info
+      LOG_FORMAT: pretty-compact
+      LABORATORY_ENABLED: true
+      PORT: 4000
+      HOST: 0.0.0.0
       SUPERGRAPH_FILE_PATH: /app/{{HIVE_ROUTER_supergraph_file | default('supergraph.graphql')}}
+      HIVE_CDN_ENDPOINT: 
+      HIVE_CDN_KEY:
+      HIVE_CDN_POLL_INTERVAL: 10s
+      APOLLO_GRAPH_REF:
+      APOLLO_KEY:
+      APOLLO_UPLINK_ENDPOINTS:
+      SUBSCRIPTIONS_ENABLED: false
+      WEBSOCKET_ENABLED: false
+      # TELEMETRY_TRACING_SAMPLING_RATE: 
+      DISABLE_SUBGRAPH_ERROR_MASKING: false
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       - ./data-transfer:/data-transfer:z
-      - ./conf/hive-router/{{HIVE_ROUTER_supergraph_file | default('supergraph.graphql')}}:/app/{{HIVE_ROUTER_supergraph_file | default('supergraph.graphql')}}:ro
+      - ./custom-conf/hive-router/{{HIVE_ROUTER_supergraph_file | default('supergraph.graphql')}}:/app/{{HIVE_ROUTER_supergraph_file | default('supergraph.graphql')}}:ro
+    {% if HIVE_ROUTER_config_file is defined and HIVE_ROUTER_config_file and HIVE_ROUTER_config_file | length %}
+      - ./custom-conf/hive-router/{{HIVE_ROUTER_config_file}}:/app/{{HIVE_ROUTER_config_file}}:ro
+    {% endif -%}   {#  HIVE_ROUTER_config_file #}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
