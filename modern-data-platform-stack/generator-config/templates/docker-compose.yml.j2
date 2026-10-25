@@ -29079,7 +29079,7 @@ services:
       - '28148:4000'
     environment:
       LOG_LEVEL: info
-      LOG_FORMAT: pretty-compact
+      LOG_FORMAT: text
       LABORATORY_ENABLED: true
       PORT: 4000
       HOST: 0.0.0.0
@@ -29111,6 +29111,12 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
+    healthcheck:
+      test: ['CMD', 'wget', '--no-proxy', '--spider', '-q', 'http://localhost:4000/health']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
 {% endif %}   {#  HIVE_ROUTER_enable #}
 
 {% if DIRECTUS_enable | default(false) %}
