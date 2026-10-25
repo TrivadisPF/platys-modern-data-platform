@@ -34,7 +34,8 @@ See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/plat
  * hive-console
  * hive-gateway
  * hive-router
- 
+ * hive-yoga-server
+
 ### Version upgrades
  
  * Update `nifi-toolkit v2` to `2.10.0`

@@ -1,0 +1,45 @@
+name: GraphQL Hive Yoga
+id: hive-yoga-server
+arch: [x86-64]
+
+tags: []
+dependencies: []
+links:
+  website: https://the-guild.dev/graphql/yoga-server
+  documentation: https://the-guild.dev/graphql/yoga-server/docs
+  github: https://github.com/graphql-hive/graphql-yoga
+
+description: >
+  GraphQL Yoga is a fully-featured, batteries-included GraphQL server. In the Platys
+  platform it runs one or more lightweight GraphQL subgraph servers that can be federated
+  by the Hive Router or Hive Gateway.
+
+enable:
+  platys_init: HIVE_YOGA_SERVER
+  example: |
+    platys init --enable-services HIVE_YOGA_SERVER
+    platys gen
+
+usage:
+  - title: Usage
+    content: |
+      Each node is built from init/hive-yoga-server/Dockerfile and runs the GraphQL server
+      mounted from scripts/hive-yoga-server/server-<N>.mjs (at /app/server.mjs). Edit these
+      files to define each subgraph. Node 1 GraphQL endpoint is available at
+      <http://dataplatform:28162/graphql>, node 2 at 28163, and so on (28162 + (N-1)).
+
+parameters:
+  - name: HIVE_YOGA_SERVER_enable
+    default: "false"
+    since: "1.21.0"
+    description: >
+      Generate one or more GraphQL Yoga subgraph servers.
+
+  - name: HIVE_YOGA_SERVER_nodes
+    default: "1"
+    since: "1.21.0"
+    description: >
+      Number of GraphQL Yoga subgraph instances to generate (hive-yoga-server-1, hive-yoga-server-2, ...).
+      Only the first 5 nodes get a host port published (28162 + (N-1), i.e. 28162-28166); further nodes
+      are reachable only over the Docker network on port 3001. Each node loads its server implementation
+      from scripts/hive-yoga-server/server-<N>.mjs. Provide a matching server-<N>.mjs file for each node.

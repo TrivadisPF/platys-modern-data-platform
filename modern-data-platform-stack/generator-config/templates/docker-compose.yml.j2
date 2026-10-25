@@ -1140,6 +1140,7 @@ networks:
   {% set HIVE_CONSOLE_enable = false -%}
   {% set HIVE_GATEWAY_enable = false -%}
   {% set HIVE_ROUTER_enable = false -%}
+  {% set HIVE_YOGA_SERVER_enable = false -%}
   {% set DIRECTUS_enable = false -%}
   {% set TYK_GATEWAY_enable = false -%}
   {% set TYK_PUMP_enable = false -%}
@@ -29118,6 +29119,52 @@ services:
       retries: 5
       start_period: 20s
 {% endif %}   {#  HIVE_ROUTER_enable #}
+
+{% if HIVE_YOGA_SERVER_enable | default(false) %}
+  #  ================================== GraphQL Hive Yoga ========================================== #
+  {% for num in range(HIVE_YOGA_SERVER_nodes | default(1)) %}
+    {% set host_port = 28162 + (loop.index - 1) %}
+  hive-yoga-server-{{loop.index}}:
+    build:
+      context: ./init/hive-yoga-server
+      dockerfile: Dockerfile
+    image: platys-hive-yoga-server:latest
+    container_name: hive-yoga-server-{{loop.index}}
+    hostname: hive-yoga-server-{{loop.index}}
+    labels:
+      com.platys.name: "hive-yoga-server"
+      com.platys.description: "GraphQL Yoga subgraph server"
+    {% if loop.index <= 5 %}
+      com.platys.restapi.title: "Hive Yoga {{loop.index}} GraphQL endpoint"
+      com.platys.restapi.url: "http://dataplatform:{{host_port}}/graphql"
+    {% endif -%}   {#  only first 5 nodes have a host port #}
+    {% if loop.index <= 5 %}
+    ports:
+      - "{{host_port}}:3001"     # only the first 5 nodes get a host port (28162-28166) reserved in port-mapping
+    {% endif -%}   {#  only map ports for the first 5 nodes #}
+    environment:
+      PORT: 3001
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      - ./data-transfer:/data-transfer:z
+      - ./scripts/hive-yoga-server/server-{{loop.index}}.mjs:/app/server.mjs:ro
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+    healthcheck:
+      test: ["CMD", "wget", "-Y", "off", "-q", "-O", "/dev/null", "http://127.0.0.1:3001/graphql?query=%7B__typename%7D"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+  {% endfor %}  {#  HIVE_YOGA_SERVER_nodes  #}
+{% endif %}   {#  HIVE_YOGA_SERVER_enable #}
 
 {% if DIRECTUS_enable | default(false) %}
   #  ================================== Directus ========================================== #

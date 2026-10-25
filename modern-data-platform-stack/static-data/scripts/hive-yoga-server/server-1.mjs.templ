@@ -1,0 +1,35 @@
+import { createServer } from 'node:http'
+import { createYoga, createSchema } from 'graphql-yoga'
+
+// Edit this file to define the GraphQL schema / subgraph served by this node.
+// It is mounted into the container at /app/server.mjs.
+const schema = createSchema({
+  typeDefs: /* GraphQL */ `
+    type Query {
+      hello: String
+      authors: [Author!]!
+    }
+
+    type Author {
+      id: ID!
+      name: String!
+    }
+  `,
+  resolvers: {
+    Query: {
+      hello: () => 'Hello from the GraphQL Hive Yoga subgraph',
+      authors: () => [
+        { id: '1', name: 'Ada Lovelace' },
+        { id: '2', name: 'Alan Turing' }
+      ]
+    }
+  }
+})
+
+const yoga = createYoga({ schema, graphqlEndpoint: '/graphql' })
+const server = createServer(yoga)
+
+const port = Number(process.env.PORT) || 3001
+server.listen(port, () => {
+  console.info(`GraphQL Hive Yoga subgraph running at http://localhost:${port}/graphql`)
+})
