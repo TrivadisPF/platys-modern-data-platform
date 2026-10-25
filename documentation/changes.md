@@ -32,7 +32,9 @@ See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/plat
  * postgraphile
  * versitygw (Versity S3 Gateway)
  * hive-console
-
+ * hive-gateway
+ * hive-router
+ 
 ### Version upgrades
  
  * Update `nifi-toolkit v2` to `2.10.0`
@@ -51,7 +53,7 @@ See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/plat
  * Update `prometheus-alertmanager` to `v0.34.1`
  * Update `nifi2` to `2.12.0`
  * Update `clickhouse` to `26.10-alpine`
- 
+
 ### Enhancements
 
  * Add ui mode for defining a platform using a Web-UI
