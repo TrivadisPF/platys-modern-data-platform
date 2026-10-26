@@ -40,14 +40,35 @@ function create_user_and_database_and_schema() {
     psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" \
         -c "GRANT ALL PRIVILEGES ON DATABASE $database TO $user;"
 
-    psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" \
-        -c "ALTER USER $user WITH $addl_roles;"
-
     if [ -n "$schema" ]; then
         echo "Creating schema '$schema' in database '$database'..."
         psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$database" \
             -c "CREATE SCHEMA IF NOT EXISTS $schema;"
         echo "Schema '$schema' created."
+    fi
+
+    # addl_roles: names of additional roles (separated by ':' if several) to create (NOLOGIN) and grant to the user
+    if [ -n "$addl_roles" ]; then
+        local role
+        for role in ${addl_roles//:/ }; do
+            echo "Create role '$role' (if missing) and grant it to '$user'."
+            psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" <<-EOSQL
+                DO \$\$
+                BEGIN
+                    IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = '$role') THEN
+                        CREATE ROLE $role NOLOGIN;
+                    END IF;
+                END
+                \$\$;
+                GRANT $role TO $user;
+EOSQL
+            if [ -n "$schema" ]; then
+                psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$database" \
+                    -c "GRANT USAGE ON SCHEMA $schema TO $role;" \
+                    -c "GRANT SELECT ON ALL TABLES IN SCHEMA $schema TO $role;" \
+                    -c "ALTER DEFAULT PRIVILEGES IN SCHEMA $schema GRANT SELECT ON TABLES TO $role;"
+            fi
+        done
     fi
 }
 
