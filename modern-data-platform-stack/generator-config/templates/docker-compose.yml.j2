@@ -10264,7 +10264,7 @@ services:
       - "7002:7002"
     environment:
     {%if OPAL_broadcast_enabled and OPAL_broadcast_type=='postgres' | default(false) %}
-      - OPAL_BROADCAST_URI=postgres://{{POSTGRESQL_user}}:{{POSTGRESQL_password}}@postgresql:5432/{{POSTGRESQL_database}}
+      - OPAL_BROADCAST_URI=postgres://{{POSTGREST_user | default('postgres') }}:{{POSTGREST_password | default('abc123!') }}@postgresql:5432/{{POSTGREST_database | default('postgres') }}
       # number of uvicorn workers to run inside the opal-server container
       - UVICORN_NUM_WORKERS=2
     {%elif OPAL_broadcast_enabled and OPAL_broadcast_type=='kafka' | default(false) %}
@@ -25262,13 +25262,13 @@ services:
     environment:
       # The standard connection URI format, documented at
       # https://www.postgresql.org/docs/current/static/libpq-connect.html#LIBPQ-CONNSTRING
-      - PGRST_DB_URI=postgres://{{POSTGRESQL_user}}:{{POSTGRESQL_password}}@postgresql:5432/{{POSTGRESQL_database}}
+      - PGRST_DB_URI=postgres://{{POSTGREST_user | default('postgres') }}:{{POSTGREST_password | default('abc123!') }}@postgresql:5432/{{POSTGREST_database | default('postgres') }}
       # The name of which database schema to expose to REST clients
-      - PGRST_DB_SCHEMA={{POSTGRESQL_schema}}
+      - PGRST_DB_SCHEMA={{POSTGREST_schema | default('demo') }}
       # The database role to use when no client authentication is provided
-    {% if POSTGRESQL_anon_role is defined and POSTGRESQL_anon_role | length %}
-      - PGRST_DB_ANON_ROLE={{POSTGRESQL_anon_role}}
-    {% endif -%}   {#  POSTGRESQL_anon_role #}
+    {% if POSTGREST_anon_role is defined and POSTGREST_anon_role | length %}
+      - PGRST_DB_ANON_ROLE={{POSTGREST_anon_role}}
+    {% endif -%}   {#  POSTGREST_anon_role #}
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
