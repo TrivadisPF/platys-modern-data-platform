@@ -28618,6 +28618,9 @@ services:
       com.platys.webui.url: "http://dataplatform:28151/graphiql"
     ports:
       - '28151:5000'
+    {% if POST_GRAPHILE_plugins is defined and POST_GRAPHILE_plugins | length %}
+    entrypoint: ["sh", "-c", "npm install --no-save {{POST_GRAPHILE_plugins | replace(',', ' ')}} && exec ./cli.js \"$$@\"", "--"]
+    {% endif -%}   {#  POST_GRAPHILE_plugins #}
     command:
       - --connection
       - postgres://{{POST_GRAPHILE_postgres_user}}:${PLATYS_POSTGRESQL_PASSWORD:-{{POST_GRAPHILE_postgres_password}}}@postgresql:5432/{{POST_GRAPHILE_postgres_database}}
@@ -28636,6 +28639,10 @@ services:
     {% if POST_GRAPHILE_dynamic_json | default(true) %}
       - --dynamic-json
     {% endif -%}   {#  POST_GRAPHILE_dynamic_json #}
+    {% if POST_GRAPHILE_plugins is defined and POST_GRAPHILE_plugins | length %}
+      - --append-plugins
+      - '{{POST_GRAPHILE_plugins | replace(' ', '')}}'
+    {% endif -%}   {#  POST_GRAPHILE_plugins #}
     {%if use_timezone | default(false) %}
     environment:
       TZ: {{use_timezone}}
