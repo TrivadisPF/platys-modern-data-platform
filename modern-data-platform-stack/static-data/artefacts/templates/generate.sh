@@ -1,7 +1,17 @@
 #!/usr/bin/env sh
 
 if [ -f "/variables/docker-compose.override.yml" ]; then
-  yq eval-all 'select(fileIndex == 0) * select(fileIndex == 1)' /variables/docker-compose.yml /variables/docker-compose.override.yml > /tmp/docker-compose.yml
+  if yq --version 2>&1 | grep -qi mikefarah; then
+    # Go yq (mikefarah)
+    yq eval-all 'select(fileIndex == 0) * select(fileIndex == 1)' /variables/docker-compose.yml /variables/docker-compose.override.yml > /tmp/docker-compose.yml
+  else
+    # Python yq (jq wrapper)
+    yq -y -s '.[0] * .[1]' /variables/docker-compose.yml /variables/docker-compose.override.yml > /tmp/docker-compose.yml
+  fi
+  # fall back to the plain compose file if the merge produced nothing usable
+  if ! grep -q '^services:' /tmp/docker-compose.yml; then
+    cp /variables/docker-compose.yml /tmp/docker-compose.yml
+  fi
 else
   cp /variables/docker-compose.yml /tmp/docker-compose.yml
 fi
