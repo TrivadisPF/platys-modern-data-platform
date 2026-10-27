@@ -1,6 +1,6 @@
 ---
 technologies:       kafka
-version:				1.19.0
+version:				1.21.0
 validated-at:			21.01.2026
 ---
 
@@ -13,7 +13,7 @@ This recipe will show how to use the [Shadowtraffic](https://shadowtraffic.io/) 
 First [initialise a platys-supported data platform](../documentation/getting-started) with the needed services enabled and generate the platform:
 
 ```bash
-platys init --enable-services KAFKA,AKHQ,SHADOW_TRAFFIC -s trivadis/platys-modern-data-platform -w 1.19.0
+platys init --enable-services KAFKA,AKHQ,SHADOWTRAFFIC -s trivadis/platys-modern-data-platform -w 1.19.0
 ```
 
 Now generate the platform 

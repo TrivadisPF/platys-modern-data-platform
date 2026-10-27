@@ -95,7 +95,7 @@ networks:
 {% set __DEBEZIUM_SERVER_version = DEBEZIUM_SERVER_version | default('latest') -%}
 {% set __DEBEZIUM_UI_version = DEBEZIUM_UI_version | default('latest') -%}
 
-{% set __SHADOW_TRAFFIC_version = SHADOW_TRAFFIC_version | default('latest') -%}
+{% set __SHADOWTRAFFIC_version = SHADOWTRAFFIC_version | default('latest') -%}
 
 {% set __HADOOP_image_version = HADOOP_image_version | default('latest') -%}
 {% set __HADOOP_version = HADOOP_version | default('latest') -%}
@@ -6625,18 +6625,18 @@ services:
       timeout: 10s    
 {% endif %}   {# KAFKA_enable and DEBEZIUM_UI_enable #}
 
-{% if SHADOW_TRAFFIC_enable | default(false) %}
+{% if SHADOWTRAFFIC_enable | default(false) %}
   #  ================================== ShadowTraffic ========================================== #
   shadowtraffic:
-    image: docker.io/shadowtraffic/shadowtraffic:{{__SHADOW_TRAFFIC_version}}
+    image: docker.io/shadowtraffic/shadowtraffic:{{__SHADOWTRAFFIC_version}}
 
     container_name: shadowtraffic
     hostname: shadowtraffic
-    profiles: ["{{SHADOW_TRAFFIC_compose_profile if SHADOW_TRAFFIC_compose_profile and SHADOW_TRAFFIC_compose_profile is defined and SHADOW_TRAFFIC_compose_profile | length > 0 else omit }}" ]
+    profiles: ["{{SHADOWTRAFFIC_compose_profile if SHADOWTRAFFIC_compose_profile and SHADOWTRAFFIC_compose_profile is defined and SHADOWTRAFFIC_compose_profile | length > 0 else omit }}" ]
     labels:
-      com.platys.name: "shadow-traffic"
+      com.platys.name: "shadowtraffic"
       com.platys.description: "Simulate production traffic to your backend."    
-  {% if SHADOW_TRAFFIC_with_studio | default(false) %}      
+  {% if SHADOWTRAFFIC_with_studio | default(false) %}      
       com.platys.webui.title: 'ShadowTraffic Studio UI'
       com.platys.webui.url: "http://dataplatform:28483"
     ports:
@@ -6654,12 +6654,12 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"      
     environment:
-      - LICENSE_ID=${SHADOW_TRAFFIC_LICENSE_ID:-{{SHADOW_TRAFFIC_license_id}}}
-      - LICENSE_EMAIL=${SHADOW_TRAFFIC_LICENSE_EMAIL:-{{SHADOW_TRAFFIC_license_email}}}
-      - LICENSE_ORGANIZATION=${SHADOW_TRAFFIC_LICENSE_ORGANIZATION:-{{SHADOW_TRAFFIC_license_organization}}}
-      - LICENSE_EDITION=${SHADOW_TRAFFIC_LICENSE_EDITION:-{{SHADOW_TRAFFIC_license_edition}}}
-      - LICENSE_EXPIRATION=${SHADOW_TRAFFIC_LICENSE_EXPIRATION:-{{SHADOW_TRAFFIC_license_expiration}}}
-      - LICENSE_SIGNATURE=${SHADOW_TRAFFIC_LICENSE_SIGNATURE:-{{SHADOW_TRAFFIC_license_signature}}}
+      - LICENSE_ID=${SHADOWTRAFFIC_LICENSE_ID:-{{SHADOWTRAFFIC_license_id}}}
+      - LICENSE_EMAIL=${SHADOWTRAFFIC_LICENSE_EMAIL:-{{SHADOWTRAFFIC_license_email}}}
+      - LICENSE_ORGANIZATION=${SHADOWTRAFFIC_LICENSE_ORGANIZATION:-{{SHADOWTRAFFIC_license_organization}}}
+      - LICENSE_EDITION=${SHADOWTRAFFIC_LICENSE_EDITION:-{{SHADOWTRAFFIC_license_edition}}}
+      - LICENSE_EXPIRATION=${SHADOWTRAFFIC_LICENSE_EXPIRATION:-{{SHADOWTRAFFIC_license_expiration}}}
+      - LICENSE_SIGNATURE=${SHADOWTRAFFIC_LICENSE_SIGNATURE:-{{SHADOWTRAFFIC_license_signature}}}
     {% if (KAFKA_enable or external['KAFKA_enable']) | default(false) %}
       - KAFKA_BOOTSTRAP_SERVERS={{ns.bootstrapServers}}
     {% endif %}
@@ -6701,17 +6701,17 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
     command: |
-      --config /data/{{SHADOW_TRAFFIC_config_file}}
+      --config /data/{{SHADOWTRAFFIC_config_file}}
       --metrics-port 9400
-      --reload {{SHADOW_TRAFFIC_reload_policy | default(omit) }}
-      {{'--watch' if SHADOW_TRAFFIC_watch_config_file_change or SHADOW_TRAFFIC_with_studio | default(false) else ''}}
-      {{'--sample ' ~ SHADOW_TRAFFIC_sample_size if SHADOW_TRAFFIC_sample_size is defined and SHADOW_TRAFFIC_sample_size and SHADOW_TRAFFIC_sample_size > 0 else ''}}
-      {{'--seed ' ~ SHADOW_TRAFFIC_seed_value if SHADOW_TRAFFIC_seed_value is defined and SHADOW_TRAFFIC_seed_value and SHADOW_TRAFFIC_seed_value > 0 else ''}}
-      {{'--stdout' if SHADOW_TRAFFIC_to_stdout | default(false) else ''}}
-      {{'--with-studio' if SHADOW_TRAFFIC_with_studio | default(false) else ''}}
-      {{'--report-benchmark' if SHADOW_TRAFFIC_report_benchmark | default(false) else ''}}
+      --reload {{SHADOWTRAFFIC_reload_policy | default(omit) }}
+      {{'--watch' if SHADOWTRAFFIC_watch_config_file_change or SHADOWTRAFFIC_with_studio | default(false) else ''}}
+      {{'--sample ' ~ SHADOWTRAFFIC_sample_size if SHADOWTRAFFIC_sample_size is defined and SHADOWTRAFFIC_sample_size and SHADOWTRAFFIC_sample_size > 0 else ''}}
+      {{'--seed ' ~ SHADOWTRAFFIC_seed_value if SHADOWTRAFFIC_seed_value is defined and SHADOWTRAFFIC_seed_value and SHADOWTRAFFIC_seed_value > 0 else ''}}
+      {{'--stdout' if SHADOWTRAFFIC_to_stdout | default(false) else ''}}
+      {{'--with-studio' if SHADOWTRAFFIC_with_studio | default(false) else ''}}
+      {{'--report-benchmark' if SHADOWTRAFFIC_report_benchmark | default(false) else ''}}
     restart: {{container_restart_policy}}
-{% endif %}   {# SHADOW_TRAFFIC_enable #}
+{% endif %}   {# SHADOWTRAFFIC_enable #}
 
 {% if ((KAFKA_enable or external['KAFKA_enable']) and KAFKA_DATAGEN_enable) | default(false) %}
   #  ================================== Kafka Datagen ========================================== #

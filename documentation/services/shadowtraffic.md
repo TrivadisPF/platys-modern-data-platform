@@ -7,7 +7,7 @@ ShadowTraffic is a product that helps you rapidly simulate production traffic to
 ## How to enable?
 
 ```bash
-platys init --enable-services SHADOW_TRAFFIC
+platys init --enable-services SHADOWTRAFFIC
 platys gen
 ```
 

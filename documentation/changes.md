@@ -83,6 +83,7 @@ See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/plat
  * Jupyter external port changed to `38888` (used to be `28888`)
  * replace `MARKDOWN_VIEWER_use_port_80` by `MARKDOWN_VIEWER_external_port` to have more control over the port used for the markdown viewer (needed for Podman if ports below `1024` are not permitted)
  * remove `BENTHOS` service, it has been replaced by `REDPANDA_CONNECT` (Redpanda Connect is the continuation of Benthos)
+ * rename `SHADOW_TRAFFIC_xxxx` to `SHADOWTRAFFIC_xxxx`
 
 ## What's new in 1.20.0
 
