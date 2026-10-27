@@ -40,11 +40,15 @@ function create_user_and_database_and_schema() {
     psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" \
         -c "GRANT ALL PRIVILEGES ON DATABASE $database TO $user;"
 
+    # schema: names of schemas (separated by ':' if several) to create in the database
+    local schema_name
     if [ -n "$schema" ]; then
-        echo "Creating schema '$schema' in database '$database'..."
-        psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$database" \
-            -c "CREATE SCHEMA IF NOT EXISTS $schema;"
-        echo "Schema '$schema' created."
+        for schema_name in ${schema//:/ }; do
+            echo "Creating schema '$schema_name' in database '$database'..."
+            psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$database" \
+                -c "CREATE SCHEMA IF NOT EXISTS $schema_name;"
+            echo "Schema '$schema_name' created."
+        done
     fi
 
     # addl_roles: names of additional roles (separated by ':' if several) to create (NOLOGIN) and grant to the user
@@ -63,10 +67,12 @@ function create_user_and_database_and_schema() {
                 GRANT $role TO $user;
 EOSQL
             if [ -n "$schema" ]; then
-                psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$database" \
-                    -c "GRANT USAGE ON SCHEMA $schema TO $role;" \
-                    -c "GRANT SELECT ON ALL TABLES IN SCHEMA $schema TO $role;" \
-                    -c "ALTER DEFAULT PRIVILEGES IN SCHEMA $schema GRANT SELECT ON TABLES TO $role;"
+                for schema_name in ${schema//:/ }; do
+                    psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$database" \
+                        -c "GRANT USAGE ON SCHEMA $schema_name TO $role;" \
+                        -c "GRANT SELECT ON ALL TABLES IN SCHEMA $schema_name TO $role;" \
+                        -c "ALTER DEFAULT PRIVILEGES IN SCHEMA $schema_name GRANT SELECT ON TABLES TO $role;"
+                done
             fi
         done
     fi
@@ -83,15 +89,7 @@ if [ -n "$POSTGRES_MULTIPLE_DATABASES" ]; then
         if [[ $index < ${#databases[*]} && $index < ${#users[*]} && $index < ${#passwords[*]} ]] ; then
 			schema="${schemas[index]:-}"
 			addl_role="${addl_roles[index]:-}"
-			if [ -n "$POSTGRES_MULTIPLE_ADDL_ROLES" ] && [ -n "${POSTGRES_MULTIPLE_SCHEMAS:-}" ]; then
-              create_user_and_database_and_schema "${databases[index]//[\'\"\`]/}" "${users[index]//[\'\"\`]/}" "${passwords[index]//[\'\"\`]/}" "${addl_role//[\'\"\`]/}" "${schema//[\'\"\`]/}"
-            elif [ -n "$POSTGRES_MULTIPLE_ADDL_ROLES" ]; then
-              create_user_and_database_and_schema "${databases[index]//[\'\"\`]/}" "${users[index]//[\'\"\`]/}" "${passwords[index]//[\'\"\`]/}" "${addl_role//[\'\"\`]/}" ""
-            elif [ -n "${POSTGRES_MULTIPLE_SCHEMAS:-}" ]; then
-              create_user_and_database_and_schema "${databases[index]//[\'\"\`]/}" "${users[index]//[\'\"\`]/}" "${passwords[index]//[\'\"\`]/}" "" "${schema//[\'\"\`]/}"
-            else
-              create_user_and_database_and_schema "${databases[index]//[\'\"\`]/}" "${users[index]//[\'\"\`]/}" "${passwords[index]//[\'\"\`]/}" "" ""
-			fi
+			create_user_and_database_and_schema "${databases[index]//[\'\"\`]/}" "${users[index]//[\'\"\`]/}" "${passwords[index]//[\'\"\`]/}" "${addl_role//[\'\"\`]/}" "${schema//[\'\"\`]/}"
         else
             echo "DATABASE '${databases[index]}' OR USER '${users[index]}' EMPTY"
         fi
