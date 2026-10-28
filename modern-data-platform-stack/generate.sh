@@ -15,22 +15,23 @@ else
    docker-compose-templer -f /opt/mdps-gen/stack-config.yml
 fi
 
-# Remove service-level "volumes:" keys that ended up without any entries (e.g. if volume_map_data_transfer_folder is false),
-# as docker compose rejects an empty volumes key
+# Remove service-level "volumes:", "environment:" and "ports:" keys that ended up without any entries
+# (e.g. if volume_map_data_transfer_folder is false), as docker compose rejects such empty keys
 awk '
 function flush(   i) { for (i = 1; i <= n; i++) print buf[i]; n = 0 }
 pending {
   if ($0 ~ /^[[:space:]]*$/ || $0 ~ /^[[:space:]]*#/) { buf[++n] = $0; next }
   match($0, /^ */)
-  if (RLENGTH > 4) print "    volumes:"
+  # keep the key if the next line is more indented or is a list item at the same level
+  if (RLENGTH > 4 || (RLENGTH == 4 && $0 ~ /^ *- /)) print header
   pending = 0
   flush()
 }
-/^    volumes:[[:space:]]*$/ { pending = 1; n = 0; next }
+/^    (volumes|environment|ports):[[:space:]]*$/ { pending = 1; header = $0; n = 0; next }
 { print }
 END { if (pending) flush() }
-' "/opt/mdps-gen/destination/docker-compose.yml" > /tmp/docker-compose.nonempty-volumes.yml && \
-  cp /tmp/docker-compose.nonempty-volumes.yml "/opt/mdps-gen/destination/docker-compose.yml"
+' "/opt/mdps-gen/destination/docker-compose.yml" > /tmp/docker-compose.nonempty-keys.yml && \
+  cp /tmp/docker-compose.nonempty-keys.yml "/opt/mdps-gen/destination/docker-compose.yml"
 
 if [ ${DEL_EMPTY_LINES:-0} -eq 1 ]
 then
