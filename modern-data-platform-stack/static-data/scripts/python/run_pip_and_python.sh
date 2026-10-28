@@ -10,6 +10,10 @@ while [ $# -gt 0 ]; do
       python_script="$2"
       shift 2
       ;;
+    --supervisord-config)
+      supervisord_config="$2"
+      shift 2
+      ;;
     *)
       echo "Unknown parameter: $1"
       exit 1
@@ -25,6 +29,13 @@ then
 else
   pip3 install --upgrade pip
   pip3 install --no-cache-dir -r $requirements_file
+fi
+
+if [ -n "$supervisord_config" ]
+then
+  # run multiple python scripts under supervisord (stays in the foreground as PID 1)
+  pip3 install --no-cache-dir supervisor
+  exec supervisord -n -c "$supervisord_config"
 fi
 
 if [ -z "$python_script" ]
