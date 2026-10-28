@@ -62,6 +62,8 @@ See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/plat
  * Add support for Spark 4.x
  * Improve support for Podman
  * Add support for working with Nexus and a HTTP Proxy for accessing internet
+ * New global settings `volume_map_data_transfer_folder` and `data_transfer_local_folder` to control mapping and location of the `data-transfer` folder
+ * `python`: optional supervisord support (`PYTHON_supervisord_enabled`) to run multiple python scripts in one container
 
 ### Breaking Changes
 
