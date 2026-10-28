@@ -16,7 +16,7 @@ platys gen
 
 ### Running multiple scripts with supervisord
 
-Set `PYTHON_supervisord_enable: true` to run the container under [supervisord](http://supervisord.org/). `PYTHON_script_to_run` is then ignored and the programs are defined in `supervisord.conf` (name configurable with `PYTHON_supervisord_config_file`) inside the folder given by `PYTHON_artefacts_folder`, which is mounted at `/app`:
+Set `PYTHON_supervisord_enabled: true` to run the container under [supervisord](http://supervisord.org/). `PYTHON_script_to_run` is then ignored and the programs are defined in `supervisord.conf` (name configurable with `PYTHON_supervisord_config_file`) inside the folder given by `PYTHON_artefacts_folder`, which is mounted at `/app`:
 
 ```ini
 [supervisord]
