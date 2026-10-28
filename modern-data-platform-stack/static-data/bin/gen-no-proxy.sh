@@ -10,12 +10,25 @@ SUBNET=${2:-10.89.0.0/16}
 ENV_FILE=${3:-.env}
 DRY_RUN=${4:-${DRY_RUN:-true}}
 
+# Lists the services of the compose file, including the ones behind a profile.
+# Instead of relying on the '--profile "*"' wildcard (not supported by all compose
+# implementations), every profile found in the file is activated explicitly.
+# Usage: list_services <compose command>   e.g. list_services docker compose
+list_services() {
+    local profile_args=()
+    local profile
+    while IFS= read -r profile; do
+        [ -n "$profile" ] && profile_args+=(--profile "$profile")
+    done < <("$@" -f "$COMPOSE_FILE" config --profiles 2>/dev/null)
+    "$@" "${profile_args[@]}" -f "$COMPOSE_FILE" config --services 2>/dev/null | tr '\n' ',' | sed 's/,$//'
+}
+
 # Try docker compose or podman compose (both support config --services)
 SERVICES=""
 if docker compose version &>/dev/null 2>&1; then
-    SERVICES=$(docker compose -f "$COMPOSE_FILE" config --services 2>/dev/null | tr '\n' ',' | sed 's/,$//')
+    SERVICES=$(list_services docker compose)
 elif podman-compose version &>/dev/null 2>&1; then
-    SERVICES=$(podman-compose -f "$COMPOSE_FILE" config --services 2>/dev/null | tr '\n' ',' | sed 's/,$//')
+    SERVICES=$(list_services podman-compose)
 fi
 
 # Fallback: parse YAML directly with awk
