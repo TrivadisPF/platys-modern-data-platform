@@ -36,6 +36,7 @@ See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/plat
  * hive-router
  * hive-yoga-server
  * apollo-rover-cli
+ * entropy-data-cli
 
 ### Version upgrades
  

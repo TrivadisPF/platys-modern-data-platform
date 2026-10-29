@@ -797,6 +797,7 @@ networks:
 {% set __DATA_CONTRACT_MANAGER_version = DATA_CONTRACT_MANAGER_version | default('latest') -%}
 {% set __DATA_CONTRACT_EDITOR_version = DATA_CONTRACT_EDITOR_version | default('latest') -%}
 {% set __DATA_CONTRACT_CLI_version = DATA_CONTRACT_CLI_version | default('latest') -%}
+{% set __ENTROPY_DATA_CLI_version = ENTROPY_DATA_CLI_version | default('latest') -%}
 
 {% set __OTEL_COLLECTOR_version = OTEL_COLLECTOR_version | default('latest') -%}
 {% set __ZIPKIN_version = ZIPKIN_version | default('latest') -%}
@@ -1214,6 +1215,7 @@ networks:
   {% set DATA_CONTRACT_MANAGER_enable = false -%}
   {% set DATA_CONTRACT_EDITOR_enable = false -%}
   {% set DATA_CONTRACT_CLI_enable = false -%}
+  {% set ENTROPY_DATA_CLI_enable = false -%}
   {% set MICROCKS_enable = false -%}
   {% set MOCK_SERVER_enable = false -%}
   {% set OTEL_COLLECTOR_enable = false %}
@@ -34830,6 +34832,39 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  DATA_CONTRACT_CLI_enable #}
+
+{% if ENTROPY_DATA_CLI_enable | default(false) %}
+  #  ================================== Entropy Data CLI ================= #
+  entropy-data-cli:
+    image: docker.io/entropydata/entropy-data-cli:{{__ENTROPY_DATA_CLI_version}}
+
+    container_name: entropy-data-cli
+    hostname: entropy-data-cli
+    labels:
+      com.platys.name: "entropy-data-cli"
+      com.platys.description: "Entropy Data CLI"
+    {%if use_timezone | default(false) %}
+    environment:
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      {{ data_transfer_volume('/data-transfer') }}
+      - {{ENTROPY_DATA_CLI_home_dir}}:/home/entropy-data:z
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    # the image's entrypoint is the CLI itself, which exits right away; override it to keep the container running
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        while [ 1 -eq 1 ];do sleep 60;done
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  ENTROPY_DATA_CLI_enable #}
 
 {% if DATA_CONTRACT_CLI_API_enable | default(false) %}
   #  ================================== Data Contract CLI API Server ================= #
