@@ -1800,9 +1800,10 @@ services:
       documentation: https://docs.redpanda.com/redpanda-connect/about/
       github: https://github.com/redpanda-data/connect
     description: >
-      Redpanda Connect (formerly Benthos) is a high-performance, declarative stream
-      processor. It connects a wide range of sources and sinks with built-in mapping,
-      enrichment, and transformation, configured through a single YAML file.
+      Redpanda Connect (formerly Benthos) is a high-performance, declarative
+      stream processor. It connects a wide range of sources and sinks with
+      built-in mapping, enrichment, and transformation, configured through a
+      single YAML file.
     enable:
       platys_init: REDPANDA_CONNECT
       example: |
@@ -1811,31 +1812,51 @@ services:
     usage:
       - title: Usage
         content: |
-          Navigate to <http://dataplatform:4195>.
+          Edit `conf/redpanda-connect/connect.yaml` to define your input, pipeline and
+          output, then run `platys gen` and start the stack.
+          
+          The HTTP health check / metrics endpoint is available at
+          <http://dataplatform:4197>.
+          
+          When Kafka is enabled, the broker list is injected into the container via the
+          `KAFKA_BROKERS` environment variable, which you can reference in the config as
+          `${KAFKA_BROKERS}`.
     parameters:
       - name: REDPANDA_CONNECT_enable
         default: "false"
         since: "1.20.0"
         description: >
-          Generate Redpanda Connect stream processing service. The configuration is read
-          from conf/redpanda-connect/connect.yaml. When Kafka is enabled, the broker list
-          is injected via the KAFKA_BROKERS environment variable.
+          Generate Redpanda Connect stream processing service. The
+          configuration is read from conf/redpanda-connect/connect.yaml. When
+          Kafka is enabled, the broker list is injected via the KAFKA_BROKERS
+          environment variable.
 
       - name: REDPANDA_CONNECT_mode
         default: "standard"
         since: "1.20.0"
-        allowed_values: ["standard", "streams"]
+        allowed_values: [standard, streams]
         description: >
-          Execution mode. 'standard' runs a single pipeline from conf/redpanda-connect/connect.yaml.
-          'streams' runs Redpanda Connect in streams mode, loading one stream per YAML file in
-          conf/redpanda-connect/streams/ (mounted into the container at /streams).
+          Execution mode. 'standard' runs a single pipeline from
+          conf/redpanda-connect/connect.yaml. 'streams' runs Redpanda Connect
+          in streams mode, loading one stream per YAML file in
+          conf/redpanda-connect/streams/ (mounted into the container at
+          /streams).
 
       - name: REDPANDA_CONNECT_watch_config_enabled
         default: "true"
         since: "1.20.0"
         description: >
-          Watch the config file(s) for changes and reload automatically (adds the --watcher flag).
-          Supported in both 'standard' and 'streams' mode.
+          Watch the config file(s) for changes and reload automatically (adds
+          the --watcher flag). Supported in both 'standard' and 'streams' mode.
+
+      - name: REDPANDA_CONNECT_additional_port_mappings
+        default: "0"
+        since: "1.20.0"
+        description: >
+          Number of additional ports to expose from the Redpanda Connect
+          service, mapped sequentially starting from external port 28740. Use
+          this when your config listens on extra ports (e.g. an http_server
+          input).
 
   - name: Nussknacker
     id: nussknacker
@@ -2371,12 +2392,12 @@ services:
     usage:
       - title: Open the AKHQ UI
         content: |
-          Navigate to <http://dataplatform:28107>.
+          Navigate to <http://dataplatform:28345>.
           If authentication is enabled, log in with the configured username and password.
     usage:
       - title: REST API
         content: |
-          The REST API is available at <http://dataplatform:28107/api>.
+          The REST API is available at <http://dataplatform:28345/api>.
           See <https://akhq.io/docs/api.html> for the full API reference.
     usage:
       - title: Monitoring endpoints
@@ -3449,6 +3470,146 @@ services:
         description: >
           the license signature
 
+  - name: Kafka Backup
+    id: kafka-backup
+    arch: [x86-64]
+    tags: []
+    dependencies: []
+    links:
+      documentation: https://github.com/osodevops/kafka-backup
+      github: https://github.com/osodevops/kafka-backup
+    description: >
+      Kafka Backup is a tool to back up and restore Kafka topics to and from
+      S3-compatible object storage.
+    enable:
+      platys_init: KAFKA
+      example: |
+        platys init --enable-services KAFKA
+        platys gen
+    parameters:
+      - name: KAFKA_BACKUP_enable
+        default: "false"
+        since: "1.20.0"
+        description: >
+          Generate Kafka Backup service
+
+      - name: KAFKA_BACKUP_volume_map_data
+        default: "false"
+        since: "1.20.0"
+        description: >
+          Volume map the data folder (./container-volume/kafka-backup/data)
+          into the Kafka Backup service
+
+      - name: KAFKA_BACKUP_s3_bucket
+        default: "admin-bucket"
+        since: "1.20.0"
+        description: >
+          S3 bucket name to store the backups in
+
+      - name: KAFKA_BACKUP_s3_prefix
+        default: ""
+        since: "1.20.0"
+        description: >
+          Key prefix (folder path) within the S3 bucket for backup objects
+
+      - name: KAFKA_BACKUP_continuous_enabled
+        default: "false"
+        since: "1.20.0"
+        description: >
+          Enable continuous backup mode; when true the backup runs indefinitely
+          consuming new messages as they arrive
+
+      - name: KAFKA_BACKUP_rust_log
+        default: "info"
+        since: "1.20.0"
+        description: >
+          Rust log level for the Kafka Backup process (trace, debug, info,
+          warn, error)
+
+  - name: Kafka Datagen
+    id: kafka-datagen
+    arch: [x86-64]
+    tags: []
+    dependencies: []
+    links:
+      documentation: https://hub.docker.com/r/spoud/kafka-datagen
+    description: >
+      Kafka Datagen generates and produces Avro-encoded messages to Kafka
+      topics using user-provided Avro schema files.
+    enable:
+      platys_init: KAFKA
+      example: |
+        platys init --enable-services KAFKA
+        platys gen
+    usage:
+      - title: Usage
+        content: |
+          Place your Avro schema file under `conf/kafka-datagen/` and reference
+          it by filename in `KAFKA_DATAGEN_schema_file`.
+    parameters:
+      - name: KAFKA_DATAGEN_enable
+        default: "false"
+        since: "1.20.0"
+        description: >
+          Generate Kafka Datagen service
+
+      - name: KAFKA_DATAGEN_topic
+        default: ""
+        since: "1.20.0"
+        description: >
+          Kafka topic to produce generated messages to
+
+      - name: KAFKA_DATAGEN_format
+        default: "json"
+        since: "1.20.0"
+        description: >
+          Message format to produce; either json or avro (avro requires Schema
+          Registry)
+
+      - name: KAFKA_DATAGEN_schema_file
+        default: "clickstream_users_schema.avro"
+        since: "1.20.0"
+        description: >
+          Avro schema file name (one of the files in here:
+          https://github.com/confluentinc/kafka-connect-datagen/tree/master/src/main/resources)
+
+      - name: KAFKA_DATAGEN_schema_keyfield
+        default: ""
+        since: "1.20.0"
+        description: >
+          Field in the schema to use as the Kafka message key
+
+      - name: KAFKA_DATAGEN_quarkus_otel_enabled
+        default: "false"
+        since: "1.20.0"
+        description: >
+          Enable OpenTelemetry tracing via Quarkus
+
+      - name: KAFKA_DATAGEN_rate
+        default: "10"
+        since: "1.20.0"
+        description: >
+          Number of messages produced per second
+
+      - name: KAFKA_DATAGEN_max_records
+        default: "0"
+        since: "1.20.0"
+        description: >
+          Maximum number of records to produce; 0 means unlimited
+
+      - name: KAFKA_DATAGEN_poison_pill_enabled
+        default: "false"
+        since: "1.20.0"
+        description: >
+          Inject poison pill messages periodically to test consumer error
+          handling
+
+      - name: KAFKA_DATAGEN_duplicate_event_enabled
+        default: "false"
+        since: "1.20.0"
+        description: >
+          Inject duplicate events to simulate at-least-once delivery scenarios
+
 
   # ---- Batch & Distributed Processing ----
 
@@ -3674,6 +3835,14 @@ services:
           Enable the DataHub agent to integrate Spark with DataHub. For it to
           take effect, either `DATAHUB_enable` or `external.DATAHUB_enable` has
           to be set to `true`.
+
+      - name: SPARK_detahub_agent_emitter
+        default: "rest"
+        since: "1.20.0"
+        allowed_values: [rest, kafka]
+        description: >
+          The emitter type used by the DataHub Spark agent to send lineage
+          events. Either `rest` (HTTP REST API) or `kafka` (Kafka topic).
 
   - name: Spark History Server
     id: spark-history
@@ -5619,6 +5788,77 @@ services:
         description: >
           Name of a custom config file to map into the FileBeat container.
 
+  - name: Vector
+    id: vector
+    arch: [x86-64]
+    tags: []
+    dependencies: []
+    links:
+      documentation: https://vector.dev/docs/
+      github: https://github.com/vectordotdev/vector
+    description: >
+      Vector is a high-performance observability data pipeline that collects,
+      transforms, and routes logs, metrics, and traces.
+    enable:
+      platys_init: VECTOR
+      example: |
+        platys init --enable-services VECTOR
+        platys gen
+    parameters:
+      - name: VECTOR_enable
+        default: "false"
+        since: "1.20.0"
+        description: >
+          Generate Vector observability data pipeline service
+
+      - name: VECTOR_nodes
+        default: "1"
+        since: "1.20.0"
+        description: >
+          Number of Vector instances to generate (vector-1, vector-2, …). Each
+          node gets its own config file (conf/vector/vector-N.yaml) and its own
+          block of additional port mappings starting from 28730 offset by node
+          index.
+
+      - name: VECTOR_volume_map_data
+        default: "false"
+        since: "1.20.0"
+        description: >
+          Volume map the data folder (./container-volume/vector) into the
+          Vector service
+
+      - name: VECTOR_log_level
+        default: "info"
+        since: "1.20.0"
+        description: >
+          Log level for Vector (trace, debug, info, warn, error)
+
+      - name: VECTOR_watch_config_enabled
+        default: "true"
+        since: "1.20.0"
+        description: >
+          Watch the configuration file for changes and automatically reload
+          Vector
+
+      - name: VECTOR_volume_map_docker_daemon
+        default: "true"
+        since: "1.20.0"
+        description: >
+          Volume map the Docker daemon socket (/var/run/docker.sock) into the
+          Vector service, needed for collecting Docker container logs and
+          metrics
+
+      - name: VECTOR_additional_port_mappings
+        default: "[0]"
+        since: "1.20.0"
+        description: >
+          Array of port counts, one entry per Vector node (maximum 3 per node).
+          Each node is allocated a fixed block of 3 ports: node 1 gets
+          28730-28732, node 2 gets 28733-28735, etc. (formula: 28730 +
+          (node_index - 1) * 3). The element value controls how many of those 3
+          ports are actually exposed. For example, [2, 0, 3] exposes ports
+          28730-28731 for node 1, none for node 2, and 28733-28735 for node 3.
+
   - name: Apache Sqoop
     id: sqoop
     arch: [x86-64]
@@ -6357,6 +6597,80 @@ services:
         since: "1.15.0"
         description: >
           Generate dbt CLI service
+
+  - name: dbt Workbench
+    id: dbt-workbench
+    arch: [x86-64]
+    tags: []
+    dependencies: [postgresql]
+    links:
+      github: https://github.com/rezer-bleede/dbt-Workbench
+    description: >
+      dbt Workbench is a web-based IDE for dbt projects. It provides a
+      browser-based interface for editing dbt models, running queries, browsing
+      documentation, and managing artifacts. The backend exposes a REST API;
+      the frontend is a Vite/React application. Requires PostgreSQL for its
+      internal metadata store.
+    enable:
+      platys_init: DBT_WORKBENCH,POSTGRESQL
+      example: |
+        platys init --enable-services DBT_WORKBENCH,POSTGRESQL
+        platys gen
+    usage:
+      - title: Usage
+        content: |
+          Navigate to <http://dataplatform:28497> to access the dbt Workbench UI.
+          The backend REST API is available at <http://dataplatform:28496>.
+    parameters:
+      - name: DBT_WORKBENCH_enable
+        default: "false"
+        since: "1.21.0"
+        description: >
+          Generate dbt Workbench service (web-based IDE for dbt projects).
+          Frontend on port `28497`, backend API on port `28496`. Requires
+          PostgreSQL.
+
+      - name: DBT_WORKBENCH_db_user
+        default: "dbt_workbench"
+        since: "1.21.0"
+        description: >
+          PostgreSQL username for the dbt Workbench metadata database.
+
+      - name: DBT_WORKBENCH_db_password
+        default: "abc123!"
+        since: "1.21.0"
+        description: >
+          PostgreSQL password for the dbt Workbench metadata database.
+
+      - name: DBT_WORKBENCH_db_name
+        default: "dbt_workbench"
+        since: "1.21.0"
+        description: >
+          PostgreSQL database name for the dbt Workbench metadata store.
+
+      - name: DBT_WORKBENCH_ai_enabled
+        default: "false"
+        since: "1.21.0"
+        description: >
+          Enable AI features in dbt Workbench (requires an OpenAI-compatible
+          API key configured separately).
+
+      - name: DBT_WORKBENCH_api_url
+        default: "http://${PUBLIC_IP:-dataplatform}:28496"
+        since: "1.21.0"
+        description: >
+          URL of the dbt Workbench backend API as seen from the browser.
+          Injected into the frontend at container startup via `sed`. Change
+          this if the backend is reachable under a different hostname or port.
+
+      - name: DBT_WORKBENCH_volume_map_data
+        default: "false"
+        since: "1.21.0"
+        description: >
+          Volume-map the `/app/data` folder of the backend container to
+          `./container-volume/dbt-workbench/data/` on the host, enabling direct
+          file access and persistent storage of dbt project files and
+          artifacts.
 
 
   # ---- Messaging & Event Brokers ----
@@ -7393,8 +7707,21 @@ services:
           A comma-separated list of Postgresql roles to assign to the users.
           Must be of same size as `POSTGRESQL_multiple_databases`. You can
           specify multiple roles for each user, separated by a colon, e.g.
-          `role1:role2,role3`. Roles that do not exist are created as
-          `NOLOGIN` roles and granted to the user.
+          `role1:role2,role3`. Roles that do not exist are created as `NOLOGIN`
+          roles and granted to the user.
+
+      - name: POSTGRESQL_multiple_schemas
+        default: ""
+        since: "1.21.0"
+        description: >
+          A comma-separated list of schemas to create in the databases on first
+          start, matched by position to `POSTGRESQL_multiple_databases`. You
+          can specify multiple schemas for each database, separated by a colon,
+          e.g. `'schema1:schema2,schema3'` creates `schema1` and `schema2` in
+          the first database and `schema3` in the second. Each schema is
+          created with `CREATE SCHEMA IF NOT EXISTS`. Additional roles
+          (`POSTGRESQL_multiple_addl_roles`) get read access to all schemas of
+          the database.
 
       - name: POSTGRESQL_wal_level
         default: ""
@@ -7480,6 +7807,115 @@ services:
         since: "1.11.0"
         description: >
           Generate PostgREST service
+
+      - name: POSTGREST_user
+        default: "postgres"
+        since: "1.21.0"
+        description: >
+          Database user PostgREST connects with
+
+      - name: POSTGREST_password
+        default: "abc123!"
+        since: "1.21.0"
+        description: >
+          Password of the database user
+
+      - name: POSTGREST_database
+        default: "postgres"
+        since: "1.21.0"
+        description: >
+          Database PostgREST connects to
+
+      - name: POSTGREST_schema
+        default: "demo"
+        since: "1.21.0"
+        description: >
+          Database schema exposed to REST clients
+
+      - name: POSTGREST_anon_role
+        default: ""
+        since: "1.21.0"
+        description: >
+          Database role used when no client authentication is provided
+          (optional)
+
+  - name: pREST
+    id: prest
+    arch: [x86-64]
+    tags: []
+    dependencies: []
+    links:
+      documentation: https://docs.prest.com.br/
+      github: https://github.com/prest/prest
+    description: >
+      pREST (PostgreSQL REST) is a fully RESTful API from any existing
+      PostgreSQL database, written in Go.
+    enable:
+      platys_init: PREST
+      example: |
+        platys init --enable-services PREST
+        platys gen
+    parameters:
+      - name: PREST_enable
+        default: "false"
+        since: "1.20.0"
+        description: >
+          Generate pREST service
+
+      - name: PREST_debug
+        default: "false"
+        since: "1.20.0"
+        description: >
+          Enable debug mode for pREST
+
+      - name: PREST_auth_enabled
+        default: "true"
+        since: "1.20.0"
+        description: >
+          Enable authentication for pREST
+
+      - name: PREST_pg_host
+        default: "postgresql"
+        since: "1.20.0"
+        description: >
+          PostgreSQL host for pREST to connect to
+
+      - name: PREST_pg_user
+        default: "postgres"
+        since: "1.20.0"
+        description: >
+          PostgreSQL user for pREST to connect with
+
+      - name: PREST_pg_password
+        default: "postgres"
+        since: "1.20.0"
+        description: >
+          PostgreSQL password for pREST to connect with
+
+      - name: PREST_pg_database
+        default: "postgres"
+        since: "1.20.0"
+        description: >
+          PostgreSQL database for pREST to connect to
+
+      - name: PREST_pg_port
+        default: "5432"
+        since: "1.20.0"
+        description: >
+          PostgreSQL port for pREST to connect to
+
+      - name: PREST_ssl_mode
+        default: "disable"
+        since: "1.20.0"
+        description: >
+          PostgreSQL SSL mode (`disable`, `require`, `verify-ca`,
+          `verify-full`)
+
+      - name: PREST_cache_enabled
+        default: "false"
+        since: "1.20.0"
+        description: >
+          Enable caching in pREST
 
   - name: Timescale
     id: timescaledb
@@ -12081,6 +12517,48 @@ services:
         description: >
           Generate Prometheus Alertmanager service
 
+  - name: Grafana Mimir
+    id: mimir
+    arch: [x86-64]
+    tags: []
+    dependencies: []
+    links:
+      documentation: https://grafana.com/docs/mimir/latest/
+      github: https://github.com/grafana/mimir
+    description: >
+      Grafana Mimir is an open-source, horizontally scalable, highly available,
+      multi-tenant, long-term storage for Prometheus metrics.
+    enable:
+      platys_init: MIMIR
+      example: |
+        platys init --enable-services MIMIR
+        platys gen
+    usage:
+      - title: Usage
+        content: |
+          Navigate to <http://dataplatform:9104>
+    parameters:
+      - name: MIMIR_enable
+        default: "false"
+        since: "1.20.0"
+        description: >
+          Generate Grafana Mimir service
+
+      - name: MIMIR_volume_map_data
+        default: "false"
+        since: "1.20.0"
+        description: >
+          Volume map the data folder (./container-volume/mimir) into the Mimir
+          service
+
+      - name: MIMIR_target
+        default: "all"
+        since: "1.20.0"
+        description: >
+          Mimir deployment target; all runs all components in a single process;
+          can also be a specific component (ingester, querier, distributor,
+          ...)
+
   - name: Tile38
     id: tile38
     arch: [x86-64]
@@ -12196,9 +12674,9 @@ services:
         default: "true"
         since: "1.21.0"
         description: >
-          Enable the `minio-mc` sidecar container (MinIO Client CLI) that pre-creates
-          buckets and optionally uploads data-transfer content on startup.
-          When `false`, no `minio-mc` container is started.
+          Enable the `minio-mc` sidecar container (MinIO Client CLI) that
+          pre-creates buckets and optionally uploads data-transfer content on
+          startup. When `false`, no `minio-mc` container is started.
 
       - name: MINIO_upload_data_transfer_to_bucket_enabled
         default: "false"
@@ -12614,9 +13092,9 @@ services:
         default: "true"
         since: "1.21.0"
         description: >
-          Enable the `rustfs-mc` sidecar container (MinIO Client CLI) that pre-creates
-          buckets and optionally uploads data-transfer content on startup.
-          When `false`, no `rustfs-mc` container is started.
+          Enable the `rustfs-mc` sidecar container (MinIO Client CLI) that
+          pre-creates buckets and optionally uploads data-transfer content on
+          startup. When `false`, no `rustfs-mc` container is started.
 
       - name: RUSTFS_upload_data_transfer_to_bucket_enabled
         default: "false"
@@ -13573,45 +14051,18 @@ services:
         description: >
           The database user password.
 
+      - name: POLARIS_db_schema
+        default: "polaris_schema"
+        since: "1.21.0"
+        description: >
+          The database schema name Polaris uses to store its metadata tables.
+
       - name: POLARIS_ui_enabled
         default: "false"
         since: "1.20.0"
         description: >
           Generate Polaris UI service (Web UI for Apache Polaris). Requires
           `POLARIS_enable` to be `true`.
-
-      - name: POLARIS_default_storage_location
-        default: "s3a://admin-bucket"
-        since: "1.20.0"
-        description: >
-          Default base storage location for the Polaris catalog, used as the
-          `default-base-location` property when the catalog is created by the
-          setup container. Must be an S3 (`s3a://`), GCS (`gs://`), or ADLS path.
-
-      - name: POLARIS_allowed_storage_locations
-        default: ""
-        since: "1.21.0"
-        description: >
-          Comma-separated list of storage locations injected into `allowedLocations`
-          of the catalog's `storageConfigInfo`, e.g. `'s3a://bucket-a,s3a://bucket-b'`.
-          When empty, defaults to a single-element array containing
-          `POLARIS_default_storage_location`.
-
-      - name: POLARIS_namespace
-        default: ""
-        since: "1.21.0"
-        description: >
-          If set, the setup container creates this namespace inside the catalog on
-          first start via the Iceberg REST API, e.g. `'my_namespace'`. Leave empty
-          to skip namespace creation.
-
-      - name: POLARIS_namespace_storage_location
-        default: ""
-        since: "1.21.0"
-        description: >
-          Storage location for the default namespace. Defaults to
-          `POLARIS_default_storage_location` when empty. Used as the namespace
-          `location` property (`<value>/<namespace>`).
 
   - name: Gravitino
     id: gravitino
@@ -13702,13 +14153,19 @@ services:
     usage:
       - title: Usage
         content: |
-          Navigate to <http://dataplatform:28463>.
+          Navigate to <http://dataplatform:28511>.
     parameters:
       - name: NIMTABLE_enable
         default: "false"
         since: "1.19.0"
         description: >
           Generate Nimtable service
+
+      - name: NIMTABLE_admin_password
+        default: "abc123!"
+        since: "1.20.0"
+        description: >
+          Password for the Nimtable admin user.
 
   - name: Lakevision
     id: lakevision
@@ -17906,7 +18363,7 @@ services:
     usage:
       - title: Connect to Apache Superset
         content: |
-          Navigate to <http://${PUBLIC_IP}:28151>
+          Navigate to <http://${PUBLIC_IP}:28463>
     parameters:
       - name: SUPERSET_enable
         default: "false"
@@ -17919,6 +18376,37 @@ services:
         since: "1.11.0"
         description: >
           Provision Superset examples?
+
+      - name: SUPERSET_volume_map_superset_home
+        default: "false"
+        since: "1.21.0"
+        description: >
+          Map the Superset home directory (`/app/superset_home`) to
+          `./container-volume/superset` on the host for persistent storage.
+
+      - name: SUPERSET_admin_password
+        default: "abc123!"
+        since: "1.21.0"
+        sensitive: true
+        description: >
+          Password for the default Superset admin user created on first start.
+
+      - name: SUPERSET_additional_requirements
+        default: ""
+        since: "1.21.0"
+        description: >
+          Space-delimited list of additional Python packages to install into
+          Superset at startup (e.g. `'trino sqlalchemy-trino'`). Packages are
+          appended to `requirements-local.txt` before the bootstrap script
+          runs.
+
+      - name: SUPERSET_mcp_enabled
+        default: "false"
+        since: "1.21.0"
+        description: >
+          Generate the Superset MCP (Model Context Protocol) server sidecar,
+          exposing Superset charts and dashboards to AI agents via the MCP
+          protocol on port 5008.
 
   - name: Redash
     id: redash
@@ -17971,9 +18459,9 @@ services:
     usage:
       - title: Usage
         content: |
-          In dev mode, navigate to the Developer Playground at <http://dataplatform:4003>.
+          In dev mode, navigate to the Developer Playground at <http://dataplatform:28464>.
           
-          The Cube.js REST API is available at <http://dataplatform:4003/cubejs-api/v1>.
+          The Cube.js REST API is available at <http://dataplatform:28464/cubejs-api/v1>.
           s
     parameters:
       - name: CUBEJS_enable
@@ -18008,7 +18496,7 @@ services:
     usage:
       - title: Usage
         content: |
-          Navigate to <http://dataplatform:28340>. 
+          Navigate to <http://dataplatform:28630>.
           
           By default the `HelloWorld` Streamlit application is used which is available in `./scripts/streamlit/apps/hello-world/hello-world.py`. Just create your application by adding a new folder to the `./scripts/streamlit/apps` and place the python code there. 
           
@@ -18882,6 +19370,19 @@ services:
         description: >
           Generate New Kafka Lag Exporter service
 
+      - name: KLAG_mcp_enabled
+        default: "false"
+        since: "1.20.0"
+        description: >
+          Enable the MCP (Model Context Protocol) server endpoint on KLag
+
+      - name: KLAG_mcp_auth_token
+        default: ""
+        since: "1.20.0"
+        description: >
+          Authentication token for the KLag MCP server endpoint; if empty the
+          endpoint is unauthenticated
+
   - name: Remora
     id: remora
     arch: [x86-64]
@@ -19404,6 +19905,13 @@ services:
         sensitive: true
         description: >
           Allows for changing the datahub secret.
+
+      - name: DATAHUB_datahub_password
+        default: "abc123!"
+        since: "1.20.0"
+        sensitive: true
+        description: >
+          Password for the default `datahub` admin user created on first start.
 
       - name: DATAHUB_map_user_props
         default: "false"
@@ -21223,38 +21731,6 @@ services:
         description: >
           the folder (home director) which is mapped into the container
 
-  - name: Entropy Data CLI
-    id: entropy-data-cli
-    arch: [x86-64, arm]
-    tags: []
-    dependencies: []
-    links:
-      website: https://entropy-data.com/
-      docker: https://hub.docker.com/r/entropydata/entropy-data-cli
-    description: >
-      Command line interface for Entropy Data
-    enable:
-      platys_init: ENTROPY_DATA_CLI
-      example: |
-        platys init --enable-services ENTROPY_DATA_CLI
-        platys gen
-    usage:
-      - title: Usage
-        content: |
-          The container keeps running, use `docker exec -ti entropy-data-cli entropy-data --help` to get started
-    parameters:
-      - name: ENTROPY_DATA_CLI_enable
-        default: "false"
-        since: "1.21.0"
-        description: >
-          Generate Entropy Data CLI service
-
-      - name: ENTROPY_DATA_CLI_home_dir
-        default: "${PWD}"
-        since: "1.21.0"
-        description: >
-          the folder (home directory) which is mapped into the container at `/home/entropy-data`
-
   - name: Data Contract CLI API
     id: data-contract-cli-api
     arch: [x86-64]
@@ -21280,6 +21756,34 @@ services:
         since: "1.19.0"
         description: >
           Generate Data Contract CLI API service
+
+  - name: Entropy Data CLI
+    id: entropy-data-cli
+    arch: [x86-64, arm]
+    tags: []
+    dependencies: []
+    links:
+      website: https://entropy-data.com/
+    description: >
+      Command line interface for Entropy Data
+    enable:
+      platys_init: ENTROPY_DATA_CLI
+      example: |
+        platys init --enable-services ENTROPY_DATA_CLI
+        platys gen
+    parameters:
+      - name: ENTROPY_DATA_CLI_enable
+        default: "false"
+        since: "1.21.0"
+        description: >
+          Generate Entropy Data CLI service
+
+      - name: ENTROPY_DATA_CLI_home_dir
+        default: "${PWD}"
+        since: "1.21.0"
+        description: >
+          the folder (home directory) which is mapped into the container at
+          `/home/entropy-data`
 
 
   # ---- Process Orchestration ----
@@ -21533,6 +22037,32 @@ services:
         description: >
           Map the platform root into the editor, so files can be edited which
           are part of the platform.
+
+      - name: CODE_SERVER_workspace_folder
+        default: "/config/workspace"
+        since: "1.21.0"
+        description: >
+          The default workspace folder opened in the editor (sets the
+          DEFAULT_WORKSPACE environment variable). It is also mapped to
+          ./container-volume/code-server/workspace on the Docker host.
+
+      - name: CODE_SERVER_volume_map_modcache
+        default: "false"
+        since: "1.21.0"
+        description: >
+          Map the local plugins/code-server/ folder into the container at
+          /modcache. Use this to cache or pre-provide Docker Mod content so it
+          persists across container restarts.
+
+      - name: CODE_SERVER_docker_mods
+        default: ""
+        since: "1.21.0"
+        description: >
+          Pass one or more linuxserver.io Docker Mods to the container via the
+          DOCKER_MODS environment variable. Mods install additional packages or
+          apply modifications at container startup. Use a single mod image
+          (e.g. linuxserver/mods:code-server-python3) or a pipe-separated list
+          for multiple mods. Leave empty to not apply any mods.
 
   - name: Coder
     id: coder
@@ -22104,121 +22634,6 @@ services:
         description: >
           Generate WeTTY service (Terminal over HTTP)
 
-  - name: dbt Workbench
-    id: dbt-workbench
-    arch: [x86-64]
-    tags: []
-    dependencies:
-      - postgresql
-    links:
-      github: https://github.com/rezer-bleede/dbt-Workbench
-    description: >
-      dbt Workbench is a web-based IDE for dbt projects. It provides a browser-based
-      interface for editing dbt models, running queries, browsing documentation, and
-      managing artifacts. Requires PostgreSQL for its internal metadata store.
-    enable:
-      platys_init: DBT_WORKBENCH,POSTGRESQL
-      example: |
-        platys init --enable-services DBT_WORKBENCH,POSTGRESQL
-        platys gen
-    usage:
-      - title: Usage
-        content: |
-          Navigate to <http://dataplatform:28497> to access the dbt Workbench UI.
-          The backend REST API is available at <http://dataplatform:28496>.
-    parameters:
-      - name: DBT_WORKBENCH_enable
-        default: "false"
-        since: "1.21.0"
-        description: >
-          Generate dbt Workbench service. Frontend on port `28497`, backend API on port `28496`.
-
-      - name: DBT_WORKBENCH_db_user
-        default: "dbt_workbench"
-        since: "1.21.0"
-        description: >
-          PostgreSQL username for the dbt Workbench metadata database.
-
-      - name: DBT_WORKBENCH_db_password
-        default: "abc123!"
-        since: "1.21.0"
-        description: >
-          PostgreSQL password for the dbt Workbench metadata database.
-
-      - name: DBT_WORKBENCH_db_name
-        default: "dbt_workbench"
-        since: "1.21.0"
-        description: >
-          PostgreSQL database name for the dbt Workbench metadata store.
-
-      - name: DBT_WORKBENCH_ai_enabled
-        default: "false"
-        since: "1.21.0"
-        description: >
-          Enable AI features in dbt Workbench.
-
-  - name: Forgejo
-    id: forgejo
-    arch: [x86-64]
-    tags: []
-    dependencies: []
-    links:
-      website: https://forgejo.org/
-      documentation: https://forgejo.org/docs/latest/
-      github: https://codeberg.org/forgejo/forgejo
-    description: >
-      Forgejo is a lightweight, self-hosted Git service. It provides repositories,
-      issue tracking, pull requests, CI/CD integration, and a web UI, making it a
-      drop-in alternative to GitHub or GitLab for on-premises use.
-    enable:
-      platys_init: FORGEJO
-      example: |
-        platys init --enable-services FORGEJO
-        platys gen
-    usage:
-      - title: Usage
-        content: |
-          Navigate to <http://dataplatform:3004> to access the Forgejo web UI.
-          SSH clone URL: `ssh://git@dataplatform:2223/<user>/<repo>.git`
-    parameters:
-      - name: FORGEJO_enable
-        default: "false"
-        since: "1.21.0"
-        description: >
-          Generate Forgejo service (lightweight self-hosted Git service).
-          Web UI on port `3004`, SSH on port `2223`.
-
-  - name: mitmproxy
-    id: mitmproxy
-    arch: [x86-64]
-    tags: []
-    dependencies: []
-    links:
-      website: https://mitmproxy.org/
-      documentation: https://docs.mitmproxy.org/
-      github: https://github.com/mitmproxy/mitmproxy
-    description: >
-      mitmproxy is a free and open source interactive HTTPS proxy. It allows you
-      to intercept, inspect, modify and replay web traffic, making it ideal for
-      debugging and testing HTTP/HTTPS-based applications.
-    enable:
-      platys_init: MITMPROXY
-      example: |
-        platys init --enable-services MITMPROXY
-        platys gen
-    usage:
-      - title: Access mitmproxy Web UI
-        content: |
-          Navigate to <http://dataplatform:9050> to access the mitmweb interface.
-          Configure your client to use `dataplatform:9051` as the HTTP/HTTPS proxy.
-    parameters:
-      - name: MITMPROXY_enable
-        default: "false"
-        since: "1.21.0"
-        description: >
-          Generate mitmproxy service (interactive HTTPS proxy for debugging and testing).
-          Proxy on port `9051`, web UI on port `9050`.
-
   - name: Raneto
     id: raneto
     arch: [x86-64]
@@ -22342,12 +22757,14 @@ services:
         description: >
           Generate a web page with the details on the data platform.
 
-      - name: MARKDOWN_VIEWER_use_port_80
-        default: "true"
-        since: "1.10.0"
+      - name: MARKDOWN_VIEWER_external_port
+        default: "80"
+        since: "1.21.0"
         description: >
-          Use Port `80` for the markdown viewer? If set to `false`, port `8008`
-          is used.
+          The external port to use for the markdown viewer. The ports `80-82`
+          are reserved in the port mapping markdown as well as `8008-8010`. If
+          `environment_to_use` is set to `2` or `3` then the port is increased
+          by `+1` or `+2`.
 
       - name: MARKDOWN_VIEWER_use_public_ip
         default: "true"
@@ -22528,6 +22945,23 @@ services:
         description: >
           Python packages to install, as a space separated list of packages: `
           `
+
+      - name: PYTHON_supervisord_enabled
+        default: "false"
+        since: "1.21.0"
+        description: >
+          Run the container under supervisord, so that multiple python scripts
+          can be run side by side. If enabled, `PYTHON_script_to_run` is
+          ignored and the programs are defined in the supervisord configuration
+          file.
+
+      - name: PYTHON_supervisord_config_file
+        default: "supervisord.conf"
+        since: "1.21.0"
+        description: >
+          the filename of the supervisord configuration file (please note that
+          the file should be in the folder mounted using
+          `PYTHON_artefacts_folder`)
 
   - name: Nuclio
     id: nuclio
@@ -22957,6 +23391,12 @@ services:
         since: "1.20.0"
         description: >
           Generate Sonatype Nexus Repository Manager service.
+
+      - name: NEXUS_compose_profile
+        default: ""
+        since: "1.20.0"
+        description: >
+          The docker compose profile the service should run in.
 
       - name: NEXUS_volume_map_data
         default: "false"
@@ -23611,6 +24051,52 @@ services:
         description: >
           Enable Apicurio Registry.
 
+  - name: Apollo Rover CLI
+    id: apollo-rover-cli
+    arch: [x86-64]
+    tags: []
+    dependencies: []
+    links:
+      website: https://www.apollographql.com/docs/rover
+      documentation: https://www.apollographql.com/docs/rover
+      github: https://github.com/apollographql/rover
+    description: >
+      Rover is the command-line interface for Apollo GraphOS. In the Platys
+      platform it runs as a long-lived utility container with the required
+      plugins (i.e. supergraph) installed, so you can compose supergraphs from
+      your subgraphs with docker exec.
+    enable:
+      platys_init: APOLLO_ROVER_CLI
+      example: |
+        platys init --enable-services APOLLO_ROVER_CLI
+        platys gen
+    usage:
+      - title: Usage
+        content: |
+          The platform folder is mounted at /workspace. Run rover through docker exec, i.e.
+          docker exec apollo-rover-cli rover supergraph compose --config custom-conf/hive-router/supergraph.yaml
+    parameters:
+      - name: APOLLO_ROVER_CLI_enable
+        default: "false"
+        since: "1.21.0"
+        description: >
+          Generate Apollo Rover CLI container.
+
+      - name: APOLLO_ROVER_CLI_plugins
+        default: ""
+        since: "1.21.0"
+        description: >
+          Comma-separated list of rover plugins installed on container start,
+          one rover plugin install command per entry (i.e.
+          supergraph@2,subgraph@2).
+
+      - name: APOLLO_ROVER_CLI_log_level
+        default: ""
+        since: "1.21.0"
+        description: >
+          Log level of rover (error, warn, info, debug, trace), set through the
+          APOLLO_LOG_LEVEL environment variable. Leave empty to not set it.
+
   - name: Confluent Control Center
     id: confluent-control-center
     arch: [x86-64]
@@ -23671,6 +24157,73 @@ services:
         description: >
           Generate Confluent Control Center Next Generation service
 
+  - name: Dockhand
+    id: dockhand
+    arch: [x86-64]
+    tags: []
+    dependencies: []
+    links:
+      website: https://github.com/fnsys/dockhand
+      documentation: https://github.com/fnsys/dockhand
+      github: https://github.com/fnsys/dockhand
+    description: >
+      Dockhand is a lightweight Docker container management UI that lets you
+      view, start, stop, and manage containers directly from your browser.
+    enable:
+      platys_init: DOCKHAND
+      example: |
+        platys init --enable-services DOCKHAND
+        platys gen
+    usage:
+      - title: Usage
+        content: |
+          Navigate to <http://dataplatform:28349>.
+    parameters:
+      - name: DOCKHAND_enable
+        default: "false"
+        since: "1.21.0"
+        description: >
+          Generate Dockhand Docker container management UI service
+
+      - name: DOCKHAND_volume_map_data
+        default: "false"
+        since: "1.21.0"
+        description: >
+          Map the Dockhand data directory (`/app/data`) to
+          `./container-volume/dockhand` on the host for persistent storage.
+
+  - name: Forgejo
+    id: forgejo
+    arch: [x86-64]
+    tags: []
+    dependencies: []
+    links:
+      website: https://forgejo.org/
+      documentation: https://forgejo.org/docs/latest/
+      github: https://codeberg.org/forgejo/forgejo
+    description: >
+      Forgejo is a lightweight, self-hosted Git service. It provides
+      repositories, issue tracking, pull requests, CI/CD integration, and a web
+      UI, making it a drop-in alternative to GitHub or GitLab for on-premises
+      use.
+    enable:
+      platys_init: FORGEJO
+      example: |
+        platys init --enable-services FORGEJO
+        platys gen
+    usage:
+      - title: Usage
+        content: |
+          Navigate to <http://dataplatform:3004> to access the Forgejo web UI.
+          SSH clone URL: `ssh://git@dataplatform:2223/<user>/<repo>.git`
+    parameters:
+      - name: FORGEJO_enable
+        default: "false"
+        since: "1.21.0"
+        description: >
+          Generate Forgejo service (lightweight self-hosted Git service). Web
+          UI on port `3004`, SSH on port `2223`.
+
   - name: Gravitino Iceberg REST Server
     id: gravitino-iceberg-rest
     arch: [x86-64]
@@ -23698,4 +24251,477 @@ services:
         since: "1.19.0"
         description: >
           Generate Gravitino Iceberg REST service
+
+  - name: GraphQL Hive Console
+    id: hive-console
+    arch: [x86-64]
+    tags: []
+    dependencies: [postgresql, redis, clickhouse, kafka]
+    links:
+      website: https://the-guild.dev/graphql/hive
+      documentation: https://the-guild.dev/graphql/hive/docs
+      github: https://github.com/graphql-hive/console
+    description: >
+      GraphQL Hive is an open-source schema registry, observability and
+      governance platform for GraphQL. The self-hosted Console is composed of
+      several micro-services (app, server, schema, policy, workflows, usage,
+      usage-ingestor) plus a one-off DB migration job, all prefixed with
+      hive-console-.
+    enable:
+      platys_init: HIVE_CONSOLE
+      example: |
+        platys init --enable-services POSTGRESQL,REDIS,CLICKHOUSE,KAFKA,MINIO,HIVE_CONSOLE
+        platys gen
+    usage:
+      - title: Usage
+        content: |
+          The web console is available at <http://dataplatform:28107>, the GraphQL API at
+          <http://dataplatform:28108/graphql> and the usage ingestion API at
+          <http://dataplatform:28109>.
+          
+          Hive Console reuses the Platys postgresql, redis-1, clickhouse, kafka and the
+          selected S3 service. These must be enabled alongside HIVE_CONSOLE. The S3 buckets
+          `artifacts` and `audit-logs`, and the Kafka topic `usage_reports_v2`, are required.
+    parameters:
+      - name: HIVE_CONSOLE_enable
+        default: "false"
+        since: "1.21.0"
+        description: >
+          Generate GraphQL Hive Console (self-hosted). Requires POSTGRESQL,
+          REDIS, CLICKHOUSE, KAFKA and an S3 service (s3_service_to_use) to be
+          enabled.
+
+      - name: HIVE_CONSOLE_log_level
+        default: "debug"
+        since: "1.21.0"
+        allowed_values: [debug, info, warn, error]
+        description: >
+          Log level applied to all Hive Console services.
+
+      - name: HIVE_CONSOLE_encryption_secret
+        default: "wywyryf9p225kuvarygyb8pyszwkrecx"
+        since: "1.21.0"
+        description: >
+          32-character secret used to encrypt sensitive data at rest. Change
+          for anything beyond local testing.
+
+      - name: HIVE_CONSOLE_supertokens_access_token_key
+        default: "qhhhcepkvllbvdvccenbyfcganxoscxt"
+        since: "1.21.0"
+        description: >
+          SuperTokens access-token signing key. Change for anything beyond
+          local testing.
+
+      - name: HIVE_CONSOLE_supertokens_refresh_token_key
+        default: "qhhhcepkvllbvdvccenbyfcganxoscxt"
+        since: "1.21.0"
+        description: >
+          SuperTokens refresh-token signing key. Change for anything beyond
+          local testing.
+
+      - name: HIVE_CONSOLE_cdn_auth_private_key
+        default: "kglbtqvqfvncuujxqdfqcscghfxkbrgy"
+        since: "1.21.0"
+        description: >
+          Private key used to sign CDN access tokens. Change for anything
+          beyond local testing.
+
+  - name: GraphQL Hive Gateway
+    id: hive-gateway
+    arch: [x86-64]
+    tags: []
+    dependencies: []
+    links:
+      website: https://the-guild.dev/graphql/hive/docs/gateway
+      documentation: https://the-guild.dev/graphql/hive/docs/gateway
+      github: https://github.com/graphql-hive/gateway
+    description: >
+      GraphQL Hive Gateway is a fully open-source, highly performant GraphQL
+      gateway compatible with Apollo Federation. It serves a composed
+      supergraph and routes queries to the underlying subgraphs.
+    enable:
+      platys_init: HIVE_GATEWAY
+      example: |
+        platys init --enable-services HIVE_GATEWAY
+        platys gen
+    usage:
+      - title: Usage
+        content: |
+          Place your composed supergraph SDL in custom-conf/hive-gateway/ (default file name
+          supergraph.graphql, configurable via HIVE_GATEWAY_supergraph_file), then run
+          platys gen. The gateway GraphQL endpoint is available at
+          <http://dataplatform:28147/graphql>.
+    parameters:
+      - name: HIVE_GATEWAY_enable
+        default: "false"
+        since: "1.21.0"
+        description: >
+          Generate GraphQL Hive Gateway, a federation gateway serving a
+          composed supergraph.
+
+      - name: HIVE_GATEWAY_supergraph_file
+        default: "supergraph.graphql"
+        since: "1.21.0"
+        description: >
+          Name of the supergraph schema file placed in
+          custom-conf/hive-gateway/ that the gateway serves. It is mounted into
+          the container at /gateway/.
+
+      - name: HIVE_GATEWAY_log_level
+        default: "info"
+        since: "1.21.0"
+        allowed_values: [debug, info, warn, error]
+        description: >
+          Log level for the gateway.
+
+  - name: GraphQL Hive Router
+    id: hive-router
+    arch: [x86-64]
+    tags: []
+    dependencies: []
+    links:
+      website: https://the-guild.dev/graphql/hive/docs/router
+      documentation: https://the-guild.dev/graphql/hive/docs/router
+      github: https://github.com/graphql-hive/router
+    description: >
+      GraphQL Hive Router is a high-performance GraphQL federation router
+      written in Rust. It serves a composed supergraph and routes queries to
+      the underlying subgraphs.
+    enable:
+      platys_init: HIVE_ROUTER
+      example: |
+        platys init --enable-services HIVE_ROUTER
+        platys gen
+    usage:
+      - title: Usage
+        content: |
+          Place your composed supergraph SDL in custom-conf/hive-router/ (default file name
+          supergraph.graphql, configurable via HIVE_ROUTER_supergraph_file), then run
+          platys gen. The router GraphQL endpoint is available at
+          <http://dataplatform:28148/graphql>.
+    parameters:
+      - name: HIVE_ROUTER_enable
+        default: "false"
+        since: "1.21.0"
+        description: >
+          Generate GraphQL Hive Router, a high-performance Rust federation
+          router serving a composed supergraph.
+
+      - name: HIVE_ROUTER_supergraph_file
+        default: "supergraph.graphql"
+        since: "1.21.0"
+        description: >
+          Name of the supergraph schema file placed in custom-conf/hive-router/
+          that the router serves. It is mounted into the container at /app/ and
+          referenced via the SUPERGRAPH_FILE_PATH environment variable.
+
+      - name: HIVE_ROUTER_config_file
+        default: ""
+        since: "1.21.0"
+        description: >
+          Name of the router config file placed in custom-conf/hive-router/,
+          mounted into the container at /app/. Leave empty to not mount one.
+
+  - name: GraphQL Hive Yoga
+    id: hive-yoga-server
+    arch: [x86-64]
+    tags: []
+    dependencies: []
+    links:
+      website: https://the-guild.dev/graphql/yoga-server
+      documentation: https://the-guild.dev/graphql/yoga-server/docs
+      github: https://github.com/graphql-hive/graphql-yoga
+    description: >
+      GraphQL Yoga is a fully-featured, batteries-included GraphQL server. In
+      the Platys platform it runs one or more lightweight GraphQL subgraph
+      servers that can be federated by the Hive Router or Hive Gateway.
+    enable:
+      platys_init: HIVE_YOGA_SERVER
+      example: |
+        platys init --enable-services HIVE_YOGA_SERVER
+        platys gen
+    usage:
+      - title: Usage
+        content: |
+          Each node is built from init/hive-yoga-server/Dockerfile and runs the GraphQL server
+          mounted from scripts/hive-yoga-server/server-<N>.mjs (at /app/server.mjs). Edit these
+          files to define each subgraph. Node 1 GraphQL endpoint is available at
+          <http://dataplatform:28162/graphql>, node 2 at 28163, and so on (28162 + (N-1)).
+    parameters:
+      - name: HIVE_YOGA_SERVER_enable
+        default: "false"
+        since: "1.21.0"
+        description: >
+          Generate one or more GraphQL Yoga subgraph servers.
+
+      - name: HIVE_YOGA_SERVER_nodes
+        default: "1"
+        since: "1.21.0"
+        description: >
+          Number of GraphQL Yoga subgraph instances to generate
+          (hive-yoga-server-1, hive-yoga-server-2, ...). Only the first 5 nodes
+          get a host port published (28162 + (N-1), i.e. 28162-28166); further
+          nodes are reachable only over the Docker network on port 3001. Each
+          node loads its server implementation from
+          scripts/hive-yoga-server/server-<N>.mjs. Provide a matching
+          server-<N>.mjs file for each node.
+
+  - name: Karapace Schema Registry
+    id: karapace-schema-registry
+    arch: [x86-64]
+    tags: []
+    dependencies: []
+    links:
+      website: https://karapace.io
+      documentation: https://karapace.io/docs/
+      github: https://github.com/aiven-open/karapace
+    description: >
+      Karapace is an open-source Confluent-compatible Schema Registry
+      implementation by Aiven. It stores schemas (Avro, JSON Schema, Protobuf)
+      in a Kafka topic and exposes the Confluent Schema Registry REST API,
+      making it a drop-in replacement.
+    enable:
+      platys_init: SCHEMA_REGISTRY
+      example: |
+        platys init --enable-services SCHEMA_REGISTRY
+        platys gen
+    usage:
+      - title: Usage
+        content: |
+          Set `SCHEMA_REGISTRY_flavour: karapace` in `config.yml` to use Karapace.
+          
+          Navigate to <http://dataplatform:8081> to access the Schema Registry REST API.
+    parameters:
+      - name: SCHEMA_REGISTRY_karapace_group_id
+        default: "karapace-schema-registry"
+        since: "1.20.0"
+        description: >
+          Kafka consumer group ID used by Karapace to store and read schema
+          data.
+
+      - name: SCHEMA_REGISTRY_karapace_log_level
+        default: "INFO"
+        since: "1.20.0"
+        allowed_values: [DEBUG, INFO, WARNING, ERROR]
+        description: >
+          Log level for the Karapace process.
+
+      - name: SCHEMA_REGISTRY_karapace_master_election_strategy
+        default: "highest"
+        since: "1.20.0"
+        allowed_values: [highest, lowest]
+        description: >
+          Strategy used to elect the primary (master) Karapace node in a
+          multi-node setup.
+
+  - name: PostGraphile
+    id: postgraphile
+    arch: [x86-64]
+    tags: []
+    dependencies: [postgresql]
+    links:
+      website: https://www.graphile.org/postgraphile/
+      documentation: https://www.graphile.org/postgraphile/introduction/
+      github: https://github.com/graphile/postgraphile
+    description: >
+      PostGraphile builds a powerful, extensible and performant GraphQL API
+      from a PostgreSQL schema in seconds, serving the GraphQL API and the
+      GraphiQL IDE over HTTP.
+    enable:
+      platys_init: POST_GRAPHILE
+      example: |
+        platys init --enable-services POSTGRESQL,POST_GRAPHILE
+        platys gen
+    usage:
+      - title: Usage
+        content: |
+          Navigate to <http://dataplatform:28151/graphiql> to use the GraphiQL IDE, or
+          query the GraphQL API at <http://dataplatform:28151/graphql>.
+          
+          Requires a running PostgreSQL (the built-in `POSTGRESQL` service or an external one).
+    parameters:
+      - name: POST_GRAPHILE_enable
+        default: "false"
+        since: "1.21.0"
+        description: >
+          Generate PostGraphile service, an instant GraphQL API for a
+          PostgreSQL database.
+
+      - name: POST_GRAPHILE_postgres_database
+        default: "postgres"
+        since: "1.21.0"
+        description: >
+          The PostgreSQL database to expose as a GraphQL API.
+
+      - name: POST_GRAPHILE_postgres_user
+        default: "postgres"
+        since: "1.21.0"
+        description: >
+          The PostgreSQL user to connect as.
+
+      - name: POST_GRAPHILE_postgres_password
+        default: "abc123!"
+        since: "1.21.0"
+        description: >
+          The PostgreSQL password to connect with. Can be overridden at runtime
+          via the PLATYS_POSTGRESQL_PASSWORD environment variable.
+
+      - name: POST_GRAPHILE_schema
+        default: "public"
+        since: "1.21.0"
+        description: >
+          The PostgreSQL schema (or comma-separated list of schemas) to expose
+          through GraphQL.
+
+      - name: POST_GRAPHILE_watch
+        default: "true"
+        since: "1.21.0"
+        description: >
+          Watch the database for schema changes and automatically update the
+          GraphQL API (adds the --watch flag).
+
+      - name: POST_GRAPHILE_enhance_graphiql
+        default: "true"
+        since: "1.21.0"
+        description: >
+          Enable the enhanced GraphiQL interface (adds the --enhance-graphiql
+          flag).
+
+      - name: POST_GRAPHILE_dynamic_json
+        default: "true"
+        since: "1.21.0"
+        description: >
+          Represent JSON and JSONB values as dynamic JSON rather than strings
+          (adds the --dynamic-json flag).
+
+      - name: POST_GRAPHILE_plugins
+        default: ""
+        since: "1.21.0"
+        description: >
+          Comma-separated list of npm packages to install at container start
+          and load as PostGraphile plugins (adds the --append-plugins flag).
+          Leave empty to install and load no plugins.
+
+  - name: Restate
+    id: restate
+    arch: [x86-64]
+    tags: []
+    dependencies: []
+    links:
+      website: https://restate.dev
+      documentation: https://docs.restate.dev
+      github: https://github.com/restatedev/restate
+    description: >
+      Restate is a durable execution engine that makes building resilient
+      distributed applications simple. It provides durable functions,
+      workflows, and event-driven patterns with built-in retries, persistence,
+      and exactly-once semantics.
+    enable:
+      platys_init: RESTATE
+      example: |
+        platys init --enable-services RESTATE
+        platys gen
+    usage:
+      - title: Usage
+        content: |
+          Navigate to <http://dataplatform:28217> to access the Restate Admin API.
+          
+          - Ingress port (for service calls): `28216` (internal: `8080`)
+          - Admin API port: `28217` (internal: `9070`)
+          - Metrics port: `28218` (internal: `9071`)
+    parameters:
+      - name: RESTATE_enable
+        default: "false"
+        since: "1.20.0"
+        description: >
+          Generate Restate durable execution engine service.
+
+      - name: RESTATE_volume_map_data
+        default: "false"
+        since: "1.20.0"
+        description: >
+          Persist Restate data to `./container-volume/restate/data` on the
+          Docker host. Enable this to retain state across container restarts.
+
+  - name: Versity S3 Gateway
+    id: versitygw
+    arch: [x86-64]
+    tags: []
+    dependencies: []
+    links:
+      website: https://www.versity.com/products/versitygw/
+      documentation: https://github.com/versity/versitygw/wiki
+      github: https://github.com/versity/versitygw
+    description: >
+      VersityGW is a high-performance, S3-compatible object storage gateway. It
+      exposes an AWS S3 API backed by a POSIX filesystem (and other backends),
+      making existing storage usable through the S3 protocol.
+    enable:
+      platys_init: VERSITYGW
+      example: |
+        platys init --enable-services VERSITYGW
+        platys gen
+    usage:
+      - title: Usage
+        content: |
+          The S3 API is available at <http://dataplatform:9006> and the Web UI at
+          <http://dataplatform:9007>.
+          
+          Set `s3_service_to_use: versitygw` to have the rest of the stack use VersityGW
+          as its internal S3 service.
+    parameters:
+      - name: VERSITYGW_enable
+        default: "false"
+        since: "1.21.0"
+        description: >
+          Generate Versity S3 Gateway service, an S3-compatible gateway backed
+          by a POSIX filesystem.
+
+      - name: VERSITYGW_access_key
+        default: "admin"
+        since: "1.21.0"
+        description: >
+          The S3 root access key. Can be overridden at runtime via the
+          PLATYS_AWS_ACCESS_KEY environment variable.
+
+      - name: VERSITYGW_secret_key
+        default: "abc123abc123!"
+        since: "1.21.0"
+        description: >
+          The S3 root secret key. Can be overridden at runtime via the
+          PLATYS_AWS_SECRET_ACCESS_KEY environment variable.
+
+      - name: VERSITYGW_region
+        default: "us-east-1"
+        since: "1.21.0"
+        description: >
+          The S3 region the gateway reports.
+
+      - name: VERSITYGW_admin_bucket_name
+        default: "admin-bucket"
+        since: "1.21.0"
+        description: >
+          The admin bucket name used when s3_service_to_use is set to
+          versitygw.
+
+      - name: VERSITYGW_volume_map_data
+        default: "false"
+        since: "1.21.0"
+        description: >
+          Volume map the gateway data (/data) and metadata (/metadata) folders
+          into ./container-volume/versitygw/ on the Docker host.
+
+      - name: VERSITYGW_mc_enabled
+        default: "true"
+        since: "1.21.0"
+        description: >
+          Start a companion mc (MinIO client) container that creates the
+          buckets listed in VERSITYGW_buckets once the gateway is up.
+
+      - name: VERSITYGW_buckets
+        default: ""
+        since: "1.21.0"
+        description: >
+          Comma-separated list of buckets to create on startup. Requires
+          VERSITYGW_mc_enabled: true.
 
