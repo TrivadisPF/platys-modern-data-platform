@@ -5259,6 +5259,17 @@ services:
       com.platys.restapi.title: 'AKHQ API'
       com.platys.restapi.url: "http://dataplatform:{{externalPort}}/api"
       com.platys.password.envvars: "PLATYS_AKHQ_ADMIN_PASSWORD,PLATYS_AKHQ_READER_PASSWORD"
+    {% if (KAFKA_enable or SCHEMA_REGISTRY_enable) | default(false) %}
+    depends_on:
+      {% if KAFKA_enable | default(false) %}
+      {{ns.kafkaServiceNames.split(',')[0]}}:
+        condition: service_healthy
+      {% endif -%}   {#  KAFKA_enable #}
+      {% if SCHEMA_REGISTRY_enable | default(false) %}
+      {{ns.schemaRegistryServiceName}}:
+        condition: service_healthy
+      {% endif -%}   {#  SCHEMA_REGISTRY_enable #}
+    {% endif -%}   {#  KAFKA_enable or SCHEMA_REGISTRY_enable #}
     ports:
       - {{externalPort}}:8080
       - {{monitoringExternalPort}}:28081
