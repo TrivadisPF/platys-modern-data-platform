@@ -4277,8 +4277,11 @@ services:
       KARAPACE_TOPIC_NAME: _schemas
       KARAPACE_LOG_LEVEL: "{{SCHEMA_REGISTRY_karapace_log_level | default('INFO')}}"
       KARAPACE_COMPATIBILITY: "{{SCHEMA_REGISTRY_schema_compatibility_level | upper}}"
+      KARAPACE_STATSD_HOST: statsd-exporter
+      KARAPACE_STATSD_PORT: 8125
       KARAPACE_KAFKA_SCHEMA_READER_STRICT_MODE: "false"
       KARAPACE_KAFKA_RETRIABLE_ERRORS_SILENCED: "true"
+      KARAPACE_TAGS__APP: karapace-schema-registry
     {% if ns.secureKafkaEnabled %}
       {% if ns.securityProtocolBROKER == 'SASL_PLAINTEXT' %}
       KARAPACE_SASL_MECHANISM: "{{ns.saslMechanismBROKER}}"
@@ -4297,6 +4300,10 @@ services:
       KARAPACE_TELEMETRY__OTEL_METRICS_EXPORTER: OTLP
       KARAPACE_TELEMETRY__OTEL_TRACES_EXPORTER: OTLP
       KARAPACE_TELEMETRY__RESOURCE_SERVICE_NAME: karapace-schema-registry
+      KARAPACE_TELEMETRY__RESOURCE_SERVICE_INSTANCE_ID: sr1
+      KARAPACE_TELEMETRY__RESOURCE_TELEMETRY_SDK_NAME: opentelemetry
+      KARAPACE_TELEMETRY__RESOURCE_TELEMETRY_SDK_LANGUAGE: python
+      KARAPACE_TELEMETRY__RESOURCE_TELEMETRY_SDK_VERSION: 1.27.0      
     {% endif -%}   {#  OTEL_COLLECTOR_enable #}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
@@ -4313,6 +4320,10 @@ services:
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
+    entrypoint:
+      - python3
+      - -m
+      - karapace    
     restart: {{container_restart_policy}}
     healthcheck:
       test: [CMD, python3, -c, "import http.client, sys; c=http.client.HTTPConnection('localhost',{{port}},timeout=5); c.request('GET','/subjects'); sys.exit(0) if c.getresponse().status==200 else sys.exit(1)"]
@@ -4321,6 +4332,18 @@ services:
       retries: 30
       start_period: 30s
   {% endfor %}
+
+  {% if PROMETHEUS_enable | default(false) %}
+
+  statsd-exporter:
+    image: prom/statsd-exporter
+    hostname: statsd-exporter
+    container_name: statsd-exporter
+    labels:
+      com.platys.name: "karapace-schema-registry"
+      com.platys.description: "Karapace Schema Registry"    
+    command: --statsd.listen-udp=:8125 --web.listen-address=:9102
+  {% endif -%}   {#  PROMETHEUS_enable #}
 {% endif %}   {# KAFKA_enable and SCHEMA_REGISTRY_flavour == karapace #}
 
 {% if (SCHEMA_REGISTRY_enable and SCHEMA_REGISTRY_UI_enable) | default(false) %}
