@@ -36,7 +36,8 @@ networks:
 {% set __KAFKA_BACKUP_version = KAFKA_BACKUP_version | default('latest') -%}
 {% set __KAFKA_DATAGEN_version = KAFKA_DATAGEN_version | default('latest') -%}
 {% set __KAFKA_MIRROR_MAKER2_version = KAFKA_MIRROR_MAKER2_version | default('latest') -%}
-{% set __SCHEMA_REGISTRY_apicurio_version = SCHEMA_REGISTRY_apicurio_version | default('latest') -%}
+{% set __SCHEMA_REGISTRY_apicurio_version = APICURIO_SCHEMA_REGISTRY_version | default('latest') -%}
+{% set __SCHEMA_REGISTRY_karapace_version = KARAPACE_SCHEMA_REGISTRY_version | default('latest') -%}
 {% set __ZOONAVIGATOR_version = ZOONAVIGATOR_version | default('latest') -%}
 {% set __ZOONAVIGATOR_API_version = ZOONAVIGATOR_API_version | default('latest') -%}
 {% set __KSQLDB_version = KSQLDB_version | default('latest') -%}
@@ -34722,7 +34723,14 @@ services:
       - SPRING_DATASOURCE_PASSWORD=${PLATYS_DATA_CONTRACT_MANAGER_POSTGRESQL_PASSWORD:-{{DATA_CONTRACT_MANAGER_postgres_password}}}
       - SPRING_MAIL_HOST={{DATA_CONTRACT_MANAGER_mail_host}}
       - SPRING_MAIL_PORT={{DATA_CONTRACT_MANAGER_mail_port}}
+      - APPLICATION_SEARCH_ENABLED=true
       - APPLICATION_SEMANTICS_ENABLED=true
+      - APPLICATION_BULKSEMANTICSUGGEST_ENABLED=true
+      - APPLICATION_ACCESSREQUEST_AI_ENABLED=true
+      - APPLICATION_COMPROMISEDPASSWORDCHECKER_ENABLED=false
+      - APPLICATION_FEATURES_ORGANIZATIONS_ADD_ENABLED=true
+      - APPLICATION_STUDIO_ENABLED=true
+      - APPLICATION_CUSTOMSCHEMA_ENABLED
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -34839,6 +34847,44 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {#  DATA_CONTRACT_CLI_enable #}
 
+{% if DATA_CONTRACT_CLI_API_enable | default(false) %}
+  #  ================================== Data Contract CLI API Server ================= #
+  data-contract-api:
+    image: docker.io/datacontract/cli:{{__DATA_CONTRACT_CLI_version}}
+
+    container_name: data-contract-api
+    hostname: data-contract-api
+    platform: linux/amd64        
+    labels:
+      com.platys.name: "data-contract-api"
+      com.platys.description: "Data Contract CLI API Server"
+      com.platys.restapi.title: "Data Contract API REST API"
+      com.platys.restapi.url: "http://dataplatform:4242"            
+    ports:
+      - 4242:4242       
+    environment:
+      - DATACONTRACT_CLI_API_KEY=a079ce4c-af90-45ab-abe5-a8d7697f60d6
+      - DATACONTRACT_POSTGRES_HOST=postgresql
+      - DATACONTRACT_POSTGRES_PORT=5432
+      - DATACONTRACT_POSTGRES_DATABASE=workshop      
+      - DATACONTRACT_POSTGRES_USERNAME=workshop
+      - DATACONTRACT_POSTGRES_PASSWORD=workshop      
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      {{ data_transfer_volume('/data-transfer') }}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    command: ["api", "--host", "0.0.0.0", "--reload", "--port", "4242", "--debug"]
+    restart: {{container_restart_policy}}
+{% endif %}   {#  DATA_CONTRACT_CLI_API_enable #}
+
 {% if ENTROPY_DATA_CLI_enable | default(false) %}
   #  ================================== Entropy Data CLI ================= #
   entropy-data-cli:
@@ -34871,39 +34917,6 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  ENTROPY_DATA_CLI_enable #}
-
-{% if DATA_CONTRACT_CLI_API_enable | default(false) %}
-  #  ================================== Data Contract CLI API Server ================= #
-  data-contract-api:
-    image: docker.io/datacontract/cli:{{__DATA_CONTRACT_CLI_version}}
-
-    container_name: data-contract-api
-    hostname: data-contract-api
-    platform: linux/amd64        
-    labels:
-      com.platys.name: "data-contract-api"
-      com.platys.description: "Data Contract CLI API Server"
-      com.platys.restapi.title: "Data Contract API REST API"
-      com.platys.restapi.url: "http://dataplatform:4242"            
-    ports:
-      - 4242:4242       
-    environment:
-      - DATACONTRACT_CLI_API_KEY=a079ce4c-af90-45ab-abe5-a8d7697f60d6
-    {%if use_timezone | default(false) %}
-      - TZ={{use_timezone}}
-    {% endif -%}   {#  use_timezone #}
-    volumes:
-      {{ data_transfer_volume('/data-transfer') }}
-    {%if use_timezone | default(false) %}
-      - "./etc/timezone:/etc/timezone:ro"
-      - "./etc/localtime:/etc/localtime:ro"
-    {% endif -%}   {#  use_timezone #}
-    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
-    <<: *logging
-    {% endif -%}   {#  logging_driver is defined ... #}
-    command: ["api", "--host", "0.0.0.0"]
-    restart: {{container_restart_policy}}
-{% endif %}   {#  DATA_CONTRACT_CLI_API_enable #}
 
 {% if MICROCKS_enable | default(false) %}
   #  ================================== Microck ================= #
