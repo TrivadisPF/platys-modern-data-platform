@@ -1878,6 +1878,8 @@ For each service there might be some other settings, such as controlling the num
 | `RUSTFS_notify_webhook_enabled` 	| `false` 	| 1.21.0 	| Send bucket event notifications to a webhook (target name `primary`, ARN `arn:rustfs:sqs:us-east-1:primary:webhook`). |
 | `RUSTFS_notify_webhook_endpoint` 	| `` 	| 1.21.0 	| HTTP or HTTPS endpoint the events are delivered to. |
 | `RUSTFS_notify_webhook_auth_token` 	| `` 	| 1.21.0 	| Optional bearer token sent in the `Authorization` header of the webhook calls. |
+| `RUSTFS_notify_kafka_enabled` 	| `false` 	| 1.21.0 	| Send bucket event notifications to the Kafka cluster of the platform or the external Kafka (target name `primary`). Security settings (SASL or SSL) are taken over from the Kafka configuration. |
+| `RUSTFS_notify_kafka_topic` 	| `rustfs-notify-log` 	| 1.21.0 	| The name of the Kafka topic where the bucket notification events are published to. |
 | `RUSTFS_notify_mqtt_enabled` 	| `false` 	| 1.21.0 	| Send bucket event notifications to an MQTT broker (target name `primary`). |
 | `RUSTFS_notify_mqtt_broker_endpoint` 	| `tcp://mosquitto-1:1883` 	| 1.21.0 	| The MQTT broker endpoint. |
 | `RUSTFS_notify_mqtt_topic` 	| `rustfs-notify-log` 	| 1.21.0 	| The MQTT topic the events are published to. |

@@ -30299,9 +30299,9 @@ services:
     {% if OTEL_COLLECTOR_enable | default(false) -%}
       - RUSTFS_OBS_ENDPOINT=http://otel-collector:4318
     {% endif -%}
-    {% if RUSTFS_notify_webhook_enabled | default(false) or RUSTFS_notify_mqtt_enabled | default(false) %}
+    {% if RUSTFS_notify_webhook_enabled | default(false) or RUSTFS_notify_mqtt_enabled | default(false) or ((KAFKA_enable or external['KAFKA_enable']) and RUSTFS_notify_kafka_enabled | default(false)) %}
       - RUSTFS_NOTIFY_ENABLE=true
-    {% endif -%}   {#  RUSTFS_notify_webhook_enabled or RUSTFS_notify_mqtt_enabled #}
+    {% endif -%}   {#  RUSTFS_notify_* #}
     {% if RUSTFS_notify_webhook_enabled | default(false) %}
       - RUSTFS_NOTIFY_WEBHOOK_ENABLE_PRIMARY=on
       - RUSTFS_NOTIFY_WEBHOOK_ENDPOINT_PRIMARY={{RUSTFS_notify_webhook_endpoint}}
@@ -30321,6 +30321,25 @@ services:
       - RUSTFS_NOTIFY_MQTT_PASSWORD_PRIMARY={{RUSTFS_notify_mqtt_password}}
       {% endif -%}   {#  RUSTFS_notify_mqtt_password #}
     {% endif -%}   {#  RUSTFS_notify_mqtt_enabled #}
+    {% if (KAFKA_enable or external['KAFKA_enable']) and RUSTFS_notify_kafka_enabled | default(false) %}
+      - RUSTFS_NOTIFY_KAFKA_ENABLE_PRIMARY=on
+      - RUSTFS_NOTIFY_KAFKA_BROKERS_PRIMARY={{ns.bootstrapServers}}
+      - RUSTFS_NOTIFY_KAFKA_TOPIC_PRIMARY={{RUSTFS_notify_kafka_topic}}
+      {% if ns.secureKafkaEnabled %}
+        {% if ns.securityProtocolBROKER == 'SASL_PLAINTEXT' %}
+      - RUSTFS_NOTIFY_KAFKA_SASL_ENABLE_PRIMARY=on
+      - RUSTFS_NOTIFY_KAFKA_SASL_MECHANISM_PRIMARY={{ns.saslMechanismBROKER}}
+      - RUSTFS_NOTIFY_KAFKA_SASL_USERNAME_PRIMARY={{KAFKA_RESTPROXY_kafka_username if KAFKA_RESTPROXY_kafka_username is defined and KAFKA_RESTPROXY_kafka_username | length else ns.kafkaToolsDefaultUsername}}
+      - RUSTFS_NOTIFY_KAFKA_SASL_PASSWORD_PRIMARY={{KAFKA_RESTPROXY_kafka_password if KAFKA_RESTPROXY_kafka_password is defined and KAFKA_RESTPROXY_kafka_password | length else ns.kafkaToolsDefaultPassword}}
+        {% elif ns.securityProtocolBROKER == 'SSL' %}
+      - RUSTFS_NOTIFY_KAFKA_TLS_ENABLE_PRIMARY=on
+          {% if KAFKA_ssl_client_authentication_enabled | default(false) %}
+      - RUSTFS_NOTIFY_KAFKA_TLS_CLIENT_CERT_PRIMARY=/certs/client.pem
+      - RUSTFS_NOTIFY_KAFKA_TLS_CLIENT_KEY_PRIMARY=/certs/client.key
+          {% endif -%}   {#  KAFKA_ssl_client_authentication_enabled #}
+        {% endif -%}   {#  ns.securityProtocolBROKER #}
+      {% endif -%}   {#  ns.secureKafkaEnabled #}
+    {% endif -%}   {#  RUSTFS_notify_kafka_enabled #}
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
@@ -30335,6 +30354,9 @@ services:
     {%if RUSTFS_volume_map_logs | default(false) %}  
       - ./container-volume/rustfs/logs:/app/logs:z
     {% endif -%}   {#  RUSTFS_volume_map_logs #}
+    {% if (KAFKA_enable or external['KAFKA_enable']) and RUSTFS_notify_kafka_enabled | default(false) and ns.secureKafkaEnabled and ns.securityProtocol == 'SSL' %}
+      - ./security/kafka/client-certs:/certs:z
+    {% endif -%}   {#  RUSTFS_notify_kafka_enabled #}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
