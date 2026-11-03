@@ -56,6 +56,7 @@ See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/plat
  * Update `prometheus-alertmanager` to `v0.34.1`
  * Update `nifi2` to `2.12.0`
  * Update `clickhouse` to `26.10-alpine`
+ * Update `risingwave` to `v3.1.0`
 
 ### Enhancements
 
