@@ -30299,6 +30299,28 @@ services:
     {% if OTEL_COLLECTOR_enable | default(false) -%}
       - RUSTFS_OBS_ENDPOINT=http://otel-collector:4318
     {% endif -%}
+    {% if RUSTFS_notify_webhook_enabled | default(false) or RUSTFS_notify_mqtt_enabled | default(false) %}
+      - RUSTFS_NOTIFY_ENABLE=true
+    {% endif -%}   {#  RUSTFS_notify_webhook_enabled or RUSTFS_notify_mqtt_enabled #}
+    {% if RUSTFS_notify_webhook_enabled | default(false) %}
+      - RUSTFS_NOTIFY_WEBHOOK_ENABLE_PRIMARY=on
+      - RUSTFS_NOTIFY_WEBHOOK_ENDPOINT_PRIMARY={{RUSTFS_notify_webhook_endpoint}}
+      {% if RUSTFS_notify_webhook_auth_token is defined and RUSTFS_notify_webhook_auth_token and RUSTFS_notify_webhook_auth_token | length %}
+      - RUSTFS_NOTIFY_WEBHOOK_AUTH_TOKEN_PRIMARY={{RUSTFS_notify_webhook_auth_token}}
+      {% endif -%}   {#  RUSTFS_notify_webhook_auth_token #}
+    {% endif -%}   {#  RUSTFS_notify_webhook_enabled #}
+    {% if RUSTFS_notify_mqtt_enabled | default(false) %}
+      - RUSTFS_NOTIFY_MQTT_ENABLE_PRIMARY=on
+      - RUSTFS_NOTIFY_MQTT_BROKER_PRIMARY={{RUSTFS_notify_mqtt_broker_endpoint}}
+      - RUSTFS_NOTIFY_MQTT_TOPIC_PRIMARY={{RUSTFS_notify_mqtt_topic}}
+      - RUSTFS_NOTIFY_MQTT_QOS_PRIMARY={{RUSTFS_notify_mqtt_qos | default(0)}}
+      {% if RUSTFS_notify_mqtt_username is defined and RUSTFS_notify_mqtt_username and RUSTFS_notify_mqtt_username | length %}
+      - RUSTFS_NOTIFY_MQTT_USERNAME_PRIMARY={{RUSTFS_notify_mqtt_username}}
+      {% endif -%}   {#  RUSTFS_notify_mqtt_username #}
+      {% if RUSTFS_notify_mqtt_password is defined and RUSTFS_notify_mqtt_password and RUSTFS_notify_mqtt_password | length %}
+      - RUSTFS_NOTIFY_MQTT_PASSWORD_PRIMARY={{RUSTFS_notify_mqtt_password}}
+      {% endif -%}   {#  RUSTFS_notify_mqtt_password #}
+    {% endif -%}   {#  RUSTFS_notify_mqtt_enabled #}
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}

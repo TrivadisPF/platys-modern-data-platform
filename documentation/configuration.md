@@ -1875,6 +1875,15 @@ For each service there might be some other settings, such as controlling the num
 | `RUSTFS_upload_data_transfer_subfolders `                        	| `` 	| 1.20.0 	|  The subfolders in `/data-transfer` to upload. By default everything will be uploaded recursively. You can specify a comma-separated list of folder names to selectively and recursively upload.                                                                                                                                           	|
 | `RUSTFS_console_enabled`                        	| `true` 	| 1.20.0 	| Enable the RustFS web console UI.                                                                                                                                        	|
 | `RUSTFS_mc_enabled`                        	| `true` 	| 1.21.0 	| Enable the `rustfs-mc` sidecar container (MinIO Client CLI) that pre-creates buckets and optionally uploads data-transfer content on startup.                                	|
+| `RUSTFS_notify_webhook_enabled` 	| `false` 	| 1.21.0 	| Send bucket event notifications to a webhook (target name `primary`, ARN `arn:rustfs:sqs:us-east-1:primary:webhook`). |
+| `RUSTFS_notify_webhook_endpoint` 	| `` 	| 1.21.0 	| HTTP or HTTPS endpoint the events are delivered to. |
+| `RUSTFS_notify_webhook_auth_token` 	| `` 	| 1.21.0 	| Optional bearer token sent in the `Authorization` header of the webhook calls. |
+| `RUSTFS_notify_mqtt_enabled` 	| `false` 	| 1.21.0 	| Send bucket event notifications to an MQTT broker (target name `primary`). |
+| `RUSTFS_notify_mqtt_broker_endpoint` 	| `tcp://mosquitto-1:1883` 	| 1.21.0 	| The MQTT broker endpoint. |
+| `RUSTFS_notify_mqtt_topic` 	| `rustfs-notify-log` 	| 1.21.0 	| The MQTT topic the events are published to. |
+| `RUSTFS_notify_mqtt_qos` 	| `0` 	| 1.21.0 	| The MQTT quality of service level (0, 1 or 2). |
+| `RUSTFS_notify_mqtt_username` 	| `` 	| 1.21.0 	| Optional username for the MQTT broker. |
+| `RUSTFS_notify_mqtt_password` 	| `` 	| 1.21.0 	| Optional password for the MQTT broker. |
 | [**_SeaweedFS_**](./services/seaweedfs.md)   &nbsp;&nbsp;&nbsp;&nbsp;![x86-64](./images/x86-64.png)                        	|         	|
 | `SEAWEEDFS_enable`                                 	| `false` 	| 1.21.0 	| Generate SeaweedFS service                                                                                                                                                              	|
 | `SEAWEEDFS_volume_map_data`                                 	| `false` 	| 1.21.0 	| Volume map data folder into the service                                                                                                                                                             	|
