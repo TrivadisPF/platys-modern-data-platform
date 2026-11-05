@@ -1,0 +1,1 @@
+Contains the data of OpenMetadata mysql service, if flag OPENMETADATA_volume_map_data is set to true.
