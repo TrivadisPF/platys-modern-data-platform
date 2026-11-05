@@ -11435,7 +11435,7 @@ services:
     depends_on:
       openmetadata-elasticsearch:
         condition: service_healthy
-      openmetadata-mysql:
+      {{'openmetadata-postgresql' if OPENMETADATA_database_type == 'postgres' else 'openmetadata-mysql'}}:
         condition: service_healthy
     environment:
       OPENMETADATA_CLUSTER_NAME: openmetadata
@@ -11453,7 +11453,7 @@ services:
       AUTHORIZER_ALLOWED_REGISTRATION_DOMAIN: '["all"]'
       AUTHORIZER_INGESTION_PRINCIPALS: '[ingestion-bot]'
       AUTHORIZER_PRINCIPAL_DOMAIN: "open-metadata.org"
-      AUTHORIZER_ALLOWED_DOMAINS:
+      AUTHORIZER_ALLOWED_DOMAINS: []
       AUTHORIZER_ENFORCE_PRINCIPAL_DOMAIN: false
       AUTHORIZER_ENABLE_SECURE_SOCKET: false
       AUTHENTICATION_PROVIDER: basic
@@ -11464,10 +11464,11 @@ services:
       AUTHENTICATION_CLIENT_ID: ""
       AUTHENTICATION_CALLBACK_URL: ""
       AUTHENTICATION_JWT_PRINCIPAL_CLAIMS: '[email,preferred_username,sub]'
-      AUTHENTICATION_JWT_PRINCIPAL_CLAIMS_MAPPING:
+      AUTHENTICATION_JWT_PRINCIPAL_CLAIMS_MAPPING: []
       AUTHENTICATION_ENABLE_SELF_SIGNUP: true
       AUTHENTICATION_CLIENT_TYPE: public
-
+      AUTHENTICATION_SESSION_EXPIRY: 604800
+      AUTHENTICATION_MAX_ACTIVE_SESSIONS_PER_USER: 5
       # JWT Configuration
       RSA_PUBLIC_KEY_FILE_PATH: "./conf/public_key.der"
       RSA_PRIVATE_KEY_FILE_PATH: "./conf/private_key.der"
@@ -11630,7 +11631,7 @@ services:
     depends_on:
       openmetadata-elasticsearch:
         condition: service_healthy
-      openmetadata-mysql:
+      {{'openmetadata-postgresql' if OPENMETADATA_database_type == 'postgres' else 'openmetadata-mysql'}}:
         condition: service_healthy
       openmetadata-migrate-all:
         condition: service_completed_successfully
@@ -11647,7 +11648,7 @@ services:
       AUTHORIZER_ALLOWED_REGISTRATION_DOMAIN: '["all"]'
       AUTHORIZER_INGESTION_PRINCIPALS: '[ingestion-bot]'
       AUTHORIZER_PRINCIPAL_DOMAIN: "open-metadata.org"
-      AUTHORIZER_ALLOWED_DOMAINS:
+      AUTHORIZER_ALLOWED_DOMAINS: []
       AUTHORIZER_ENFORCE_PRINCIPAL_DOMAIN: false
       AUTHORIZER_ENABLE_SECURE_SOCKET: false
       AUTHENTICATION_PROVIDER: basic
@@ -11658,10 +11659,11 @@ services:
       AUTHENTICATION_CLIENT_ID: ""
       AUTHENTICATION_CALLBACK_URL: ""
       AUTHENTICATION_JWT_PRINCIPAL_CLAIMS: '[email,preferred_username,sub]'
-      AUTHENTICATION_JWT_PRINCIPAL_CLAIMS_MAPPING:
+      AUTHENTICATION_JWT_PRINCIPAL_CLAIMS_MAPPING: []
       AUTHENTICATION_ENABLE_SELF_SIGNUP: true
       AUTHENTICATION_CLIENT_TYPE: public
-
+      AUTHENTICATION_SESSION_EXPIRY: 604800
+      AUTHENTICATION_MAX_ACTIVE_SESSIONS_PER_USER: 5
       # JWT Configuration
       RSA_PUBLIC_KEY_FILE_PATH: "./conf/public_key.der"
       RSA_PRIVATE_KEY_FILE_PATH: "./conf/private_key.der"
@@ -11719,8 +11721,8 @@ services:
       #eventMonitoringConfiguration
       EVENT_MONITOR: prometheus
       EVENT_MONITOR_BATCH_SIZE: 10
-      #EVENT_MONITOR_PATH_PATTERN: '["/api/v1/tables/*", "/api/v1/health-check"]'
-      EVENT_MONITOR_LATENCY:
+      EVENT_MONITOR_PATH_PATTERN: '["/api/v1/tables/*", "/api/v1/health-check"]'
+      EVENT_MONITOR_LATENCY: '[]'
 
       #pipelineServiceClientConfiguration
       PIPELINE_SERVICE_CLIENT_ENABLED: true
@@ -11804,7 +11806,7 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
     healthcheck:
-      test: ["CMD", "wget", "--no-proxy", "-q", "-O", "/dev/null", "http://localhost:8586/healthcheck"]
+      test: [ "CMD", "wget", "--no-proxy", "-q", "--spider",  "http://localhost:8586/healthcheck" ]
 
   {% if OPENMETADATA_database_type == 'mysql' | default(false) %}
   openmetadata-mysql:
@@ -11875,10 +11877,15 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}    
     command: "--work_mem=10MB"
     restart: {{container_restart_policy}}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
   {% endif %}    {#  OPENMETADATA_database_type == 'postgres' #}
 
   openmetadata-elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.4
+    image: docker.elastic.co/elasticsearch/elasticsearch:9.3.0
     hostname: openmetadata-elasticsearch
     container_name: openmetadata-elasticsearch
     labels:
@@ -11920,7 +11927,7 @@ services:
     depends_on:
       openmetadata-elasticsearch:
         condition: service_healthy
-      openmetadata-mysql:
+      {{'openmetadata-postgresql' if OPENMETADATA_database_type == 'postgres' else 'openmetadata-mysql'}}:
         condition: service_healthy
       openmetadata-server:
         condition: service_healthy
@@ -11978,6 +11985,7 @@ services:
     {% if OPENMETADATA_volume_map_data %}    
       - ./container-volume/openmetadata/ingestion/config:/opt/airflow/dag_generated_configs:z
       - ./container-volume/openmetadata/ingestion/dags:/opt/airflow/dags:z
+      - ./container-volume/openmetadata/ingestion/tmp:/tmp:z
     {% endif -%}   {#  OPENMETADATA_volume_map_data #}
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
     <<: *logging
