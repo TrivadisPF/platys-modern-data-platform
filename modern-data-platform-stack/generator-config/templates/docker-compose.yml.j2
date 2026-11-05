@@ -11424,6 +11424,7 @@ services:
 {% endif %}   {#  DATALAB_enable #}
 
 {% if OPENMETADATA_enable  | default(false) %}
+  {% set __OPENMETADATA_search_engine = OPENMETADATA_search_engine_type | default('elasticsearch') -%}
   #  ================================== OpenMetadata ========================================== #
   openmetadata-migrate-all:
     image: docker.getcollate.io/openmetadata/server:{{__OPENMETADATA_version}}
@@ -11433,7 +11434,7 @@ services:
       com.platys.name: "openmetadata"
       com.platys.description: "OpenMetadata Data Catalog"
     depends_on:
-      openmetadata-elasticsearch:
+      openmetadata-{{__OPENMETADATA_search_engine}}:
         condition: service_healthy
       {{'openmetadata-postgresql' if OPENMETADATA_database_type == 'postgres' else 'openmetadata-mysql'}}:
         condition: service_healthy
@@ -11502,12 +11503,12 @@ services:
   {% endif %}    
       OM_DATABASE: openmetadata_db
       # ElasticSearch Configurations
-      ELASTICSEARCH_HOST: openmetadata-elasticsearch
+      ELASTICSEARCH_HOST: openmetadata-{{__OPENMETADATA_search_engine}}
       ELASTICSEARCH_PORT: 9200
       ELASTICSEARCH_SCHEME: http
       ELASTICSEARCH_USER: ""
       ELASTICSEARCH_PASSWORD: ""
-      SEARCH_TYPE: "elasticsearch"
+      SEARCH_TYPE: "{{__OPENMETADATA_search_engine}}"
       ELASTICSEARCH_TRUST_STORE_PATH: ""
       ELASTICSEARCH_TRUST_STORE_PASSWORD: ""
       ELASTICSEARCH_CONNECTION_TIMEOUT_SECS: 5
@@ -11650,7 +11651,7 @@ services:
       - "8585:8585"
       - "8586:8586"
     depends_on:
-      openmetadata-elasticsearch:
+      openmetadata-{{__OPENMETADATA_search_engine}}:
         condition: service_healthy
       {{'openmetadata-postgresql' if OPENMETADATA_database_type == 'postgres' else 'openmetadata-mysql'}}:
         condition: service_healthy
@@ -11718,12 +11719,12 @@ services:
   {% endif %}    
       OM_DATABASE: openmetadata_db
       # ElasticSearch Configurations
-      ELASTICSEARCH_HOST: openmetadata-elasticsearch
+      ELASTICSEARCH_HOST: openmetadata-{{__OPENMETADATA_search_engine}}
       ELASTICSEARCH_PORT: 9200
       ELASTICSEARCH_SCHEME: http
       ELASTICSEARCH_USER: ""
       ELASTICSEARCH_PASSWORD: ""
-      SEARCH_TYPE: "elasticsearch"
+      SEARCH_TYPE: "{{__OPENMETADATA_search_engine}}"
       ELASTICSEARCH_TRUST_STORE_PATH: ""
       ELASTICSEARCH_TRUST_STORE_PASSWORD: ""
       ELASTICSEARCH_CONNECTION_TIMEOUT_SECS: 5
@@ -11938,6 +11939,7 @@ services:
       retries: 10
   {% endif %}    {#  OPENMETADATA_database_type == 'postgres' #}
 
+  {% if __OPENMETADATA_search_engine == 'elasticsearch' %}
   openmetadata-elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:9.3.0
     hostname: openmetadata-elasticsearch
@@ -11945,9 +11947,11 @@ services:
     labels:
       com.platys.name: "elasticsearch"
       com.platys.description: "OpenMetadata Data Catalog Eleasticsearch Instance"
+      com.platys.restapi.title: "Elasticsearch REST API"
+      com.platys.restapi.url: "http://dataplatform:9202"
     ports:
-      - "19203:9200"
-      - "19204:9300"
+      - "9202:9200"
+      - "9303:9300"
     environment:
       - discovery.type=single-node
       - ES_JAVA_OPTS=-Xms1024m -Xmx1024m
@@ -11973,7 +11977,9 @@ services:
       interval: 15s
       timeout: 10s
       retries: 10
+  {% endif %}    {#  __OPENMETADATA_search_engine == 'elasticsearch' #}
 
+  {% if __OPENMETADATA_search_engine == 'opensearch' %}
   openmetadata-opensearch:
     image: opensearchproject/opensearch:3.4.0
     hostname: openmetadata-opensearch
@@ -11988,9 +11994,11 @@ services:
     labels:
       com.platys.name: "opensearch"
       com.platys.description: "OpenMetadata Data Catalog OpenSearch Instance"    
+      com.platys.restapi.title: "Opensearch REST API"
+      com.platys.restapi.url: "http://dataplatform:9203"
     ports:
-      - "9200:9200"
-      - "9300:9300"
+      - "9203:9200"
+      - "9303:9300"
     environment:
       - discovery.type=single-node
       - node.name=opensearch
@@ -12017,13 +12025,14 @@ services:
       interval: 30s
       timeout: 10s
       retries: 5
+  {% endif %}    {#  __OPENMETADATA_search_engine == 'opensearch' #}
 
   openmetadata-ingestion:
     image: docker.getcollate.io/openmetadata/ingestion:{{__OPENMETADATA_version}}
     hostname: openmetadata-ingestion
     container_name: openmetadata-ingestion
     depends_on:
-      openmetadata-elasticsearch:
+      openmetadata-{{__OPENMETADATA_search_engine}}:
         condition: service_healthy
       {{'openmetadata-postgresql' if OPENMETADATA_database_type == 'postgres' else 'openmetadata-mysql'}}:
         condition: service_healthy

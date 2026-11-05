@@ -317,7 +317,11 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 9126 | 9123 | fluss-tablet-server-3 |
 9200 | 9200 | elasticsearch-1 |
 9201 | 9200 | langwatch-opensearch |
+9202 | 9200 | openmetadata-elasticsearch |
+9203 | 9200 | openmetadata-opensearch |
 9300 | 9300 | elasticsearch-1 |
+9302 | 9300 | openmetadata-elasticsearch |
+9303 | 9300 | openmetadata-opensearch |
 9160 | 9160 | cassandra-1 |
 9161 | 9160 | cassandra-2 |
 9162 | 9160 | cassandra-3 |
@@ -439,8 +443,6 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 19200 | 9200 | elasticsearch-atlas |
 19201 | 9200 | amundsen-elasticsearch |
 19202 | 9200 | datahub-elasticsearch |
-19203 | 9200 | openmetadata-elasticsearch |
-19204 | 9300 | openmetadata-elasticsearch |
 19092 | 19092 | kafka-1 (docker-host)   |
 19093 | 19093 | kafka-2 (docker-host    |
 19094 | 19094 | kafka-3 (docker-host)   |
