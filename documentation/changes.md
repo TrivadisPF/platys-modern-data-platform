@@ -57,7 +57,7 @@ See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/plat
  * Update `nifi2` to `2.12.0`
  * Update `clickhouse` to `26.10-alpine`
  * Update `risingwave` to `v3.1.0`
- * Update `openmetadata` to `2.0.5`
+ * Update `openmetadata` to `2.0.7`
 
 ### Enhancements
 
