@@ -1,0 +1,75 @@
+# Where OPA fetches policy/data bundles from
+services:
+  acmecorp:
+    url: https://example.com/service/v1
+    credentials:
+      bearer:
+        token: "my-token"          # or oauth2, client_tls, s3_signing, gcp_metadata, etc.
+    headers:
+      Authorization: Bearer xyz
+    response_header_timeout_seconds: 5
+    allow_insecure_tls: false
+
+# Bundle download and activation
+bundles:
+  authz:
+    service: acmecorp
+    resource: bundles/http/example/authz.tar.gz
+    persist: true                  # cache on disk for restarts
+    polling:
+      min_delay_seconds: 10
+      max_delay_seconds: 20
+    signing:
+      keyid: my_global_key
+    # optional: restrict which parts of the data tree the bundle may write to
+    # scope: write
+
+# Decision logging
+decision_logs:
+  service: acmecorp
+  reporting:
+    min_delay_seconds: 300
+    max_delay_seconds: 600
+  console: true                    # also log decisions to stdout
+  mask_decision: /system/log/mask  # rule that redacts sensitive fields
+
+# Status reporting
+status:
+  service: acmecorp
+  console: false
+  prometheus: true
+
+# Legacy single-policy/data fetch (the bundles setting is preferred)
+discovery:
+  name: example
+  resource: /configuration/example/discovery
+  service: acmecorp
+
+# Verification keys for signed bundles
+keys:
+  my_global_key:
+    algorithm: RS256
+    key: |
+      -----BEGIN PUBLIC KEY-----
+      ...
+      -----END PUBLIC KEY-----
+
+# Server/API behavior
+default_decision: /http/example/authz/allow
+default_authorization_decision: /system/authz/allow
+caching:
+  inter_query_builtin_cache:
+    max_size_bytes: 10000000
+distributed_tracing:
+  type: grpc
+  address: localhost:4317
+server:
+  encoding:
+    gzip:
+      min_length: 1024
+persistence_directory: /var/opa
+labels:
+  app: myapp
+  region: eu-west
+plugins: {}                        # config for custom plugins
+nd_builtin_cache: false

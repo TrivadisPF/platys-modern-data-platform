@@ -10161,14 +10161,15 @@ services:
     command:
       - "run"
       - "--server"
-      - "--watch"
-      - "--format=pretty"      
+      - "--watch"   
       - "--log-level={{OPA_log_level | lower}}"
       - "--log-format={{OPA_log_format | lower}}"
       - "--addr=0.0.0.0:8181"
       - "--set=decision_logs.console=true"
+    {% if OPA_volume_map_config_file | default(false) %}
       - "--config-file"
-      - "/data/policies/{{OPA_config_filename | default('config.yml')}}"
+      - "/config/config.yml"
+    {% endif -%}   {#  OPA_volume_map_config_file #}
       - "/data/policies"
     {%if use_timezone | default(false) %}
     environment:
@@ -10176,6 +10177,9 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       {{ data_transfer_volume('/data-transfer') }}
+    {% if OPA_volume_map_config_file | default(false) %}
+      - ./custom-conf/opa/config.yml:/config/config.yml:z
+    {% endif -%}   {#  OPA_volume_map_config_file #}
       - ./security/opa/policies:/data/policies:z
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
