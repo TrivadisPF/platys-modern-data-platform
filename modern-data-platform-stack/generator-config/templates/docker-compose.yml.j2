@@ -618,7 +618,7 @@ networks:
 {% set __DRILL_version = DRILL_version | default('latest') -%}
 
 {% set __HASURA_version = HASURA_version | default('latest') -%}
-{% set __POST_GRAPHILE_version = POST_GRAPHILE_version | default('latest') -%}
+{% set __POSTGRAPHILE_version = POSTGRAPHILE_version | default('latest') -%}
 {% set __HIVE_CONSOLE_version = HIVE_CONSOLE_version | default('latest') -%}
 {% set __HIVE_GATEWAY_version = HIVE_GATEWAY_version | default('latest') -%}
 {% set __HIVE_ROUTER_version = HIVE_ROUTER_version | default('latest') -%}
@@ -1145,7 +1145,7 @@ networks:
   {% set DREMIO_enable = false -%}
   {% set DRILL_enable = false -%}
   {% set HASURA_enable = false -%}
-  {% set POST_GRAPHILE_enable = false -%}
+  {% set POSTGRAPHILE_enable = false -%}
   {% set GRAPHQL_MESH_enable = false -%}
   {% set COSMO_ROUTER_enable = false -%}
   {% set HIVE_CONSOLE_enable = false -%}
@@ -28776,10 +28776,10 @@ services:
     restart: {{container_restart_policy}}
 {% endif %}   {#  HASURA_enable #}
 
-{% if POST_GRAPHILE_enable | default(false) %}
+{% if POSTGRAPHILE_enable | default(false) %}
   #  ================================== PostGraphile ========================================== #
   postgraphile:
-    image: docker.io/graphile/postgraphile:{{__POST_GRAPHILE_version}}
+    image: docker.io/graphile/postgraphile:{{__POSTGRAPHILE_version}}
 
     container_name: postgraphile
     hostname: postgraphile
@@ -28790,40 +28790,40 @@ services:
       com.platys.webui.url: "http://dataplatform:28151/graphiql"
     ports:
       - '28151:5000'
-    {% if POST_GRAPHILE_plugins is defined and POST_GRAPHILE_plugins | length %}
-    entrypoint: ["sh", "-c", "npm install --no-save {{POST_GRAPHILE_plugins | replace(',', ' ')}} && exec ./cli.js \"$$@\"", "--"]
-    {% endif -%}   {#  POST_GRAPHILE_plugins #}
+    {% if POSTGRAPHILE_plugins is defined and POSTGRAPHILE_plugins | length %}
+    entrypoint: ["sh", "-c", "npm install --no-save {{POSTGRAPHILE_plugins | replace(',', ' ')}} && exec ./cli.js \"$$@\"", "--"]
+    {% endif -%}   {#  POSTGRAPHILE_plugins #}
     command:
       - --connection
-      - postgres://{{POST_GRAPHILE_postgres_user}}:${PLATYS_POSTGRESQL_PASSWORD:-{{POST_GRAPHILE_postgres_password}}}@postgresql:5432/{{POST_GRAPHILE_postgres_database}}
+      - postgres://{{POSTGRAPHILE_postgres_user}}:${PLATYS_POSTGRESQL_PASSWORD:-{{POSTGRAPHILE_postgres_password}}}@postgresql:5432/{{POSTGRAPHILE_postgres_database}}
       - --schema
-      - {{POST_GRAPHILE_schema | default('public')}}
+      - {{POSTGRAPHILE_schema | default('public')}}
       - --host
       - 0.0.0.0
       - --port
       - "5000"
-    {% if POST_GRAPHILE_watch | default(true) %}
+    {% if POSTGRAPHILE_watch | default(true) %}
       - --watch
-    {% endif -%}   {#  POST_GRAPHILE_watch #}
-    {% if POST_GRAPHILE_enhance_graphiql | default(true) %}
+    {% endif -%}   {#  POSTGRAPHILE_watch #}
+    {% if POSTGRAPHILE_enhance_graphiql | default(true) %}
       - --enhance-graphiql
-    {% endif -%}   {#  POST_GRAPHILE_enhance_graphiql #}
-    {% if POST_GRAPHILE_dynamic_json | default(true) %}
+    {% endif -%}   {#  POSTGRAPHILE_enhance_graphiql #}
+    {% if POSTGRAPHILE_dynamic_json | default(true) %}
       - --dynamic-json
-    {% endif -%}   {#  POST_GRAPHILE_dynamic_json #}
-    {% if POST_GRAPHILE_plugins is defined and POST_GRAPHILE_plugins | length %}
+    {% endif -%}   {#  POSTGRAPHILE_dynamic_json #}
+    {% if POSTGRAPHILE_plugins is defined and POSTGRAPHILE_plugins | length %}
       - --append-plugins
-      - '{{POST_GRAPHILE_plugins | replace(' ', '')}}'
-    {% endif -%}   {#  POST_GRAPHILE_plugins #}
+      - '{{POSTGRAPHILE_plugins | replace(' ', '')}}'
+    {% endif -%}   {#  POSTGRAPHILE_plugins #}
     {%if use_timezone | default(false) %}
     environment:
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       {{ data_transfer_volume('/data-transfer') }}
-    {% if POST_GRAPHILE_volume_map_postgraphilerc | default(false) %}
+    {% if POSTGRAPHILE_volume_map_postgraphilerc | default(false) %}
       - ./custom-conf/postgraphile/.postgraphilerc.js:/postgraphile/.postgraphilerc.js:z
-    {% endif -%}   {#  POST_GRAPHILE_volume_map_postgraphilerc #}
+    {% endif -%}   {#  POSTGRAPHILE_volume_map_postgraphilerc #}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -28832,7 +28832,7 @@ services:
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
-{% endif %}   {#  POST_GRAPHILE_enable #}
+{% endif %}   {#  POSTGRAPHILE_enable #}
 
 {% if GRAPHQL_MESH_enable | default(false) %}
   #  ================================== GraphQL Mesh ========================================== #
