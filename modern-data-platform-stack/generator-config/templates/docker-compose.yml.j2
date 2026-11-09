@@ -22689,16 +22689,28 @@ services:
     environment:
       - PUPPYGRAPH_USERNAME=puppygraph
       - PUPPYGRAPH_PASSWORD=abc123!
-      - METRICS_ENABLED=true
+      - QUERY_TIMEOUT="5m"
+      - STORAGE_PATH_ROOT=/data/storage
+      - METRICS_ENABLED={{PUPPYGRAPH_metrics_enabled | default(true) | lower}}
+      - AI_ENABLED={{PUPPYGRAPH_ai_enabled | default(false) | lower}}
     {%if use_timezone | default(false) %}
       - TZ={{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       {{ data_transfer_volume('/data-transfer') }}
+    {% if PUPPYGRAPH_volume_map_data | default(false) %}
+      - "./container-volume/puppygraph/data:/data/storage:z"
+    {% endif -%}   {#  PUPPYGRAPH_volume_map_data #}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
     {% endif -%}   {#  use_timezone #}
+    healthcheck:
+      test: curl -sf -o /dev/null http://localhost:8081/readyz
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 60s
     {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
     <<: *logging
     {% endif -%}   {#  logging_driver is defined ... #}
