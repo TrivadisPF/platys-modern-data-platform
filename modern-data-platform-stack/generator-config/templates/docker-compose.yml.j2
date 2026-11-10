@@ -17677,6 +17677,7 @@ services:
     tty: true
     environment:
       OLLAMA_KEEP_ALIVE: "24h"
+      OLLAMA_HOST: 0.0.0.0
       OLLAMA_DEBUG: {{1 if OLLAMA_debug else 0}}
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
@@ -17702,27 +17703,25 @@ services:
       start_period: 10s    
   {%if OLLAMA_llms is defined and OLLAMA_llms and OLLAMA_llms | length %}
   ollama-pull-model:
-    image: docker.io/genai-stack/pull-model:latest
-
+    image: docker.io/ollama/ollama:latest
     container_name: ollama-pull-model
     hostname: ollama-pull-model
-    build:
-      context: ./dockerfiles/genai-stack
-      dockerfile: pull_model.Dockerfile
     environment:
-      - OLLAMA_BASE_URL={{ns.ollamaUrl}}
+      - OLLAMA_HOST={{ns.ollamaUrl | replace('http://', '')}}
     entrypoint:
       # In the command section, $ are replaced with $$ to avoid the error 'Invalid interpolation format for "command" option'
-      - bash
+      - sh
       - -c
       - |
-        echo "Installing LLMs"
+        echo 'Waiting for Ollama to be ready...';
+        until ollama list > /dev/null 2>&1; do
+          sleep 2;
+        done;      
+        echo "Pulling LLMs"
         for llm in $$(echo "{{OLLAMA_llms}}" | sed "s/,/ /g")
         do
-          export LLM="$$llm"
-          bb -f pull_model.clj "$$llm"
+          ollama pull "$$llm"
         done
-    tty: true
     init: true
   {% endif -%}   {#  OLLAMA_llms is defined ... #}
 {% endif %}   {# OLLAMA_enable  #}
