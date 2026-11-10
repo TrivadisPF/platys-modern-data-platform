@@ -61,7 +61,8 @@ See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/plat
  * Update `opa` to `1.22.2`
  * Update `opal` to `0.9.9`
  * Update `puppygraph` to `1.18.1`
- * Updata `fluss` to `1.0.0`
+ * Update `fluss` to `1.0.0`
+ * Update `ollama` to `0.40.16`
 
 ### Enhancements
 
