@@ -911,12 +911,10 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28497 | 3000 | dbt-workbench (frontend UI) |
 28498 |  |  |
 28499 | 8888 | klag |
+28500 | 8080 | stalwart (Admin UI / JMAP) |
+28501 | 25 | stalwart (SMTP) |
 28511 | 3000 | nimtable-web |
 28512 | 8182 | nimtable |
-28513 |      | |
-28514 |      | |
-28515 |      | |
-28516 |      | |
 28630 | 80 | streamlit-1 |
 28631 | 80 | streamlit-2 |
 28632 | 80 | streamlit-3 |

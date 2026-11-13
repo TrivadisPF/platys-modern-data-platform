@@ -2293,6 +2293,10 @@ For each service there might be some other settings, such as controlling the num
 | `MAILHOG_mongo_uri`                                   	| `mongo-1:27017` 	| 1.17.0 	| The host and port for the MongoDB message storage, if `MAILHOG_storage_type` is set to `mongodb`|             	|   
 | `MAILHOG_mongo_db`                                   	| `mailhog` 	| 1.17.0 	| The database name for the MongoDB message storage, if `MAILHOG_storage_type` is set to `mongodb`|             	|  
 | `MAILHOG_mongo_collection`                                   	| `messages` 	| 1.17.0 	| The collection name for the MongoDB message storage, if `MAILHOG_storage_type` is set to `mongodb`|             	|                               	|
+| [**_Stalwart_**](./services/stalwart.md)  &nbsp;&nbsp;&nbsp;&nbsp;![x86-64](./images/x86-64.png)                   	|         	|       	|                                                                                                                                                                                     	|          	|          	|
+| `STALWART_enable`                                   	| `false` 	| 1.21.0 	| Generate Stalwart service 	|             	|                                	|
+| `STALWART_admin_password`                                   	| `abc123!` 	| 1.21.0 	| The password of the temporary `admin` account used for the initial setup in the Admin UI (sets `STALWART_RECOVERY_ADMIN`). Without it, Stalwart prints a random password once in the log. 	|             	|                                	|
+| `STALWART_volume_map_data`                                   	| `false` 	| 1.21.0 	| Map the `etc` (configuration) and `data` folders into the container (`/etc/stalwart` and `/var/lib/stalwart`). 	|             	|                                	|
 
 ### Process Orchestration
 

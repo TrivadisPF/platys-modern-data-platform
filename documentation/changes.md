@@ -37,6 +37,7 @@ See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/plat
  * hive-yoga-server
  * apollo-rover-cli
  * entropy-data-cli
+ * Stalwart
 
 ### Version upgrades
  

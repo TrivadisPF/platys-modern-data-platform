@@ -669,6 +669,7 @@ networks:
 {% set __MAILDEV_version = MAILDEV_version | default('latest') -%}
 {% set __MAILPIT_version = MAILPIT_version | default('latest') -%}
 {% set __MAILHOG_version = MAILHOG_version | default('latest') -%}
+{% set __STALWART_version = STALWART_version | default('latest') -%}
 
 {% set __CAMUNDA_BPM_PLATFORM_version = CAMUNDA_BPM_PLATFORM_version | default('latest') -%}
 {% set __CAMUNDA_OPTIMIZE_version = CAMUNDA_OPTIMIZE_version | default('latest') -%}
@@ -1177,6 +1178,7 @@ networks:
   {% set MAILDEV_enable = false -%}
   {% set MAILPIT_enable = false -%}
   {% set MAILHOG_enable = false -%}
+  {% set STALWART_enable = false -%}
   {% set CAMUNDA_BPM_PLATFORM_enable = false -%}
   {% set CAMUNDA_OPTIMIZE_enable = false -%}
   {% set CAMUNDA_ZEEBE_enable = false -%}
@@ -33031,6 +33033,42 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
 {% endif %}   {#  MAILHOG_enable #}
+
+{% if STALWART_enable | default(false) %}
+  #  ================================== Stalwart ========================================== #
+  stalwart:
+    image: docker.io/stalwartlabs/stalwart:{{__STALWART_version}}
+
+    container_name: stalwart
+    hostname: stalwart
+    labels:
+      com.platys.name: "stalwart"
+      com.platys.description: "All-in-one mail and collaboration server (SMTP, IMAP, JMAP, CalDAV, CardDAV, WebDAV)"
+      com.platys.webui.title: "Stalwart Admin UI"
+      com.platys.webui.url: "http://dataplatform:28500/admin"
+    ports:
+      - "28500:8080"
+      - "28501:25"
+    environment:
+      - STALWART_RECOVERY_ADMIN=admin:{{STALWART_admin_password | default('abc123!')}}
+    {%if use_timezone | default(false) %}
+      - TZ={{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    volumes:
+      {{ data_transfer_volume('/data-transfer') }}
+    {% if STALWART_volume_map_data | default(false) %}
+      - ./container-volume/stalwart/etc:/etc/stalwart:z
+      - ./container-volume/stalwart/data:/var/lib/stalwart:z
+    {% endif -%}   {#  STALWART_volume_map_data #}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+{% endif %}   {#  STALWART_enable #}
 
 {% if CAMUNDA_BPM_PLATFORM_enable | default(false) %}
   #  ================================== Camunda BPM Platform ========================================== #
