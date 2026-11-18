@@ -194,7 +194,6 @@ networks:
 {% set __LDAP_USER_MANAGER_version = LDAP_USER_MANAGER_version | default('latest') -%}
 
 {% set __RANGER_version = RANGER_version | default('latest') -%}
-{% set __RANGER_postgresql_version = RANGER_postgresql_version | default('latest') -%}
 
 {% set __OPA_version = OPA_version | default('latest') -%}
 {% set __MOAT_version = MOAT_version | default('latest') -%}
@@ -10085,26 +10084,28 @@ services:
 
 {% if RANGER_enable  | default(false) %}
   #  ================================== Apache Ranger ========================================== #
-  ranger-admin:
-    image: docker.io/trivadis/apache-ranger:{{__RANGER_version}}
-
-    container_name: ranger-admin
-    hostname: ranger-admin
+  ranger-solr:
+    image: docker.io/apache/ranger-solr:{{__RANGER_version}}
+    container_name: ranger-solr
+    hostname: ranger-solr
     labels:
       com.platys.name: "ranger"
-      com.platys.description: "Ranger Admin"
-    stdin_open: true
-    tty: true
-    depends_on:
-      - postgresql
+      com.platys.description: "Ranger Solr (audit store)"
+    command:
+      - solr-precreate
+      - ranger_audits
+      - /opt/solr/server/solr/configsets/ranger_audits/
     ports:
-      - "6080:6080"
+      - "8984:8983"
     {%if use_timezone | default(false) %}
     environment:
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       {{ data_transfer_volume('/data-transfer') }}
+    {% if RANGER_solr_volume_map_data | default(false) %}
+      - ./container-volume/ranger/solr/data:/var/solr
+    {% endif %}  
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -10114,28 +10115,62 @@ services:
     {% endif -%}   {#  logging_driver is defined ... #}
     restart: {{container_restart_policy}}
 
-  ranger-postgresql:
-    image: docker.io/postgres:{{__RANGER_postgresql_version}}
-
-    container_name: ranger-postgresql
-    hostname: ranger-postgresql
+  ranger-db:
+    image: docker.io/apache/ranger-db:{{__RANGER_version}}
+    container_name: ranger-db
+    hostname: ranger-db
     labels:
       com.platys.name: "ranger"
       com.platys.description: "Ranger PostgreSQL Instance"
     environment:
-      POSTGRES_PASSWORD: abc123!
-      POSTGRES_USER: postgres
-      POSTGRES_DB: ranger-admin
-      PGDATA: /var/lib/postgresql/data
+      POSTGRES_PASSWORD: rangeradmin
+      RANGER_DB_USER: rangeradmin
+      RANGER_DB_PASSWORD: rangeradmin
+    {%if use_timezone | default(false) %}
+      TZ: {{use_timezone}}
+    {% endif -%}   {#  use_timezone #}
+    healthcheck:
+      test: ["CMD-SHELL", "su -c 'pg_isready -q' postgres"]
+      interval: 10s
+      timeout: 2s
+      retries: 30
+    volumes:
+      {{ data_transfer_volume('/data-transfer') }}
+    {% if RANGER_postgresql_volume_map_data | default(false) %}
+      - ./container-volume/ranger/postgresql/data:/var/lib/postgresql/data
+    {% endif %}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+
+  ranger-admin:
+    image: docker.io/apache/ranger:{{__RANGER_version}}
+    container_name: ranger-admin
+    hostname: ranger-admin
+    labels:
+      com.platys.name: "ranger"
+      com.platys.description: "Ranger Admin"
+    depends_on:
+      ranger-db:
+        condition: service_healthy
+      ranger-solr:
+        condition: service_started
+    ports:
+      - "6080:6080"
+    environment:
+      POSTGRES_PASSWORD: rangeradmin
+      RANGER_DB_USER: rangeradmin
+      RANGER_DB_PASSWORD: rangeradmin
     {%if use_timezone | default(false) %}
       TZ: {{use_timezone}}
     {% endif -%}   {#  use_timezone #}
     volumes:
       {{ data_transfer_volume('/data-transfer') }}
-      - ./init/ranger/postgresql:/docker-entrypoint-initdb.d/:z
-    {% if RANGER_postgresql_volume_map_data %}
-      - ./container-volume/ranger/postgresql/data:/var/lib/postgresql/data:Z
-    {% endif %}
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
       - "./etc/localtime:/etc/localtime:ro"
@@ -37645,9 +37680,6 @@ volumes:
 {% endif %}
 {%if NIFI2_enable | default(false) %}
   nifi-config-vol:
-{% endif %}
-{%if SEAWEEDFS_enable and not SEAWEEDFS_volume_map_data | default(false) %}
-  seaweedfs-data:
 {% endif %}
 {%if SPARK_enable %}
   spark-{{__SPARK_version | replace('.','-')}}-vol:

@@ -1,0 +1,1 @@
+Contains the data of ranger-postgresql db service, if flag RANGER_POSTGRESQL_volume_map_data is set to true.

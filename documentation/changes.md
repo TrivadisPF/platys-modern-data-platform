@@ -64,6 +64,7 @@ See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/plat
  * Update `puppygraph` to `1.18.1`
  * Update `fluss` to `1.0.0`
  * Update `ollama` to `0.40.16`
+ * Update `ranger` to `2.9.0`
 
 ### Enhancements
 
@@ -73,6 +74,7 @@ See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/plat
  * Add support for working with Nexus and a HTTP Proxy for accessing internet
  * New global settings `volume_map_data_transfer_folder` and `data_transfer_local_folder` to control mapping and location of the `data-transfer` folder
  * `python`: optional supervisord support (`PYTHON_supervisord_enabled`) to run multiple python scripts in one container
+ * `ranger`: use the official `apache/ranger`, `apache/ranger-db` and `apache/ranger-solr` images (adds Solr audit store, new property `RANGER_solr_volume_map_data`)
 
 ### Breaking Changes
 
@@ -95,6 +97,7 @@ See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/plat
  * replace `MARKDOWN_VIEWER_use_port_80` by `MARKDOWN_VIEWER_external_port` to have more control over the port used for the markdown viewer (needed for Podman if ports below `1024` are not permitted)
  * remove `BENTHOS` service, it has been replaced by `REDPANDA_CONNECT` (Redpanda Connect is the continuation of Benthos)
  * rename `SHADOW_TRAFFIC_xxxx` to `SHADOWTRAFFIC_xxxx`
+ * `ranger`: container `ranger-postgresql` renamed to `ranger-db`, `RANGER_postgresql_version` removed, Ranger Solr UI/API exposed on port `6081`
 
 ## What's new in 1.20.0
 

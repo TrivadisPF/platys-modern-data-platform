@@ -13,5 +13,15 @@ platys init --enable-services RANGER
 platys gen
 ```
 
+## Containers
+
+| Container | Image | Port | Purpose |
+|-----------|-------|------|---------|
+| `ranger-admin` | `apache/ranger` | `6080` | Ranger Admin UI |
+| `ranger-db` | `apache/ranger-db` | - | PostgreSQL metadata store |
+| `ranger-solr` | `apache/ranger-solr` | `6081` (→ 8983) | Solr, `ranger_audits` collection for audit |
+
 ## How to use it?
+
+Navigate to <http://dataplatform:6080> (default login `admin` / `rangerR0cks!`).
 
