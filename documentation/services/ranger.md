@@ -23,5 +23,5 @@ platys gen
 
 ## How to use it?
 
-Navigate to <http://dataplatform:6080> (default login `admin` / `rangerR0cks!`).
+Navigate to <http://dataplatform:6080> (default login `admin` / `admin`).
 
