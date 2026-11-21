@@ -33457,9 +33457,12 @@ services:
 {% if DBT_enable | default(false) %}
   #  ================================== DBT (Data Build Tool) ========================================== #
   dbt:
-    image: ghcr.io/dbt-labs/dbt-spark:{{__DBT_version}}
+    build:
+      context: ./init/dbt-spark
+      dockerfile: Dockerfile
     container_name: dbt
     hostname: dbt
+    working_dir: /dbt
     labels:
       com.platys.name: "dbt"
       com.platys.description: "Data transformation builder"
@@ -33469,7 +33472,7 @@ services:
     {% endif -%}   {#  use_timezone #}
     volumes:
       {{ data_transfer_volume('/data-transfer') }}
-      - ${PLATYS_DATA_TRANSFER_LOCAL_FOLDER:-{{ data_transfer_local_folder | default('./data-transfer') }}}/dbt:/usr/app:z
+      - ${PLATYS_DATA_TRANSFER_LOCAL_FOLDER:-{{ data_transfer_local_folder | default('./data-transfer') }}}/dbt:/dbt:z
       - ./custom-conf/dbt/profiles.yml:/root/.dbt/:z
     {%if use_timezone | default(false) %}
       - "./etc/timezone:/etc/timezone:ro"
