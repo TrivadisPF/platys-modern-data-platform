@@ -65,6 +65,7 @@ See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/plat
  * Update `fluss` to `1.0.0`
  * Update `ollama` to `0.40.16`
  * Update `ranger` to `2.9.0`
+ * Add support for `flink` `2.3` (`FLINK_base_version: '2.3'`, Flink `2.3.0`)
 
 ### Enhancements
 
