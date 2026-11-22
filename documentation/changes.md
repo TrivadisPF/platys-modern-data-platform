@@ -98,6 +98,7 @@ See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/plat
  * replace `MARKDOWN_VIEWER_use_port_80` by `MARKDOWN_VIEWER_external_port` to have more control over the port used for the markdown viewer (needed for Podman if ports below `1024` are not permitted)
  * remove `BENTHOS` service, it has been replaced by `REDPANDA_CONNECT` (Redpanda Connect is the continuation of Benthos)
  * rename `SHADOW_TRAFFIC_xxxx` to `SHADOWTRAFFIC_xxxx`
+ * `flink`: `FLINK_base_version: '2.1'` is no longer supported, use `1.20`, `2.2` or `2.3`
  * `ranger`: container `ranger-postgresql` renamed to `ranger-db`, `RANGER_postgresql_version` removed, Ranger Solr UI/API exposed on port `6081`
 
 ## What's new in 1.20.0
