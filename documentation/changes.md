@@ -38,6 +38,7 @@ See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/plat
  * apollo-rover-cli
  * entropy-data-cli
  * Stalwart
+ * Pocket ID
 
 ### Version upgrades
  

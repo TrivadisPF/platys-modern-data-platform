@@ -29,6 +29,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 1274 | 1234 | nifi2-2 (prometheus exporter) | 
 1275 | 1234 | nifi2-3 (prometheus exporter) | 
 1337 | 1337 | konga | 
+1411 | 1411 | pocket-id |
 1433 | 1433 | sqlserver |
 1522 | 1521 | oracledb-xe |
 1523 | 1521 | oracledb-oci-free |

@@ -748,6 +748,7 @@ networks:
 {% set __VAULT_version = VAULT_version | default('latest') -%}
 {% set __KEYCLOAK_version = KEYCLOAK_version | default('latest') -%}
 {% set __AUTHELIA_version = AUTHELIA_version | default('latest') -%}
+{% set __POCKET_ID_version = POCKET_ID_version | default('v3') -%}
 {% set __MOCK_SERVER_version = MOCK_SERVER_version | default('latest') -%}
 {% set __ETCD_version = ETCD_version | default('latest') -%}
 {% set __ETCD_BROWSER_version = ETCD_BROWSER_version | default('latest') -%}
@@ -1211,6 +1212,7 @@ networks:
   {% set AZURE_STORAGE_EXPLORER_enable = false -%}
   {% set PYICEBERG_enable = false -%}
   {% set KEYCLOAK_enable = false -%}
+  {% set POCKET_ID_enable = false -%}
   {% set POSTMAN_enable = false -%}
   {% set PACT_BROKER_enable = false -%}
   {% set DATA_MESH_MANAGER_enable = false -%}
@@ -34757,6 +34759,47 @@ services:
       timeout: 2s
       retries: 15    
 {% endif %}   {#  AUTHELIA_enable #}
+
+{% if POCKET_ID_enable | default(false) %}
+  #  ================================== Pocket ID ================= #
+  pocket-id:
+    image: ghcr.io/pocket-id/pocket-id:{{__POCKET_ID_version}}
+    hostname: pocket-id
+    container_name: pocket-id
+    labels:
+      com.platys.name: "pocket-id"
+      com.platys.description: "Simple OIDC provider with passkey authentication"
+      com.platys.webui.title: "Pocket ID UI"
+      com.platys.webui.url: "http://dataplatform:1411"
+    ports:
+      - "1411:1411"
+    environment:
+      APP_URL: "{{ POCKET_ID_app_url | default('http://${PUBLIC_IP:-127.0.0.1}:1411') }}"
+      ENCRYPTION_KEY: "{{ POCKET_ID_encryption_key | default('21TkfvLfjs7oZAr9ZMcAWh/kTrJkkoJ8B10hXADH9DM=') }}"
+      TRUST_PROXY: "{{ POCKET_ID_trust_proxy | default(false) | string | lower }}"
+      MAXMIND_LICENSE_KEY: "{{ POCKET_ID_maxmind_license_key | default('') }}"
+      PUID: "{{ POCKET_ID_puid | default(1000) }}"
+      PGID: "{{ POCKET_ID_pgid | default(1000) }}"
+    volumes:
+      {{ data_transfer_volume('/data-transfer') }}
+    {% if POCKET_ID_volume_map_data | default(false) %}
+      - "./container-volume/pocket-id/data:/app/data:z"
+    {% endif %}
+    {%if use_timezone | default(false) %}
+      - "./etc/timezone:/etc/timezone:ro"
+      - "./etc/localtime:/etc/localtime:ro"
+    {% endif -%}   {#  use_timezone #}
+    {%if logging_driver is defined and logging_driver and logging_driver in ('fluentd','loki','syslog','splunk') | default(false) %}
+    <<: *logging
+    {% endif -%}   {#  logging_driver is defined ... #}
+    restart: {{container_restart_policy}}
+    healthcheck:
+      test: [ "CMD", "/app/pocket-id", "healthcheck" ]
+      interval: 1m30s
+      timeout: 5s
+      retries: 2
+      start_period: 10s
+{% endif %}   {#  POCKET_ID_enable #}
 
 {% if POSTMAN_enable | default(false) %}
   #  ================================== Postman ================= #

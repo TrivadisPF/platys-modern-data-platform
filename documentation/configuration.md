@@ -733,6 +733,15 @@ For each service there might be some other settings, such as controlling the num
 | `KEYCLOAK_features`                             	| `` 	| 1.17.0 	| A comma-separated list of features to enable (some supported features, and all preview features are disabled by default). See <https://www.keycloak.org/server/features>.                                                                                                                                            	|
 | [**_Authelia_**](./services/authelia.md)   &nbsp;&nbsp;&nbsp;&nbsp;![x86-64](./images/x86-64.png)  ![arm](./images/arm.png)        	|         	|       	|                                                                                                                                                                                     	|        
 | `AUTHELIA_enable`                             	| `false` 	| 1.18.0 	| Generate Authelia service                                                                                                                                             	|
+| [**_Pocket ID_**](./services/pocket-id.md)   &nbsp;&nbsp;&nbsp;&nbsp;![x86-64](./images/x86-64.png)  ![arm](./images/arm.png) 	|         	|       	|  	|
+| `POCKET_ID_enable` 	| `false` 	| 1.21.0 	| Generate Pocket ID service 	|
+| `POCKET_ID_app_url` 	| `` 	| 1.21.0 	| Public URL of Pocket ID as seen by the browser. If empty, `http://${PUBLIC_IP}:1411` is used 	|
+| `POCKET_ID_encryption_key` 	| `21TkfvLfjs7oZAr9ZMcAWh/kTrJkkoJ8B10hXADH9DM=` 	| 1.21.0 	| Base64 encryption key (generate with `openssl rand -base64 32`) 	|
+| `POCKET_ID_trust_proxy` 	| `false` 	| 1.21.0 	| Set to `true` if running behind a reverse proxy 	|
+| `POCKET_ID_maxmind_license_key` 	| `` 	| 1.21.0 	| Optional MaxMind license key for GeoIP lookups 	|
+| `POCKET_ID_puid` 	| `1000` 	| 1.21.0 	| User ID the container runs as 	|
+| `POCKET_ID_pgid` 	| `1000` 	| 1.21.0 	| Group ID the container runs as 	|
+| `POCKET_ID_volume_map_data` 	| `false` 	| 1.21.0 	| Map the data folder (`/app/data`) to `./container-volume/pocket-id/data` 	|
 | [**_Curity Identity Server_**](./services/curity.md)   &nbsp;&nbsp;&nbsp;&nbsp;![x86-64](./images/x86-64.png)                     	|         	|       	|                                                                                                                                                                                     	|        
 | `CURITY_enable`                             	| `false` 	| 1.16.0 	| Generate Curity service                                                                                                                                             	|
 | `CURITY_logging_level`                             	| `INFO` 	| 1.16.0 	| Logging level                                                                                                                                             	|
