@@ -66,8 +66,8 @@ See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/plat
  * Update `fluss` to `1.0.0`
  * Update `ollama` to `0.40.16`
  * Update `ranger` to `2.9.0`
- * Add support for `flink` `2.3` (`FLINK_base_version: '2.3'`, Flink `2.3.0`)
-
+ * Update `starrocks` to `4.1-latest`
+ 
 ### Enhancements
 
  * Add ui mode for defining a platform using a Web-UI
@@ -77,6 +77,7 @@ See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/plat
  * New global settings `volume_map_data_transfer_folder` and `data_transfer_local_folder` to control mapping and location of the `data-transfer` folder
  * `python`: optional supervisord support (`PYTHON_supervisord_enabled`) to run multiple python scripts in one container
  * `ranger`: use the official `apache/ranger`, `apache/ranger-db` and `apache/ranger-solr` images (adds Solr audit store, new property `RANGER_solr_volume_map_data`)
+ * Add support for `flink` `2.3` (`FLINK_base_version: '2.3'`, Flink `2.3.0`)
 
 ### Breaking Changes
 
