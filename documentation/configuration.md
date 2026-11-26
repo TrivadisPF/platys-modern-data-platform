@@ -742,6 +742,9 @@ For each service there might be some other settings, such as controlling the num
 | `POCKET_ID_puid` 	| `1000` 	| 1.21.0 	| User ID the container runs as 	|
 | `POCKET_ID_pgid` 	| `1000` 	| 1.21.0 	| Group ID the container runs as 	|
 | `POCKET_ID_volume_map_data` 	| `false` 	| 1.21.0 	| Map the data folder (`/app/data`) to `./container-volume/pocket-id/data` 	|
+| [**_FUXA_**](./services/fuxa.md)   &nbsp;&nbsp;&nbsp;&nbsp;![x86-64](./images/x86-64.png)  ![arm](./images/arm.png) 	|         	|       	|  	|
+| `FUXA_enable` 	| `false` 	| 1.21.0 	| Generate FUXA service 	|
+| `FUXA_volume_map_data` 	| `false` 	| 1.21.0 	| Map the `_appdata`, `_db`, `_logs` and `_images` folders to `./container-volume/fuxa/` 	|
 | [**_Curity Identity Server_**](./services/curity.md)   &nbsp;&nbsp;&nbsp;&nbsp;![x86-64](./images/x86-64.png)                     	|         	|       	|                                                                                                                                                                                     	|        
 | `CURITY_enable`                             	| `false` 	| 1.16.0 	| Generate Curity service                                                                                                                                             	|
 | `CURITY_logging_level`                             	| `INFO` 	| 1.16.0 	| Logging level                                                                                                                                             	|

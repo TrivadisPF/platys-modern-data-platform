@@ -44,6 +44,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 1097 | 1097 | ksqldb-server-3 (jmx) |
 1113 | 1113 | eventstore |
 1880 | 1880 | nodered-1 |
+1881 | 1881 | fuxa |
 1882 | 1882 | kafka-mqtt-1 |
 1883 | 1883 | mosquitto-1 |
 1884 | 1883 | mosquitto-2 |

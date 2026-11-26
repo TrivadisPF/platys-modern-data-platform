@@ -39,6 +39,7 @@ See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/plat
  * entropy-data-cli
  * Stalwart
  * Pocket ID
+ * FUXA
 
 ### Version upgrades
  
