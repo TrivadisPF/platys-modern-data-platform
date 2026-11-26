@@ -68,6 +68,7 @@ See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/plat
  * Update `ollama` to `0.40.16`
  * Update `ranger` to `2.9.0`
  * Update `starrocks` to `4.1-latest`
+ * Update `node-red` to `5`
  
 ### Enhancements
 
